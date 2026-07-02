@@ -25,6 +25,24 @@ This application is a Laravel application and its main Laravel ecosystems packag
 
 This project has domain-specific skills available in `**/skills/**`. You MUST activate the relevant skill whenever you work in that domain—don't wait until you're stuck.
 
+## How to Apply
+
+Always use a sub-agent to read rule files and explore this skill's content.
+
+1. Identify the file type and select relevant sections (e.g., migration → §16, controller → §1, §3, §5, §6, §10)
+2. Check sibling files for existing patterns — follow those first per Consistency First
+3. Verify API syntax with `search-docs` for the installed Laravel version
+
+=== user custom rules ===
+
+# User Custom Rules
+
+- **Tech Stack**: Luôn sử dụng **Filament PHP + MySQL** làm cơ sở dữ liệu mặc định cho dự án này (cấu hình qua `.env`).
+- **Yêu cầu cốt lõi**: Khi phát triển bất kỳ phân hệ/tính năng mới nào, AI agent phải:
+  1. Thiết lập đầy đủ cả **Migration** và **Model** tương ứng.
+  2. Thiết lập **Filament Resource** (sử dụng `php artisan make:filament-resource ModelName --generate`) để tự động tạo menu điều hướng, các trang CRUD (danh sách, tạo mới, chỉnh sửa, xóa).
+  3. Đảm bảo Filament tự động thực hiện các câu truy vấn cơ sở dữ liệu và tự động gắn dữ liệu vào giao diện, tránh viết các câu truy vấn thủ công hoặc code HTML giao diện không cần thiết.
+
 ## Conventions
 
 - You must follow all existing code conventions used in this application. When creating or editing a file, check sibling files for the correct structure, approach, and naming.

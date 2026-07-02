@@ -1,0 +1,158 @@
+<?php
+
+namespace App\Filament\Resources;
+
+use App\Filament\Resources\StockResource\Pages;
+use App\Models\Stock;
+use Filament\Forms;
+use Filament\Forms\Form;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Contracts\HasTable;
+use Filament\Tables\Table;
+
+class StockResource extends Resource
+{
+    protected static ?string $model = Stock::class;
+
+    protected static ?string $navigationIcon = 'heroicon-o-archive-box';
+
+    protected static ?string $navigationLabel = 'Kho';
+
+    protected static ?string $modelLabel = 'Kho hàng';
+
+    protected static ?string $pluralModelLabel = 'Kho';
+
+    protected static ?string $navigationGroup = 'XUẤT ĂN';
+
+    protected static ?int $navigationSort = 2;
+
+    public static function form(Form $form): Form
+    {
+        return $form
+            ->schema([
+                Forms\Components\Select::make('ingredient_id')
+                    ->label('Nguyên liệu')
+                    ->relationship('ingredient', 'name')
+                    ->searchable()
+                    ->preload()
+                    ->required(),
+                Forms\Components\TextInput::make('quantity')
+                    ->label('Số lượng tồn')
+                    ->required()
+                    ->numeric()
+                    ->default(0.000),
+                Forms\Components\TextInput::make('min_quantity')
+                    ->label('Định mức tối thiểu (min)')
+                    ->required()
+                    ->numeric()
+                    ->default(0.000),
+                Forms\Components\TextInput::make('unit_price')
+                    ->label('Đơn giá (đ)')
+                    ->required()
+                    ->numeric()
+                    ->default(0.00),
+            ]);
+    }
+
+    public static function table(Table $table): Table
+    {
+        return $table
+            ->columns([
+                Tables\Columns\TextColumn::make('index')
+                    ->label('#')
+                    ->state(static function (HasTable $livewire, \stdClass $rowLoop): string {
+                        return (string) ($rowLoop->iteration);
+                    }),
+                Tables\Columns\TextColumn::make('ingredient.code')
+                    ->label('MÃ NL')
+                    ->sortable()
+                    ->searchable()
+                    ->weight('bold'),
+                Tables\Columns\TextColumn::make('ingredient.name')
+                    ->label('NGUYÊN LIỆU')
+                    ->sortable()
+                    ->searchable()
+                    ->description(fn ($record) => 'Click để xem Thẻ kho')
+                    ->weight('bold'),
+                Tables\Columns\TextColumn::make('ingredient.type')
+                    ->label('LOẠI')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'Động vật' => 'danger',
+                        'Thực vật' => 'success',
+                        'Thực phẩm khô' => 'warning',
+                        'Gia vị' => 'info',
+                        default => 'gray',
+                    }),
+                Tables\Columns\TextColumn::make('ingredient.supplier.name')
+                    ->label('NCC')
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('quantity')
+                    ->label('TỒN HIỆN TẠI')
+                    ->state(fn ($record) => $record->quantity.' '.$record->ingredient->unit)
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('min_quantity')
+                    ->label('TỐI THIỂU')
+                    ->state(fn ($record) => $record->min_quantity.' '.$record->ingredient->unit)
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('unit_price')
+                    ->label('ĐƠN GIÁ')
+                    ->money('VND')
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('total_value')
+                    ->label('GIÁ TRỊ')
+                    ->money('VND')
+                    ->state(fn ($record) => $record->quantity * $record->unit_price)
+                    ->weight('bold')
+                    ->color('primary'),
+                Tables\Columns\TextColumn::make('updated_at')
+                    ->label('CẬP NHẬT LẦN CUỐI')
+                    ->dateTime('H:i d/m/Y')
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('stock_status')
+                    ->label('TRẠNG THÁI')
+                    ->badge()
+                    ->state(fn ($record): string => match (true) {
+                        $record->quantity == 0 => 'Hết hàng',
+                        $record->quantity <= $record->min_quantity => 'Sắp hết',
+                        default => 'Đủ hàng',
+                    })
+                    ->color(fn ($state): string => match ($state) {
+                        'Hết hàng' => 'danger',
+                        'Sắp hết' => 'warning',
+                        default => 'success',
+                    }),
+            ])
+            ->filters([
+                Tables\Filters\SelectFilter::make('ingredient_id')
+                    ->label('Nguyên liệu')
+                    ->relationship('ingredient', 'name'),
+            ])
+            ->actions([
+                Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
+            ])
+            ->bulkActions([
+                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\DeleteBulkAction::make(),
+                ]),
+            ]);
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            //
+        ];
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => Pages\ListStocks::route('/'),
+            'create' => Pages\CreateStock::route('/create'),
+            'edit' => Pages\EditStock::route('/{record}/edit'),
+        ];
+    }
+}
