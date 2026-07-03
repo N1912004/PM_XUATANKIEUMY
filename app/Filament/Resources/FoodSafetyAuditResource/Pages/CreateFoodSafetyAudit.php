@@ -8,4 +8,9 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateFoodSafetyAudit extends CreateRecord
 {
     protected static string $resource = FoodSafetyAuditResource::class;
+
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
 }

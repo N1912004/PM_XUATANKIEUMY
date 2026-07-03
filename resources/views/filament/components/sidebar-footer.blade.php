@@ -1,5 +1,5 @@
 <div class="px-4 py-3 border-t border-gray-100 dark:border-gray-800" style="background: transparent;">
-    <a href="#" 
+    <a href="{{ url('/admin/system-settings') }}" 
        style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 10px 16px; border-radius: 8px; background-color: #1267e8; color: #ffffff !important; text-decoration: none !important; font-size: 13px; font-weight: bold; box-shadow: 0 4px 6px -1px rgba(18, 103, 232, 0.15); transition: background-color 0.15s ease;"
        onmouseover="this.style.backgroundColor='#0e52b9'"
        onmouseout="this.style.backgroundColor='#1267e8'">

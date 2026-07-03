@@ -30,7 +30,7 @@ class LeaveOvertimeResource extends Resource
         return $form
             ->schema([
                 Forms\Components\Section::make('Thông tin yêu cầu')
-                    ->grid(3)
+                    ->columns(3)
                     ->schema([
                         Forms\Components\Select::make('employee_id')
                             ->label('Nhân viên yêu cầu')
@@ -61,7 +61,7 @@ class LeaveOvertimeResource extends Resource
                             ->nullable(),
                     ]),
                 Forms\Components\Section::make('Chi tiết & Duyệt')
-                    ->grid(2)
+                    ->columns(2)
                     ->schema([
                         Forms\Components\Textarea::make('reason')
                             ->label('Lý do chi tiết')

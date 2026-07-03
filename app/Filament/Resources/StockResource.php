@@ -36,7 +36,42 @@ class StockResource extends Resource
                     ->relationship('ingredient', 'name')
                     ->searchable()
                     ->preload()
-                    ->required(),
+                    ->required()
+                    ->unique('stocks', 'ingredient_id', ignoreRecord: true)
+                    ->validationMessages([
+                        'unique' => 'Nguyên liệu này đã tồn tại trong kho hàng.',
+                    ])
+                    ->createOptionForm([
+                        Forms\Components\TextInput::make('code')
+                            ->label('Mã nguyên liệu')
+                            ->required()
+                            ->default(fn () => 'NL'.str_pad(mt_rand(1, 99999), 5, '0', STR_PAD_LEFT))
+                            ->unique('ingredients', 'code'),
+                        Forms\Components\TextInput::make('name')
+                            ->label('Tên nguyên liệu')
+                            ->required(),
+                        Forms\Components\Select::make('type')
+                            ->label('Phân loại')
+                            ->options([
+                                'Động vật' => 'Động vật',
+                                'Thực vật' => 'Thực vật',
+                                'Thực phẩm khô' => 'Thực phẩm khô',
+                                'Gia vị' => 'Gia vị',
+                            ])
+                            ->required(),
+                        Forms\Components\TextInput::make('unit')
+                            ->label('Đơn vị tính')
+                            ->required()
+                            ->placeholder('VD: Kg, Hộp, Quả, ...'),
+                        Forms\Components\Select::make('supplier_id')
+                            ->label('Nhà cung cấp')
+                            ->relationship('supplier', 'name')
+                            ->nullable(),
+                        Forms\Components\TextInput::make('reference_price')
+                            ->label('Đơn giá tham chiếu (đ)')
+                            ->numeric()
+                            ->default(0),
+                    ]),
                 Forms\Components\TextInput::make('quantity')
                     ->label('Số lượng tồn')
                     ->required()

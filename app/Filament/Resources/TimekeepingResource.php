@@ -30,7 +30,7 @@ class TimekeepingResource extends Resource
         return $form
             ->schema([
                 Forms\Components\Section::make('Thông tin ca làm việc')
-                    ->grid(3)
+                    ->columns(3)
                     ->schema([
                         Forms\Components\Select::make('employee_id')
                             ->label('Nhân viên')
@@ -50,7 +50,7 @@ class TimekeepingResource extends Resource
                             ->required(),
                     ]),
                 Forms\Components\Section::make('Thời gian ghi nhận')
-                    ->grid(3)
+                    ->columns(3)
                     ->schema([
                         Forms\Components\TimePicker::make('check_in')
                             ->label('Giờ vào (Check-in)')

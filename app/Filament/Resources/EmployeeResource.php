@@ -39,7 +39,23 @@ class EmployeeResource extends Resource
                                     ->label('Ảnh hồ sơ cá nhân')
                                     ->image()
                                     ->avatar()
+                                    ->disk('public')
+                                    ->directory('avatars')
+                                    ->visibility('public')
+                                    ->imageEditor()
+                                    ->imageEditorAspectRatios([
+                                        '1:1',
+                                    ])
+                                    ->imageCropAspectRatio('1:1')
+                                    ->imageResizeTargetWidth('300')
+                                    ->imageResizeTargetHeight('300')
+                                    ->imagePreviewHeight('200')
+                                    ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
                                     ->maxSize(2048)
+                                    ->helperText('Tải lên ảnh JPG, PNG hoặc WebP. Tối đa 2MB.')
+                                    ->uploadButtonPosition('center')
+                                    ->uploadProgressIndicatorPosition('center')
+                                    ->removeUploadedFileButtonPosition('center')
                                     ->alignCenter(),
                             ]),
 
@@ -48,7 +64,7 @@ class EmployeeResource extends Resource
                             ->columnSpan(2)
                             ->schema([
                                 Forms\Components\Section::make('Thông tin cá nhân')
-                                    ->grid(3)
+                                    ->columns(3)
                                     ->schema([
                                         Forms\Components\TextInput::make('name')
                                             ->label('Họ và tên')
@@ -89,7 +105,7 @@ class EmployeeResource extends Resource
                                     ]),
 
                                 Forms\Components\Section::make('Thông tin công việc')
-                                    ->grid(2)
+                                    ->columns(2)
                                     ->schema([
                                         Forms\Components\Select::make('department')
                                             ->label('Phòng ban')
@@ -105,13 +121,11 @@ class EmployeeResource extends Resource
                                             ->placeholder('VD: Tổ trưởng bếp, Thủ kho...')
                                             ->required()
                                             ->maxLength(255),
-                                        Forms\Components\Select::make('area')
+                                        Forms\Components\Select::make('area_id')
                                             ->label('Khu vực làm việc')
-                                            ->options([
-                                                'Hà Nội' => 'Hà Nội',
-                                                'Đà Nẵng' => 'Đà Nẵng',
-                                                'TP. Hồ Chí Minh' => 'TP. Hồ Chí Minh',
-                                            ])
+                                            ->relationship('area', 'name')
+                                            ->searchable()
+                                            ->preload()
                                             ->required(),
                                         Forms\Components\DatePicker::make('start_date')
                                             ->label('Ngày vào làm')
@@ -142,6 +156,7 @@ class EmployeeResource extends Resource
                     }),
                 Tables\Columns\ImageColumn::make('avatar_url')
                     ->label('AVATAR')
+                    ->disk('public')
                     ->circular()
                     ->defaultImageUrl(fn () => 'https://ui-avatars.com/api/?name=NV&color=7F9CF5&background=EBF4FF'),
                 Tables\Columns\TextColumn::make('code')
@@ -163,7 +178,7 @@ class EmployeeResource extends Resource
                 Tables\Columns\TextColumn::make('position')
                     ->label('VỊ TRÍ')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('area')
+                Tables\Columns\TextColumn::make('area.name')
                     ->label('KHU VỰC')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('start_date')
@@ -190,13 +205,9 @@ class EmployeeResource extends Resource
                         'Kho' => 'Kho',
                         'Sản xuất' => 'Sản xuất',
                     ]),
-                Tables\Filters\SelectFilter::make('area')
+                Tables\Filters\SelectFilter::make('area_id')
                     ->label('Khu vực')
-                    ->options([
-                        'Hà Nội' => 'Hà Nội',
-                        'Đà Nẵng' => 'Đà Nẵng',
-                        'TP. Hồ Chí Minh' => 'TP. Hồ Chí Minh',
-                    ]),
+                    ->relationship('area', 'name'),
                 Tables\Filters\SelectFilter::make('status')
                     ->label('Trạng thái')
                     ->options([

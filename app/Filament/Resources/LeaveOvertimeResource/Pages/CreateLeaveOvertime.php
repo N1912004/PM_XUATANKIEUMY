@@ -8,4 +8,9 @@ use Filament\Resources\Pages\CreateRecord;
 class CreateLeaveOvertime extends CreateRecord
 {
     protected static string $resource = LeaveOvertimeResource::class;
+
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
 }
