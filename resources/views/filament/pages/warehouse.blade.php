@@ -56,12 +56,13 @@
             background: #334155;
         }
         .wh-action-btn-primary {
-            background: #2563eb;
-            color: #ffffff;
-            border-color: #2563eb;
+            background: rgb(var(--primary-600)) !important;
+            color: #ffffff !important;
+            border-color: rgb(var(--primary-600)) !important;
         }
         .wh-action-btn-primary:hover {
-            background: #1d4ed8;
+            background: rgb(var(--primary-700)) !important;
+            border-color: rgb(var(--primary-700)) !important;
         }
 
         /* Stats cards */
@@ -167,12 +168,12 @@
             color: #ffffff;
         }
         .tab-btn.active {
-            background: #eff6ff;
-            color: #2563eb;
+            background: rgba(var(--primary-500), 0.1) !important;
+            color: rgb(var(--primary-600)) !important;
         }
         .dark .tab-btn.active {
-            background: #1e3a8a/30;
-            color: #3b82f6;
+            background: rgba(var(--primary-500), 0.15) !important;
+            color: rgb(var(--primary-400)) !important;
         }
 
         .filter-controls {
@@ -477,7 +478,7 @@
                                 <td style="text-align: right; font-weight: 750;">{{ $item['quantity'] }} {{ $item['ingredient']['unit'] }}</td>
                                 <td style="text-align: right; color: #64748b;">{{ $item['min_quantity'] }} {{ $item['ingredient']['unit'] }}</td>
                                 <td style="text-align: right;">{{ number_format($item['unit_price'], 0, ',', '.') }}đ</td>
-                                <td style="text-align: right; font-weight: 700; color: #2563eb;">{{ number_format($item['quantity'] * $item['unit_price'], 0, ',', '.') }}đ</td>
+                                <td style="text-align: right; font-weight: 700; color: rgb(var(--primary-600));" class="dark:text-primary-400">{{ number_format($item['quantity'] * $item['unit_price'], 0, ',', '.') }}đ</td>
                                 <td>
                                     @if($item['quantity'] == 0)
                                         <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-800 dark:bg-red-950/20 dark:text-red-400">Hết hàng</span>
@@ -668,12 +669,12 @@
                                         <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-800 dark:bg-red-950/20 dark:text-red-400">Xuất kho</span>
                                     @endif
                                 </td>
-                                <td style="font-weight: 700;">{{ $log['stock']['ingredient']['name'] ?? '—' }}</td>
+                                <td style="font-weight: 700;">{{ $log['ingredient']['name'] ?? '—' }}</td>
                                 <td style="text-align: right; font-weight: 750; color: {{ $log['type'] === 'Nhập kho' ? '#16a34a' : '#ef4444' }}">
                                     {{ $log['type'] === 'Nhập kho' ? '+' : '-' }}{{ $log['quantity'] }}
                                 </td>
-                                <td style="text-align: right; font-weight: 700;">{{ $log['balance_after'] }}</td>
-                                <td>{{ $log['reference'] }}</td>
+                                <td style="text-align: right; font-weight: 700;">{{ $log['after_quantity'] }}</td>
+                                <td>{{ $log['note'] }}</td>
                             </tr>
                         @empty
                             <tr>

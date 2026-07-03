@@ -1,10 +1,31 @@
+<style>
+    .custom-checkin-btn {
+        background-color: rgb(var(--primary-600)) !important;
+        border-color: rgb(var(--primary-600)) !important;
+    }
+    .custom-checkin-btn:hover {
+        background-color: rgb(var(--primary-700)) !important;
+        border-color: rgb(var(--primary-700)) !important;
+    }
+    .custom-checkin-avatar-border {
+        border-color: rgba(var(--primary-200), 1) !important;
+        background-color: rgba(var(--primary-50), 0.5) !important;
+        color: rgb(var(--primary-600)) !important;
+    }
+    .dark .custom-checkin-avatar-border {
+        border-color: rgba(var(--primary-800), 0.5) !important;
+        background-color: rgba(var(--primary-900), 0.2) !important;
+        color: rgb(var(--primary-400)) !important;
+    }
+</style>
+
 <div class="p-6 bg-white rounded-xl border border-gray-250 shadow-sm dark:bg-gray-900 dark:border-gray-800">
     <!-- Top Row: Profile & Meta -->
     <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 pb-6 border-b border-gray-100 dark:border-gray-800">
         <!-- Left: Profile Block -->
         <div class="flex items-center gap-4">
             <!-- Avatar with initials fallback -->
-            <div class="relative w-14 h-14 rounded-full overflow-hidden border border-blue-200 dark:border-blue-800 flex items-center justify-center bg-blue-50 text-blue-600 font-extrabold text-base">
+            <div class="relative w-14 h-14 rounded-full overflow-hidden border flex items-center justify-center font-extrabold text-base custom-checkin-avatar-border">
                 @if($employee && $employee->avatar_url)
                     <img src="{{ $employee->avatar_url }}" class="w-full h-full object-cover">
                 @elseif($employee)
@@ -107,7 +128,7 @@
                 </div>
             @else
                 <button wire:click="checkIn" 
-                        class="flex items-center justify-center gap-3 w-full px-5 py-3 rounded-xl border border-blue-500 bg-blue-600 hover:bg-blue-700 text-white font-bold transition shadow-sm">
+                        class="flex items-center justify-center gap-3 w-full px-5 py-3 rounded-xl text-white font-bold transition shadow-sm custom-checkin-btn">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h3a3 3 0 013 3v1"/>
                     </svg>

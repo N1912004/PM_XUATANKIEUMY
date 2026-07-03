@@ -97,11 +97,11 @@ class ListStocks extends ListRecords
             if ($diff != 0) {
                 // Record transaction
                 StockTransaction::create([
-                    'stock_id' => $stock->id,
+                    'ingredient_id' => $stock->ingredient_id,
                     'type' => $diff > 0 ? 'Nhập kho' : 'Xuất kho',
                     'quantity' => abs($diff),
-                    'balance_after' => $actualQty,
-                    'reference' => 'Kiểm kê cuối ngày '.($this->checkNotes[$stockId] ?: ''),
+                    'after_quantity' => $actualQty,
+                    'note' => 'Kiểm kê cuối ngày '.($this->checkNotes[$stockId] ?: ''),
                 ]);
 
                 $stock->update(['quantity' => $actualQty]);
@@ -138,11 +138,11 @@ class ListStocks extends ListRecords
 
             $newQty = $stock->quantity + $this->inQuantity;
             StockTransaction::create([
-                'stock_id' => $stock->id,
+                'ingredient_id' => $stock->ingredient_id,
                 'type' => 'Nhập kho',
                 'quantity' => $this->inQuantity,
-                'balance_after' => $newQty,
-                'reference' => $this->inRef ?: 'Nhập kho trực tiếp',
+                'after_quantity' => $newQty,
+                'note' => $this->inRef ?: 'Nhập kho trực tiếp',
             ]);
 
             $stock->update([
@@ -171,11 +171,11 @@ class ListStocks extends ListRecords
 
             $newQty = $stock->quantity - $this->outQuantity;
             StockTransaction::create([
-                'stock_id' => $stock->id,
+                'ingredient_id' => $stock->ingredient_id,
                 'type' => 'Xuất kho',
                 'quantity' => $this->outQuantity,
-                'balance_after' => $newQty,
-                'reference' => $this->outReason.($this->outRef ? ' ('.$this->outRef.')' : ''),
+                'after_quantity' => $newQty,
+                'note' => $this->outReason.($this->outRef ? ' ('.$this->outRef.')' : ''),
             ]);
 
             $stock->update(['quantity' => $newQty]);
@@ -211,7 +211,7 @@ class ListStocks extends ListRecords
 
     public function getLogData(): array
     {
-        return StockTransaction::with(['stock.ingredient'])
+        return StockTransaction::with(['ingredient'])
             ->latest()
             ->take(50)
             ->get()

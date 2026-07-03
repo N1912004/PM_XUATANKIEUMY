@@ -70,10 +70,10 @@
             position: relative;
             overflow: hidden;
             border-radius: 16px;
-            background: linear-gradient(135deg, #1e40af 0%, #2563eb 50%, #4f46e5 100%) !important;
+            background: linear-gradient(135deg, rgb(var(--primary-800)) 0%, rgb(var(--primary-600)) 50%, rgb(var(--primary-500)) 100%) !important;
             padding: 32px !important;
             color: #ffffff !important;
-            box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.15) !important;
+            box-shadow: 0 10px 25px -5px rgba(var(--primary-600), 0.15) !important;
         }
         .premium-banner h2 {
             color: #ffffff !important;
@@ -110,6 +110,20 @@
             display: flex !important;
             align-items: center !important;
             gap: 8px !important;
+        }
+        
+        .custom-dashboard-link {
+            color: rgb(var(--primary-600)) !important;
+        }
+        .custom-dashboard-link:hover {
+            color: rgb(var(--primary-500)) !important;
+        }
+        .custom-dashboard-btn {
+            background-color: rgb(var(--primary-600)) !important;
+            box-shadow: 0 4px 6px -1px rgba(var(--primary-500), 0.2), 0 2px 4px -2px rgba(var(--primary-500), 0.2) !important;
+        }
+        .custom-dashboard-btn:hover {
+            background-color: rgb(var(--primary-500)) !important;
         }
     </style>
 
@@ -247,7 +261,7 @@
                             <x-heroicon-o-book-open class="h-5 w-5 text-blue-500" />
                             <h3 class="text-base font-extrabold text-gray-900 dark:text-white">Thực đơn ca hôm nay</h3>
                         </div>
-                        <a href="{{ url('/admin/menus') }}" class="text-xs font-extrabold text-blue-600 hover:text-blue-500 transition-colors uppercase tracking-wider">Xem tất cả</a>
+                        <a href="{{ url('/admin/menus') }}" class="text-xs font-extrabold transition-colors uppercase tracking-wider custom-dashboard-link">Xem tất cả</a>
                     </div>
                     
                     @if(count($todayMenus) > 0)
@@ -282,7 +296,7 @@
                                 <x-heroicon-o-face-frown class="h-8 w-8 text-gray-400" />
                             </div>
                             <p class="text-sm font-bold text-gray-500 dark:text-gray-400">Hôm nay chưa thiết lập thực đơn</p>
-                            <a href="{{ url('/admin/menus') }}" class="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 px-4 py-2 text-xs font-bold text-white shadow-md shadow-blue-500/10 transition-all">
+                            <a href="{{ url('/admin/menus') }}" class="mt-4 inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold text-white transition-all custom-dashboard-btn">
                                 <x-heroicon-m-plus class="h-4 w-4" /> Thiết lập thực đơn mới
                             </a>
                         </div>
@@ -342,7 +356,7 @@
                             <x-heroicon-o-document-text class="h-5 w-5 text-indigo-500" />
                             <h3 class="text-base font-extrabold text-gray-900 dark:text-white">Đơn hàng mới tạo (PO)</h3>
                         </div>
-                        <a href="{{ url('/admin/purchase-orders') }}" class="text-xs font-extrabold text-blue-600 hover:text-blue-500 transition-colors uppercase tracking-wider">Xem hết</a>
+                        <a href="{{ url('/admin/purchase-orders') }}" class="text-xs font-extrabold transition-colors uppercase tracking-wider custom-dashboard-link">Xem hết</a>
                     </div>
                     
                     @if(count($recentOrders) > 0)
@@ -403,7 +417,7 @@
                             <x-heroicon-o-check-badge class="h-5 w-5 text-green-500" />
                             <h3 class="text-base font-extrabold text-gray-900 dark:text-white">Nhật ký kiểm thực ATTP hôm nay</h3>
                         </div>
-                        <a href="{{ url('/admin/food-safety-audits') }}" class="text-xs font-extrabold text-blue-600 hover:text-blue-500 transition-colors uppercase tracking-wider">Kiểm thực</a>
+                        <a href="{{ url('/admin/food-safety-audits') }}" class="text-xs font-extrabold transition-colors uppercase tracking-wider custom-dashboard-link">Kiểm thực</a>
                     </div>
                     
                     @if(count($todayAudits) > 0)
@@ -437,7 +451,7 @@
                                 <x-heroicon-o-shield-exclamation class="h-8 w-8 text-amber-500" />
                             </div>
                             <p class="text-sm font-bold text-gray-500 dark:text-gray-400">Hôm nay chưa ghi nhận biên bản kiểm thực</p>
-                            <a href="{{ url('/admin/food-safety-audits') }}" class="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 px-4 py-2 text-xs font-bold text-white shadow-md shadow-blue-500/10 transition-all">
+                            <a href="{{ url('/admin/food-safety-audits') }}" class="mt-4 inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold text-white transition-all custom-dashboard-btn">
                                 <x-heroicon-m-plus class="h-4 w-4" /> Bắt đầu kiểm thực 3 bước
                             </a>
                         </div>

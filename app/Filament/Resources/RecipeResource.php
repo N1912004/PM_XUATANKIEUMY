@@ -21,7 +21,7 @@ class RecipeResource extends Resource
 
     protected static ?string $navigationLabel = 'Ngân Hàng Thực đơn';
 
-    protected static ?string $navigationGroup = 'XUẤT ĂN';
+    protected static ?string $navigationGroup = 'VẬN HÀNH BẾP';
 
     protected static ?int $navigationSort = 1;
 

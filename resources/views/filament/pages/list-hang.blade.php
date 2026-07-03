@@ -1,3 +1,22 @@
+<style>
+    .custom-today-btn {
+        background-color: rgba(var(--primary-500), 0.1) !important;
+        color: rgb(var(--primary-600)) !important;
+        border: 1px solid rgba(var(--primary-500), 0.2) !important;
+    }
+    .custom-today-btn:hover {
+        background-color: rgba(var(--primary-500), 0.2) !important;
+    }
+    .dark .custom-today-btn {
+        background-color: rgba(var(--primary-500), 0.2) !important;
+        color: rgb(var(--primary-400)) !important;
+        border-color: rgba(var(--primary-500), 0.3) !important;
+    }
+    .dark .custom-today-btn:hover {
+        background-color: rgba(var(--primary-500), 0.3) !important;
+    }
+</style>
+
 <x-filament-panels::page>
     <div class="space-y-6">
         <!-- Date and Shift Filters -->
@@ -16,7 +35,7 @@
                         &rarr;
                     </button>
                     <button wire:click="$set('date', '{{ now()->toDateString() }}')"
-                            class="px-4 py-2 text-sm font-semibold rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400">
+                            class="px-4 py-2 text-sm font-semibold rounded-lg custom-today-btn">
                         Hôm nay
                     </button>
                 </div>
@@ -139,7 +158,7 @@
                                             </span>
                                         </div>
                                         <div class="flex items-center gap-4 text-sm">
-                                            <span class="font-bold text-blue-600 dark:text-blue-400">{{ number_format($dish['portions']) }} suất</span>
+                                            <span class="font-bold dark:text-primary-400" style="color: rgb(var(--primary-600));">{{ number_format($dish['portions']) }} suất</span>
                                             <span class="text-gray-400 dark:text-gray-500">{{ count($dish['ingredients']) }} NL</span>
                                             <svg xmlns="http://www.w3.org/2000/svg" 
                                                  :class="expanded ? 'transform rotate-180' : ''" 

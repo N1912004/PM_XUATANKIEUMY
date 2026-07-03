@@ -22,7 +22,7 @@ class FoodSafetyAuditResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Kiểm thực 3 bước';
 
-    protected static ?string $navigationGroup = 'XUẤT ĂN';
+    protected static ?string $navigationGroup = 'VẬN HÀNH BẾP';
 
     protected static ?int $navigationSort = 8;
 

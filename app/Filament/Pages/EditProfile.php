@@ -9,13 +9,15 @@ use Filament\Pages\Auth\EditProfile as BaseEditProfile;
 
 class EditProfile extends BaseEditProfile
 {
+    protected function getSavedNotification(): ?Notification
+    {
+        return Notification::make()
+            ->success()
+            ->title('Đã cập nhật hồ sơ thành công!');
+    }
+
     protected function afterSave(): void
     {
-        Notification::make()
-            ->success()
-            ->title('Đã cập nhật hồ sơ thành công!')
-            ->send();
-
         $this->redirect(filament()->getUrl());
     }
 

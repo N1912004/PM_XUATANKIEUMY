@@ -248,7 +248,7 @@
                                         <td class="p-3 text-center border-r border-gray-200 dark:border-gray-700">
                                             <span class="px-2 py-0.5 rounded bg-green-50 text-green-700 dark:bg-green-950/20 dark:text-green-400 text-xxs font-bold">Đạt</span>
                                         </td>
-                                        <td class="p-3 text-center border-r border-gray-200 dark:border-gray-700 font-semibold text-blue-600">{{ $item['sample_kept'] }}</td>
+                                        <td class="p-3 text-center border-r border-gray-200 dark:border-gray-700 font-semibold dark:text-primary-400" style="color: rgb(var(--primary-600));">{{ $item['sample_kept'] }}</td>
                                         <td class="p-3 text-center border-r border-gray-200 dark:border-gray-700 font-bold text-emerald-600">{{ $item['temp'] }}</td>
                                         <td class="p-3 text-gray-500 italic">{{ $item['notes'] }}</td>
                                     </tr>
@@ -262,7 +262,7 @@
                                         <td class="p-3 text-center border-r border-gray-200 dark:border-gray-700">{{ $item['time'] }}</td>
                                         <td class="p-3 text-center border-r border-gray-200 dark:border-gray-700 font-semibold">{{ $item['quantity'] }}</td>
                                         <td class="p-3 text-center border-r border-gray-200 dark:border-gray-700 font-mono font-bold text-purple-600">{{ $item['sample_code'] }}</td>
-                                        <td class="p-3 text-center border-r border-gray-200 dark:border-gray-700 font-bold text-blue-600">{{ $item['temp'] }}</td>
+                                        <td class="p-3 text-center border-r border-gray-200 dark:border-gray-700 font-bold dark:text-primary-400" style="color: rgb(var(--primary-600));">{{ $item['temp'] }}</td>
                                         <td class="p-3 border-r border-gray-200 dark:border-gray-700 font-medium">{{ $item['staff'] }}</td>
                                         <td class="p-3 text-gray-500 italic">{{ $item['notes'] }}</td>
                                     </tr>

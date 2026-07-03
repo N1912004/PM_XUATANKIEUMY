@@ -17,7 +17,7 @@ class ListHang extends Page
 
     protected static ?string $title = 'List hàng';
 
-    protected static ?string $navigationGroup = 'XUẤT ĂN';
+    protected static ?string $navigationGroup = 'CUNG ỨNG & KHO';
 
     protected static ?int $navigationSort = 3;
 

@@ -104,9 +104,9 @@
         .week-btn {
             height: 34px;
             padding: 0 14px;
-            background: #ebf3ff;
-            color: #1267e8;
-            border: 1px solid #1267e8;
+            background: rgba(var(--primary-500), 0.1);
+            color: rgb(var(--primary-600));
+            border: 1px solid rgb(var(--primary-600));
             border-radius: 8px;
             font-size: 12.5px;
             font-weight: 700;
@@ -115,16 +115,16 @@
             flex-shrink: 0;
         }
         .week-btn:hover {
-            background: #1267e8;
+            background: rgb(var(--primary-600));
             color: #ffffff;
         }
         .dark .week-btn {
-            background: #172554;
-            color: #93c5fd;
-            border-color: #2563eb;
+            background: rgba(var(--primary-500), 0.15);
+            color: rgb(var(--primary-300));
+            border-color: rgb(var(--primary-600));
         }
         .dark .week-btn:hover {
-            background: #2563eb;
+            background: rgb(var(--primary-600));
             color: #ffffff;
         }
 

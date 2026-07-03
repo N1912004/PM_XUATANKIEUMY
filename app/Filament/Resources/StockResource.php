@@ -23,7 +23,7 @@ class StockResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Kho';
 
-    protected static ?string $navigationGroup = 'XUẤT ĂN';
+    protected static ?string $navigationGroup = 'CUNG ỨNG & KHO';
 
     protected static ?int $navigationSort = 2;
 

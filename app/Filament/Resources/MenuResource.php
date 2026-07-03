@@ -22,7 +22,7 @@ class MenuResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Lập thực đơn';
 
-    protected static ?string $navigationGroup = 'XUẤT ĂN';
+    protected static ?string $navigationGroup = 'VẬN HÀNH BẾP';
 
     protected static ?int $navigationSort = 7;
 

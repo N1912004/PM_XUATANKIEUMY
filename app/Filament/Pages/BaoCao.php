@@ -15,7 +15,7 @@ class BaoCao extends Page
 
     protected static ?string $title = 'Báo cáo';
 
-    protected static ?string $navigationGroup = 'XUẤT ĂN';
+    protected static ?string $navigationGroup = 'VẬN HÀNH BẾP';
 
     protected static ?int $navigationSort = 9;
 

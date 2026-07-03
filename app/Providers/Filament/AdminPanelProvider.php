@@ -10,9 +10,9 @@ use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Navigation\MenuItem;
+use Filament\Navigation\NavigationGroup;
 use Filament\Panel;
 use Filament\PanelProvider;
-use Filament\Support\Colors\Color;
 use Filament\View\PanelsRenderHook;
 use Filament\Widgets;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
@@ -37,6 +37,7 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->login()
             ->profile(EditProfile::class)
+            ->sidebarCollapsibleOnDesktop()
             ->brandName($siteName)
             ->brandLogo(fn () => view('filament.components.brand-logo', ['siteName' => $this->getSetting('site_name', 'Bluefire Catering')]))
             ->darkModeBrandLogo(fn () => view('filament.components.brand-logo', ['siteName' => $this->getSetting('site_name', 'Bluefire Catering')]))
@@ -60,7 +61,7 @@ class AdminPanelProvider extends PanelProvider
                     ->icon('heroicon-o-user'),
             ])
             ->colors([
-                'primary' => Color::Blue,
+                'primary' => $this->getSetting('primary_color', '#2563eb'),
             ])
             ->font('Inter')
             ->renderHook(
@@ -109,21 +110,21 @@ class AdminPanelProvider extends PanelProvider
                             color: #ffffff !important;
                         }
 
-                        /* Active item styling: Solid blue background with white text and icon */
+                        /* Active item styling: Solid primary background with white text and icon */
                         .fi-sidebar-item.fi-active > .fi-sidebar-item-button,
                         .fi-sidebar-item-active > .fi-sidebar-item-button,
                         .fi-sidebar-item-active > a {
-                            background-color: #2563eb !important;
+                            background-color: rgb(var(--primary-600)) !important;
                             color: #ffffff !important;
                             font-weight: 600 !important;
-                            box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2), 0 2px 4px -2px rgba(37, 99, 235, 0.2) !important;
+                            box-shadow: 0 4px 6px -1px rgba(var(--primary-600), 0.2), 0 2px 4px -2px rgba(var(--primary-600), 0.2) !important;
                         }
                         
-                        /* Active item hover style: Slightly darker blue, maintaining white text */
+                        /* Active item hover style: Slightly darker primary, maintaining white text */
                         .fi-sidebar-item.fi-active > .fi-sidebar-item-button:hover,
                         .fi-sidebar-item-active > .fi-sidebar-item-button:hover,
                         .fi-sidebar-item-active > a:hover {
-                            background-color: #1d4ed8 !important; /* Darker Blue */
+                            background-color: rgb(var(--primary-700)) !important; /* Darker Primary */
                             color: #ffffff !important;
                         }
 
@@ -134,24 +135,31 @@ class AdminPanelProvider extends PanelProvider
                             color: #ffffff !important;
                         }
                         
-                        /* Inactive menu items: Distinct colors for icons matching design system */
-                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href$="/admin"] .fi-sidebar-item-icon { color: #3b82f6 !important; } /* Xanh dương sáng */
-                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/recipes"] .fi-sidebar-item-icon { color: #f97316 !important; } /* Cam */
-                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/warehouse"] .fi-sidebar-item-icon { color: #10b981 !important; } /* Xanh lá */
-                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/list-hang"] .fi-sidebar-item-icon { color: #10b981 !important; } /* Xanh lá */
-                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/ingredients"] .fi-sidebar-item-icon { color: #10b981 !important; } /* Xanh lá */
-                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/suppliers"] .fi-sidebar-item-icon { color: #d97706 !important; } /* Cam đậm */
-                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/purchase-orders"] .fi-sidebar-item-icon { color: #10b981 !important; } /* Xanh lá */
-                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/menus"] .fi-sidebar-item-icon { color: #10b981 !important; } /* Xanh lá */
-                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/food-safety-audit"] .fi-sidebar-item-icon { color: #2563eb !important; } /* Xanh dương */
-                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/bao-cao"] .fi-sidebar-item-icon { color: #10b981 !important; } /* Xanh lá */
-                        
-                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/employees"] .fi-sidebar-item-icon { color: #2563eb !important; } /* Xanh dương */
-                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/timekeepings"] .fi-sidebar-item-icon { color: #2563eb !important; } /* Xanh dương */
-                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/leave-overtimes"] .fi-sidebar-item-icon { color: #eab308 !important; } /* Vàng */
-                        
-                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/chat-nhom"] .fi-sidebar-item-icon { color: #2563eb !important; } /* Xanh dương */
-                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/areas"] .fi-sidebar-item-icon { color: #2563eb !important; } /* Xanh dương */
+                        /* Inactive menu items: Grouped and harmonized color themes by domain */
+                        /* 1. Tổng quan & Giao tiếp (Vibrant Sky Blue) */
+                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href$="/admin"] .fi-sidebar-item-icon,
+                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/chat-nhom"] .fi-sidebar-item-icon,
+                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/areas"] .fi-sidebar-item-icon { color: #0ea5e9 !important; }
+
+                        /* 2. Vận hành Bếp & Thực đơn (Vibrant Orange) */
+                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/recipes"] .fi-sidebar-item-icon,
+                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/menus"] .fi-sidebar-item-icon,
+                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/bao-cao"] .fi-sidebar-item-icon { color: #f97316 !important; }
+
+                        /* 3. Cung ứng & Kho hàng (Vibrant Emerald) */
+                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/stocks"] .fi-sidebar-item-icon,
+                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/list-hang"] .fi-sidebar-item-icon,
+                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/ingredients"] .fi-sidebar-item-icon,
+                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/suppliers"] .fi-sidebar-item-icon,
+                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/purchase-orders"] .fi-sidebar-item-icon { color: #10b981 !important; }
+
+                        /* 4. An toàn Vệ sinh thực phẩm (Vibrant Indigo) */
+                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/food-safety-audits"] .fi-sidebar-item-icon { color: #6366f1 !important; }
+
+                        /* 5. Nhân sự & Chấm công (Vibrant Violet) */
+                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/employees"] .fi-sidebar-item-icon,
+                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/timekeepings"] .fi-sidebar-item-icon,
+                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/leave-overtimes"] .fi-sidebar-item-icon { color: #8b5cf6 !important; }
                     </style>
                 ')
             )
@@ -161,10 +169,16 @@ class AdminPanelProvider extends PanelProvider
                 Dashboard::class,
             ])
             ->navigationGroups([
-                'TỔNG QUAN',
-                'XUẤT ĂN',
-                'NHÂN SỰ',
-                'CHAT NHÓM',
+                NavigationGroup::make()
+                    ->label('TỔNG QUAN'),
+                NavigationGroup::make()
+                    ->label('VẬN HÀNH BẾP'),
+                NavigationGroup::make()
+                    ->label('CUNG ỨNG & KHO'),
+                NavigationGroup::make()
+                    ->label('NHÂN SỰ'),
+                NavigationGroup::make()
+                    ->label('CHAT NHÓM'),
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([

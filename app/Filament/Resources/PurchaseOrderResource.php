@@ -24,7 +24,7 @@ class PurchaseOrderResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Đặt hàng';
 
-    protected static ?string $navigationGroup = 'XUẤT ĂN';
+    protected static ?string $navigationGroup = 'CUNG ỨNG & KHO';
 
     protected static ?int $navigationSort = 6;
 

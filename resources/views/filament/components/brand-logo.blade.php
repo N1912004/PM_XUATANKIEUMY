@@ -4,7 +4,7 @@
     $parts = explode(' ', $displayName, 2);
 @endphp
 
-<div class="flex items-center gap-3 py-1">
+<div class="flex items-center gap-3 pt-1 pb-3">
     @if($logoPath)
         <!-- Custom Logo Image -->
         <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($logoPath) }}" 
