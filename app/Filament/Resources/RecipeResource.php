@@ -161,6 +161,15 @@ class RecipeResource extends Resource
                     ->label('ĐƠN GIÁ SUẤT ĂN')
                     ->money('VND')
                     ->sortable(),
+                Tables\Columns\TextColumn::make('total_weight')
+                    ->label('TỔNG ĐỊNH LƯỢNG')
+                    ->state(fn ($record) => number_format($record->ingredients->sum('pivot.quantity_per_portion'), 3).' Kg'),
+                Tables\Columns\TextColumn::make('total_cost')
+                    ->label('TỔNG COST NGUYÊN LIỆU')
+                    ->money('VND')
+                    ->state(fn ($record) => $record->ingredients->sum(fn ($i) => $i->pivot->quantity_per_portion * $i->reference_price))
+                    ->weight('bold')
+                    ->color('success'),
                 Tables\Columns\TextColumn::make('ingredients_count')
                     ->label('SỐ NGUYÊN LIỆU')
                     ->counts('ingredients')

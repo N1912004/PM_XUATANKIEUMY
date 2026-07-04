@@ -20,6 +20,7 @@ use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\HtmlString;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
@@ -39,8 +40,8 @@ class AdminPanelProvider extends PanelProvider
             ->profile(EditProfile::class)
             ->sidebarCollapsibleOnDesktop()
             ->brandName($siteName)
-            ->brandLogo(fn () => view('filament.components.brand-logo', ['siteName' => $this->getSetting('site_name', 'Bluefire Catering')]))
-            ->darkModeBrandLogo(fn () => view('filament.components.brand-logo', ['siteName' => $this->getSetting('site_name', 'Bluefire Catering')]))
+            ->brandLogo(fn () => request()->routeIs('filament.admin.auth.login') ? new HtmlString('') : view('filament.components.brand-logo', ['siteName' => $this->getSetting('site_name', 'Bluefire Catering')]))
+            ->darkModeBrandLogo(fn () => request()->routeIs('filament.admin.auth.login') ? new HtmlString('') : view('filament.components.brand-logo', ['siteName' => $this->getSetting('site_name', 'Bluefire Catering')]))
             ->brandLogoHeight('2.5rem')
             ->favicon($faviconUrl)
             ->renderHook(
@@ -58,12 +59,17 @@ class AdminPanelProvider extends PanelProvider
             ->userMenuItems([
                 'profile' => MenuItem::make()
                     ->label('Cài đặt')
-                    ->icon('heroicon-o-user'),
+                    ->icon('heroicon-o-user')
+                    ->url("javascript:Livewire.dispatch('open-profile-modal')"),
             ])
+            ->renderHook(
+                PanelsRenderHook::BODY_END,
+                fn (): string => Blade::render("@livewire('edit-profile-modal')"),
+            )
             ->colors([
                 'primary' => $this->getSetting('primary_color', '#2563eb'),
             ])
-            ->font('Inter')
+            ->font('IBM Plex Sans')
             ->renderHook(
                 PanelsRenderHook::HEAD_END,
                 fn () => new HtmlString('
@@ -71,18 +77,74 @@ class AdminPanelProvider extends PanelProvider
                         /* Base font styling for all sidebar elements to match */
                         .fi-sidebar, 
                         .fi-sidebar * {
-                            font-family: \'Inter\', system-ui, -apple-system, sans-serif !important;
+                            font-family: \'IBM Plex Sans\', sans-serif !important;
                         }
 
-                        /* Base inactive menu item styling - darker, crisp, and high contrast */
-                        .fi-sidebar-item-button {
+                        /* Fix duplicate select arrows globally on custom pages */
+                        select:not([class*="fi-"]) {
+                            appearance: none !important;
+                            -webkit-appearance: none !important;
+                            -moz-appearance: none !important;
+                            background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 20 20\'%3E%3Cpath stroke=\'%236b7280\' stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'1.5\' d=\'m6 8 4 4 4-4\'/%3E%3C/svg%3E") !important;
+                            background-position: right 0.5rem center !important;
+                            background-repeat: no-repeat !important;
+                            background-size: 1.25rem 1.25rem !important;
+                            padding-right: 2rem !important;
+                        }
+
+                        /* Force correct branding color and high contrast on all primary buttons */
+                        .fi-btn.fi-btn-color-primary,
+                        button[type="submit"]:not(.fi-btn-color-gray) {
+                            background-color: rgb(var(--primary-600)) !important;
+                            color: #ffffff !important;
+                            font-weight: 600 !important;
+                        }
+                        .fi-btn.fi-btn-color-primary *,
+                        button[type="submit"]:not(.fi-btn-color-gray) * {
+                            color: #ffffff !important;
+                        }
+                        .fi-btn.fi-btn-color-primary:hover,
+                        button[type="submit"]:not(.fi-btn-color-gray):hover {
+                            background-color: rgb(var(--primary-700)) !important;
+                            box-shadow: 0 4px 6px -1px rgba(var(--primary-600), 0.2), 0 2px 4px -2px rgba(var(--primary-600), 0.2) !important;
+                        }
+
+                        /* Parent menu group labels (menu cha) - Extra Bold and High Contrast */
+                        .fi-sidebar-group-label {
+                            color: #111827 !important; /* Slate-900 */
+                            font-weight: 800 !important; /* Extra Bold */
+                            font-size: 0.78rem !important;
+                            letter-spacing: 0.05em !important;
+                            text-transform: uppercase !important;
+                        }
+                        .dark .fi-sidebar-group-label {
+                            color: #ffffff !important; /* White in dark mode */
+                        }
+                        .fi-sidebar-group-collapse-button {
                             color: #374151 !important; /* Slate-700 */
-                            font-size: 0.9rem !important;
-                            font-weight: 550 !important;
+                        }
+                        .dark .fi-sidebar-group-collapse-button {
+                            color: #cbd5e1 !important; /* Slate-300 */
+                        }
+
+                        /* Base inactive menu item styling - darker, crisp, and bold */
+                        .fi-sidebar-item-button {
+                            font-size: 0.92rem !important;
                             letter-spacing: -0.01em !important;
                             transition: all 0.2s ease !important;
                         }
                         
+                        /* Inactive menu item text color and font weight (excluding icons) */
+                        .fi-sidebar-item:not(.fi-active):not(.fi-sidebar-item-active) .fi-sidebar-item-label {
+                            color: #1f2937 !important; /* Slate-800 */
+                            font-weight: 600 !important;
+                        }
+
+                        /* Inactive items: Dark Mode base style */
+                        .dark .fi-sidebar-item:not(.fi-active):not(.fi-sidebar-item-active) .fi-sidebar-item-label {
+                            color: #e5e7eb !important; /* Gray-200 */
+                        }
+
                         /* Inactive items hover style: Light Mode */
                         .fi-sidebar-item:not(.fi-active):not(.fi-sidebar-item-active) > .fi-sidebar-item-button:hover,
                         .fi-sidebar-item:not(.fi-active):not(.fi-sidebar-item-active) > a:hover {
@@ -92,11 +154,6 @@ class AdminPanelProvider extends PanelProvider
                         .fi-sidebar-item:not(.fi-active):not(.fi-sidebar-item-active) > .fi-sidebar-item-button:hover *,
                         .fi-sidebar-item:not(.fi-active):not(.fi-sidebar-item-active) > a:hover * {
                             color: #111827 !important;
-                        }
-
-                        /* Inactive items: Dark Mode base style */
-                        .dark .fi-sidebar-item-button {
-                            color: #9ca3af !important; /* Gray-400 */
                         }
 
                         /* Inactive items hover style: Dark Mode override */

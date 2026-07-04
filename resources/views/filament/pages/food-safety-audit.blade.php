@@ -46,8 +46,8 @@
                 </div>
 
                 <div class="flex items-center gap-3 mt-4 sm:mt-0">
-                    <button class="px-4 py-2 text-sm font-semibold rounded-lg bg-green-50 text-green-700 hover:bg-green-100 dark:bg-green-950/20 dark:text-green-400 flex items-center gap-2 border border-green-150 dark:border-green-900/30">
-                        📥 Xuất toàn bộ Excel
+                    <button wire:click="exportCSV" class="px-4 py-2 text-sm font-semibold rounded-lg bg-green-50 text-green-700 hover:bg-green-100 dark:bg-green-950/20 dark:text-green-400 flex items-center gap-2 border border-green-150 dark:border-green-900/30 active:scale-95 transition-all">
+                        📥 Xuất báo cáo (CSV)
                     </button>
                 </div>
             </div>
@@ -57,7 +57,8 @@
         <div class="flex border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-2 rounded-xl border">
             @foreach(['Bước 1', 'Bước 2', 'Bước 3', 'Lưu mẫu', 'Hủy mẫu'] as $step)
                 <button wire:click="$set('activeStep', '{{ $step }}')"
-                        class="flex-1 py-3 text-sm font-bold rounded-lg transition-all {{ $activeStep === $step ? 'bg-primary-500 text-white shadow-sm' : 'text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800' }}">
+                        class="flex-1 py-3 text-sm font-bold rounded-lg transition-all {{ $activeStep === $step ? 'text-white shadow-sm' : 'text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800' }}"
+                        style="{{ $activeStep === $step ? 'background-color: rgb(var(--primary-600)) !important; color: white !important;' : '' }}">
                     {{ $step }}
                 </button>
             @endforeach
@@ -110,10 +111,11 @@
                     ĐỊA CHỈ: TỔ 15, ẤP 2 XÃ LONG THỌ, HUYỆN NHƠN TRẠCH, TỈNH ĐỒNG NAI
                 </p>
                 <div class="flex justify-center gap-6 pt-2 text-xs font-semibold text-gray-700 dark:text-gray-300">
-                    <span>📍 ĐỊA ĐIỂM KIỂM TRA: <strong class="text-primary-600">{{ $canteen }}</strong></span>
-                    <span>👤 NGƯỜI KIỂM TRA: <strong class="text-primary-600">{{ $inspector }}</strong></span>
+                    <span>📍 ĐỊA ĐIỂM KIỂM TRA: <strong style="color: rgb(var(--primary-600)) !important;">{{ $canteen }}</strong></span>
+                    <span>👤 NGƯỜI KIỂM TRA: <strong style="color: rgb(var(--primary-600)) !important;">{{ $inspector }}</strong></span>
                 </div>
-                <div class="mt-4 inline-block bg-primary-50 text-primary-700 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider dark:bg-primary-950/20 dark:text-primary-400 border border-primary-100 dark:border-primary-900/30">
+                <div class="mt-4 inline-block px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider border"
+                     style="background-color: rgba(var(--primary-600), 0.1) !important; color: rgb(var(--primary-600)) !important; border-color: rgba(var(--primary-600), 0.2) !important;">
                     {{ $activeStep }}: 
                     @if($activeStep === 'Bước 1')
                         KIỂM TRA TRƯỚC KHI CHẾ BIẾN THỨC ĂN (ĐẦU VÀO)

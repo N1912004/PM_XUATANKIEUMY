@@ -9,6 +9,7 @@ use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Filament\Support\Enums\MaxWidth;
 
 class SystemSettings extends Page implements HasForms
 {
@@ -25,6 +26,11 @@ class SystemSettings extends Page implements HasForms
     protected static bool $shouldRegisterNavigation = false;
 
     protected static string $view = 'filament.pages.system-settings';
+
+    public function getMaxContentWidth(): MaxWidth|string|null
+    {
+        return MaxWidth::ThreeExtraLarge;
+    }
 
     /** @var array<string, mixed> */
     public ?array $data = [];
@@ -49,6 +55,7 @@ class SystemSettings extends Page implements HasForms
         return $form
             ->schema([
                 Forms\Components\Tabs::make('settings_tabs')
+                    ->columnSpanFull()
                     ->tabs([
                         // Tab 1: Thương hiệu
                         Forms\Components\Tabs\Tab::make('Thương hiệu')

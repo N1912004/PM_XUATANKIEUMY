@@ -54,6 +54,15 @@
                     </div>
                 </div>
 
+                <!-- Auto PO Button -->
+                <div class="flex items-center gap-3">
+                    <button wire:click="generatePurchaseOrders"
+                            class="px-4 py-2 text-sm font-bold rounded-lg text-white shadow-sm transition-all hover:opacity-95 active:scale-95 flex items-center gap-1.5"
+                            style="background-color: rgb(var(--primary-600)) !important;">
+                        <span>🛒</span> Tạo PO Tự Động
+                    </button>
+                </div>
+
                 <!-- Day Info -->
                 <div class="flex items-center gap-2">
                     <span class="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase">

@@ -23,7 +23,7 @@
 
     <!-- Dynamic Site Name Text -->
     <span class="text-lg font-black tracking-tight text-gray-900 dark:text-white">
-        {{ $parts[0] }} @if(isset($parts[1]))<span class="text-red-600">{{ $parts[1] }}</span>@endif
+        {{ $displayName }}
     </span>
 </div>
 

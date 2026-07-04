@@ -3,10 +3,15 @@
 namespace App\Filament\Pages;
 
 use App\Models\Menu;
+use App\Models\PurchaseOrder;
+use App\Models\PurchaseOrderItem;
 use App\Models\Shift;
+use App\Models\Supplier;
+use Carbon\Carbon;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 
 class ListHang extends Page
@@ -74,7 +79,7 @@ class ListHang extends Page
 
         foreach ($shifts as $shift) {
             $menus = Menu::with(['recipe.ingredients'])
-                ->where('date', $this->date)
+                ->whereDate('date', $this->date)
                 ->where('shift_id', $shift->id)
                 ->get();
 
@@ -136,11 +141,11 @@ class ListHang extends Page
             ];
         }
 
-        $portions = Menu::where('date', $this->date)
+        $portions = Menu::whereDate('date', $this->date)
             ->whereIn('shift_id', $this->selectedShifts)
             ->sum('estimated_portions');
 
-        $dishes = Menu::where('date', $this->date)
+        $dishes = Menu::whereDate('date', $this->date)
             ->whereIn('shift_id', $this->selectedShifts)
             ->distinct('recipe_id')
             ->count('recipe_id');
@@ -162,5 +167,122 @@ class ListHang extends Page
             'dishes' => $dishes,
             'ingredients' => count($ingCodes),
         ];
+    }
+
+    public function generatePurchaseOrders(): void
+    {
+        if (empty($this->selectedShifts) || ! $this->date) {
+            Notification::make()
+                ->title('Vui lòng chọn ngày và ca phục vụ!')
+                ->danger()
+                ->send();
+
+            return;
+        }
+
+        $menus = Menu::with(['recipe.ingredients.supplier'])
+            ->whereDate('date', $this->date)
+            ->whereIn('shift_id', $this->selectedShifts)
+            ->get();
+
+        if ($menus->isEmpty()) {
+            Notification::make()
+                ->title('Không có thực đơn nào được lập cho ngày và ca đã chọn để tạo PO!')
+                ->warning()
+                ->send();
+
+            return;
+        }
+
+        // Calculate total demand per ingredient
+        $demands = [];
+        foreach ($menus as $menu) {
+            $recipe = $menu->recipe;
+            if (! $recipe) {
+                continue;
+            }
+
+            foreach ($recipe->ingredients as $ingredient) {
+                $qty = $menu->estimated_portions * $ingredient->pivot->quantity_per_portion;
+                if ($qty <= 0) {
+                    continue;
+                }
+
+                if (! isset($demands[$ingredient->id])) {
+                    $demands[$ingredient->id] = [
+                        'ingredient' => $ingredient,
+                        'quantity' => 0,
+                    ];
+                }
+                $demands[$ingredient->id]['quantity'] += $qty;
+            }
+        }
+
+        if (empty($demands)) {
+            Notification::make()
+                ->title('Không có nguyên liệu nào cần chuẩn bị để tạo PO!')
+                ->warning()
+                ->send();
+
+            return;
+        }
+
+        // Group by supplier
+        $supplierGroups = [];
+        $firstSupplier = Supplier::first();
+
+        foreach ($demands as $id => $data) {
+            $ingredient = $data['ingredient'];
+            $supplierId = $ingredient->supplier_id ?? ($firstSupplier ? $firstSupplier->id : null);
+
+            if (! $supplierId) {
+                continue; // Skip if no supplier exists at all in system
+            }
+
+            if (! isset($supplierGroups[$supplierId])) {
+                $supplierGroups[$supplierId] = [];
+            }
+            $supplierGroups[$supplierId][] = $data;
+        }
+
+        $poCount = 0;
+        $poCodes = [];
+
+        foreach ($supplierGroups as $supplierId => $itemsData) {
+            $poCode = 'PO-LH-'.Carbon::parse($this->date)->format('Ymd').'-'.mt_rand(100, 999);
+
+            // Check if PO code already exists, retry if needed
+            while (PurchaseOrder::where('code', $poCode)->exists()) {
+                $poCode = 'PO-LH-'.Carbon::parse($this->date)->format('Ymd').'-'.mt_rand(100, 999);
+            }
+
+            $po = PurchaseOrder::create([
+                'code' => $poCode,
+                'supplier_id' => $supplierId,
+                'status' => 'draft',
+                'estimated_delivery_date' => $this->date,
+                'note' => 'Đơn đặt hàng tự động tạo từ List hàng ngày '.Carbon::parse($this->date)->format('d/m/Y'),
+            ]);
+
+            foreach ($itemsData as $data) {
+                PurchaseOrderItem::create([
+                    'purchase_order_id' => $po->id,
+                    'ingredient_id' => $data['ingredient']->id,
+                    'quantity_ordered' => $data['quantity'],
+                    'quantity_received' => 0.0,
+                    'unit_price' => $data['ingredient']->reference_price ?? 0.0,
+                ]);
+            }
+
+            $poCount++;
+            $poCodes[] = $poCode;
+        }
+
+        Notification::make()
+            ->title('Tạo PO thành công!')
+            ->body("Đã tạo tự động {$poCount} đơn đặt hàng nháp: ".implode(', ', $poCodes))
+            ->success()
+            ->persistent()
+            ->send();
     }
 }
