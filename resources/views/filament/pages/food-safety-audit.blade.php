@@ -46,8 +46,11 @@
                 </div>
 
                 <div class="flex items-center gap-3 mt-4 sm:mt-0">
+                    <button wire:click="exportExcel" class="px-4 py-2 text-sm font-semibold rounded-lg bg-green-600 text-white hover:bg-green-700 flex items-center gap-2 shadow-sm active:scale-95 transition-all">
+                        📊 Xuất Excel (Biểu mẫu BYT)
+                    </button>
                     <button wire:click="exportCSV" class="px-4 py-2 text-sm font-semibold rounded-lg bg-green-50 text-green-700 hover:bg-green-100 dark:bg-green-950/20 dark:text-green-400 flex items-center gap-2 border border-green-150 dark:border-green-900/30 active:scale-95 transition-all">
-                        📥 Xuất báo cáo (CSV)
+                        📥 Xuất CSV
                     </button>
                 </div>
             </div>

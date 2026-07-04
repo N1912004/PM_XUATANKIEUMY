@@ -8,7 +8,6 @@ use App\Models\Menu;
 use App\Models\Recipe;
 use App\Models\Shift;
 use App\Models\Supplier;
-use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -60,13 +59,8 @@ class FoodSafetyAuditExportTest extends TestCase
             'status' => 'locked',
         ]);
 
-        // 2. Authenticate
-        $user = User::create([
-            'name' => 'Admin Test',
-            'email' => 'admin-test@example.com',
-            'password' => bcrypt('password'),
-        ]);
-        $this->actingAs($user);
+        // 2. Authenticate (super_admin để bỏ qua kiểm tra phân quyền của Shield)
+        $this->actingAs($this->createSuperAdmin());
 
         // 3. Test Livewire exportCSV action
         $response = Livewire::test(ListFoodSafetyAudits::class)

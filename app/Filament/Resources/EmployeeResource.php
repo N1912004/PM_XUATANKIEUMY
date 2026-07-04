@@ -10,6 +10,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class EmployeeResource extends Resource
 {
@@ -126,7 +127,17 @@ class EmployeeResource extends Resource
                                             ->relationship('area', 'name')
                                             ->searchable()
                                             ->preload()
-                                            ->required(),
+                                            ->required()
+                                            ->live(),
+                                        Forms\Components\Select::make('kitchen_id')
+                                            ->label('Bếp ăn trực thuộc')
+                                            ->relationship(
+                                                'kitchen',
+                                                'name',
+                                                fn (Builder $query, Forms\Get $get) => $query->when($get('area_id'), fn ($q, $areaId) => $q->where('area_id', $areaId)),
+                                            )
+                                            ->searchable()
+                                            ->preload(),
                                         Forms\Components\DatePicker::make('start_date')
                                             ->label('Ngày vào làm')
                                             ->required(),
@@ -181,6 +192,11 @@ class EmployeeResource extends Resource
                 Tables\Columns\TextColumn::make('area.name')
                     ->label('KHU VỰC')
                     ->sortable(),
+                Tables\Columns\TextColumn::make('kitchen.name')
+                    ->label('BẾP ĂN')
+                    ->placeholder('—')
+                    ->sortable()
+                    ->toggleable(),
                 Tables\Columns\TextColumn::make('start_date')
                     ->label('NGÀY VÀO LÀM')
                     ->date('d/m/Y')

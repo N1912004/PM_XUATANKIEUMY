@@ -528,11 +528,11 @@
             <p class="report-subtitle">Tổng hợp món ăn & nguyên liệu theo khoảng ngày và ca phục vụ</p>
         </div>
         <div>
-            <button type="button" class="excel-btn">
+            <button type="button" class="excel-btn" wire:click="exportExcel">
                 <svg class="w-4 h-4 text-emerald-600" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"/>
                 </svg>
-                <span>Xuất Excel</span>
+                <span>Xuất Excel tài chính</span>
             </button>
         </div>
     </div>
@@ -606,6 +606,13 @@
             <div>
                 <div class="stat-val">{{ number_format($stats['suat'], 0, ',', '.') }}</div>
                 <div class="stat-lbl">Tổng suất</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon" style="background: #fef2f2; color: #dc2626;">💰</div>
+            <div>
+                <div class="stat-val">{{ number_format($stats['cost'] ?? 0, 0, ',', '.') }} đ</div>
+                <div class="stat-lbl">Tổng giá vốn (Cost)</div>
             </div>
         </div>
     </div>

@@ -2,10 +2,13 @@
 
 namespace App\Filament\Pages;
 
+use App\Exports\FinancialReportExport;
 use App\Models\Menu;
 use App\Models\Shift;
 use Carbon\Carbon;
 use Filament\Pages\Page;
+use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class BaoCao extends Page
 {
@@ -85,7 +88,7 @@ class BaoCao extends Page
 
             foreach ($allShifts as $shift) {
                 $menusQuery = Menu::with(['recipe.ingredients'])
-                    ->where('date', $dateStr)
+                    ->whereDate('date', $dateStr)
                     ->where('shift_id', $shift->id);
 
                 if (! empty($this->search)) {
@@ -113,25 +116,34 @@ class BaoCao extends Page
                     }
 
                     $ingredients = [];
+                    $costPerPortion = 0.0;
                     foreach ($recipe->ingredients as $ingredient) {
                         $qty = $menu->estimated_portions * $ingredient->pivot->quantity_per_portion;
-                        // Let's check if the ingredient matches search to highlight or filter
+                        $lineCost = $ingredient->pivot->quantity_per_portion * (float) $ingredient->reference_price;
+                        $costPerPortion += $lineCost;
                         $ingredients[] = [
                             'code' => $ingredient->code,
                             'name' => $ingredient->name,
                             'dl_g' => $ingredient->pivot->quantity_per_portion,
                             'suat' => $menu->estimated_portions,
-                            'phan' => 1, // Mock portion count
+                            'phan' => 1,
                             'quantity' => $qty,
                             'unit' => $ingredient->unit,
+                            'unit_cost' => (float) $ingredient->reference_price,
+                            'line_cost' => $lineCost * $menu->estimated_portions,
                         ];
                     }
+
+                    // Tổng giá vốn món = giá vốn/suất × số suất
+                    $dishCost = $costPerPortion * $menu->estimated_portions;
 
                     $dishes[] = [
                         'name' => $recipe->name,
                         'type' => $recipe->type,
                         'suat' => $menu->estimated_portions,
                         'phan' => 1,
+                        'cost_per_portion' => $costPerPortion,
+                        'dish_cost' => $dishCost,
                         'ingredients' => $ingredients,
                     ];
                 }
@@ -167,6 +179,7 @@ class BaoCao extends Page
         $totalDays = count($grouped);
         $totalDish = 0;
         $totalSuat = 0;
+        $totalCost = 0.0;
         $ingCodes = [];
 
         foreach ($grouped as $day) {
@@ -174,6 +187,7 @@ class BaoCao extends Page
                 foreach ($shift['dishes'] as $dish) {
                     $totalDish++;
                     $totalSuat += $dish['suat'];
+                    $totalCost += $dish['dish_cost'] ?? 0;
                     foreach ($dish['ingredients'] as $ing) {
                         $ingCodes[$ing['code']] = true;
                     }
@@ -186,6 +200,21 @@ class BaoCao extends Page
             'dishes' => $totalDish,
             'ingredients' => count($ingCodes),
             'suat' => $totalSuat,
+            'cost' => $totalCost,
         ];
+    }
+
+    /**
+     * Xuất báo cáo tài chính chi phí bếp ăn (tổng giá vốn theo Ngày → Ca → Món) ra Excel.
+     */
+    public function exportExcel(): BinaryFileResponse
+    {
+        $fileName = 'BaoCao_TaiChinh_'.str_replace('-', '', (string) $this->fromDate)
+            .'_'.str_replace('-', '', (string) $this->toDate).'.xlsx';
+
+        return Excel::download(
+            new FinancialReportExport($this->getGroupedData(), $this->getStats()),
+            $fileName,
+        );
     }
 }

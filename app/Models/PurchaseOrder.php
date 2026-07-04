@@ -13,19 +13,27 @@ class PurchaseOrder extends Model
 
     protected $fillable = [
         'code',
+        'kitchen_id',
         'supplier_id',
         'status',
+        'stocked_at',
         'estimated_delivery_date',
         'note',
     ];
 
     protected $casts = [
         'estimated_delivery_date' => 'date',
+        'stocked_at' => 'datetime',
     ];
 
     public function supplier(): BelongsTo
     {
         return $this->belongsTo(Supplier::class);
+    }
+
+    public function kitchen(): BelongsTo
+    {
+        return $this->belongsTo(Kitchen::class);
     }
 
     public function items(): HasMany
@@ -36,11 +44,18 @@ class PurchaseOrder extends Model
     protected static function booted(): void
     {
         static::updated(function (PurchaseOrder $purchaseOrder) {
-            // Check if status changed to 'done'
-            if ($purchaseOrder->wasChanged('status') && $purchaseOrder->status === 'done') {
+            // Chỉ tự động nhập kho 1 LẦN DUY NHẤT: khi đơn chuyển sang 'done' và chưa từng nhập kho.
+            // Cờ stocked_at chống nhập lặp nếu trạng thái đổi done → khác → done.
+            if ($purchaseOrder->wasChanged('status')
+                && $purchaseOrder->status === 'done'
+                && is_null($purchaseOrder->stocked_at)) {
                 foreach ($purchaseOrder->items as $item) {
+                    // Tồn kho theo từng bếp: khóa theo (kitchen_id, ingredient_id)
                     $stock = Stock::firstOrCreate(
-                        ['ingredient_id' => $item->ingredient_id],
+                        [
+                            'kitchen_id' => $purchaseOrder->kitchen_id,
+                            'ingredient_id' => $item->ingredient_id,
+                        ],
                         [
                             'quantity' => 0,
                             'min_quantity' => 10,
@@ -57,6 +72,7 @@ class PurchaseOrder extends Model
                     ]);
 
                     StockTransaction::create([
+                        'kitchen_id' => $purchaseOrder->kitchen_id,
                         'ingredient_id' => $item->ingredient_id,
                         'type' => 'Nhập kho',
                         'quantity' => $item->quantity_received,
@@ -64,6 +80,9 @@ class PurchaseOrder extends Model
                         'note' => "Nhập kho tự động từ đơn đặt hàng: {$purchaseOrder->code}",
                     ]);
                 }
+
+                // Đánh dấu đã nhập kho (updateQuietly để không kích hoạt lại hook updated)
+                $purchaseOrder->updateQuietly(['stocked_at' => now()]);
             }
         });
     }

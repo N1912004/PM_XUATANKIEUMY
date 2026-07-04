@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Concerns\BelongsToKitchen;
 use App\Filament\Resources\MenuResource\Pages;
 use App\Models\Menu;
 use Filament\Forms;
@@ -12,6 +13,8 @@ use Filament\Tables\Table;
 
 class MenuResource extends Resource
 {
+    use BelongsToKitchen;
+
     protected static ?string $model = Menu::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-calendar-days';
@@ -30,6 +33,7 @@ class MenuResource extends Resource
     {
         return $form
             ->schema([
+                static::kitchenSelect(),
                 Forms\Components\DatePicker::make('date')
                     ->label('Ngày áp dụng')
                     ->required(),
@@ -55,6 +59,7 @@ class MenuResource extends Resource
                     ->required()
                     ->options([
                         'draft' => 'Nháp (Draft)',
+                        'sent' => 'Đã gửi khách hàng (Sent)',
                         'locked' => 'Đã chốt (Locked)',
                     ])
                     ->default('draft'),
@@ -65,6 +70,7 @@ class MenuResource extends Resource
     {
         return $table
             ->columns([
+                static::kitchenColumn(),
                 Tables\Columns\TextColumn::make('date')
                     ->label('Ngày áp dụng')
                     ->date('d/m/Y')
@@ -97,11 +103,13 @@ class MenuResource extends Resource
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         'draft' => 'warning',
+                        'sent' => 'info',
                         'locked' => 'success',
                         default => 'gray',
                     })
                     ->formatStateUsing(fn (string $state): string => match ($state) {
                         'draft' => 'Nháp',
+                        'sent' => 'Đã gửi khách hàng',
                         'locked' => 'Đã chốt',
                         default => $state,
                     }),
@@ -111,6 +119,9 @@ class MenuResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
+                Tables\Filters\SelectFilter::make('kitchen_id')
+                    ->label('Bếp ăn')
+                    ->relationship('kitchen', 'name'),
                 Tables\Filters\SelectFilter::make('shift_id')
                     ->label('Ca làm việc')
                     ->relationship('shift', 'name'),
@@ -118,6 +129,7 @@ class MenuResource extends Resource
                     ->label('Trạng thái')
                     ->options([
                         'draft' => 'Nháp',
+                        'sent' => 'Đã gửi khách hàng',
                         'locked' => 'Đã chốt',
                     ]),
             ])
@@ -135,7 +147,7 @@ class MenuResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            MenuResource\RelationManagers\AuditLogsRelationManager::class,
         ];
     }
 

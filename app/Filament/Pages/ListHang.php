@@ -8,6 +8,7 @@ use App\Models\PurchaseOrderItem;
 use App\Models\Shift;
 use App\Models\Supplier;
 use Carbon\Carbon;
+use Filament\Facades\Filament;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
@@ -258,6 +259,7 @@ class ListHang extends Page
 
             $po = PurchaseOrder::create([
                 'code' => $poCode,
+                'kitchen_id' => Filament::auth()->user()?->currentKitchenId(),
                 'supplier_id' => $supplierId,
                 'status' => 'draft',
                 'estimated_delivery_date' => $this->date,

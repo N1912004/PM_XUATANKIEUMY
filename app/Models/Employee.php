@@ -15,6 +15,7 @@ class Employee extends Model
         'department',
         'position',
         'area_id',
+        'kitchen_id',
         'start_date',
         'status',
         'avatar_url',
@@ -23,6 +24,11 @@ class Employee extends Model
     public function area(): BelongsTo
     {
         return $this->belongsTo(Area::class);
+    }
+
+    public function kitchen(): BelongsTo
+    {
+        return $this->belongsTo(Kitchen::class);
     }
 
     public function timekeepings()

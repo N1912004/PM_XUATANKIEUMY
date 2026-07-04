@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Concerns\BelongsToKitchen;
 use App\Filament\Resources\PurchaseOrderResource\Pages;
 use App\Models\Ingredient;
 use App\Models\PurchaseOrder;
@@ -14,6 +15,8 @@ use Filament\Tables\Table;
 
 class PurchaseOrderResource extends Resource
 {
+    use BelongsToKitchen;
+
     protected static ?string $model = PurchaseOrder::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-shopping-cart';
@@ -37,6 +40,7 @@ class PurchaseOrderResource extends Resource
                     ->required()
                     ->unique(ignoreRecord: true)
                     ->maxLength(255),
+                static::kitchenSelect(),
                 Forms\Components\Select::make('supplier_id')
                     ->label('Nhà cung cấp')
                     ->relationship('supplier', 'name')
@@ -105,6 +109,7 @@ class PurchaseOrderResource extends Resource
                     ->searchable()
                     ->sortable()
                     ->weight('bold'),
+                static::kitchenColumn(),
                 Tables\Columns\TextColumn::make('supplier.name')
                     ->label('NHÀ CUNG CẤP')
                     ->sortable()
@@ -138,6 +143,9 @@ class PurchaseOrderResource extends Resource
                     }),
             ])
             ->filters([
+                Tables\Filters\SelectFilter::make('kitchen_id')
+                    ->label('Bếp ăn')
+                    ->relationship('kitchen', 'name'),
                 Tables\Filters\SelectFilter::make('supplier_id')
                     ->label('Nhà cung cấp')
                     ->relationship('supplier', 'name'),

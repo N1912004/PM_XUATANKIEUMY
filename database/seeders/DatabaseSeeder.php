@@ -438,5 +438,8 @@ class DatabaseSeeder extends Seeder
             'manager_id' => $emp2->id,
             'status' => 'Đang hoạt động',
         ]);
+
+        // 12. Phân quyền: tạo vai trò & gán super_admin cho user hiện có
+        $this->call(ShieldRoleSeeder::class);
     }
 }

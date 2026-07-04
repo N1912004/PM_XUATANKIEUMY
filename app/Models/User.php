@@ -5,15 +5,18 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Filament\Models\Contracts\HasAvatar;
+use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Storage;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements HasAvatar
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, HasRoles, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -49,6 +52,28 @@ class User extends Authenticatable implements HasAvatar
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Chỉ tài khoản đã được gán ít nhất 1 vai trò mới được vào panel quản trị.
+     * (Mọi user hiện hữu đều được seed vai trò super_admin nên không bị khóa.)
+     */
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return $this->roles()->exists();
+    }
+
+    public function employee(): BelongsTo
+    {
+        return $this->belongsTo(Employee::class);
+    }
+
+    /**
+     * Bếp trực thuộc của người dùng (qua hồ sơ nhân viên) — dùng để lọc/phân quyền dữ liệu theo bếp.
+     */
+    public function currentKitchenId(): ?int
+    {
+        return $this->employee?->kitchen_id;
     }
 
     public function getFilamentAvatarUrl(): ?string

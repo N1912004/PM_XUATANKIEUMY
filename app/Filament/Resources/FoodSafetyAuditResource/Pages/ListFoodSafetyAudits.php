@@ -2,10 +2,15 @@
 
 namespace App\Filament\Resources\FoodSafetyAuditResource\Pages;
 
+use App\Exports\FoodSafetyAuditReportExport;
 use App\Filament\Resources\FoodSafetyAuditResource;
+use App\Models\FoodSafetyAudit;
 use App\Models\Menu;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
+use Illuminate\Support\Collection;
+use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ListFoodSafetyAudits extends ListRecords
@@ -44,7 +49,7 @@ class ListFoodSafetyAudits extends ListRecords
         }
 
         $query = Menu::with(['recipe.ingredients'])
-            ->where('date', $this->date);
+            ->whereDate('date', $this->date);
 
         if ($this->selectedShift) {
             $query->where('shift_id', $this->selectedShift);
@@ -80,7 +85,7 @@ class ListFoodSafetyAudits extends ListRecords
         }
 
         $query = Menu::with(['recipe.ingredients.supplier', 'shift'])
-            ->where('date', $this->date);
+            ->whereDate('date', $this->date);
 
         if ($this->selectedShift) {
             $query->where('shift_id', $this->selectedShift);
@@ -111,7 +116,7 @@ class ListFoodSafetyAudits extends ListRecords
                         'quantity' => $qty,
                         'unit' => $ingredient->unit,
                         'supplier' => $ingredient->supplier->name ?? 'Cơ sở tự do',
-                        'invoice' => 'HĐ-'.($ingredient->supplier->code ?? 'NCC').'-'.mt_rand(100, 999),
+                        'invoice' => 'HĐ-'.($ingredient->supplier->code ?? 'NCC').'-'.str_replace('-', '', $this->date),
                         'vet_check' => ($ingredient->type === 'Động vật') ? 'Đạt' : '—',
                         'sensory' => 'Đạt',
                         'quick_test' => '—',
@@ -123,58 +128,95 @@ class ListFoodSafetyAudits extends ListRecords
             return array_values($seenIngredients);
         }
 
-        // Steps 2 to 5: Dishes list check
+        // Steps 2 to 5: Dishes list check — lấy dữ liệu THẬT đã ghi nhận (nếu có)
+        $records = $this->auditRecordsByRecipe();
+
         $dishes = [];
-        foreach ($menus as $index => $menu) {
+        foreach ($menus as $menu) {
             $recipe = $menu->recipe;
             if (! $recipe) {
                 continue;
             }
 
             $dishName = $recipe->name;
+            /** @var FoodSafetyAudit|null $audit */
+            $audit = $records->get($recipe->id);
 
             if ($this->activeStep === 'Bước 2') {
                 $dishes[] = [
                     'name' => $dishName,
-                    'time' => '09:30',
-                    'sensory' => 'Đạt',
-                    'temp' => '85°C',
-                    'cook' => $this->inspector,
-                    'kitchen' => 'Bếp số '.(($index % 3) + 1),
-                    'notes' => 'Chín đều, màu sắc tốt',
+                    'time' => $this->timeRange($audit?->cook_start_at, $audit?->cook_end_at),
+                    'sensory' => $audit->status ?? '',
+                    'temp' => $audit->temperature ?? '',
+                    'cook' => $audit->inspected_by ?? '',
+                    'kitchen' => $menu->shift->name ?? '',
+                    'notes' => $audit->notes ?? '',
                 ];
             } elseif ($this->activeStep === 'Bước 3') {
                 $dishes[] = [
                     'name' => $dishName,
-                    'time' => '11:00',
-                    'sensory' => 'Đạt',
-                    'sample_kept' => 'Có (Tủ lưu mẫu)',
-                    'temp' => '72°C',
-                    'notes' => 'Khay chia thức ăn sạch',
+                    'time' => $audit?->sample_kept_at?->format('H:i') ?? '',
+                    'sensory' => $audit->status ?? '',
+                    'sample_kept' => $audit && $audit->sample_kept_by ? 'Có ('.$audit->sample_kept_by.')' : '',
+                    'temp' => $audit->temperature ?? '',
+                    'notes' => $audit->notes ?? '',
                 ];
             } elseif ($this->activeStep === 'Lưu mẫu') {
                 $dishes[] = [
                     'name' => $dishName,
-                    'time' => '10:45',
-                    'quantity' => '150g',
-                    'sample_code' => 'M-'.str_replace('-', '', $this->date).'-'.$recipe->code,
-                    'temp' => '4°C',
-                    'staff' => $this->inspector,
-                    'notes' => 'Hộp vô trùng, niêm phong',
+                    'time' => $audit?->sample_kept_at?->format('H:i') ?? '',
+                    'quantity' => '',
+                    'sample_code' => $audit->sample_code ?? '',
+                    'temp' => $audit->temperature ?? '',
+                    'staff' => $audit->sample_kept_by ?? '',
+                    'notes' => $audit->utensil ?? '',
                 ];
             } elseif ($this->activeStep === 'Hủy mẫu') {
                 $dishes[] = [
                     'name' => $dishName,
-                    'time' => '11:00',
+                    'time' => $audit?->sample_kept_at?->format('H:i') ?? '',
                     'retention' => '24 giờ',
-                    'status' => 'Bình thường',
-                    'staff' => $this->inspector,
-                    'notes' => 'Hủy mẫu theo quy định',
+                    'status' => $audit->status ?? '',
+                    'staff' => $audit->sample_kept_by ?? '',
+                    'notes' => $audit->notes ?? '',
                 ];
             }
         }
 
         return $dishes;
+    }
+
+    /**
+     * Lấy các bản ghi kiểm thực đã lưu cho ngày/ca/bước hiện tại, keyed theo recipe_id.
+     *
+     * @return Collection<int, FoodSafetyAudit>
+     */
+    protected function auditRecordsByRecipe(): Collection
+    {
+        $query = FoodSafetyAudit::whereDate('date', $this->date)
+            ->where('stage', $this->activeStep)
+            ->whereNotNull('recipe_id');
+
+        if ($this->selectedShift) {
+            $query->where('shift_id', $this->selectedShift);
+        }
+
+        return $query->get()->keyBy('recipe_id');
+    }
+
+    /**
+     * Định dạng khoảng thời gian chế biến "HH:MM - HH:MM" từ 2 mốc giờ.
+     */
+    protected function timeRange(?string $start, ?string $end): string
+    {
+        $start = $start ? substr($start, 0, 5) : '';
+        $end = $end ? substr($end, 0, 5) : '';
+
+        if ($start && $end) {
+            return $start.' - '.$end;
+        }
+
+        return $start ?: $end;
     }
 
     public function exportCSV(): StreamedResponse
@@ -283,5 +325,30 @@ class ListFoodSafetyAudits extends ListRecords
         };
 
         return response()->streamDownload($callback, $fileName, $headers);
+    }
+
+    /**
+     * Xuất báo cáo kiểm thực 3 bước theo biểu mẫu chuẩn Bộ Y tế (QĐ 1246/QĐ-BYT) — file .xlsx.
+     * Mỗi bước là 1 sheet có tiêu đề gộp ô; dữ liệu B2/B3 lấy từ bản ghi kiểm thực đã lưu.
+     */
+    public function exportExcel(): BinaryFileResponse
+    {
+        $fileName = 'BaoCao_KiemThuc_3Buoc_'.str_replace('-', '', (string) $this->date).'.xlsx';
+
+        $steps = ['Bước 1', 'Bước 2', 'Bước 3', 'Lưu mẫu', 'Hủy mẫu'];
+        $itemsByStep = [];
+        $previousStep = $this->activeStep;
+
+        foreach ($steps as $step) {
+            $this->activeStep = $step;
+            $itemsByStep[$step] = $this->getAuditItems();
+        }
+
+        $this->activeStep = $previousStep;
+
+        return Excel::download(
+            new FoodSafetyAuditReportExport($itemsByStep, (string) $this->date, $this->canteen, $this->inspector),
+            $fileName,
+        );
     }
 }

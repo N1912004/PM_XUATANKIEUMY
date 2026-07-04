@@ -2,7 +2,11 @@
 
 namespace App\Filament\Pages;
 
+use App\Events\MessageSent;
+use App\Models\Message;
+use Filament\Facades\Filament;
 use Filament\Pages\Page;
+use Livewire\Attributes\On;
 
 class ChatNhom extends Page
 {
@@ -17,4 +21,79 @@ class ChatNhom extends Page
     protected static ?int $navigationSort = 1;
 
     protected static string $view = 'filament.pages.chat-nhom';
+
+    /**
+     * Danh sách tin nhắn hiển thị (dạng mảng để realtime append dễ dàng).
+     *
+     * @var array<int, array<string, mixed>>
+     */
+    public array $messages = [];
+
+    public string $newMessage = '';
+
+    public function mount(): void
+    {
+        $this->messages = Message::with('user')
+            ->latest()
+            ->limit(50)
+            ->get()
+            ->reverse()
+            ->map(fn (Message $m): array => $this->toArray($m))
+            ->values()
+            ->all();
+    }
+
+    public function sendMessage(): void
+    {
+        $data = $this->validate([
+            'newMessage' => ['required', 'string', 'max:2000'],
+        ]);
+
+        $user = Filament::auth()->user();
+
+        $message = Message::create([
+            'user_id' => $user->getAuthIdentifier(),
+            'kitchen_id' => $user->currentKitchenId(),
+            'body' => $data['newMessage'],
+        ]);
+
+        $message->setRelation('user', $user);
+
+        // Hiển thị ngay cho người gửi + phát realtime cho những người khác
+        $this->messages[] = $this->toArray($message);
+        $this->newMessage = '';
+
+        broadcast(new MessageSent($message))->toOthers();
+    }
+
+    /**
+     * Nhận tin nhắn realtime từ Reverb (kênh private chat-nhom).
+     *
+     * @param  array<string, mixed>  $payload
+     */
+    #[On('echo-private:chat-nhom,MessageSent')]
+    public function onMessageReceived(array $payload): void
+    {
+        $this->messages[] = [
+            'id' => $payload['id'] ?? null,
+            'user_id' => $payload['user_id'] ?? null,
+            'user_name' => $payload['user_name'] ?? 'Ẩn danh',
+            'body' => $payload['body'] ?? '',
+            'created_at' => $payload['created_at'] ?? now()->format('H:i d/m'),
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    protected function toArray(Message $message): array
+    {
+        return [
+            'id' => $message->id,
+            'user_id' => $message->user_id,
+            'user_name' => $message->user?->name ?? 'Ẩn danh',
+            'body' => $message->body,
+            'created_at' => $message->created_at?->format('H:i d/m'),
+        ];
+    }
 }
