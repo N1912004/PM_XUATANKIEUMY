@@ -62,7 +62,7 @@ class AdminPanelProvider extends PanelProvider
             )
             ->userMenuItems([
                 'profile' => MenuItem::make()
-                    ->label('Cài đặt')
+                    ->label(fn () => __('Cài đặt tài khoản'))
                     ->icon('heroicon-o-user')
                     ->url("javascript:Livewire.dispatch('open-profile-modal')"),
             ])
@@ -236,15 +236,15 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->navigationGroups([
                 NavigationGroup::make()
-                    ->label('TỔNG QUAN'),
+                    ->label(fn () => __('TỔNG QUAN')),
                 NavigationGroup::make()
-                    ->label('VẬN HÀNH BẾP'),
+                    ->label(fn () => __('VẬN HÀNH BẾP')),
                 NavigationGroup::make()
-                    ->label('CUNG ỨNG & KHO'),
+                    ->label(fn () => __('CUNG ỨNG & KHO')),
                 NavigationGroup::make()
-                    ->label('NHÂN SỰ'),
+                    ->label(fn () => __('NHÂN SỰ')),
                 NavigationGroup::make()
-                    ->label('CHAT NHÓM'),
+                    ->label(fn () => __('CHAT NHÓM')),
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
