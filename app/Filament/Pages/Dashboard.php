@@ -55,7 +55,9 @@ class Dashboard extends Page
 
     public function mount(): void
     {
-        $this->todayFormatted = Carbon::today()->locale('vi')->isoFormat('dddd, [Ngày] DD/MM/Y');
+        $this->todayFormatted = Carbon::today()->locale(app()->getLocale())->isoFormat(
+            app()->getLocale() === 'vi' ? 'dddd, [Ngày] DD/MM/Y' : 'dddd, MMMM DD, Y'
+        );
 
         $hour = (int) date('H');
         if ($hour < 12) {

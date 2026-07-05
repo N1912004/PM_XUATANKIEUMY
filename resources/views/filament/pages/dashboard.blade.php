@@ -297,14 +297,14 @@
                                 <div class="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-gray-800/40 transition-colors hover:bg-blue-50/30 dark:hover:bg-blue-950/10">
                                     <div class="flex items-center gap-3">
                                         <div class="rounded-lg bg-blue-100 px-3 py-1.5 text-xs font-extrabold text-blue-800 dark:bg-blue-950/60 dark:text-blue-300">
-                                            {{ $menu->shift->name ?? __('Ca') }}
+                                            {{ __($menu->shift->name ?? 'Ca') }}
                                         </div>
                                         <div>
                                             <p class="text-sm font-bold text-gray-900 dark:text-white">
                                                 {{ $menu->recipe->name ?? __('Món ăn') }}
                                             </p>
                                             <p class="text-2xs text-gray-400 mt-0.5 font-medium">
-                                                {{ __('Phân loại') }}: {{ $menu->recipe->type ?? __('Chưa rõ') }}
+                                                {{ __('Phân loại') }}: {{ __($menu->recipe->type ?? 'Chưa rõ') }}
                                             </p>
                                         </div>
                                     </div>
@@ -354,13 +354,13 @@
                                             {{ $stock['ingredient']['name'] ?? __('Nguyên liệu') }}
                                         </p>
                                         <p class="text-2xs text-gray-500 mt-1 font-medium">
-                                            {{ __('Định mức an toàn') }}: <span class="font-bold text-gray-700 dark:text-gray-300">{{ number_format($stock['min_quantity']) }} {{ $stock['ingredient']['unit'] ?? '' }}</span>
+                                            {{ __('Định mức an toàn') }}: <span class="font-bold text-gray-700 dark:text-gray-300">{{ number_format($stock['min_quantity']) }} {{ __($stock['ingredient']['unit'] ?? '') }}</span>
                                         </p>
                                     </div>
                                     <div class="text-right">
                                         <span class="inline-flex items-center gap-1.5 rounded-lg bg-red-100 dark:bg-red-950 px-3 py-1.5 text-xs font-bold text-red-700 dark:text-red-400">
                                             <span class="h-1.5 w-1.5 rounded-full bg-red-500 animate-ping"></span>
-                                            {{ __('Tồn') }}: {{ number_format($stock['quantity']) }} {{ $stock['ingredient']['unit'] ?? '' }}
+                                            {{ __('Tồn') }}: {{ number_format($stock['quantity']) }} {{ __($stock['ingredient']['unit'] ?? '') }}
                                         </span>
                                     </div>
                                 </div>
@@ -457,10 +457,10 @@
                                     <div>
                                         <div class="flex items-center gap-2">
                                             <span class="text-sm font-bold text-gray-950 dark:text-white">
-                                                {{ $audit->stage }}
+                                                {{ __($audit->stage) }}
                                             </span>
                                             <span class="text-2xs font-semibold text-gray-400 bg-gray-200/50 dark:bg-gray-700 px-1.5 py-0.5 rounded-md">
-                                                {{ $audit->shift->name ?? __('Ca') }}
+                                                {{ __($audit->shift->name ?? 'Ca') }}
                                             </span>
                                         </div>
                                         <p class="text-2xs text-gray-500 mt-1 font-medium">
