@@ -27,7 +27,7 @@ class Dashboard extends Page
 
     public static function getNavigationLabel(): string
     {
-        return __('Dashboard');
+        return __('Bảng điều khiển');
     }
 
     public function getTitle(): string

@@ -20,7 +20,7 @@ class IngredientResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return __('List nguyên liệu');
+        return __('Danh sách nguyên liệu');
     }
 
     public static function getModelLabel(): string
@@ -30,7 +30,7 @@ class IngredientResource extends Resource
 
     public static function getPluralModelLabel(): string
     {
-        return __('List nguyên liệu');
+        return __('Danh sách nguyên liệu');
     }
 
     public static function getNavigationGroup(): ?string

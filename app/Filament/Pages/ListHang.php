@@ -30,12 +30,12 @@ class ListHang extends Page
 
     public static function getNavigationLabel(): string
     {
-        return __('List hàng');
+        return __('Danh sách hàng');
     }
 
     public function getTitle(): string
     {
-        return __('List hàng');
+        return __('Danh sách hàng');
     }
 
     public ?string $date = null;
