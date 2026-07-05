@@ -16,15 +16,24 @@ class Dashboard extends Page
 {
     use WithPagination;
 
-    protected static ?string $navigationGroup = 'TỔNG QUAN';
-
     protected static ?string $navigationIcon = 'heroicon-o-squares-2x2';
 
-    protected static ?string $navigationLabel = 'Dashboard';
-
-    protected static ?string $title = 'Bảng điều khiển';
-
     protected static string $view = 'filament.pages.dashboard';
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('TỔNG QUAN');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('Dashboard');
+    }
+
+    public function getTitle(): string
+    {
+        return __('Bảng điều khiển');
+    }
 
     public int $totalPortionsToday = 0;
 

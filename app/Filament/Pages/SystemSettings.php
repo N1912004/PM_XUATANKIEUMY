@@ -170,7 +170,15 @@ class SystemSettings extends Page implements HasForms
 
         foreach ($settingsMap as $key => $group) {
             if (array_key_exists($key, $data)) {
-                Setting::set($key, $data[$key], $group);
+                $value = $data[$key];
+
+                // FileUpload fields return an array of file paths.
+                // We extract the first file path string for storage.
+                if (is_array($value)) {
+                    $value = reset($value) ?: null;
+                }
+
+                Setting::set($key, $value, $group);
             }
         }
 

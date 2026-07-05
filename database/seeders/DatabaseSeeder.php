@@ -222,6 +222,36 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
+        // Areas & Kitchens (defined early to resolve circular dependencies)
+        $area1 = Area::firstOrCreate(['code' => 'KV-DN'], [
+            'name' => 'Đồng Nai',
+            'status' => 'Đang hoạt động',
+            'notes' => 'Khu vực vận hành Nhơn Trạch',
+        ]);
+        $area2 = Area::firstOrCreate(['code' => 'KV-HCM'], [
+            'name' => 'Hồ Chí Minh',
+            'status' => 'Đang hoạt động',
+            'notes' => 'Các điểm phục vụ nội thành',
+        ]);
+        $area3 = Area::firstOrCreate(['code' => 'KV-BD'], [
+            'name' => 'Bình Dương',
+            'status' => 'Tạm dừng',
+            'notes' => 'Đang rà soát lại công suất',
+        ]);
+
+        $kitchen1 = Kitchen::firstOrCreate(['name' => 'Nhà ăn Nhơn Trạch 1'], [
+            'area_id' => $area1->id,
+            'type' => 'Bếp sản xuất',
+            'capacity' => 1800,
+            'status' => 'Đang hoạt động',
+        ]);
+        $kitchen2 = Kitchen::firstOrCreate(['name' => 'Nhà ăn Summit'], [
+            'area_id' => $area1->id,
+            'type' => 'Nhà ăn phục vụ',
+            'capacity' => 900,
+            'status' => 'Đang hoạt động',
+        ]);
+
         // 8. Employees (Nhanvien.png)
         $emp1 = Employee::firstOrCreate(['code' => 'NV001'], [
             'name' => 'Nguyễn Văn An',
@@ -229,7 +259,8 @@ class DatabaseSeeder extends Seeder
             'phone' => '0987.654.001',
             'department' => 'Nhân sự',
             'position' => 'Quản lý nhân sự',
-            'area' => 'Hà Nội',
+            'area_id' => $area1->id,
+            'kitchen_id' => null,
             'start_date' => '2022-03-15',
             'status' => 'Đang làm việc',
             'avatar_url' => 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=100&q=80',
@@ -241,7 +272,8 @@ class DatabaseSeeder extends Seeder
             'phone' => '0987.654.002',
             'department' => 'Kế toán',
             'position' => 'Kế toán trưởng',
-            'area' => 'Hà Nội',
+            'area_id' => $area1->id,
+            'kitchen_id' => $kitchen2->id,
             'start_date' => '2021-01-10',
             'status' => 'Đang làm việc',
             'avatar_url' => 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=100&q=80',
@@ -253,7 +285,8 @@ class DatabaseSeeder extends Seeder
             'phone' => '0987.654.003',
             'department' => 'Kho',
             'position' => 'Thủ kho',
-            'area' => 'Đà Nẵng',
+            'area_id' => $area1->id,
+            'kitchen_id' => $kitchen1->id,
             'start_date' => '2022-06-05',
             'status' => 'Đang làm việc',
             'avatar_url' => 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=100&q=80',
@@ -265,7 +298,8 @@ class DatabaseSeeder extends Seeder
             'phone' => '0987.654.004',
             'department' => 'Sản xuất',
             'position' => 'Tổ trưởng bếp',
-            'area' => 'TP. Hồ Chí Minh',
+            'area_id' => $area2->id,
+            'kitchen_id' => null,
             'start_date' => '2022-08-20',
             'status' => 'Nghỉ phép',
             'avatar_url' => 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=100&q=80',
@@ -277,7 +311,8 @@ class DatabaseSeeder extends Seeder
             'phone' => '0987.654.005',
             'department' => 'Kinh doanh',
             'position' => 'Nhân viên kinh doanh',
-            'area' => 'Hà Nội',
+            'area_id' => $area1->id,
+            'kitchen_id' => null,
             'start_date' => '2022-11-12',
             'status' => 'Đang làm việc',
             'avatar_url' => 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&q=80',
@@ -289,7 +324,8 @@ class DatabaseSeeder extends Seeder
             'phone' => '0987.654.006',
             'department' => 'Chăm sóc KH',
             'position' => 'Nhân viên CSKH',
-            'area' => 'Đà Nẵng',
+            'area_id' => $area1->id,
+            'kitchen_id' => null,
             'start_date' => '2023-02-01',
             'status' => 'Đang làm việc',
             'avatar_url' => 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=100&q=80',
@@ -301,7 +337,8 @@ class DatabaseSeeder extends Seeder
             'phone' => '0987.654.007',
             'department' => 'IT',
             'position' => 'Lập trình viên',
-            'area' => 'Hà Nội',
+            'area_id' => $area1->id,
+            'kitchen_id' => null,
             'start_date' => '2023-04-18',
             'status' => 'Nghỉ việc',
             'avatar_url' => 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=100&q=80',
@@ -313,7 +350,8 @@ class DatabaseSeeder extends Seeder
             'phone' => '0987.654.008',
             'department' => 'Sản xuất',
             'position' => 'Nhân viên sơ chế',
-            'area' => 'TP. Hồ Chí Minh',
+            'area_id' => $area2->id,
+            'kitchen_id' => null,
             'start_date' => '2023-05-22',
             'status' => 'Đang làm việc',
             'avatar_url' => 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=100&q=80',
@@ -404,40 +442,13 @@ class DatabaseSeeder extends Seeder
             'status' => 'Đã duyệt',
         ]);
 
-        // 11. Areas & Kitchens (Khuvuc.png)
-        $area1 = Area::firstOrCreate(['code' => 'KV-DN'], [
-            'name' => 'Đồng Nai',
-            'manager_id' => $emp1->id,
-            'status' => 'Đang hoạt động',
-            'notes' => 'Khu vực vận hành Nhơn Trạch',
-        ]);
-        $area2 = Area::firstOrCreate(['code' => 'KV-HCM'], [
-            'name' => 'Hồ Chí Minh',
-            'manager_id' => $emp4->id,
-            'status' => 'Đang hoạt động',
-            'notes' => 'Các điểm phục vụ nội thành',
-        ]);
-        $area3 = Area::firstOrCreate(['code' => 'KV-BD'], [
-            'name' => 'Bình Dương',
-            'manager_id' => $emp2->id,
-            'status' => 'Tạm dừng',
-            'notes' => 'Đang rà soát lại công suất',
-        ]);
+        // 11. Update managers for Areas & Kitchens (Khuvuc.png)
+        $area1->update(['manager_id' => $emp1->id]);
+        $area2->update(['manager_id' => $emp4->id]);
+        $area3->update(['manager_id' => $emp2->id]);
 
-        Kitchen::firstOrCreate(['name' => 'Nhà ăn Nhơn Trạch 1'], [
-            'area_id' => $area1->id,
-            'type' => 'Bếp sản xuất',
-            'capacity' => 1800,
-            'manager_id' => $emp3->id,
-            'status' => 'Đang hoạt động',
-        ]);
-        Kitchen::firstOrCreate(['name' => 'Nhà ăn Summit'], [
-            'area_id' => $area1->id,
-            'type' => 'Nhà ăn phục vụ',
-            'capacity' => 900,
-            'manager_id' => $emp2->id,
-            'status' => 'Đang hoạt động',
-        ]);
+        $kitchen1->update(['manager_id' => $emp3->id]);
+        $kitchen2->update(['manager_id' => $emp2->id]);
 
         // 12. Phân quyền: tạo vai trò & gán super_admin cho user hiện có
         $this->call(ShieldRoleSeeder::class);

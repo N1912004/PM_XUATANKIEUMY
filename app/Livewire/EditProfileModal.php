@@ -101,6 +101,8 @@ class EditProfileModal extends Component implements HasActions, HasForms
                         ->success()
                         ->title('Đã cập nhật hồ sơ thành công!')
                         ->send();
+
+                    $this->redirect(request()->header('Referer') ?: filament()->getUrl());
                 }
             });
     }

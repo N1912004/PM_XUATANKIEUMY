@@ -1,3 +1,30 @@
+<style>
+    .btn-export-excel {
+        background-color: #16a34a !important; /* bg-green-600 */
+        color: #ffffff !important;
+        border: 1px solid #15803d !important;
+    }
+    .btn-export-excel:hover {
+        background-color: #15803d !important; /* bg-green-700 */
+    }
+    .btn-export-csv {
+        background-color: #f0fdf4 !important; /* bg-green-50 */
+        color: #15803d !important; /* text-green-700 */
+        border: 1px solid #dcfce7 !important; /* border-green-200 */
+    }
+    .btn-export-csv:hover {
+        background-color: #dcfce7 !important; /* bg-green-100 */
+    }
+    .dark .btn-export-csv {
+        background-color: rgba(22, 163, 74, 0.1) !important;
+        color: #4ade80 !important;
+        border-color: rgba(22, 163, 74, 0.2) !important;
+    }
+    .dark .btn-export-csv:hover {
+        background-color: rgba(22, 163, 74, 0.2) !important;
+    }
+</style>
+
 <x-filament-panels::page>
     <div class="space-y-6">
         <!-- Top filter and actions bar -->
@@ -46,10 +73,10 @@
                 </div>
 
                 <div class="flex items-center gap-3 mt-4 sm:mt-0">
-                    <button wire:click="exportExcel" class="px-4 py-2 text-sm font-semibold rounded-lg bg-green-600 text-white hover:bg-green-700 flex items-center gap-2 shadow-sm active:scale-95 transition-all">
+                    <button wire:click="exportExcel" class="px-4 py-2 text-sm font-semibold rounded-lg btn-export-excel flex items-center gap-2 shadow-sm active:scale-95 transition-all">
                         📊 Xuất Excel (Biểu mẫu BYT)
                     </button>
-                    <button wire:click="exportCSV" class="px-4 py-2 text-sm font-semibold rounded-lg bg-green-50 text-green-700 hover:bg-green-100 dark:bg-green-950/20 dark:text-green-400 flex items-center gap-2 border border-green-150 dark:border-green-900/30 active:scale-95 transition-all">
+                    <button wire:click="exportCSV" class="px-4 py-2 text-sm font-semibold rounded-lg btn-export-csv flex items-center gap-2 active:scale-95 transition-all">
                         📥 Xuất CSV
                     </button>
                 </div>

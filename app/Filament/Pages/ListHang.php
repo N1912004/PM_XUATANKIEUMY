@@ -19,15 +19,24 @@ class ListHang extends Page
 {
     protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-list';
 
-    protected static ?string $navigationLabel = 'List hàng';
-
-    protected static ?string $title = 'List hàng';
-
-    protected static ?string $navigationGroup = 'CUNG ỨNG & KHO';
-
     protected static ?int $navigationSort = 3;
 
     protected static string $view = 'filament.pages.list-hang';
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('CUNG ỨNG & KHO');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('List hàng');
+    }
+
+    public function getTitle(): string
+    {
+        return __('List hàng');
+    }
 
     public ?string $date = null;
 

@@ -4,6 +4,7 @@ namespace App\Providers\Filament;
 
 use App\Filament\Pages\Dashboard;
 use App\Filament\Pages\EditProfile;
+use App\Http\Middleware\SetLocale;
 use App\Models\Setting;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Http\Middleware\Authenticate;
@@ -51,11 +52,13 @@ class AdminPanelProvider extends PanelProvider
             )
             ->renderHook(
                 PanelsRenderHook::USER_MENU_BEFORE,
-                fn () => new HtmlString('
+                fn () => new HtmlString(
+                    view('filament.components.language-switcher')->render().'
                     <span class="text-sm font-bold text-gray-700 dark:text-gray-200 mr-3" style="align-self: center;">
                         '.e(filament()->auth()->user()?->name ?? auth()->user()?->name ?? 'Admin').'
                     </span>
-                ')
+                '
+                )
             )
             ->userMenuItems([
                 'profile' => MenuItem::make()
@@ -258,6 +261,7 @@ class AdminPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
+                SetLocale::class,
             ])
             ->plugins([
                 FilamentShieldPlugin::make(),

@@ -125,6 +125,33 @@
         .custom-dashboard-btn:hover {
             background-color: rgb(var(--primary-500)) !important;
         }
+
+        .custom-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(1, minmax(0, 1fr));
+            gap: 1.25rem;
+        }
+        @media (min-width: 640px) {
+            .custom-stats-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+        @media (min-width: 1024px) {
+            .custom-stats-grid {
+                grid-template-columns: repeat(4, minmax(0, 1fr));
+            }
+        }
+
+        .custom-actions-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 1rem;
+        }
+        @media (min-width: 768px) {
+            .custom-actions-grid {
+                grid-template-columns: repeat(4, minmax(0, 1fr));
+            }
+        }
     </style>
 
     <div class="custom-dashboard-container space-y-6">
@@ -138,13 +165,13 @@
                 <div class="space-y-2">
                     <div class="badge-status inline-flex items-center gap-1.5">
                         <span class="h-2 w-2 rounded-full bg-green-400 animate-ping"></span>
-                        Hệ thống đã sẵn sàng
+                        {{ __('Hệ thống đã sẵn sàng') }}
                     </div>
                     <h2>
-                        {{ $greeting }}, {{ auth()->user()->name }}
+                        {{ __($greeting) }}, {{ auth()->user()->name }}
                     </h2>
                     <p>
-                        Báo cáo tổng hợp vận hành nhà ăn, quản lý kho hàng và đặt hàng nguyên liệu ngày hôm nay.
+                        {{ __('Báo cáo tổng hợp vận hành nhà ăn, quản lý kho hàng và đặt hàng nguyên liệu ngày hôm nay.') }}
                     </p>
                 </div>
                 <div class="date-box self-start md:self-auto">
@@ -155,18 +182,18 @@
         </div>
 
         <!-- 2. Operational Stats Widgets (Premium Styled Cards) -->
-        <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <div class="custom-stats-grid">
             <!-- Portions Today -->
             <div class="premium-card p-6 border-l-4 border-l-amber-500">
                 <div class="flex items-center justify-between">
                     <div class="icon-box bg-amber-50 dark:bg-amber-950/20 text-amber-500">
                         <x-heroicon-o-book-open class="h-6 w-6" />
                     </div>
-                    <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Hôm nay</span>
+                    <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">{{ __('Hôm nay') }}</span>
                 </div>
                 <div class="mt-4">
                     <h3 class="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white">{{ number_format($totalPortionsToday) }}</h3>
-                    <p class="mt-1 text-xs font-bold text-gray-500 uppercase tracking-wide">Suất ăn dự kiến</p>
+                    <p class="mt-1 text-xs font-bold text-gray-500 uppercase tracking-wide">{{ __('Suất ăn dự kiến') }}</p>
                 </div>
             </div>
 
@@ -176,11 +203,11 @@
                     <div class="icon-box bg-green-50 dark:bg-green-950/20 text-green-500">
                         <x-heroicon-o-archive-box class="h-6 w-6" />
                     </div>
-                    <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Nguyên liệu</span>
+                    <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">{{ __('Nguyên liệu') }}</span>
                 </div>
                 <div class="mt-4">
                     <h3 class="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white">{{ number_format($totalIngredients) }}</h3>
-                    <p class="mt-1 text-xs font-bold text-gray-500 uppercase tracking-wide">Đang hoạt động</p>
+                    <p class="mt-1 text-xs font-bold text-gray-500 uppercase tracking-wide">{{ __('Đang hoạt động') }}</p>
                 </div>
             </div>
 
@@ -190,11 +217,11 @@
                     <div class="icon-box bg-blue-50 dark:bg-blue-950/20 text-blue-500">
                         <x-heroicon-o-shopping-cart class="h-6 w-6" />
                     </div>
-                    <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Đơn hàng</span>
+                    <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">{{ __('Đơn hàng') }}</span>
                 </div>
                 <div class="mt-4">
                     <h3 class="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white">{{ number_format($pendingOrders) }}</h3>
-                    <p class="mt-1 text-xs font-bold text-gray-500 uppercase tracking-wide">Đang xử lý (PO)</p>
+                    <p class="mt-1 text-xs font-bold text-gray-500 uppercase tracking-wide">{{ __('Đang xử lý (PO)') }}</p>
                 </div>
             </div>
 
@@ -204,11 +231,11 @@
                     <div class="icon-box bg-indigo-50 dark:bg-indigo-950/20 text-indigo-500">
                         <x-heroicon-o-users class="h-6 w-6" />
                     </div>
-                    <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Bếp ăn</span>
+                    <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">{{ __('Bếp ăn') }}</span>
                 </div>
                 <div class="mt-4">
                     <h3 class="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white">{{ number_format($activeEmployees) }}</h3>
-                    <p class="mt-1 text-xs font-bold text-gray-500 uppercase tracking-wide">Nhân viên làm việc</p>
+                    <p class="mt-1 text-xs font-bold text-gray-500 uppercase tracking-wide">{{ __('Nhân viên làm việc') }}</p>
                 </div>
             </div>
         </div>
@@ -217,35 +244,35 @@
         <div class="premium-card p-6">
             <h3 class="text-base font-extrabold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                 <x-heroicon-s-bolt class="h-5 w-5 text-yellow-500 animate-bounce" />
-                Lối tắt tác vụ nhanh
+                {{ __('Lối tắt tác vụ nhanh') }}
             </h3>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="custom-actions-grid">
                 <a href="{{ url('/admin/menus') }}" class="action-card flex flex-col items-center justify-center p-5 rounded-2xl bg-gradient-to-b from-gray-50 to-white hover:from-amber-50/50 hover:to-amber-50/10 group hover:border-amber-300 dark:from-gray-800/40 dark:to-gray-900/40 dark:hover:from-amber-950/20">
                     <div class="rounded-full bg-amber-100 dark:bg-amber-900/30 p-3 mb-3 group-hover:scale-110 transition-transform">
                         <x-heroicon-o-calendar class="h-6 w-6 text-amber-600" />
                     </div>
-                    <span class="text-xs font-bold text-gray-800 dark:text-gray-200 group-hover:text-amber-800 dark:group-hover:text-amber-400">Lập thực đơn</span>
+                    <span class="text-xs font-bold text-gray-800 dark:text-gray-200 group-hover:text-amber-800 dark:group-hover:text-amber-400">{{ __('Lập thực đơn') }}</span>
                 </a>
                 
                 <a href="{{ url('/admin/purchase-orders') }}" class="action-card flex flex-col items-center justify-center p-5 rounded-2xl bg-gradient-to-b from-gray-50 to-white hover:from-green-50/50 hover:to-green-50/10 group hover:border-green-300 dark:from-gray-800/40 dark:to-gray-900/40 dark:hover:from-green-950/20">
                     <div class="rounded-full bg-green-100 dark:bg-green-900/30 p-3 mb-3 group-hover:scale-110 transition-transform">
                         <x-heroicon-o-shopping-bag class="h-6 w-6 text-green-600" />
                     </div>
-                    <span class="text-xs font-bold text-gray-800 dark:text-gray-200 group-hover:text-green-800 dark:group-hover:text-green-400">Đặt hàng NCC</span>
+                    <span class="text-xs font-bold text-gray-800 dark:text-gray-200 group-hover:text-green-800 dark:group-hover:text-green-400">{{ __('Đặt hàng NCC') }}</span>
                 </a>
 
                 <a href="{{ url('/admin/food-safety-audits') }}" class="action-card flex flex-col items-center justify-center p-5 rounded-2xl bg-gradient-to-b from-gray-50 to-white hover:from-blue-50/50 hover:to-blue-50/10 group hover:border-blue-300 dark:from-gray-800/40 dark:to-gray-900/40 dark:hover:from-blue-950/20">
                     <div class="rounded-full bg-blue-100 dark:bg-blue-900/30 p-3 mb-3 group-hover:scale-110 transition-transform">
                         <x-heroicon-o-shield-check class="h-6 w-6 text-blue-600" />
                     </div>
-                    <span class="text-xs font-bold text-gray-800 dark:text-gray-200 group-hover:text-blue-800 dark:group-hover:text-blue-400">Kiểm thực ATTP</span>
+                    <span class="text-xs font-bold text-gray-800 dark:text-gray-200 group-hover:text-blue-800 dark:group-hover:text-blue-400">{{ __('Kiểm thực ATTP') }}</span>
                 </a>
 
                 <a href="{{ url('/admin/timekeepings') }}" class="action-card flex flex-col items-center justify-center p-5 rounded-2xl bg-gradient-to-b from-gray-50 to-white hover:from-indigo-50/50 hover:to-indigo-50/10 group hover:border-indigo-300 dark:from-gray-800/40 dark:to-gray-900/40 dark:hover:from-indigo-950/20">
                     <div class="rounded-full bg-indigo-100 dark:bg-indigo-900/30 p-3 mb-3 group-hover:scale-110 transition-transform">
                         <x-heroicon-o-clock class="h-6 w-6 text-indigo-600" />
                     </div>
-                    <span class="text-xs font-bold text-gray-800 dark:text-gray-200 group-hover:text-indigo-800 dark:group-hover:text-indigo-400">Chấm công NV</span>
+                    <span class="text-xs font-bold text-gray-800 dark:text-gray-200 group-hover:text-indigo-800 dark:group-hover:text-indigo-400">{{ __('Chấm công NV') }}</span>
                 </a>
             </div>
         </div>
@@ -259,9 +286,9 @@
                     <div class="flex items-center justify-between mb-4 pb-3 border-b border-gray-100 dark:border-gray-800">
                         <div class="flex items-center gap-2">
                             <x-heroicon-o-book-open class="h-5 w-5 text-blue-500" />
-                            <h3 class="text-base font-extrabold text-gray-900 dark:text-white">Thực đơn ca hôm nay</h3>
+                            <h3 class="text-base font-extrabold text-gray-900 dark:text-white">{{ __('Thực đơn ca hôm nay') }}</h3>
                         </div>
-                        <a href="{{ url('/admin/menus') }}" class="text-xs font-extrabold transition-colors uppercase tracking-wider custom-dashboard-link">Xem tất cả</a>
+                        <a href="{{ url('/admin/menus') }}" class="text-xs font-extrabold transition-colors uppercase tracking-wider custom-dashboard-link">{{ __('Xem tất cả') }}</a>
                     </div>
                     
                     @if(count($todayMenus) > 0)
@@ -270,14 +297,14 @@
                                 <div class="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-gray-800/40 transition-colors hover:bg-blue-50/30 dark:hover:bg-blue-950/10">
                                     <div class="flex items-center gap-3">
                                         <div class="rounded-lg bg-blue-100 px-3 py-1.5 text-xs font-extrabold text-blue-800 dark:bg-blue-950/60 dark:text-blue-300">
-                                            {{ $menu->shift->name ?? 'Ca' }}
+                                            {{ $menu->shift->name ?? __('Ca') }}
                                         </div>
                                         <div>
                                             <p class="text-sm font-bold text-gray-900 dark:text-white">
-                                                {{ $menu->recipe->name ?? 'Món ăn' }}
+                                                {{ $menu->recipe->name ?? __('Món ăn') }}
                                             </p>
                                             <p class="text-2xs text-gray-400 mt-0.5 font-medium">
-                                                Phân loại: {{ $menu->recipe->type ?? 'Chưa rõ' }}
+                                                {{ __('Phân loại') }}: {{ $menu->recipe->type ?? __('Chưa rõ') }}
                                             </p>
                                         </div>
                                     </div>
@@ -285,7 +312,7 @@
                                         <p class="text-sm font-extrabold text-gray-900 dark:text-white">
                                             {{ number_format($menu->estimated_portions) }}
                                         </p>
-                                        <p class="text-2xs font-semibold text-gray-400 uppercase tracking-wider">Suất ăn</p>
+                                        <p class="text-2xs font-semibold text-gray-400 uppercase tracking-wider">{{ __('Suất ăn') }}</p>
                                     </div>
                                 </div>
                             @endforeach
@@ -298,9 +325,9 @@
                             <div class="rounded-full bg-gray-50 p-4 mb-3 dark:bg-gray-800">
                                 <x-heroicon-o-face-frown class="h-8 w-8 text-gray-400" />
                             </div>
-                            <p class="text-sm font-bold text-gray-500 dark:text-gray-400">Hôm nay chưa thiết lập thực đơn</p>
+                            <p class="text-sm font-bold text-gray-500 dark:text-gray-400">{{ __('Hôm nay chưa thiết lập thực đơn') }}</p>
                             <a href="{{ url('/admin/menus') }}" class="mt-4 inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold text-white transition-all custom-dashboard-btn">
-                                <x-heroicon-m-plus class="h-4 w-4" /> Thiết lập thực đơn mới
+                                <x-heroicon-m-plus class="h-4 w-4" /> {{ __('Thiết lập thực đơn mới') }}
                             </a>
                         </div>
                     @endif
@@ -311,10 +338,10 @@
                     <div class="flex items-center justify-between mb-4 pb-3 border-b border-gray-100 dark:border-gray-800">
                         <div class="flex items-center gap-2">
                             <x-heroicon-o-exclamation-triangle class="h-5 w-5 text-red-500" />
-                            <h3 class="text-base font-extrabold text-gray-900 dark:text-white">Cảnh báo tồn kho tối thiểu</h3>
+                            <h3 class="text-base font-extrabold text-gray-900 dark:text-white">{{ __('Cảnh báo tồn kho tối thiểu') }}</h3>
                         </div>
                         <span class="rounded-full bg-red-100 px-2.5 py-0.5 text-2xs font-extrabold text-red-700 dark:bg-red-950/40 dark:text-red-400">
-                            {{ number_format($lowStockCount) }} nguyên liệu
+                            {{ number_format($lowStockCount) }} {{ __('nguyên liệu') }}
                         </span>
                     </div>
                     
@@ -324,16 +351,16 @@
                                 <div class="flex items-center justify-between rounded-xl border border-red-100 bg-red-50/20 p-4 dark:border-red-900/20 dark:bg-red-950/10">
                                     <div>
                                         <p class="text-sm font-bold text-gray-950 dark:text-white">
-                                            {{ $stock['ingredient']['name'] ?? 'Nguyên liệu' }}
+                                            {{ $stock['ingredient']['name'] ?? __('Nguyên liệu') }}
                                         </p>
                                         <p class="text-2xs text-gray-500 mt-1 font-medium">
-                                            Định mức an toàn: <span class="font-bold text-gray-700 dark:text-gray-300">{{ number_format($stock['min_quantity']) }} {{ $stock['ingredient']['unit'] ?? '' }}</span>
+                                            {{ __('Định mức an toàn') }}: <span class="font-bold text-gray-700 dark:text-gray-300">{{ number_format($stock['min_quantity']) }} {{ $stock['ingredient']['unit'] ?? '' }}</span>
                                         </p>
                                     </div>
                                     <div class="text-right">
                                         <span class="inline-flex items-center gap-1.5 rounded-lg bg-red-100 dark:bg-red-950 px-3 py-1.5 text-xs font-bold text-red-700 dark:text-red-400">
                                             <span class="h-1.5 w-1.5 rounded-full bg-red-500 animate-ping"></span>
-                                            Tồn: {{ number_format($stock['quantity']) }} {{ $stock['ingredient']['unit'] ?? '' }}
+                                            {{ __('Tồn') }}: {{ number_format($stock['quantity']) }} {{ $stock['ingredient']['unit'] ?? '' }}
                                         </span>
                                     </div>
                                 </div>
@@ -344,7 +371,7 @@
                             <div class="rounded-full bg-green-50 p-4 mb-3 dark:bg-green-950/20">
                                 <x-heroicon-o-check-circle class="h-8 w-8 text-green-500" />
                             </div>
-                            <p class="text-sm font-bold text-gray-500 dark:text-gray-400">Kho hàng ở mức an toàn ổn định</p>
+                            <p class="text-sm font-bold text-gray-500 dark:text-gray-400">{{ __('Kho hàng ở mức an toàn ổn định') }}</p>
                         </div>
                     @endif
                 </div>
@@ -357,9 +384,9 @@
                     <div class="flex items-center justify-between mb-4 pb-3 border-b border-gray-100 dark:border-gray-800">
                         <div class="flex items-center gap-2">
                             <x-heroicon-o-document-text class="h-5 w-5 text-indigo-500" />
-                            <h3 class="text-base font-extrabold text-gray-900 dark:text-white">Đơn hàng mới tạo (PO)</h3>
+                            <h3 class="text-base font-extrabold text-gray-900 dark:text-white">{{ __('Đơn hàng mới tạo (PO)') }}</h3>
                         </div>
-                        <a href="{{ url('/admin/purchase-orders') }}" class="text-xs font-extrabold transition-colors uppercase tracking-wider custom-dashboard-link">Xem hết</a>
+                        <a href="{{ url('/admin/purchase-orders') }}" class="text-xs font-extrabold transition-colors uppercase tracking-wider custom-dashboard-link">{{ __('Xem tất cả') }}</a>
                     </div>
                     
                     @if(count($recentOrders) > 0)
@@ -375,7 +402,7 @@
                                                 {{ $order['code'] }}
                                             </p>
                                             <p class="text-2xs text-gray-400 mt-0.5 font-medium">
-                                                Nhà cung cấp: {{ $order['supplier']['name'] ?? 'Chưa rõ' }}
+                                                {{ __('Nhà cung cấp') }}: {{ $order['supplier']['name'] ?? __('Chưa rõ') }}
                                             </p>
                                         </div>
                                     </div>
@@ -389,10 +416,10 @@
                                                 default => 'gray'
                                             };
                                             $badgeText = match($order['status']) {
-                                                'draft' => 'Bản nháp',
-                                                'sent' => 'Đã gửi NCC',
-                                                'checking' => 'Đang kiểm hàng',
-                                                'done' => 'Hoàn thành',
+                                                'draft' => __('Bản nháp'),
+                                                'sent' => __('Đã gửi NCC'),
+                                                'checking' => __('Đang kiểm hàng'),
+                                                'done' => __('Hoàn thành'),
                                                 default => $order['status']
                                             };
                                         @endphp
@@ -408,7 +435,7 @@
                             <div class="rounded-full bg-gray-50 p-4 mb-3 dark:bg-gray-800">
                                 <x-heroicon-o-clipboard class="h-8 w-8 text-gray-400" />
                             </div>
-                            <p class="text-sm font-bold text-gray-500 dark:text-gray-400">Chưa có đơn đặt hàng nào gần đây</p>
+                            <p class="text-sm font-bold text-gray-500 dark:text-gray-400">{{ __('Chưa có đơn đặt hàng nào gần đây') }}</p>
                         </div>
                     @endif
                 </div>
@@ -418,9 +445,9 @@
                     <div class="flex items-center justify-between mb-4 pb-3 border-b border-gray-100 dark:border-gray-800">
                         <div class="flex items-center gap-2">
                             <x-heroicon-o-check-badge class="h-5 w-5 text-green-500" />
-                            <h3 class="text-base font-extrabold text-gray-900 dark:text-white">Nhật ký kiểm thực ATTP hôm nay</h3>
+                            <h3 class="text-base font-extrabold text-gray-900 dark:text-white">{{ __('Nhật ký kiểm thực ATTP hôm nay') }}</h3>
                         </div>
-                        <a href="{{ url('/admin/food-safety-audits') }}" class="text-xs font-extrabold transition-colors uppercase tracking-wider custom-dashboard-link">Kiểm thực</a>
+                        <a href="{{ url('/admin/food-safety-audits') }}" class="text-xs font-extrabold transition-colors uppercase tracking-wider custom-dashboard-link">{{ __('Kiểm thực') }}</a>
                     </div>
                     
                     @if(count($todayAudits) > 0)
@@ -433,16 +460,16 @@
                                                 {{ $audit->stage }}
                                             </span>
                                             <span class="text-2xs font-semibold text-gray-400 bg-gray-200/50 dark:bg-gray-700 px-1.5 py-0.5 rounded-md">
-                                                {{ $audit->shift->name ?? 'Ca' }}
+                                                {{ $audit->shift->name ?? __('Ca') }}
                                             </span>
                                         </div>
                                         <p class="text-2xs text-gray-500 mt-1 font-medium">
-                                            Kiểm tra viên: <span class="font-bold text-gray-700 dark:text-gray-300">{{ $audit->inspected_by }}</span>
+                                            {{ __('Kiểm tra viên') }}: <span class="font-bold text-gray-700 dark:text-gray-300">{{ $audit->inspected_by }}</span>
                                         </p>
                                     </div>
                                     <div>
                                         <x-filament::badge :color="$audit->status === 'Đạt' ? 'success' : 'danger'" class="rounded-lg px-2.5 py-1">
-                                            {{ $audit->status }}
+                                            {{ __($audit->status) }}
                                         </x-filament::badge>
                                     </div>
                                 </div>
@@ -456,9 +483,9 @@
                             <div class="rounded-full bg-amber-50 p-4 mb-3 dark:bg-amber-950/20">
                                 <x-heroicon-o-shield-exclamation class="h-8 w-8 text-amber-500" />
                             </div>
-                            <p class="text-sm font-bold text-gray-500 dark:text-gray-400">Hôm nay chưa ghi nhận biên bản kiểm thực</p>
+                            <p class="text-sm font-bold text-gray-500 dark:text-gray-400">{{ __('Hôm nay chưa ghi nhận biên bản kiểm thực') }}</p>
                             <a href="{{ url('/admin/food-safety-audits') }}" class="mt-4 inline-flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold text-white transition-all custom-dashboard-btn">
-                                <x-heroicon-m-plus class="h-4 w-4" /> Bắt đầu kiểm thực 3 bước
+                                <x-heroicon-m-plus class="h-4 w-4" /> {{ __('Bắt đầu kiểm thực 3 bước') }}
                             </a>
                         </div>
                     @endif
