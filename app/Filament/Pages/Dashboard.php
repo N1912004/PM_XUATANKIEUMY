@@ -10,9 +10,12 @@ use App\Models\PurchaseOrder;
 use App\Models\Stock;
 use Carbon\Carbon;
 use Filament\Pages\Page;
+use Livewire\WithPagination;
 
 class Dashboard extends Page
 {
+    use WithPagination;
+
     protected static ?string $navigationGroup = 'TỔNG QUAN';
 
     protected static ?string $navigationIcon = 'heroicon-o-squares-2x2';
@@ -31,13 +34,11 @@ class Dashboard extends Page
 
     public int $activeEmployees = 0;
 
-    public array $todayMenus = [];
-
     public array $lowStockIngredients = [];
 
-    public array $recentOrders = [];
+    public int $lowStockCount = 0;
 
-    public array $todayAudits = [];
+    public array $recentOrders = [];
 
     public string $greeting = '';
 
@@ -56,35 +57,61 @@ class Dashboard extends Page
             $this->greeting = 'Chào buổi tối';
         }
 
+        // Ngày hôm nay dạng chuỗi 'Y-m-d' để so sánh trực tiếp trên cột DATE.
+        $today = Carbon::today()->toDateString();
+
         // Fetch Stats
-        $this->totalPortionsToday = (int) Menu::whereDate('date', Carbon::today())->sum('estimated_portions');
+        $this->totalPortionsToday = (int) Menu::where('date', $today)->sum('estimated_portions');
         $this->totalIngredients = (int) Ingredient::where('status', true)->count();
         $this->pendingOrders = (int) PurchaseOrder::whereIn('status', ['draft', 'sent', 'checking'])->count();
         $this->activeEmployees = (int) Employee::where('status', 'Đang làm việc')->count();
 
-        // Fetch Today's Menus
-        $this->todayMenus = Menu::whereDate('date', Carbon::today())
-            ->with(['shift', 'recipe'])
-            ->get()
-            ->toArray();
+        // Fetch Low Stock Ingredients.
+        // Chỉ cảnh báo khi có định mức tối thiểu (> 0) và nguyên liệu đang hoạt động.
+        // Sắp xếp theo mức thiếu hụt nhiều nhất và giới hạn danh sách để an toàn với dữ liệu lớn;
+        // tổng số cảnh báo thực tế được đếm riêng qua $lowStockCount.
+        $lowStockQuery = Stock::query()
+            ->where('min_quantity', '>', 0)
+            ->whereColumn('quantity', '<=', 'min_quantity')
+            ->whereHas('ingredient', fn ($query) => $query->where('status', true));
 
-        // Fetch Low Stock Ingredients
-        $this->lowStockIngredients = Stock::whereColumn('quantity', '<=', 'min_quantity')
-            ->with('ingredient')
-            ->get()
+        $this->lowStockCount = (int) $lowStockQuery->clone()->count();
+
+        $this->lowStockIngredients = $lowStockQuery
+            ->with('ingredient:id,name,unit')
+            ->orderByRaw('(min_quantity - quantity) DESC')
+            ->limit(50)
+            ->get(['id', 'ingredient_id', 'quantity', 'min_quantity'])
             ->toArray();
 
         // Fetch Recent Purchase Orders
-        $this->recentOrders = PurchaseOrder::with('supplier')
+        $this->recentOrders = PurchaseOrder::with('supplier:id,name')
             ->latest()
             ->limit(5)
-            ->get()
+            ->get(['id', 'code', 'supplier_id', 'status', 'created_at'])
             ->toArray();
+    }
 
-        // Fetch Today's Food Safety Audits
-        $this->todayAudits = FoodSafetyAudit::whereDate('date', Carbon::today())
-            ->with('shift')
-            ->get()
-            ->toArray();
+    /**
+     * Get view data for dynamic elements (e.g. paginated queries).
+     */
+    public function getViewData(): array
+    {
+        $today = Carbon::today()->toDateString();
+
+        return [
+            'todayMenus' => Menu::where('date', $today)
+                ->with([
+                    'shift:id,name',
+                    'recipe:id,name,type',
+                ])
+                ->orderBy('shift_id')
+                ->paginate(5, ['*'], 'menusPage'),
+
+            'todayAudits' => FoodSafetyAudit::where('date', $today)
+                ->with('shift:id,name')
+                ->latest()
+                ->paginate(5, ['*'], 'auditsPage'),
+        ];
     }
 }

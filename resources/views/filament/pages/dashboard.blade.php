@@ -270,25 +270,28 @@
                                 <div class="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-gray-800/40 transition-colors hover:bg-blue-50/30 dark:hover:bg-blue-950/10">
                                     <div class="flex items-center gap-3">
                                         <div class="rounded-lg bg-blue-100 px-3 py-1.5 text-xs font-extrabold text-blue-800 dark:bg-blue-950/60 dark:text-blue-300">
-                                            {{ $menu['shift']['name'] ?? 'Ca' }}
+                                            {{ $menu->shift->name ?? 'Ca' }}
                                         </div>
                                         <div>
                                             <p class="text-sm font-bold text-gray-900 dark:text-white">
-                                                {{ $menu['recipe']['name'] ?? 'Món ăn' }}
+                                                {{ $menu->recipe->name ?? 'Món ăn' }}
                                             </p>
                                             <p class="text-2xs text-gray-400 mt-0.5 font-medium">
-                                                Phân loại: {{ $menu['recipe']['type'] ?? 'Chưa rõ' }}
+                                                Phân loại: {{ $menu->recipe->type ?? 'Chưa rõ' }}
                                             </p>
                                         </div>
                                     </div>
                                     <div class="text-right">
                                         <p class="text-sm font-extrabold text-gray-900 dark:text-white">
-                                            {{ number_format($menu['estimated_portions']) }}
+                                            {{ number_format($menu->estimated_portions) }}
                                         </p>
                                         <p class="text-2xs font-semibold text-gray-400 uppercase tracking-wider">Suất ăn</p>
                                     </div>
                                 </div>
                             @endforeach
+                        </div>
+                        <div class="mt-4">
+                            {{ $todayMenus->links() }}
                         </div>
                     @else
                         <div class="flex flex-col items-center justify-center py-12 text-center">
@@ -311,7 +314,7 @@
                             <h3 class="text-base font-extrabold text-gray-900 dark:text-white">Cảnh báo tồn kho tối thiểu</h3>
                         </div>
                         <span class="rounded-full bg-red-100 px-2.5 py-0.5 text-2xs font-extrabold text-red-700 dark:bg-red-950/40 dark:text-red-400">
-                            {{ count($lowStockIngredients) }} nguyên liệu
+                            {{ number_format($lowStockCount) }} nguyên liệu
                         </span>
                     </div>
                     
@@ -427,23 +430,26 @@
                                     <div>
                                         <div class="flex items-center gap-2">
                                             <span class="text-sm font-bold text-gray-950 dark:text-white">
-                                                {{ $audit['stage'] }}
+                                                {{ $audit->stage }}
                                             </span>
                                             <span class="text-2xs font-semibold text-gray-400 bg-gray-200/50 dark:bg-gray-700 px-1.5 py-0.5 rounded-md">
-                                                {{ $audit['shift']['name'] ?? 'Ca' }}
+                                                {{ $audit->shift->name ?? 'Ca' }}
                                             </span>
                                         </div>
                                         <p class="text-2xs text-gray-500 mt-1 font-medium">
-                                            Kiểm tra viên: <span class="font-bold text-gray-700 dark:text-gray-300">{{ $audit['inspected_by'] }}</span>
+                                            Kiểm tra viên: <span class="font-bold text-gray-700 dark:text-gray-300">{{ $audit->inspected_by }}</span>
                                         </p>
                                     </div>
                                     <div>
-                                        <x-filament::badge :color="$audit['status'] === 'Đạt' ? 'success' : 'danger'" class="rounded-lg px-2.5 py-1">
-                                            {{ $audit['status'] }}
+                                        <x-filament::badge :color="$audit->status === 'Đạt' ? 'success' : 'danger'" class="rounded-lg px-2.5 py-1">
+                                            {{ $audit->status }}
                                         </x-filament::badge>
                                     </div>
                                 </div>
                             @endforeach
+                        </div>
+                        <div class="mt-4">
+                            {{ $todayAudits->links() }}
                         </div>
                     @else
                         <div class="flex flex-col items-center justify-center py-12 text-center">
