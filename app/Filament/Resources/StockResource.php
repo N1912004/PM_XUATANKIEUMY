@@ -23,15 +23,27 @@ class StockResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-archive-box';
 
-    protected static ?string $navigationLabel = 'Kho';
-
-    protected static ?string $modelLabel = 'Kho hàng';
-
-    protected static ?string $pluralModelLabel = 'Kho';
-
-    protected static ?string $navigationGroup = 'CUNG ỨNG & KHO';
-
     protected static ?int $navigationSort = 2;
+
+    public static function getNavigationLabel(): string
+    {
+        return __('Kho');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('Kho hàng');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('Kho');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('CUNG ỨNG & KHO');
+    }
 
     public static function form(Form $form): Form
     {

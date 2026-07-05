@@ -16,15 +16,27 @@ class SupplierResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-truck';
 
-    protected static ?string $navigationLabel = 'Nhà cung cấp';
-
-    protected static ?string $modelLabel = 'Nhà cung cấp';
-
-    protected static ?string $pluralModelLabel = 'Nhà cung cấp';
-
-    protected static ?string $navigationGroup = 'CUNG ỨNG & KHO';
-
     protected static ?int $navigationSort = 5;
+
+    public static function getNavigationLabel(): string
+    {
+        return __('Nhà cung cấp');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('Nhà cung cấp');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('Nhà cung cấp');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('CUNG ỨNG & KHO');
+    }
 
     public static function form(Form $form): Form
     {

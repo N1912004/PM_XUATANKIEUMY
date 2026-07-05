@@ -19,15 +19,27 @@ class StockTransferResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-arrows-right-left';
 
-    protected static ?string $navigationLabel = 'Điều chuyển kho';
-
-    protected static ?string $modelLabel = 'Phiếu điều chuyển kho';
-
-    protected static ?string $pluralModelLabel = 'Điều chuyển kho';
-
-    protected static ?string $navigationGroup = 'CUNG ỨNG & KHO';
-
     protected static ?int $navigationSort = 4;
+
+    public static function getNavigationLabel(): string
+    {
+        return __('Điều chuyển kho');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('Phiếu điều chuyển kho');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('Điều chuyển kho');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('CUNG ỨNG & KHO');
+    }
 
     public static function form(Form $form): Form
     {

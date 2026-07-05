@@ -14,15 +14,24 @@ class BaoCao extends Page
 {
     protected static ?string $navigationIcon = 'heroicon-o-chart-bar';
 
-    protected static ?string $navigationLabel = 'Báo cáo';
-
-    protected static ?string $title = 'Báo cáo';
-
-    protected static ?string $navigationGroup = 'VẬN HÀNH BẾP';
-
     protected static ?int $navigationSort = 9;
 
     protected static string $view = 'filament.pages.bao-cao';
+
+    public static function getNavigationLabel(): string
+    {
+        return __('Báo cáo');
+    }
+
+    public function getTitle(): string
+    {
+        return __('Báo cáo');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('VẬN HÀNH BẾP');
+    }
 
     public ?string $fromDate = '2026-05-18';
 

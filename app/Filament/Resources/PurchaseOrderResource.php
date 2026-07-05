@@ -21,15 +21,27 @@ class PurchaseOrderResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-shopping-cart';
 
-    protected static ?string $navigationLabel = 'Đặt hàng';
-
-    protected static ?string $modelLabel = 'Đơn đặt hàng';
-
-    protected static ?string $pluralModelLabel = 'Đặt hàng';
-
-    protected static ?string $navigationGroup = 'CUNG ỨNG & KHO';
-
     protected static ?int $navigationSort = 6;
+
+    public static function getNavigationLabel(): string
+    {
+        return __('Đặt hàng');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('Đơn đặt hàng');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('Đặt hàng');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('CUNG ỨNG & KHO');
+    }
 
     public static function form(Form $form): Form
     {

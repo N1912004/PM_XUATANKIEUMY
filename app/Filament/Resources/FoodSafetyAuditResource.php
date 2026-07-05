@@ -16,15 +16,27 @@ class FoodSafetyAuditResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-shield-check';
 
-    protected static ?string $navigationLabel = 'Kiểm thực 3 bước';
-
-    protected static ?string $modelLabel = 'Nhật ký kiểm thực';
-
-    protected static ?string $pluralModelLabel = 'Kiểm thực 3 bước';
-
-    protected static ?string $navigationGroup = 'VẬN HÀNH BẾP';
-
     protected static ?int $navigationSort = 8;
+
+    public static function getNavigationLabel(): string
+    {
+        return __('Kiểm thực 3 bước');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('Nhật ký kiểm thực');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('Kiểm thực 3 bước');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('VẬN HÀNH BẾP');
+    }
 
     public static function form(Form $form): Form
     {

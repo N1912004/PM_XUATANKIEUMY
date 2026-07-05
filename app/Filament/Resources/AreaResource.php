@@ -17,13 +17,22 @@ class AreaResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-map-pin';
 
-    protected static ?string $navigationLabel = 'Khu vực';
-
-    protected static ?string $pluralModelLabel = 'Khu vực';
-
-    protected static ?string $navigationGroup = 'CHAT NHÓM';
-
     protected static ?int $navigationSort = 2;
+
+    public static function getNavigationLabel(): string
+    {
+        return __('Khu vực');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('Khu vực');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('CHAT NHÓM');
+    }
 
     public static function form(Form $form): Form
     {

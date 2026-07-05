@@ -17,9 +17,15 @@ class SystemSettings extends Page implements HasForms
 
     protected static ?string $navigationIcon = 'heroicon-o-cog-6-tooth';
 
-    protected static ?string $title = 'Cài đặt hệ thống';
+    public static function getNavigationLabel(): string
+    {
+        return __('Cài đặt hệ thống');
+    }
 
-    protected static ?string $navigationLabel = 'Cài đặt hệ thống';
+    public function getTitle(): string
+    {
+        return __('Cài đặt hệ thống');
+    }
 
     protected static ?string $slug = 'system-settings';
 

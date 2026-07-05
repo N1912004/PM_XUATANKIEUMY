@@ -12,13 +12,22 @@ class ChatNhom extends Page
 {
     protected static ?string $navigationIcon = 'heroicon-o-chat-bubble-left-right';
 
-    protected static ?string $navigationLabel = 'Chat nhóm';
-
-    protected static ?string $title = 'Chat nhóm';
-
-    protected static ?string $navigationGroup = 'CHAT NHÓM';
-
     protected static ?int $navigationSort = 1;
+
+    public static function getNavigationLabel(): string
+    {
+        return __('Chat nhóm');
+    }
+
+    public function getTitle(): string
+    {
+        return __('Chat nhóm');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('CHAT NHÓM');
+    }
 
     protected static string $view = 'filament.pages.chat-nhom';
 

@@ -19,15 +19,27 @@ class RecipeResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-book-open';
 
-    protected static ?string $navigationLabel = 'Ngân Hàng Thực đơn';
-
-    protected static ?string $navigationGroup = 'VẬN HÀNH BẾP';
-
     protected static ?int $navigationSort = 1;
 
-    protected static ?string $modelLabel = 'Món ăn';
+    public static function getNavigationLabel(): string
+    {
+        return __('Ngân Hàng Thực đơn');
+    }
 
-    protected static ?string $pluralModelLabel = 'Ngân Hàng Thực đơn';
+    public static function getModelLabel(): string
+    {
+        return __('Món ăn');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('Ngân Hàng Thực đơn');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('VẬN HÀNH BẾP');
+    }
 
     public static function form(Form $form): Form
     {

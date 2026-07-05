@@ -17,13 +17,22 @@ class LeaveOvertimeResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-sun';
 
-    protected static ?string $navigationLabel = 'Nghỉ phép & Tăng ca';
-
-    protected static ?string $pluralModelLabel = 'Nghỉ phép & Tăng ca';
-
-    protected static ?string $navigationGroup = 'NHÂN SỰ';
-
     protected static ?int $navigationSort = 3;
+
+    public static function getNavigationLabel(): string
+    {
+        return __('Nghỉ phép & Tăng ca');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('Nghỉ phép & Tăng ca');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('NHÂN SỰ');
+    }
 
     public static function form(Form $form): Form
     {

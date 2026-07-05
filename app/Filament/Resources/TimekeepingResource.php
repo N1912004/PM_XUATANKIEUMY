@@ -17,13 +17,22 @@ class TimekeepingResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-clock';
 
-    protected static ?string $navigationLabel = 'Chấm công';
-
-    protected static ?string $pluralModelLabel = 'Chấm công';
-
-    protected static ?string $navigationGroup = 'NHÂN SỰ';
-
     protected static ?int $navigationSort = 2;
+
+    public static function getNavigationLabel(): string
+    {
+        return __('Chấm công');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('Chấm công');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('NHÂN SỰ');
+    }
 
     public static function form(Form $form): Form
     {

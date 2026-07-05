@@ -18,13 +18,22 @@ class EmployeeResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-users';
 
-    protected static ?string $navigationLabel = 'Nhân viên';
-
-    protected static ?string $pluralModelLabel = 'Nhân viên';
-
-    protected static ?string $navigationGroup = 'NHÂN SỰ';
-
     protected static ?int $navigationSort = 1;
+
+    public static function getNavigationLabel(): string
+    {
+        return __('Nhân viên');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('Nhân viên');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('NHÂN SỰ');
+    }
 
     public static function form(Form $form): Form
     {

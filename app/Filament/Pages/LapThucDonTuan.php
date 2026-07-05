@@ -25,13 +25,22 @@ class LapThucDonTuan extends Page implements HasForms
 
     protected static ?string $navigationIcon = 'heroicon-o-table-cells';
 
-    protected static ?string $navigationLabel = 'Lập thực đơn tuần';
-
-    protected static ?string $title = 'Lập thực đơn tuần';
-
-    protected static ?string $navigationGroup = 'VẬN HÀNH BẾP';
-
     protected static ?int $navigationSort = 6;
+
+    public static function getNavigationLabel(): string
+    {
+        return __('Lập thực đơn tuần');
+    }
+
+    public function getTitle(): string
+    {
+        return __('Lập thực đơn tuần');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('VẬN HÀNH BẾP');
+    }
 
     protected static string $view = 'filament.pages.lap-thuc-don-tuan';
 

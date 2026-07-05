@@ -16,15 +16,27 @@ class IngredientResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-list-bullet';
 
-    protected static ?string $navigationLabel = 'List nguyên liệu';
-
-    protected static ?string $modelLabel = 'Nguyên liệu';
-
-    protected static ?string $pluralModelLabel = 'List nguyên liệu';
-
-    protected static ?string $navigationGroup = 'CUNG ỨNG & KHO';
-
     protected static ?int $navigationSort = 4;
+
+    public static function getNavigationLabel(): string
+    {
+        return __('List nguyên liệu');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('Nguyên liệu');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('List nguyên liệu');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('CUNG ỨNG & KHO');
+    }
 
     public static function form(Form $form): Form
     {

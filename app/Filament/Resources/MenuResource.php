@@ -19,15 +19,27 @@ class MenuResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-calendar-days';
 
-    protected static ?string $navigationLabel = 'Lập thực đơn';
-
-    protected static ?string $modelLabel = 'Thực đơn';
-
-    protected static ?string $pluralModelLabel = 'Lập thực đơn';
-
-    protected static ?string $navigationGroup = 'VẬN HÀNH BẾP';
-
     protected static ?int $navigationSort = 7;
+
+    public static function getNavigationLabel(): string
+    {
+        return __('Lập thực đơn');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('Thực đơn');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('Lập thực đơn');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('VẬN HÀNH BẾP');
+    }
 
     public static function form(Form $form): Form
     {
