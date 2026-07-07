@@ -16,8 +16,17 @@ trait BelongsToKitchen
     public static function getEloquentQuery(): Builder
     {
         $query = parent::getEloquentQuery();
+        $user = Filament::auth()->user();
 
-        $kitchenId = Filament::auth()->user()?->currentKitchenId();
+        if (! $user) {
+            return $query;
+        }
+
+        if ($user->hasRole(['super_admin', 'Quản trị viên'])) {
+            return $query;
+        }
+
+        $kitchenId = $user->currentKitchenId();
 
         if ($kitchenId) {
             $query->where($query->getModel()->getTable().'.kitchen_id', $kitchenId);

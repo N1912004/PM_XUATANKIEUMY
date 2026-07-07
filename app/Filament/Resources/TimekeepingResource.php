@@ -10,6 +10,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class TimekeepingResource extends Resource
 {
@@ -192,5 +193,25 @@ class TimekeepingResource extends Resource
             'create' => Pages\CreateTimekeeping::route('/create'),
             'edit' => Pages\EditTimekeeping::route('/{record}/edit'),
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery();
+        $user = filament()->auth()->user();
+
+        if (! $user) {
+            return $query;
+        }
+
+        if ($user->hasRole(['super_admin', 'Quản trị viên'])) {
+            return $query;
+        }
+
+        if ($user->hasRole('Bếp trưởng') && $kitchenId = $user->currentKitchenId()) {
+            return $query->whereHas('employee', fn (Builder $q) => $q->where('kitchen_id', $kitchenId));
+        }
+
+        return $query->where('employee_id', $user->employee_id);
     }
 }

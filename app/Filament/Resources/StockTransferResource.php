@@ -12,6 +12,7 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class StockTransferResource extends Resource
 {
@@ -151,5 +152,30 @@ class StockTransferResource extends Resource
             'create' => Pages\CreateStockTransfer::route('/create'),
             'edit' => Pages\EditStockTransfer::route('/{record}/edit'),
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery();
+        $user = Filament::auth()->user();
+
+        if (! $user) {
+            return $query;
+        }
+
+        if ($user->hasRole(['super_admin', 'Quản trị viên'])) {
+            return $query;
+        }
+
+        $kitchenId = $user->currentKitchenId();
+
+        if ($kitchenId) {
+            $query->where(function (Builder $q) use ($kitchenId) {
+                $q->where('source_kitchen_id', $kitchenId)
+                    ->orWhere('dest_kitchen_id', $kitchenId);
+            });
+        }
+
+        return $query;
     }
 }

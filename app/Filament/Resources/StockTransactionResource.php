@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Concerns\BelongsToKitchen;
 use App\Filament\Resources\StockTransactionResource\Pages;
 use App\Models\StockTransaction;
 use Filament\Forms;
@@ -12,6 +13,8 @@ use Filament\Tables\Table;
 
 class StockTransactionResource extends Resource
 {
+    use BelongsToKitchen;
+
     protected static ?string $model = StockTransaction::class;
 
     protected static bool $shouldRegisterNavigation = false;

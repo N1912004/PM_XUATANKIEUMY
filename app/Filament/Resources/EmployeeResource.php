@@ -268,4 +268,24 @@ class EmployeeResource extends Resource
             'edit' => Pages\EditEmployee::route('/{record}/edit'),
         ];
     }
+
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery();
+        $user = filament()->auth()->user();
+
+        if (! $user) {
+            return $query;
+        }
+
+        if ($user->hasRole(['super_admin', 'Quản trị viên'])) {
+            return $query;
+        }
+
+        if ($user->hasRole(['Bếp trưởng', 'Thủ kho']) && $kitchenId = $user->currentKitchenId()) {
+            return $query->where('kitchen_id', $kitchenId);
+        }
+
+        return $query->where('id', $user->employee_id);
+    }
 }
