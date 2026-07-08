@@ -38,6 +38,7 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
+            ->spa()
             ->login()
             ->profile(EditProfile::class)
             ->sidebarCollapsibleOnDesktop()
@@ -83,8 +84,18 @@ class AdminPanelProvider extends PanelProvider
                 PanelsRenderHook::HEAD_END,
                 fn () => new HtmlString('
                     <style>
+                        /* Keep the sidebar at full width: let the main content flex item
+                           shrink below its min-content width so wide custom tables scroll
+                           inside their own overflow-x wrappers instead of squeezing the sidebar. */
+                        .fi-main-ctn {
+                            min-width: 0 !important;
+                        }
+                        .fi-sidebar {
+                            flex-shrink: 0 !important;
+                        }
+
                         /* Base font styling for all sidebar elements to match */
-                        .fi-sidebar, 
+                        .fi-sidebar,
                         .fi-sidebar * {
                             font-family: \'IBM Plex Sans\', sans-serif !important;
                         }

@@ -72,7 +72,12 @@ class ChatNhom extends Page
         $this->messages[] = $this->toArray($message);
         $this->newMessage = '';
 
-        broadcast(new MessageSent($message))->toOthers();
+        // Không để lỗi broadcast (Reverb chưa chạy / socket chưa kết nối) làm hỏng việc gửi tin
+        try {
+            broadcast(new MessageSent($message))->toOthers();
+        } catch (\Throwable $e) {
+            report($e);
+        }
     }
 
     /**

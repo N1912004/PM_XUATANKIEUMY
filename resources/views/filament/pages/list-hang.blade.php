@@ -513,8 +513,14 @@
     .dark .oh-group-title {
         color: #fff;
     }
+    .oh-table-wrap {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
     .oh-table {
         width: 100%;
+        min-width: 72rem;
         border-collapse: collapse;
     }
     .oh-table th {
@@ -937,6 +943,7 @@
                                     </div>
                                 </div>
 
+                                <div class="oh-table-wrap">
                                 <table class="oh-table">
                                     <thead>
                                         <tr>
@@ -963,11 +970,14 @@
                                                     </td>
                                                     <td style="font-weight:700;">
                                                         <div class="dark:text-white">{{ $item['name'] }}</div>
-                                                        @if(!empty($item['ordered_info']))
+                                                        @if(!empty($item['ordered_info']['total']))
                                                             <div style="margin-top:4px; display:flex; gap:4px; flex-wrap:wrap;">
-                                                                @foreach($item['ordered_info'] as $order)
-                                                                    <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-amber-100 text-amber-800 border border-amber-250">Đã đặt · {{ $order['orderId'] }}</span>
+                                                                @foreach($item['ordered_info']['codes'] as $orderCode)
+                                                                    <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold whitespace-nowrap bg-amber-100 text-amber-800 border border-amber-250">Đã đặt · {{ $orderCode }}</span>
                                                                 @endforeach
+                                                                @if($item['ordered_info']['total'] > count($item['ordered_info']['codes']))
+                                                                    <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold whitespace-nowrap bg-slate-100 text-slate-600 border border-slate-200" title="Tổng {{ $item['ordered_info']['total'] }} đơn đã đặt cho nguyên liệu này trong ngày">+{{ $item['ordered_info']['total'] - count($item['ordered_info']['codes']) }} đơn khác</span>
+                                                                @endif
                                                             </div>
                                                         @endif
                                                     </td>
@@ -1018,6 +1028,7 @@
                                         </tr>
                                     </tbody>
                                 </table>
+                                </div>
                             </div>
                         @endif
                     @endforeach

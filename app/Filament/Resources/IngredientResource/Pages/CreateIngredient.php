@@ -13,4 +13,14 @@ class CreateIngredient extends CreateRecord
     {
         return $this->getResource()::getUrl('index');
     }
+
+    public function getTitle(): string
+    {
+        return __('Thêm nguyên liệu');
+    }
+
+    public function getSubheading(): ?string
+    {
+        return __('Chỉ khai báo các thông tin cần thiết: tên, mã, đơn vị và loại nguyên liệu');
+    }
 }

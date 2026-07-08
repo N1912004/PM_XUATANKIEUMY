@@ -3,17 +3,249 @@
 namespace App\Filament\Resources\PurchaseOrderResource\Pages;
 
 use App\Filament\Resources\PurchaseOrderResource;
-use Filament\Actions;
-use Filament\Resources\Pages\ListRecords;
+use App\Models\PurchaseOrder;
+use App\Models\PurchaseOrderItem;
+use Carbon\Carbon;
+use Filament\Notifications\Notification;
+use Filament\Resources\Pages\Page;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Livewire\WithPagination;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
-class ListPurchaseOrders extends ListRecords
+class ListPurchaseOrders extends Page
 {
+    use WithPagination;
+
     protected static string $resource = PurchaseOrderResource::class;
 
-    protected function getHeaderActions(): array
+    protected static string $view = 'filament.resources.purchase-orders.pages.list-purchase-orders';
+
+    public string $search = '';
+
+    public string $monthFilter = '';
+
+    public string $typeFilter = '';
+
+    public string $statusFilter = '';
+
+    public int $perPage = 10;
+
+    protected $queryString = [
+        'search' => ['except' => ''],
+        'monthFilter' => ['except' => ''],
+        'typeFilter' => ['except' => ''],
+        'statusFilter' => ['except' => ''],
+    ];
+
+    public function mount(): void
     {
+        // Default to current month if not set
+        if (empty($this->monthFilter)) {
+            $this->monthFilter = now()->format('Y-m');
+        }
+    }
+
+    public function updatedSearch(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedMonthFilter(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedTypeFilter(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedStatusFilter(): void
+    {
+        $this->resetPage();
+    }
+
+    public function resetFilters(): void
+    {
+        $this->search = '';
+        $this->monthFilter = now()->format('Y-m');
+        $this->typeFilter = '';
+        $this->statusFilter = '';
+        $this->resetPage();
+    }
+
+    public function deleteOrder(int $orderId): void
+    {
+        $order = PurchaseOrder::query()->find($orderId);
+
+        if (! $order) {
+            return;
+        }
+
+        $order->delete();
+
+        Notification::make()
+            ->title('Đã xóa đơn đặt hàng')
+            ->success()
+            ->send();
+
+        $this->resetPage();
+    }
+
+    public function formatFriendly(float $value): string
+    {
+        if ($value >= 1000000) {
+            $m = $value / 1000000;
+
+            return (floor($m) == $m ? number_format($m, 0) : number_format($m, 1, '.', '')).' tr';
+        }
+        if ($value >= 1000) {
+            return number_format($value / 1000, 0, '.', '.').' nghìn đ';
+        }
+
+        return number_format($value).' đ';
+    }
+
+    public function monthOptions(): array
+    {
+        // Distinct months from purchase orders
+        $months = PurchaseOrder::query()
+            ->selectRaw("DATE_FORMAT(created_at, '%Y-%m') as month_val")
+            ->distinct()
+            ->orderBy('month_val', 'desc')
+            ->pluck('month_val')
+            ->all();
+
+        $options = [];
+
+        // Add current month if not present
+        $currentMonth = now()->format('Y-m');
+        if (! in_array($currentMonth, $months)) {
+            $months[] = $currentMonth;
+            rsort($months);
+        }
+
+        foreach ($months as $m) {
+            $carbon = Carbon::parse($m.'-01');
+            $options[$m] = 'Tháng '.$carbon->format('m/Y');
+        }
+
+        return $options;
+    }
+
+    public function stats(): array
+    {
+        [$startOfMonth, $endOfMonth] = $this->monthRange();
+
+        $statusCounts = PurchaseOrder::query()
+            ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
+            ->selectRaw('status, COUNT(*) as aggregate')
+            ->groupBy('status')
+            ->pluck('aggregate', 'status');
+
+        // Total value of all orders created in this filtered month (aggregated in SQL)
+        $totalValue = (float) PurchaseOrderItem::query()
+            ->whereHas('purchaseOrder', fn ($q) => $q->whereBetween('created_at', [$startOfMonth, $endOfMonth]))
+            ->selectRaw('COALESCE(SUM(quantity_ordered * unit_price), 0) as aggregate')
+            ->value('aggregate');
+
         return [
-            Actions\CreateAction::make(),
+            'total_orders' => $statusCounts->sum(),
+            'pending_orders' => $statusCounts->get('checking', 0),
+            'done_orders' => $statusCounts->get('done', 0),
+            'total_value' => $totalValue,
         ];
+    }
+
+    public function orders(): LengthAwarePaginator
+    {
+        return $this->baseQuery()
+            ->with(['supplier', 'items'])
+            ->withCount('items')
+            ->orderBy('id', 'desc')
+            ->paginate($this->perPage);
+    }
+
+    public function exportExcel(): StreamedResponse
+    {
+        $fileName = 'don-dat-hang-'.now()->format('Ymd-His').'.csv';
+
+        return response()->streamDownload(function (): void {
+            $output = fopen('php://output', 'w');
+            fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+            fputcsv($output, ['Mã đơn', 'Nhà cung cấp', 'Bếp ăn', 'Ngày giao dự kiến', 'Tổng giá trị', 'Trạng thái', 'Ghi chú']);
+
+            $this->baseQuery()
+                ->with(['supplier', 'kitchen', 'items'])
+                ->orderBy('id', 'desc')
+                ->chunk(100, function ($orders) use ($output): void {
+                    foreach ($orders as $order) {
+                        $total = $order->items->sum(fn ($item) => $item->quantity_ordered * $item->unit_price);
+                        fputcsv($output, [
+                            $order->code,
+                            $order->supplier?->name ?? '',
+                            $order->kitchen?->name ?? '',
+                            $order->estimated_delivery_date?->format('d/m/Y') ?? '',
+                            $total,
+                            match ($order->status) {
+                                'draft' => 'Nháp',
+                                'sent' => 'Đã gửi NCC',
+                                'checking' => 'Đang kiểm hàng',
+                                'done' => 'Hoàn thành',
+                                default => $order->status,
+                            },
+                            $order->note,
+                        ]);
+                    }
+                });
+
+            fclose($output);
+        }, $fileName, ['Content-Type' => 'text/csv; charset=UTF-8']);
+    }
+
+    /**
+     * @return array{0: Carbon, 1: Carbon}
+     */
+    protected function monthRange(): array
+    {
+        if (! preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $this->monthFilter)) {
+            $this->monthFilter = now()->format('Y-m');
+        }
+
+        $month = Carbon::parse($this->monthFilter.'-01');
+
+        return [$month->copy()->startOfMonth(), $month->copy()->endOfMonth()];
+    }
+
+    protected function baseQuery()
+    {
+        [$startOfMonth, $endOfMonth] = $this->monthRange();
+
+        return PurchaseOrder::query()
+            ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
+            ->when($this->search !== '', function ($query): void {
+                $search = mb_strtolower($this->search);
+                $query->where(function ($query) use ($search): void {
+                    $query->whereRaw('LOWER(code) LIKE ?', ["%{$search}%"])
+                        ->orWhereRaw('LOWER(note) LIKE ?', ["%{$search}%"])
+                        ->orWhereHas('supplier', function ($q) use ($search) {
+                            $q->whereRaw('LOWER(name) LIKE ?', ["%{$search}%"]);
+                        });
+                });
+            })
+            ->when($this->typeFilter !== '', function ($query): void {
+                if ($this->typeFilter === 'week') {
+                    $query->where(function ($q) {
+                        $q->whereRaw('LOWER(note) LIKE ?', ['%tuần%'])
+                            ->orWhereRaw('LOWER(code) LIKE ?', ['%tuan%']);
+                    });
+                } elseif ($this->typeFilter === 'day') {
+                    $query->where(function ($q) {
+                        $q->whereRaw('LOWER(note) LIKE ?', ['%ngày%'])
+                            ->orWhereRaw('LOWER(code) LIKE ?', ['%ngay%']);
+                    });
+                }
+            })
+            ->when($this->statusFilter !== '', fn ($query) => $query->where('status', $this->statusFilter));
     }
 }

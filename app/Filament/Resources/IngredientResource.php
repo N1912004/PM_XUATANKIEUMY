@@ -6,6 +6,8 @@ use App\Filament\Resources\IngredientResource\Pages;
 use App\Models\Ingredient;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Infolists;
+use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -42,72 +44,75 @@ class IngredientResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Grid::make(3)
+                Forms\Components\Section::make('Thông tin nguyên liệu')
                     ->schema([
-                        Forms\Components\Section::make('Thông tin nguyên liệu')
-                            ->columnSpan(2)
-                            ->schema([
-                                Forms\Components\TextInput::make('name')
-                                    ->label('Tên nguyên liệu')
-                                    ->required()
-                                    ->placeholder('Nhập tên nguyên liệu'),
-                                Forms\Components\TextInput::make('code')
-                                    ->label('Mã nguyên liệu')
-                                    ->required()
-                                    ->unique(ignoreRecord: true)
-                                    ->placeholder('Nhập mã nguyên liệu'),
-                                Forms\Components\Select::make('supplier_id')
-                                    ->label('Nhà cung cấp')
-                                    ->relationship('supplier', 'name')
-                                    ->required()
-                                    ->searchable()
-                                    ->preload()
-                                    ->placeholder('Chọn nhà cung cấp'),
-                                Forms\Components\Select::make('unit')
-                                    ->label('Đơn vị')
-                                    ->required()
-                                    ->options([
-                                        'Kg' => 'Kg',
-                                        'Quả' => 'Quả',
-                                        'Gói' => 'Gói',
-                                        'Chai' => 'Chai',
-                                        'Thùng' => 'Thùng',
-                                        'Lít' => 'Lít',
-                                    ])
-                                    ->placeholder('Chọn đơn vị'),
-                                Forms\Components\Select::make('type')
-                                    ->label('Loại nguyên liệu')
-                                    ->required()
-                                    ->options([
-                                        'Động vật' => 'Động vật',
-                                        'Thực vật' => 'Thực vật',
-                                        'Thực phẩm khô' => 'Thực phẩm khô',
-                                        'Gia vị' => 'Gia vị',
-                                    ])
-                                    ->placeholder('Chọn loại nguyên liệu')
-                                    ->columnSpanFull(),
-                                Forms\Components\TextInput::make('reference_price')
-                                    ->label('Đơn giá tham chiếu (đ)')
-                                    ->required()
-                                    ->numeric()
-                                    ->default(0.00),
+                        Forms\Components\TextInput::make('name')
+                            ->label('Tên nguyên liệu')
+                            ->required()
+                            ->placeholder('Nhập tên nguyên liệu'),
+                        Forms\Components\TextInput::make('code')
+                            ->label('Mã nguyên liệu')
+                            ->unique(ignoreRecord: true)
+                            ->placeholder('Nhập mã nguyên liệu'),
+                        Forms\Components\Select::make('unit')
+                            ->label('Đơn vị')
+                            ->required()
+                            ->options([
+                                'Kg' => 'Kg',
+                                'Quả' => 'Quả',
+                                'Gói' => 'Gói',
+                                'Chai' => 'Chai',
+                                'Thùng' => 'Thùng',
+                                'Lít' => 'Lít',
                             ])
-                            ->columns(2),
-                        Forms\Components\Group::make()
-                            ->columnSpan(1)
+                            ->placeholder('Chọn đơn vị'),
+                        Forms\Components\Select::make('type')
+                            ->label('Loại nguyên liệu')
+                            ->required()
+                            ->options([
+                                'Động vật' => 'Động Vật',
+                                'Thực vật' => 'Thực Vật',
+                                'Thực phẩm khô' => 'Thực Phẩm Khô',
+                                'Gia vị' => 'Gia vị',
+                            ])
+                            ->placeholder('Chọn loại nguyên liệu'),
+                        Forms\Components\Toggle::make('status')
+                            ->label('Trạng thái')
+                            ->default(true)
+                            ->onColor('primary')
+                            ->offColor('danger')
+                            ->columnSpanFull(),
+                    ])
+                    ->columns(2),
+            ]);
+    }
+
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                Infolists\Components\Section::make()
+                    ->schema([
+                        Infolists\Components\ViewEntry::make('header_card')
+                            ->view('filament.resources.ingredients.view-header')
+                            ->columnSpanFull(),
+                        Infolists\Components\Grid::make(2)
                             ->schema([
-                                Forms\Components\Section::make('Thiết lập nhanh')
-                                    ->schema([
-                                        Forms\Components\Toggle::make('status')
-                                            ->label('Trạng thái')
-                                            ->default(true)
-                                            ->onColor('success')
-                                            ->offColor('danger'),
-                                    ]),
+                                Infolists\Components\TextEntry::make('code')
+                                    ->label('Mã nguyên liệu')
+                                    ->weight('bold'),
+                                Infolists\Components\TextEntry::make('name')
+                                    ->label('Tên nguyên liệu')
+                                    ->weight('bold'),
+                                Infolists\Components\TextEntry::make('unit')
+                                    ->label('Đơn vị')
+                                    ->weight('bold'),
+                                Infolists\Components\TextEntry::make('type')
+                                    ->label('Loại nguyên liệu')
+                                    ->weight('bold'),
                             ]),
                     ]),
-            ])
-            ->columns(1);
+            ]);
     }
 
     public static function table(Table $table): Table
@@ -118,12 +123,16 @@ class IngredientResource extends Resource
                     ->label('STT')
                     ->state(static function (Tables\Contracts\HasTable $livewire, \stdClass $rowLoop): string {
                         return (string) ($rowLoop->iteration);
-                    }),
+                    })
+                    ->alignCenter()
+                    ->width('56px'),
                 Tables\Columns\TextColumn::make('code')
                     ->label('MÃ NGUYÊN LIỆU')
                     ->searchable()
                     ->sortable()
-                    ->weight('bold'),
+                    ->color('primary')
+                    ->weight('semibold')
+                    ->size('sm'),
                 Tables\Columns\TextColumn::make('name')
                     ->label('TÊN NGUYÊN LIỆU')
                     ->searchable()
@@ -131,25 +140,22 @@ class IngredientResource extends Resource
                     ->weight('bold'),
                 Tables\Columns\TextColumn::make('supplier.name')
                     ->label('TÊN NCC')
-                    ->sortable(),
+                    ->sortable()
+                    ->size('sm'),
                 Tables\Columns\TextColumn::make('unit')
-                    ->label('ĐƠN VỊ'),
+                    ->label('ĐƠN VỊ')
+                    ->size('sm'),
                 Tables\Columns\TextColumn::make('type')
                     ->label('LOẠI NL')
-                    ->badge()
-                    ->color(fn (string $state): string => match ($state) {
-                        'Động vật' => 'danger',
-                        'Thực vật' => 'success',
-                        'Thực phẩm khô' => 'warning',
-                        'Gia vị' => 'info',
-                        default => 'gray',
-                    }),
+                    ->size('sm'),
                 Tables\Columns\TextColumn::make('status')
                     ->label('TRẠNG THÁI')
                     ->badge()
-                    ->state(fn ($record) => $record->status ? 'Đang hoạt động' : 'Ngừng hoạt động')
-                    ->color(fn ($state) => $state === 'Đang hoạt động' ? 'success' : 'danger'),
+                    ->formatStateUsing(fn ($state) => $state ? 'Đang hoạt động' : 'Ngừng hoạt động')
+                    ->icon(fn ($state) => $state ? 'heroicon-o-check-circle' : 'heroicon-o-x-circle')
+                    ->color(fn ($state) => $state ? 'success' : 'danger'),
             ])
+            ->defaultSort('id', 'asc')
             ->filters([
                 Tables\Filters\SelectFilter::make('supplier_id')
                     ->label('Nhà cung cấp')
@@ -173,10 +179,14 @@ class IngredientResource extends Resource
                         'Gia vị' => 'Gia vị',
                     ]),
             ])
+            ->filtersLayout(Tables\Enums\FiltersLayout::AboveContent)
             ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\ViewAction::make()
+                    ->iconButton(),
+                Tables\Actions\EditAction::make()
+                    ->iconButton(),
+                Tables\Actions\DeleteAction::make()
+                    ->iconButton(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -187,9 +197,7 @@ class IngredientResource extends Resource
 
     public static function getRelations(): array
     {
-        return [
-            //
-        ];
+        return [];
     }
 
     public static function getPages(): array
@@ -197,6 +205,7 @@ class IngredientResource extends Resource
         return [
             'index' => Pages\ListIngredients::route('/'),
             'create' => Pages\CreateIngredient::route('/create'),
+            'view' => Pages\ViewIngredient::route('/{record}'),
             'edit' => Pages\EditIngredient::route('/{record}/edit'),
         ];
     }

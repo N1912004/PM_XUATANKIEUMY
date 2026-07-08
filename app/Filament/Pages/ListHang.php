@@ -136,6 +136,15 @@ class ListHang extends Page
             ->whereIn('shift_id', $this->poSelectedShifts)
             ->get();
 
+        // Prefetch existing PO codes per ingredient for the order date in one query
+        // (avoids one query per ingredient inside the loop below).
+        $existingPoCodesByIngredient = PurchaseOrderItem::query()
+            ->whereHas('purchaseOrder', fn ($q) => $q->whereDate('estimated_delivery_date', $this->poDate))
+            ->with('purchaseOrder:id,code')
+            ->get(['id', 'purchase_order_id', 'ingredient_id'])
+            ->groupBy('ingredient_id')
+            ->map(fn ($items) => $items->pluck('purchaseOrder.code')->filter()->unique()->values());
+
         $agg = [];
         foreach ($menus as $menu) {
             $recipe = $menu->recipe;
@@ -157,17 +166,12 @@ class ListHang extends Page
                         $agg[$ingId]['dishes'][] = $recipe->name;
                     }
                 } else {
-                    // Check if already ordered
-                    $existingPOs = PurchaseOrder::whereDate('estimated_delivery_date', $this->poDate)
-                        ->whereHas('items', fn ($q) => $q->where('ingredient_id', $ingId))
-                        ->get();
-
-                    $orderedInfo = [];
-                    foreach ($existingPOs as $po) {
-                        $orderedInfo[] = [
-                            'orderId' => $po->code,
-                        ];
-                    }
+                    // Already-ordered info: cap displayed codes to keep UI and Livewire payload small
+                    $existingCodes = $existingPoCodesByIngredient->get($ingId, collect());
+                    $orderedInfo = [
+                        'total' => $existingCodes->count(),
+                        'codes' => $existingCodes->take(3)->all(),
+                    ];
 
                     $loai = 'kho';
                     if ($ing->type === 'Động vật') {

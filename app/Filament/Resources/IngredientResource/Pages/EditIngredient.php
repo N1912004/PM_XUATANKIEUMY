@@ -21,4 +21,14 @@ class EditIngredient extends EditRecord
     {
         return $this->getResource()::getUrl('index');
     }
+
+    public function getTitle(): string
+    {
+        return __('Sửa nguyên liệu');
+    }
+
+    public function getSubheading(): ?string
+    {
+        return __('Chỉ khai báo các thông tin cần thiết: tên, mã, đơn vị và loại nguyên liệu');
+    }
 }

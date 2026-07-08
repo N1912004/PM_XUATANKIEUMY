@@ -13,7 +13,16 @@ class ListIngredients extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            Actions\CreateAction::make()
+                ->label('Thêm nguyên liệu')
+                ->icon('heroicon-o-plus'),
+        ];
+    }
+
+    protected function getHeaderWidgets(): array
+    {
+        return [
+            IngredientStatsOverview::class,
         ];
     }
 }

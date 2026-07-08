@@ -65,11 +65,26 @@
         </form>
     </div>
 
-    <script>
-        document.addEventListener('livewire:initialized', () => {
-            Livewire.hook('morph.updated', () => {
-                window.dispatchEvent(new CustomEvent('messages-updated'));
-            });
-        });
+    <script data-navigate-once>
+        // SPA-safe: with wire:navigate, "livewire:initialized" only fires on the first
+        // full page load, so register the hook immediately when Livewire is already up.
+        (function registerChatMorphHook() {
+            if (window.__chatMorphHookRegistered) {
+                return;
+            }
+
+            const register = () => {
+                window.__chatMorphHookRegistered = true;
+                Livewire.hook('morph.updated', () => {
+                    window.dispatchEvent(new CustomEvent('messages-updated'));
+                });
+            };
+
+            if (window.Livewire?.hook) {
+                register();
+            } else {
+                document.addEventListener('livewire:initialized', register, { once: true });
+            }
+        })();
     </script>
 </x-filament-panels::page>
