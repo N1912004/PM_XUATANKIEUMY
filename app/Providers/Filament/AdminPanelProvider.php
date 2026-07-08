@@ -226,6 +226,55 @@ class AdminPanelProvider extends PanelProvider
                         .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/employees"] .fi-sidebar-item-icon,
                         .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/timekeepings"] .fi-sidebar-item-icon,
                         .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/leave-overtimes"] .fi-sidebar-item-icon { color: #8b5cf6 !important; }
+
+                        /* Recipe create/edit form: match BA mockup spacing and cost table emphasis */
+                        .fi-resource-recipes .fi-header-heading {
+                            font-size: 1.875rem !important;
+                            line-height: 2.25rem !important;
+                            font-weight: 800 !important;
+                            color: #111827 !important;
+                        }
+                        .fi-resource-recipes .fi-header-subheading {
+                            color: #64748b !important;
+                            font-size: 1rem !important;
+                            font-weight: 500 !important;
+                        }
+                        .fi-resource-recipes .recipe-form-section,
+                        .fi-resource-recipes .recipe-cost-section {
+                            border: 1px solid #dbe3ee !important;
+                            border-radius: 1rem !important;
+                            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05) !important;
+                        }
+                        .fi-resource-recipes .recipe-cost-section .fi-fo-repeater-item {
+                            border: 0 !important;
+                            box-shadow: none !important;
+                            background: transparent !important;
+                        }
+                        .fi-resource-recipes .recipe-cost-section .fi-fo-repeater-item-header {
+                            background: #f8fafc !important;
+                            border-radius: 0.75rem 0.75rem 0 0 !important;
+                        }
+                        .fi-resource-recipes .recipe-line-total {
+                            color: #ea580c !important;
+                            font-weight: 800 !important;
+                            padding-top: 0.625rem !important;
+                        }
+                        .fi-resource-recipes .recipe-total-cost {
+                            display: flex !important;
+                            align-items: center !important;
+                            justify-content: center !important;
+                            min-height: 4rem !important;
+                            border: 1px solid #fdba74 !important;
+                            border-radius: 0.75rem !important;
+                            background: linear-gradient(90deg, #fff7ed, #fef3c7) !important;
+                            color: #9a3412 !important;
+                            font-size: 1.125rem !important;
+                            font-weight: 800 !important;
+                        }
+                        .fi-resource-recipes .recipe-cost-note {
+                            color: #64748b !important;
+                            font-weight: 500 !important;
+                        }
                     </style>
                 ')
             )
