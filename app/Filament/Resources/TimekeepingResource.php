@@ -153,7 +153,10 @@ class TimekeepingResource extends Resource
             ->filters([
                 Tables\Filters\SelectFilter::make('employee_id')
                     ->label('Nhân viên')
-                    ->relationship('employee', 'name'),
+                    ->relationship('employee', 'name')
+                    // Tìm kiếm ajax thay vì render toàn bộ nhân viên vào HTML (~1MB với 1000+ NV)
+                    ->searchable()
+                    ->optionsLimit(50),
                 Tables\Filters\SelectFilter::make('shift_id')
                     ->label('Ca làm việc')
                     ->relationship('shift', 'name'),

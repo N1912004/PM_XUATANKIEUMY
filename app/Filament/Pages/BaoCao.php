@@ -65,10 +65,22 @@ class BaoCao extends Page
         $this->toDate = '2026-05-23';
     }
 
+    /**
+     * Request-scope memo: getGroupedData() được gọi từ cả getStats() lẫn blade,
+     * chỉ tính 1 lần mỗi render. (Protected nên không bị Livewire serialize.)
+     *
+     * @var array<int, array<string, mixed>>|null
+     */
+    protected ?array $groupedDataMemo = null;
+
     public function getGroupedData(): array
     {
+        if ($this->groupedDataMemo !== null) {
+            return $this->groupedDataMemo;
+        }
+
         if (! $this->fromDate || ! $this->toDate || empty($this->selectedShifts)) {
-            return [];
+            return $this->groupedDataMemo = [];
         }
 
         $start = Carbon::parse($this->fromDate);
@@ -88,30 +100,38 @@ class BaoCao extends Page
             6 => 'THỨ 7',
         ];
 
+        // Nạp shifts 1 lần và toàn bộ menus của cả khoảng ngày bằng 1 query
+        // (thay vì 1 query cho mỗi ngày × ca), rồi group trong PHP.
+        $allShifts = Shift::whereIn('id', $this->selectedShifts)->get();
+
+        // Khoảng nửa mở [start, end+1) — sargable trên MySQL (dùng index) và đúng cả trên
+        // SQLite (nơi cột date lưu kèm giờ '00:00:00' khi test)
+        $menusQuery = Menu::with(['recipe.ingredients'])
+            ->where('date', '>=', $start->toDateString())
+            ->where('date', '<', $end->copy()->addDay()->toDateString())
+            ->whereIn('shift_id', $this->selectedShifts);
+
+        if (! empty($this->search)) {
+            $searchLower = '%'.strtolower($this->search).'%';
+            $menusQuery->whereHas('recipe', function ($query) use ($searchLower) {
+                $query->whereRaw('LOWER(name) LIKE ?', [$searchLower])
+                    ->orWhereHas('ingredients', function ($q) use ($searchLower) {
+                        $q->whereRaw('LOWER(name) LIKE ?', [$searchLower])
+                            ->orWhereRaw('LOWER(code) LIKE ?', [$searchLower]);
+                    });
+            });
+        }
+
+        $menusByDateShift = $menusQuery->get()
+            ->groupBy([fn (Menu $menu) => $menu->date->toDateString(), 'shift_id']);
+
         while ($current->lte($end)) {
             $dateStr = $current->toDateString();
 
-            // Fetch menus for this date and selected shifts
             $shiftsData = [];
-            $allShifts = Shift::whereIn('id', $this->selectedShifts)->get();
 
             foreach ($allShifts as $shift) {
-                $menusQuery = Menu::with(['recipe.ingredients'])
-                    ->whereDate('date', $dateStr)
-                    ->where('shift_id', $shift->id);
-
-                if (! empty($this->search)) {
-                    $searchLower = '%'.strtolower($this->search).'%';
-                    $menusQuery->whereHas('recipe', function ($query) use ($searchLower) {
-                        $query->whereRaw('LOWER(name) LIKE ?', [$searchLower])
-                            ->orWhereHas('ingredients', function ($q) use ($searchLower) {
-                                $q->whereRaw('LOWER(name) LIKE ?', [$searchLower])
-                                    ->orWhereRaw('LOWER(code) LIKE ?', [$searchLower]);
-                            });
-                    });
-                }
-
-                $menus = $menusQuery->get();
+                $menus = $menusByDateShift[$dateStr][$shift->id] ?? collect();
 
                 if ($menus->isEmpty()) {
                     continue;
@@ -178,7 +198,7 @@ class BaoCao extends Page
             $current->addDay();
         }
 
-        return $days;
+        return $this->groupedDataMemo = $days;
     }
 
     public function getStats(): array

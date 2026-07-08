@@ -162,7 +162,10 @@ class LeaveOvertimeResource extends Resource
             ->filters([
                 Tables\Filters\SelectFilter::make('employee_id')
                     ->label('Nhân viên')
-                    ->relationship('employee', 'name'),
+                    ->relationship('employee', 'name')
+                    // Tìm kiếm ajax thay vì render toàn bộ nhân viên vào HTML
+                    ->searchable()
+                    ->optionsLimit(50),
                 Tables\Filters\SelectFilter::make('type')
                     ->label('Loại yêu cầu')
                     ->options([

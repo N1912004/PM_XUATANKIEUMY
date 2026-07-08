@@ -129,17 +129,20 @@ class ListHang extends Page
             return;
         }
 
+        // Khoảng nửa mở [from, to+1) — dùng index, đúng trên cả MySQL lẫn SQLite (test)
         $menus = Menu::with(['recipe.ingredients.supplier'])
             ->when($kitchenId, fn ($q) => $q->where('kitchen_id', $kitchenId))
-            ->whereDate('date', '>=', $this->poSourceFrom)
-            ->whereDate('date', '<=', $this->poSourceTo)
+            ->where('date', '>=', $this->poSourceFrom)
+            ->where('date', '<', Carbon::parse($this->poSourceTo)->addDay()->toDateString())
             ->whereIn('shift_id', $this->poSelectedShifts)
             ->get();
 
         // Prefetch existing PO codes per ingredient for the order date in one query
         // (avoids one query per ingredient inside the loop below).
+        $poDateEnd = Carbon::parse($this->poDate)->addDay()->toDateString();
         $existingPoCodesByIngredient = PurchaseOrderItem::query()
-            ->whereHas('purchaseOrder', fn ($q) => $q->whereDate('estimated_delivery_date', $this->poDate))
+            ->whereHas('purchaseOrder', fn ($q) => $q->where('estimated_delivery_date', '>=', $this->poDate)
+                ->where('estimated_delivery_date', '<', $poDateEnd))
             ->with('purchaseOrder:id,code')
             ->get(['id', 'purchase_order_id', 'ingredient_id'])
             ->groupBy('ingredient_id')
@@ -284,23 +287,42 @@ class ListHang extends Page
         $this->mode = 'list';
     }
 
+    /**
+     * Request-scope memo: getGroupedData() được gọi từ cả getStats() lẫn blade,
+     * chỉ tính 1 lần mỗi render. (Protected nên không bị Livewire serialize.)
+     *
+     * @var array<int, array<string, mixed>>|null
+     */
+    protected ?array $groupedDataMemo = null;
+
     public function getGroupedData(): array
     {
+        if ($this->groupedDataMemo !== null) {
+            return $this->groupedDataMemo;
+        }
+
         if (empty($this->selectedShifts) || ! $this->date) {
-            return [];
+            return $this->groupedDataMemo = [];
         }
 
         $kitchenId = auth()->user()?->currentKitchenId();
 
         $shifts = Shift::whereIn('id', $this->selectedShifts)->get();
+
+        // 1 query cho tất cả ca (thay vì 1 query/ca); khoảng nửa mở [ngày, ngày+1)
+        // để dùng được index và đúng trên cả MySQL lẫn SQLite (test)
+        $menusByShift = Menu::with(['recipe.ingredients'])
+            ->when($kitchenId, fn ($q) => $q->where('kitchen_id', $kitchenId))
+            ->where('date', '>=', $this->date)
+            ->where('date', '<', Carbon::parse($this->date)->addDay()->toDateString())
+            ->whereIn('shift_id', $this->selectedShifts)
+            ->get()
+            ->groupBy('shift_id');
+
         $data = [];
 
         foreach ($shifts as $shift) {
-            $menus = Menu::with(['recipe.ingredients'])
-                ->when($kitchenId, fn ($q) => $q->where('kitchen_id', $kitchenId))
-                ->whereDate('date', $this->date)
-                ->where('shift_id', $shift->id)
-                ->get();
+            $menus = $menusByShift->get($shift->id, collect());
 
             if ($menus->isEmpty()) {
                 continue;
@@ -347,7 +369,7 @@ class ListHang extends Page
             ];
         }
 
-        return $data;
+        return $this->groupedDataMemo = $data;
     }
 
     public function getStats(): array
@@ -363,16 +385,16 @@ class ListHang extends Page
 
         $kitchenId = auth()->user()?->currentKitchenId();
 
-        $portions = Menu::whereDate('date', $this->date)
+        // Khoảng nửa mở [ngày, ngày+1) để dùng index (date, shift_id); gộp 2 aggregate vào 1 query
+        $totals = Menu::where('date', '>=', $this->date)
+            ->where('date', '<', Carbon::parse($this->date)->addDay()->toDateString())
             ->whereIn('shift_id', $this->selectedShifts)
             ->when($kitchenId, fn ($q) => $q->where('kitchen_id', $kitchenId))
-            ->sum('estimated_portions');
+            ->selectRaw('COALESCE(SUM(estimated_portions), 0) as portions, COUNT(DISTINCT recipe_id) as dishes')
+            ->first();
 
-        $dishes = Menu::whereDate('date', $this->date)
-            ->whereIn('shift_id', $this->selectedShifts)
-            ->when($kitchenId, fn ($q) => $q->where('kitchen_id', $kitchenId))
-            ->distinct('recipe_id')
-            ->count('recipe_id');
+        $portions = (int) $totals->portions;
+        $dishes = (int) $totals->dishes;
 
         $grouped = $this->getGroupedData();
         $ingCodes = [];
