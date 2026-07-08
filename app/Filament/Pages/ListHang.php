@@ -8,10 +8,6 @@ use App\Models\PurchaseOrderItem;
 use App\Models\Shift;
 use App\Models\Supplier;
 use Carbon\Carbon;
-use Filament\Facades\Filament;
-use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 
@@ -22,6 +18,27 @@ class ListHang extends Page
     protected static ?int $navigationSort = 3;
 
     protected static string $view = 'filament.pages.list-hang';
+
+    public string $mode = 'list'; // 'list' or 'create_po'
+
+    public ?string $date = null;
+
+    public array $selectedShifts = [];
+
+    public ?string $weekFrom = null;
+
+    public ?string $weekTo = null;
+
+    // PO Creation variables
+    public ?string $poDate = null;
+
+    public ?string $poSourceFrom = null;
+
+    public ?string $poSourceTo = null;
+
+    public array $poSelectedShifts = [];
+
+    public array $poItems = [];
 
     public static function getNavigationGroup(): ?string
     {
@@ -38,44 +55,229 @@ class ListHang extends Page
         return __('Danh sách hàng');
     }
 
-    public ?string $date = null;
-
-    public array $selectedShifts = [];
-
     public function mount(): void
     {
         $this->date = now()->toDateString();
+        $dt = Carbon::parse($this->date);
+        $this->weekFrom = $dt->copy()->startOfWeek()->toDateString();
+        $this->weekTo = $dt->copy()->endOfWeek()->toDateString();
         $this->selectedShifts = Shift::pluck('id')->toArray();
-    }
 
-    public function form(Form $form): Form
-    {
-        return $form
-            ->schema([
-                DatePicker::make('date')
-                    ->label('Ngày phục vụ')
-                    ->required()
-                    ->live()
-                    ->afterStateUpdated(fn () => $this->updatedDate()),
-                Select::make('selectedShifts')
-                    ->label('Chọn Ca phục vụ')
-                    ->multiple()
-                    ->options(Shift::pluck('name', 'id'))
-                    ->preload()
-                    ->live()
-                    ->afterStateUpdated(fn () => $this->updatedShifts()),
-            ])
-            ->statePath('data');
+        // PO Defaults
+        $this->poDate = now()->toDateString();
+        $this->poSourceFrom = now()->toDateString();
+        $this->poSourceTo = now()->toDateString();
+        $this->poSelectedShifts = Shift::pluck('id')->toArray();
     }
 
     public function updatedDate(): void
     {
-        // Livewire updates it automatically
+        $dt = Carbon::parse($this->date);
+        $this->weekFrom = $dt->copy()->startOfWeek()->toDateString();
+        $this->weekTo = $dt->copy()->endOfWeek()->toDateString();
     }
 
-    public function updatedShifts(): void
+    public function updatedPoSourceFrom(): void
     {
-        // Livewire updates it automatically
+        $this->loadPOIngredients();
+    }
+
+    public function updatedPoSourceTo(): void
+    {
+        $this->loadPOIngredients();
+    }
+
+    public function updatedPoSelectedShifts(): void
+    {
+        $this->loadPOIngredients();
+    }
+
+    public function goToday(): void
+    {
+        $this->date = now()->toDateString();
+        $this->updatedDate();
+    }
+
+    public function changeDay(int $delta): void
+    {
+        $this->date = Carbon::parse($this->date)->addDays($delta)->toDateString();
+        $this->updatedDate();
+    }
+
+    public function goOrderCreate(): void
+    {
+        $this->mode = 'create_po';
+        $this->poDate = $this->date;
+        $this->poSourceFrom = $this->date;
+        $this->poSourceTo = $this->date;
+        $this->poSelectedShifts = $this->selectedShifts;
+        $this->loadPOIngredients();
+    }
+
+    public function goBackToList(): void
+    {
+        $this->mode = 'list';
+    }
+
+    public function loadPOIngredients(): void
+    {
+        $kitchenId = auth()->user()?->currentKitchenId();
+
+        if (empty($this->poSelectedShifts) || ! $this->poSourceFrom || ! $this->poSourceTo) {
+            $this->poItems = [];
+
+            return;
+        }
+
+        $menus = Menu::with(['recipe.ingredients.supplier'])
+            ->when($kitchenId, fn ($q) => $q->where('kitchen_id', $kitchenId))
+            ->whereDate('date', '>=', $this->poSourceFrom)
+            ->whereDate('date', '<=', $this->poSourceTo)
+            ->whereIn('shift_id', $this->poSelectedShifts)
+            ->get();
+
+        $agg = [];
+        foreach ($menus as $menu) {
+            $recipe = $menu->recipe;
+            if (! $recipe) {
+                continue;
+            }
+
+            foreach ($recipe->ingredients as $ing) {
+                $qty = $menu->estimated_portions * $ing->pivot->quantity_per_portion;
+                if ($qty <= 0) {
+                    continue;
+                }
+
+                $ingId = $ing->id;
+                if (isset($agg[$ingId])) {
+                    $agg[$ingId]['total_suat'] += $menu->estimated_portions;
+                    $agg[$ingId]['total_kg'] += $qty;
+                    if (! in_array($recipe->name, $agg[$ingId]['dishes'])) {
+                        $agg[$ingId]['dishes'][] = $recipe->name;
+                    }
+                } else {
+                    // Check if already ordered
+                    $existingPOs = PurchaseOrder::whereDate('estimated_delivery_date', $this->poDate)
+                        ->whereHas('items', fn ($q) => $q->where('ingredient_id', $ingId))
+                        ->get();
+
+                    $orderedInfo = [];
+                    foreach ($existingPOs as $po) {
+                        $orderedInfo[] = [
+                            'orderId' => $po->code,
+                        ];
+                    }
+
+                    $loai = 'kho';
+                    if ($ing->type === 'Động vật') {
+                        $loai = 'thit';
+                    } elseif ($ing->type === 'Thực vật') {
+                        $loai = 'uot';
+                    }
+
+                    $agg[$ingId] = [
+                        'ingredient_id' => $ingId,
+                        'name' => $ing->name,
+                        'code' => $ing->code,
+                        'unit' => $ing->unit,
+                        'total_suat' => $menu->estimated_portions,
+                        'total_kg' => $qty,
+                        'quantity_manual' => round($qty, 3),
+                        'reference_price' => (float) $ing->reference_price,
+                        'supplier_id' => $ing->supplier_id,
+                        'split' => 'P1',
+                        'checked' => true,
+                        'loai' => $loai,
+                        'dishes' => [$recipe->name],
+                        'ordered_info' => $orderedInfo,
+                    ];
+                }
+            }
+        }
+
+        $this->poItems = array_values($agg);
+    }
+
+    public function bulkAssignSupplier(string $loai, int $supplierId): void
+    {
+        foreach ($this->poItems as $index => $item) {
+            if ($item['loai'] === $loai) {
+                $this->poItems[$index]['supplier_id'] = $supplierId;
+            }
+        }
+    }
+
+    public function createOrders(): void
+    {
+        $selectedItems = collect($this->poItems)->filter(fn ($item) => $item['checked'] && (float) ($item['quantity_manual'] ?? 0) > 0);
+
+        if ($selectedItems->isEmpty()) {
+            Notification::make()->title('Không có nguyên liệu nào được chọn để tạo PO!')->warning()->send();
+
+            return;
+        }
+
+        $kitchenId = auth()->user()?->currentKitchenId();
+
+        // Group by Supplier and Split (Phiếu 1, Phiếu 2, Phiếu 3)
+        $grouped = $selectedItems->groupBy(fn ($item) => $item['supplier_id'].'-'.$item['split']);
+
+        $poCount = 0;
+        $poCodes = [];
+
+        foreach ($grouped as $key => $items) {
+            $parts = explode('-', $key);
+            $supplierId = (int) $parts[0];
+            $split = $parts[1];
+
+            $supplier = Supplier::find($supplierId);
+            if (! $supplier) {
+                continue;
+            }
+
+            // Code format: PO-LH-YYYYMMDD-NCC-P1
+            $nccCode = strtolower(str_replace(' ', '', $supplier->code ?: 'NCC'));
+            $poCode = 'PO-LH-'.Carbon::parse($this->poDate)->format('Ymd').'-'.strtoupper($nccCode).'-'.$split;
+
+            // Avoid duplicates
+            $attempts = 0;
+            while (PurchaseOrder::where('code', $poCode)->exists() && $attempts < 10) {
+                $poCode = 'PO-LH-'.Carbon::parse($this->poDate)->format('Ymd').'-'.strtoupper($nccCode).'-'.$split.'-'.mt_rand(10, 99);
+                $attempts++;
+            }
+
+            $po = PurchaseOrder::create([
+                'code' => $poCode,
+                'kitchen_id' => $kitchenId,
+                'supplier_id' => $supplierId,
+                'status' => 'draft',
+                'estimated_delivery_date' => $this->poDate,
+                'note' => 'Đơn đặt hàng tự động tạo từ List hàng ngày '.Carbon::parse($this->poDate)->format('d/m/Y')." ({$split})",
+            ]);
+
+            foreach ($items as $item) {
+                PurchaseOrderItem::create([
+                    'purchase_order_id' => $po->id,
+                    'ingredient_id' => $item['ingredient_id'],
+                    'quantity_ordered' => $item['quantity_manual'],
+                    'quantity_received' => 0.0,
+                    'unit_price' => $item['reference_price'],
+                ]);
+            }
+
+            $poCount++;
+            $poCodes[] = $poCode;
+        }
+
+        Notification::make()
+            ->title('Tạo PO thành công!')
+            ->body("Đã tạo tự động {$poCount} đơn đặt hàng nháp: ".implode(', ', $poCodes))
+            ->success()
+            ->persistent()
+            ->send();
+
+        $this->mode = 'list';
     }
 
     public function getGroupedData(): array
@@ -84,11 +286,14 @@ class ListHang extends Page
             return [];
         }
 
+        $kitchenId = auth()->user()?->currentKitchenId();
+
         $shifts = Shift::whereIn('id', $this->selectedShifts)->get();
         $data = [];
 
         foreach ($shifts as $shift) {
             $menus = Menu::with(['recipe.ingredients'])
+                ->when($kitchenId, fn ($q) => $q->where('kitchen_id', $kitchenId))
                 ->whereDate('date', $this->date)
                 ->where('shift_id', $shift->id)
                 ->get();
@@ -115,6 +320,7 @@ class ListHang extends Page
                         'code' => $ingredient->code,
                         'name' => $ingredient->name,
                         'quantity' => $qty,
+                        'quantity_per_portion' => $ingredient->pivot->quantity_per_portion,
                         'unit' => $ingredient->unit,
                     ];
                 }
@@ -151,17 +357,20 @@ class ListHang extends Page
             ];
         }
 
+        $kitchenId = auth()->user()?->currentKitchenId();
+
         $portions = Menu::whereDate('date', $this->date)
             ->whereIn('shift_id', $this->selectedShifts)
+            ->when($kitchenId, fn ($q) => $q->where('kitchen_id', $kitchenId))
             ->sum('estimated_portions');
 
         $dishes = Menu::whereDate('date', $this->date)
             ->whereIn('shift_id', $this->selectedShifts)
+            ->when($kitchenId, fn ($q) => $q->where('kitchen_id', $kitchenId))
             ->distinct('recipe_id')
             ->count('recipe_id');
 
         $grouped = $this->getGroupedData();
-        $ingCount = 0;
         $ingCodes = [];
         foreach ($grouped as $s) {
             foreach ($s['dishes'] as $d) {
@@ -181,119 +390,11 @@ class ListHang extends Page
 
     public function generatePurchaseOrders(): void
     {
-        if (empty($this->selectedShifts) || ! $this->date) {
-            Notification::make()
-                ->title('Vui lòng chọn ngày và ca phục vụ!')
-                ->danger()
-                ->send();
-
-            return;
-        }
-
-        $menus = Menu::with(['recipe.ingredients.supplier'])
-            ->whereDate('date', $this->date)
-            ->whereIn('shift_id', $this->selectedShifts)
-            ->get();
-
-        if ($menus->isEmpty()) {
-            Notification::make()
-                ->title('Không có thực đơn nào được lập cho ngày và ca đã chọn để tạo PO!')
-                ->warning()
-                ->send();
-
-            return;
-        }
-
-        // Calculate total demand per ingredient
-        $demands = [];
-        foreach ($menus as $menu) {
-            $recipe = $menu->recipe;
-            if (! $recipe) {
-                continue;
-            }
-
-            foreach ($recipe->ingredients as $ingredient) {
-                $qty = $menu->estimated_portions * $ingredient->pivot->quantity_per_portion;
-                if ($qty <= 0) {
-                    continue;
-                }
-
-                if (! isset($demands[$ingredient->id])) {
-                    $demands[$ingredient->id] = [
-                        'ingredient' => $ingredient,
-                        'quantity' => 0,
-                    ];
-                }
-                $demands[$ingredient->id]['quantity'] += $qty;
-            }
-        }
-
-        if (empty($demands)) {
-            Notification::make()
-                ->title('Không có nguyên liệu nào cần chuẩn bị để tạo PO!')
-                ->warning()
-                ->send();
-
-            return;
-        }
-
-        // Group by supplier
-        $supplierGroups = [];
-        $firstSupplier = Supplier::first();
-
-        foreach ($demands as $id => $data) {
-            $ingredient = $data['ingredient'];
-            $supplierId = $ingredient->supplier_id ?? ($firstSupplier ? $firstSupplier->id : null);
-
-            if (! $supplierId) {
-                continue; // Skip if no supplier exists at all in system
-            }
-
-            if (! isset($supplierGroups[$supplierId])) {
-                $supplierGroups[$supplierId] = [];
-            }
-            $supplierGroups[$supplierId][] = $data;
-        }
-
-        $poCount = 0;
-        $poCodes = [];
-
-        foreach ($supplierGroups as $supplierId => $itemsData) {
-            $poCode = 'PO-LH-'.Carbon::parse($this->date)->format('Ymd').'-'.mt_rand(100, 999);
-
-            // Check if PO code already exists, retry if needed
-            while (PurchaseOrder::where('code', $poCode)->exists()) {
-                $poCode = 'PO-LH-'.Carbon::parse($this->date)->format('Ymd').'-'.mt_rand(100, 999);
-            }
-
-            $po = PurchaseOrder::create([
-                'code' => $poCode,
-                'kitchen_id' => Filament::auth()->user()?->currentKitchenId(),
-                'supplier_id' => $supplierId,
-                'status' => 'draft',
-                'estimated_delivery_date' => $this->date,
-                'note' => 'Đơn đặt hàng tự động tạo từ List hàng ngày '.Carbon::parse($this->date)->format('d/m/Y'),
-            ]);
-
-            foreach ($itemsData as $data) {
-                PurchaseOrderItem::create([
-                    'purchase_order_id' => $po->id,
-                    'ingredient_id' => $data['ingredient']->id,
-                    'quantity_ordered' => $data['quantity'],
-                    'quantity_received' => 0.0,
-                    'unit_price' => $data['ingredient']->reference_price ?? 0.0,
-                ]);
-            }
-
-            $poCount++;
-            $poCodes[] = $poCode;
-        }
-
-        Notification::make()
-            ->title('Tạo PO thành công!')
-            ->body("Đã tạo tự động {$poCount} đơn đặt hàng nháp: ".implode(', ', $poCodes))
-            ->success()
-            ->persistent()
-            ->send();
+        $this->poDate = $this->date;
+        $this->poSourceFrom = $this->date;
+        $this->poSourceTo = $this->date;
+        $this->poSelectedShifts = $this->selectedShifts;
+        $this->loadPOIngredients();
+        $this->createOrders();
     }
 }
