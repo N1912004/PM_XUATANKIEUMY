@@ -8,10 +8,15 @@ use App\Models\Menu;
 use App\Models\Recipe;
 use App\Models\Shift;
 use Filament\Resources\Pages\Page;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Carbon;
+use Livewire\WithPagination;
 
 class ListMenus extends Page
 {
+    use WithPagination;
+
     protected static string $resource = MenuResource::class;
 
     protected static string $view = 'filament.resources.menus.pages.list-menus';
@@ -27,6 +32,8 @@ class ListMenus extends Page
     public $statusFilter = ''; // 'draft', 'sent', 'locked'
 
     public $monthFilter = '2026-05'; // Mặc định tháng seeder
+
+    public int $perPage = 10;
 
     // FORM WEEK STATES
     public $weekKitchenId;
@@ -86,6 +93,32 @@ class ListMenus extends Page
         $this->statusFilter = '';
         $hasData = Menu::where('date', 'like', '%2026-05%')->exists();
         $this->monthFilter = $hasData ? '2026-05' : now()->format('Y-m');
+        $this->resetPage();
+    }
+
+    public function updatedSearch(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedTypeFilter(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedStatusFilter(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedMonthFilter(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedPerPage(): void
+    {
+        $this->resetPage();
     }
 
     // ==========================================
@@ -184,7 +217,16 @@ class ListMenus extends Page
             $result = $result->where('type', 'day');
         }
 
-        return $result;
+        // Phân trang thủ công trên collection đã gộp (không paginate được ở tầng SQL vì gộp tuần/ngày)
+        $page = Paginator::resolveCurrentPage('page');
+
+        return new LengthAwarePaginator(
+            $result->forPage($page, $this->perPage)->values(),
+            $result->count(),
+            $this->perPage,
+            $page,
+            ['pageName' => 'page']
+        );
     }
 
     // ==========================================

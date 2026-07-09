@@ -3,8 +3,9 @@
     @include('filament.resources.timekeepings.partials.styles')
 
     @php
-        $employee = $this->getEmployee();
-        $todayTimekeeping = $this->getTodayTimekeeping();
+        $employee = $this->getAttendanceCardEmployee();
+        $attendanceRecord = $this->getAttendanceCardRecord();
+        $canUseAttendanceActions = $this->canUseAttendanceActions($employee);
         $timekeepingsList = $this->timekeepings();
         $shifts = $this->getShifts();
         $depts = $this->getDepartments();
@@ -19,19 +20,28 @@
         if ($this->areaFilter !== '') $activeFiltersCount++;
         if ($this->statusFilter !== '') $activeFiltersCount++;
 
-        // Chuẩn bị thông tin cho user check-in card
         $avatarColors = ['#1267E8', '#059669', '#D97706', '#7C3AED', '#EA580C', '#EC4899'];
         $empBgColor = $employee ? $avatarColors[$employee->id % count($avatarColors)] : '#1267E8';
         $empInitials = '';
         if ($employee) {
             $words = explode(' ', $employee->name);
-            if (count($words) >= 2) {
-                $empInitials = mb_substr($words[0], 0, 1) . mb_substr($words[count($words)-1], 0, 1);
-            } else {
-                $empInitials = mb_substr($employee->name, 0, 2);
-            }
+            $empInitials = count($words) >= 2
+                ? mb_substr($words[0], 0, 1) . mb_substr($words[count($words) - 1], 0, 1)
+                : mb_substr($employee->name, 0, 2);
             $empInitials = mb_strtoupper($empInitials);
         }
+
+        $cardDate = \Carbon\Carbon::parse($this->dateFilter ?: now()->toDateString());
+        $dayNames = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
+        $statusLabel = $attendanceRecord?->status ?: 'Chưa ghi nhận';
+        $statusClass = match ($statusLabel) {
+            'Đúng giờ' => 'ok',
+            'Đi trễ' => 'late',
+            'Tăng ca' => 'ot',
+            'Nghỉ phép' => 'leave',
+            'Vắng mặt' => 'absent',
+            default => 'neutral',
+        };
     @endphp
 
     @if (session()->has('message'))
@@ -63,38 +73,32 @@
     </div>
 
     @if($employee)
-        <!-- Personal Check-in Card -->
         <div class="ci-card">
-            @if($todayTimekeeping)
-                <div class="ci-confirm" style="margin-bottom: 14px;">
-                    <i class="fa-solid fa-circle-check" style="color: #10B981;"></i>
-                    Thời gian đã được lưu vào bảng chấm công.
-                </div>
-            @endif
-
             <div class="ci-top">
                 <div class="ci-user">
                     @if($employee->avatar_url && filter_var($employee->avatar_url, FILTER_VALIDATE_URL))
-                        <div class="ci-av"><img src="{{ $employee->avatar_url }}"></div>
+                        <div class="ci-av"><img src="{{ $employee->avatar_url }}" alt="{{ $employee->name }}"></div>
                     @elseif($employee->avatar_url)
-                        <div class="ci-av"><img src="{{ asset('storage/' . $employee->avatar_url) }}"></div>
+                        <div class="ci-av"><img src="{{ asset('storage/' . $employee->avatar_url) }}" alt="{{ $employee->name }}"></div>
                     @else
-                        <div class="ci-av" style="background:{{ $empBgColor }}1A; color:{{ $empBgColor }}; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:18px">
+                        <div class="ci-av ci-av-fallback" style="background:{{ $empBgColor }}1A; color:{{ $empBgColor }}">
                             {{ $empInitials }}
                         </div>
                     @endif
+
                     <div>
                         <div class="ci-name">{{ $employee->name }}</div>
                         <div class="ci-id">{{ $employee->code }}</div>
                         <div class="ci-role">Nhân viên · {{ $employee->department ?? '—' }}</div>
                     </div>
                 </div>
+
                 <div class="ci-meta">
                     <div class="ci-meta-item">
                         <i class="ci-meta-ico fa-regular fa-calendar"></i>
                         <div>
-                            <div class="ci-meta-lbl">Hôm nay</div>
-                            <div class="ci-meta-val">{{ now()->format('d/m/Y') }} (Thứ {{ ['Chủ Nhật', 'Hai', 'Ba', 'Tư', 'Năm', 'Sáu', 'Bảy'][now()->dayOfWeek] }})</div>
+                            <div class="ci-meta-lbl">Ngày làm việc</div>
+                            <div class="ci-meta-val">{{ $cardDate->format('d/m/Y') }} ({{ $dayNames[$cardDate->dayOfWeek] }})</div>
                         </div>
                     </div>
                     <div class="ci-meta-item">
@@ -102,29 +106,17 @@
                         <div>
                             <div class="ci-meta-lbl">Ca làm việc</div>
                             <div class="ci-meta-val">
-                                @if($todayTimekeeping && $todayTimekeeping->shift)
-                                    {{ $todayTimekeeping->shift->name }} · {{ $todayTimekeeping->shift->time_range }}
+                                @if($attendanceRecord?->shift)
+                                    {{ $attendanceRecord->shift->name }} · {{ $attendanceRecord->shift->time_range }}
                                 @else
-                                    Ca sáng · 07:00 – 16:00
+                                    Chưa phân ca
                                 @endif
                             </div>
                         </div>
                     </div>
-                    <div>
-                        <div class="ci-meta-lbl" style="margin-bottom:4px">Trạng thái</div>
-                        @if($todayTimekeeping)
-                            @if($todayTimekeeping->status === 'Đúng giờ')
-                                <span class="ci-status-badge">Đúng giờ</span>
-                            @elseif($todayTimekeeping->status === 'Đi trễ')
-                                <span class="ci-status-badge late">Đi trễ</span>
-                            @elseif($todayTimekeeping->status === 'Tăng ca')
-                                <span class="ci-status-badge" style="background:var(--bl-s); color:var(--bl); border-color:var(--bl-m)">Tăng ca</span>
-                            @else
-                                <span class="ci-status-badge late">{{ $todayTimekeeping->status }}</span>
-                            @endif
-                        @else
-                            <span class="ci-status-badge" style="background:#F1F5F9; color:#475569; border-color:#CBD5E1">Đang làm việc</span>
-                        @endif
+                    <div class="ci-meta-status">
+                        <div class="ci-meta-lbl">Trạng thái</div>
+                        <span class="ci-status-badge {{ $statusClass }}">{{ $statusLabel }}</span>
                     </div>
                 </div>
             </div>
@@ -132,63 +124,78 @@
             <div class="ci-bottom">
                 <div class="ci-time-box">
                     <div class="ci-time-lbl">Check-in</div>
-                    <div class="ci-time-val in">{{ $todayTimekeeping?->check_in ? date('H:i', strtotime($todayTimekeeping->check_in)) : '--' }}</div>
-                    <div class="ci-time-date">{{ $todayTimekeeping?->check_in ? now()->format('d/m/Y') : '--' }}</div>
+                    <div class="ci-time-val in">{{ $attendanceRecord?->check_in ? date('H:i', strtotime($attendanceRecord->check_in)) : '--' }}</div>
+                    <div class="ci-time-date">{{ $attendanceRecord?->check_in ? $cardDate->format('d/m/Y') : '--' }}</div>
                 </div>
                 <div class="ci-divider"></div>
                 <div class="ci-time-box">
                     <div class="ci-time-lbl">Check-out</div>
-                    <div class="ci-time-val out">{{ $todayTimekeeping?->check_out ? date('H:i', strtotime($todayTimekeeping->check_out)) : '--' }}</div>
-                    <div class="ci-time-date">{{ $todayTimekeeping?->check_out ? now()->format('d/m/Y') : '--' }}</div>
+                    <div class="ci-time-val out">{{ $attendanceRecord?->check_out ? date('H:i', strtotime($attendanceRecord->check_out)) : '--' }}</div>
+                    <div class="ci-time-date">{{ $attendanceRecord?->check_out ? $cardDate->format('d/m/Y') : '--' }}</div>
                 </div>
                 <div class="ci-divider"></div>
-                
-                <div class="ci-btn-wrap">
-                    @if($todayTimekeeping && $todayTimekeeping->check_in)
+
+                <div class="ci-actions">
+                    @if($attendanceRecord?->check_in)
                         <button class="ci-btn done-in" type="button" disabled>
-                            <i class="ci-btn-ico fa-solid fa-circle-check" style="color: #10B981;"></i>
-                            <div>
-                                <div>Check-in</div>
-                                <div class="ci-btn-sub">Đã thực hiện lúc {{ date('H:i', strtotime($todayTimekeeping->check_in)) }}</div>
-                            </div>
+                            <i class="ci-btn-ico fa-solid fa-circle-check"></i>
+                            <span>
+                                <strong>Check-in</strong>
+                                <small>Đã thực hiện lúc {{ date('H:i', strtotime($attendanceRecord->check_in)) }}</small>
+                            </span>
                         </button>
-                    @else
+                    @elseif($canUseAttendanceActions)
                         <button class="ci-btn active-in" type="button" wire:click="checkIn">
                             <i class="ci-btn-ico fa-regular fa-clock"></i>
-                            <div>
-                                <div>Check-in</div>
-                                <div class="ci-btn-sub">Bấm để ghi nhận vào ca</div>
-                            </div>
+                            <span>
+                                <strong>Check-in</strong>
+                                <small>Bấm để ghi nhận vào ca</small>
+                            </span>
+                        </button>
+                    @else
+                        <button class="ci-btn disabled" type="button" disabled>
+                            <i class="ci-btn-ico fa-regular fa-clock"></i>
+                            <span>
+                                <strong>Check-in</strong>
+                                <small>Chưa có dữ liệu</small>
+                            </span>
                         </button>
                     @endif
 
-                    @if($todayTimekeeping && $todayTimekeeping->check_out)
+                    @if($attendanceRecord?->check_out)
                         <button class="ci-btn done-out" type="button" disabled>
-                            <i class="ci-btn-ico fa-solid fa-circle-check" style="color: var(--po-bl);"></i>
-                            <div>
-                                <div>Check-out</div>
-                                <div class="ci-btn-sub">Đã thực hiện lúc {{ date('H:i', strtotime($todayTimekeeping->check_out)) }}</div>
-                            </div>
+                            <i class="ci-btn-ico fa-solid fa-circle-check"></i>
+                            <span>
+                                <strong>Check-out</strong>
+                                <small>Đã thực hiện lúc {{ date('H:i', strtotime($attendanceRecord->check_out)) }}</small>
+                            </span>
                         </button>
-                    @elseif($todayTimekeeping && $todayTimekeeping->check_in)
+                    @elseif($attendanceRecord?->check_in && $canUseAttendanceActions)
                         <button class="ci-btn active-out" type="button" wire:click="checkOut">
                             <i class="ci-btn-ico fa-regular fa-clock"></i>
-                            <div>
-                                <div>Check-out</div>
-                                <div class="ci-btn-sub">Bấm để ghi nhận ra ca</div>
-                            </div>
+                            <span>
+                                <strong>Check-out</strong>
+                                <small>Bấm để ghi nhận ra ca</small>
+                            </span>
                         </button>
                     @else
-                        <button class="ci-btn" type="button" style="border-color:#CBD5E1; color:#94A3B8; cursor:not-allowed" disabled>
+                        <button class="ci-btn disabled" type="button" disabled>
                             <i class="ci-btn-ico fa-regular fa-clock"></i>
-                            <div>
-                                <div>Check-out</div>
-                                <div class="ci-btn-sub">Cần check-in trước</div>
-                            </div>
+                            <span>
+                                <strong>Check-out</strong>
+                                <small>{{ $attendanceRecord?->check_in ? 'Chưa có dữ liệu' : 'Cần check-in trước' }}</small>
+                            </span>
                         </button>
                     @endif
                 </div>
             </div>
+
+            @if($attendanceRecord)
+                <div class="ci-confirm">
+                    <i class="fa-solid fa-circle-check"></i>
+                    Thời gian đã được lưu vào bảng chấm công.
+                </div>
+            @endif
         </div>
     @endif
 

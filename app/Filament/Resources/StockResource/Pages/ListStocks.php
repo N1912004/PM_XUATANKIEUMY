@@ -16,6 +16,7 @@ use App\Models\StockTransferItem;
 use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Livewire\WithFileUploads;
 
 class ListStocks extends ListRecords
@@ -31,6 +32,8 @@ class ListStocks extends ListRecords
     public string $search = '';
 
     public string $selectedType = '';
+
+    public int $perPage = 10;
 
     // End day check properties
     public ?string $checkDate = null;
@@ -783,7 +786,22 @@ class ListStocks extends ListRecords
         }
     }
 
-    public function getWarehouseData(): array
+    public function updatedSearch(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedSelectedType(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedPerPage(): void
+    {
+        $this->resetPage();
+    }
+
+    public function getWarehouseData(): LengthAwarePaginator
     {
         $kitchenId = auth()->user()?->currentKitchenId();
         $query = Stock::with(['ingredient.supplier']);
@@ -806,7 +824,7 @@ class ListStocks extends ListRecords
             });
         }
 
-        return $query->get()->toArray();
+        return $query->orderBy('id')->paginate($this->perPage);
     }
 
     public function getLogData(): array
