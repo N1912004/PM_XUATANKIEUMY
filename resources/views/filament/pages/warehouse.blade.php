@@ -555,7 +555,7 @@
                     <tbody>
                         @forelse($stocksData as $index => $item)
                             <tr wire:click="openLedger({{ $item['ingredient']['id'] }})" style="cursor: pointer;" title="Click để xem Thẻ kho">
-                                <td style="text-align: center;">{{ $index + 1 }}</td>
+                                <td style="text-align: center;">{{ ($stocksData->currentPage() - 1) * $stocksData->perPage() + $index + 1 }}</td>
                                 <td><span style="font-weight: 700;">{{ $item['ingredient']['code'] }}</span></td>
                                 <td style="font-weight: 700; color: #0f172a;" class="dark:text-white">
                                     <div>{{ $item['ingredient']['name'] }}</div>
@@ -587,6 +587,68 @@
                     </tbody>
                 </table>
             </div>
+
+            @if($stocksData->hasPages() || $stocksData->total() > 10)
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; padding:12px 4px 2px; font-size:12px; color:#64748b;" class="dark:text-gray-400">
+                    <div>
+                        Hiển thị {{ $stocksData->firstItem() ?? 0 }}-{{ $stocksData->lastItem() ?? 0 }} trên {{ $stocksData->total() }} mặt hàng tồn kho
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <select wire:model.live="perPage" style="height:30px; border:1px solid #cbd5e1; border-radius:6px; padding:0 8px; font-size:12px; background:transparent;" class="dark:border-gray-700 dark:bg-gray-800">
+                            <option value="10">10 / trang</option>
+                            <option value="20">20 / trang</option>
+                            <option value="50">50 / trang</option>
+                        </select>
+
+                        @if($stocksData->hasPages())
+                            <nav role="navigation" aria-label="Pagination Navigation" style="display:flex; align-items:center; gap:4px;">
+                                {{-- Trang trước --}}
+                                @if ($stocksData->onFirstPage())
+                                    <span aria-disabled="true" style="opacity:.4; padding:4px;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><polyline points="15 18 9 12 15 6"/></svg>
+                                    </span>
+                                @else
+                                    <button type="button" wire:click="previousPage" rel="prev" style="display:inline-flex; align-items:center; justify-content:center; min-width:28px; height:28px; border:1px solid #cbd5e1; border-radius:6px; background:transparent; cursor:pointer;" class="dark:border-gray-700">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><polyline points="15 18 9 12 15 6"/></svg>
+                                    </button>
+                                @endif
+
+                                {{-- Số trang (dạng cửa sổ: 1 … n-1 n n+1 … cuối) --}}
+                                @php
+                                    $whCurrentPage = $stocksData->currentPage();
+                                    $whLastPage = $stocksData->lastPage();
+                                    $whPageWindow = collect([1, $whCurrentPage - 1, $whCurrentPage, $whCurrentPage + 1, $whLastPage])
+                                        ->filter(fn ($p) => $p >= 1 && $p <= $whLastPage)
+                                        ->unique()
+                                        ->sort()
+                                        ->values();
+                                @endphp
+                                @foreach ($whPageWindow as $i => $page)
+                                    @if ($i > 0 && $page - $whPageWindow[$i - 1] > 1)
+                                        <span aria-hidden="true" style="padding:0 4px">…</span>
+                                    @endif
+                                    @if ($page == $whCurrentPage)
+                                        <span aria-current="page" style="display:inline-flex; align-items:center; justify-content:center; min-width:28px; height:28px; border-radius:6px; background:rgb(var(--primary-600)); color:#fff; font-weight:700;">{{ $page }}</span>
+                                    @else
+                                        <button type="button" wire:click="gotoPage({{ $page }})" style="display:inline-flex; align-items:center; justify-content:center; min-width:28px; height:28px; border:1px solid #cbd5e1; border-radius:6px; background:transparent; cursor:pointer;" class="dark:border-gray-700">{{ $page }}</button>
+                                    @endif
+                                @endforeach
+
+                                {{-- Trang sau --}}
+                                @if ($stocksData->hasMorePages())
+                                    <button type="button" wire:click="nextPage" rel="next" style="display:inline-flex; align-items:center; justify-content:center; min-width:28px; height:28px; border:1px solid #cbd5e1; border-radius:6px; background:transparent; cursor:pointer;" class="dark:border-gray-700">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><polyline points="9 18 15 12 9 6"/></svg>
+                                    </button>
+                                @else
+                                    <span aria-disabled="true" style="opacity:.4; padding:4px;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><polyline points="9 18 15 12 9 6"/></svg>
+                                    </span>
+                                @endif
+                            </nav>
+                        @endif
+                    </div>
+                </div>
+            @endif
 
         @elseif($warehouseTab === 'check')
             <div>

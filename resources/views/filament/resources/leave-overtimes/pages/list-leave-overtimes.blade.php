@@ -196,14 +196,17 @@
                                     }
                                 @endphp
                                 <div style="font-weight:600; color:var(--po-tx)">{{ $dateStr }}</div>
-                                <div style="font-size:10.5px; color:var(--po-mu); margin-top:2px">
-                                    @try {
-                                        $carbonDate = \Carbon\Carbon::parse($row->start_date);
-                                        echo '(Thứ ' . ['Chủ Nhật', 'Hai', 'Ba', 'Tư', 'Năm', 'Sáu', 'Bảy'][$carbonDate->dayOfWeek] . ')';
-                                    } @catch(\Exception $e) {
-                                        echo '';
+                                @php
+                                    try {
+                                        $carbonDate = \Carbon\Carbon::createFromFormat('d/m/Y', trim(explode('-', (string) $row->start_date)[0]));
+                                        $dayOfWeekLabel = '(Thứ ' . ['Chủ Nhật', 'Hai', 'Ba', 'Tư', 'Năm', 'Sáu', 'Bảy'][$carbonDate->dayOfWeek] . ')';
+                                    } catch (\Exception $e) {
+                                        $dayOfWeekLabel = '';
                                     }
-                                </div>
+                                @endphp
+                                @if($dayOfWeekLabel !== '')
+                                    <div style="font-size:10.5px; color:var(--po-mu); margin-top:2px">{{ $dayOfWeekLabel }}</div>
+                                @endif
                             </td>
                             <td style="padding:12px 12px; font-weight:700; color:var(--po-tx)">{{ $row->duration_text }}</td>
                             <td style="padding:12px 12px; max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap" title="{{ $row->reason }}">{{ $row->reason ?: '—' }}</td>
@@ -275,8 +278,8 @@
             </table>
         </div>
 
-        <!-- Table Footer / Pagination -->
-        @if($itemsList->hasPages())
+        <!-- Table Footer / Pagination (hiển thị cả khi chưa đủ 1 trang để thấy tổng số dòng) -->
+        @if($itemsList->total() > 0)
             @php
                 $currentPage = $itemsList->currentPage();
                 $lastPage = $itemsList->lastPage();
@@ -297,6 +300,7 @@
                         <option value="50">50 dòng/trang</option>
                     </select>
 
+                    @if($itemsList->hasPages())
                     <nav role="navigation" aria-label="Pagination Navigation" style="display:flex; align-items:center; gap:4px">
                         {{-- Previous --}}
                         @if ($itemsList->onFirstPage())
@@ -334,6 +338,7 @@
                             </span>
                         @endif
                     </nav>
+                    @endif
                 </div>
             </div>
         @endif

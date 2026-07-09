@@ -94,21 +94,57 @@ class ListTimekeepings extends Page
         $this->resetPage();
     }
 
-    public function getEmployee(): ?Employee
+    public function getAttendanceCardEmployee(): ?Employee
     {
         $user = auth()->user();
         if ($user && $user->employee_id) {
             return Employee::with('area')->find($user->employee_id);
         }
 
-        // Không fallback sang nhân viên bất kỳ: tài khoản chưa liên kết hồ sơ
-        // nhân sự thì không được check-in/out thay người khác
-        return null;
+        if ($user && ! $user->hasRole(['super_admin', 'Quản trị viên', 'Bếp trưởng'])) {
+            return null;
+        }
+
+        $record = (clone $this->baseQuery())
+            ->whereNotNull('employee_id')
+            ->first();
+
+        return $record?->employee
+            ? Employee::with('area')->find($record->employee_id)
+            : Employee::with('area')->first();
+    }
+
+    public function getAttendanceCardRecord(): ?Timekeeping
+    {
+        $employee = $this->getAttendanceCardEmployee();
+        if (! $employee) {
+            return null;
+        }
+
+        return Timekeeping::with('shift')
+            ->where('employee_id', $employee->id)
+            ->where('date', $this->dateFilter ?: now()->toDateString())
+            ->first();
+    }
+
+    public function canUseAttendanceActions(?Employee $employee): bool
+    {
+        $user = auth()->user();
+
+        return (bool) (
+            $employee
+            && $user
+            && (int) $user->employee_id === (int) $employee->id
+            && ($this->dateFilter ?: now()->toDateString()) === now()->toDateString()
+        );
     }
 
     public function checkIn()
     {
-        $employee = $this->getEmployee();
+        $employee = auth()->user()?->employee_id
+            ? Employee::find(auth()->user()->employee_id)
+            : null;
+
         if (! $employee) {
             session()->flash('error', 'Không tìm thấy thông tin nhân sự liên kết với tài khoản.');
 
@@ -124,43 +160,40 @@ class ListTimekeepings extends Page
         if (! $timekeeping->check_in) {
             $timekeeping->check_in = now()->format('H:i');
 
-            // Gán ca làm việc mặc định
             $shift = Shift::where('name', 'CA 1')->orWhere('name', 'Ca 1')->first() ?: Shift::first();
             if ($shift) {
                 $timekeeping->shift_id = $shift->id;
             }
 
-            // Đi trễ nếu check-in sau 07:05
-            $limit = Carbon::createFromTimeString('07:05:00');
-            if (now()->gt($limit)) {
-                $timekeeping->status = 'Đi trễ';
-            } else {
-                $timekeeping->status = 'Đúng giờ';
-            }
+            $timekeeping->status = now()->gt(Carbon::createFromTimeString('07:05:00'))
+                ? 'Đi trễ'
+                : 'Đúng giờ';
 
             $timekeeping->save();
+            $this->dateFilter = $today;
             session()->flash('message', 'Check-in thành công lúc '.$timekeeping->check_in.'!');
         }
     }
 
     public function checkOut()
     {
-        $employee = $this->getEmployee();
+        $employee = auth()->user()?->employee_id
+            ? Employee::find(auth()->user()->employee_id)
+            : null;
+
         if (! $employee) {
             session()->flash('error', 'Không tìm thấy thông tin nhân sự.');
 
             return;
         }
 
-        $today = now()->toDateString();
         $timekeeping = Timekeeping::where('employee_id', $employee->id)
-            ->where('date', $today)
+            ->where('date', now()->toDateString())
             ->first();
 
         if ($timekeeping && $timekeeping->check_in && ! $timekeeping->check_out) {
             $timekeeping->check_out = now()->format('H:i');
 
-            // Tính số giờ overtime (sau 16:00:00)
             $checkOutTime = now();
             $shiftEndTime = Carbon::createFromTimeString('16:00:00');
             if ($checkOutTime->gt($shiftEndTime)) {
@@ -174,21 +207,9 @@ class ListTimekeepings extends Page
             }
 
             $timekeeping->save();
+            $this->dateFilter = now()->toDateString();
             session()->flash('message', 'Check-out thành công lúc '.$timekeeping->check_out.'!');
         }
-    }
-
-    public function getTodayTimekeeping()
-    {
-        $employee = $this->getEmployee();
-        if (! $employee) {
-            return null;
-        }
-
-        return Timekeeping::with('shift')
-            ->where('employee_id', $employee->id)
-            ->where('date', now()->toDateString())
-            ->first();
     }
 
     /**

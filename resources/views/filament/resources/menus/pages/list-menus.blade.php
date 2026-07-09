@@ -188,6 +188,68 @@
             @endforelse
         </div>
 
+        @if($menusList->hasPages() || $menusList->total() > 10)
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-top:14px; font-size:12px; color:var(--po-mu)">
+                <div>
+                    Hiển thị {{ $menusList->firstItem() ?? 0 }}-{{ $menusList->lastItem() ?? 0 }} trên {{ $menusList->total() }} thực đơn
+                </div>
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <select wire:model.live="perPage" style="height:30px; border:1px solid var(--po-bd); border-radius:6px; padding:0 8px; font-size:12px; background:transparent;">
+                        <option value="10">10 / trang</option>
+                        <option value="20">20 / trang</option>
+                        <option value="50">50 / trang</option>
+                    </select>
+
+                    @if($menusList->hasPages())
+                        <nav role="navigation" aria-label="Pagination Navigation" style="display:flex; align-items:center; gap:4px;">
+                            {{-- Trang trước --}}
+                            @if ($menusList->onFirstPage())
+                                <span aria-disabled="true" style="opacity:.4; padding:4px;">
+                                    <i class="fa-solid fa-chevron-left" style="font-size:11px"></i>
+                                </span>
+                            @else
+                                <button type="button" wire:click="previousPage" rel="prev" style="display:inline-flex; align-items:center; justify-content:center; min-width:28px; height:28px; border:1px solid var(--po-bd); border-radius:6px; background:transparent; cursor:pointer;">
+                                    <i class="fa-solid fa-chevron-left" style="font-size:11px"></i>
+                                </button>
+                            @endif
+
+                            {{-- Số trang (dạng cửa sổ: 1 … n-1 n n+1 … cuối) --}}
+                            @php
+                                $mpCurrentPage = $menusList->currentPage();
+                                $mpLastPage = $menusList->lastPage();
+                                $mpPageWindow = collect([1, $mpCurrentPage - 1, $mpCurrentPage, $mpCurrentPage + 1, $mpLastPage])
+                                    ->filter(fn ($p) => $p >= 1 && $p <= $mpLastPage)
+                                    ->unique()
+                                    ->sort()
+                                    ->values();
+                            @endphp
+                            @foreach ($mpPageWindow as $i => $page)
+                                @if ($i > 0 && $page - $mpPageWindow[$i - 1] > 1)
+                                    <span aria-hidden="true" style="padding:0 4px">…</span>
+                                @endif
+                                @if ($page == $mpCurrentPage)
+                                    <span aria-current="page" style="display:inline-flex; align-items:center; justify-content:center; min-width:28px; height:28px; border-radius:6px; background:var(--po-bl); color:#fff; font-weight:700;">{{ $page }}</span>
+                                @else
+                                    <button type="button" wire:click="gotoPage({{ $page }})" style="display:inline-flex; align-items:center; justify-content:center; min-width:28px; height:28px; border:1px solid var(--po-bd); border-radius:6px; background:transparent; cursor:pointer;">{{ $page }}</button>
+                                @endif
+                            @endforeach
+
+                            {{-- Trang sau --}}
+                            @if ($menusList->hasMorePages())
+                                <button type="button" wire:click="nextPage" rel="next" style="display:inline-flex; align-items:center; justify-content:center; min-width:28px; height:28px; border:1px solid var(--po-bd); border-radius:6px; background:transparent; cursor:pointer;">
+                                    <i class="fa-solid fa-chevron-right" style="font-size:11px"></i>
+                                </button>
+                            @else
+                                <span aria-disabled="true" style="opacity:.4; padding:4px;">
+                                    <i class="fa-solid fa-chevron-right" style="font-size:11px"></i>
+                                </span>
+                            @endif
+                        </nav>
+                    @endif
+                </div>
+            </div>
+        @endif
+
     @elseif($activeView === 'week')
         <!-- =========================================================================
              VIEW 2: BIỂU MẪU THỰC ĐƠN TUẦN
