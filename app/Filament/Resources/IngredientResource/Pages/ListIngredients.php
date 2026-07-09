@@ -2,9 +2,14 @@
 
 namespace App\Filament\Resources\IngredientResource\Pages;
 
+use App\Exports\IngredientsExport;
 use App\Filament\Resources\IngredientResource;
+use App\Imports\IngredientsImport;
 use Filament\Actions;
+use Filament\Forms\Components\FileUpload;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ListIngredients extends ListRecords
 {
@@ -13,6 +18,56 @@ class ListIngredients extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
+            Actions\Action::make('import_excel')
+                ->label('Nhập Excel')
+                ->icon('heroicon-o-document-arrow-up')
+                ->color('info')
+                ->form([
+                    FileUpload::make('excel_file')
+                        ->label('Chọn tệp Excel (.xlsx)')
+                        ->acceptedFileTypes([
+                            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                            'application/vnd.ms-excel',
+                        ])
+                        ->required()
+                        ->disk('local')
+                        ->directory('imports'),
+                ])
+                ->action(function (array $data) {
+                    $filePath = storage_path('app/'.$data['excel_file']);
+
+                    try {
+                        Excel::import(
+                            new IngredientsImport,
+                            $filePath
+                        );
+
+                        Notification::make()
+                            ->title('Nhập dữ liệu thành công!')
+                            ->success()
+                            ->send();
+                    } catch (\Exception $e) {
+                        Notification::make()
+                            ->title('Lỗi khi nhập dữ liệu!')
+                            ->body($e->getMessage())
+                            ->danger()
+                            ->send();
+                    } finally {
+                        if (file_exists($filePath)) {
+                            unlink($filePath);
+                        }
+                    }
+                }),
+            Actions\Action::make('export_excel')
+                ->label('Xuất Excel')
+                ->icon('heroicon-o-document-arrow-down')
+                ->color('success')
+                ->action(function () {
+                    return Excel::download(
+                        new IngredientsExport,
+                        'danh-muc-nguyen-lieu-'.now()->format('Ymd-His').'.xlsx'
+                    );
+                }),
             Actions\CreateAction::make()
                 ->label('Thêm nguyên liệu')
                 ->icon('heroicon-o-plus'),

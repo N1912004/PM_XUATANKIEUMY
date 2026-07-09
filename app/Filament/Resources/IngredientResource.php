@@ -4,11 +4,13 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\IngredientResource\Pages;
 use App\Models\Ingredient;
+use App\Models\Setting;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Infolists;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
+use Filament\Support\RawJs;
 use Filament\Tables;
 use Filament\Tables\Table;
 
@@ -55,27 +57,35 @@ class IngredientResource extends Resource
                             ->unique(ignoreRecord: true)
                             ->placeholder('Nhập mã nguyên liệu'),
                         Forms\Components\Select::make('unit')
-                            ->label('Đơn vị')
+                            ->label(__('Đơn vị'))
                             ->required()
-                            ->options([
-                                'Kg' => 'Kg',
-                                'Quả' => 'Quả',
-                                'Gói' => 'Gói',
-                                'Chai' => 'Chai',
-                                'Thùng' => 'Thùng',
-                                'Lít' => 'Lít',
-                            ])
-                            ->placeholder('Chọn đơn vị'),
+                            ->options(function () {
+                                $raw = Setting::get('ingredient_units', 'Kg, Quả, Gói, Chai, Thùng, Lít');
+                                $units = array_map('trim', explode(',', $raw));
+
+                                return array_combine($units, $units);
+                            })
+                            ->placeholder(__('Chọn đơn vị')),
                         Forms\Components\Select::make('type')
-                            ->label('Loại nguyên liệu')
+                            ->label(__('Loại nguyên liệu'))
                             ->required()
-                            ->options([
-                                'Động vật' => 'Động Vật',
-                                'Thực vật' => 'Thực Vật',
-                                'Thực phẩm khô' => 'Thực Phẩm Khô',
-                                'Gia vị' => 'Gia vị',
-                            ])
-                            ->placeholder('Chọn loại nguyên liệu'),
+                            ->options(function () {
+                                $raw = Setting::get('ingredient_types', 'Động vật, Thực vật, Thực phẩm khô, Gia vị');
+                                $types = array_map('trim', explode(',', $raw));
+
+                                return array_combine($types, $types);
+                            })
+                            ->placeholder(__('Chọn loại nguyên liệu')),
+                        Forms\Components\TextInput::make('reference_price')
+                            ->label('Đơn giá tham chiếu gốc')
+                            ->required()
+                            ->default(0)
+                            ->prefix('VND')
+                            ->placeholder('Nhập đơn giá tham chiếu cơ bản')
+                            ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
+                            ->stripCharacters(',')
+                            ->formatStateUsing(fn ($state) => $state ? round((float) $state) : 0)
+                            ->dehydrateStateUsing(fn ($state) => $state ? (float) str_replace([',', '.'], '', $state) : 0),
                         Forms\Components\Toggle::make('status')
                             ->label('Trạng thái')
                             ->default(true)
@@ -110,6 +120,38 @@ class IngredientResource extends Resource
                                 Infolists\Components\TextEntry::make('type')
                                     ->label('Loại nguyên liệu')
                                     ->weight('bold'),
+                                Infolists\Components\TextEntry::make('reference_price')
+                                    ->label('Đơn giá tham chiếu gốc')
+                                    ->money('VND')
+                                    ->weight('bold'),
+                                Infolists\Components\TextEntry::make('status')
+                                    ->label('Trạng thái')
+                                    ->badge()
+                                    ->color(fn ($state) => $state ? 'success' : 'danger')
+                                    ->formatStateUsing(fn ($state) => $state ? 'Đang hoạt động' : 'Ngừng hoạt động')
+                                    ->weight('bold'),
+                                Infolists\Components\TextEntry::make('suppliers.name')
+                                    ->label('Nhà cung cấp liên kết')
+                                    ->badge()
+                                    ->separator(',')
+                                    ->weight('bold')
+                                    ->columnSpanFull(),
+                                Infolists\Components\RepeatableEntry::make('suppliers')
+                                    ->label('Bảng báo giá của các nhà cung cấp')
+                                    ->schema([
+                                        Infolists\Components\TextEntry::make('name')
+                                            ->label('Tên nhà cung cấp')
+                                            ->weight('semibold'),
+                                        Infolists\Components\TextEntry::make('code')
+                                            ->label('Mã nhà cung cấp'),
+                                        Infolists\Components\TextEntry::make('pivot.reference_price')
+                                            ->label('Đơn giá cung cấp')
+                                            ->money('VND')
+                                            ->color('primary')
+                                            ->weight('bold'),
+                                    ])
+                                    ->columns(3)
+                                    ->columnSpanFull(),
                             ]),
                     ]),
             ]);
@@ -138,15 +180,30 @@ class IngredientResource extends Resource
                     ->searchable()
                     ->sortable()
                     ->weight('bold'),
-                Tables\Columns\TextColumn::make('supplier.name')
+                Tables\Columns\TextColumn::make('suppliers_display')
                     ->label('TÊN NCC')
-                    ->sortable()
+                    ->badge()
+                    ->state(function ($record) {
+                        $names = $record->suppliers->pluck('name')->toArray();
+                        $total = count($names);
+                        if ($total <= 2) {
+                            return $names;
+                        }
+
+                        return [...array_slice($names, 0, 2), '+'.($total - 2).' NCC'];
+                    })
+                    ->color(fn (string $state): string => str_starts_with($state, '+') ? 'gray' : 'success')
                     ->size('sm'),
                 Tables\Columns\TextColumn::make('unit')
                     ->label('ĐƠN VỊ')
                     ->size('sm'),
                 Tables\Columns\TextColumn::make('type')
                     ->label('LOẠI NL')
+                    ->size('sm'),
+                Tables\Columns\TextColumn::make('reference_price')
+                    ->label('ĐƠN GIÁ THAM CHIẾU')
+                    ->money('VND')
+                    ->sortable()
                     ->size('sm'),
                 Tables\Columns\TextColumn::make('status')
                     ->label('TRẠNG THÁI')
@@ -159,25 +216,23 @@ class IngredientResource extends Resource
             ->filters([
                 Tables\Filters\SelectFilter::make('supplier_id')
                     ->label('Nhà cung cấp')
-                    ->relationship('supplier', 'name'),
+                    ->relationship('suppliers', 'name'),
                 Tables\Filters\SelectFilter::make('unit')
-                    ->label('Đơn vị')
-                    ->options([
-                        'Kg' => 'Kg',
-                        'Quả' => 'Quả',
-                        'Gói' => 'Gói',
-                        'Chai' => 'Chai',
-                        'Thùng' => 'Thùng',
-                        'Lít' => 'Lít',
-                    ]),
+                    ->label(__('Đơn vị'))
+                    ->options(function () {
+                        $raw = Setting::get('ingredient_units', 'Kg, Quả, Gói, Chai, Thùng, Lít');
+                        $units = array_map('trim', explode(',', $raw));
+
+                        return array_combine($units, $units);
+                    }),
                 Tables\Filters\SelectFilter::make('type')
-                    ->label('Loại NL')
-                    ->options([
-                        'Động vật' => 'Động vật',
-                        'Thực vật' => 'Thực vật',
-                        'Thực phẩm khô' => 'Thực phẩm khô',
-                        'Gia vị' => 'Gia vị',
-                    ]),
+                    ->label(__('Loại NL'))
+                    ->options(function () {
+                        $raw = Setting::get('ingredient_types', 'Động vật, Thực vật, Thực phẩm khô, Gia vị');
+                        $types = array_map('trim', explode(',', $raw));
+
+                        return array_combine($types, $types);
+                    }),
             ])
             ->filtersLayout(Tables\Enums\FiltersLayout::AboveContent)
             ->actions([

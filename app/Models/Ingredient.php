@@ -34,6 +34,13 @@ class Ingredient extends Model
         return $this->belongsTo(Supplier::class);
     }
 
+    public function suppliers(): BelongsToMany
+    {
+        return $this->belongsToMany(Supplier::class, 'ingredient_supplier')
+            ->withPivot('reference_price')
+            ->withTimestamps();
+    }
+
     public function stock(): HasOne
     {
         return $this->hasOne(Stock::class);

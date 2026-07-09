@@ -7,7 +7,7 @@
                 <x-slot name="icon">
                     <x-heroicon-m-check class="h-5 w-5" />
                 </x-slot>
-                Lưu cài đặt
+                {{ __('settings.save_settings') }}
             </x-filament::button>
 
             <x-filament::button
@@ -15,7 +15,7 @@
                 tag="a"
                 :href="filament()->getUrl()"
             >
-                Hủy
+                {{ __('settings.cancel') }}
             </x-filament::button>
         </div>
     </form>

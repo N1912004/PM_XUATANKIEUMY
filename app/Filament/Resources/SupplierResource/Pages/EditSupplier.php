@@ -51,7 +51,7 @@ class EditSupplier extends Page
 
         foreach ($supplier->ingredients as $ingredient) {
             $this->selectedIngredients[$ingredient->id] = true;
-            $this->ingredientCosts[$ingredient->id] = (float) $ingredient->reference_price;
+            $this->ingredientCosts[$ingredient->id] = (float) $ingredient->pivot->reference_price;
         }
     }
 
@@ -98,10 +98,6 @@ class EditSupplier extends Page
     public function ingredients(): array
     {
         return Ingredient::query()
-            ->where(function ($query): void {
-                $query->whereNull('supplier_id')
-                    ->orWhere('supplier_id', $this->supplierId);
-            })
             ->when($this->ingredientSearch !== '', function ($query): void {
                 $search = mb_strtolower($this->ingredientSearch);
                 $query->where(function ($query) use ($search): void {
@@ -131,24 +127,31 @@ class EditSupplier extends Page
 
     protected function syncIngredients(Supplier $supplier): void
     {
+        $syncData = [];
+        foreach ($this->selectedIngredients as $ingredientId => $selected) {
+            if ($selected) {
+                $syncData[$ingredientId] = [
+                    'reference_price' => (float) ($this->ingredientCosts[$ingredientId] ?? 0),
+                ];
+            }
+        }
+        $supplier->ingredients()->sync($syncData);
+
+        // Đồng bộ ngược cột supplier_id và reference_price ở bảng ingredients để tương thích ngược.
         Ingredient::query()
             ->where('supplier_id', $supplier->id)
-            ->whereNotIn('id', collect($this->selectedIngredients)->filter()->keys())
+            ->whereNotIn('id', array_keys($syncData))
             ->update([
                 'supplier_id' => null,
                 'reference_price' => 0,
             ]);
 
-        foreach ($this->selectedIngredients as $ingredientId => $selected) {
-            if (! $selected) {
-                continue;
-            }
-
+        foreach ($syncData as $ingredientId => $pivotData) {
             Ingredient::query()
                 ->whereKey($ingredientId)
                 ->update([
                     'supplier_id' => $supplier->id,
-                    'reference_price' => (float) ($this->ingredientCosts[$ingredientId] ?? 0),
+                    'reference_price' => $pivotData['reference_price'],
                 ]);
         }
     }

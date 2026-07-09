@@ -19,12 +19,12 @@ class SystemSettings extends Page implements HasForms
 
     public static function getNavigationLabel(): string
     {
-        return __('Cài đặt hệ thống');
+        return __('settings.navigation_label');
     }
 
     public function getTitle(): string
     {
-        return __('Cài đặt hệ thống');
+        return __('settings.title');
     }
 
     protected static ?string $slug = 'system-settings';
@@ -53,6 +53,8 @@ class SystemSettings extends Page implements HasForms
             'company_phone' => Setting::get('company_phone'),
             'company_email' => Setting::get('company_email'),
             'primary_color' => Setting::get('primary_color', '#f59e0b'),
+            'ingredient_units' => Setting::get('ingredient_units', 'Kg, Quả, Gói, Chai, Thùng, Lít'),
+            'ingredient_types' => Setting::get('ingredient_types', 'Động vật, Thực vật, Thực phẩm khô, Gia vị'),
         ]);
     }
 
@@ -64,34 +66,34 @@ class SystemSettings extends Page implements HasForms
                     ->columnSpanFull()
                     ->tabs([
                         // Tab 1: Thương hiệu
-                        Forms\Components\Tabs\Tab::make('Thương hiệu')
+                        Forms\Components\Tabs\Tab::make(__('settings.tabs.branding'))
                             ->icon('heroicon-o-paint-brush')
                             ->schema([
-                                Forms\Components\Section::make('Thông tin CMS')
-                                    ->description('Cấu hình tên và mô tả hiển thị trên hệ thống.')
+                                Forms\Components\Section::make(__('settings.branding.cms_info'))
+                                    ->description(__('settings.branding.cms_info_desc'))
                                     ->icon('heroicon-o-globe-alt')
                                     ->columns(2)
                                     ->schema([
                                         Forms\Components\TextInput::make('site_name')
-                                            ->label('Tên CMS / Hệ thống')
-                                            ->placeholder('VD: Bluefire Catering')
+                                            ->label(__('settings.branding.site_name'))
+                                            ->placeholder(__('settings.branding.site_name_placeholder'))
                                             ->required()
                                             ->maxLength(255)
-                                            ->helperText('Tên hiển thị trên sidebar, tiêu đề trang và tab trình duyệt.'),
+                                            ->helperText(__('settings.branding.site_name_helper')),
                                         Forms\Components\TextInput::make('site_description')
-                                            ->label('Mô tả hệ thống')
-                                            ->placeholder('VD: Hệ thống quản lý xuất ăn')
+                                            ->label(__('settings.branding.site_description'))
+                                            ->placeholder(__('settings.branding.site_description_placeholder'))
                                             ->maxLength(500)
-                                            ->helperText('Mô tả ngắn gọn về hệ thống.'),
+                                            ->helperText(__('settings.branding.site_description_helper')),
                                     ]),
 
-                                Forms\Components\Section::make('Logo & Favicon')
-                                    ->description('Tải lên logo và biểu tượng (favicon) cho hệ thống.')
+                                Forms\Components\Section::make(__('settings.branding.logo_favicon'))
+                                    ->description(__('settings.branding.logo_favicon_desc'))
                                     ->icon('heroicon-o-photo')
                                     ->columns(2)
                                     ->schema([
                                         Forms\Components\FileUpload::make('site_logo')
-                                            ->label('Logo hệ thống')
+                                            ->label(__('settings.branding.logo'))
                                             ->image()
                                             ->disk('public')
                                             ->directory('settings')
@@ -99,56 +101,79 @@ class SystemSettings extends Page implements HasForms
                                             ->imagePreviewHeight('80')
                                             ->acceptedFileTypes(['image/png', 'image/svg+xml', 'image/jpeg', 'image/webp'])
                                             ->maxSize(1024)
-                                            ->helperText('Logo hiển thị trên sidebar. Khuyến nghị: PNG/SVG, nền trong suốt, kích thước 200x60px.'),
+                                            ->helperText(__('settings.branding.logo_helper')),
                                         Forms\Components\FileUpload::make('site_favicon')
-                                            ->label('Favicon')
+                                            ->label(__('settings.branding.favicon'))
                                             ->disk('public')
                                             ->directory('settings')
                                             ->visibility('public')
                                             ->imagePreviewHeight('48')
                                             ->acceptedFileTypes(['image/svg+xml', 'image/png', 'image/x-icon', 'image/vnd.microsoft.icon'])
                                             ->maxSize(512)
-                                            ->helperText('Biểu tượng nhỏ hiển thị trên tab trình duyệt. Khuyến nghị: SVG hoặc PNG 32x32px.'),
+                                            ->helperText(__('settings.branding.favicon_helper')),
                                     ]),
 
-                                Forms\Components\Section::make('Màu chủ đạo')
-                                    ->description('Tùy chỉnh màu sắc giao diện.')
+                                Forms\Components\Section::make(__('settings.branding.primary_color'))
+                                    ->description(__('settings.branding.primary_color_desc'))
                                     ->icon('heroicon-o-swatch')
                                     ->schema([
                                         Forms\Components\ColorPicker::make('primary_color')
-                                            ->label('Màu chủ đạo')
-                                            ->helperText('Màu chính dùng cho nút, link và các thành phần giao diện nổi bật.'),
+                                            ->label(__('settings.branding.primary_color'))
+                                            ->helperText(__('settings.branding.primary_color_helper')),
                                     ]),
                             ]),
 
                         // Tab 2: Công ty
-                        Forms\Components\Tabs\Tab::make('Thông tin công ty')
+                        Forms\Components\Tabs\Tab::make(__('settings.tabs.company'))
                             ->icon('heroicon-o-building-office')
                             ->schema([
-                                Forms\Components\Section::make('Thông tin doanh nghiệp')
-                                    ->description('Thông tin công ty hiển thị trên báo cáo và biểu mẫu xuất ra.')
+                                Forms\Components\Section::make(__('settings.company.title'))
+                                    ->description(__('settings.company.desc'))
                                     ->icon('heroicon-o-identification')
                                     ->columns(2)
                                     ->schema([
                                         Forms\Components\TextInput::make('company_name')
-                                            ->label('Tên công ty')
-                                            ->placeholder('VD: Công ty TNHH Bluefire Group')
+                                            ->label(__('settings.company.name'))
+                                            ->placeholder(__('settings.company.name_placeholder'))
                                             ->maxLength(255),
                                         Forms\Components\TextInput::make('company_phone')
-                                            ->label('Số điện thoại')
+                                            ->label(__('settings.company.phone'))
                                             ->tel()
-                                            ->placeholder('VD: 0901 234 567')
+                                            ->placeholder(__('settings.company.phone_placeholder'))
                                             ->maxLength(20),
                                         Forms\Components\TextInput::make('company_email')
-                                            ->label('Email liên hệ')
+                                            ->label(__('settings.company.email'))
                                             ->email()
-                                            ->placeholder('VD: info@bluefire.vn')
+                                            ->placeholder(__('settings.company.email_placeholder'))
                                             ->maxLength(255),
                                         Forms\Components\Textarea::make('company_address')
-                                            ->label('Địa chỉ')
-                                            ->placeholder('VD: 123 Đường ABC, Quận 1, TP.HCM')
+                                            ->label(__('settings.company.address'))
+                                            ->placeholder(__('settings.company.address_placeholder'))
                                             ->rows(2)
                                             ->columnSpanFull(),
+                                    ]),
+                            ]),
+
+                        // Tab 3: Nguyên liệu & Kho
+                        Forms\Components\Tabs\Tab::make(__('settings.tabs.ingredients_stock'))
+                            ->icon('heroicon-o-square-3-stack-3d')
+                            ->schema([
+                                Forms\Components\Section::make(__('settings.ingredients.title'))
+                                    ->description(__('settings.ingredients.desc'))
+                                    ->icon('heroicon-o-squares-2x2')
+                                    ->schema([
+                                        Forms\Components\Textarea::make('ingredient_units')
+                                            ->label(__('settings.ingredients.units'))
+                                            ->placeholder(__('settings.ingredients.units_placeholder'))
+                                            ->helperText(__('settings.ingredients.units_helper'))
+                                            ->required()
+                                            ->rows(3),
+                                        Forms\Components\Textarea::make('ingredient_types')
+                                            ->label(__('settings.ingredients.types'))
+                                            ->placeholder(__('settings.ingredients.types_placeholder'))
+                                            ->helperText(__('settings.ingredients.types_helper'))
+                                            ->required()
+                                            ->rows(3),
                                     ]),
                             ]),
                     ])
@@ -172,6 +197,8 @@ class SystemSettings extends Page implements HasForms
             'company_address' => 'company',
             'company_phone' => 'company',
             'company_email' => 'company',
+            'ingredient_units' => 'ingredients',
+            'ingredient_types' => 'ingredients',
         ];
 
         foreach ($settingsMap as $key => $group) {
@@ -192,8 +219,8 @@ class SystemSettings extends Page implements HasForms
 
         Notification::make()
             ->success()
-            ->title('Đã lưu cài đặt hệ thống!')
-            ->body('Các thay đổi sẽ được áp dụng ngay lập tức.')
+            ->title(__('settings.notifications.saved_title'))
+            ->body(__('settings.notifications.saved_body'))
             ->send();
 
         $this->redirect(filament()->getUrl());

@@ -116,16 +116,23 @@ class CreateSupplier extends Page
 
     protected function syncIngredients(Supplier $supplier): void
     {
+        $syncData = [];
         foreach ($this->selectedIngredients as $ingredientId => $selected) {
-            if (! $selected) {
-                continue;
+            if ($selected) {
+                $syncData[$ingredientId] = [
+                    'reference_price' => (float) ($this->ingredientCosts[$ingredientId] ?? 0),
+                ];
             }
+        }
+        $supplier->ingredients()->sync($syncData);
 
+        // Đồng bộ ngược cột supplier_id và reference_price ở bảng ingredients để tương thích ngược.
+        foreach ($syncData as $ingredientId => $pivotData) {
             Ingredient::query()
                 ->whereKey($ingredientId)
                 ->update([
                     'supplier_id' => $supplier->id,
-                    'reference_price' => (float) ($this->ingredientCosts[$ingredientId] ?? 0),
+                    'reference_price' => $pivotData['reference_price'],
                 ]);
         }
     }
