@@ -1,59 +1,92 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 📦 PM_XUATANKIEUMY - Hướng Dẫn Setup Dự Án
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Dự án quản lý suất ăn công nghiệp xây dựng trên nền tảng **Laravel 12** kết hợp hệ sinh thái quản trị **Filament v3**.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 🛠️ Công Nghệ Sử Dụng & Tài Liệu Tham Khảo
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+*   **Framework**: [Laravel 12 Documentation](https://laravel.com/docs)
+*   **Admin Panel**: [Filament PHP v3 Documentation](https://filamentphp.com/docs) (Hệ thống quản trị CRUD cực mạnh)
+*   **Frontend Interactivity**: [Livewire v3 Documentation](https://livewire.laravel.com/docs) & [Alpine.js](https://alpinejs.dev/docs)
+*   **CSS Utility**: [Tailwind CSS v4](https://tailwindcss.com/docs)
+*   **Realtime**: [Laravel Reverb](https://laravel.com/docs/reverb) (Phục vụ phân hệ Chat nhóm)
+*   **Asset Bundler**: [Vite](https://vite.dev/guide/)
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+---
 
-## Learning Laravel
+## 🚀 Hướng Dẫn Setup Dự Án Khi Clone Về Máy Mới
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+Vui lòng thực hiện theo thứ tự các bước dưới đây để thiết lập môi trường phát triển cục bộ:
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Bước 1: Tải mã nguồn về máy
+Mở Terminal và clone nhánh phát triển `quocnghi_dev` về máy:
+```bash
+git clone -b quocnghi_dev https://gitlab.citgroup.vn/xuat-an-chuan-my/xuat-an-chuan-my.git
+cd xuat-an-chuan-my
+```
 
-## Laravel Sponsors
+### Bước 2: Cài đặt các thư viện phụ thuộc (Dependencies)
+Cài đặt toàn bộ thư viện backend (PHP) và frontend (JS):
+```bash
+# 1. Cài đặt các package PHP của Laravel & Filament
+composer install
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+# 2. Cài đặt các package Javascript của Vite & Tailwind
+npm install
+```
 
-### Premium Partners
+### Bước 3: Thiết lập cấu hình môi trường (`.env`)
+Tạo tệp cấu hình môi trường cá nhân từ tệp mẫu:
+```bash
+# 1. Sao chép cấu hình mẫu
+cp .env.example .env
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+# 2. Khởi tạo mã khóa bảo mật của ứng dụng (App Key)
+php artisan key:generate
+```
+*Sau đó, hãy mở tệp `.env` vừa tạo và chỉnh sửa thông số kết nối cơ sở dữ liệu (`DB_DATABASE`, `DB_PORT`, `DB_USERNAME`, `DB_PASSWORD`) cho khớp với máy local của bạn.*
 
-## Contributing
+> [!NOTE]
+> Mặc định trong cấu hình mẫu sử dụng cổng MySQL là `3307` (`DB_PORT=3307`). Nếu máy của bạn dùng MySQL cổng mặc định `3306`, vui lòng sửa lại trong `.env`.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### Bước 4: Khởi tạo Cơ sở dữ liệu (Database)
+Tùy vào nhu cầu sử dụng dữ liệu, bạn chọn 1 trong 2 cách sau:
 
-## Code of Conduct
+*   **Cách A: Sử dụng lại CSDL mẫu đã sao lưu trong Repo (Khuyên dùng để có sẵn dữ liệu test)**:
+    Tạo một database trống trên MySQL (ví dụ: `pm_xuatankieumy`), sau đó chạy lệnh import file SQL có sẵn trong thư mục `database/`:
+    ```bash
+    mysql -u root -p pm_xuatankieumy < database/backup_pm_xuatankieumy.sql
+    ```
+*   **Cách B: Chạy CSDL mới tinh sạch sẽ từ Migration**:
+    Nếu bạn muốn tạo mới toàn bộ cấu trúc bảng và dữ liệu mẫu tự động:
+    ```bash
+    php artisan migrate:fresh --seed
+    ```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### Bước 5: Khởi tạo liên kết lưu trữ (Storage Link)
+*Đây là bước bắt buộc để hiển thị các tệp tải lên như Avatar nhân vật, hình ảnh nguyên liệu, file đính kèm...*
+```bash
+php artisan storage:link
+```
 
-## Security Vulnerabilities
+### Bước 6: Biên dịch Assets và Chạy ứng dụng
+```bash
+# 1. Biên dịch toàn bộ CSS/JS (bao gồm phần CSS tối ưu vừa gộp)
+npm run build
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+# 2. Khởi chạy máy chủ ảo Laravel
+php artisan serve
+```
+*(Nếu hệ thống cần dùng tính năng realtime/chat, chạy thêm lệnh: `php artisan reverb:start`)*
 
-## License
+---
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## 📐 Tiêu Chuẩn Viết Code (Coding Convention)
+Dự án sử dụng **Laravel Pint** để tự động chuẩn hóa định dạng code. Trước khi tạo PR commit, vui lòng chạy lệnh sau để tự động format lại code sạch:
+```bash
+vendor/bin/pint --format agent
+```
+
+---
+*Bản quyền phát triển thuộc về CIT Group.*
