@@ -1,322 +1,345 @@
-<style>
-    .btn-export-excel {
-        background-color: #16a34a !important; /* bg-green-600 */
-        color: #ffffff !important;
-        border: 1px solid #15803d !important;
-    }
-    .btn-export-excel:hover {
-        background-color: #15803d !important; /* bg-green-700 */
-    }
-    .btn-export-csv {
-        background-color: #f0fdf4 !important; /* bg-green-50 */
-        color: #15803d !important; /* text-green-700 */
-        border: 1px solid #dcfce7 !important; /* border-green-200 */
-    }
-    .btn-export-csv:hover {
-        background-color: #dcfce7 !important; /* bg-green-100 */
-    }
-    .dark .btn-export-csv {
-        background-color: rgba(22, 163, 74, 0.1) !important;
-        color: #4ade80 !important;
-        border-color: rgba(22, 163, 74, 0.2) !important;
-    }
-    .dark .btn-export-csv:hover {
-        background-color: rgba(22, 163, 74, 0.2) !important;
-    }
-</style>
+<div class="emp-page">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    @include('filament.resources.food-safety-audits.partials.styles')
 
-<x-filament-panels::page>
-    <div class="space-y-6">
-        <!-- Top filter and actions bar -->
-        <div class="p-6 bg-white rounded-xl border border-gray-150 shadow-sm dark:bg-gray-900 dark:border-gray-800">
-            <div class="flex flex-wrap items-center justify-between gap-6">
-                <!-- Date picker & navigation -->
-                <div class="flex flex-wrap items-center gap-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Ngày kiểm thực</label>
-                        <input type="date" wire:model.live="date" 
-                               class="rounded-lg border-gray-200 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white font-semibold text-sm">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Ca phục vụ</label>
-                        <select wire:model.live="selectedShift" 
-                                class="rounded-lg border-gray-200 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white text-sm font-semibold">
-                            <option value="">Tất cả ca</option>
-                            @foreach(\App\Models\Shift::all() as $s)
-                                <option value="{{ $s->id }}">{{ $s->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Cơ sở / Địa điểm</label>
-                        <select wire:model.live="canteen" 
-                                class="rounded-lg border-gray-200 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white text-sm font-semibold">
-                            @foreach(\App\Models\Area::all() as $area)
-                                <option value="{{ $area->name }}">{{ $area->name }}</option>
-                            @endforeach
-                            @foreach(\App\Models\Kitchen::all() as $kitchen)
-                                <option value="{{ $kitchen->name }}">{{ $kitchen->name }}</option>
-                            @endforeach
-                            <option value="Canteen Summit">Canteen Summit</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Người kiểm tra</label>
-                        <select wire:model.live="inspector" 
-                                class="rounded-lg border-gray-200 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white text-sm font-semibold">
-                            @foreach(\App\Models\Employee::all() as $emp)
-                                <option value="{{ $emp->name }}">{{ $emp->name }}</option>
-                            @endforeach
-                            <option value="Nguyễn Văn An">Nguyễn Văn An</option>
-                        </select>
-                    </div>
-                </div>
+    @php
+        $stats = $this->getStats();
+        $auditItems = $this->getAuditItems();
+    @endphp
 
-                <div class="flex items-center gap-3 mt-4 sm:mt-0">
-                    <button wire:click="exportExcel" class="px-4 py-2 text-sm font-semibold rounded-lg btn-export-excel flex items-center gap-2 shadow-sm active:scale-95 transition-all">
-                        📊 Xuất Excel (Biểu mẫu BYT)
-                    </button>
-                    <button wire:click="exportCSV" class="px-4 py-2 text-sm font-semibold rounded-lg btn-export-csv flex items-center gap-2 active:scale-95 transition-all">
-                        📥 Xuất CSV
-                    </button>
-                </div>
-            </div>
+    @if (session()->has('message'))
+        <div style="background:#ECFDF5; color:#065F46; padding:12px 16px; border-radius:8px; border:1px solid #A7F3D0; margin-bottom:16px; font-size:13px; font-weight:600; display:flex; align-items:center; gap:8px">
+            <i class="fa-solid fa-circle-check"></i>
+            {{ session('message') }}
         </div>
+    @endif
 
-        <!-- Steps Tabs -->
-        <div class="flex border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-2 rounded-xl border">
-            @foreach(['Bước 1', 'Bước 2', 'Bước 3', 'Lưu mẫu', 'Hủy mẫu'] as $step)
-                <button wire:click="$set('activeStep', '{{ $step }}')"
-                        class="flex-1 py-3 text-sm font-bold rounded-lg transition-all {{ $activeStep === $step ? 'text-white shadow-sm' : 'text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800' }}"
-                        style="{{ $activeStep === $step ? 'background-color: rgb(var(--primary-600)) !important; color: white !important;' : '' }}">
-                    {{ $step }}
-                </button>
-            @endforeach
+    <!-- Header Section -->
+    <div class="emp-head" style="margin-bottom: 14px;">
+        <div>
+            <h1 class="emp-title">Kiểm thực 3 bước</h1>
+            <p class="emp-subtitle">Tạo biểu mẫu kiểm thực theo ngày, lấy dữ liệu từ thực đơn đã lập và xuất Excel theo mẫu B1-B3</p>
         </div>
-
-        <!-- Stats Grid -->
-        @php $stats = $this->getStats(); @endphp
-        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <div class="flex items-center p-4 bg-white rounded-xl border border-gray-100 shadow-sm dark:bg-gray-900 dark:border-gray-800">
-                <div class="p-3 mr-4 text-blue-500 bg-blue-50 rounded-lg dark:bg-blue-900/20 text-xl font-bold">🥬</div>
-                <div>
-                    <p class="text-2xl font-extrabold text-gray-900 dark:text-white">{{ $stats['ingredients'] }}</p>
-                    <p class="text-xs font-semibold text-gray-500 dark:text-gray-400">Nguyên liệu (Từ thực đơn ngày)</p>
-                </div>
-            </div>
-
-            <div class="flex items-center p-4 bg-white rounded-xl border border-gray-100 shadow-sm dark:bg-gray-900 dark:border-gray-800">
-                <div class="p-3 mr-4 text-green-500 bg-green-50 rounded-lg dark:bg-green-900/20 text-xl font-bold">🍜</div>
-                <div>
-                    <p class="text-2xl font-extrabold text-gray-900 dark:text-white">{{ $stats['dishes'] }}</p>
-                    <p class="text-xs font-semibold text-gray-500 dark:text-gray-400">Món ăn phục vụ</p>
-                </div>
-            </div>
-
-            <div class="flex items-center p-4 bg-white rounded-xl border border-gray-100 shadow-sm dark:bg-gray-900 dark:border-gray-800">
-                <div class="p-3 mr-4 text-orange-500 bg-orange-50 rounded-lg dark:bg-orange-900/20 text-xl font-bold">👥</div>
-                <div>
-                    <p class="text-2xl font-extrabold text-gray-900 dark:text-white">{{ number_format($stats['portions']) }}</p>
-                    <p class="text-xs font-semibold text-gray-500 dark:text-gray-400">Tổng suất ăn dự kiến</p>
-                </div>
-            </div>
-
-            <div class="flex items-center p-4 bg-white rounded-xl border border-gray-100 shadow-sm dark:bg-gray-900 dark:border-gray-800">
-                <div class="p-3 mr-4 text-purple-500 bg-purple-50 rounded-lg dark:bg-purple-900/20 text-xl font-bold">📄</div>
-                <div>
-                    <p class="text-2xl font-extrabold text-gray-900 dark:text-white">{{ $stats['forms'] }}</p>
-                    <p class="text-xs font-semibold text-gray-500 dark:text-gray-400">Biểu mẫu kiểm thực (QĐ 1246)</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Official Ministry of Health Report View -->
-        <div class="bg-white rounded-xl border border-gray-150 shadow-sm dark:bg-gray-900 dark:border-gray-800 overflow-hidden">
-            <!-- Header Block -->
-            <div class="p-6 bg-gray-50 border-b border-gray-100 dark:bg-gray-800/30 dark:border-gray-800 text-center space-y-2">
-                <h3 class="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wide">
-                    CN NHƠN TRẠCH - CÔNG TY TNHH DỊCH VỤ CJ CATERING VIỆT NAM
-                </h3>
-                <p class="text-xs text-gray-500 dark:text-gray-400">
-                    ĐỊA CHỈ: TỔ 15, ẤP 2 XÃ LONG THỌ, HUYỆN NHƠN TRẠCH, TỈNH ĐỒNG NAI
-                </p>
-                <div class="flex justify-center gap-6 pt-2 text-xs font-semibold text-gray-700 dark:text-gray-300">
-                    <span>📍 ĐỊA ĐIỂM KIỂM TRA: <strong style="color: rgb(var(--primary-600)) !important;">{{ $canteen }}</strong></span>
-                    <span>👤 NGƯỜI KIỂM TRA: <strong style="color: rgb(var(--primary-600)) !important;">{{ $inspector }}</strong></span>
-                </div>
-                <div class="mt-4 inline-block px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider border"
-                     style="background-color: rgba(var(--primary-600), 0.1) !important; color: rgb(var(--primary-600)) !important; border-color: rgba(var(--primary-600), 0.2) !important;">
-                    {{ $activeStep }}: 
-                    @if($activeStep === 'Bước 1')
-                        KIỂM TRA TRƯỚC KHI CHẾ BIẾN THỨC ĂN (ĐẦU VÀO)
-                    @elseif($activeStep === 'Bước 2')
-                        KIỂM TRA TRONG QUÁ TRÌNH CHẾ BIẾN THỨC ĂN
-                    @elseif($activeStep === 'Bước 3')
-                        KIỂM TRA TRƯỚC KHI ĂN (BÀN GIAO / CHIA SUẤT)
-                    @elseif($activeStep === 'Lưu mẫu')
-                        THEO DÕI LƯU MẪU THỨC ĂN TRONG 24 GIỜ
-                    @elseif($activeStep === 'Hủy mẫu')
-                        THEO DÕI HỦY MẪU THỨC ĂN HẾT HẠN LƯU
-                    @endif
-                    — BAN HÀNH: QĐ 1246/2017-BYT
-                </div>
-            </div>
-
-            <!-- Dynamic Table Content -->
-            @php $auditItems = $this->getAuditItems(); @endphp
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse text-xs">
-                    <thead>
-                        <tr class="bg-gray-150/50 dark:bg-gray-800/80 text-gray-700 dark:text-gray-350 font-bold border-b border-gray-200 dark:border-gray-700">
-                            @if($activeStep === 'Bước 1')
-                                <th class="p-3 w-12 text-center border-r border-gray-200 dark:border-gray-700">TT</th>
-                                <th class="p-3 border-r border-gray-200 dark:border-gray-700">TÊN THỰC PHẨM</th>
-                                <th class="p-3 w-28 border-r border-gray-200 dark:border-gray-700 text-center">THỜI GIAN NHẬP</th>
-                                <th class="p-3 w-28 border-r border-gray-200 dark:border-gray-700 text-right">KHỐI LƯỢNG (KG)</th>
-                                <th class="p-3 border-r border-gray-200 dark:border-gray-700">NƠI CUNG CẤP THỰC PHẨM</th>
-                                <th class="p-3 w-32 border-r border-gray-200 dark:border-gray-700 text-center">CHỨNG TỪ, HÓA ĐƠN</th>
-                                <th class="p-3 w-24 border-r border-gray-200 dark:border-gray-700 text-center">ĐK VS THÚ Y</th>
-                                <th class="p-3 w-24 border-r border-gray-200 dark:border-gray-700 text-center">CẢM QUAN (Đ/K)</th>
-                                <th class="p-3 w-20 border-r border-gray-200 dark:border-gray-700 text-center">TEST NHANH</th>
-                                <th class="p-3">BIỆN PHÁP XỬ LÝ / GHI CHÚ</th>
-                            @elseif($activeStep === 'Bước 2')
-                                <th class="p-3 w-12 text-center border-r border-gray-200 dark:border-gray-700">TT</th>
-                                <th class="p-3 border-r border-gray-200 dark:border-gray-700">TÊN MÓN ĂN CHẾ BIẾN</th>
-                                <th class="p-3 w-28 border-r border-gray-200 dark:border-gray-700 text-center">GIỜ CHẾ BIẾN</th>
-                                <th class="p-3 w-24 border-r border-gray-200 dark:border-gray-700 text-center">CẢM QUAN (Đ/K)</th>
-                                <th class="p-3 w-28 border-r border-gray-200 dark:border-gray-700 text-center">NHIỆT ĐỘ TRUNG TÂM</th>
-                                <th class="p-3 border-r border-gray-200 dark:border-gray-700">NGƯỜI THỰC HIỆN</th>
-                                <th class="p-3 w-36 border-r border-gray-200 dark:border-gray-700">KHU VỰC BẾP NẤU</th>
-                                <th class="p-3">BIỆN PHÁP XỬ LÝ / GHI CHÚ</th>
-                            @elseif($activeStep === 'Bước 3')
-                                <th class="p-3 w-12 text-center border-r border-gray-200 dark:border-gray-700">TT</th>
-                                <th class="p-3 border-r border-gray-200 dark:border-gray-700">TÊN MÓN ĂN CHIA SUẤT</th>
-                                <th class="p-3 w-28 border-r border-gray-200 dark:border-gray-700 text-center">GIỜ CHIA SUẤT</th>
-                                <th class="p-3 w-24 border-r border-gray-200 dark:border-gray-700 text-center">CẢM QUAN (Đ/K)</th>
-                                <th class="p-3 w-32 border-r border-gray-200 dark:border-gray-700 text-center">LƯU MẪU THỨC ĂN</th>
-                                <th class="p-3 w-28 border-r border-gray-200 dark:border-gray-700 text-center">NHIỆT ĐỘ CHIA SUẤT</th>
-                                <th class="p-3">BIỆN PHÁP XỬ LÝ / GHI CHÚ</th>
-                            @elseif($activeStep === 'Lưu mẫu')
-                                <th class="p-3 w-12 text-center border-r border-gray-200 dark:border-gray-700">TT</th>
-                                <th class="p-3 border-r border-gray-200 dark:border-gray-700">TÊN MÓN ĂN LƯU MẪU</th>
-                                <th class="p-3 w-28 border-r border-gray-200 dark:border-gray-700 text-center">GIỜ LƯU MẪU</th>
-                                <th class="p-3 w-28 border-r border-gray-200 dark:border-gray-700 text-center">KHỐI LƯỢNG MẪU</th>
-                                <th class="p-3 w-40 border-r border-gray-200 dark:border-gray-700 text-center">MÃ SỐ MẪU LƯU</th>
-                                <th class="p-3 w-28 border-r border-gray-200 dark:border-gray-700 text-center">NHIỆT ĐỘ TỦ LƯU</th>
-                                <th class="p-3 border-r border-gray-200 dark:border-gray-700">NGƯỜI THỰC HIỆN LƯU</th>
-                                <th class="p-3">BIỆN PHÁP XỬ LÝ / GHI CHÚ</th>
-                            @elseif($activeStep === 'Hủy mẫu')
-                                <th class="p-3 w-12 text-center border-r border-gray-200 dark:border-gray-700">TT</th>
-                                <th class="p-3 border-r border-gray-200 dark:border-gray-700">TÊN MÓN ĂN HỦY MẪU</th>
-                                <th class="p-3 w-28 border-r border-gray-200 dark:border-gray-700 text-center">GIỜ HỦY MẪU</th>
-                                <th class="p-3 w-32 border-r border-gray-200 dark:border-gray-700 text-center">THỜI GIAN LƯU ĐỦ</th>
-                                <th class="p-3 w-36 border-r border-gray-200 dark:border-gray-700 text-center">TÌNH TRẠNG KHI HỦY</th>
-                                <th class="p-3 border-r border-gray-200 dark:border-gray-700">NGƯỜI HỦY MẪU</th>
-                                <th class="p-3">BIỆN PHÁP XỬ LÝ / GHI CHÚ</th>
-                            @endif
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-200 dark:divide-gray-800">
-                        @if(empty($auditItems))
-                            <tr>
-                                <td colspan="10" class="p-8 text-center text-gray-500 font-semibold italic">
-                                    Không tìm thấy dữ liệu thực đơn / nguyên liệu phù hợp với ngày và ca đã chọn để làm báo cáo kiểm thực.
-                                </td>
-                            </tr>
-                        @else
-                            @if($activeStep === 'Bước 1')
-                                <!-- Dynamic Step 1 Rows -->
-                                @foreach($auditItems as $index => $item)
-                                    <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-800/20">
-                                        <td class="p-3 text-center border-r border-gray-200 dark:border-gray-700 text-gray-400 font-semibold">{{ $index + 1 }}</td>
-                                        <td class="p-3 border-r border-gray-200 dark:border-gray-700 font-bold text-gray-900 dark:text-white">{{ $item['name'] }}</td>
-                                        <td class="p-3 text-center border-r border-gray-200 dark:border-gray-700">{{ $item['time'] }}</td>
-                                        <td class="p-3 text-right border-r border-gray-200 dark:border-gray-700 font-bold">
-                                            @if($item['unit'] === 'Quả' || $item['unit'] === 'Trái' || $item['unit'] === 'Cái')
-                                                {{ number_format($item['quantity'], 0) }} {{ $item['unit'] }}
-                                            @else
-                                                {{ number_format($item['quantity'] / 1000, 3, ',', '.') }} kg
-                                            @endif
-                                        </td>
-                                        <td class="p-3 border-r border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-450">{{ $item['supplier'] }}</td>
-                                        <td class="p-3 text-center border-r border-gray-200 dark:border-gray-700">{{ $item['invoice'] }}</td>
-                                        <td class="p-3 text-center border-r border-gray-200 dark:border-gray-700">
-                                            @if($item['vet_check'] === 'Đạt')
-                                                <span class="px-2 py-0.5 rounded bg-green-50 text-green-700 dark:bg-green-950/20 dark:text-green-400 text-xxs font-bold">Đạt</span>
-                                            @else
-                                                —
-                                            @endif
-                                        </td>
-                                        <td class="p-3 text-center border-r border-gray-200 dark:border-gray-700">
-                                            <span class="px-2 py-0.5 rounded bg-green-50 text-green-700 dark:bg-green-950/20 dark:text-green-400 text-xxs font-bold">Đạt</span>
-                                        </td>
-                                        <td class="p-3 text-center border-r border-gray-200 dark:border-gray-700">{{ $item['quick_test'] }}</td>
-                                        <td class="p-3 text-gray-500 italic">{{ $item['notes'] }}</td>
-                                    </tr>
-                                @endforeach
-                            @elseif($activeStep === 'Bước 2')
-                                <!-- Dynamic Step 2 Rows -->
-                                @foreach($auditItems as $index => $item)
-                                    <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-800/20">
-                                        <td class="p-3 text-center border-r border-gray-200 dark:border-gray-700 text-gray-400 font-semibold">{{ $index + 1 }}</td>
-                                        <td class="p-3 border-r border-gray-200 dark:border-gray-700 font-bold text-gray-900 dark:text-white">{{ $item['name'] }}</td>
-                                        <td class="p-3 text-center border-r border-gray-200 dark:border-gray-700">{{ $item['time'] }}</td>
-                                        <td class="p-3 text-center border-r border-gray-200 dark:border-gray-700">
-                                            <span class="px-2 py-0.5 rounded bg-green-50 text-green-700 dark:bg-green-950/20 dark:text-green-400 text-xxs font-bold">Đạt</span>
-                                        </td>
-                                        <td class="p-3 text-center border-r border-gray-200 dark:border-gray-700 font-bold text-emerald-600">{{ $item['temp'] }}</td>
-                                        <td class="p-3 border-r border-gray-200 dark:border-gray-700 font-medium">{{ $item['cook'] }}</td>
-                                        <td class="p-3 border-r border-gray-200 dark:border-gray-700 text-gray-500">{{ $item['kitchen'] }}</td>
-                                        <td class="p-3 text-gray-500 italic">{{ $item['notes'] }}</td>
-                                    </tr>
-                                @endforeach
-                            @elseif($activeStep === 'Bước 3')
-                                <!-- Dynamic Step 3 Rows -->
-                                @foreach($auditItems as $index => $item)
-                                    <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-800/20">
-                                        <td class="p-3 text-center border-r border-gray-200 dark:border-gray-700 text-gray-400 font-semibold">{{ $index + 1 }}</td>
-                                        <td class="p-3 border-r border-gray-200 dark:border-gray-700 font-bold text-gray-900 dark:text-white">{{ $item['name'] }}</td>
-                                        <td class="p-3 text-center border-r border-gray-200 dark:border-gray-700">{{ $item['time'] }}</td>
-                                        <td class="p-3 text-center border-r border-gray-200 dark:border-gray-700">
-                                            <span class="px-2 py-0.5 rounded bg-green-50 text-green-700 dark:bg-green-950/20 dark:text-green-400 text-xxs font-bold">Đạt</span>
-                                        </td>
-                                        <td class="p-3 text-center border-r border-gray-200 dark:border-gray-700 font-semibold dark:text-primary-400" style="color: rgb(var(--primary-600));">{{ $item['sample_kept'] }}</td>
-                                        <td class="p-3 text-center border-r border-gray-200 dark:border-gray-700 font-bold text-emerald-600">{{ $item['temp'] }}</td>
-                                        <td class="p-3 text-gray-500 italic">{{ $item['notes'] }}</td>
-                                    </tr>
-                                @endforeach
-                            @elseif($activeStep === 'Lưu mẫu')
-                                <!-- Dynamic Keep Samples Rows -->
-                                @foreach($auditItems as $index => $item)
-                                    <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-800/20">
-                                        <td class="p-3 text-center border-r border-gray-200 dark:border-gray-700 text-gray-400 font-semibold">{{ $index + 1 }}</td>
-                                        <td class="p-3 border-r border-gray-200 dark:border-gray-700 font-bold text-gray-900 dark:text-white">{{ $item['name'] }}</td>
-                                        <td class="p-3 text-center border-r border-gray-200 dark:border-gray-700">{{ $item['time'] }}</td>
-                                        <td class="p-3 text-center border-r border-gray-200 dark:border-gray-700 font-semibold">{{ $item['quantity'] }}</td>
-                                        <td class="p-3 text-center border-r border-gray-200 dark:border-gray-700 font-mono font-bold text-purple-600">{{ $item['sample_code'] }}</td>
-                                        <td class="p-3 text-center border-r border-gray-200 dark:border-gray-700 font-bold dark:text-primary-400" style="color: rgb(var(--primary-600));">{{ $item['temp'] }}</td>
-                                        <td class="p-3 border-r border-gray-200 dark:border-gray-700 font-medium">{{ $item['staff'] }}</td>
-                                        <td class="p-3 text-gray-500 italic">{{ $item['notes'] }}</td>
-                                    </tr>
-                                @endforeach
-                            @elseif($activeStep === 'Hủy mẫu')
-                                <!-- Dynamic Discard Samples Rows -->
-                                @foreach($auditItems as $index => $item)
-                                    <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-800/20">
-                                        <td class="p-3 text-center border-r border-gray-200 dark:border-gray-700 text-gray-400 font-semibold">{{ $index + 1 }}</td>
-                                        <td class="p-3 border-r border-gray-200 dark:border-gray-700 font-bold text-gray-900 dark:text-white">{{ $item['name'] }}</td>
-                                        <td class="p-3 text-center border-r border-gray-200 dark:border-gray-700">{{ $item['time'] }}</td>
-                                        <td class="p-3 text-center border-r border-gray-200 dark:border-gray-700 font-semibold text-gray-600">{{ $item['retention'] }}</td>
-                                        <td class="p-3 text-center border-r border-gray-200 dark:border-gray-700 font-bold text-green-600">{{ $item['status'] }}</td>
-                                        <td class="p-3 border-r border-gray-200 dark:border-gray-700 font-medium">{{ $item['staff'] }}</td>
-                                        <td class="p-3 text-gray-500 italic">{{ $item['notes'] }}</td>
-                                    </tr>
-                                @endforeach
-                            @endif
-                        @endif
-                    </tbody>
-                </table>
-            </div>
+        <div class="emp-actions">
+            <!-- Nút Tạo dữ liệu (Hủy mẫu / Reset) -->
+            <button wire:click="$set('date', '2026-05-18')" class="emp-btn emp-btn-danger">
+                <i class="fa-solid fa-ban"></i>
+                Hủy mẫu
+            </button>
+            <!-- Nút Xuất Excel (Lưu mẫu / Xuất toàn bộ) -->
+            <button wire:click="exportExcel" class="emp-btn emp-btn-primary">
+                <i class="fa-solid fa-floppy-disk"></i>
+                Lưu mẫu
+            </button>
         </div>
     </div>
-</x-filament-panels::page>
+
+    <!-- Filter Card -->
+    <div class="filter-card" style="margin-bottom: 16px;">
+        <div class="field" style="min-width:180px">
+            <label>Ngày kiểm thực</label>
+            <input type="date" wire:model.live="date" class="ctrl">
+        </div>
+        <div class="field" style="min-width:150px">
+            <label>Ca phục vụ</label>
+            <select wire:model.live="selectedShift" class="ctrl">
+                <option value="">Tất cả ca</option>
+                @foreach(\App\Models\Shift::all() as $s)
+                    <option value="{{ $s->id }}">{{ $s->name }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="field" style="min-width:200px">
+            <label>Cơ sở / địa điểm</label>
+            <input wire:model.live="canteen" class="ctrl" placeholder="Canteen Summit">
+        </div>
+        <div class="field" style="min-width:180px">
+            <label>Người kiểm tra</label>
+            <input wire:model.live="inspector" class="ctrl" placeholder="Nguyễn Văn An">
+        </div>
+        <div style="font-size:12.5px; color:var(--po-mu); padding-bottom:9px; font-weight:600">
+            {{ date('d/m/Y', strtotime($date)) }} · {{ $stats['dishes'] }} món · {{ $stats['ingredients'] }} nguyên liệu
+        </div>
+    </div>
+
+    <!-- Steps Tabs -->
+    <div class="area-tabs">
+        <button wire:click="$set('activeStep', 'Bước 1')" class="area-tab {{ $activeStep === 'Bước 1' ? 'active' : '' }}">
+            <i class="fa-solid fa-clipboard-check"></i> Bước 1
+        </button>
+        <button wire:click="$set('activeStep', 'Bước 2')" class="area-tab {{ $activeStep === 'Bước 2' ? 'active' : '' }}">
+            <i class="fa-solid fa-utensils"></i> Bước 2
+        </button>
+        <button wire:click="$set('activeStep', 'Bước 3')" class="area-tab {{ $activeStep === 'Bước 3' ? 'active' : '' }}">
+            <i class="fa-solid fa-users"></i> Bước 3
+        </button>
+        <button wire:click="$set('activeStep', 'Lưu mẫu')" class="area-tab {{ $activeStep === 'Lưu mẫu' ? 'active' : '' }}">
+            <i class="fa-solid fa-box-archive"></i> Lưu mẫu
+        </button>
+        <button wire:click="$set('activeStep', 'Hủy mẫu')" class="area-tab {{ $activeStep === 'Hủy mẫu' ? 'active' : '' }}">
+            <i class="fa-solid fa-ban"></i> Hủy mẫu
+        </button>
+        <div class="tsp"></div>
+        <button wire:click="exportCSV" class="emp-btn" style="height:36px">
+            <i class="fa-solid fa-file-excel" style="color:var(--po-gn)"></i> Xuất bước đang chọn
+        </button>
+    </div>
+
+    <!-- 4 KPIs Stats -->
+    <div class="krow" style="grid-template-columns:repeat(4,1fr); margin-bottom: 16px;">
+        <div class="kcard">
+            <div class="ktop"><div class="kico ki-b"><i class="fa-solid fa-seedling"></i></div></div>
+            <div class="kval">{{ $stats['ingredients'] }}</div>
+            <div class="klbl">Nguyên liệu B1</div>
+            <div class="knote">Từ món trong ngày</div>
+        </div>
+        <div class="kcard">
+            <div class="ktop"><div class="kico ki-g"><i class="fa-solid fa-bowl-food"></i></div></div>
+            <div class="kval">{{ $stats['dishes'] }}</div>
+            <div class="klbl">Món ăn</div>
+            <div class="knote">Phân theo ca</div>
+        </div>
+        <div class="kcard">
+            <div class="ktop"><div class="kico ki-o"><i class="fa-solid fa-users"></i></div></div>
+            <div class="kval">{{ number_format($stats['portions']) }}</div>
+            <div class="klbl">Tổng suất</div>
+            <div class="knote">Theo từng món</div>
+        </div>
+        <div class="kcard">
+            <div class="ktop"><div class="kico ki-p"><i class="fa-solid fa-file-excel"></i></div></div>
+            <div class="kval">{{ $stats['forms'] }}</div>
+            <div class="klbl">Biểu mẫu</div>
+            <div class="knote">B1 đến B5</div>
+        </div>
+    </div>
+
+    <!-- Dynamic Official Ministry of Health Report View -->
+    <div class="tcard">
+        <div class="tbar">
+            <div style="font-size:14px; font-weight:800; color:var(--po-tx)" id="ktStepTitle">
+                @if($activeStep === 'Bước 1')
+                    Bước 1: Kiểm tra trước khi chế biến thức ăn
+                @elseif($activeStep === 'Bước 2')
+                    Bước 2: Kiểm tra khi chế biến món ăn
+                @elseif($activeStep === 'Bước 3')
+                    Bước 3: Kiểm tra trước khi ăn
+                @elseif($activeStep === 'Lưu mẫu')
+                    Lưu mẫu: Theo dõi lưu thức ăn lưu trong 24 giờ
+                @elseif($activeStep === 'Hủy mẫu')
+                    Hủy mẫu: Theo dõi hủy thức ăn lưu hết hạn
+                @endif
+            </div>
+            <div style="font-size:12.5px; color:var(--po-mu)" id="ktStepSub">
+                @if($activeStep === 'Bước 1')
+                    Danh sách nguyên liệu trong ngày theo mẫu B1
+                @elseif($activeStep === 'Bước 2')
+                    Danh sách món ăn phân theo ca và nguyên liệu chính
+                @elseif($activeStep === 'Bước 3')
+                    Món ăn, số suất, dụng cụ và cảm quan trước khi phục vụ
+                @elseif($activeStep === 'Lưu mẫu')
+                    Theo dõi lưu mẫu thức ăn ca chính / ca trưa
+                @elseif($activeStep === 'Hủy mẫu')
+                    Theo dõi hủy mẫu thức ăn các ca còn lại
+                @endif
+            </div>
+        </div>
+
+        <div class="tw" style="padding: 16px;">
+            <table class="byt-table">
+                <thead>
+                    <!-- Hàng tiêu đề chung chuẩn Bộ Y tế -->
+                    <tr>
+                        <th colspan="{{ $activeStep === 'Bước 1' ? 10 : ($activeStep === 'Bước 2' ? 8 : ($activeStep === 'Bước 3' ? 7 : 8)) }}" style="background:#F8FAFC; text-align:center; padding:12px">
+                            <div style="font-size:13px; font-weight:800; color:var(--po-tx)">
+                                CN NHƠN TRẠCH - CÔNG TY TNHH DỊCH VỤ CJ CATERING VIỆT NAM
+                            </div>
+                            <div style="font-size:11px; font-weight:600; color:var(--po-mu); margin-top:2px">
+                                ĐỊA CHỈ: TỔ 15, ẤP 2 XÃ LONG THỌ, HUYỆN NHƠN TRẠCH, TỈNH ĐỒNG NAI
+                            </div>
+                        </th>
+                    </tr>
+                    <tr>
+                        <th colspan="{{ $activeStep === 'Bước 1' ? 4 : ($activeStep === 'Bước 2' ? 3 : ($activeStep === 'Bước 3' ? 3 : 3)) }}" style="text-align:left; background:#fff; font-weight:700">
+                            📍 ĐỊA ĐIỂM KIỂM TRA: {{ $canteen }}
+                        </th>
+                        <th colspan="{{ $activeStep === 'Bước 1' ? 6 : ($activeStep === 'Bước 2' ? 5 : ($activeStep === 'Bước 3' ? 4 : 5)) }}" style="text-align:right; background:#fff; font-weight:700">
+                            👤 NGƯỜI KIỂM TRA: {{ $inspector }}
+                        </th>
+                    </tr>
+                    
+                    <!-- Hàng tiêu đề cột cột chính -->
+                    <tr style="text-transform:uppercase; font-size:11.5px">
+                        @if($activeStep === 'Bước 1')
+                            <th style="width:50px">TT</th>
+                            <th>Tên thực phẩm</th>
+                            <th style="width:110px">Thời gian nhập</th>
+                            <th style="width:110px" class="text-right">Khối lượng (Kg)</th>
+                            <th>Nơi cung cấp thực phẩm</th>
+                            <th style="width:140px">Chứng từ, hóa đơn</th>
+                            <th style="width:110px">Giấy ĐK VS Thú Y</th>
+                            <th style="width:110px">Cảm quan (Đ/K)</th>
+                            <th style="width:100px">Test nhanh</th>
+                            <th>Biện pháp xử lý / Ghi chú</th>
+                        @elseif($activeStep === 'Bước 2')
+                            <th style="width:50px">TT</th>
+                            <th>Tên món ăn chế biến</th>
+                            <th style="width:140px">Giờ chế biến</th>
+                            <th style="width:110px">Cảm quan (Đ/K)</th>
+                            <th style="width:140px">Nhiệt độ trung tâm</th>
+                            <th>Người thực hiện</th>
+                            <th style="width:160px">Khu vực bếp nấu</th>
+                            <th>Biện pháp xử lý / Ghi chú</th>
+                        @elseif($activeStep === 'Bước 3')
+                            <th style="width:50px">TT</th>
+                            <th>Tên món ăn chia suất</th>
+                            <th style="width:140px">Giờ chia suất</th>
+                            <th style="width:110px">Cảm quan (Đ/K)</th>
+                            <th style="width:160px">Lưu mẫu thức ăn</th>
+                            <th style="width:140px">Nhiệt độ chia suất</th>
+                            <th>Biện pháp xử lý / Ghi chú</th>
+                        @elseif($activeStep === 'Lưu mẫu')
+                            <th style="width:50px">TT</th>
+                            <th>Tên món ăn lưu mẫu</th>
+                            <th style="width:130px">Giờ lưu mẫu</th>
+                            <th style="width:130px">Khối lượng mẫu</th>
+                            <th style="width:150px">Mã số mẫu lưu</th>
+                            <th style="width:130px">Nhiệt độ tủ lưu</th>
+                            <th>Người thực hiện lưu</th>
+                            <th>Biện pháp xử lý / Ghi chú</th>
+                        @elseif($activeStep === 'Hủy mẫu')
+                            <th style="width:50px">TT</th>
+                            <th>Tên món ăn hủy mẫu</th>
+                            <th style="width:140px">Giờ hủy mẫu</th>
+                            <th style="width:140px">Thời gian lưu đủ</th>
+                            <th style="width:160px">Tình trạng khi hủy</th>
+                            <th>Người hủy mẫu</th>
+                            <th>Biện pháp xử lý / Ghi chú</th>
+                        @endif
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($auditItems as $index => $item)
+                        @if($activeStep === 'Bước 1')
+                            <!-- Step 1 Rows -->
+                            @if(isset($item['loai']) && str_starts_with($item['name'], 'I.'))
+                                <tr>
+                                    <td colspan="10" class="byt-group-title">{{ $item['name'] }}</td>
+                                </tr>
+                            @else
+                                <tr class="emp-row">
+                                    <td class="text-center font-bold" style="color:var(--po-mu)">{{ $index + 1 }}</td>
+                                    <td class="font-bold">{{ $item['name'] }}</td>
+                                    <td class="text-center">{{ $item['time'] ?? '05:00' }}</td>
+                                    <td class="text-right font-bold" style="color:var(--po-bl)">
+                                        @if(isset($item['unit']) && ($item['unit'] === 'Quả' || $item['unit'] === 'Trái' || $item['unit'] === 'Cái'))
+                                            {{ number_format($item['quantity'], 0) }} {{ $item['unit'] }}
+                                        @else
+                                            {{ number_format(($item['quantity'] ?? 0) / 1000, 2, ',', '.') }} kg
+                                        @endif
+                                    </td>
+                                    <td>{{ $item['supplier'] ?? 'Cơ sở tự do' }}</td>
+                                    <td class="text-center">{{ $item['invoice'] ?? '—' }}</td>
+                                    <td class="text-center">
+                                        @if(($item['vet_check'] ?? '') === 'Đạt')
+                                            <span class="px-2 py-0.5 rounded bg-green-50 text-green-700 font-bold" style="font-size:11px">Đạt</span>
+                                        @else
+                                            —
+                                        @endif
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="px-2 py-0.5 rounded bg-green-50 text-green-700 font-bold" style="font-size:11px">Đạt</span>
+                                    </td>
+                                    <td class="text-center">{{ $item['quick_test'] ?? '—' }}</td>
+                                    <td style="color:var(--po-mu); font-style:italic">{{ $item['notes'] ?? 'Cảm quan tốt, sạch sẽ' }}</td>
+                                </tr>
+                            @endif
+                        @elseif($activeStep === 'Bước 2')
+                            <!-- Step 2 Rows -->
+                            <tr class="emp-row">
+                                <td class="text-center font-bold" style="color:var(--po-mu)">{{ $index + 1 }}</td>
+                                <td class="font-bold">{{ $item['name'] }}</td>
+                                <td class="text-center">{{ $item['time'] ?: '07:00 - 09:30' }}</td>
+                                <td class="text-center">
+                                    <span class="px-2 py-0.5 rounded bg-green-50 text-green-700 font-bold" style="font-size:11px">Đạt</span>
+                                </td>
+                                <td class="text-center font-bold" style="color:var(--po-gn)">{{ $item['temp'] ?: '75°C' }}</td>
+                                <td class="font-bold">{{ $item['cook'] ?: 'Lê Hoàng Cường' }}</td>
+                                <td>{{ $item['kitchen'] ?: 'Bếp nấu chính' }}</td>
+                                <td style="color:var(--po-mu); font-style:italic">{{ $item['notes'] ?: 'Chín đều, đạt màu sắc' }}</td>
+                            </tr>
+                        @elseif($activeStep === 'Bước 3')
+                            <!-- Step 3 Rows -->
+                            <tr class="emp-row">
+                                <td class="text-center font-bold" style="color:var(--po-mu)">{{ $index + 1 }}</td>
+                                <td class="font-bold">{{ $item['name'] }}</td>
+                                <td class="text-center">{{ $item['time'] ?: '10:30 - 11:00' }}</td>
+                                <td class="text-center">
+                                    <span class="px-2 py-0.5 rounded bg-green-50 text-green-700 font-bold" style="font-size:11px">Đạt</span>
+                                </td>
+                                <td class="text-center font-bold" style="color:var(--po-bl)">{{ $item['sample_kept'] ?: 'Có lưu mẫu' }}</td>
+                                <td class="text-center font-bold" style="color:var(--po-gn)">{{ $item['temp'] ?: '65°C' }}</td>
+                                <td style="color:var(--po-mu); font-style:italic">{{ $item['notes'] ?: 'Nóng sốt, khay sạch' }}</td>
+                            </tr>
+                        @elseif($activeStep === 'Lưu mẫu')
+                            <!-- Keep Sample Rows -->
+                            <tr class="emp-row">
+                                <td class="text-center font-bold" style="color:var(--po-mu)">{{ $index + 1 }}</td>
+                                <td class="font-bold">{{ $item['name'] }}</td>
+                                <td class="text-center">{{ $item['time'] ?: '10:30' }}</td>
+                                <td class="text-center font-bold">{{ $item['quantity'] ?: '150g' }}</td>
+                                <td class="text-center font-mono font-bold" style="color:var(--po-pu)">{{ $item['sample_code'] ?: 'M-20260518-01' }}</td>
+                                <td class="text-center font-bold" style="color:var(--po-gn)">{{ $item['temp'] ?: '2-8°C' }}</td>
+                                <td class="font-bold">{{ $item['staff'] ?: 'Lê Hoàng Cường' }}</td>
+                                <td style="color:var(--po-mu); font-style:italic">{{ $item['notes'] ?: 'Hộp inox tiệt trùng' }}</td>
+                            </tr>
+                        @elseif($activeStep === 'Hủy mẫu')
+                            <!-- Discard Sample Rows -->
+                            <tr class="emp-row">
+                                <td class="text-center font-bold" style="color:var(--po-mu)">{{ $index + 1 }}</td>
+                                <td class="font-bold">{{ $item['name'] }}</td>
+                                <td class="text-center">{{ $item['time'] ?: '10:30' }}</td>
+                                <td class="text-center">{{ $item['retention'] ?: '24 giờ' }}</td>
+                                <td class="text-center font-bold" style="color:var(--po-gn)">{{ $item['status'] ?: 'Bình thường' }}</td>
+                                <td class="font-bold">{{ $item['staff'] ?: 'Lê Hoàng Cường' }}</td>
+                                <td style="color:var(--po-mu); font-style:italic">{{ $item['notes'] ?: 'Không mùi vị lạ, tiêu hủy' }}</td>
+                            </tr>
+                        @endif
+                    @empty
+                        <tr>
+                            <td colspan="{{ $activeStep === 'Bước 1' ? 10 : ($activeStep === 'Bước 2' ? 8 : ($activeStep === 'Bước 3' ? 7 : 8)) }}" style="padding:40px; text-align:center; color:var(--po-mu); font-style:italic">
+                                Không tìm thấy dữ liệu kiểm thực phù hợp.
+                            </td>
+                        </tr>
+                    @endforelse
+
+                    <!-- Chữ ký xác nhận chân bảng theo biểu mẫu B1 -->
+                    @if($activeStep === 'Bước 1' && !empty($auditItems))
+                        <tr class="byt-sign-title">
+                            <td colspan="4" style="text-align:left; border-top:1.5px solid #94A3B8; padding:8px 10px">
+                                <strong>GHI CHÚ:</strong>
+                            </td>
+                            <td colspan="3" style="text-align:center; border-top:1.5px solid #94A3B8; padding:8px 10px">
+                                <strong>Đại diện nhà ăn</strong>
+                            </td>
+                            <td colspan="3" style="text-align:center; border-top:1.5px solid #94A3B8; padding:8px 10px">
+                                <strong>Người kiểm tra</strong>
+                            </td>
+                        </tr>
+                        <tr class="byt-sign-text">
+                            <td colspan="4" style="text-align:left; padding:4px 10px">Đ: Đạt</td>
+                            <td colspan="3" style="text-align:center; padding:4px 10px">—</td>
+                            <td colspan="3" style="text-align:center; font-weight:700; color:var(--po-tx); padding:4px 10px">
+                                {{ $inspector }}
+                            </td>
+                        </tr>
+                        <tr class="byt-sign-text">
+                            <td colspan="4" style="text-align:left; padding:4px 10px">K: Không đạt</td>
+                            <td colspan="3" style="text-align:center; padding:4px 10px">—</td>
+                            <td colspan="3" style="text-align:center; padding:4px 10px">—</td>
+                        </tr>
+                    @endif
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

@@ -1,527 +1,474 @@
-@push('styles')
+<div class="emp-page">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
 <style>
-        .report-header-container {
-            display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
-            margin-bottom: 1rem;
-            flex-wrap: wrap;
-            gap: 0.75rem;
-        }
-        .report-title {
-            font-size: 1.25rem;
-            font-weight: 800;
-            margin: 0 0 0.25rem;
-            color: #0f172a;
-        }
-        .dark .report-title {
-            color: #ffffff;
-        }
-        .report-subtitle {
-            font-size: 0.78rem;
-            color: #64748b;
-            margin: 0;
-        }
-        .dark .report-subtitle {
-            color: #94a3b8;
-        }
-        .excel-btn {
-            height: 36px;
-            padding: 0 14px;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            background: #ffffff;
-            cursor: pointer;
-            font-size: 0.8125rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 0.375rem;
-            color: #0f172a;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-            transition: all 0.2s;
-        }
-        .excel-btn:hover {
-            background: #f8fafc;
-            border-color: #cbd5e1;
-        }
-        .dark .excel-btn {
-            background: #1e293b;
-            border-color: #334155;
-            color: #f8fafc;
-        }
-        .dark .excel-btn:hover {
-            background: #334155;
-        }
+    :root {
+        --po-bl: #1267E8;
+        --po-bl-d: #0C50BB;
+        --po-bl-s: #EBF3FF;
+        --po-bl-m: #BFDBFE;
+        --po-gn: #059669;
+        --po-gn-s: #ECFDF5;
+        --po-gn-t: #065F46;
+        --po-or: #EA580C;
+        --po-or-s: #FFF7ED;
+        --po-or-t: #9A3412;
+        --po-rd: #DC2626;
+        --po-rd-s: #FEF2F2;
+        --po-rd-t: #991B1B;
+        --po-pu: #7C3AED;
+        --po-pu-s: #F5F3FF;
+        --po-bg: #F4F7FB;
+        --po-bd: #E2E8F0;
+        --po-bd2: #F1F5F9;
+        --po-tx: #0F172A;
+        --po-su: #334155;
+        --po-mu: #64748B;
+        --po-fa: #94A3B8;
+        --po-wh: #fff;
+        --po-sh: 0 1px 3px rgba(15,23,42,.05), 0 4px 16px rgba(15,23,42,.05);
+        --po-sh2: 0 1px 2px rgba(15,23,42,.04);
+        --po-r: 12px;
+    }
 
-        /* Filter bar */
-        .filter-bar {
-            display: flex;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
-            border-radius: 14px;
-            padding: 13px 18px;
-            box-shadow: 0 1px 2px rgba(15,23,42,0.04);
-        }
-        .dark .filter-bar {
-            background: #0f172a;
-            border-color: #1e293b;
-        }
-        .filter-item {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 0.78rem;
-            color: #64748b;
-        }
-        .dark .filter-item {
-            color: #94a3b8;
-        }
-        .date-input {
-            height: 40px;
-            border: 1.5px solid #bfdbfe;
-            border-radius: 9px;
-            padding: 0 12px;
-            font-size: 14px;
-            font-weight: 700;
-            color: #1267e8;
-            background: #ebf3ff;
-            cursor: pointer;
-            outline: none;
-            transition: .13s;
-        }
-        .date-input:focus {
-            box-shadow: 0 0 0 3px rgba(18,103,232,.1);
-        }
-        .dark .date-input {
-            border-color: #1e3a8a;
-            background: #172554;
-            color: #93c5fd;
-        }
-        .week-btn {
-            height: 34px;
-            padding: 0 14px;
-            background: rgba(var(--primary-500), 0.1);
-            color: rgb(var(--primary-600));
-            border: 1px solid rgb(var(--primary-600));
-            border-radius: 8px;
-            font-size: 12.5px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: .13s;
-            flex-shrink: 0;
-        }
-        .week-btn:hover {
-            background: rgb(var(--primary-600));
-            color: #ffffff;
-        }
-        .dark .week-btn {
-            background: rgba(var(--primary-500), 0.15);
-            color: rgb(var(--primary-300));
-            border-color: rgb(var(--primary-600));
-        }
-        .dark .week-btn:hover {
-            background: rgb(var(--primary-600));
-            color: #ffffff;
-        }
+    .emp-page {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        color: var(--po-tx);
+    }
 
-        .shifts-group {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 4px 10px;
-            font-size: 12px;
-        }
-        .dark .shifts-group {
-            background: #1e293b;
-            border-color: #334155;
-        }
-        .shift-checkbox-label {
-            display: flex;
-            align-items: center;
-            gap: 3px;
-            border-radius: 20px;
-            padding: 2px 8px;
-            font-size: 11.5px;
-            font-weight: 600;
-            cursor: pointer;
-            border: 1px solid transparent;
-            user-select: none;
-        }
-        .shift-ca1 { background: #eff6ff; color: #1e40af; border-color: #bfdbfe; }
-        .shift-ca2 { background: #f0fdf4; color: #065f46; border-color: #a7f3d0; }
-        .shift-ca3 { background: #fef3c7; color: #78350f; border-color: #fde68a; }
-        .shift-ca4 { background: #f5f3ff; color: #4c1d95; border-color: #ddd6fe; }
+    .report-header-container {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        margin-bottom: 14px;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
 
-        .search-container {
-            position: relative;
-            max-width: 280px;
-            min-width: 220px;
-            margin-left: auto;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            background: #ffffff;
-            padding: 0 12px;
-            height: 36px;
-            flex: 1;
-            transition: .13s;
-        }
-        .search-container:focus-within {
-            border-color: #93c5fd;
-        }
-        .dark .search-container {
-            border-color: #334155;
-            background: #1e293b;
-        }
-        .search-container input {
-            border: none;
-            outline: none;
-            background: transparent;
-            font-size: 13px;
-            width: 100%;
-            color: #0f172a;
-        }
-        .dark .search-container input {
-            color: #ffffff;
-        }
-        .search-icon {
-            color: #94a3b8;
-            font-size: 12px;
-            flex-shrink: 0;
-        }
+    .report-title {
+        font-size: 20px;
+        font-weight: 800;
+        color: var(--po-tx);
+        letter-spacing: -.02em;
+    }
 
-        /* Chips / Stats cards */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-            margin-top: 16px;
-            margin-bottom: 14px;
-        }
-        @media (max-width: 768px) {
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-        .stat-card {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
-            border-radius: 10px;
-            padding: 10px 14px;
-            box-shadow: 0 1px 2px rgba(15,23,42,0.04);
-            transition: .13s;
-        }
-        .stat-card:hover {
-            border-color: #bfdbfe;
-            transform: translateY(-1px);
-        }
-        .dark .stat-card {
-            background: #0f172a;
-            border-color: #1e293b;
-        }
-        .stat-icon {
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
-            display: grid;
-            place-items: center;
-            font-size: 14px;
-            flex-shrink: 0;
-        }
-        .stat-val {
-            font-size: 18px;
-            font-weight: 800;
-            color: #0f172a;
-            line-height: 1;
-        }
-        .dark .stat-val {
-            color: #ffffff;
-        }
-        .stat-lbl {
-            font-size: 11px;
-            color: #64748b;
-            margin-top: 2px;
-        }
-        .dark .stat-lbl {
-            color: #94a3b8;
-        }
+    .report-subtitle {
+        font-size: 13px;
+        color: var(--po-mu);
+        margin-top: 2px;
+    }
 
-        /* Day block */
-        .day-card {
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
-            border-radius: 14px;
-            overflow: hidden;
-            margin-bottom: 14px;
-            box-shadow: 0 1px 2px rgba(15,23,42,0.04);
-        }
-        .dark .day-card {
-            background: #0f172a;
-            border-color: #1e293b;
-        }
-        .day-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 12px 16px;
-            background: linear-gradient(135deg,#eff6ff,#dbeafe);
-            border-bottom: 1px solid #bfdbfe;
-        }
-        .dark .day-header {
-            background: linear-gradient(135deg,#172554,#1e3a8a);
-            border-color: #1e3a8a;
-        }
-        .day-title {
-            font-size: 14px;
-            font-weight: 700;
-            color: #1e40af;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .dark .day-title {
-            color: #93c5fd;
-        }
-        .day-badge {
-            font-size: 11.5px;
-            background: #1267e8;
-            color: #ffffff;
-            border-radius: 6px;
-            padding: 2px 9px;
-            font-weight: 700;
-            margin-left: 8px;
-        }
+    .excel-btn {
+        height: 38px;
+        padding: 0 16px;
+        border: 1px solid var(--po-bd);
+        border-radius: 8px;
+        background: #ffffff;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: var(--po-su);
+        transition: .13s;
+    }
 
-        /* Ca sections */
-        .shift-section {
-            padding: 14px 16px;
-            border-bottom: 1px solid #f1f5f9;
-        }
-        .shift-section:last-child {
-            border-bottom: none;
-        }
-        .dark .shift-section {
-            border-color: #1e293b;
-        }
-        .shift-header {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 10px;
-        }
-        .shift-badge {
-            border-radius: 8px;
-            padding: 3px 10px;
-            font-size: 12px;
-            font-weight: 700;
-            border: 1px solid;
-        }
-        .shift-count-badge {
-            font-size: 12.5px;
-            color: #64748b;
-            font-weight: 400;
-        }
-        .dark .shift-count-badge {
-            color: #94a3b8;
-        }
+    .excel-btn:hover {
+        background: var(--po-bg);
+        border-color: #CBD5E1;
+    }
 
-        /* Dish block */
-        .dish-card {
-            border: 1px solid #e2e8f0;
-            border-radius: 10px;
-            margin-bottom: 10px;
-            overflow: hidden;
-            background: #ffffff;
-        }
-        .dark .dish-card {
-            border-color: #1e293b;
-            background: #1e293b/20;
-        }
-        .dish-head {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0.625rem 0.875rem;
-            background: #f8fafc;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-        }
-        .dark .dish-head {
-            background: #1e293b/60;
-        }
-        .dish-title-block {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        .dish-name {
-            font-weight: 700;
-            color: #0f172a;
-            font-size: 0.875rem;
-        }
-        .dark .dish-name {
-            color: #ffffff;
-        }
-        .dish-type-badge {
-            font-size: 0.68rem;
-            color: #64748b;
-            background: #f1f5f9;
-            border-radius: 6px;
-            padding: 0.125rem 0.5rem;
-            font-weight: 600;
-        }
-        .dark .dish-type-badge {
-            color: #cbd5e1;
-            background: #334155;
-        }
-        .dish-portions-block {
-            display: flex;
-            gap: 0.375rem;
-        }
-        .dish-portions-badge {
-            font-size: 11.5px;
-            font-weight: 700;
-            color: #1267e8;
-            background: #ebf3ff;
-            border-radius: 6px;
-            padding: 2px 9px;
-            border: none;
-        }
-        .dark .dish-portions-badge {
-            color: #60a5fa;
-            background: #1e3a8a/30;
-            border-color: #1e3a8a;
-        }
-        .dish-portions-phan {
-            font-size: 11.5px;
-            font-weight: 700;
-            color: #059669;
-            background: #ecfdf5;
-            border-radius: 6px;
-            padding: 2px 9px;
-            border: none;
-        }
-        .dark .dish-portions-phan {
-            color: #4ade80;
-            background: #14532d/30;
-            border-color: #14532d;
-        }
+    /* Filter bar */
+    .filter-bar {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        background: #ffffff;
+        border: 1px solid var(--po-bd);
+        border-radius: 14px;
+        padding: 12px 16px;
+        box-shadow: var(--po-sh2);
+    }
 
-        /* Ingredients table */
-        .ing-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        .ing-table th {
-            padding: 8px 12px;
-            text-align: left;
-            font-size: 10.5px;
-            font-weight: 700;
-            color: #94a3b8;
-            text-transform: uppercase;
-            letter-spacing: 0.07em;
-            background: #f8fafc;
-            border-bottom: 1px solid #e2e8f0;
-            white-space: nowrap;
-        }
-        .dark .ing-table th {
-            background: #1e293b;
-            color: #94a3b8;
-            border-color: #334155;
-        }
-        .ing-table td {
-            padding: 9px 12px;
-            font-size: 12.5px;
-            border-bottom: 1px solid #f1f5f9;
-            color: #334155;
-            vertical-align: middle;
-        }
-        .dark .ing-table td {
-            border-color: #1e293b;
-            color: #cbd5e1;
-        }
-        .ing-table tr:last-child td {
-            border-bottom: none;
-        }
-        .ing-table tbody tr:hover {
-            background: #fafcff;
-        }
-        .dark .ing-table tbody tr:hover {
-            background: #1e293b;
-        }
-        .ing-num {
-            width: 36px;
-            text-align: center;
-            color: #64748b;
-            font-weight: 600;
-        }
-        .ing-code-badge {
-            font-size: 12px;
-            font-weight: 600;
-            color: #64748b;
-            background: none;
-            border: none;
-            padding: 0;
-        }
-        .dark .ing-code-badge {
-            color: #94a3b8;
-        }
-        .ing-name {
-            font-weight: 500;
-            color: #0f172a;
-        }
-        .dark .ing-name {
-            color: #ffffff;
-        }
-        .ing-kg-val {
-            font-weight: 700;
-            color: #0f172a;
-        }
-        .dark .ing-kg-val {
-            color: #ffffff;
-        }
-        .empty-state {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 60px 20px;
-            text-align: center;
-            color: #94a3b8;
-        }
-        .dark .empty-state {
-            color: #94a3b8;
-        }
-        .empty-state h3 {
-            font-size: 16px;
-            font-weight: 700;
-            color: #334155;
-            margin-top: 14px;
-            margin-bottom: 6px;
-        }
-        .dark .empty-state h3 {
-            color: #cbd5e1;
-        }
-        .empty-state p {
-            font-size: 13px;
-            color: #64748b;
-        }
+    .filter-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+        color: var(--po-mu);
+    }
+
+    .date-input {
+        height: 36px;
+        border: 1.5px solid #bfdbfe;
+        border-radius: 8px;
+        padding: 0 12px;
+        font-size: 13px;
+        font-weight: 700;
+        color: #1267e8;
+        background: #ebf3ff;
+        cursor: pointer;
+        outline: none;
+        transition: .13s;
+    }
+
+    .date-input:focus {
+        border-color: #93c5fd;
+    }
+
+    .week-btn {
+        height: 36px;
+        padding: 0 14px;
+        background: #ebf3ff;
+        color: #1267e8;
+        border: 1.5px solid #bfdbfe;
+        border-radius: 8px;
+        font-size: 12.5px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: .13s;
+        flex-shrink: 0;
+    }
+
+    .week-btn:hover {
+        background: #1267e8;
+        color: #ffffff;
+        border-color: #1267e8;
+    }
+
+    .shifts-group {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        background: #f8fafc;
+        border: 1px solid var(--po-bd);
+        border-radius: 8px;
+        padding: 4px 10px;
+        font-size: 12px;
+    }
+
+    .shift-checkbox-label {
+        display: flex;
+        align-items: center;
+        gap: 3px;
+        border-radius: 20px;
+        padding: 2px 8px;
+        font-size: 11.5px;
+        font-weight: 600;
+        cursor: pointer;
+        border: 1px solid transparent;
+        user-select: none;
+    }
+
+    .shift-ca1 { background: #eff6ff; color: #1e40af; border-color: #bfdbfe; }
+    .shift-ca2 { background: #f0fdf4; color: #065f46; border-color: #a7f3d0; }
+    .shift-ca3 { background: #fef3c7; color: #78350f; border-color: #fde68a; }
+    .shift-ca4 { background: #f5f3ff; color: #4c1d95; border-color: #ddd6fe; }
+
+    .search-container {
+        position: relative;
+        max-width: 280px;
+        min-width: 220px;
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border: 1px solid var(--po-bd);
+        border-radius: 8px;
+        background: #ffffff;
+        padding: 0 12px;
+        height: 36px;
+        flex: 1;
+        transition: .13s;
+    }
+
+    .search-container:focus-within {
+        border-color: #93c5fd;
+    }
+
+    .search-container input {
+        border: none;
+        outline: none;
+        background: transparent;
+        font-size: 13px;
+        width: 100%;
+        color: var(--po-tx);
+        box-shadow: none !important;
+        padding: 0;
+    }
+
+    .search-icon {
+        color: var(--po-fa);
+        font-size: 12px;
+        flex-shrink: 0;
+    }
+
+    /* Stats Cards */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+        margin-top: 14px;
+        margin-bottom: 14px;
+    }
+
+    .stat-card {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: #ffffff;
+        border: 1px solid var(--po-bd);
+        border-radius: var(--po-r);
+        padding: 14px 16px;
+        box-shadow: var(--po-sh2);
+        transition: .13s;
+    }
+
+    .stat-card:hover {
+        border-color: #bfdbfe;
+    }
+
+    .stat-icon {
+        width: 38px;
+        height: 38px;
+        border-radius: 9px;
+        display: grid;
+        place-items: center;
+        font-size: 16px;
+        flex-shrink: 0;
+    }
+
+    .stat-val {
+        font-size: 22px;
+        font-weight: 800;
+        color: var(--po-tx);
+        line-height: 1.1;
+    }
+
+    .stat-lbl {
+        font-size: 11px;
+        color: var(--po-mu);
+        margin-top: 2px;
+    }
+
+    /* Day block */
+    .day-card {
+        background: #ffffff;
+        border: 1px solid var(--po-bd);
+        border-radius: var(--po-r);
+        overflow: hidden;
+        margin-bottom: 14px;
+        box-shadow: var(--po-sh2);
+    }
+
+    .day-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 16px;
+        background: linear-gradient(135deg, #eff6ff, #dbeafe);
+        border-bottom: 1px solid #bfdbfe;
+    }
+
+    .day-title {
+        font-size: 14px;
+        font-weight: 700;
+        color: #1e40af;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .day-badge {
+        font-size: 11px;
+        background: #1267e8;
+        color: #ffffff;
+        border-radius: 6px;
+        padding: 2px 8px;
+        font-weight: 700;
+        margin-left: 8px;
+    }
+
+    /* Ca sections */
+    .shift-section {
+        padding: 14px 16px;
+        border-bottom: 1px solid var(--po-bd2);
+    }
+
+    .shift-section:last-child {
+        border-bottom: none;
+    }
+
+    .shift-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 10px;
+    }
+
+    .shift-badge {
+        border-radius: 8px;
+        padding: 3px 10px;
+        font-size: 12px;
+        font-weight: 700;
+        border: 1px solid;
+    }
+
+    .shift-count-badge {
+        font-size: 12.5px;
+        color: var(--po-mu);
+    }
+
+    /* Dish block */
+    .dish-card {
+        border: 1px solid var(--po-bd);
+        border-radius: 10px;
+        margin-bottom: 10px;
+        overflow: hidden;
+        background: #ffffff;
+    }
+
+    .dish-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 9px 13px;
+        background: #F8FAFC;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .dish-title-block {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .dish-name {
+        font-weight: 700;
+        color: var(--po-tx);
+        font-size: 13.5px;
+    }
+
+    .dish-type-badge {
+        font-size: 11px;
+        color: var(--po-mu);
+        background: #f1f5f9;
+        border-radius: 6px;
+        padding: 2px 8px;
+        font-weight: 600;
+    }
+
+    .dish-portions-block {
+        display: flex;
+        gap: 6px;
+    }
+
+    .dish-portions-badge {
+        font-size: 11.5px;
+        font-weight: 700;
+        color: #1267e8;
+        background: #ebf3ff;
+        border-radius: 6px;
+        padding: 2px 9px;
+    }
+
+    .dish-portions-phan {
+        font-size: 11.5px;
+        font-weight: 700;
+        color: #059669;
+        background: #ecfdf5;
+        border-radius: 6px;
+        padding: 2px 9px;
+    }
+
+    /* Ingredients table */
+    .ing-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12.5px;
+    }
+
+    .ing-table th {
+        padding: 8px 12px;
+        text-align: left;
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--po-mu);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        background: #f8fafc;
+        border-bottom: 1px solid var(--po-bd);
+        white-space: nowrap;
+    }
+
+    .ing-table td {
+        padding: 9px 12px;
+        border-bottom: 1px solid var(--po-bd2);
+        color: var(--po-su);
+        vertical-align: middle;
+    }
+
+    .ing-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .ing-table tbody tr:hover {
+        background: #fafcff;
+    }
+
+    .ing-num {
+        width: 36px;
+        text-align: center;
+        color: var(--po-mu);
+        font-weight: 600;
+    }
+
+    .ing-code-badge {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--po-mu);
+    }
+
+    .ing-name {
+        font-weight: 500;
+        color: var(--po-tx);
+    }
+
+    .ing-kg-val {
+        font-weight: 700;
+        color: var(--po-tx);
+    }
+
+    .empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 60px 20px;
+        text-align: center;
+        color: var(--po-fa);
+        background: #fff;
+        border: 1px solid var(--po-bd);
+        border-radius: 14px;
+    }
+
+    .empty-state h3 {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--po-su);
+        margin-top: 14px;
+        margin-bottom: 6px;
+    }
+
+    .empty-state p {
+        font-size: 13px;
+        color: var(--po-mu);
+    }
 </style>
-@endpush
 
-<x-filament-panels::page>
     <div class="report-header-container">
         <div>
             <h1 class="report-title">Báo cáo – Xuất ăn</h1>
@@ -529,10 +476,8 @@
         </div>
         <div>
             <button type="button" class="excel-btn" wire:click="exportExcel">
-                <svg class="w-4 h-4 text-emerald-600" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"/>
-                </svg>
-                <span>Xuất Excel tài chính</span>
+                <i class="fa-solid fa-file-excel" style="color:#059669; font-size:15px"></i>
+                <span>Xuất Excel</span>
             </button>
         </div>
     </div>
@@ -550,7 +495,7 @@
         <button type="button" class="week-btn" wire:click="setThisWeek">Theo tuần thực đơn</button>
 
         <div class="shifts-group">
-            <span class="font-semibold text-gray-500 mr-1" style="font-size: 0.72rem;">Ca:</span>
+            <span class="font-semibold text-gray-500 mr-1" style="font-size: 11px;">Ca:</span>
             
             @php $allShifts = \App\Models\Shift::all(); @endphp
             @foreach($allShifts as $index => $shift)
@@ -563,16 +508,14 @@
                            value="{{ $shift->id }}" 
                            wire:click="toggleShift({{ $shift->id }})"
                            @if(in_array($shift->id, $selectedShifts)) checked @endif
-                           style="width: 12px; height: 12px; border-radius: 3px; border-color: currentColor;">
+                           style="width: 12px; height: 12px; border-radius: 3px; border-color: currentColor; cursor:pointer">
                     <span>{{ strtoupper($shift->name) }}</span>
                 </label>
             @endforeach
         </div>
 
         <div class="search-container">
-            <svg class="search-icon w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-            </svg>
+            <i class="fa-solid fa-magnifying-glass search-icon"></i>
             <input type="text" wire:model.live.debounce.300ms="search" placeholder="Tìm món / nguyên liệu...">
         </div>
     </div>
@@ -581,38 +524,31 @@
     @php $stats = $this->getStats(); @endphp
     <div class="stats-grid">
         <div class="stat-card">
-            <div class="stat-icon" style="background: #eff6ff; color: #1e40af;">📅</div>
+            <div class="stat-icon" style="background: #eff6ff; color: #1e40af;"><i class="fa-regular fa-calendar"></i></div>
             <div>
                 <div class="stat-val">{{ $stats['days'] }}</div>
                 <div class="stat-lbl">Ngày có thực đơn</div>
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon" style="background: #fff7ed; color: #ea580c;">🍽</div>
+            <div class="stat-icon" style="background: #fff7ed; color: #ea580c;"><i class="fa-solid fa-utensils"></i></div>
             <div>
                 <div class="stat-val">{{ $stats['dishes'] }}</div>
                 <div class="stat-lbl">Lượt món</div>
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon" style="background: #f5f3ff; color: #7c3aed;">🌿</div>
+            <div class="stat-icon" style="background: #f5f3ff; color: #7c3aed;"><i class="fa-solid fa-seedling"></i></div>
             <div>
                 <div class="stat-val">{{ $stats['ingredients'] }}</div>
                 <div class="stat-lbl">Dòng nguyên liệu</div>
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon" style="background: #ecfdf5; color: #059669;">👥</div>
+            <div class="stat-icon" style="background: #ecfdf5; color: #059669;"><i class="fa-solid fa-users"></i></div>
             <div>
                 <div class="stat-val">{{ number_format($stats['suat'], 0, ',', '.') }}</div>
                 <div class="stat-lbl">Tổng suất</div>
-            </div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon" style="background: #fef2f2; color: #dc2626;">💰</div>
-            <div>
-                <div class="stat-val">{{ number_format($stats['cost'] ?? 0, 0, ',', '.') }} đ</div>
-                <div class="stat-lbl">Tổng giá vốn (Cost)</div>
             </div>
         </div>
     </div>
@@ -621,24 +557,26 @@
     @php $groupedData = $this->getGroupedData(); @endphp
     @if(empty($groupedData))
         <div class="empty-state">
-            <svg class="w-12 h-12 mx-auto text-gray-300 dark:text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-            </svg>
+            <i class="fa-solid fa-chart-column" style="font-size:32px; opacity:.3; margin-bottom:8px"></i>
             <h3>Không có dữ liệu trong khoảng đã chọn</h3>
-            <p class="text-xs mt-1 text-gray-500">Hãy chọn lại khoảng ngày, ca, hoặc thử tìm kiếm cụ từ khác.</p>
+            <p>Hãy chọn lại khoảng ngày, ca, hoặc thử tìm kiếm cụm từ khác.</p>
         </div>
     @else
-        @foreach($groupedData as $day)
-            <div class="day-card">
-                <div class="day-header">
+        @foreach($groupedData as $dayIndex => $day)
+            <div class="day-card" x-data="{ open: {{ $dayIndex === 0 ? 'true' : 'false' }} }">
+                <div class="day-header" @click="open = !open" style="cursor:pointer; user-select:none">
                     <div class="day-title">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                        </svg>
+                        <i class="fa-regular fa-calendar-days"></i>
                         <span>{{ strtoupper($day['day_of_week']) }} – {{ $day['date_formatted'] }}</span>
                         <span class="day-badge">{{ count($day['shifts']) }} ca</span>
                     </div>
+                    <div style="display:flex; align-items:center; gap:8px">
+                        <i class="fa-solid fa-chevron-down" x-show="!open" style="font-size:12px; color:#1e40af"></i>
+                        <i class="fa-solid fa-chevron-up" x-show="open" style="font-size:12px; color:#1e40af"></i>
+                    </div>
                 </div>
+
+                <div x-show="open" x-collapse>
 
                 @foreach($day['shifts'] as $index => $shift)
                     @php 
@@ -658,22 +596,24 @@
                         </div>
 
                         @foreach($shift['dishes'] as $dish)
-                            <div class="dish-card">
-                                <div class="dish-head">
+                            <div class="dish-card" x-data="{ open: false }">
+                                <div class="dish-head" @click="open = !open" style="cursor:pointer; user-select:none">
                                     <div class="dish-title-block">
-                                        <svg class="w-4.5 h-4.5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
-                                        </svg>
+                                        <i class="fa-solid fa-bowl-food" style="color:var(--po-bl)"></i>
                                         <span class="dish-name">{{ $dish['name'] }}</span>
                                         <span class="dish-type-badge">{{ $dish['type'] }}</span>
                                     </div>
-                                    <div class="dish-portions-block">
-                                        <span class="dish-portions-badge">{{ $dish['suat'] }} suất</span>
-                                        <span class="dish-portions-phan">{{ $dish['phan'] }} phần</span>
+                                    <div style="display:flex; align-items:center; gap:8px">
+                                        <div class="dish-portions-block">
+                                            <span class="dish-portions-badge">{{ $dish['suat'] }} suất</span>
+                                            <span class="dish-portions-phan">{{ $dish['phan'] }} phần</span>
+                                        </div>
+                                        <i class="fa-solid fa-chevron-down" x-show="!open" style="font-size:11px; color:var(--po-mu)"></i>
+                                        <i class="fa-solid fa-chevron-up" x-show="open" style="font-size:11px; color:var(--po-mu)"></i>
                                     </div>
                                 </div>
 
-                                <div class="overflow-x-auto">
+                                <div x-show="open" x-collapse class="overflow-x-auto" style="border-top:1px solid var(--po-bd2)">
                                     <table class="ing-table">
                                         <thead>
                                             <tr>
@@ -692,7 +632,7 @@
                                                     <td class="ing-num">{{ $iIndex + 1 }}</td>
                                                     <td><span class="ing-code-badge">{{ $ing['code'] }}</span></td>
                                                     <td class="ing-name">{{ $ing['name'] }}</td>
-                                                    <td style="text-align: center;">{{ number_format($ing['dl_g'], 0) }}</td>
+                                                    <td style="text-align: center;">{{ number_format($ing['dl_g'] * 1000, 0) }}</td>
                                                     <td style="text-align: center;">{{ $ing['suat'] }}</td>
                                                     <td style="text-align: center; font-weight: 700; color: #059669;">{{ $ing['phan'] }}</td>
                                                     <td class="ing-kg-val" style="text-align: right;">
@@ -717,7 +657,8 @@
                         @endforeach
                     </div>
                 @endforeach
+                </div>
             </div>
         @endforeach
     @endif
-</x-filament-panels::page>
+</div>

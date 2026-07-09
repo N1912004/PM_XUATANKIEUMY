@@ -8,7 +8,7 @@
     @endphp
 
     <div class="sup-breadcrumb">
-        <a href="#">Xuất ăn</a>
+        <a href="{{ url('/admin') }}">Xuất ăn</a>
         <span>/</span>
         <a href="{{ \App\Filament\Resources\SupplierResource::getUrl('index') }}">Nhà cung cấp</a>
         <span>/</span>

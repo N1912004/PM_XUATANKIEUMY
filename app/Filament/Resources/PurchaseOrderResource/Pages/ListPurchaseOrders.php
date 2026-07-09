@@ -82,6 +82,8 @@ class ListPurchaseOrders extends Page
             return;
         }
 
+        abort_unless(PurchaseOrderResource::canDelete($order), 403);
+
         $order->delete();
 
         Notification::make()
@@ -247,5 +249,54 @@ class ListPurchaseOrders extends Page
                 }
             })
             ->when($this->statusFilter !== '', fn ($query) => $query->where('status', $this->statusFilter));
+    }
+
+    /**
+     * Xuất đơn đặt hàng cụ thể sang định dạng CSV/Excel.
+     */
+    public function exportSingleOrder(int $orderId): StreamedResponse
+    {
+        $order = PurchaseOrder::with(['supplier', 'kitchen', 'items.ingredient'])->find($orderId);
+        if (! $order) {
+            abort(404);
+        }
+
+        abort_unless(PurchaseOrderResource::canView($order), 403);
+
+        $fileName = 'PO-'.$order->code.'-'.now()->format('Ymd').'.csv';
+
+        return response()->streamDownload(function () use ($order): void {
+            $output = fopen('php://output', 'w');
+            fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+            fputcsv($output, ['Mã đơn hàng', $order->code]);
+            fputcsv($output, ['Nhà cung cấp', $order->supplier?->name ?? 'Chưa gán']);
+            fputcsv($output, ['Bếp ăn', $order->kitchen?->name ?? 'Chung']);
+            fputcsv($output, ['Ngày giao dự kiến', $order->estimated_delivery_date?->format('d/m/Y') ?? '']);
+            fputcsv($output, ['Trạng thái', match ($order->status) {
+                'draft' => 'Nháp',
+                'sent' => 'Đã gửi NCC',
+                'checking' => 'Đang kiểm hàng',
+                'done' => 'Hoàn thành',
+                default => $order->status,
+            }]);
+            fputcsv($output, []);
+            fputcsv($output, ['STT', 'Mã nguyên liệu', 'Tên nguyên liệu', 'Đơn vị', 'SL đặt', 'SL thực nhận', 'Đơn giá', 'Thành tiền']);
+
+            $i = 1;
+            foreach ($order->items as $item) {
+                $total = $item->quantity_ordered * $item->unit_price;
+                fputcsv($output, [
+                    $i++,
+                    $item->ingredient?->code ?? '',
+                    $item->ingredient?->name ?? '',
+                    $item->ingredient?->unit ?? '',
+                    $item->quantity_ordered,
+                    $item->quantity_received,
+                    $item->unit_price,
+                    $total,
+                ]);
+            }
+            fclose($output);
+        }, $fileName, ['Content-Type' => 'text/csv; charset=UTF-8']);
     }
 }

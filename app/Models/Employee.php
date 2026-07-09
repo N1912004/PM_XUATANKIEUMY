@@ -19,6 +19,32 @@ class Employee extends Model
         'start_date',
         'status',
         'avatar_url',
+        'gender',
+        'dob',
+        'id_card',
+        'id_card_date',
+        'id_card_place',
+        'marital_status',
+        'nationality',
+        'ethnic',
+        'religion',
+        'permanent_address',
+        'temporary_address',
+        'emergency_contact_name',
+        'emergency_contact_phone',
+        'emergency_contact_relation',
+        'sub_department',
+        'level',
+        'work_type',
+        'manager_id',
+        'documents',
+    ];
+
+    protected $casts = [
+        'dob' => 'date',
+        'id_card_date' => 'date',
+        'start_date' => 'date',
+        'documents' => 'array',
     ];
 
     public function area(): BelongsTo
@@ -29,6 +55,11 @@ class Employee extends Model
     public function kitchen(): BelongsTo
     {
         return $this->belongsTo(Kitchen::class);
+    }
+
+    public function manager(): BelongsTo
+    {
+        return $this->belongsTo(Employee::class, 'manager_id');
     }
 
     public function timekeepings()

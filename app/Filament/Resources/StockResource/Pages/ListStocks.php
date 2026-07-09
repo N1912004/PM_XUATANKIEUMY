@@ -135,6 +135,23 @@ class ListStocks extends ListRecords
         if ($firstKitchen) {
             $this->destKitchenId = $firstKitchen->id;
         }
+
+        // Tự động nhận tham số URL để chuyển đổi tab/PO nhanh từ màn hình Đặt hàng
+        // (validate whitelist trước khi gán vào state để tránh giá trị bất thường từ query string)
+        $poId = request()->query('po_id');
+        $tab = request()->query('tab');
+        $inMode = request()->query('inMode');
+
+        if (is_string($tab) && in_array($tab, ['stock', 'in', 'out', 'check', 'log'], true)) {
+            $this->warehouseTab = $tab;
+        }
+        if (is_string($inMode) && in_array($inMode, ['po', 'direct'], true)) {
+            $this->inMode = $inMode;
+        }
+        if (is_scalar($poId) && (int) $poId > 0) {
+            $this->selectedPOId = (int) $poId;
+            $this->loadPOItems();
+        }
     }
 
     protected function getHeaderActions(): array
@@ -422,6 +439,13 @@ class ListStocks extends ListRecords
             ->where('shift_id', $this->prodShiftId)
             ->get();
 
+        // Nạp tồn kho 1 lần cho toàn bộ nguyên liệu liên quan (tránh N+1 trong vòng lặp)
+        $ingredientIds = $menus->flatMap(fn ($menu) => $menu->recipe->ingredients->pluck('id'))->unique();
+        $stocksByIngredient = Stock::where('kitchen_id', $kitchenId)
+            ->whereIn('ingredient_id', $ingredientIds)
+            ->get()
+            ->keyBy('ingredient_id');
+
         $ingredients = [];
         foreach ($menus as $menu) {
             $portions = (float) $menu->estimated_portions;
@@ -432,7 +456,7 @@ class ListStocks extends ListRecords
                 if (isset($ingredients[$ing->id])) {
                     $ingredients[$ing->id]['quantity_expected'] += $needed;
                 } else {
-                    $stock = Stock::where('kitchen_id', $kitchenId)->where('ingredient_id', $ing->id)->first();
+                    $stock = $stocksByIngredient->get($ing->id);
                     $ingredients[$ing->id] = [
                         'ingredient_id' => $ing->id,
                         'name' => $ing->name,
@@ -658,9 +682,12 @@ class ListStocks extends ListRecords
         return $query->get()->all();
     }
 
+    /** @var array<int, Ingredient>|null Cache trong 1 lần render — blade gọi hàm này trong vòng lặp dòng */
+    protected ?array $ingredientsListCache = null;
+
     public function getIngredientsList(): array
     {
-        return Ingredient::where('status', true)->get()->all();
+        return $this->ingredientsListCache ??= Ingredient::where('status', true)->get()->all();
     }
 
     public function getRecentTransfers(): array
@@ -803,20 +830,21 @@ class ListStocks extends ListRecords
             $query->where('kitchen_id', $kitchenId);
         }
 
-        $allStocks = $query->get();
-        $totalItems = $allStocks->count();
-        $totalValue = $allStocks->sum(fn ($s) => $s->quantity * $s->unit_price);
-        $lowStock = $allStocks->filter(fn ($s) => $s->quantity <= $s->min_quantity)->count();
+        // Tính KPI bằng SQL aggregate thay vì nạp toàn bộ bảng tồn kho vào RAM
+        $stats = $query
+            ->selectRaw('COUNT(*) AS total_items')
+            ->selectRaw('COALESCE(SUM(quantity * unit_price), 0) AS total_value')
+            ->selectRaw('COALESCE(SUM(CASE WHEN quantity <= min_quantity THEN 1 ELSE 0 END), 0) AS low_stock')
+            ->selectRaw('COALESCE(SUM(CASE WHEN DATE(updated_at) = ? THEN 1 ELSE 0 END), 0) AS checked_today', [now()->toDateString()])
+            ->first();
 
-        // Calculate need checking today
-        $checkedToday = $allStocks->filter(fn ($s) => $s->updated_at && $s->updated_at->isToday())->count();
-        $needCheck = max(0, $totalItems - $checkedToday);
+        $totalItems = (int) $stats->total_items;
 
         return [
             'items' => $totalItems,
-            'value' => $totalValue,
-            'low' => $lowStock,
-            'check' => $needCheck,
+            'value' => (float) $stats->total_value,
+            'low' => (int) $stats->low_stock,
+            'check' => max(0, $totalItems - (int) $stats->checked_today),
         ];
     }
 

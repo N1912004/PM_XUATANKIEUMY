@@ -243,9 +243,21 @@
                             </button>
                         @endif
 
-                        {{-- Pagination Elements --}}
-                        @foreach ($suppliersList->getUrlRange(1, $suppliersList->lastPage()) as $page => $url)
-                            @if ($page == $suppliersList->currentPage())
+                        {{-- Pagination Elements (dạng cửa sổ: 1 … n-1 n n+1 … cuối) --}}
+                        @php
+                            $supCurrentPage = $suppliersList->currentPage();
+                            $supLastPage = $suppliersList->lastPage();
+                            $supPageWindow = collect([1, $supCurrentPage - 1, $supCurrentPage, $supCurrentPage + 1, $supLastPage])
+                                ->filter(fn ($p) => $p >= 1 && $p <= $supLastPage)
+                                ->unique()
+                                ->sort()
+                                ->values();
+                        @endphp
+                        @foreach ($supPageWindow as $i => $page)
+                            @if ($i > 0 && $page - $supPageWindow[$i - 1] > 1)
+                                <span aria-hidden="true" style="padding:0 4px">…</span>
+                            @endif
+                            @if ($page == $supCurrentPage)
                                 <span aria-current="page">
                                     <span>{{ $page }}</span>
                                 </span>
