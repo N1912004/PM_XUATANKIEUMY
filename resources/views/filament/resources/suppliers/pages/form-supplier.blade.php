@@ -105,7 +105,24 @@
                                         <td>{{ $ing->unit }}</td>
                                         <td>{{ $ing->type }}</td>
                                         <td>
-                                            <input type="number" step="any" wire:model.live="ingredientCosts.{{ $ing->id }}" 
+                                            <input type="text"
+                                                   x-data="{ 
+                                                       rawVal: @entangle('ingredientCosts.' . $ing->id),
+                                                       get formatted() {
+                                                           if (this.rawVal === undefined || this.rawVal === null || this.rawVal === '') return '';
+                                                           let clean = String(this.rawVal).replace(/[^0-9.]/g, '');
+                                                           let parts = clean.split('.');
+                                                           parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+                                                           return parts.join('.');
+                                                       },
+                                                       set formatted(val) {
+                                                           let clean = val.replace(/,/g, '');
+                                                           if (!isNaN(clean) || clean === '') {
+                                                               this.rawVal = clean === '' ? null : Number(clean);
+                                                           }
+                                                       }
+                                                   }"
+                                                   x-model="formatted"
                                                    class="sup-input sup-cost" placeholder="Nhập chi phí"
                                                    @if(!($selectedIngredients[$ing->id] ?? false)) disabled @endif>
                                         </td>
