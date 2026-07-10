@@ -22,7 +22,7 @@ class ListTimekeepings extends Page
     // Search and filters
     public $search = '';
 
-    public $dateFilter = '2026-05-15'; // Khớp mặc định seeder và HTML mẫu
+    public $dateFilter = '';
 
     public $shiftFilter = '';
 
@@ -45,9 +45,7 @@ class ListTimekeepings extends Page
 
     public function mount(): void
     {
-        // Kiểm tra xem database có bất cứ bản ghi nào ở ngày 15/05/2026 không, nếu không lấy ngày hôm nay
-        $hasData = Timekeeping::where('date', '2026-05-15')->exists();
-        if (! $hasData) {
+        if ($this->dateFilter === '') {
             $this->dateFilter = now()->toDateString();
         }
     }
@@ -85,8 +83,7 @@ class ListTimekeepings extends Page
     public function resetFilters()
     {
         $this->search = '';
-        $hasData = Timekeeping::where('date', '2026-05-15')->exists();
-        $this->dateFilter = $hasData ? '2026-05-15' : now()->toDateString();
+        $this->dateFilter = now()->toDateString();
         $this->shiftFilter = '';
         $this->departmentFilter = '';
         $this->areaFilter = '';
@@ -197,8 +194,10 @@ class ListTimekeepings extends Page
             $checkOutTime = now();
             $shiftEndTime = Carbon::createFromTimeString('16:00:00');
             if ($checkOutTime->gt($shiftEndTime)) {
-                $diffMinutes = $checkOutTime->diffInMinutes($shiftEndTime);
-                $hours = floor($diffMinutes / 60);
+                // Carbon 3: diffInMinutes có dấu — phải tính từ giờ tan ca ĐẾN giờ check-out,
+                // chiều ngược lại trả số âm và lưu overtime_hours thành chuỗi rác kiểu "-2h-30"
+                $diffMinutes = (int) $shiftEndTime->diffInMinutes($checkOutTime);
+                $hours = intdiv($diffMinutes, 60);
                 $minutes = $diffMinutes % 60;
                 $timekeeping->overtime_hours = $hours.'h'.str_pad($minutes, 2, '0', STR_PAD_LEFT);
                 $timekeeping->status = 'Tăng ca';
@@ -326,6 +325,8 @@ class ListTimekeepings extends Page
 
     public function exportTimekeepings()
     {
+        abort_unless(TimekeepingResource::canViewAny(), 403);
+
         // Dùng chung baseQuery để export tuân thủ đúng phân quyền
         // và bộ lọc như bảng đang hiển thị
         $records = $this->baseQuery()->get();

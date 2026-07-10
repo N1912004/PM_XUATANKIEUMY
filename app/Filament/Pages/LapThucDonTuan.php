@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Resources\MenuResource;
 use App\Models\Kitchen;
 use App\Models\Menu;
 use App\Models\Recipe;
@@ -18,6 +19,7 @@ use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Illuminate\Support\Facades\DB;
 
 class LapThucDonTuan extends Page implements HasForms
 {
@@ -118,6 +120,9 @@ class LapThucDonTuan extends Page implements HasForms
      */
     public function save(string $status = 'draft'): void
     {
+        // Ghi/chốt thực đơn là đầu pipeline (List hàng → PO → Kho) — phải có quyền theo policy Menu
+        abort_unless(MenuResource::canCreate(), 403);
+
         $state = $this->form->getState();
         $entries = $state['entries'] ?? [];
 
@@ -130,23 +135,59 @@ class LapThucDonTuan extends Page implements HasForms
         $weekStart = Carbon::parse($state['week_start']);
         $kitchenId = $state['kitchen_id'] ?? null;
 
+        // User không phải quản trị chỉ được lập thực đơn cho bếp của chính mình
+        // (select bếp trên form là dữ liệu client, không tin được)
+        $user = auth()->user();
+        if ($user && ! $user->hasRole(['super_admin', 'Quản trị viên'])) {
+            $ownKitchenId = $user->currentKitchenId();
+            if ($ownKitchenId && (int) $kitchenId !== (int) $ownKitchenId) {
+                Notification::make()->title('Bạn chỉ có thể lập thực đơn cho bếp của mình!')->danger()->send();
+
+                return;
+            }
+        }
+
         $duplicates = $this->duplicateWarnings($entries, $weekStart, $kitchenId);
 
-        foreach ($entries as $entry) {
-            $date = $weekStart->copy()->addDays((int) $entry['day'])->toDateString();
+        $skippedLocked = 0;
 
-            Menu::updateOrCreate(
-                [
-                    'kitchen_id' => $kitchenId,
-                    'date' => $date,
-                    'shift_id' => $entry['shift_id'],
-                    'recipe_id' => $entry['recipe_id'],
-                ],
-                [
-                    'estimated_portions' => $entry['estimated_portions'],
-                    'status' => $status,
-                ],
-            );
+        DB::transaction(function () use ($entries, $weekStart, $kitchenId, $status, &$skippedLocked): void {
+            foreach ($entries as $entry) {
+                $date = $weekStart->copy()->addDays((int) $entry['day'])->toDateString();
+
+                // Không hạ cấp thực đơn ĐÃ CHỐT về nháp/gửi khách — locked là căn cứ đã sinh PO/List hàng
+                $existing = Menu::where('kitchen_id', $kitchenId)
+                    ->where('date', $date)
+                    ->where('shift_id', $entry['shift_id'])
+                    ->where('recipe_id', $entry['recipe_id'])
+                    ->first();
+
+                if ($existing && $existing->status === 'locked' && $status !== 'locked') {
+                    $skippedLocked++;
+
+                    continue;
+                }
+
+                Menu::updateOrCreate(
+                    [
+                        'kitchen_id' => $kitchenId,
+                        'date' => $date,
+                        'shift_id' => $entry['shift_id'],
+                        'recipe_id' => $entry['recipe_id'],
+                    ],
+                    [
+                        'estimated_portions' => $entry['estimated_portions'],
+                        'status' => $status,
+                    ],
+                );
+            }
+        });
+
+        if ($skippedLocked > 0) {
+            Notification::make()
+                ->title("{$skippedLocked} món đã CHỐT được giữ nguyên (không ghi đè về '{$status}')")
+                ->warning()
+                ->send();
         }
 
         $label = match ($status) {

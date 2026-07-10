@@ -68,9 +68,9 @@ class EditLeaveOvertime extends Page
         $this->approver_id = $this->record->approver_id;
         $this->status = $this->record->status;
 
-        // Định dạng start_date / end_date
-        $this->start_date = $this->record->start_date ? Carbon::parse(str_replace('/', '-', $this->record->start_date))->toDateString() : null;
-        $this->end_date = $this->record->end_date ? Carbon::parse(str_replace('/', '-', $this->record->end_date))->toDateString() : null;
+        // Cột đã là DATE (cast Carbon) — chỉ cần đưa về Y-m-d cho input type=date
+        $this->start_date = $this->record->start_date?->toDateString();
+        $this->end_date = $this->record->end_date?->toDateString();
 
         // Xác định tab đang chọn
         if (str_contains($this->type, 'Tăng ca')) {
@@ -130,6 +130,8 @@ class EditLeaveOvertime extends Page
 
     public function save()
     {
+        abort_unless(LeaveOvertimeResource::canEdit($this->record), 403);
+
         $this->validate([
             'employee_id' => 'required',
             'start_date' => 'required|date',
@@ -178,8 +180,8 @@ class EditLeaveOvertime extends Page
         $this->record->update([
             'employee_id' => $this->employee_id,
             'type' => $this->type,
-            'start_date' => date('d/m/Y', strtotime($this->start_date)),
-            'end_date' => $this->formTab === 'leave' ? date('d/m/Y', strtotime($this->end_date)) : date('d/m/Y', strtotime($this->start_date)),
+            'start_date' => $this->start_date,
+            'end_date' => $this->formTab === 'leave' ? $this->end_date : $this->start_date,
             'duration_text' => $this->duration_text,
             'reason' => $fullReason,
             'approver_id' => $this->approver_id,

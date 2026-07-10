@@ -19,7 +19,16 @@ class StockTransaction extends Model
         'after_quantity',
         'note',
         'attachment_url',
+        'created_by',
     ];
+
+    protected static function booted(): void
+    {
+        // Tự truy vết người thao tác cho mọi dòng thẻ kho tạo trong ngữ cảnh web
+        static::creating(function (StockTransaction $transaction): void {
+            $transaction->created_by ??= auth()->id();
+        });
+    }
 
     public function ingredient(): BelongsTo
     {
@@ -29,5 +38,10 @@ class StockTransaction extends Model
     public function kitchen(): BelongsTo
     {
         return $this->belongsTo(Kitchen::class);
+    }
+
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
     }
 }

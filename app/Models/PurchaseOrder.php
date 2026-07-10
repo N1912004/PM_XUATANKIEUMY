@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\DB;
 
 class PurchaseOrder extends Model
 {
@@ -16,6 +17,7 @@ class PurchaseOrder extends Model
         'kitchen_id',
         'supplier_id',
         'status',
+        'type',
         'stocked_at',
         'estimated_delivery_date',
         'note',
@@ -45,26 +47,42 @@ class PurchaseOrder extends Model
     {
         static::updated(function (PurchaseOrder $purchaseOrder) {
             // Chỉ tự động nhập kho 1 LẦN DUY NHẤT: khi đơn chuyển sang 'done' và chưa từng nhập kho.
-            // Cờ stocked_at chống nhập lặp nếu trạng thái đổi done → khác → done.
-            if ($purchaseOrder->wasChanged('status')
+            if (! ($purchaseOrder->wasChanged('status')
                 && $purchaseOrder->status === 'done'
-                && is_null($purchaseOrder->stocked_at)) {
-                foreach ($purchaseOrder->items as $item) {
-                    // Tồn kho theo từng bếp: khóa theo (kitchen_id, ingredient_id)
-                    $stock = Stock::firstOrCreate(
-                        [
+                && is_null($purchaseOrder->stocked_at))) {
+                return;
+            }
+
+            DB::transaction(function () use ($purchaseOrder): void {
+                // Claim atomic cờ stocked_at: 2 request đồng thời thì chỉ 1 bên UPDATE được dòng
+                // còn NULL — bên kia nhận affected = 0 và bỏ qua, chặn nhập kho lặp (double-receive).
+                $claimed = self::whereKey($purchaseOrder->id)
+                    ->whereNull('stocked_at')
+                    ->update(['stocked_at' => now()]);
+
+                if ($claimed === 0) {
+                    return;
+                }
+
+                foreach ($purchaseOrder->items()->get() as $item) {
+                    // Khóa dòng tồn kho (kitchen_id, ingredient_id) để tránh lost-update với luồng khác
+                    $stock = Stock::query()
+                        ->where('kitchen_id', $purchaseOrder->kitchen_id)
+                        ->where('ingredient_id', $item->ingredient_id)
+                        ->lockForUpdate()
+                        ->first();
+
+                    if (! $stock) {
+                        $stock = Stock::create([
                             'kitchen_id' => $purchaseOrder->kitchen_id,
                             'ingredient_id' => $item->ingredient_id,
-                        ],
-                        [
                             'quantity' => 0,
                             'min_quantity' => 10,
                             'unit_price' => $item->unit_price,
-                        ]
-                    );
+                        ]);
+                    }
 
-                    $oldQty = $stock->quantity;
-                    $newQty = $oldQty + $item->quantity_received;
+                    $newQty = (float) $stock->quantity + (float) $item->quantity_received;
 
                     $stock->update([
                         'quantity' => $newQty,
@@ -75,15 +93,15 @@ class PurchaseOrder extends Model
                         'kitchen_id' => $purchaseOrder->kitchen_id,
                         'ingredient_id' => $item->ingredient_id,
                         'type' => 'Nhập kho',
+                        'voucher_code' => $purchaseOrder->code,
                         'quantity' => $item->quantity_received,
                         'after_quantity' => $newQty,
                         'note' => "Nhập kho tự động từ đơn đặt hàng: {$purchaseOrder->code}",
                     ]);
                 }
+            });
 
-                // Đánh dấu đã nhập kho (updateQuietly để không kích hoạt lại hook updated)
-                $purchaseOrder->updateQuietly(['stocked_at' => now()]);
-            }
+            $purchaseOrder->refresh();
         });
     }
 }

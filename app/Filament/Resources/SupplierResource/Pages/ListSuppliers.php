@@ -64,6 +64,8 @@ class ListSuppliers extends Page
             return;
         }
 
+        abort_unless(SupplierResource::canDelete($supplier), 403);
+
         $supplier->delete();
 
         Notification::make()
@@ -76,6 +78,8 @@ class ListSuppliers extends Page
 
     public function exportExcel(): StreamedResponse
     {
+        abort_unless(SupplierResource::canViewAny(), 403);
+
         $fileName = 'nha-cung-cap-'.now()->format('Ymd-His').'.csv';
 
         return response()->streamDownload(function (): void {

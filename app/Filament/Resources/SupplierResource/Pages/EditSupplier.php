@@ -63,8 +63,10 @@ class EditSupplier extends Page
 
     public function save(): void
     {
-        $data = $this->validate($this->rules());
         $supplier = Supplier::query()->findOrFail($this->supplierId);
+        abort_unless(SupplierResource::canEdit($supplier), 403);
+
+        $data = $this->validate($this->rules());
 
         $supplier->update($data);
         $this->syncIngredients($supplier);

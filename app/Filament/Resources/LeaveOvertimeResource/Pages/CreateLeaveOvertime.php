@@ -49,19 +49,20 @@ class CreateLeaveOvertime extends Page
 
     public $ot_end_time = '20:30';
 
-    public $ot_location = 'Bếp trung tâm - Khu A';
+    public $ot_location;
 
-    public $ot_work_description = 'Chuẩn bị nguyên liệu, hỗ trợ chế biến, đóng gói và kiểm tra chất lượng sản phẩm.';
+    public $ot_work_description;
 
-    public $co_worker = 'Trần Thị Bích Ngọc';
+    public $co_worker;
 
     public function mount(): void
     {
         $this->start_date = now()->toDateString();
         $this->end_date = now()->toDateString();
         $this->handover_time = now()->format('Y-m-d\T17:00');
-        $this->employee_id = Employee::first()?->id;
-        $this->approver_id = Employee::where('id', '!=', $this->employee_id)->first()?->id;
+        // Mặc định theo nhân sự của chính user đang đăng nhập (không lấy bừa Employee đầu tiên)
+        $this->employee_id = auth()->user()?->employee_id;
+        $this->approver_id = null;
     }
 
     public function switchFormTab($tab)
@@ -78,6 +79,8 @@ class CreateLeaveOvertime extends Page
 
     public function save()
     {
+        abort_unless(LeaveOvertimeResource::canCreate(), 403);
+
         $this->validate([
             'employee_id' => 'required',
             'start_date' => 'required|date',
@@ -126,12 +129,14 @@ class CreateLeaveOvertime extends Page
         LeaveOvertime::create([
             'employee_id' => $this->employee_id,
             'type' => $this->type,
-            'start_date' => date('d/m/Y', strtotime($this->start_date)),
-            'end_date' => $this->formTab === 'leave' ? date('d/m/Y', strtotime($this->end_date)) : date('d/m/Y', strtotime($this->start_date)),
+            'start_date' => $this->start_date,
+            'end_date' => $this->formTab === 'leave' ? $this->end_date : $this->start_date,
             'duration_text' => $this->duration_text,
             'reason' => $fullReason,
             'approver_id' => $this->approver_id,
-            'status' => $this->status,
+            // Ép trạng thái phía server: $this->status là public property, client có thể sửa
+            // payload Livewire thành 'Đã duyệt' để bỏ qua quy trình duyệt
+            'status' => 'Chờ duyệt',
         ]);
 
         session()->flash('message', 'Tạo yêu cầu mới thành công!');

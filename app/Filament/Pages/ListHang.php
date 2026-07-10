@@ -2,6 +2,8 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Resources\PurchaseOrderResource;
+use App\Models\Ingredient;
 use App\Models\Menu;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderItem;
@@ -10,6 +12,7 @@ use App\Models\Supplier;
 use Carbon\Carbon;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Illuminate\Support\Facades\DB;
 
 class ListHang extends Page
 {
@@ -217,6 +220,8 @@ class ListHang extends Page
 
     public function createOrders(): void
     {
+        abort_unless(PurchaseOrderResource::canCreate(), 403);
+
         $selectedItems = collect($this->poItems)->filter(fn ($item) => $item['checked'] && (float) ($item['quantity_manual'] ?? 0) > 0);
 
         if ($selectedItems->isEmpty()) {
@@ -230,59 +235,79 @@ class ListHang extends Page
         // Group by Supplier and Split (Phiếu 1, Phiếu 2, Phiếu 3)
         $grouped = $selectedItems->groupBy(fn ($item) => $item['supplier_id'].'-'.$item['split']);
 
+        // Đơn giá tra lại từ DB theo ingredient_id — KHÔNG tin reference_price trong payload Livewire
+        // (client có thể sửa để tạo PO giá 0đ)
+        $priceByIngredient = Ingredient::whereIn('id', $selectedItems->pluck('ingredient_id')->unique())
+            ->pluck('reference_price', 'id');
+
         $poCount = 0;
         $poCodes = [];
+        $skippedNames = [];
 
-        foreach ($grouped as $key => $items) {
-            $parts = explode('-', $key);
-            $supplierId = (int) $parts[0];
-            $split = $parts[1];
+        DB::transaction(function () use ($grouped, $kitchenId, $priceByIngredient, &$poCount, &$poCodes, &$skippedNames): void {
+            foreach ($grouped as $key => $items) {
+                $parts = explode('-', $key);
+                $supplierId = (int) $parts[0];
+                $split = $parts[1];
 
-            $supplier = Supplier::find($supplierId);
-            if (! $supplier) {
-                continue;
-            }
+                $supplier = Supplier::find($supplierId);
+                if (! $supplier) {
+                    // Không bỏ qua lặng lẽ — gom lại để báo cho user biết mặt hàng nào chưa được đặt
+                    $skippedNames = array_merge($skippedNames, $items->pluck('name')->all());
 
-            // Code format: PO-LH-YYYYMMDD-NCC-P1
-            $nccCode = strtolower(str_replace(' ', '', $supplier->code ?: 'NCC'));
-            $poCode = 'PO-LH-'.Carbon::parse($this->poDate)->format('Ymd').'-'.strtoupper($nccCode).'-'.$split;
+                    continue;
+                }
 
-            // Avoid duplicates
-            $attempts = 0;
-            while (PurchaseOrder::where('code', $poCode)->exists() && $attempts < 10) {
-                $poCode = 'PO-LH-'.Carbon::parse($this->poDate)->format('Ymd').'-'.strtoupper($nccCode).'-'.$split.'-'.mt_rand(10, 99);
-                $attempts++;
-            }
+                // Code format: PO-LH-YYYYMMDD-NCC-P1
+                $nccCode = strtolower(str_replace(' ', '', $supplier->code ?: 'NCC'));
+                $poCode = 'PO-LH-'.Carbon::parse($this->poDate)->format('Ymd').'-'.strtoupper($nccCode).'-'.$split;
 
-            $po = PurchaseOrder::create([
-                'code' => $poCode,
-                'kitchen_id' => $kitchenId,
-                'supplier_id' => $supplierId,
-                'status' => 'draft',
-                'estimated_delivery_date' => $this->poDate,
-                'note' => 'Đơn đặt hàng tự động tạo từ List hàng ngày '.Carbon::parse($this->poDate)->format('d/m/Y')." ({$split})",
-            ]);
+                // Avoid duplicates
+                $attempts = 0;
+                while (PurchaseOrder::where('code', $poCode)->exists() && $attempts < 10) {
+                    $poCode = 'PO-LH-'.Carbon::parse($this->poDate)->format('Ymd').'-'.strtoupper($nccCode).'-'.$split.'-'.mt_rand(10, 99);
+                    $attempts++;
+                }
 
-            foreach ($items as $item) {
-                PurchaseOrderItem::create([
-                    'purchase_order_id' => $po->id,
-                    'ingredient_id' => $item['ingredient_id'],
-                    'quantity_ordered' => $item['quantity_manual'],
-                    'quantity_received' => 0.0,
-                    'unit_price' => $item['reference_price'],
+                $po = PurchaseOrder::create([
+                    'code' => $poCode,
+                    'kitchen_id' => $kitchenId,
+                    'supplier_id' => $supplierId,
+                    'status' => 'draft',
+                    'type' => 'day',
+                    'estimated_delivery_date' => $this->poDate,
+                    'note' => 'Đơn đặt hàng tự động tạo từ List hàng ngày '.Carbon::parse($this->poDate)->format('d/m/Y')." ({$split})",
                 ]);
+
+                foreach ($items as $item) {
+                    PurchaseOrderItem::create([
+                        'purchase_order_id' => $po->id,
+                        'ingredient_id' => $item['ingredient_id'],
+                        'quantity_ordered' => (float) $item['quantity_manual'],
+                        'quantity_received' => 0.0,
+                        'unit_price' => (float) ($priceByIngredient[$item['ingredient_id']] ?? 0),
+                    ]);
+                }
+
+                $poCount++;
+                $poCodes[] = $poCode;
             }
+        });
 
-            $poCount++;
-            $poCodes[] = $poCode;
-        }
-
-        Notification::make()
+        $notification = Notification::make()
             ->title('Tạo PO thành công!')
             ->body("Đã tạo tự động {$poCount} đơn đặt hàng nháp: ".implode(', ', $poCodes))
             ->success()
-            ->persistent()
-            ->send();
+            ->persistent();
+
+        if ($skippedNames !== []) {
+            $notification->body(
+                "Đã tạo {$poCount} đơn đặt hàng nháp: ".implode(', ', $poCodes)
+                ."\n⚠️ BỎ QUA (chưa gán nhà cung cấp): ".implode(', ', array_unique($skippedNames))
+            )->warning();
+        }
+
+        $notification->send();
 
         $this->mode = 'list';
     }

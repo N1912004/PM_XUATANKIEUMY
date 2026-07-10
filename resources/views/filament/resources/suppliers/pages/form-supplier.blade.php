@@ -106,20 +106,17 @@
                                         <td>{{ $ing->type }}</td>
                                         <td>
                                             <input type="text"
-                                                   x-data="{ 
+                                                   x-data="{
                                                        rawVal: @entangle('ingredientCosts.' . $ing->id),
+                                                       {{-- VND không có số lẻ: chỉ nhận chữ số, hiển thị kiểu VN (dấu chấm nghìn) — đồng bộ với form Nguyên liệu --}}
                                                        get formatted() {
                                                            if (this.rawVal === undefined || this.rawVal === null || this.rawVal === '') return '';
-                                                           let clean = String(this.rawVal).replace(/[^0-9.]/g, '');
-                                                           let parts = clean.split('.');
-                                                           parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-                                                           return parts.join('.');
+                                                           let digits = String(Math.round(Number(this.rawVal) || 0));
+                                                           return digits.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
                                                        },
                                                        set formatted(val) {
-                                                           let clean = val.replace(/,/g, '');
-                                                           if (!isNaN(clean) || clean === '') {
-                                                               this.rawVal = clean === '' ? null : Number(clean);
-                                                           }
+                                                           let clean = String(val).replace(/[^0-9]/g, '');
+                                                           this.rawVal = clean === '' ? null : Number(clean);
                                                        }
                                                    }"
                                                    x-model="formatted"

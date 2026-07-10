@@ -134,7 +134,7 @@ class LeaveOvertimeResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('time_range')
                     ->label('THỜI GIAN / NGÀY ÁP DỤNG')
-                    ->state(fn ($record) => $record->start_date.($record->end_date ? ' đến '.$record->end_date : ''))
+                    ->state(fn ($record) => $record->start_date?->format('d/m/Y').($record->end_date ? ' đến '.$record->end_date->format('d/m/Y') : ''))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('duration_text')
                     ->label('SỐ NGÀY / SỐ GIỜ')

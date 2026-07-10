@@ -22,7 +22,7 @@ class ListLeaveOvertimes extends Page
     // Filters
     public $search = '';
 
-    public $monthFilter = '2026-05'; // Mặc định tháng seeder
+    public $monthFilter = '';
 
     public $departmentFilter = '';
 
@@ -43,11 +43,7 @@ class ListLeaveOvertimes extends Page
 
     public function mount(): void
     {
-        // Kiểm tra xem database có bất cứ bản ghi nào ở tháng 05/2026 không, nếu không lấy tháng hiện tại
-        $hasData = LeaveOvertime::where('start_date', 'like', '%05/2026%')
-            ->orWhere('start_date', 'like', '%2026-05%')
-            ->exists();
-        if (! $hasData) {
+        if ($this->monthFilter === '') {
             $this->monthFilter = now()->format('Y-m');
         }
     }
@@ -86,10 +82,7 @@ class ListLeaveOvertimes extends Page
     public function resetFilters()
     {
         $this->search = '';
-        $hasData = LeaveOvertime::where('start_date', 'like', '%05/2026%')
-            ->orWhere('start_date', 'like', '%2026-05%')
-            ->exists();
-        $this->monthFilter = $hasData ? '2026-05' : now()->format('Y-m');
+        $this->monthFilter = now()->format('Y-m');
         $this->departmentFilter = '';
         $this->typeFilter = '';
         $this->statusFilter = '';
@@ -117,12 +110,17 @@ class ListLeaveOvertimes extends Page
     {
         $item = LeaveOvertime::find($id);
         if ($item) {
+            abort_unless(LeaveOvertimeResource::canDelete($item), 403);
             $item->delete();
             session()->flash('message', 'Xóa yêu cầu thành công.');
         }
     }
 
-    public function leaveOvertimes()
+    /**
+     * Query gốc: PHÂN QUYỀN + toàn bộ bộ lọc — dùng chung cho bảng và export
+     * để export không bao giờ lộ dữ liệu ngoài phạm vi user được thấy.
+     */
+    protected function baseQuery()
     {
         $query = LeaveOvertime::with(['employee', 'approver']);
 
@@ -138,11 +136,6 @@ class ListLeaveOvertimes extends Page
             }
         }
 
-        // Tab lọc
-        if ($this->activeTab === 'history') {
-            $query->whereIn('status', ['Đã duyệt', 'Từ chối', 'Đã hủy']);
-        }
-
         // Tìm kiếm
         if ($this->search) {
             $query->whereHas('employee', function ($q) {
@@ -152,15 +145,15 @@ class ListLeaveOvertimes extends Page
             });
         }
 
-        // Bộ lọc tháng
+        // Bộ lọc tháng: cột đã là DATE nên lọc bằng khoảng ngày (dùng được index)
         if ($this->monthFilter) {
             $parts = explode('-', $this->monthFilter);
             if (count($parts) === 2) {
-                $monthStr = $parts[1].'/'.$parts[0]; // "MM/YYYY"
-                $query->where(function ($q) use ($monthStr) {
-                    $q->where('start_date', 'like', '%'.$monthStr.'%')
-                        ->orWhere('start_date', 'like', '%'.$this->monthFilter.'%');
-                });
+                $monthStart = \Carbon\Carbon::createFromDate((int) $parts[0], (int) $parts[1], 1);
+                $query->whereBetween('start_date', [
+                    $monthStart->toDateString(),
+                    $monthStart->copy()->endOfMonth()->toDateString(),
+                ]);
             }
         }
 
@@ -179,40 +172,26 @@ class ListLeaveOvertimes extends Page
             $query->where('status', $this->statusFilter);
         }
 
+        return $query;
+    }
+
+    public function leaveOvertimes()
+    {
+        $query = $this->baseQuery();
+
+        // Tab lọc
+        if ($this->activeTab === 'history') {
+            $query->whereIn('status', ['Đã duyệt', 'Từ chối', 'Đã hủy']);
+        }
+
         return $query->paginate($this->perPage);
     }
 
     public function exportLeaveOvertimes()
     {
-        $query = LeaveOvertime::with(['employee', 'approver']);
+        abort_unless(LeaveOvertimeResource::canViewAny(), 403);
 
-        if ($this->search) {
-            $query->whereHas('employee', function ($q) {
-                $q->where('name', 'like', '%'.$this->search.'%')
-                    ->orWhere('code', 'like', '%'.$this->search.'%');
-            });
-        }
-        if ($this->monthFilter) {
-            $parts = explode('-', $this->monthFilter);
-            if (count($parts) === 2) {
-                $monthStr = $parts[1].'/'.$parts[0];
-                $query->where(function ($q) use ($monthStr) {
-                    $q->where('start_date', 'like', '%'.$monthStr.'%')
-                        ->orWhere('start_date', 'like', '%'.$this->monthFilter.'%');
-                });
-            }
-        }
-        if ($this->departmentFilter) {
-            $query->whereHas('employee', fn ($q) => $q->where('department', $this->departmentFilter));
-        }
-        if ($this->typeFilter) {
-            $query->where('type', $this->typeFilter);
-        }
-        if ($this->statusFilter) {
-            $query->where('status', $this->statusFilter);
-        }
-
-        $records = $query->get();
+        $records = $this->baseQuery()->get();
         $filename = 'nghi_phep_tang_ca_'.($this->monthFilter ?: now()->format('Y-m')).'.csv';
 
         $headers = [
@@ -236,7 +215,7 @@ class ListLeaveOvertimes extends Page
                     $row->employee?->name,
                     $row->employee?->department,
                     $row->type,
-                    $row->start_date.($row->end_date ? ' - '.$row->end_date : ''),
+                    $row->start_date?->format('d/m/Y').($row->end_date && ! $row->end_date->equalTo($row->start_date) ? ' - '.$row->end_date->format('d/m/Y') : ''),
                     $row->duration_text,
                     $row->reason,
                     $row->approver?->name,

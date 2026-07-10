@@ -83,9 +83,9 @@ class IngredientResource extends Resource
                             ->prefix('VND')
                             ->placeholder('Nhập đơn giá tham chiếu cơ bản')
                             ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
-                            ->stripCharacters(',')
+                            ->stripCharacters(['.', ','])
                             ->formatStateUsing(fn ($state) => $state ? round((float) $state) : 0)
-                            ->dehydrateStateUsing(fn ($state) => $state ? (float) str_replace([',', '.'], '', $state) : 0),
+                            ->dehydrateStateUsing(fn ($state) => $state ? (float) str_replace([',', '.'], '', (string) $state) : 0),
                         Forms\Components\Toggle::make('status')
                             ->label('Trạng thái')
                             ->default(true)

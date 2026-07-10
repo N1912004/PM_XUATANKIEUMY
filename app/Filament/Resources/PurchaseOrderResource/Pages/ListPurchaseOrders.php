@@ -170,6 +170,8 @@ class ListPurchaseOrders extends Page
 
     public function exportExcel(): StreamedResponse
     {
+        abort_unless(PurchaseOrderResource::canViewAny(), 403);
+
         $fileName = 'don-dat-hang-'.now()->format('Ymd-His').'.csv';
 
         return response()->streamDownload(function (): void {
@@ -224,6 +226,11 @@ class ListPurchaseOrders extends Page
         [$startOfMonth, $endOfMonth] = $this->monthRange();
 
         return PurchaseOrder::query()
+            // Kitchen scoping theo convention Timekeeping: user thường chỉ thấy PO của bếp mình
+            ->when(
+                ($user = auth()->user()) && ! $user->hasRole(['super_admin', 'Quản trị viên']),
+                fn ($query) => $query->where('kitchen_id', auth()->user()->currentKitchenId() ?? -1)
+            )
             ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
             ->when($this->search !== '', function ($query): void {
                 $search = mb_strtolower($this->search);
@@ -236,15 +243,22 @@ class ListPurchaseOrders extends Page
                 });
             })
             ->when($this->typeFilter !== '', function ($query): void {
+                // Ưu tiên cột type (PO mới); fallback LIKE trên note/code cho dữ liệu cũ chưa có type
                 if ($this->typeFilter === 'week') {
                     $query->where(function ($q) {
-                        $q->whereRaw('LOWER(note) LIKE ?', ['%tuần%'])
-                            ->orWhereRaw('LOWER(code) LIKE ?', ['%tuan%']);
+                        $q->where('type', 'week')
+                            ->orWhere(fn ($qq) => $qq->whereNull('type')->where(function ($w) {
+                                $w->whereRaw('LOWER(note) LIKE ?', ['%tuần%'])
+                                    ->orWhereRaw('LOWER(code) LIKE ?', ['%tuan%']);
+                            }));
                     });
                 } elseif ($this->typeFilter === 'day') {
                     $query->where(function ($q) {
-                        $q->whereRaw('LOWER(note) LIKE ?', ['%ngày%'])
-                            ->orWhereRaw('LOWER(code) LIKE ?', ['%ngay%']);
+                        $q->where('type', 'day')
+                            ->orWhere(fn ($qq) => $qq->whereNull('type')->where(function ($w) {
+                                $w->whereRaw('LOWER(note) LIKE ?', ['%ngày%'])
+                                    ->orWhereRaw('LOWER(code) LIKE ?', ['%ngay%']);
+                            }));
                     });
                 }
             })

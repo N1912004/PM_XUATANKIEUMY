@@ -17,6 +17,7 @@ use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
 use Livewire\WithFileUploads;
 
 class ListStocks extends ListRecords
@@ -223,30 +224,40 @@ class ListStocks extends ListRecords
     // End Day Check Save
     public function saveEndDay(): void
     {
+        abort_unless(StockResource::canEdit(new Stock), 403);
+
         $kitchenId = auth()->user()?->currentKitchenId();
 
-        foreach ($this->actualQuantities as $stockId => $actualQty) {
-            $stock = Stock::find($stockId);
-            if (! $stock) {
-                continue;
+        DB::transaction(function () use ($kitchenId): void {
+            foreach ($this->actualQuantities as $stockId => $actualQty) {
+                // Khóa dòng tồn và chỉ chấp nhận stock thuộc bếp của user (chống sửa payload chéo bếp)
+                $stock = Stock::query()
+                    ->whereKey($stockId)
+                    ->when($kitchenId, fn ($q) => $q->where('kitchen_id', $kitchenId))
+                    ->lockForUpdate()
+                    ->first();
+
+                if (! $stock) {
+                    continue;
+                }
+
+                $diff = (float) $actualQty - (float) $stock->quantity;
+                if ($diff != 0) {
+                    $type = $diff > 0 ? 'Nhập kho' : 'Xuất kho';
+
+                    StockTransaction::create([
+                        'kitchen_id' => $stock->kitchen_id,
+                        'ingredient_id' => $stock->ingredient_id,
+                        'type' => $type,
+                        'quantity' => abs($diff),
+                        'after_quantity' => $actualQty,
+                        'note' => 'Kiểm kê cuối ngày: '.(($this->checkNotes[$stockId] ?? '') ?: 'Điều chỉnh chênh lệch thực tế'),
+                    ]);
+
+                    $stock->update(['quantity' => $actualQty]);
+                }
             }
-
-            $diff = (float) $actualQty - (float) $stock->quantity;
-            if ($diff != 0) {
-                $type = $diff > 0 ? 'Nhập kho' : 'Xuất kho';
-
-                StockTransaction::create([
-                    'kitchen_id' => $kitchenId,
-                    'ingredient_id' => $stock->ingredient_id,
-                    'type' => $type,
-                    'quantity' => abs($diff),
-                    'after_quantity' => $actualQty,
-                    'note' => 'Kiểm kê cuối ngày: '.($this->checkNotes[$stockId] ?: 'Điều chỉnh chênh lệch thực tế'),
-                ]);
-
-                $stock->update(['quantity' => $actualQty]);
-            }
-        }
+        });
 
         Notification::make()
             ->title('Đã lưu tồn cuối ngày thành công!')
@@ -291,72 +302,102 @@ class ListStocks extends ListRecords
 
     public function confirmInboundPO(): void
     {
+        abort_unless(StockResource::canCreate(), 403);
+
         if (! $this->selectedPOId) {
             Notification::make()->title('Vui lòng chọn đơn đặt hàng hợp lệ!')->danger()->send();
 
             return;
         }
 
-        $po = PurchaseOrder::find($this->selectedPOId);
-        if (! $po) {
-            Notification::make()->title('Đơn đặt hàng không tồn tại!')->danger()->send();
+        $done = DB::transaction(function (): bool {
+            // Khóa PO và kiểm tra lại trạng thái NGAY TRONG transaction:
+            // bấm đúp / 2 người cùng xác nhận thì người sau thấy stocked_at đã có và dừng.
+            $po = PurchaseOrder::query()->whereKey($this->selectedPOId)->lockForUpdate()->first();
 
-            return;
-        }
+            if (! $po) {
+                Notification::make()->title('Đơn đặt hàng không tồn tại!')->danger()->send();
 
-        $kitchenId = auth()->user()?->currentKitchenId() ?? $po->kitchen_id;
-
-        foreach ($this->poItemsData as $itemData) {
-            $qtyReceived = (float) ($itemData['quantity_received'] ?? 0);
-            $unitPrice = (float) ($itemData['unit_price'] ?? 0);
-
-            if ($qtyReceived <= 0) {
-                continue;
+                return false;
             }
 
-            $poItem = PurchaseOrderItem::find($itemData['id']);
-            if ($poItem) {
+            if ($po->status === 'done' || $po->stocked_at !== null) {
+                Notification::make()->title('Đơn này đã được nhập kho trước đó!')->warning()->send();
+
+                return false;
+            }
+
+            $kitchenId = auth()->user()?->currentKitchenId() ?? $po->kitchen_id;
+
+            foreach ($this->poItemsData as $itemData) {
+                $qtyReceived = (float) ($itemData['quantity_received'] ?? 0);
+                $unitPrice = (float) ($itemData['unit_price'] ?? 0);
+
+                if ($qtyReceived <= 0) {
+                    continue;
+                }
+
+                // Chỉ nhận item thuộc đúng PO đang xác nhận (chống sửa payload trỏ sang PO khác)
+                $poItem = PurchaseOrderItem::query()
+                    ->whereKey($itemData['id'])
+                    ->where('purchase_order_id', $po->id)
+                    ->first();
+
+                if (! $poItem) {
+                    continue;
+                }
+
                 $poItem->update([
                     'quantity_received' => $qtyReceived,
                     'unit_price' => $unitPrice,
                 ]);
+
+                $stock = Stock::query()
+                    ->where('kitchen_id', $kitchenId)
+                    ->where('ingredient_id', $poItem->ingredient_id)
+                    ->lockForUpdate()
+                    ->first();
+
+                if (! $stock) {
+                    $stock = Stock::create([
+                        'kitchen_id' => $kitchenId,
+                        'ingredient_id' => $poItem->ingredient_id,
+                        'quantity' => 0,
+                        'min_quantity' => 10,
+                        'unit_price' => $unitPrice,
+                    ]);
+                }
+
+                $newQty = (float) $stock->quantity + $qtyReceived;
+
+                $stock->update([
+                    'quantity' => $newQty,
+                    'unit_price' => $unitPrice > 0 ? $unitPrice : $stock->unit_price,
+                ]);
+
+                StockTransaction::create([
+                    'kitchen_id' => $kitchenId,
+                    'ingredient_id' => $poItem->ingredient_id,
+                    'type' => 'Nhập kho',
+                    'voucher_code' => $po->code,
+                    'quantity' => $qtyReceived,
+                    'after_quantity' => $newQty,
+                    'note' => "Nhập kho thực tế từ đơn đặt hàng: {$po->code}",
+                ]);
             }
 
-            $stock = Stock::firstOrCreate(
-                [
-                    'kitchen_id' => $kitchenId,
-                    'ingredient_id' => $itemData['ingredient_id'],
-                ],
-                [
-                    'quantity' => 0,
-                    'min_quantity' => 10,
-                    'unit_price' => $unitPrice,
-                ]
-            );
-
-            $oldQty = $stock->quantity;
-            $newQty = $oldQty + $qtyReceived;
-
-            $stock->update([
-                'quantity' => $newQty,
-                'unit_price' => $unitPrice > 0 ? $unitPrice : $stock->unit_price,
+            // updateQuietly: đã nhập kho tại đây rồi, không để hook booted của PurchaseOrder nhập lần 2
+            $po->updateQuietly([
+                'status' => 'done',
+                'stocked_at' => now(),
             ]);
 
-            StockTransaction::create([
-                'kitchen_id' => $kitchenId,
-                'ingredient_id' => $itemData['ingredient_id'],
-                'type' => 'Nhập kho',
-                'voucher_code' => $po->code,
-                'quantity' => $qtyReceived,
-                'after_quantity' => $newQty,
-                'note' => "Nhập kho thực tế từ đơn đặt hàng: {$po->code}",
-            ]);
+            return true;
+        });
+
+        if (! $done) {
+            return;
         }
-
-        $po->update([
-            'status' => 'done',
-            'stocked_at' => now(),
-        ]);
 
         Notification::make()->title('Đã xác nhận nhập theo PO và cập nhật Thẻ kho!')->success()->send();
 
@@ -383,6 +424,8 @@ class ListStocks extends ListRecords
 
     public function confirmDirectInbound(): void
     {
+        abort_unless(StockResource::canCreate(), 403);
+
         if (empty($this->directItemsData)) {
             Notification::make()->title('Vui lòng thêm ít nhất một mặt hàng!')->danger()->send();
 
@@ -394,6 +437,12 @@ class ListStocks extends ListRecords
 
             return;
         }
+
+        // Chỉ nhận ảnh/PDF tối đa 5MB — chặn upload file thực thi/script vào disk public
+        $this->validate(
+            ['directInvoiceFile' => ['file', 'mimes:jpg,jpeg,png,webp,pdf', 'max:5120']],
+            ['directInvoiceFile.mimes' => 'Chứng từ chỉ chấp nhận ảnh (JPG/PNG/WEBP) hoặc PDF.', 'directInvoiceFile.max' => 'Chứng từ tối đa 5MB.'],
+        );
 
         $kitchenId = auth()->user()?->currentKitchenId();
         $path = $this->directInvoiceFile->store('stock-vouchers', 'public');
@@ -487,6 +536,8 @@ class ListStocks extends ListRecords
 
     public function confirmProductionOut(): void
     {
+        abort_unless(StockResource::canEdit(new Stock), 403);
+
         if (empty($this->prodItemsData)) {
             Notification::make()->title('Không có nguyên liệu sản xuất cần xuất!')->danger()->send();
 
@@ -495,44 +546,50 @@ class ListStocks extends ListRecords
 
         $kitchenId = auth()->user()?->currentKitchenId() ?? Kitchen::first()?->id;
 
-        foreach ($this->prodItemsData as $itemData) {
-            $actual = (float) ($itemData['quantity_actual'] ?? 0);
-            $available = (float) ($itemData['available_qty'] ?? 0);
-
-            if ($actual > $available) {
-                Notification::make()->title("Số lượng xuất của {$itemData['name']} vượt quá lượng tồn khả dụng ($available)! Vui lòng điều chỉnh lại.")
-                    ->danger()
-                    ->send();
-
-                return;
-            }
-        }
-
         $shift = Shift::find($this->prodShiftId);
         $shiftName = $shift ? $shift->name : "Ca #{$this->prodShiftId}";
-        $voucherCode = 'PX-SX-'.now()->format('Ymd').'-'.str_pad((string) random_int(1, 999), 3, '0', STR_PAD_LEFT);
 
-        foreach ($this->prodItemsData as $itemData) {
-            $qty = (float) ($itemData['quantity_actual'] ?? 0);
-            if ($qty <= 0) {
-                continue;
-            }
+        try {
+            DB::transaction(function () use ($kitchenId, $shiftName): void {
+                $voucherCode = $this->nextVoucherCode('PX-SX');
 
-            $stock = Stock::where('kitchen_id', $kitchenId)->where('ingredient_id', $itemData['ingredient_id'])->first();
-            if ($stock) {
-                $newQty = $stock->quantity - $qty;
-                $stock->update(['quantity' => $newQty]);
+                foreach ($this->prodItemsData as $itemData) {
+                    $qty = (float) ($itemData['quantity_actual'] ?? 0);
+                    if ($qty <= 0) {
+                        continue;
+                    }
 
-                StockTransaction::create([
-                    'kitchen_id' => $kitchenId,
-                    'ingredient_id' => $itemData['ingredient_id'],
-                    'type' => 'Xuất kho',
-                    'voucher_code' => $voucherCode,
-                    'quantity' => -$qty,
-                    'after_quantity' => $newQty,
-                    'note' => "Xuất kho sản xuất ca {$shiftName} ngày {$this->prodDate}",
-                ]);
-            }
+                    // Khóa dòng tồn và kiểm tra tồn khả dụng THỰC TẾ tại thời điểm xuất
+                    // (không tin available_qty do client giữ từ lúc mở form)
+                    $stock = Stock::query()
+                        ->where('kitchen_id', $kitchenId)
+                        ->where('ingredient_id', $itemData['ingredient_id'])
+                        ->lockForUpdate()
+                        ->first();
+
+                    $available = $stock ? ((float) $stock->quantity - (float) $stock->frozen_quantity) : 0.0;
+                    if (! $stock || $qty > $available) {
+                        throw new \RuntimeException("Số lượng xuất của {$itemData['name']} vượt quá lượng tồn khả dụng ({$available})! Vui lòng điều chỉnh lại.");
+                    }
+
+                    $newQty = (float) $stock->quantity - $qty;
+                    $stock->update(['quantity' => $newQty]);
+
+                    StockTransaction::create([
+                        'kitchen_id' => $kitchenId,
+                        'ingredient_id' => $itemData['ingredient_id'],
+                        'type' => 'Xuất kho',
+                        'voucher_code' => $voucherCode,
+                        'quantity' => -$qty,
+                        'after_quantity' => $newQty,
+                        'note' => "Xuất kho sản xuất ca {$shiftName} ngày {$this->prodDate}",
+                    ]);
+                }
+            });
+        } catch (\RuntimeException $e) {
+            Notification::make()->title($e->getMessage())->danger()->send();
+
+            return;
         }
 
         Notification::make()->title('Đã xác nhận xuất kho sản xuất và ghi Thẻ kho!')->success()->send();
@@ -540,6 +597,21 @@ class ListStocks extends ListRecords
         $this->outMode = null;
         $this->prodItemsData = [];
         $this->warehouseTab = 'stock';
+    }
+
+    /**
+     * Sinh mã phiếu tuần tự theo ngày (max hiện có + 1) — thay cho random_int(1,999) dễ trùng.
+     * Gọi bên trong DB::transaction để thu hẹp tối đa cửa sổ race giữa 2 phiếu đồng thời.
+     */
+    protected function nextVoucherCode(string $type): string
+    {
+        $prefix = $type.'-'.now()->format('Ymd').'-';
+        $last = StockTransaction::where('voucher_code', 'like', $prefix.'%')
+            ->orderByDesc('voucher_code')
+            ->value('voucher_code');
+        $sequence = $last ? ((int) substr($last, strlen($prefix))) + 1 : 1;
+
+        return $prefix.str_pad((string) $sequence, 4, '0', STR_PAD_LEFT);
     }
 
     // Transfer Outbound Handlers
@@ -576,6 +648,8 @@ class ListStocks extends ListRecords
 
     public function confirmTransferOut(): void
     {
+        abort_unless(StockResource::canEdit(new Stock), 403);
+
         if (! $this->destKitchenId) {
             Notification::make()->title('Vui lòng chọn bếp nhận!')->danger()->send();
 
@@ -614,31 +688,47 @@ class ListStocks extends ListRecords
             }
         }
 
-        $transfer = StockTransfer::create([
-            'code' => 'CK-'.now()->format('Ymd').'-'.str_pad((string) random_int(1, 999), 3, '0', STR_PAD_LEFT),
-            'source_kitchen_id' => $sourceKitchenId,
-            'dest_kitchen_id' => $this->destKitchenId,
-            'status' => StockTransfer::STATUS_IN_TRANSIT,
-            'created_by' => auth()->id(),
-            'note' => $this->transferNote,
-        ]);
+        try {
+            // Tạo phiếu + items + đóng băng tồn trong MỘT transaction: lỗi bước nào rollback toàn bộ,
+            // không để lại phiếu "Đang chuyển" mà chưa đóng băng tồn (hoặc ngược lại).
+            DB::transaction(function () use ($sourceKitchenId): void {
+                $lastCode = StockTransfer::where('code', 'like', 'CK-'.now()->format('Ymd').'-%')
+                    ->orderByDesc('code')
+                    ->value('code');
+                $sequence = $lastCode ? ((int) substr($lastCode, -4)) + 1 : 1;
 
-        foreach ($this->transferItemsData as $itemData) {
-            $ingId = $itemData['ingredient_id'];
-            $qty = (float) ($itemData['quantity'] ?? 0);
+                $transfer = StockTransfer::create([
+                    'code' => 'CK-'.now()->format('Ymd').'-'.str_pad((string) $sequence, 4, '0', STR_PAD_LEFT),
+                    'source_kitchen_id' => $sourceKitchenId,
+                    'dest_kitchen_id' => $this->destKitchenId,
+                    'status' => StockTransfer::STATUS_IN_TRANSIT,
+                    'created_by' => auth()->id(),
+                    'note' => $this->transferNote,
+                ]);
 
-            if (! $ingId || $qty <= 0) {
-                continue;
-            }
+                foreach ($this->transferItemsData as $itemData) {
+                    $ingId = $itemData['ingredient_id'];
+                    $qty = (float) ($itemData['quantity'] ?? 0);
 
-            StockTransferItem::create([
-                'stock_transfer_id' => $transfer->id,
-                'ingredient_id' => $ingId,
-                'quantity' => $qty,
-            ]);
+                    if (! $ingId || $qty <= 0) {
+                        continue;
+                    }
+
+                    StockTransferItem::create([
+                        'stock_transfer_id' => $transfer->id,
+                        'ingredient_id' => $ingId,
+                        'quantity' => $qty,
+                    ]);
+                }
+
+                // Kiểm tra tồn khả dụng thực tế + đóng băng (ném RuntimeException nếu thiếu)
+                $transfer->freezeSourceStock();
+            });
+        } catch (\RuntimeException $e) {
+            Notification::make()->title($e->getMessage())->danger()->send();
+
+            return;
         }
-
-        $transfer->freezeSourceStock();
 
         Notification::make()->title('Đã tạo phiếu điều chuyển thành công! Trạng thái: Đang chuyển.')->success()->send();
 
@@ -650,9 +740,19 @@ class ListStocks extends ListRecords
 
     public function confirmTransferReceive(int $transferId): void
     {
+        abort_unless(StockResource::canEdit(new Stock), 403);
+
         $transfer = StockTransfer::find($transferId);
         if (! $transfer) {
             Notification::make()->title('Không tìm thấy phiếu điều chuyển!')->danger()->send();
+
+            return;
+        }
+
+        // Chỉ BẾP NHẬN mới được xác nhận nhận hàng (blade chỉ ẩn nút — không đủ, phải chặn server-side)
+        $kitchenId = auth()->user()?->currentKitchenId();
+        if ($kitchenId !== null && (int) $transfer->dest_kitchen_id !== (int) $kitchenId) {
+            Notification::make()->title('Chỉ bếp nhận mới được xác nhận nhận hàng của phiếu này!')->danger()->send();
 
             return;
         }
@@ -714,6 +814,8 @@ class ListStocks extends ListRecords
     // Original Single Item Movement Fallbacks (for compatibility if called)
     public function saveMovement(string $type): void
     {
+        abort_unless(StockResource::canEdit(new Stock), 403);
+
         if ($type === 'in') {
             if (! $this->inIngredientId || $this->inQuantity <= 0) {
                 Notification::make()->title('Vui lòng chọn nguyên liệu và số lượng hợp lệ!')->danger()->send();
@@ -722,31 +824,39 @@ class ListStocks extends ListRecords
             }
 
             $kitchenId = auth()->user()?->currentKitchenId();
-            $stock = Stock::where('kitchen_id', $kitchenId)->where('ingredient_id', $this->inIngredientId)->first();
-            if (! $stock) {
-                $stock = Stock::create([
-                    'kitchen_id' => $kitchenId,
-                    'ingredient_id' => $this->inIngredientId,
-                    'quantity' => 0,
-                    'min_quantity' => 10,
-                    'unit_price' => $this->inPrice,
+
+            DB::transaction(function () use ($kitchenId): void {
+                $stock = Stock::where('kitchen_id', $kitchenId)
+                    ->where('ingredient_id', $this->inIngredientId)
+                    ->lockForUpdate()
+                    ->first();
+
+                if (! $stock) {
+                    $stock = Stock::create([
+                        'kitchen_id' => $kitchenId,
+                        'ingredient_id' => $this->inIngredientId,
+                        'quantity' => 0,
+                        'min_quantity' => 10,
+                        'unit_price' => $this->inPrice,
+                    ]);
+                }
+
+                $newQty = (float) $stock->quantity + $this->inQuantity;
+
+                $stock->update([
+                    'quantity' => $newQty,
+                    'unit_price' => $this->inPrice > 0 ? $this->inPrice : $stock->unit_price,
                 ]);
-            }
 
-            $newQty = $stock->quantity + $this->inQuantity;
-            StockTransaction::create([
-                'kitchen_id' => $kitchenId,
-                'ingredient_id' => $stock->ingredient_id,
-                'type' => 'Nhập kho',
-                'quantity' => $this->inQuantity,
-                'after_quantity' => $newQty,
-                'note' => $this->inRef ?: 'Nhập kho trực tiếp',
-            ]);
-
-            $stock->update([
-                'quantity' => $newQty,
-                'unit_price' => $this->inPrice > 0 ? $this->inPrice : $stock->unit_price,
-            ]);
+                StockTransaction::create([
+                    'kitchen_id' => $kitchenId,
+                    'ingredient_id' => $stock->ingredient_id,
+                    'type' => 'Nhập kho',
+                    'quantity' => $this->inQuantity,
+                    'after_quantity' => $newQty,
+                    'note' => $this->inRef ?: 'Nhập kho trực tiếp',
+                ]);
+            });
 
             Notification::make()->title('Đã lưu nhập kho thành công!')->success()->send();
 
@@ -760,24 +870,38 @@ class ListStocks extends ListRecords
             }
 
             $kitchenId = auth()->user()?->currentKitchenId();
-            $stock = Stock::where('kitchen_id', $kitchenId)->where('ingredient_id', $this->outIngredientId)->first();
-            if (! $stock || $stock->quantity < $this->outQuantity) {
-                Notification::make()->title('Số lượng tồn kho không đủ để xuất!')->danger()->send();
+
+            try {
+                DB::transaction(function () use ($kitchenId): void {
+                    $stock = Stock::where('kitchen_id', $kitchenId)
+                        ->where('ingredient_id', $this->outIngredientId)
+                        ->lockForUpdate()
+                        ->first();
+
+                    // So sánh với tồn KHẢ DỤNG (trừ phần đang đóng băng cho điều chuyển), không phải tồn thô
+                    $available = $stock ? ((float) $stock->quantity - (float) $stock->frozen_quantity) : 0.0;
+                    if (! $stock || $available < $this->outQuantity) {
+                        throw new \RuntimeException('Số lượng tồn khả dụng không đủ để xuất!');
+                    }
+
+                    $newQty = (float) $stock->quantity - $this->outQuantity;
+
+                    $stock->update(['quantity' => $newQty]);
+
+                    StockTransaction::create([
+                        'kitchen_id' => $kitchenId,
+                        'ingredient_id' => $stock->ingredient_id,
+                        'type' => 'Xuất kho',
+                        'quantity' => $this->outQuantity,
+                        'after_quantity' => $newQty,
+                        'note' => $this->outReason.($this->outRef ? ' ('.$this->outRef.')' : ''),
+                    ]);
+                });
+            } catch (\RuntimeException $e) {
+                Notification::make()->title($e->getMessage())->danger()->send();
 
                 return;
             }
-
-            $newQty = $stock->quantity - $this->outQuantity;
-            StockTransaction::create([
-                'kitchen_id' => $kitchenId,
-                'ingredient_id' => $stock->ingredient_id,
-                'type' => 'Xuất kho',
-                'quantity' => $this->outQuantity,
-                'after_quantity' => $newQty,
-                'note' => $this->outReason.($this->outRef ? ' ('.$this->outRef.')' : ''),
-            ]);
-
-            $stock->update(['quantity' => $newQty]);
 
             Notification::make()->title('Đã lưu xuất kho thành công!')->success()->send();
 

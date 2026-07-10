@@ -9,7 +9,10 @@ use Illuminate\Database\Eloquent\Builder;
 
 /**
  * Phân cấp dữ liệu theo Bếp: tự động lọc bản ghi theo bếp của người dùng đang đăng nhập,
- * và cung cấp sẵn field/cột "Bếp" cho Resource. Nếu người dùng chưa gắn bếp (null) thì xem toàn bộ.
+ * và cung cấp sẵn field/cột "Bếp" cho Resource.
+ *
+ * Fail-closed: người dùng thường CHƯA được gắn bếp thì không thấy bản ghi nào
+ * (trước đây fail-open — user chưa gán bếp xem được dữ liệu của TẤT CẢ các bếp).
  */
 trait BelongsToKitchen
 {
@@ -30,6 +33,8 @@ trait BelongsToKitchen
 
         if ($kitchenId) {
             $query->where($query->getModel()->getTable().'.kitchen_id', $kitchenId);
+        } else {
+            $query->whereRaw('1 = 0');
         }
 
         return $query;

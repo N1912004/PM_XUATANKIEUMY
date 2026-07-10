@@ -238,6 +238,8 @@ class BaoCao extends Page
      */
     public function exportExcel(): BinaryFileResponse
     {
+        abort_unless(auth()->user()?->can('page_BaoCao') ?? false, 403);
+
         $fileName = 'BaoCao_TaiChinh_'.str_replace('-', '', (string) $this->fromDate)
             .'_'.str_replace('-', '', (string) $this->toDate).'.xlsx';
 

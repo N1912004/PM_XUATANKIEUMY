@@ -89,8 +89,10 @@ class ListEmployees extends Page
             foreach ($docs as $doc) {
                 if (! empty($doc['expired_at'])) {
                     try {
+                        // Carbon 3: diffInDays có dấu (âm khi expired_at ở tương lai) nên điều kiện cũ
+                        // "<= 30" đúng với MỌI hồ sơ còn hạn — đếm "sắp hết hạn" bằng isBetween cho chuẩn
                         $expDate = Carbon::parse($doc['expired_at']);
-                        if ($expDate->isPast() || $expDate->diffInDays(now()) <= 30) {
+                        if ($expDate->isPast() || $expDate->isBetween(now(), now()->addDays(30))) {
                             $expDocsCount++;
                         }
                     } catch (\Exception $e) {
@@ -164,6 +166,8 @@ class ListEmployees extends Page
      */
     public function exportEmployees(): StreamedResponse
     {
+        abort_unless(EmployeeResource::canViewAny(), 403);
+
         // Export tôn trọng đúng bộ lọc/tìm kiếm đang áp dụng trên bảng
         $employees = $this->baseQuery()->with('area')->get();
         $fileName = 'DANH_SACH_NHAN_VIEN_'.now()->format('Ymd').'.csv';

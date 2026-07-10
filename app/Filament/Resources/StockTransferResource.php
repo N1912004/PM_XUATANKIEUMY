@@ -127,8 +127,25 @@ class StockTransferResource extends Resource
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
                     ->requiresConfirmation()
-                    ->visible(fn (StockTransfer $record): bool => $record->status === StockTransfer::STATUS_IN_TRANSIT)
+                    // Chỉ BẾP NHẬN (hoặc quản trị) mới thấy/bấm được nút nhận hàng — bếp xuất không tự xác nhận thay
+                    ->visible(function (StockTransfer $record): bool {
+                        if ($record->status !== StockTransfer::STATUS_IN_TRANSIT) {
+                            return false;
+                        }
+                        $user = Filament::auth()->user();
+                        if (! $user || $user->hasRole(['super_admin', 'Quản trị viên'])) {
+                            return true;
+                        }
+
+                        return (int) $record->dest_kitchen_id === (int) $user->currentKitchenId();
+                    })
                     ->action(function (StockTransfer $record): void {
+                        $user = Filament::auth()->user();
+                        abort_if(
+                            $user && ! $user->hasRole(['super_admin', 'Quản trị viên'])
+                                && (int) $record->dest_kitchen_id !== (int) $user->currentKitchenId(),
+                            403
+                        );
                         $record->confirmReceived(Filament::auth()->id());
                         Notification::make()->title('Đã nhận hàng & cập nhật tồn kho bếp nhận')->success()->send();
                     }),
@@ -137,8 +154,25 @@ class StockTransferResource extends Resource
                     ->icon('heroicon-o-x-circle')
                     ->color('danger')
                     ->requiresConfirmation()
-                    ->visible(fn (StockTransfer $record): bool => $record->status === StockTransfer::STATUS_IN_TRANSIT)
+                    // Hủy phiếu: chỉ bếp XUẤT (nơi tạo phiếu) hoặc quản trị
+                    ->visible(function (StockTransfer $record): bool {
+                        if ($record->status !== StockTransfer::STATUS_IN_TRANSIT) {
+                            return false;
+                        }
+                        $user = Filament::auth()->user();
+                        if (! $user || $user->hasRole(['super_admin', 'Quản trị viên'])) {
+                            return true;
+                        }
+
+                        return (int) $record->source_kitchen_id === (int) $user->currentKitchenId();
+                    })
                     ->action(function (StockTransfer $record): void {
+                        $user = Filament::auth()->user();
+                        abort_if(
+                            $user && ! $user->hasRole(['super_admin', 'Quản trị viên'])
+                                && (int) $record->source_kitchen_id !== (int) $user->currentKitchenId(),
+                            403
+                        );
                         $record->cancel();
                         Notification::make()->title('Đã hủy phiếu & hoàn tồn về bếp xuất')->warning()->send();
                     }),

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Employee extends Model
 {
@@ -62,12 +63,12 @@ class Employee extends Model
         return $this->belongsTo(Employee::class, 'manager_id');
     }
 
-    public function timekeepings()
+    public function timekeepings(): HasMany
     {
         return $this->hasMany(Timekeeping::class);
     }
 
-    public function leaveOvertimes()
+    public function leaveOvertimes(): HasMany
     {
         return $this->hasMany(LeaveOvertime::class);
     }

@@ -108,8 +108,7 @@ class StockTransactionResource extends Resource
                     ->relationship('ingredient', 'name'),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\ViewAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -123,6 +122,25 @@ class StockTransactionResource extends Resource
         return [
             //
         ];
+    }
+
+    /**
+     * Sổ thẻ kho là LEDGER BẤT BIẾN: mọi biến động tồn phải đi qua các luồng nghiệp vụ
+     * (nhập PO, nhập ngoài, xuất sản xuất, điều chuyển, kiểm kê) — không tạo/sửa/xóa tay.
+     */
+    public static function canCreate(): bool
+    {
+        return false;
+    }
+
+    public static function canEdit(\Illuminate\Database\Eloquent\Model $record): bool
+    {
+        return false;
+    }
+
+    public static function canDelete(\Illuminate\Database\Eloquent\Model $record): bool
+    {
+        return false;
     }
 
     public static function getPages(): array

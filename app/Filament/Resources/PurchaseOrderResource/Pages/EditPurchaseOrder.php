@@ -43,6 +43,8 @@ class EditPurchaseOrder extends EditRecord
      */
     public function exportCurrentNcc(): StreamedResponse
     {
+        abort_unless(PurchaseOrderResource::canView($this->record), 403);
+
         $order = $this->record->load(['supplier', 'kitchen', 'items.ingredient']);
         $fileName = 'PO-'.$order->code.'-'.now()->format('Ymd').'.csv';
 
@@ -77,10 +79,15 @@ class EditPurchaseOrder extends EditRecord
      */
     public function exportAllNcc(): StreamedResponse
     {
+        abort_unless(PurchaseOrderResource::canView($this->record), 403);
+
+        // Chỉ xuất các PO cùng đợt mà user thực sự có quyền xem (không vượt phạm vi record đã authorize)
         $relatedPOs = PurchaseOrder::with(['supplier', 'kitchen', 'items.ingredient'])
             ->where('kitchen_id', $this->record->kitchen_id)
             ->where('estimated_delivery_date', $this->record->estimated_delivery_date)
-            ->get();
+            ->get()
+            ->filter(fn ($po) => PurchaseOrderResource::canView($po))
+            ->values();
 
         // Null-safe: PO có thể chưa có ngày giao dự kiến
         $fileName = 'PO-DOT-'.($this->record->estimated_delivery_date?->format('Ymd') ?? now()->format('Ymd')).'.csv';

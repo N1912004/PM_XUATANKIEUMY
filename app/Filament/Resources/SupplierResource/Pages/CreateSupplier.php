@@ -48,6 +48,8 @@ class CreateSupplier extends Page
 
     public function save(): void
     {
+        abort_unless(SupplierResource::canCreate(), 403);
+
         $data = $this->validate($this->rules());
 
         $supplier = Supplier::query()->create($data);

@@ -11,6 +11,7 @@ use Filament\Resources\Pages\Page;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Livewire\WithPagination;
 
 class ListMenus extends Page
@@ -31,7 +32,7 @@ class ListMenus extends Page
 
     public $statusFilter = ''; // 'draft', 'sent', 'locked'
 
-    public $monthFilter = '2026-05'; // Mặc định tháng seeder
+    public $monthFilter = '';
 
     public int $perPage = 10;
 
@@ -65,9 +66,7 @@ class ListMenus extends Page
 
     public function mount(): void
     {
-        // Kiểm tra xem DB có dữ liệu tháng 5/2026 không, nếu không lấy tháng hiện tại
-        $hasData = Menu::where('date', 'like', '%2026-05%')->exists();
-        if (! $hasData) {
+        if ($this->monthFilter === '') {
             $this->monthFilter = now()->format('Y-m');
         }
 
@@ -91,8 +90,7 @@ class ListMenus extends Page
         $this->search = '';
         $this->typeFilter = '';
         $this->statusFilter = '';
-        $hasData = Menu::where('date', 'like', '%2026-05%')->exists();
-        $this->monthFilter = $hasData ? '2026-05' : now()->format('Y-m');
+        $this->monthFilter = now()->format('Y-m');
         $this->resetPage();
     }
 
@@ -126,19 +124,22 @@ class ListMenus extends Page
     // ==========================================
     public function getStats()
     {
-        // KPIs tĩnh & động
-        $totalMenus = Menu::count();
-        $sentCount = Menu::where('status', 'sent')->count();
-        $lockedCount = Menu::where('status', 'locked')->count();
-
-        // Nhóm thực đơn theo tuần đang chạy
-        $activeWeeks = Menu::distinct()->select('kitchen_id', 'status')->get()->count();
+        // KPI thật theo tháng đang lọc (1 query aggregate), không dùng hằng số demo
+        $monthPrefix = $this->monthFilter ?: now()->format('Y-m');
+        $counts = Menu::query()
+            ->where('date', '>=', $monthPrefix.'-01')
+            ->where('date', '<', \Illuminate\Support\Carbon::parse($monthPrefix.'-01')->addMonth()->toDateString())
+            ->selectRaw('COUNT(*) AS total')
+            ->selectRaw("SUM(CASE WHEN status = 'sent' THEN 1 ELSE 0 END) AS sent")
+            ->selectRaw("SUM(CASE WHEN status = 'locked' THEN 1 ELSE 0 END) AS locked")
+            ->selectRaw('COUNT(DISTINCT CONCAT(kitchen_id, "-", YEARWEEK(date, 1))) AS active_weeks')
+            ->first();
 
         return [
-            'total_active_weeks' => max($activeWeeks, 3),
-            'sent_month' => max($sentCount, 12),
-            'pending' => max($totalMenus - $sentCount - $lockedCount, 2),
-            'locked_month' => max($lockedCount, 10),
+            'total_active_weeks' => (int) $counts->active_weeks,
+            'sent_month' => (int) $counts->sent,
+            'pending' => max(0, (int) $counts->total - (int) $counts->sent - (int) $counts->locked),
+            'locked_month' => (int) $counts->locked,
         ];
     }
 
@@ -262,43 +263,71 @@ class ListMenus extends Page
         }
     }
 
+    /**
+     * User không phải quản trị chỉ được thao tác trên bếp của mình — kitchenId từ Livewire là dữ liệu client.
+     */
+    protected function assertKitchenAccess($kitchenId): void
+    {
+        $user = auth()->user();
+        if (! $user || $user->hasRole(['super_admin', 'Quản trị viên'])) {
+            return;
+        }
+
+        $ownKitchenId = $user->currentKitchenId();
+        abort_if($ownKitchenId && (int) $kitchenId !== (int) $ownKitchenId, 403, 'Bạn chỉ có thể thao tác trên thực đơn của bếp mình.');
+    }
+
     public function saveWeekMenu($status = null)
     {
+        abort_unless(MenuResource::canCreate(), 403);
+        $this->assertKitchenAccess($this->weekKitchenId);
+
         if ($status) {
             $this->weekStatus = $status;
         }
 
         $shifts = Shift::all();
         $start = Carbon::parse($this->weekStartDate);
+        $skippedLocked = 0;
 
-        for ($d = 0; $d < 6; $d++) {
-            $currentDate = $start->copy()->addDays($d)->toDateString();
-            foreach ($shifts as $shift) {
-                $recipeId = $this->weekGrid[$d][$shift->id] ?? null;
-                $portions = $this->weekPortions[$d][$shift->id] ?? 200;
+        DB::transaction(function () use ($shifts, $start, &$skippedLocked): void {
+            for ($d = 0; $d < 6; $d++) {
+                $currentDate = $start->copy()->addDays($d)->toDateString();
+                foreach ($shifts as $shift) {
+                    $recipeId = $this->weekGrid[$d][$shift->id] ?? null;
+                    $portions = $this->weekPortions[$d][$shift->id] ?? 200;
 
-                if ($recipeId) {
-                    // Update or create
-                    Menu::updateOrCreate([
-                        'kitchen_id' => $this->weekKitchenId,
-                        'date' => $currentDate,
-                        'shift_id' => $shift->id,
-                    ], [
-                        'recipe_id' => $recipeId,
-                        'estimated_portions' => $portions,
-                        'status' => $this->weekStatus,
-                    ]);
-                } else {
-                    // Nếu để trống thì xóa bản ghi nếu tồn tại
-                    Menu::where('kitchen_id', $this->weekKitchenId)
+                    $existing = Menu::where('kitchen_id', $this->weekKitchenId)
                         ->where('date', $currentDate)
                         ->where('shift_id', $shift->id)
-                        ->delete();
+                        ->first();
+
+                    // Menu ĐÃ CHỐT không bị ghi đè/xóa ngầm khi lưu với trạng thái thấp hơn
+                    if ($existing && $existing->status === 'locked' && $this->weekStatus !== 'locked') {
+                        $skippedLocked++;
+
+                        continue;
+                    }
+
+                    if ($recipeId) {
+                        Menu::updateOrCreate([
+                            'kitchen_id' => $this->weekKitchenId,
+                            'date' => $currentDate,
+                            'shift_id' => $shift->id,
+                        ], [
+                            'recipe_id' => $recipeId,
+                            'estimated_portions' => $portions,
+                            'status' => $this->weekStatus,
+                        ]);
+                    } elseif ($existing) {
+                        // Xóa qua model instance để hook audit (MenuAuditLog) vẫn chạy
+                        $existing->delete();
+                    }
                 }
             }
-        }
+        });
 
-        session()->flash('message', 'Lưu thực đơn tuần thành công!');
+        session()->flash('message', 'Lưu thực đơn tuần thành công!'.($skippedLocked > 0 ? " ({$skippedLocked} ca đã chốt được giữ nguyên)" : ''));
         $this->switchView('list');
     }
 
@@ -366,7 +395,20 @@ class ListMenus extends Page
     {
         $menuId = $this->dayItems[$shiftId]['recipes'][$index]['menu_id'] ?? null;
         if ($menuId) {
-            Menu::destroy($menuId);
+            // menu_id là dữ liệu client — phải kiểm tra quyền xóa + quyền bếp + trạng thái trước khi destroy
+            $menu = Menu::find($menuId);
+            if ($menu) {
+                abort_unless(MenuResource::canDelete($menu), 403);
+                $this->assertKitchenAccess($menu->kitchen_id);
+
+                if ($menu->status === 'locked') {
+                    session()->flash('error', 'Không thể xóa món thuộc thực đơn đã chốt!');
+
+                    return;
+                }
+
+                $menu->delete();
+            }
         }
         unset($this->dayItems[$shiftId]['recipes'][$index]);
         $this->dayItems[$shiftId]['recipes'] = array_values($this->dayItems[$shiftId]['recipes']);
@@ -374,20 +416,40 @@ class ListMenus extends Page
 
     public function saveDayMenu($status = null)
     {
+        abort_unless(MenuResource::canCreate(), 403);
+        $this->assertKitchenAccess($this->dayKitchenId);
+
         if ($status) {
             $this->dayStatus = $status;
         }
 
-        foreach ($this->dayItems as $shiftId => $data) {
-            foreach ($data['recipes'] as $item) {
-                $recipeId = $item['recipe_id'];
-                $portions = $item['portions'];
-                $menuId = $item['menu_id'];
+        $skippedLocked = 0;
 
-                if ($recipeId) {
+        DB::transaction(function () use (&$skippedLocked): void {
+            foreach ($this->dayItems as $shiftId => $data) {
+                foreach ($data['recipes'] as $item) {
+                    $recipeId = $item['recipe_id'];
+                    $portions = $item['portions'];
+                    $menuId = $item['menu_id'];
+
+                    if (! $recipeId) {
+                        continue;
+                    }
+
                     if ($menuId) {
-                        $menu = Menu::find($menuId);
+                        // Chỉ nhận menu thuộc đúng bếp/ngày đang thao tác (menu_id là dữ liệu client)
+                        $menu = Menu::whereKey($menuId)
+                            ->where('kitchen_id', $this->dayKitchenId)
+                            ->first();
+
                         if ($menu) {
+                            // Không hạ cấp menu đã chốt về trạng thái thấp hơn
+                            if ($menu->status === 'locked' && $this->dayStatus !== 'locked') {
+                                $skippedLocked++;
+
+                                continue;
+                            }
+
                             $menu->update([
                                 'recipe_id' => $recipeId,
                                 'estimated_portions' => $portions,
@@ -406,9 +468,9 @@ class ListMenus extends Page
                     }
                 }
             }
-        }
+        });
 
-        session()->flash('message', 'Lưu thực đơn ngày thành công!');
+        session()->flash('message', 'Lưu thực đơn ngày thành công!'.($skippedLocked > 0 ? " ({$skippedLocked} món đã chốt được giữ nguyên)" : ''));
         $this->switchView('list');
     }
 

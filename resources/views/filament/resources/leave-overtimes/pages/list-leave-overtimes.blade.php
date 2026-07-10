@@ -190,22 +190,16 @@
                             </td>
                             <td style="padding:12px 12px;">
                                 @php
-                                    $dateStr = $row->start_date;
-                                    if ($row->end_date && $row->end_date !== $row->start_date) {
-                                        $dateStr .= ' - ' . $row->end_date;
+                                    $dateStr = $row->start_date?->format('d/m/Y');
+                                    if ($row->end_date && ! $row->end_date->equalTo($row->start_date)) {
+                                        $dateStr .= ' - ' . $row->end_date->format('d/m/Y');
                                     }
                                 @endphp
                                 <div style="font-weight:600; color:var(--po-tx)">{{ $dateStr }}</div>
-                                @php
-                                    try {
-                                        $carbonDate = \Carbon\Carbon::createFromFormat('d/m/Y', trim(explode('-', (string) $row->start_date)[0]));
-                                        $dayOfWeekLabel = '(Thứ ' . ['Chủ Nhật', 'Hai', 'Ba', 'Tư', 'Năm', 'Sáu', 'Bảy'][$carbonDate->dayOfWeek] . ')';
-                                    } catch (\Exception $e) {
-                                        $dayOfWeekLabel = '';
-                                    }
-                                @endphp
-                                @if($dayOfWeekLabel !== '')
-                                    <div style="font-size:10.5px; color:var(--po-mu); margin-top:2px">{{ $dayOfWeekLabel }}</div>
+                                @if($row->start_date)
+                                    <div style="font-size:10.5px; color:var(--po-mu); margin-top:2px">
+                                        (Thứ {{ ['Chủ Nhật', 'Hai', 'Ba', 'Tư', 'Năm', 'Sáu', 'Bảy'][$row->start_date->dayOfWeek] }})
+                                    </div>
                                 @endif
                             </td>
                             <td style="padding:12px 12px; font-weight:700; color:var(--po-tx)">{{ $row->duration_text }}</td>

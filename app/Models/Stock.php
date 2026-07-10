@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\DB;
 
 class Stock extends Model
 {
@@ -18,6 +19,16 @@ class Stock extends Model
         'min_quantity',
         'unit_price',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'quantity' => 'float',
+            'frozen_quantity' => 'float',
+            'min_quantity' => 'float',
+            'unit_price' => 'float',
+        ];
+    }
 
     public function ingredient(): BelongsTo
     {
@@ -49,35 +60,54 @@ class Stock extends Model
         string $attachmentUrl,
         ?string $note = null,
     ): StockTransaction {
-        $stock = self::firstOrCreate(
-            ['kitchen_id' => $kitchenId, 'ingredient_id' => $ingredientId],
-            ['quantity' => 0, 'min_quantity' => 10, 'unit_price' => $unitPrice],
-        );
+        // Toàn bộ cộng tồn + ghi thẻ kho phải nguyên tử: lỗi giữa chừng thì rollback cả hai,
+        // và lockForUpdate chặn lost-update khi 2 phiếu nhập cùng (bếp, nguyên liệu) chạy song song.
+        return DB::transaction(function () use ($kitchenId, $ingredientId, $quantity, $unitPrice, $attachmentUrl, $note): StockTransaction {
+            $stock = self::query()
+                ->where('kitchen_id', $kitchenId)
+                ->where('ingredient_id', $ingredientId)
+                ->lockForUpdate()
+                ->first();
 
-        $newQty = $stock->quantity + $quantity;
-        $stock->update([
-            'quantity' => $newQty,
-            'unit_price' => $unitPrice > 0 ? $unitPrice : $stock->unit_price,
-        ]);
+            if (! $stock) {
+                $stock = self::create([
+                    'kitchen_id' => $kitchenId,
+                    'ingredient_id' => $ingredientId,
+                    'quantity' => 0,
+                    'min_quantity' => 10,
+                    'unit_price' => $unitPrice,
+                ]);
+            }
 
-        return StockTransaction::create([
-            'kitchen_id' => $kitchenId,
-            'ingredient_id' => $ingredientId,
-            'type' => 'Nhập kho ngoài',
-            'voucher_code' => self::generateExternalVoucherCode(),
-            'quantity' => $quantity,
-            'after_quantity' => $newQty,
-            'note' => $note ?: 'Nhập kho ngoài (mua trực tiếp)',
-            'attachment_url' => $attachmentUrl,
-        ]);
+            $newQty = (float) $stock->quantity + $quantity;
+            $stock->update([
+                'quantity' => $newQty,
+                'unit_price' => $unitPrice > 0 ? $unitPrice : $stock->unit_price,
+            ]);
+
+            return StockTransaction::create([
+                'kitchen_id' => $kitchenId,
+                'ingredient_id' => $ingredientId,
+                'type' => 'Nhập kho ngoài',
+                'voucher_code' => self::generateExternalVoucherCode(),
+                'quantity' => $quantity,
+                'after_quantity' => $newQty,
+                'note' => $note ?: 'Nhập kho ngoài (mua trực tiếp)',
+                'attachment_url' => $attachmentUrl,
+            ]);
+        });
     }
 
     protected static function generateExternalVoucherCode(): string
     {
-        do {
-            $code = 'NX-EXT-'.now()->format('Ymd').'-'.str_pad((string) random_int(1, 999), 3, '0', STR_PAD_LEFT);
-        } while (StockTransaction::where('voucher_code', $code)->exists());
+        // Sinh tuần tự theo ngày (max hiện có + 1) thay vì random_int(1,999):
+        // hết dải số không lặp vô hạn, xác suất trùng chỉ còn ở mức 2 transaction cùng mili-giây.
+        $prefix = 'NX-EXT-'.now()->format('Ymd').'-';
+        $last = StockTransaction::where('voucher_code', 'like', $prefix.'%')
+            ->orderByDesc('voucher_code')
+            ->value('voucher_code');
+        $sequence = $last ? ((int) substr($last, strlen($prefix))) + 1 : 1;
 
-        return $code;
+        return $prefix.str_pad((string) $sequence, 4, '0', STR_PAD_LEFT);
     }
 }
