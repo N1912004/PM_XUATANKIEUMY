@@ -4,6 +4,7 @@ namespace App\Filament\Resources\StockResource\Pages;
 
 use App\Filament\Resources\StockResource;
 use App\Models\Ingredient;
+use App\Models\IngredientType;
 use App\Models\Kitchen;
 use App\Models\Menu;
 use App\Models\PurchaseOrder;
@@ -207,6 +208,14 @@ class ListStocks extends ListRecords
     public function getLedgerIngredient(): ?Ingredient
     {
         return $this->selectedLedgerIngId ? Ingredient::find($this->selectedLedgerIngId) : null;
+    }
+
+    /** @var \Illuminate\Support\Collection|null Memo 1 render — options bộ lọc loại NL từ bảng danh mục */
+    protected $ingredientTypesCache = null;
+
+    public function getIngredientTypeOptions()
+    {
+        return $this->ingredientTypesCache ??= IngredientType::orderBy('name')->pluck('name');
     }
 
     public function openInTypeModal(): void
@@ -982,8 +991,9 @@ class ListStocks extends ListRecords
         }
 
         if (! empty($this->selectedType)) {
-            $query->whereHas('ingredient', function ($q) {
-                $q->where('type', $this->selectedType);
+            // Cột ingredients.type đã đổi thành quan hệ ingredient_type_id → lọc qua bảng danh mục
+            $query->whereHas('ingredient.typeRelation', function ($q) {
+                $q->where('name', $this->selectedType);
             });
         }
 

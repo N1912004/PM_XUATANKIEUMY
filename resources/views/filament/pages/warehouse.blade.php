@@ -523,10 +523,9 @@
                 </div>
                 <select class="type-select" wire:model.live="selectedType">
                     <option value="">Tất cả loại</option>
-                    <option value="Động vật">Động vật</option>
-                    <option value="Thực vật">Thực vật</option>
-                    <option value="Thực phẩm khô">Thực phẩm khô</option>
-                    <option value="Gia vị">Gia vị</option>
+                    @foreach($this->getIngredientTypeOptions() as $typeName)
+                        <option value="{{ $typeName }}">{{ $typeName }}</option>
+                    @endforeach
                 </select>
             </div>
         @endif

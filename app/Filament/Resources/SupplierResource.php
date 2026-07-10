@@ -35,7 +35,7 @@ class SupplierResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('CUNG ỨNG & KHO');
+        return __('CUNG ỨNG');
     }
 
     public static function form(Form $form): Form

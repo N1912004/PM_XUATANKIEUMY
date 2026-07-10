@@ -4,7 +4,6 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\IngredientResource\Pages;
 use App\Models\Ingredient;
-use App\Models\Setting;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Infolists;
@@ -13,6 +12,7 @@ use Filament\Resources\Resource;
 use Filament\Support\RawJs;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class IngredientResource extends Resource
 {
@@ -39,7 +39,7 @@ class IngredientResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('CUNG ỨNG & KHO');
+        return __('NGUYÊN LIỆU & KHO');
     }
 
     public static function form(Form $form): Form
@@ -56,25 +56,31 @@ class IngredientResource extends Resource
                             ->label('Mã nguyên liệu')
                             ->unique(ignoreRecord: true)
                             ->placeholder('Nhập mã nguyên liệu'),
-                        Forms\Components\Select::make('unit')
+                        Forms\Components\Select::make('unit_id')
                             ->label(__('Đơn vị'))
+                            ->relationship('unitRelation', 'name')
                             ->required()
-                            ->options(function () {
-                                $raw = Setting::get('ingredient_units', 'Kg, Quả, Gói, Chai, Thùng, Lít');
-                                $units = array_map('trim', explode(',', $raw));
-
-                                return array_combine($units, $units);
-                            })
+                            ->searchable()
+                            ->preload()
+                            ->createOptionForm([
+                                Forms\Components\TextInput::make('name')
+                                    ->label('Tên đơn vị')
+                                    ->required()
+                                    ->unique('units', 'name'),
+                            ])
                             ->placeholder(__('Chọn đơn vị')),
-                        Forms\Components\Select::make('type')
+                        Forms\Components\Select::make('ingredient_type_id')
                             ->label(__('Loại nguyên liệu'))
+                            ->relationship('typeRelation', 'name')
                             ->required()
-                            ->options(function () {
-                                $raw = Setting::get('ingredient_types', 'Động vật, Thực vật, Thực phẩm khô, Gia vị');
-                                $types = array_map('trim', explode(',', $raw));
-
-                                return array_combine($types, $types);
-                            })
+                            ->searchable()
+                            ->preload()
+                            ->createOptionForm([
+                                Forms\Components\TextInput::make('name')
+                                    ->label('Tên loại nguyên liệu')
+                                    ->required()
+                                    ->unique('ingredient_types', 'name'),
+                            ])
                             ->placeholder(__('Chọn loại nguyên liệu')),
                         Forms\Components\TextInput::make('reference_price')
                             ->label('Đơn giá tham chiếu gốc')
@@ -192,12 +198,15 @@ class IngredientResource extends Resource
 
                         return [...array_slice($names, 0, 2), '+'.($total - 2).' NCC'];
                     })
+                    // Cột ảo (state) không map cột DB → phải tự viết query tìm qua quan hệ n-n suppliers.
+                    // Filament tự OR khối này với search của code/name trong ô tìm kiếm chung.
+                    ->searchable(query: fn (Builder $query, string $search): Builder => $query->whereHas('suppliers', fn (Builder $q) => $q->where('name', 'like', "%{$search}%")))
                     ->color(fn (string $state): string => str_starts_with($state, '+') ? 'gray' : 'success')
                     ->size('sm'),
-                Tables\Columns\TextColumn::make('unit')
+                Tables\Columns\TextColumn::make('unitRelation.name')
                     ->label('ĐƠN VỊ')
                     ->size('sm'),
-                Tables\Columns\TextColumn::make('type')
+                Tables\Columns\TextColumn::make('typeRelation.name')
                     ->label('LOẠI NL')
                     ->size('sm'),
                 Tables\Columns\TextColumn::make('reference_price')
@@ -216,23 +225,19 @@ class IngredientResource extends Resource
             ->filters([
                 Tables\Filters\SelectFilter::make('supplier_id')
                     ->label('Nhà cung cấp')
-                    ->relationship('suppliers', 'name'),
-                Tables\Filters\SelectFilter::make('unit')
+                    ->relationship('suppliers', 'name')
+                    ->searchable()
+                    ->preload(),
+                Tables\Filters\SelectFilter::make('unit_id')
                     ->label(__('Đơn vị'))
-                    ->options(function () {
-                        $raw = Setting::get('ingredient_units', 'Kg, Quả, Gói, Chai, Thùng, Lít');
-                        $units = array_map('trim', explode(',', $raw));
-
-                        return array_combine($units, $units);
-                    }),
-                Tables\Filters\SelectFilter::make('type')
+                    ->relationship('unitRelation', 'name')
+                    ->searchable()
+                    ->preload(),
+                Tables\Filters\SelectFilter::make('ingredient_type_id')
                     ->label(__('Loại NL'))
-                    ->options(function () {
-                        $raw = Setting::get('ingredient_types', 'Động vật, Thực vật, Thực phẩm khô, Gia vị');
-                        $types = array_map('trim', explode(',', $raw));
-
-                        return array_combine($types, $types);
-                    }),
+                    ->relationship('typeRelation', 'name')
+                    ->searchable()
+                    ->preload(),
             ])
             ->filtersLayout(Tables\Enums\FiltersLayout::AboveContent)
             ->actions([

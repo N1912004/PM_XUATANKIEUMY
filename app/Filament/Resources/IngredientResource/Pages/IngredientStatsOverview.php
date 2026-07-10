@@ -3,7 +3,9 @@
 namespace App\Filament\Resources\IngredientResource\Pages;
 
 use App\Models\Ingredient;
+use App\Models\IngredientType;
 use App\Models\Supplier;
+use App\Models\Unit;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 
@@ -13,8 +15,9 @@ class IngredientStatsOverview extends StatsOverviewWidget
     {
         $totalIngredients = Ingredient::count();
         $totalSuppliers = Supplier::whereHas('ingredients')->count();
-        $totalUnits = Ingredient::distinct('unit')->count('unit');
-        $totalTypes = Ingredient::distinct('type')->count('type');
+        // Cột unit/type đã chuyển sang bảng danh mục riêng — đếm trực tiếp từ bảng mới
+        $totalUnits = Unit::count();
+        $totalTypes = IngredientType::count();
 
         return [
             Stat::make('Tổng nguyên liệu', $totalIngredients)
