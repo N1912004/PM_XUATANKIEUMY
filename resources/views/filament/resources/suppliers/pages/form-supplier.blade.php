@@ -54,15 +54,21 @@
 
                         <div class="sup-field sup-field-full">
                             <label class="sup-label">Loại thực phẩm cung cấp <span class="sup-required">*</span></label>
-                            <select wire:model="type" class="sup-select" required>
-                                <option value="">Chọn loại thực phẩm cung cấp</option>
-                                <option value="Thịt">Thịt</option>
-                                <option value="Rau củ">Rau củ</option>
-                                <option value="Thực phẩm khô">Thực phẩm khô</option>
-                                <option value="Gia vị">Gia vị</option>
-                                <option value="Hải sản">Hải sản</option>
-                                <option value="Tổng hợp">Tổng hợp</option>
-                            </select>
+                            <div class="sup-input" style="display:flex; flex-wrap:wrap; gap:6px; padding:8px 12px; min-height:42px; background:var(--sup-bg); border:1.5px solid var(--sup-bd2); border-radius:.5rem; align-items:center">
+                                @php
+                                    $selectedTypes = array_filter(explode(', ', $this->type));
+                                @endphp
+                                @forelse($selectedTypes as $sType)
+                                    <span style="background:#e0f2fe; color:#0369a1; padding:4px 10px; border-radius:9999px; font-size:12px; font-weight:700">
+                                        {{ $sType }}
+                                    </span>
+                                @empty
+                                    <span style="color:var(--sup-mu); font-size:13px">
+                                        Chưa có loại thực phẩm nào (Tự động cập nhật khi tích chọn nguyên liệu ở dưới)
+                                    </span>
+                                @endforelse
+                            </div>
+                            <input type="hidden" wire:model="type" required>
                             @error('type') <span class="sup-error">{{ $message }}</span> @enderror
                         </div>
                     </div>

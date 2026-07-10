@@ -35,7 +35,7 @@ class SupplierResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('CUNG ỨNG');
+        return __('CUNG ỨNG & KHO');
     }
 
     public static function form(Form $form): Form
@@ -124,7 +124,7 @@ class SupplierResource extends Resource
                 Tables\Columns\TextColumn::make('type')
                     ->label('PHÒNG GIAO DỊCH / PHÂN LOẠI')
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
+                    ->color(fn(string $state): string => match ($state) {
                         'Thịt' => 'danger',
                         'Rau củ' => 'success',
                         'Thực phẩm khô' => 'warning',
@@ -140,8 +140,8 @@ class SupplierResource extends Resource
                 Tables\Columns\TextColumn::make('status')
                     ->label('TRẠNG THÁI')
                     ->badge()
-                    ->state(fn ($record) => $record->status ? 'Đang hoạt động' : 'Tạm ngưng')
-                    ->color(fn ($state) => $state === 'Đang hoạt động' ? 'success' : 'danger'),
+                    ->state(fn($record) => $record->status ? 'Đang hoạt động' : 'Tạm ngưng')
+                    ->color(fn($state) => $state === 'Đang hoạt động' ? 'success' : 'danger'),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('type')

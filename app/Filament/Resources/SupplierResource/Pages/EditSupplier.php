@@ -159,4 +159,43 @@ class EditSupplier extends Page
             ]);
         }
     }
+
+    /**
+     * Lấy các Loại Nguyên liệu từ danh sách nguyên liệu đã chọn.
+     *
+     * @return array<string, string>
+     */
+    public function getAvailableTypes(): array
+    {
+        $selectedIds = collect($this->selectedIngredients)
+            ->filter()
+            ->keys();
+
+        if ($selectedIds->isEmpty()) {
+            return [];
+        }
+
+        $types = Ingredient::query()
+            ->whereIn('id', $selectedIds)
+            ->with('typeRelation')
+            ->get()
+            ->pluck('type')
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+
+        $options = [];
+        foreach ($types as $type) {
+            $options[$type] = $type;
+        }
+
+        return $options;
+    }
+
+    public function updatedSelectedIngredients(): void
+    {
+        $types = array_keys($this->getAvailableTypes());
+        $this->type = implode(', ', $types);
+    }
 }

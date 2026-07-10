@@ -37,7 +37,7 @@ class IngredientsImport implements ToCollection
     /** Số dòng theo từng trạng thái. */
     public function countOf(string $status): int
     {
-        return count(array_filter($this->results, fn (array $r): bool => $r['status'] === $status));
+        return count(array_filter($this->results, fn(array $r): bool => $r['status'] === $status));
     }
 
     /** Tổng số dòng ghi vào CSDL thành công. */
@@ -54,8 +54,8 @@ class IngredientsImport implements ToCollection
     public function skippedMessages(): array
     {
         return array_values(array_map(
-            fn (array $r): string => $r['message'],
-            array_filter($this->results, fn (array $r): bool => $r['status'] === self::SKIPPED),
+            fn(array $r): string => $r['message'],
+            array_filter($this->results, fn(array $r): bool => $r['status'] === self::SKIPPED),
         ));
     }
 
@@ -108,7 +108,7 @@ class IngredientsImport implements ToCollection
 
         // Mặc định trạng thái là hoạt động (true)
         $status = true;
-        if (! empty($statusText)) {
+        if (!empty($statusText)) {
             if (in_array(strtolower($statusText), ['ngừng hoạt động', 'tạm dừng', 'ngưng hoạt động', 'inactive', 'false', '0'])) {
                 $status = false;
             }
@@ -118,13 +118,13 @@ class IngredientsImport implements ToCollection
             DB::transaction(function () use ($code, $name, $type, $unit, $refPrice, $supplierName, $status) {
                 // 1. Tìm hoặc tự động tạo mới Đơn vị tính
                 $unitRecord = null;
-                if (! empty($unit)) {
+                if (!empty($unit)) {
                     $unitRecord = Unit::query()->firstOrCreate(['name' => $unit]);
                 }
 
                 // 2. Tìm hoặc tự động tạo mới Loại nguyên liệu
                 $typeRecord = null;
-                if (! empty($type)) {
+                if (!empty($type)) {
                     $typeRecord = IngredientType::query()->firstOrCreate(['name' => $type]);
                 }
 
@@ -143,7 +143,7 @@ class IngredientsImport implements ToCollection
                 );
 
                 // 4. Liên kết với Nhà cung cấp nếu có thông tin
-                if (! empty($supplierName)) {
+                if (!empty($supplierName)) {
                     // Hỗ trợ trường hợp ghi nhiều NCC phân cách bằng dấu phẩy
                     $supplierNames = array_map('trim', explode(',', $supplierName));
                     $supplierIds = [];
@@ -158,14 +158,14 @@ class IngredientsImport implements ToCollection
                         $supplier = Supplier::query()->firstOrCreate(
                             ['name' => $sName],
                             [
-                                'code' => 'SUP_'.strtoupper(uniqid()),
+                                'code' => 'SUP_' . strtoupper(uniqid()),
                                 'type' => 'Tổng hợp',
                             ]
                         );
                         $supplierIds[] = $supplier->id;
                     }
 
-                    if (! empty($supplierIds)) {
+                    if (!empty($supplierIds)) {
                         $ingredient->suppliers()->syncWithoutDetaching($supplierIds);
                     }
                 }

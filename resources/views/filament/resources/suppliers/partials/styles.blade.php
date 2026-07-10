@@ -654,18 +654,23 @@
 
             .sup-bottom-bar {
                 position: sticky;
-                bottom: -2rem;
-                z-index: 5;
-                margin: 2rem -1.75rem -2rem !important;
-                min-height: 4rem;
-                background: var(--sup-wh);
-                border-top: 1px solid var(--sup-bd);
+                bottom: 1.25rem;
+                z-index: 10;
+                margin: 2rem 0 0 0 !important;
+                min-height: 4.25rem;
+                background: rgba(255, 255, 255, 0.85);
+                backdrop-filter: blur(12px) saturate(190%);
+                -webkit-backdrop-filter: blur(12px) saturate(190%);
+                border: 1px solid rgba(226, 232, 240, 0.8);
+                border-radius: 1rem;
                 display: flex;
                 align-items: center;
                 justify-content: flex-end;
                 gap: .75rem;
-                padding: .8rem 1.75rem !important;
-                box-shadow: 0 -2px 12px rgba(15, 23, 42, .05);
+                padding: .8rem 1.5rem !important;
+                box-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.15), 
+                            0 1px 3px rgba(15, 23, 42, 0.05);
+                transition: all 0.3s ease;
             }
 
             .sup-breadcrumb {
