@@ -62,6 +62,7 @@ return [
         'create_desc' => 'Chỉ khai báo các thông tin cần thiết: tên, mã, đơn vị và loại nguyên liệu',
         'back' => 'Quay lại',
         'edit' => 'Chỉnh sửa',
+        'view_desc' => 'Thông tin chi tiết của nguyên liệu trong danh mục',
     ],
     'stats' => [
         'total' => 'Tổng nguyên liệu',

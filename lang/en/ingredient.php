@@ -62,6 +62,7 @@ return [
         'create_desc' => 'Only declare the essentials: name, code, unit and ingredient type',
         'back' => 'Back',
         'edit' => 'Edit',
+        'view_desc' => 'Detailed information of the ingredient in the catalog',
     ],
     'stats' => [
         'total' => 'Total Ingredients',

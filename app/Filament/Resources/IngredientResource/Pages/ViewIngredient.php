@@ -17,7 +17,7 @@ class ViewIngredient extends ViewRecord
 
     public function getSubheading(): ?string
     {
-        return 'Thông tin chi tiết của nguyên liệu trong danh mục';
+        return __('ingredient.actions.view_desc');
     }
 
     protected function getHeaderActions(): array
