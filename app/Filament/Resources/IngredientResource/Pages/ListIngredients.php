@@ -15,6 +15,11 @@ class ListIngredients extends ListRecords
 {
     protected static string $resource = IngredientResource::class;
 
+    public function getTitle(): string
+    {
+        return __('ingredient.navigation.ingredient_plural');
+    }
+
     protected function getHeaderActions(): array
     {
         return [

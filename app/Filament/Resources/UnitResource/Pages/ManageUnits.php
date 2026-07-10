@@ -10,6 +10,11 @@ class ManageUnits extends ManageRecords
 {
     protected static string $resource = UnitResource::class;
 
+    public function getTitle(): string
+    {
+        return __('ingredient.navigation.unit_plural');
+    }
+
     protected function getHeaderActions(): array
     {
         return [
