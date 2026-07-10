@@ -90,5 +90,7 @@ return [
     ],
     'validation' => [
         'code_unique' => 'Mã nguyên liệu đã tồn tại trong hệ thống.',
+        'code_regex' => 'Mã nguyên liệu chỉ được chứa chữ cái không dấu, số, dấu gạch ngang (-) hoặc gạch dưới (_).',
+        'name_unique' => 'Tên nguyên liệu đã tồn tại trong hệ thống.',
     ],
 ];

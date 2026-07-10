@@ -90,5 +90,7 @@ return [
     ],
     'validation' => [
         'code_unique' => 'The ingredient code has already been taken.',
+        'code_regex' => 'The ingredient code may only contain letters, numbers, dashes (-), and underscores (_).',
+        'name_unique' => 'The ingredient name has already been taken.',
     ],
 ];

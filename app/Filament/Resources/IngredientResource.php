@@ -52,12 +52,21 @@ class IngredientResource extends Resource
                         Forms\Components\TextInput::make('name')
                             ->label(__('ingredient.form.name'))
                             ->required()
+                            ->unique(ignoreRecord: true)
+                            ->maxLength(255)
+                            ->validationMessages([
+                                'unique' => __('ingredient.validation.name_unique'),
+                            ])
                             ->placeholder(__('ingredient.form.name_placeholder')),
                         Forms\Components\TextInput::make('code')
                             ->label(__('ingredient.form.code'))
+                            ->required()
                             ->unique(ignoreRecord: true)
+                            ->maxLength(50)
+                            ->regex('/^[A-Za-z0-9_-]+$/')
                             ->validationMessages([
                                 'unique' => __('ingredient.validation.code_unique'),
+                                'regex' => __('ingredient.validation.code_regex'),
                             ])
                             ->placeholder(__('ingredient.form.code_placeholder')),
                         Forms\Components\Select::make('unit_id')
@@ -70,6 +79,7 @@ class IngredientResource extends Resource
                                 Forms\Components\TextInput::make('name')
                                     ->label(__('ingredient.form.unit_name'))
                                     ->required()
+                                    ->maxLength(255)
                                     ->unique('units', 'name'),
                             ])
                             ->placeholder(__('ingredient.form.unit_placeholder')),
@@ -83,12 +93,15 @@ class IngredientResource extends Resource
                                 Forms\Components\TextInput::make('name')
                                     ->label(__('ingredient.form.type_name'))
                                     ->required()
+                                    ->maxLength(255)
                                     ->unique('ingredient_types', 'name'),
                             ])
                             ->placeholder(__('ingredient.form.type_placeholder')),
                         Forms\Components\TextInput::make('reference_price')
                             ->label(__('ingredient.form.reference_price'))
                             ->required()
+                            ->numeric()
+                            ->minValue(0)
                             ->default(0)
                             ->prefix('VND')
                             ->placeholder(__('ingredient.form.reference_price_placeholder'))
