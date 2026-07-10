@@ -13,6 +13,7 @@ use Filament\Support\RawJs;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class IngredientResource extends Resource
 {
@@ -241,6 +242,7 @@ class IngredientResource extends Resource
                     ->relationship('typeRelation', 'name')
                     ->searchable()
                     ->preload(),
+                Tables\Filters\TrashedFilter::make(),
             ])
             ->filtersLayout(Tables\Enums\FiltersLayout::AboveContent)
             ->actions([
@@ -250,10 +252,16 @@ class IngredientResource extends Resource
                     ->iconButton(),
                 Tables\Actions\DeleteAction::make()
                     ->iconButton(),
+                Tables\Actions\RestoreAction::make()
+                    ->iconButton(),
+                Tables\Actions\ForceDeleteAction::make()
+                    ->iconButton(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\RestoreBulkAction::make(),
+                    Tables\Actions\ForceDeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -271,5 +279,13 @@ class IngredientResource extends Resource
             'view' => Pages\ViewIngredient::route('/{record}'),
             'edit' => Pages\EditIngredient::route('/{record}/edit'),
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->withoutGlobalScopes([
+                SoftDeletingScope::class,
+            ]);
     }
 }
