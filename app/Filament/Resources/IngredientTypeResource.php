@@ -60,7 +60,10 @@ class IngredientTypeResource extends Resource
                 Tables\Columns\TextColumn::make('index')
                     ->label(__('ingredient.table.index'))
                     ->state(static function (Tables\Contracts\HasTable $livewire, \stdClass $rowLoop): string {
-                        return (string) ($rowLoop->iteration);
+                        $currentPage = method_exists($livewire, 'getTablePage') ? $livewire->getTablePage() : 1;
+                        $recordsPerPage = method_exists($livewire, 'getTableRecordsPerPage') ? $livewire->getTableRecordsPerPage() : 10;
+                        $perPage = is_numeric($recordsPerPage) ? (int) $recordsPerPage : 10;
+                        return (string) ($rowLoop->iteration + ($perPage * ($currentPage - 1)));
                     })
                     ->alignCenter()
                     ->width('56px'),
@@ -75,6 +78,7 @@ class IngredientTypeResource extends Resource
                     ->sortable()
                     ->color('gray'),
             ])
+            ->defaultSort('id', 'desc')
             ->filters([
                 //
             ])
