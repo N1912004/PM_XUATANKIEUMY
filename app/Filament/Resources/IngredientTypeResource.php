@@ -21,17 +21,17 @@ class IngredientTypeResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return __('Loại nguyên liệu');
+        return __('ingredient.navigation.type');
     }
 
     public static function getModelLabel(): string
     {
-        return __('Loại nguyên liệu');
+        return __('ingredient.navigation.type');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('Danh sách loại nguyên liệu');
+        return __('ingredient.navigation.type_plural');
     }
 
     public static function getNavigationGroup(): ?string
@@ -44,8 +44,8 @@ class IngredientTypeResource extends Resource
         return $form
             ->schema([
                 Forms\Components\TextInput::make('name')
-                    ->label('Tên loại nguyên liệu')
-                    ->placeholder('Ví dụ: Động vật, Thực vật, Gia vị...')
+                    ->label(__('ingredient.type.name'))
+                    ->placeholder(__('ingredient.type.name_placeholder'))
                     ->required()
                     ->unique(ignoreRecord: true)
                     ->maxLength(255)
@@ -58,19 +58,19 @@ class IngredientTypeResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('index')
-                    ->label('STT')
+                    ->label(__('ingredient.table.index'))
                     ->state(static function (Tables\Contracts\HasTable $livewire, \stdClass $rowLoop): string {
                         return (string) ($rowLoop->iteration);
                     })
                     ->alignCenter()
                     ->width('56px'),
                 Tables\Columns\TextColumn::make('name')
-                    ->label('TÊN LOẠI NGUYÊN LIỆU')
+                    ->label(__('ingredient.type.table_name'))
                     ->searchable()
                     ->sortable()
                     ->weight('bold'),
                 Tables\Columns\TextColumn::make('created_at')
-                    ->label('NGÀY TẠO')
+                    ->label(__('ingredient.unit.created_at'))
                     ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->color('gray'),
@@ -88,7 +88,7 @@ class IngredientTypeResource extends Resource
                         // loại của các nguyên liệu liên quan, nên chặn lại
                         if ($record->ingredients()->exists()) {
                             Notification::make()
-                                ->title('Không thể xóa: đang được '.$record->ingredients()->count().' nguyên liệu sử dụng')
+                                ->title(__('ingredient.delete.in_use', ['count' => $record->ingredients()->count()]))
                                 ->danger()
                                 ->send();
                             $action->cancel();
@@ -102,7 +102,7 @@ class IngredientTypeResource extends Resource
                             $inUse = $records->filter(fn ($r) => $r->ingredients()->exists());
                             if ($inUse->isNotEmpty()) {
                                 Notification::make()
-                                    ->title('Không thể xóa: '.$inUse->pluck('name')->implode(', ').' đang được nguyên liệu sử dụng')
+                                    ->title(__('ingredient.delete.in_use_names', ['names' => $inUse->pluck('name')->implode(', ')]))
                                     ->danger()
                                     ->send();
                                 $action->cancel();

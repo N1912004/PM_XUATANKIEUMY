@@ -18,12 +18,12 @@
         @if($record->status)
             <span style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;background:#ECFDF5;color:#059669;font-size:13px;font-weight:600">
                 <span style="width:8px;height:8px;border-radius:50%;background:#059669;display:inline-block"></span>
-                Đang hoạt động
+                {{ __('ingredient.status.active') }}
             </span>
         @else
             <span style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;background:#FEF2F2;color:#DC2626;font-size:13px;font-weight:600">
                 <span style="width:8px;height:8px;border-radius:50%;background:#DC2626;display:inline-block"></span>
-                Ngừng hoạt động
+                {{ __('ingredient.status.inactive') }}
             </span>
         @endif
     </div>

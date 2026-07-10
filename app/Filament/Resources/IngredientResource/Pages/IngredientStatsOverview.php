@@ -20,23 +20,23 @@ class IngredientStatsOverview extends StatsOverviewWidget
         $totalTypes = IngredientType::count();
 
         return [
-            Stat::make('Tổng nguyên liệu', $totalIngredients)
-                ->description('Đang quản lý')
+            Stat::make(__('ingredient.stats.total'), $totalIngredients)
+                ->description(__('ingredient.stats.total_desc'))
                 ->descriptionIcon('heroicon-o-information-circle')
                 ->color('primary')
                 ->icon('heroicon-o-beaker'),
-            Stat::make('Nhà cung cấp', $totalSuppliers)
-                ->description('Đang liên kết')
+            Stat::make(__('ingredient.stats.suppliers'), $totalSuppliers)
+                ->description(__('ingredient.stats.suppliers_desc'))
                 ->descriptionIcon('heroicon-o-information-circle')
                 ->color('success')
                 ->icon('heroicon-o-truck'),
-            Stat::make('Đơn vị tính', $totalUnits)
-                ->description('Kg, Gói, Chai...')
+            Stat::make(__('ingredient.stats.units'), $totalUnits)
+                ->description(__('ingredient.stats.units_desc'))
                 ->descriptionIcon('heroicon-o-information-circle')
                 ->color('warning')
                 ->icon('heroicon-o-chart-bar'),
-            Stat::make('Loại nguyên liệu', $totalTypes)
-                ->description('Động vật, thực vật...')
+            Stat::make(__('ingredient.stats.types'), $totalTypes)
+                ->description(__('ingredient.stats.types_desc'))
                 ->descriptionIcon('heroicon-o-information-circle')
                 ->color('info')
                 ->icon('heroicon-o-tag'),

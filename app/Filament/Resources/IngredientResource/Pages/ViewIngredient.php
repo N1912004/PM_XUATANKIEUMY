@@ -24,12 +24,12 @@ class ViewIngredient extends ViewRecord
     {
         return [
             Actions\Action::make('back')
-                ->label('Quay lại')
+                ->label(__('ingredient.actions.back'))
                 ->icon('heroicon-o-arrow-left')
                 ->url($this->getResource()::getUrl('index'))
                 ->color('gray'),
             Actions\EditAction::make()
-                ->label('Chỉnh sửa')
+                ->label(__('ingredient.actions.edit'))
                 ->icon('heroicon-o-pencil'),
         ];
     }

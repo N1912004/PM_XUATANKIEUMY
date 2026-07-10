@@ -21,17 +21,17 @@ class UnitResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return __('Đơn vị tính');
+        return __('ingredient.navigation.unit');
     }
 
     public static function getModelLabel(): string
     {
-        return __('Đơn vị tính');
+        return __('ingredient.navigation.unit');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('Danh sách đơn vị tính');
+        return __('ingredient.navigation.unit_plural');
     }
 
     public static function getNavigationGroup(): ?string
@@ -44,8 +44,8 @@ class UnitResource extends Resource
         return $form
             ->schema([
                 Forms\Components\TextInput::make('name')
-                    ->label('Tên đơn vị')
-                    ->placeholder('Ví dụ: Kg, Quả, Gói...')
+                    ->label(__('ingredient.unit.name'))
+                    ->placeholder(__('ingredient.unit.name_placeholder'))
                     ->required()
                     ->unique(ignoreRecord: true)
                     ->maxLength(255)
@@ -58,19 +58,19 @@ class UnitResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('index')
-                    ->label('STT')
+                    ->label(__('ingredient.table.index'))
                     ->state(static function (Tables\Contracts\HasTable $livewire, \stdClass $rowLoop): string {
                         return (string) ($rowLoop->iteration);
                     })
                     ->alignCenter()
                     ->width('56px'),
                 Tables\Columns\TextColumn::make('name')
-                    ->label('TÊN ĐƠN VỊ')
+                    ->label(__('ingredient.unit.table_name'))
                     ->searchable()
                     ->sortable()
                     ->weight('bold'),
                 Tables\Columns\TextColumn::make('created_at')
-                    ->label('NGÀY TẠO')
+                    ->label(__('ingredient.unit.created_at'))
                     ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->color('gray'),
@@ -86,7 +86,7 @@ class UnitResource extends Resource
                     ->before(function (Tables\Actions\DeleteAction $action, $record): void {
                         if ($record->ingredients()->exists()) {
                             Notification::make()
-                                ->title('Không thể xóa: đang được '.$record->ingredients()->count().' nguyên liệu sử dụng')
+                                ->title(__('ingredient.delete.in_use', ['count' => $record->ingredients()->count()]))
                                 ->danger()
                                 ->send();
                             $action->cancel();
@@ -100,7 +100,7 @@ class UnitResource extends Resource
                             $inUse = $records->filter(fn ($r) => $r->ingredients()->exists());
                             if ($inUse->isNotEmpty()) {
                                 Notification::make()
-                                    ->title('Không thể xóa: '.$inUse->pluck('name')->implode(', ').' đang được nguyên liệu sử dụng')
+                                    ->title(__('ingredient.delete.in_use_names', ['names' => $inUse->pluck('name')->implode(', ')]))
                                     ->danger()
                                     ->send();
                                 $action->cancel();

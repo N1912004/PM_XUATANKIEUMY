@@ -19,12 +19,12 @@ class ListIngredients extends ListRecords
     {
         return [
             Actions\Action::make('import_excel')
-                ->label('Nhập Excel')
+                ->label(__('ingredient.actions.import'))
                 ->icon('heroicon-o-document-arrow-up')
                 ->color('info')
                 ->form([
                     FileUpload::make('excel_file')
-                        ->label('Chọn tệp Excel (.xlsx)')
+                        ->label(__('ingredient.actions.import_file'))
                         ->acceptedFileTypes([
                             'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
                             'application/vnd.ms-excel',
@@ -43,12 +43,12 @@ class ListIngredients extends ListRecords
                         );
 
                         Notification::make()
-                            ->title('Nhập dữ liệu thành công!')
+                            ->title(__('ingredient.actions.import_success'))
                             ->success()
                             ->send();
                     } catch (\Exception $e) {
                         Notification::make()
-                            ->title('Lỗi khi nhập dữ liệu!')
+                            ->title(__('ingredient.actions.import_error'))
                             ->body($e->getMessage())
                             ->danger()
                             ->send();
@@ -59,7 +59,7 @@ class ListIngredients extends ListRecords
                     }
                 }),
             Actions\Action::make('export_excel')
-                ->label('Xuất Excel')
+                ->label(__('ingredient.actions.export'))
                 ->icon('heroicon-o-document-arrow-down')
                 ->color('success')
                 ->action(function () {
@@ -69,7 +69,7 @@ class ListIngredients extends ListRecords
                     );
                 }),
             Actions\CreateAction::make()
-                ->label('Thêm nguyên liệu')
+                ->label(__('ingredient.actions.create'))
                 ->icon('heroicon-o-plus'),
         ];
     }
