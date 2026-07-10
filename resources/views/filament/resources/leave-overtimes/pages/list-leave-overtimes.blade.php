@@ -1,5 +1,4 @@
 <div class="emp-page">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     @include('filament.resources.leave-overtimes.partials.styles')
 
     @php

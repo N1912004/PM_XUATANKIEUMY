@@ -1,5 +1,4 @@
 <div class="emp-page">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     @include('filament.resources.menus.partials.styles')
 
     @php
@@ -89,9 +88,9 @@
                 <option value="locked">Đã chốt</option>
             </select>
             <select wire:model.live="monthFilter" class="mp-sel">
-                <option value="2026-05">Tháng 05/2026</option>
-                <option value="2026-06">Tháng 06/2026</option>
-                <option value="{{ now()->format('Y-m') }}">Tháng {{ now()->format('m/Y') }}</option>
+                @foreach($this->getMonthOptions() as $ym => $label)
+                    <option value="{{ $ym }}">{{ $label }}</option>
+                @endforeach
             </select>
             <div class="tsp"></div>
             <button wire:click="resetFilters" class="att-rbtn" title="Cài lại bộ lọc">
@@ -173,7 +172,7 @@
                                 <i class="fa-solid fa-pencil"></i>
                             </button>
                             <!-- Xuất Excel -->
-                            <button class="abt" title="Xuất Excel" onclick="alert('Đã xuất file excel thực đơn thành công!')">
+                            <button class="abt" title="Xuất Excel" wire:click="exportMenus({{ $row['kitchen_id'] }}, '{{ $row['start_date'] }}', '{{ $row['end_date'] }}')">
                                 <i class="fa-solid fa-file-excel" style="color:var(--po-gn)"></i>
                             </button>
                         </div>
@@ -262,7 +261,7 @@
             </div>
             <div class="emp-actions">
                 <button wire:click="switchView('list')" class="emp-btn"><i class="fa-solid fa-arrow-left"></i> Quay lại</button>
-                <button type="button" class="emp-btn" onclick="alert('Xuất Excel thành công!')"><i class="fa-solid fa-file-excel" style="color:var(--po-gn)"></i> Xuất Excel</button>
+                <button type="button" class="emp-btn" wire:click="exportWeekForm"><i class="fa-solid fa-file-excel" style="color:var(--po-gn)"></i> Xuất Excel</button>
                 <button wire:click="saveWeekMenu('draft')" class="emp-btn"><i class="fa-regular fa-floppy-disk"></i> Lưu nháp</button>
                 <button wire:click="saveWeekMenu('sent')" class="emp-btn"><i class="fa-regular fa-paper-plane"></i> Gửi xác nhận</button>
                 <button wire:click="saveWeekMenu('locked')" class="emp-btn emp-btn-primary"><i class="fa-solid fa-lock"></i> Chốt thực đơn</button>
@@ -349,7 +348,7 @@
             </div>
             <div class="emp-actions">
                 <button wire:click="switchView('list')" class="emp-btn"><i class="fa-solid fa-arrow-left"></i> Quay lại</button>
-                <button type="button" class="emp-btn" onclick="alert('Xuất Excel thành công!')"><i class="fa-solid fa-file-excel" style="color:var(--po-gn)"></i> Xuất Excel</button>
+                <button type="button" class="emp-btn" wire:click="exportDayForm"><i class="fa-solid fa-file-excel" style="color:var(--po-gn)"></i> Xuất Excel</button>
                 <button wire:click="saveDayMenu('draft')" class="emp-btn"><i class="fa-regular fa-floppy-disk"></i> Lưu nháp</button>
                 <button wire:click="saveDayMenu('locked')" class="emp-btn emp-btn-primary"><i class="fa-solid fa-lock"></i> Chốt thực đơn</button>
             </div>

@@ -7,6 +7,7 @@ use App\Models\Menu;
 use App\Models\Shift;
 use Carbon\Carbon;
 use Filament\Pages\Page;
+use Illuminate\Database\Eloquent\Collection;
 use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
@@ -33,9 +34,9 @@ class BaoCao extends Page
         return __('VẬN HÀNH BẾP');
     }
 
-    public ?string $fromDate = '2026-05-18';
+    public ?string $fromDate = null;
 
-    public ?string $toDate = '2026-05-23';
+    public ?string $toDate = null;
 
     public array $selectedShifts = [1, 2, 3];
 
@@ -43,11 +44,22 @@ class BaoCao extends Page
 
     public function mount(): void
     {
-        // Try to sync shifts
+        // Mặc định tuần hiện tại (T2 → T7) thay vì tuần seeder demo
+        $this->fromDate ??= now()->startOfWeek()->toDateString();
+        $this->toDate ??= now()->startOfWeek()->addDays(5)->toDateString();
+
         $shifts = Shift::pluck('id')->toArray();
         if (! empty($shifts)) {
             $this->selectedShifts = array_slice($shifts, 0, 3);
         }
+    }
+
+    /** @var Collection|null Memo trong 1 render — blade gọi trong vòng lặp */
+    protected $allShiftsCache = null;
+
+    public function getAllShifts()
+    {
+        return $this->allShiftsCache ??= Shift::all();
     }
 
     public function toggleShift(int $id): void
@@ -61,8 +73,8 @@ class BaoCao extends Page
 
     public function setThisWeek(): void
     {
-        $this->fromDate = '2026-05-18';
-        $this->toDate = '2026-05-23';
+        $this->fromDate = now()->startOfWeek()->toDateString();
+        $this->toDate = now()->startOfWeek()->addDays(5)->toDateString();
     }
 
     /**

@@ -18,11 +18,13 @@ class Setting extends Model
      */
     public static function get(string $key, mixed $default = null): mixed
     {
-        return Cache::rememberForever("setting.{$key}", function () use ($key, $default) {
-            $setting = static::where('key', $key)->first();
-
-            return $setting?->value ?? $default;
+        // Cache giá trị DB (kể cả null), KHÔNG cache $default — tránh default của call-site
+        // đầu tiên bị "đóng băng" vĩnh viễn cho mọi call-site khác
+        $value = Cache::rememberForever("setting.{$key}", function () use ($key) {
+            return static::where('key', $key)->value('value');
         });
+
+        return $value ?? $default;
     }
 
     /**

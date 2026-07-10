@@ -679,12 +679,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @php 
-                                $kitchenId = auth()->user()?->currentKitchenId();
-                                $stocksData = \App\Models\Stock::with('ingredient')
-                                    ->when($kitchenId, fn($q) => $q->where('kitchen_id', $kitchenId))
-                                    ->get(); 
-                            @endphp
+                            @php $stocksData = $this->getCheckStocks(); @endphp
                             @foreach($stocksData as $index => $item)
                                 <tr>
                                     <td style="text-align: center;">{{ $index + 1 }}</td>
@@ -697,7 +692,7 @@
                                     <td style="text-align: center;">
                                         <input type="number" 
                                                step="0.01" 
-                                               wire:model.live="actualQuantities.{{ $item->id }}" 
+                                               wire:model.blur="actualQuantities.{{ $item->id }}" 
                                                class="w-28 text-center border border-gray-300 rounded px-2 py-1 text-xs dark:bg-gray-800 dark:border-gray-700">
                                     </td>
                                     <td style="text-align: right; font-weight: 700; color: {{ ($actualQuantities[$item->id] ?? $item->quantity) - $item->quantity < 0 ? '#ef4444' : (($actualQuantities[$item->id] ?? $item->quantity) - $item->quantity > 0 ? '#16a34a' : 'inherit') }}">
@@ -706,7 +701,7 @@
                                     </td>
                                     <td>
                                         <input type="text" 
-                                               wire:model.live="checkNotes.{{ $item->id }}" 
+                                               wire:model.blur="checkNotes.{{ $item->id }}" 
                                                placeholder="Lý do chênh lệch..."
                                                class="w-full border border-gray-300 rounded px-2 py-1 text-xs dark:bg-gray-800 dark:border-gray-700">
                                     </td>
@@ -892,7 +887,7 @@
                             <div class="form-field" style="width: 140px;">
                                 <label style="font-size:0.7rem;">Ca làm việc</label>
                                 <select wire:model.live="prodShiftId" style="height:34px;">
-                                    @foreach(\App\Models\Shift::all() as $sh)
+                                    @foreach($this->getShiftsList() as $sh)
                                         <option value="{{ $sh->id }}">{{ $sh->name }}</option>
                                     @endforeach
                                 </select>
@@ -1216,7 +1211,7 @@
 
     <!-- LEDGER (THẺ KHO) DRAWER MODAL -->
     @if($selectedLedgerIngId)
-        @php $ledgerIng = \App\Models\Ingredient::find($selectedLedgerIngId); @endphp
+        @php $ledgerIng = $this->getLedgerIngredient(); @endphp
         <div class="flow-modal-overlay">
             <div class="flow-modal-container" style="width: min(720px, 94vw);">
                 <div class="flex justify-between items-center pb-3 border-b border-gray-200 dark:border-gray-700 mb-4">

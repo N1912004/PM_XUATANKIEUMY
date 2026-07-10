@@ -119,6 +119,84 @@ class ListMenus extends Page
         $this->resetPage();
     }
 
+    /**
+     * Danh sách tháng cho bộ lọc: sinh từ dữ liệu Menu thực tế + tháng hiện tại (không hardcode).
+     *
+     * @return array<string, string> ['Y-m' => 'Tháng m/Y']
+     */
+    public function getMonthOptions(): array
+    {
+        $months = Menu::query()
+            ->selectRaw("DISTINCT DATE_FORMAT(date, '%Y-%m') AS ym")
+            ->orderByDesc('ym')
+            ->pluck('ym')
+            ->push(now()->format('Y-m'))
+            ->unique()
+            ->sortDesc();
+
+        return $months->mapWithKeys(function (string $ym): array {
+            [$y, $m] = explode('-', $ym);
+
+            return [$ym => "Tháng {$m}/{$y}"];
+        })->all();
+    }
+
+    /**
+     * Xuất CSV thực đơn thật (thay nút alert() giả trước đây). Có thể giới hạn phạm vi
+     * theo bếp + khoảng ngày (dùng cho nút xuất trên từng card tuần/ngày).
+     */
+    public function exportMenus(?int $kitchenId = null, ?string $from = null, ?string $to = null)
+    {
+        abort_unless(MenuResource::canViewAny(), 403);
+
+        $query = Menu::with(['kitchen', 'shift', 'recipe'])->orderBy('date')->orderBy('shift_id');
+
+        if ($kitchenId && $from) {
+            $query->where('kitchen_id', $kitchenId)
+                ->whereBetween('date', [$from, $to ?: $from]);
+        } elseif ($this->monthFilter) {
+            $query->where('date', 'like', $this->monthFilter.'%');
+        }
+
+        $records = $query->get();
+        $filename = 'thuc_don_'.($from ?: $this->monthFilter ?: now()->format('Y-m')).'.csv';
+
+        return response()->streamDownload(function () use ($records): void {
+            $output = fopen('php://output', 'w');
+            fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+            fputcsv($output, ['STT', 'Bếp ăn', 'Ngày', 'Thứ', 'Ca', 'Món ăn', 'Số suất', 'Trạng thái']);
+
+            $statusLabels = ['draft' => 'Nháp', 'sent' => 'Đã gửi khách', 'locked' => 'Đã chốt'];
+            foreach ($records as $i => $menu) {
+                fputcsv($output, [
+                    $i + 1,
+                    $menu->kitchen?->name,
+                    $menu->date->format('d/m/Y'),
+                    'Thứ '.['Chủ Nhật', 'Hai', 'Ba', 'Tư', 'Năm', 'Sáu', 'Bảy'][$menu->date->dayOfWeek],
+                    $menu->shift?->name,
+                    $menu->recipe?->name,
+                    $menu->estimated_portions,
+                    $statusLabels[$menu->status] ?? $menu->status,
+                ]);
+            }
+            fclose($output);
+        }, $filename, ['Content-Type' => 'text/csv; charset=UTF-8']);
+    }
+
+    /** Xuất tuần đang soạn trên form (T2 → T7). */
+    public function exportWeekForm()
+    {
+        $start = Carbon::parse($this->weekStartDate);
+
+        return $this->exportMenus((int) $this->weekKitchenId, $start->toDateString(), $start->copy()->addDays(5)->toDateString());
+    }
+
+    /** Xuất ngày đang soạn trên form. */
+    public function exportDayForm()
+    {
+        return $this->exportMenus((int) $this->dayKitchenId, $this->dayDate, $this->dayDate);
+    }
+
     // ==========================================
     // DATA FETCHERS & STATS
     // ==========================================
@@ -128,7 +206,7 @@ class ListMenus extends Page
         $monthPrefix = $this->monthFilter ?: now()->format('Y-m');
         $counts = Menu::query()
             ->where('date', '>=', $monthPrefix.'-01')
-            ->where('date', '<', \Illuminate\Support\Carbon::parse($monthPrefix.'-01')->addMonth()->toDateString())
+            ->where('date', '<', Carbon::parse($monthPrefix.'-01')->addMonth()->toDateString())
             ->selectRaw('COUNT(*) AS total')
             ->selectRaw("SUM(CASE WHEN status = 'sent' THEN 1 ELSE 0 END) AS sent")
             ->selectRaw("SUM(CASE WHEN status = 'locked' THEN 1 ELSE 0 END) AS locked")
@@ -143,46 +221,73 @@ class ListMenus extends Page
         ];
     }
 
+    /**
+     * Query menu đã áp bộ lọc tháng / trạng thái / tìm kiếm bếp — dùng chung cho 2 bước bên dưới.
+     */
+    protected function filteredMenuQuery()
+    {
+        return Menu::query()
+            ->when($this->monthFilter, fn ($q) => $q
+                ->where('date', '>=', $this->monthFilter.'-01')
+                ->where('date', '<', Carbon::parse($this->monthFilter.'-01')->addMonth()->toDateString()))
+            ->when($this->statusFilter, fn ($q) => $q->where('status', $this->statusFilter))
+            ->when($this->search, fn ($q) => $q->whereHas('kitchen', fn ($k) => $k->where('name', 'like', '%'.$this->search.'%')));
+    }
+
     public function menus()
     {
-        $query = Menu::with(['kitchen', 'shift', 'recipe']);
+        // Bước 1: gộp nhóm + phân trang Ở TẦNG SQL (chỉ lấy các khóa nhóm của trang hiện tại)
+        // thay vì nạp toàn bộ menu của tháng vào PHP rồi gộp — trước đây 720+ bản ghi/request.
+        // Tuần = thứ 2 đầu tuần (WEEKDAY: 0 = thứ 2); ngày = chính date.
+        $weekKeys = $this->filteredMenuQuery()
+            ->selectRaw("'week' AS card_type, kitchen_id, DATE_SUB(date, INTERVAL WEEKDAY(date) DAY) AS group_date")
+            ->groupBy('kitchen_id', 'group_date');
 
-        // Bộ lọc tháng
-        if ($this->monthFilter) {
-            $query->where('date', 'like', $this->monthFilter.'%');
-        }
+        $dayKeys = $this->filteredMenuQuery()
+            ->selectRaw("'day' AS card_type, kitchen_id, date AS group_date")
+            ->groupBy('kitchen_id', 'group_date');
 
-        // Bộ lọc trạng thái
-        if ($this->statusFilter) {
-            $query->where('status', $this->statusFilter);
-        }
+        $keysQuery = match ($this->typeFilter) {
+            'week' => $weekKeys,
+            'day' => $dayKeys,
+            default => $weekKeys->unionAll($dayKeys),
+        };
 
-        // Tìm kiếm theo bếp/nhà ăn
-        if ($this->search) {
-            $query->whereHas('kitchen', fn ($q) => $q->where('name', 'like', '%'.$this->search.'%'));
-        }
+        $page = Paginator::resolveCurrentPage('page');
+        $allKeys = DB::query()->fromSub($keysQuery, 'groups')
+            ->orderByDesc('group_date')
+            ->orderBy('card_type')
+            ->orderBy('kitchen_id');
 
-        $records = $query->orderBy('date', 'desc')->get();
+        $total = (clone $allKeys)->count();
+        $pageKeys = $allKeys->forPage($page, $this->perPage)->get();
 
-        // Thuật toán gộp các bản ghi đơn lẻ thành "Thực đơn tuần" và "Thực đơn ngày"
-        $grouped = [];
+        // Bước 2: chỉ nạp chi tiết menu cho ~perPage nhóm của trang này để dựng card
+        $cards = $pageKeys->map(function ($key) {
+            $isWeek = $key->card_type === 'week';
+            $start = Carbon::parse($key->group_date);
+            $end = $isWeek ? $start->copy()->addDays(5) : $start->copy();
 
-        foreach ($records as $menu) {
-            $date = Carbon::parse($menu->date);
-            $startOfWeek = $date->copy()->startOfWeek();
+            $menu = Menu::with(['kitchen.area', 'shift'])
+                ->where('kitchen_id', $key->kitchen_id)
+                ->whereBetween('date', [$start->toDateString(), $end->toDateString()])
+                ->orderByDesc('date')
+                ->first();
 
-            // Nhóm theo tuần
-            $weekKey = 'week_'.$menu->kitchen_id.'_'.$startOfWeek->toDateString();
-            if (! isset($grouped[$weekKey])) {
-                $grouped[$weekKey] = [
+            if (! $menu) {
+                return null;
+            }
+
+            if ($isWeek) {
+                return [
                     'id' => $menu->id,
                     'type' => 'week',
                     'kitchen_id' => $menu->kitchen_id,
                     'kitchen_name' => $menu->kitchen?->name ?? 'Nhà ăn',
                     'title' => 'Thực đơn tuần - '.$menu->kitchen?->name,
-                    'sub' => 'Từ ngày '.$startOfWeek->format('d/m/Y').' đến '.$startOfWeek->copy()->addDays(5)->format('d/m/Y'),
-                    'start_date' => $startOfWeek->toDateString(),
-                    'end_date' => $startOfWeek->copy()->addDays(5)->toDateString(),
+                    'sub' => 'Từ ngày '.$start->format('d/m/Y').' đến '.$end->format('d/m/Y'),
+                    'start_date' => $start->toDateString(),
+                    'end_date' => $end->toDateString(),
                     'meta_company' => $menu->kitchen?->area?->name ?? 'Công ty Summit',
                     'meta_info' => 'Tổng 6 ngày · '.($menu->kitchen?->id ? '18 ca' : 'Ca ăn'),
                     'status' => $menu->status,
@@ -190,44 +295,23 @@ class ListMenus extends Page
                 ];
             }
 
-            // Nhóm theo ngày
-            $dayKey = 'day_'.$menu->kitchen_id.'_'.$menu->date->toDateString();
-            if (! isset($grouped[$dayKey])) {
-                $grouped[$dayKey] = [
-                    'id' => $menu->id,
-                    'type' => 'day',
-                    'kitchen_id' => $menu->kitchen_id,
-                    'kitchen_name' => $menu->kitchen?->name ?? 'Nhà ăn',
-                    'title' => 'Thực đơn ngày – '.$menu->date->format('d/m/Y').' (Thứ '.['Chủ Nhật', 'Hai', 'Ba', 'Tư', 'Năm', 'Sáu', 'Bảy'][$menu->date->dayOfWeek].')',
-                    'sub' => $menu->kitchen?->name.' · '.$menu->shift?->name.' · '.$menu->estimated_portions.' suất',
-                    'start_date' => $menu->date->toDateString(),
-                    'end_date' => $menu->date->toDateString(),
-                    'meta_company' => $menu->kitchen?->area?->name ?? 'Công ty Summit',
-                    'meta_info' => $menu->estimated_portions.' suất '.$menu->shift?->name,
-                    'status' => $menu->status,
-                    'date_raw' => $menu->date,
-                ];
-            }
-        }
+            return [
+                'id' => $menu->id,
+                'type' => 'day',
+                'kitchen_id' => $menu->kitchen_id,
+                'kitchen_name' => $menu->kitchen?->name ?? 'Nhà ăn',
+                'title' => 'Thực đơn ngày – '.$menu->date->format('d/m/Y').' (Thứ '.['Chủ Nhật', 'Hai', 'Ba', 'Tư', 'Năm', 'Sáu', 'Bảy'][$menu->date->dayOfWeek].')',
+                'sub' => $menu->kitchen?->name.' · '.$menu->shift?->name.' · '.$menu->estimated_portions.' suất',
+                'start_date' => $menu->date->toDateString(),
+                'end_date' => $menu->date->toDateString(),
+                'meta_company' => $menu->kitchen?->area?->name ?? 'Công ty Summit',
+                'meta_info' => $menu->estimated_portions.' suất '.$menu->shift?->name,
+                'status' => $menu->status,
+                'date_raw' => $menu->date,
+            ];
+        })->filter()->values();
 
-        // Lọc theo loại
-        $result = collect($grouped)->values();
-        if ($this->typeFilter === 'week') {
-            $result = $result->where('type', 'week');
-        } elseif ($this->typeFilter === 'day') {
-            $result = $result->where('type', 'day');
-        }
-
-        // Phân trang thủ công trên collection đã gộp (không paginate được ở tầng SQL vì gộp tuần/ngày)
-        $page = Paginator::resolveCurrentPage('page');
-
-        return new LengthAwarePaginator(
-            $result->forPage($page, $this->perPage)->values(),
-            $result->count(),
-            $this->perPage,
-            $page,
-            ['pageName' => 'page']
-        );
+        return new LengthAwarePaginator($cards, $total, $this->perPage, $page, ['pageName' => 'page']);
     }
 
     // ==========================================
@@ -245,14 +329,16 @@ class ListMenus extends Page
         $shifts = Shift::all();
         $start = Carbon::parse($startDate);
 
+        // Nạp menu CẢ TUẦN bằng 1 query rồi tra theo (ngày, ca) — trước đây 6 ngày × số ca query lẻ
+        $menusByDayShift = Menu::where('kitchen_id', $kitchenId)
+            ->whereBetween('date', [$start->toDateString(), $start->copy()->addDays(5)->toDateString()])
+            ->get()
+            ->keyBy(fn (Menu $m) => $m->date->toDateString().'|'.$m->shift_id);
+
         for ($d = 0; $d < 6; $d++) {
             $currentDate = $start->copy()->addDays($d)->toDateString();
             foreach ($shifts as $shift) {
-                // Tìm bản ghi menu
-                $menu = Menu::where('kitchen_id', $kitchenId)
-                    ->where('date', $currentDate)
-                    ->where('shift_id', $shift->id)
-                    ->first();
+                $menu = $menusByDayShift->get($currentDate.'|'.$shift->id);
 
                 $this->weekGrid[$d][$shift->id] = $menu?->recipe_id ?? '';
                 $this->weekPortions[$d][$shift->id] = $menu?->estimated_portions ?? 200;
@@ -350,11 +436,14 @@ class ListMenus extends Page
         $this->dayItems = [];
         $shifts = Shift::all();
 
+        // 1 query cho cả ngày, nhóm theo ca — thay vì mỗi ca một query
+        $menusByShift = Menu::where('kitchen_id', $kitchenId)
+            ->where('date', $date)
+            ->get()
+            ->groupBy('shift_id');
+
         foreach ($shifts as $shift) {
-            $menus = Menu::where('kitchen_id', $kitchenId)
-                ->where('date', $date)
-                ->where('shift_id', $shift->id)
-                ->get();
+            $menus = $menusByShift->get($shift->id, collect());
 
             $recipes = [];
             foreach ($menus as $m) {

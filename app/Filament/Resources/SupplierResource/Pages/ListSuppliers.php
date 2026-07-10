@@ -27,6 +27,11 @@ class ListSuppliers extends Page
 
     public int $perPage = 10;
 
+    public function updatedPerPage(): void
+    {
+        $this->resetPage();
+    }
+
     protected $queryString = [
         'search' => ['except' => ''],
         'typeFilter' => ['except' => ''],

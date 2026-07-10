@@ -5,6 +5,7 @@ namespace App\Filament\Resources\LeaveOvertimeResource\Pages;
 use App\Filament\Resources\LeaveOvertimeResource;
 use App\Models\Employee;
 use App\Models\LeaveOvertime;
+use Carbon\Carbon;
 use Filament\Resources\Pages\Page;
 use Livewire\WithPagination;
 
@@ -31,6 +32,11 @@ class ListLeaveOvertimes extends Page
     public $statusFilter = '';
 
     public $perPage = 10;
+
+    public function updatedPerPage(): void
+    {
+        $this->resetPage();
+    }
 
     protected $queryString = [
         'activeTab' => ['except' => 'all'],
@@ -149,7 +155,7 @@ class ListLeaveOvertimes extends Page
         if ($this->monthFilter) {
             $parts = explode('-', $this->monthFilter);
             if (count($parts) === 2) {
-                $monthStart = \Carbon\Carbon::createFromDate((int) $parts[0], (int) $parts[1], 1);
+                $monthStart = Carbon::createFromDate((int) $parts[0], (int) $parts[1], 1);
                 $query->whereBetween('start_date', [
                     $monthStart->toDateString(),
                     $monthStart->copy()->endOfMonth()->toDateString(),

@@ -34,6 +34,11 @@ class ListTimekeepings extends Page
 
     public $perPage = 10;
 
+    public function updatedPerPage(): void
+    {
+        $this->resetPage();
+    }
+
     protected $queryString = [
         'search' => ['except' => ''],
         'dateFilter' => ['except' => ''],

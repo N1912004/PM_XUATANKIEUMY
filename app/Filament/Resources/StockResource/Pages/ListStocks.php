@@ -17,6 +17,7 @@ use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Livewire\WithFileUploads;
 
@@ -112,16 +113,8 @@ class ListStocks extends ListRecords
 
         $kitchenId = auth()->user()?->currentKitchenId();
 
-        // Initialize actual quantities for end day checks
-        $stocksQuery = Stock::query();
-        if ($kitchenId) {
-            $stocksQuery->where('kitchen_id', $kitchenId);
-        }
-        $stocks = $stocksQuery->get();
-        foreach ($stocks as $stock) {
-            $this->actualQuantities[$stock->id] = $stock->quantity;
-            $this->checkNotes[$stock->id] = '';
-        }
+        // actualQuantities khởi tạo LAZY khi user mở tab kiểm kê (setTab('check'))
+        // — không nạp toàn bộ bảng Stock vào payload Livewire cho mọi lần vào trang
 
         // Set defaults
         $firstIng = Ingredient::first();
@@ -148,6 +141,10 @@ class ListStocks extends ListRecords
 
         if (is_string($tab) && in_array($tab, ['stock', 'in', 'out', 'check', 'log'], true)) {
             $this->warehouseTab = $tab;
+
+            if ($tab === 'check') {
+                $this->initEndDayCheck();
+            }
         }
         if (is_string($inMode) && in_array($inMode, ['po', 'direct'], true)) {
             $this->inMode = $inMode;
@@ -168,6 +165,48 @@ class ListStocks extends ListRecords
     public function setTab(string $tab): void
     {
         $this->warehouseTab = $tab;
+
+        if ($tab === 'check' && $this->actualQuantities === []) {
+            $this->initEndDayCheck();
+        }
+    }
+
+    /** Nạp tồn hiện tại của bếp vào form kiểm kê (chỉ khi mở tab). */
+    protected function initEndDayCheck(): void
+    {
+        foreach ($this->getCheckStocks() as $stock) {
+            $this->actualQuantities[$stock->id] = $stock->quantity;
+            $this->checkNotes[$stock->id] = '';
+        }
+    }
+
+    /** @var Collection|null Memo 1 render cho tab kiểm kê */
+    protected $checkStocksCache = null;
+
+    public function getCheckStocks()
+    {
+        if ($this->checkStocksCache !== null) {
+            return $this->checkStocksCache;
+        }
+
+        $kitchenId = auth()->user()?->currentKitchenId();
+
+        return $this->checkStocksCache = Stock::with('ingredient')
+            ->when($kitchenId, fn ($q) => $q->where('kitchen_id', $kitchenId))
+            ->get();
+    }
+
+    /** @var Collection|null Memo 1 render */
+    protected $shiftsCache = null;
+
+    public function getShiftsList()
+    {
+        return $this->shiftsCache ??= Shift::all();
+    }
+
+    public function getLedgerIngredient(): ?Ingredient
+    {
+        return $this->selectedLedgerIngId ? Ingredient::find($this->selectedLedgerIngId) : null;
     }
 
     public function openInTypeModal(): void

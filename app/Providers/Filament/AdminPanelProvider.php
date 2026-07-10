@@ -71,10 +71,10 @@ class AdminPanelProvider extends PanelProvider
                 PanelsRenderHook::BODY_END,
                 fn (): string => Blade::render("@livewire('edit-profile-modal')"),
             )
-            // Nạp Laravel Echo (Reverb) vào panel để chat nhóm nhận tin nhắn realtime.
+            // Nạp Laravel Echo (Reverb) cho chat realtime + app.css (bundle Font Awesome thay CDN).
             ->renderHook(
                 PanelsRenderHook::HEAD_END,
-                fn (): string => Blade::render("@vite('resources/js/app.js')"),
+                fn (): string => Blade::render("@vite(['resources/css/app.css', 'resources/js/app.js'])"),
             )
             ->colors([
                 'primary' => $this->getSetting('primary_color', '#2563eb'),

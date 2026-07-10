@@ -1,5 +1,4 @@
 <div class="emp-page">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
 <style>
     :root {
@@ -497,7 +496,7 @@
         <div class="shifts-group">
             <span class="font-semibold text-gray-500 mr-1" style="font-size: 11px;">Ca:</span>
             
-            @php $allShifts = \App\Models\Shift::all(); @endphp
+            @php $allShifts = $this->getAllShifts(); @endphp
             @foreach($allShifts as $index => $shift)
                 @php 
                     $classes = ['shift-ca1', 'shift-ca2', 'shift-ca3', 'shift-ca4'];

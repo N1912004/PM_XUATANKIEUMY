@@ -707,7 +707,7 @@
                 <!-- Shift checkboxes styled as badges -->
                 <div style="display:flex;align-items:center;gap:5px;font-size:12px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:4px 10px;" class="dark:bg-gray-800 dark:border-gray-700">
                     <span style="font-weight:600;color:#64748B">Ca:</span>
-                    @foreach(\App\Models\Shift::all() as $index => $sh)
+                    @foreach($this->getShiftsList() as $index => $sh)
                         @php 
                             $bg = ['#EFF6FF', '#F0FDF4', '#FEF3C7', '#F5F3FF'][$index % 4];
                             $color = ['#1e40af', '#065F46', '#78350F', '#4C1D95'][$index % 4];
@@ -894,7 +894,7 @@
                     <div class="form-field" style="min-width:240px">
                         <label>Ca lấy nguyên liệu</label>
                         <div style="display:flex; gap:6px; flex-wrap:wrap; background:#F8FAFC; border:1px solid var(--bd); border-radius:8px; padding:7px 9px; min-height:38px;" class="dark:bg-gray-800 dark:border-gray-700">
-                            @foreach(\App\Models\Shift::all() as $sh)
+                            @foreach($this->getShiftsList() as $sh)
                                 <label style="font-size:11px; font-weight:700; color:#1e40af; display:flex; align-items:center; gap:4px; cursor:pointer;">
                                     <input type="checkbox" value="{{ $sh->id }}" wire:model.live="poSelectedShifts" style="border-radius:3px;">
                                     <span>{{ $sh->name }}</span>
@@ -918,7 +918,7 @@
                             'uot' => ['label' => 'Rau củ quả & Nông sản', 'icon' => '🥬', 'class' => 'loai-uot'],
                             'kho' => ['label' => 'Hàng khô & Gia vị', 'icon' => '🧂', 'class' => 'loai-kho']
                         ];
-                        $suppliers = \App\Models\Supplier::where('status', true)->get();
+                        $suppliers = $this->getActiveSuppliers();
                     @endphp
 
                     @foreach($categories as $key => $cat)
@@ -1085,7 +1085,7 @@
                     
                     @forelse($byNcc as $supId => $items)
                         @php 
-                            $ncc = \App\Models\Supplier::find($supId);
+                            $ncc = $this->getAllSuppliers()->get($supId);
                             $total = $items->sum(fn($it) => $it['quantity_manual'] * $it['reference_price']);
                         @endphp
                         @if($ncc)

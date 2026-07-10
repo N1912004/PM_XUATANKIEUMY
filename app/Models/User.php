@@ -79,6 +79,11 @@ class User extends Authenticatable implements HasAvatar
     public function getFilamentAvatarUrl(): ?string
     {
         if ($this->avatar_url) {
+            // avatar_url có thể là URL tuyệt đối (seeder dùng Unsplash) hoặc path trong storage
+            if (filter_var($this->avatar_url, FILTER_VALIDATE_URL)) {
+                return $this->avatar_url;
+            }
+
             return Storage::disk('public')->url($this->avatar_url);
         }
 

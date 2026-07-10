@@ -12,6 +12,7 @@ use App\Models\Supplier;
 use Carbon\Carbon;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
 class ListHang extends Page
@@ -207,6 +208,30 @@ class ListHang extends Page
         }
 
         $this->poItems = array_values($agg);
+    }
+
+    /** @var Collection|null Memo 1 render — blade gọi trong vòng lặp */
+    protected $shiftsCache = null;
+
+    public function getShiftsList()
+    {
+        return $this->shiftsCache ??= Shift::all();
+    }
+
+    /** @var Collection|null Memo 1 render, keyBy id để tra cứu O(1) */
+    protected $activeSuppliersCache = null;
+
+    public function getActiveSuppliers()
+    {
+        return $this->activeSuppliersCache ??= Supplier::where('status', true)->get()->keyBy('id');
+    }
+
+    /** @var Collection|null Memo 1 render — tra cứu tên NCC theo id (kể cả NCC ngừng hoạt động) */
+    protected $allSuppliersCache = null;
+
+    public function getAllSuppliers()
+    {
+        return $this->allSuppliersCache ??= Supplier::all()->keyBy('id');
     }
 
     public function bulkAssignSupplier(string $loai, int $supplierId): void

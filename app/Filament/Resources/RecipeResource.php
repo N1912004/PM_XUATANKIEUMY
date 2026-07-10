@@ -360,13 +360,17 @@ class RecipeResource extends Resource
         return 'MON'.str_pad((string) ((Recipe::query()->max('id') ?? 0) + 1), 5, '0', STR_PAD_LEFT);
     }
 
+    /** @var array<int, float> Memo giá theo request — Placeholder line_total gọi hàm này cho từng dòng repeater mỗi re-render */
+    private static array $priceMemo = [];
+
     private static function ingredientPrice(mixed $ingredientId): float
     {
         if (blank($ingredientId)) {
             return 0;
         }
 
-        return (float) (Ingredient::query()->whereKey($ingredientId)->value('reference_price') ?? 0);
+        return self::$priceMemo[(int) $ingredientId]
+            ??= (float) (Ingredient::query()->whereKey($ingredientId)->value('reference_price') ?? 0);
     }
 
     /**

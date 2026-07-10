@@ -92,6 +92,7 @@ class CreateSupplier extends Page
                 });
             })
             ->orderBy('id')
+            ->limit(100) // bảng chọn nguyên liệu render lại mỗi keystroke — giới hạn và dùng ô tìm kiếm để thu hẹp
             ->get()
             ->all();
     }
@@ -130,12 +131,13 @@ class CreateSupplier extends Page
 
         // Đồng bộ ngược cột supplier_id và reference_price ở bảng ingredients để tương thích ngược.
         foreach ($syncData as $ingredientId => $pivotData) {
-            Ingredient::query()
-                ->whereKey($ingredientId)
-                ->update([
-                    'supplier_id' => $supplier->id,
-                    'reference_price' => $pivotData['reference_price'],
-                ]);
+            // Update qua model instance để hook đổi giá của Ingredient chạy
+            // (đưa các recipe liên quan về 'pending' khi giá tham chiếu thay đổi)
+            $ingredient = Ingredient::find($ingredientId);
+            $ingredient?->update([
+                'supplier_id' => $supplier->id,
+                'reference_price' => $pivotData['reference_price'],
+            ]);
         }
     }
 }

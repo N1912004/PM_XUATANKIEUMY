@@ -70,18 +70,26 @@ class Dashboard extends Page
 
         // Ngày hôm nay dạng chuỗi 'Y-m-d' để so sánh trực tiếp trên cột DATE.
         $today = Carbon::today()->toDateString();
+        $kitchenId = $this->scopedKitchenId();
 
-        // Fetch Stats
-        $this->totalPortionsToday = (int) Menu::where('date', $today)->sum('estimated_portions');
+        // Fetch Stats (scope theo bếp của user nếu không phải quản trị)
+        $this->totalPortionsToday = (int) Menu::where('date', $today)
+            ->when($kitchenId, fn ($q) => $q->where('kitchen_id', $kitchenId))
+            ->sum('estimated_portions');
         $this->totalIngredients = (int) Ingredient::where('status', true)->count();
-        $this->pendingOrders = (int) PurchaseOrder::whereIn('status', ['draft', 'sent', 'checking'])->count();
-        $this->activeEmployees = (int) Employee::where('status', 'Đang làm việc')->count();
+        $this->pendingOrders = (int) PurchaseOrder::whereIn('status', ['draft', 'sent', 'checking'])
+            ->when($kitchenId, fn ($q) => $q->where('kitchen_id', $kitchenId))
+            ->count();
+        $this->activeEmployees = (int) Employee::where('status', 'Đang làm việc')
+            ->when($kitchenId, fn ($q) => $q->where('kitchen_id', $kitchenId))
+            ->count();
 
         // Fetch Low Stock Ingredients.
         // Chỉ cảnh báo khi có định mức tối thiểu (> 0) và nguyên liệu đang hoạt động.
         // Sắp xếp theo mức thiếu hụt nhiều nhất và giới hạn danh sách để an toàn với dữ liệu lớn;
         // tổng số cảnh báo thực tế được đếm riêng qua $lowStockCount.
         $lowStockQuery = Stock::query()
+            ->when($kitchenId, fn ($q) => $q->where('kitchen_id', $kitchenId))
             ->where('min_quantity', '>', 0)
             ->whereColumn('quantity', '<=', 'min_quantity')
             ->whereHas('ingredient', fn ($query) => $query->where('status', true));
@@ -97,10 +105,25 @@ class Dashboard extends Page
 
         // Fetch Recent Purchase Orders
         $this->recentOrders = PurchaseOrder::with('supplier:id,name')
+            ->when($kitchenId, fn ($q) => $q->where('kitchen_id', $kitchenId))
             ->latest()
             ->limit(5)
             ->get(['id', 'code', 'supplier_id', 'status', 'created_at'])
             ->toArray();
+    }
+
+    /**
+     * Bếp cần scope KPI: null với quản trị viên (xem toàn hệ thống),
+     * ngược lại là bếp của user — đồng bộ convention BelongsToKitchen.
+     */
+    protected function scopedKitchenId(): ?int
+    {
+        $user = auth()->user();
+        if (! $user || $user->hasRole(['super_admin', 'Quản trị viên'])) {
+            return null;
+        }
+
+        return $user->currentKitchenId();
     }
 
     /**
@@ -109,9 +132,11 @@ class Dashboard extends Page
     public function getViewData(): array
     {
         $today = Carbon::today()->toDateString();
+        $kitchenId = $this->scopedKitchenId();
 
         return [
             'todayMenus' => Menu::where('date', $today)
+                ->when($kitchenId, fn ($q) => $q->where('kitchen_id', $kitchenId))
                 ->with([
                     'shift:id,name',
                     'recipe:id,name,type',

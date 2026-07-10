@@ -1,5 +1,4 @@
 <!-- Nhúng FontAwesome CDN để hiển thị các icon chuẩn theo demo -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
 @php
     $record = $getRecord();

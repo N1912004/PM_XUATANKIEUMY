@@ -68,20 +68,29 @@ class Menu extends Model
                 return;
             }
 
+            // Gom các field thay đổi thành 1 lệnh insert duy nhất thay vì N insert nhỏ
+            $now = now();
+            $rows = [];
             foreach (self::AUDITED_FIELDS as $field) {
                 if (! $menu->wasChanged($field)) {
                     continue;
                 }
 
-                MenuAuditLog::create([
+                $rows[] = [
                     'menu_id' => $menu->id,
                     'user_id' => Auth::id(),
                     'action' => 'updated',
                     'field' => $field,
                     'old_value' => (string) $menu->getOriginal($field),
                     'new_value' => (string) $menu->getAttribute($field),
-                    'edited_at' => now(),
-                ]);
+                    'edited_at' => $now,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ];
+            }
+
+            if ($rows !== []) {
+                MenuAuditLog::insert($rows);
             }
         });
 
