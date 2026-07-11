@@ -184,7 +184,9 @@
             }
 
             .sup-table-card {
-                overflow: hidden;
+                /* Không cắt overflow ở đây, nếu không dropdown filter bị card che cụt.
+                   Việc bo góc bảng chuyển xuống .sup-table-wrap. */
+                overflow: visible;
             }
 
             .sup-toolbar {
@@ -252,12 +254,140 @@
                 min-width: 9.5rem;
             }
 
+            /* Combobox lọc "Loại TP cung cấp": vừa tìm kiếm vừa chọn */
+            .sup-combo {
+                position: relative;
+            }
+
+            .sup-combo-toggle {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: .5rem;
+                cursor: pointer;
+                text-align: left;
+            }
+
+            .sup-combo-placeholder {
+                color: var(--sup-fa);
+            }
+
+            .sup-combo-caret {
+                width: 1rem;
+                height: 1rem;
+                flex: none;
+                color: var(--sup-fa);
+            }
+
+            .sup-combo-panel {
+                position: absolute;
+                z-index: 30;
+                top: calc(100% + .25rem);
+                left: 0;
+                right: 0;
+                background: var(--sup-wh);
+                border: 1px solid var(--sup-bd);
+                border-radius: .65rem;
+                box-shadow: 0 10px 25px -5px rgb(0 0 0 / .12);
+                overflow: hidden;
+            }
+
+            .sup-combo-search {
+                width: 100%;
+                border: none;
+                border-bottom: 1px solid var(--sup-bd);
+                background: transparent;
+                color: var(--sup-su);
+                padding: .6rem .9rem;
+                outline: none;
+                font-size: .875rem;
+            }
+
+            .sup-combo-list {
+                max-height: 13rem;
+                overflow-y: auto;
+                margin: 0;
+                padding: .25rem;
+                list-style: none;
+            }
+
+            .sup-combo-option {
+                display: block;
+                width: 100%;
+                border: none;
+                background: transparent;
+                color: var(--sup-su);
+                text-align: left;
+                padding: .5rem .65rem;
+                border-radius: .45rem;
+                font-size: .875rem;
+                cursor: pointer;
+            }
+
+            .sup-combo-option:hover {
+                background: var(--sup-bg, rgb(0 0 0 / .04));
+            }
+
+            .sup-combo-option-active {
+                font-weight: 700;
+                background: rgb(245 158 11 / .12);
+            }
+
+            /* Hàng chọn nhiều: ô tick bên trái */
+            .sup-combo-check {
+                display: flex;
+                align-items: center;
+                gap: .55rem;
+            }
+
+            .sup-combo-box {
+                flex: none;
+                width: 1.05rem;
+                height: 1.05rem;
+                border: 1.5px solid var(--sup-bd);
+                border-radius: .3rem;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                color: #fff;
+            }
+
+            .sup-combo-box svg {
+                width: .8rem;
+                height: .8rem;
+            }
+
+            .sup-combo-box-on {
+                background: rgb(245 158 11);
+                border-color: rgb(245 158 11);
+            }
+
+            .sup-combo-clear {
+                color: var(--sup-fa);
+                font-size: .8rem;
+                border-bottom: 1px solid var(--sup-bd);
+                border-radius: 0;
+                margin-bottom: .15rem;
+            }
+
+            .sup-combo-empty {
+                padding: .6rem .65rem;
+                color: var(--sup-fa);
+                font-size: .82rem;
+            }
+
+            [x-cloak] {
+                display: none !important;
+            }
+
             .sup-spacer {
                 flex: 1;
             }
 
             .sup-table-wrap {
                 overflow-x: auto;
+                border-bottom-left-radius: var(--sup-r);
+                border-bottom-right-radius: var(--sup-r);
             }
 
             .sup-table {

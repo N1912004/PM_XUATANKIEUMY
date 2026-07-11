@@ -3,6 +3,11 @@
     @php
         $statsData = $this->stats();
         $suppliersList = $this->suppliers();
+
+        // Dùng đúng class nút gốc của Filament để đồng bộ màu/kiểu với toàn app.
+        // Màu đổi qua biến --c-* (fi-color-custom), chỉ cần trỏ sang palette tương ứng.
+        $fiBtn = 'fi-btn relative grid-flow-col items-center justify-center font-semibold outline-none transition duration-75 focus-visible:ring-2 rounded-lg fi-size-md fi-btn-size-md gap-1.5 px-3 py-2 text-sm inline-grid shadow-sm bg-custom-600 text-white hover:bg-custom-500 focus-visible:ring-custom-500/50 dark:bg-custom-500 dark:hover:bg-custom-400 dark:focus-visible:ring-custom-400/50';
+        $fiVars = fn (string $c) => "--c-400:var(--{$c}-400);--c-500:var(--{$c}-500);--c-600:var(--{$c}-600);";
     @endphp
 
     <div class="sup-head">
@@ -11,22 +16,32 @@
             <p class="sup-subtitle">Quản lý thông tin NCC, loại thực phẩm cung cấp và bảng giá theo từng nguyên liệu</p>
         </div>
         <div class="sup-actions">
-            <button wire:click="exportExcel" class="sup-btn">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--sup-gn)">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                    <polyline points="14 2 14 8 20 8"/>
-                    <line x1="16" y1="13" x2="8" y2="13"/>
-                    <line x1="16" y1="17" x2="8" y2="17"/>
-                    <polyline points="10 9 9 9 8 9"/>
+            <button
+                type="button"
+                wire:click="exportExcel"
+                wire:loading.attr="disabled"
+                wire:target="exportExcel"
+                style="{{ $fiVars('success') }}"
+                class="{{ $fiBtn }} fi-color-custom fi-btn-color-success"
+            >
+                <svg wire:loading.remove wire:target="exportExcel" class="fi-btn-icon h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m.75 12 3 3m0 0 3-3m-3 3v-6m-1.5-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"/>
                 </svg>
-                Xuất Excel
+                <svg wire:loading wire:target="exportExcel" class="animate-spin fi-btn-icon h-5 w-5" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path clip-rule="evenodd" d="M12 19C15.866 19 19 15.866 19 12C19 8.13401 15.866 5 12 5C8.13401 5 5 8.13401 5 12C5 15.866 8.13401 19 12 19ZM12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" fill-rule="evenodd" fill="currentColor" opacity="0.2"/>
+                    <path d="M2 12C2 6.47715 6.47715 2 12 2V5C8.13401 5 5 8.13401 5 12H2Z" fill="currentColor"/>
+                </svg>
+                <span class="fi-btn-label">Xuất Excel</span>
             </button>
-            <a href="{{ \App\Filament\Resources\SupplierResource::getUrl('create') }}" class="sup-btn sup-btn-primary">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                    <line x1="12" y1="5" x2="12" y2="19"/>
-                    <line x1="5" y1="12" x2="19" y2="12"/>
+            <a
+                href="{{ \App\Filament\Resources\SupplierResource::getUrl('create') }}"
+                style="{{ $fiVars('primary') }}"
+                class="{{ $fiBtn }} fi-color-custom fi-btn-color-primary"
+            >
+                <svg class="fi-btn-icon h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
                 </svg>
-                Thêm NCC
+                <span class="fi-btn-label">Thêm NCC</span>
             </a>
         </div>
     </div>
@@ -113,14 +128,96 @@
                 <input wire:model.live.debounce.300ms="search" type="text" placeholder="Tìm tên NCC, SĐT hoặc email...">
             </div>
 
-            <div class="sup-filter">
-                <label>Loại TP cung cấp</label>
-                <select wire:model.live="typeFilter" class="sup-select">
-                    <option value="">Tất cả</option>
-                    @foreach($this->typeOptions() as $opt)
-                        <option value="{{ $opt }}">{{ $opt }}</option>
-                    @endforeach
-                </select>
+            <div class="sup-filter" style="min-width:14rem">
+                <label id="sup-type-label">Loại TP cung cấp</label>
+                {{-- Combobox thuần Alpine: Choices.js không có trong dự án và Filament
+                     không expose nó ra global, nên tự dựng để vừa tìm vừa chọn. --}}
+                <div
+                    class="sup-combo"
+                    x-data="{
+                        open: false,
+                        search: '',
+                        selected: @entangle('typeFilter').live,
+                        options: @js(array_values($this->typeOptions())),
+                        get filtered() {
+                            const q = this.search.trim().toLowerCase();
+                            return q === '' ? this.options : this.options.filter(o => o.toLowerCase().includes(q));
+                        },
+                        get label() {
+                            if (! this.selected.length) return 'Tất cả';
+                            if (this.selected.length <= 2) return this.selected.join(', ');
+                            return this.selected.length + ' loại đã chọn';
+                        },
+                        isChecked(option) {
+                            return this.selected.includes(option);
+                        },
+                        toggleOption(option) {
+                            this.isChecked(option)
+                                ? this.selected = this.selected.filter(o => o !== option)
+                                : this.selected = [...this.selected, option];
+                        },
+                        toggle() {
+                            this.open = ! this.open;
+                            if (this.open) {
+                                this.search = '';
+                                this.$nextTick(() => this.$refs.search?.focus());
+                            }
+                        },
+                    }"
+                    @click.outside="open = false"
+                    @keydown.escape.stop="open = false"
+                >
+                    <button
+                        type="button"
+                        class="sup-select sup-combo-toggle"
+                        aria-haspopup="listbox"
+                        :aria-expanded="open"
+                        aria-labelledby="sup-type-label"
+                        @click="toggle()"
+                    >
+                        <span :class="! selected.length && 'sup-combo-placeholder'" x-text="label"></span>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="sup-combo-caret">
+                            <polyline points="6 9 12 15 18 9"/>
+                        </svg>
+                    </button>
+
+                    <div x-show="open" x-cloak x-transition.opacity.duration.100ms class="sup-combo-panel">
+                        <input
+                            x-ref="search"
+                            x-model="search"
+                            type="text"
+                            class="sup-combo-search"
+                            placeholder="Tìm loại thực phẩm..."
+                            @keydown.enter.prevent="filtered.length && toggleOption(filtered[0])"
+                        >
+
+                        <ul class="sup-combo-list" role="listbox" aria-multiselectable="true">
+                            <li>
+                                <button type="button" class="sup-combo-option sup-combo-clear" @click="selected = []">
+                                    Bỏ chọn tất cả
+                                </button>
+                            </li>
+                            <template x-for="option in filtered" :key="option">
+                                <li>
+                                    <button
+                                        type="button"
+                                        class="sup-combo-option sup-combo-check"
+                                        :class="isChecked(option) && 'sup-combo-option-active'"
+                                        role="option"
+                                        :aria-selected="isChecked(option)"
+                                        @click="toggleOption(option)"
+                                    >
+                                        <span class="sup-combo-box" :class="isChecked(option) && 'sup-combo-box-on'">
+                                            <svg x-show="isChecked(option)" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5"><polyline points="20 6 9 17 4 12"/></svg>
+                                        </span>
+                                        <span x-text="option"></span>
+                                    </button>
+                                </li>
+                            </template>
+                            <li x-show="filtered.length === 0" class="sup-combo-empty">Không tìm thấy loại phù hợp</li>
+                        </ul>
+                    </div>
+                </div>
             </div>
 
             <div class="sup-filter">
@@ -134,23 +231,19 @@
 
             <div class="sup-spacer"></div>
 
-            @if($search !== '' || $typeFilter !== '' || $statusFilter !== '')
-                <button wire:click="resetFilters" class="sup-btn sup-row-danger" style="margin-right: 6px">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px">
-                        <line x1="18" y1="6" x2="6" y2="18"/>
-                        <line x1="6" y1="6" x2="18" y2="18"/>
+            @if($search !== '' || $typeFilter !== [] || $statusFilter !== '')
+                <button
+                    type="button"
+                    wire:click="resetFilters"
+                    style="{{ $fiVars('danger') }}"
+                    class="{{ $fiBtn }} fi-color-custom fi-btn-color-danger"
+                >
+                    <svg class="fi-btn-icon h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/>
                     </svg>
-                    Xóa lọc
+                    <span class="fi-btn-label">Xóa lọc</span>
                 </button>
             @endif
-
-            <a href="{{ \App\Filament\Resources\SupplierResource::getUrl('create') }}" class="sup-btn sup-btn-primary">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                    <line x1="12" y1="5" x2="12" y2="19"/>
-                    <line x1="5" y1="12" x2="19" y2="12"/>
-                </svg>
-                Thêm NCC
-            </a>
         </div>
 
         <div class="sup-table-wrap">
