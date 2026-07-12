@@ -34,3 +34,9 @@
         <span style="color: #ffffff !important;">{{ __('Cài đặt hệ thống') }}</span>
     </a>
 </div>
+
+<!-- Ép trình duyệt tải trước Font Awesome ngay khi load app để tránh lỗi ô vuông khi chuyển trang SPA (Livewire navigate) -->
+<div style="position: absolute; left: -9999px; top: -9999px; opacity: 0; width: 0; height: 0; overflow: hidden;" aria-hidden="true">
+    <i class="fa-solid fa-clock"></i>
+    <i class="fa-brands fa-font-awesome"></i>
+</div>

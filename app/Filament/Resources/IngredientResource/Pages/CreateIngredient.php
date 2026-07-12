@@ -16,11 +16,11 @@ class CreateIngredient extends CreateRecord
 
     public function getTitle(): string
     {
-        return __('Thêm nguyên liệu');
+        return __('ingredient.actions.create');
     }
 
     public function getSubheading(): ?string
     {
-        return __('Chỉ khai báo các thông tin cần thiết: tên, mã, đơn vị và loại nguyên liệu');
+        return __('ingredient.actions.create_desc');
     }
 }

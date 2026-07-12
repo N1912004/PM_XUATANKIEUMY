@@ -47,6 +47,8 @@ class RolePermissionSeeder extends Seeder
             $crud('menu', $full),
             $crud('recipe', $full),
             $crud('ingredient', $manage),
+            $crud('unit', $manage),
+            $crud('ingredient::type', $manage),
             $crud('supplier', $view),
             $crud('purchase::order', $full),
             $crud('stock', $manage),
@@ -65,6 +67,8 @@ class RolePermissionSeeder extends Seeder
         // ===== Thủ kho: kho + nhận PO, xem danh mục liên quan =====
         $thuKho = array_merge(
             $crud('stock', $manage),
+            $crud('unit', $view),
+            $crud('ingredient::type', $view),
             $crud('stock::transaction', $view),
             $crud('stock::transfer', $manage),
             $crud('purchase::order', ['view_any', 'view', 'update']),

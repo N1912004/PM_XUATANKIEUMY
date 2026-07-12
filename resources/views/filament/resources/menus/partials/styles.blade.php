@@ -32,6 +32,44 @@
         --po-r: 12px;
     }
 
+    :root.dark {
+        --po-bl-s: rgba(18, 103, 232, .18);
+        --po-gn-s: rgba(5, 150, 105, .18);
+        --po-or-s: rgba(234, 88, 12, .18);
+        --po-pu-s: rgba(124, 58, 237, .18);
+        --po-rd-s: rgba(220, 38, 38, .18);
+        --po-gn-t: #34D399;
+        --po-rd-t: #F87171;
+        --po-bg: #0b1120;
+        --po-wh: #1e293b;
+        --po-tx: #f1f5f9;
+        --po-su: #cbd5e1;
+        --po-mu: #94a3b8;
+        --po-fa: #64748b;
+        --po-bd: #334155;
+        --po-bd2: #263449;
+        --po-sh: 0 1px 2px rgba(0, 0, 0, .4);
+    }
+
+    .dark .emp-search {
+        background: #0f172a;
+    }
+
+    .dark .emp-table thead tr,
+    .dark .emp-table tbody tr:hover,
+    .dark .emp-btn:hover {
+        background: #172033 !important;
+    }
+
+    .dark .emp-bottom-bar {
+        background: rgba(15, 23, 42, .85);
+        border-color: rgba(51, 65, 85, .8);
+    }
+
+    .fi-main {
+        background: var(--po-bg);
+    }
+
     .emp-page {
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         color: var(--po-tx);
@@ -84,7 +122,7 @@
 
     .emp-btn:hover {
         background: var(--po-bg);
-        border-color: #CBD5E1;
+        border-color: var(--po-bd);
     }
 
     .emp-btn-primary {
@@ -219,13 +257,13 @@
 
     .att-rbtn:hover {
         background: var(--po-bg);
-        border-color: #CBD5E1;
+        border-color: var(--po-bd);
     }
 
     /* Locked Warning Panel */
     .mp-locked-panel {
-        background: #FFFBEB;
-        border: 1px solid #FDE68A;
+        background: var(--po-or-s);
+        border: 1px solid var(--po-or);
         border-radius: var(--po-r);
         padding: 14px 16px;
     }
@@ -242,7 +280,7 @@
     .mp-locked-panel-title {
         font-size: 14px;
         font-weight: 800;
-        color: #78350F;
+        color: var(--po-or);
         display: flex;
         align-items: center;
         gap: 6px;
@@ -250,7 +288,7 @@
 
     .mp-locked-panel-sub {
         font-size: 11.5px;
-        color: #B45309;
+        color: var(--po-or);
         margin-top: 3px;
     }
 
@@ -270,17 +308,17 @@
     .dv-field label {
         font-size: 11px;
         font-weight: 700;
-        color: #92400E;
+        color: var(--po-or);
     }
 
     .dv-sel {
         height: 34px;
         border-radius: 7px;
-        border: 1px solid #F59E0B;
-        background: #fff;
+        border: 1px solid var(--po-or);
+        background: var(--po-wh);
         padding: 0 10px;
         font-size: 12.5px;
-        color: #78350F;
+        color: var(--po-or);
         outline: none;
     }
 
@@ -294,7 +332,7 @@
         align-items: center;
         gap: 5px;
         cursor: pointer;
-        background: #fff;
+        background: var(--po-wh);
         border: 1px solid var(--po-bd);
         color: var(--po-su);
     }
@@ -327,7 +365,7 @@
 
     .mp-item:hover {
         border-color: var(--po-bl-m);
-        background: #FAFBFD;
+        background: var(--po-bg);
     }
 
     .mp-item-ico {
@@ -380,9 +418,9 @@
 
     /* Status Pill (Thực đơn) */
     .ms-draft {
-        background: #F1F5F9;
-        color: #475569;
-        border: 1px solid #CBD5E1;
+        background: var(--po-bd2);
+        color: var(--po-su);
+        border: 1px solid var(--po-bd);
         font-size: 11px;
         font-weight: 700;
         padding: 2px 8px;
@@ -400,9 +438,9 @@
     }
 
     .ms-locked {
-        background: #FEF3C7;
-        color: #D97706;
-        border: 1px solid #FCD34D;
+        background: var(--po-or-s);
+        color: var(--po-or);
+        border: 1px solid var(--po-or);
         font-size: 11px;
         font-weight: 700;
         padding: 2px 8px;
@@ -503,13 +541,13 @@
     }
 
     .ctrl:focus {
-        border-color: #93C5FD;
-        background: #fff;
+        border-color: var(--po-bl-m);
+        background: var(--po-wh);
     }
 
     /* Tóm tắt & Luật lệ */
     .lf-sum {
-        background: #FFF;
+        background: var(--po-wh);
         border: 1px solid var(--po-bd);
         border-radius: var(--po-r);
         padding: 14px 16px;
@@ -530,7 +568,7 @@
         justify-content: space-between;
         font-size: 12.5px;
         padding: 6px 0;
-        border-bottom: 1px solid #FAFBFB;
+        border-bottom: 1px solid var(--po-bd2);
     }
 
     .lf-sum-k {

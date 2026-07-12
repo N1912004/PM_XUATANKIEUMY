@@ -21,12 +21,12 @@
             </div>
             <div style="display:flex; gap:8px; flex-wrap:wrap">
                 <!-- Nút Quay lại -->
-                <a href="{{ \App\Filament\Resources\PurchaseOrderResource::getUrl('index') }}" class="po-btn" style="background:#fff; border:1px solid var(--po-bd); color:var(--po-tx)">
+                <a href="{{ \App\Filament\Resources\PurchaseOrderResource::getUrl('index') }}" class="po-btn" style="background:var(--po-wh); border:1px solid var(--po-bd); color:var(--po-tx)">
                     <i class="fa-solid fa-arrow-left"></i> Quay lại
                 </a>
 
                 <!-- Nút Xuất Excel (tất cả NCC) -->
-                <button wire:click="exportAllNcc" class="po-btn" style="background:#fff; border:1px solid var(--po-bd); color:var(--po-tx)">
+                <button wire:click="exportAllNcc" class="po-btn" style="background:var(--po-wh); border:1px solid var(--po-bd); color:var(--po-tx)">
                     <i class="fa-solid fa-file-excel" style="color:var(--po-gn)"></i> Xuất Excel (tất cả NCC)
                 </button>
 
@@ -50,7 +50,7 @@
                 <a href="{{ \App\Filament\Resources\PurchaseOrderResource::getUrl('edit', ['record' => $po]) }}" 
                    class="oh-ncc-tab" 
                    style="display:flex; align-items:center; gap:8px; padding:8px 14px; border-radius:30px; font-size:13px; font-weight:700; text-decoration:none; transition:.13s; border:1px solid; 
-                          {{ $isActive ? 'background:'.$color.'; color:#fff; border-color:'.$color.'; box-shadow: 0 4px 12px '.($color).'33;' : 'background:#fff; color:#1E293B; border-color:#E2E8F0;' }}">
+                          {{ $isActive ? 'background:'.$color.'; color:#fff; border-color:'.$color.'; box-shadow: 0 4px 12px '.($color).'33;' : 'background:var(--po-wh); color:var(--po-tx); border-color:var(--po-bd);' }}">
                     
                     @if(!$isActive)
                         <span style="width:8px; height:8px; border-radius:50%; background:{{ $color }}; display:inline-block"></span>
@@ -59,11 +59,11 @@
                     <span>{{ $po->supplier?->name }}</span>
 
                     <span style="display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; border-radius:50%; font-size:11px; 
-                                 {{ $isActive ? 'background:rgba(255,255,255,0.2); color:#fff;' : 'background:#F1F5F9; color:#64748B;' }}">
+                                 {{ $isActive ? 'background:rgba(255,255,255,0.2); color:#fff;' : 'background:var(--po-bd2); color:var(--po-mu);' }}">
                         {{ $po->items->count() }}
                     </span>
 
-                    <span style="font-size:12px; font-weight:500; {{ $isActive ? 'color:rgba(255,255,255,0.85);' : 'color:#64748B;' }}">
+                    <span style="font-size:12px; font-weight:500; {{ $isActive ? 'color:rgba(255,255,255,0.85);' : 'color:var(--po-mu);' }}">
                         {{ number_format($poTotal / 1000, 0, '', '') }}k đ
                     </span>
                 </a>
@@ -71,7 +71,7 @@
         </div>
 
         <!-- Main Content Area: NCC Detail Card -->
-        <div class="po-list-card" style="background:#fff; border:1px solid var(--po-bd2); border-radius:12px; padding:20px; box-shadow:var(--po-sh2)">
+        <div class="po-list-card" style="background:var(--po-wh); border:1px solid var(--po-bd2); border-radius:12px; padding:20px; box-shadow:var(--po-sh2)">
             <!-- Detail Header -->
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px">
                 <div style="display:flex; align-items:center; gap:8px">
@@ -82,7 +82,7 @@
                     </span>
                 </div>
                 <!-- Nút xuất Excel NCC này -->
-                <button wire:click="exportCurrentNcc" class="po-btn" style="background:#fff; border:1px solid var(--po-bd); color:var(--po-tx); padding:6px 12px; font-size:12px">
+                <button wire:click="exportCurrentNcc" class="po-btn" style="background:var(--po-wh); border:1px solid var(--po-bd); color:var(--po-tx); padding:6px 12px; font-size:12px">
                     <i class="fa-solid fa-file-excel" style="color:var(--po-gn)"></i> Xuất Excel NCC này
                 </button>
             </div>
@@ -111,7 +111,7 @@
                                 $isThit = str_contains($ingType, 'động vật') || str_contains($ingType, 'thịt') || str_contains($ingType, 'cá') || str_contains($ingType, 'thủy sản') || str_contains($ingName, 'thịt') || str_contains($ingName, 'cá') || str_contains($ingName, 'gà') || str_contains($ingName, 'vịt') || str_contains($ingName, 'trứng') || str_contains($ingName, 'giò') || str_contains($ingName, 'chả');
                                 $isRau = str_contains($ingType, 'thực vật') || str_contains($ingType, 'rau') || str_contains($ingType, 'củ') || str_contains($ingType, 'quả') || str_contains($ingName, 'rau') || str_contains($ingName, 'củ') || str_contains($ingName, 'quả') || str_contains($ingName, 'hành') || str_contains($ingName, 'tỏi') || str_contains($ingName, 'ớt') || str_contains($ingName, 'nấm') || str_contains($ingName, 'lá');
                             @endphp
-                            <tr style="border-bottom:1px solid #F1F5F9; color:var(--po-tx)">
+                            <tr style="border-bottom:1px solid var(--po-bd2); color:var(--po-tx)">
                                 <td style="padding:12px 8px; color:var(--po-mu)">{{ $index + 1 }}</td>
                                 <td style="padding:12px 8px; font-weight:700">{{ $item->ingredient?->name }}</td>
                                 <td style="padding:12px 8px">
@@ -135,17 +135,17 @@
                                 <td style="padding:12px 8px; text-align:right; color:var(--po-mu)">
                                     {{ number_format($item->unit_price, 0, ',', '.') }} đ/{{ $item->ingredient?->unit }}
                                 </td>
-                                <td style="padding:12px 8px; text-align:right; font-weight:700; color:#DC2626">
+                                <td style="padding:12px 8px; text-align:right; font-weight:700; color:var(--po-rd)">
                                     {{ number_format($total, 0, ',', '.') }} đ
                                 </td>
                             </tr>
                         @endforeach
                         <!-- Tổng cộng dòng NCC -->
-                        <tr style="background:#EFF6FF; color:var(--po-bl); font-weight:700; border-top:1.5px solid #BFDBFE">
+                        <tr style="background:var(--po-bl-s); color:var(--po-bl); font-weight:700; border-top:1.5px solid var(--po-bl-m)">
                             <td colspan="4" style="padding:14px 12px; text-align:right; font-size:14px">
                                 Tổng đơn {{ $record->supplier?->name }}:
                             </td>
-                            <td colspan="2" style="padding:14px 12px; text-align:right; font-size:16px; color:#1D4ED8">
+                            <td colspan="2" style="padding:14px 12px; text-align:right; font-size:16px; color:var(--po-bl)">
                                 {{ number_format($currentPOTotal, 0, ',', '.') }} đ
                             </td>
                         </tr>

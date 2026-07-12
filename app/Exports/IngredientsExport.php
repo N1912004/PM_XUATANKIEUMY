@@ -11,14 +11,23 @@ use Maatwebsite\Excel\Concerns\WithTitle;
 use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
 
 class IngredientsExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
 {
-    protected const COLS = 7;
+    protected const COLS = 8;
+
+    protected $query;
+
+    public function __construct($query = null)
+    {
+        $this->query = $query;
+    }
 
     public function title(): string
     {
-        return 'Danh mục nguyên liệu';
+        return __('ingredient.excel.title');
     }
 
     /**
@@ -27,29 +36,31 @@ class IngredientsExport implements FromArray, ShouldAutoSize, WithEvents, WithTi
     public function array(): array
     {
         $rows = [];
-        $rows[] = ['DANH MỤC NGUYÊN LIỆU', '', '', '', '', '', ''];
-        $rows[] = ['', '', '', '', '', '', ''];
+        $rows[] = [__('ingredient.excel.title'), '', '', '', '', '', '', ''];
         $rows[] = [
-            'Mã nguyên liệu',
-            'Tên nguyên liệu',
-            'Loại nguyên liệu',
-            'Đơn vị tính',
-            'Đơn giá tham chiếu gốc',
-            'Nhà cung cấp',
-            'Trạng thái',
+            __('ingredient.excel.stt'),
+            __('ingredient.excel.code'),
+            __('ingredient.excel.name'),
+            __('ingredient.excel.type'),
+            __('ingredient.excel.unit'),
+            __('ingredient.excel.price'),
+            __('ingredient.excel.supplier'),
+            __('ingredient.excel.status'),
         ];
 
-        $this->ingredients()->each(function (Ingredient $ingredient) use (&$rows): void {
+        $index = 1;
+        $this->ingredients()->each(function (Ingredient $ingredient) use (&$rows, &$index): void {
             $suppliersText = $ingredient->suppliers->pluck('name')->implode(', ');
 
             $rows[] = [
+                $index++,
                 $ingredient->code,
                 $ingredient->name,
                 $ingredient->type,
                 $ingredient->unit,
                 (float) $ingredient->reference_price,
-                $suppliersText ?: '--',
-                $ingredient->status ? 'Đang hoạt động' : 'Ngừng hoạt động',
+                $suppliersText ?: '',
+                $ingredient->status ? __('ingredient.status.active') : __('ingredient.status.inactive'),
             ];
         });
 
@@ -65,10 +76,43 @@ class IngredientsExport implements FromArray, ShouldAutoSize, WithEvents, WithTi
                 $lastRow = $sheet->getHighestRow();
 
                 $sheet->mergeCells("A1:{$lastCol}1");
-                $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+                $sheet->getRowDimension(1)->setRowHeight(35);
+                $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(16);
                 $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-                $sheet->getStyle("A3:{$lastCol}3")->getFont()->setBold(true);
-                $sheet->getStyle("E4:E{$lastRow}")->getNumberFormat()->setFormatCode('#,##0.00');
+                $sheet->getStyle('A1')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+
+                $sheet->getRowDimension(2)->setRowHeight(25);
+                $headerStyle = [
+                    'font' => [
+                        'bold' => true,
+                        'color' => ['rgb' => 'FFFFFF'],
+                        'size' => 11,
+                    ],
+                    'fill' => [
+                        'fillType' => Fill::FILL_SOLID,
+                        'startColor' => ['rgb' => '0F4C81'],
+                    ],
+                    'alignment' => [
+                        'horizontal' => Alignment::HORIZONTAL_CENTER,
+                        'vertical' => Alignment::VERTICAL_CENTER,
+                    ],
+                ];
+                $sheet->getStyle("A2:{$lastCol}2")->applyFromArray($headerStyle);
+
+                $sheet->getStyle("F3:F{$lastRow}")->getNumberFormat()->setFormatCode('#,##0.00');
+                $sheet->getStyle("F3:F{$lastRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+                $sheet->getStyle("A3:A{$lastRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle("H3:H{$lastRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+                $borderStyle = [
+                    'borders' => [
+                        'allBorders' => [
+                            'borderStyle' => Border::BORDER_THIN,
+                            'color' => ['rgb' => 'D3D3D3'],
+                        ],
+                    ],
+                ];
+                $sheet->getStyle("A2:{$lastCol}{$lastRow}")->applyFromArray($borderStyle);
             },
         ];
     }
@@ -78,9 +122,11 @@ class IngredientsExport implements FromArray, ShouldAutoSize, WithEvents, WithTi
      */
     private function ingredients(): Collection
     {
-        return Ingredient::query()
-            ->with('suppliers')
-            ->orderBy('id')
+        // Clone query để tránh ảnh hưởng đến truy vấn gốc của Filament
+        $query = $this->query ? clone $this->query : Ingredient::query()->orderBy('id');
+
+        return $query
+            ->with(['suppliers', 'unitRelation', 'typeRelation'])
             ->get();
     }
 }

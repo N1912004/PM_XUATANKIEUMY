@@ -10,7 +10,7 @@
     @endphp
 
     @if (session()->has('message'))
-        <div style="background:#ECFDF5; color:#065F46; padding:12px 16px; border-radius:8px; border:1px solid #A7F3D0; margin-bottom:16px; font-size:13px; font-weight:600; display:flex; align-items:center; gap:8px">
+        <div style="background:var(--po-gn-s); color:var(--po-gn-t); padding:12px 16px; border-radius:8px; border:1px solid var(--po-gn); margin-bottom:16px; font-size:13px; font-weight:600; display:flex; align-items:center; gap:8px">
             <i class="fa-solid fa-circle-check"></i>
             {{ session('message') }}
         </div>
@@ -41,28 +41,28 @@
         <!-- 4 KPIs Stats -->
         <div class="mp-krow" style="margin-bottom: 16px;">
             <div class="mp-kcard">
-                <div class="mp-kico" style="background:#EBF3FF; color:var(--po-bl)"><i class="fa-regular fa-calendar-week"></i></div>
+                <div class="mp-kico" style="background:var(--po-bl-s); color:var(--po-bl)"><i class="fa-regular fa-calendar-week"></i></div>
                 <div>
                     <div class="mp-klbl">Thực đơn tuần đang chạy</div>
                     <div class="mp-kval">{{ $stats['total_active_weeks'] }}</div>
                 </div>
             </div>
             <div class="mp-kcard">
-                <div class="mp-kico" style="background:#ECFDF5; color:var(--po-gn)"><i class="fa-solid fa-circle-check"></i></div>
+                <div class="mp-kico" style="background:var(--po-gn-s); color:var(--po-gn)"><i class="fa-solid fa-circle-check"></i></div>
                 <div>
                     <div class="mp-klbl">Đã gửi khách tháng này</div>
                     <div class="mp-kval">{{ $stats['sent_month'] }}</div>
                 </div>
             </div>
             <div class="mp-kcard">
-                <div class="mp-kico" style="background:#FFF7ED; color:var(--po-or)"><i class="fa-solid fa-clock-rotate-left"></i></div>
+                <div class="mp-kico" style="background:var(--po-or-s); color:var(--po-or)"><i class="fa-solid fa-clock-rotate-left"></i></div>
                 <div>
                     <div class="mp-klbl">Chờ xác nhận</div>
                     <div class="mp-kval">{{ $stats['pending'] }}</div>
                 </div>
             </div>
             <div class="mp-kcard">
-                <div class="mp-kico" style="background:#FEF3C7; color:#78350F"><i class="fa-solid fa-lock"></i></div>
+                <div class="mp-kico" style="background:var(--po-or-s); color:var(--po-or)"><i class="fa-solid fa-lock"></i></div>
                 <div>
                     <div class="mp-klbl">Đã chốt tháng này</div>
                     <div class="mp-kval">{{ $stats['locked_month'] }}</div>
@@ -141,7 +141,7 @@
         <div class="mp-card-list">
             @forelse($menusList as $row)
                 <div wire:click="{{ $row['type'] === 'week' ? "loadWeekMenu({$row['kitchen_id']}, '{$row['start_date']}')" : "loadDayMenu({$row['kitchen_id']}, '{$row['start_date']}')" }}" class="mp-item">
-                    <div class="mp-item-ico" style="{{ $row['type'] === 'week' ? 'background:#EBF3FF;color:var(--po-bl)' : 'background:#F5F3FF;color:var(--po-pu)' }}">
+                    <div class="mp-item-ico" style="{{ $row['type'] === 'week' ? 'background:var(--po-bl-s);color:var(--po-bl)' : 'background:var(--po-pu-s);color:var(--po-pu)' }}">
                         @if($row['type'] === 'week')
                             <i class="fa-regular fa-calendar-week"></i>
                         @else
@@ -179,7 +179,7 @@
                     </div>
                 </div>
             @empty
-                <div style="background:#fff; border:1px solid var(--po-bd); border-radius:12px; padding:40px; text-align:center; color:var(--po-mu)">
+                <div style="background:var(--po-wh); border:1px solid var(--po-bd); border-radius:12px; padding:40px; text-align:center; color:var(--po-mu)">
                     <i class="fa-regular fa-calendar" style="font-size:32px; opacity:.3; margin-bottom:8px"></i>
                     <div style="font-weight:700; color:var(--po-tx)">Không tìm thấy thực đơn nào</div>
                     <div style="font-size:12px">Hãy thử đổi tháng hoặc từ khóa tìm kiếm.</div>
@@ -269,7 +269,7 @@
         </div>
 
         <!-- Form settings -->
-        <div class="tcard" style="padding:16px; margin-bottom:14px; background:#FAFBFC; display:flex; gap:12px; flex-wrap:wrap">
+        <div class="tcard" style="padding:16px; margin-bottom:14px; background:var(--po-bd2); display:flex; gap:12px; flex-wrap:wrap">
             <div class="field" style="min-width:240px">
                 <label>Nhà ăn / Bếp ăn *</label>
                 <select wire:model="weekKitchenId" class="ctrl" required>
@@ -306,14 +306,14 @@
                 <tbody>
                     @foreach($shifts as $shift)
                         <tr style="border-bottom:1px solid var(--po-bd)">
-                            <td style="padding:14px; font-weight:800; background:#F8FAFC; color:var(--po-tx)">
+                            <td style="padding:14px; font-weight:800; background:var(--po-bd2); color:var(--po-tx)">
                                 {{ $shift->name }}
                                 <div style="font-size:10px; font-weight:500; color:var(--po-mu); margin-top:2px">
                                     {{ $shift->time_range }}
                                 </div>
                             </td>
                             @for($d = 0; $d < 6; $d++)
-                                <td style="padding:10px; text-align:center; background:#fff">
+                                <td style="padding:10px; text-align:center; background:var(--po-wh)">
                                     <div style="display:flex; flex-direction:column; gap:6px">
                                         <!-- Món ăn select -->
                                         <select wire:model="weekGrid.{{ $d }}.{{ $shift->id }}" class="ctrl" style="font-size:12px; height:32px">
@@ -355,7 +355,7 @@
         </div>
 
         <!-- Settings form -->
-        <div class="tcard" style="padding:16px; margin-bottom:14px; background:#FAFBFC; display:flex; gap:12px; flex-wrap:wrap">
+        <div class="tcard" style="padding:16px; margin-bottom:14px; background:var(--po-bd2); display:flex; gap:12px; flex-wrap:wrap">
             <div class="field" style="min-width:240px">
                 <label>Nhà ăn / Bếp ăn *</label>
                 <select wire:model="dayKitchenId" class="ctrl" required>

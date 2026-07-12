@@ -44,14 +44,14 @@
     @endphp
 
     @if (session()->has('message'))
-        <div style="background:#ECFDF5; color:#065F46; padding:12px 16px; border-radius:8px; border:1px solid #A7F3D0; margin-bottom:16px; font-size:13px; font-weight:600; display:flex; align-items:center; gap:8px">
+        <div style="background:var(--po-gn-s); color:var(--po-gn-t); padding:12px 16px; border-radius:8px; border:1px solid var(--po-gn); margin-bottom:16px; font-size:13px; font-weight:600; display:flex; align-items:center; gap:8px">
             <i class="fa-solid fa-circle-check"></i>
             {{ session('message') }}
         </div>
     @endif
 
     @if (session()->has('error'))
-        <div style="background:#FEF2F2; color:#991B1B; padding:12px 16px; border-radius:8px; border:1px solid #FCA5A5; margin-bottom:16px; font-size:13px; font-weight:600; display:flex; align-items:center; gap:8px">
+        <div style="background:var(--po-rd-s); color:var(--po-rd-t); padding:12px 16px; border-radius:8px; border:1px solid var(--po-rd); margin-bottom:16px; font-size:13px; font-weight:600; display:flex; align-items:center; gap:8px">
             <i class="fa-solid fa-triangle-exclamation"></i>
             {{ session('error') }}
         </div>
@@ -272,7 +272,7 @@
         <div class="att-tw">
             <table style="width:100%; border-collapse:collapse; text-align:left; font-size:13px">
                 <thead>
-                    <tr style="border-bottom:1.5px solid var(--po-bd2); color:var(--po-mu); font-weight:700; text-transform:uppercase; font-size:11px; background:#F8FAFC">
+                    <tr style="border-bottom:1.5px solid var(--po-bd2); color:var(--po-mu); font-weight:700; text-transform:uppercase; font-size:11px; background:var(--po-bd2)">
                         <th style="padding:14px 12px; width:40px"><input type="checkbox"></th>
                         <th style="padding:14px 12px; width:100px">Mã NV</th>
                         <th style="padding:14px 12px">Họ và tên</th>
@@ -304,7 +304,7 @@
                             // Check icon của ca làm việc
                             $isNightShift = $row->shift && (str_contains(strtolower($row->shift->name), 'tối') || str_contains(strtolower($row->shift->name), 'ca 2') || str_contains(strtolower($row->shift->name), 'ca 3'));
                         @endphp
-                        <tr style="border-bottom:1px solid #F1F5F9; color:var(--po-tx)" class="emp-row">
+                        <tr style="border-bottom:1px solid var(--po-bd2); color:var(--po-tx)" class="emp-row">
                             <td style="padding:12px 12px;"><input type="checkbox"></td>
                             <td style="padding:12px 12px; font-weight:700; color:var(--po-mu)">{{ $row->employee?->code }}</td>
                             <td style="padding:12px 12px;">
@@ -375,7 +375,7 @@
                                 @elseif($row->status === 'Vắng mặt')
                                     <span class="st-pill st-absent">Vắng mặt</span>
                                 @else
-                                    <span class="st-pill" style="background:#F1F5F9; color:#475569;">{{ $row->status }}</span>
+                                    <span class="st-pill" style="background:var(--po-bd2); color:var(--po-su);">{{ $row->status }}</span>
                                 @endif
                             </td>
                             <td style="padding:12px 12px; text-align:center">
@@ -428,7 +428,7 @@
                     Hiển thị <strong>{{ $timekeepingsList->firstItem() }}</strong> đến <strong>{{ $timekeepingsList->lastItem() }}</strong> trong tổng số <strong>{{ number_format($timekeepingsList->total(), 0, ',', '.') }}</strong> bản ghi
                 </div>
                 <div class="po-pagination" style="display:flex; align-items:center; gap:12px">
-                    <select wire:model.live="perPage" class="po-select" style="min-width:7rem;height:2.1rem;padding:0 .5rem;border-radius:.5rem; border:1px solid var(--po-bd); outline:none; background:#fff">
+                    <select wire:model.live="perPage" class="po-select" style="min-width:7rem;height:2.1rem;padding:0 .5rem;border-radius:.5rem; border:1px solid var(--po-bd); outline:none; background:var(--po-wh); color:var(--po-tx)">
                         <option value="10">10 dòng/trang</option>
                         <option value="20">20 dòng/trang</option>
                         <option value="50">50 dòng/trang</option>
@@ -437,11 +437,11 @@
                     <nav role="navigation" aria-label="Pagination Navigation" style="display:flex; align-items:center; gap:4px">
                         {{-- Previous --}}
                         @if ($timekeepingsList->onFirstPage())
-                            <span aria-disabled="true" style="width:30px; height:30px; border-radius:6px; border:1px solid #E2E8F0; display:flex; align-items:center; justify-content:center; color:#CBD5E1; cursor:not-allowed">
+                            <span aria-disabled="true" style="width:30px; height:30px; border-radius:6px; border:1px solid var(--po-bd); display:flex; align-items:center; justify-content:center; color:var(--po-fa); cursor:not-allowed">
                                 <i class="fa-solid fa-chevron-left" style="font-size: 10px;"></i>
                             </span>
                         @else
-                            <button type="button" wire:click="previousPage" rel="prev" style="width:30px; height:30px; border-radius:6px; border:1px solid #E2E8F0; display:flex; align-items:center; justify-content:center; color:#475569; cursor:pointer; background:#fff">
+                            <button type="button" wire:click="previousPage" rel="prev" style="width:30px; height:30px; border-radius:6px; border:1px solid var(--po-bd); display:flex; align-items:center; justify-content:center; color:var(--po-su); cursor:pointer; background:var(--po-wh)">
                                 <i class="fa-solid fa-chevron-left" style="font-size: 10px;"></i>
                             </button>
                         @endif
@@ -456,17 +456,17 @@
                                     <span>{{ $page }}</span>
                                 </span>
                             @else
-                                <button type="button" wire:click="gotoPage({{ $page }})" style="width:30px; height:30px; border-radius:6px; border:1px solid #E2E8F0; display:flex; align-items:center; justify-content:center; color:#475569; cursor:pointer; background:#fff font-weight:500">{{ $page }}</button>
+                                <button type="button" wire:click="gotoPage({{ $page }})" style="width:30px; height:30px; border-radius:6px; border:1px solid var(--po-bd); display:flex; align-items:center; justify-content:center; color:var(--po-su); cursor:pointer; background:var(--po-wh); font-weight:500">{{ $page }}</button>
                             @endif
                         @endforeach
 
                         {{-- Next --}}
                         @if ($timekeepingsList->hasMorePages())
-                            <button type="button" wire:click="nextPage" rel="next" style="width:30px; height:30px; border-radius:6px; border:1px solid #E2E8F0; display:flex; align-items:center; justify-content:center; color:#475569; cursor:pointer; background:#fff">
+                            <button type="button" wire:click="nextPage" rel="next" style="width:30px; height:30px; border-radius:6px; border:1px solid var(--po-bd); display:flex; align-items:center; justify-content:center; color:var(--po-su); cursor:pointer; background:var(--po-wh)">
                                 <i class="fa-solid fa-chevron-right" style="font-size: 10px;"></i>
                             </button>
                         @else
-                            <span aria-disabled="true" style="width:30px; height:30px; border-radius:6px; border:1px solid #E2E8F0; display:flex; align-items:center; justify-content:center; color:#CBD5E1; cursor:not-allowed">
+                            <span aria-disabled="true" style="width:30px; height:30px; border-radius:6px; border:1px solid var(--po-bd); display:flex; align-items:center; justify-content:center; color:var(--po-fa); cursor:not-allowed">
                                 <i class="fa-solid fa-chevron-right" style="font-size: 10px;"></i>
                             </span>
                         @endif

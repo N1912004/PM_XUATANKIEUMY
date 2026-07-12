@@ -263,7 +263,7 @@
             border-bottom: 1px solid #e2e8f0;
         }
         .dark .wh-table th {
-            background: #1e293b/40;
+            background: rgba(30, 41, 59, 0.4);
             color: #94a3b8;
             border-color: #334155;
         }
@@ -277,10 +277,10 @@
             color: #cbd5e1;
         }
         .wh-table tr:hover td {
-            background: #f8fafc/50;
+            background: rgba(248, 250, 252, 0.5);
         }
         .dark .wh-table tr:hover td {
-            background: #1e293b/20;
+            background: rgba(30, 41, 59, 0.2);
         }
         
         .form-grid {
@@ -321,6 +321,16 @@
             border-color: #334155;
             background: #1e293b;
             color: #ffffff;
+        }
+        .date-input {
+            background-color: #ffffff;
+            color: #0f172a;
+        }
+        .dark .date-input,
+        .dark input[type="date"] {
+            background-color: #1e293b !important;
+            border-color: #334155 !important;
+            color: #ffffff !important;
         }
         .form-field textarea {
             height: auto;
@@ -382,7 +392,7 @@
             border-color: #334155;
         }
         .dark .flow-modal-choice:hover {
-            background: #1e293b/60;
+            background: rgba(30, 41, 59, 0.6);
             border-color: rgb(var(--primary-400));
         }
 
@@ -523,10 +533,9 @@
                 </div>
                 <select class="type-select" wire:model.live="selectedType">
                     <option value="">Tất cả loại</option>
-                    <option value="Động vật">Động vật</option>
-                    <option value="Thực vật">Thực vật</option>
-                    <option value="Thực phẩm khô">Thực phẩm khô</option>
-                    <option value="Gia vị">Gia vị</option>
+                    @foreach($this->getIngredientTypeOptions() as $typeName)
+                        <option value="{{ $typeName }}">{{ $typeName }}</option>
+                    @endforeach
                 </select>
             </div>
         @endif

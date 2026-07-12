@@ -2,14 +2,17 @@
 
 namespace App\Filament\Resources\SupplierResource\Pages;
 
+use App\Exports\SuppliersExport;
 use App\Filament\Resources\SupplierResource;
 use App\Models\Ingredient;
+use App\Models\IngredientType;
 use App\Models\Supplier;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Livewire\WithPagination;
-use Symfony\Component\HttpFoundation\StreamedResponse;
+use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class ListSuppliers extends Page
 {
@@ -21,7 +24,8 @@ class ListSuppliers extends Page
 
     public string $search = '';
 
-    public string $typeFilter = '';
+    /** @var array<int, string> Chọn nhiều loại; NCC khớp nếu chứa BẤT KỲ loại nào đã chọn. */
+    public array $typeFilter = [];
 
     public string $statusFilter = '';
 
@@ -34,7 +38,7 @@ class ListSuppliers extends Page
 
     protected $queryString = [
         'search' => ['except' => ''],
-        'typeFilter' => ['except' => ''],
+        'typeFilter' => ['except' => []],
         'statusFilter' => ['except' => ''],
     ];
 
@@ -56,7 +60,7 @@ class ListSuppliers extends Page
     public function resetFilters(): void
     {
         $this->search = '';
-        $this->typeFilter = '';
+        $this->typeFilter = [];
         $this->statusFilter = '';
         $this->resetPage();
     }
@@ -81,36 +85,19 @@ class ListSuppliers extends Page
         $this->resetPage();
     }
 
-    public function exportExcel(): StreamedResponse
+    public function exportExcel(): BinaryFileResponse
     {
         abort_unless(SupplierResource::canViewAny(), 403);
 
-        $fileName = 'nha-cung-cap-'.now()->format('Ymd-His').'.csv';
+        // Xuất đúng danh sách đang hiển thị: dùng lại baseQuery() nên mọi bộ lọc
+        // (tìm kiếm, loại, trạng thái) và phạm vi quyền đều được giữ nguyên.
+        $query = $this->baseQuery()
+            ->withCount('ingredients')
+            ->orderBy('id');
 
-        return response()->streamDownload(function (): void {
-            $output = fopen('php://output', 'w');
-            fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
-            fputcsv($output, ['Mã NCC', 'Tên NCC', 'Số điện thoại', 'Email', 'Loại TP', 'Số nguyên liệu', 'Trạng thái']);
+        $fileName = 'nha-cung-cap-'.now()->format('Ymd-His').'.xlsx';
 
-            $this->baseQuery()
-                ->withCount('ingredients')
-                ->orderBy('id')
-                ->chunk(100, function ($suppliers) use ($output): void {
-                    foreach ($suppliers as $supplier) {
-                        fputcsv($output, [
-                            $supplier->code,
-                            $supplier->name,
-                            $supplier->phone,
-                            $supplier->email,
-                            $supplier->type,
-                            $supplier->ingredients_count,
-                            $supplier->status ? 'Đang hoạt động' : 'Tạm khóa',
-                        ]);
-                    }
-                });
-
-            fclose($output);
-        }, $fileName, ['Content-Type' => 'text/csv; charset=UTF-8']);
+        return Excel::download(new SuppliersExport($query), $fileName);
     }
 
     public function suppliers(): LengthAwarePaginator
@@ -122,15 +109,16 @@ class ListSuppliers extends Page
     }
 
     /**
+     * Nguồn loại cho bộ lọc: danh mục `ingredient_types` (dùng chung với Nguyên
+     * liệu). Loại cũ của NCC đã được chuẩn hoá vào danh mục nên chỉ cần đọc đây.
+     *
      * @return array<int, string>
      */
     public function typeOptions(): array
     {
-        return Supplier::query()
-            ->whereNotNull('type')
-            ->distinct()
-            ->orderBy('type')
-            ->pluck('type', 'type')
+        return IngredientType::query()
+            ->orderBy('name')
+            ->pluck('name')
             ->all();
     }
 
@@ -141,7 +129,7 @@ class ListSuppliers extends Page
     {
         return [
             'suppliers' => Supplier::query()->count(),
-            'types' => Supplier::query()->whereNotNull('type')->distinct('type')->count('type'),
+            'types' => IngredientType::query()->whereHas('suppliers')->count(),
             'ingredients' => Ingredient::query()->whereNotNull('supplier_id')->count(),
             'quotes' => Ingredient::query()->whereNotNull('supplier_id')->where('reference_price', '>', 0)->count(),
         ];
@@ -159,7 +147,10 @@ class ListSuppliers extends Page
                         ->orWhereRaw('LOWER(code) LIKE ?', ["%{$search}%"]);
                 });
             })
-            ->when($this->typeFilter !== '', fn ($query) => $query->where('type', $this->typeFilter))
+            ->when($this->typeFilter !== [], fn ($query) => $query->whereHas(
+                'ingredientTypes',
+                fn ($query) => $query->whereIn('name', $this->typeFilter)
+            ))
             ->when($this->statusFilter !== '', fn ($query) => $query->where('status', $this->statusFilter === 'active'));
     }
 }

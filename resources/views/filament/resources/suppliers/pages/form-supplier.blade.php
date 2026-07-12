@@ -36,14 +36,14 @@
                             @error('name') <span class="sup-error">{{ $message }}</span> @enderror
                         </div>
                         <div class="sup-field">
-                            <label class="sup-label">Mã NCC</label>
+                            <label class="sup-label">Mã NCC <span class="sup-required">*</span></label>
                             <input wire:model="code" type="text" class="sup-input" placeholder="Nhập mã nhà cung cấp" required>
                             @error('code') <span class="sup-error">{{ $message }}</span> @enderror
                         </div>
 
                         <div class="sup-field">
                             <label class="sup-label">Số điện thoại <span class="sup-required">*</span></label>
-                            <input wire:model="phone" type="text" class="sup-input" placeholder="Nhập số điện thoại" required>
+                            <input wire:model="phone" type="tel" class="sup-input" placeholder="Nhập số điện thoại" required>
                             @error('phone') <span class="sup-error">{{ $message }}</span> @enderror
                         </div>
                         <div class="sup-field">
@@ -54,15 +54,21 @@
 
                         <div class="sup-field sup-field-full">
                             <label class="sup-label">Loại thực phẩm cung cấp <span class="sup-required">*</span></label>
-                            <select wire:model="type" class="sup-select" required>
-                                <option value="">Chọn loại thực phẩm cung cấp</option>
-                                <option value="Thịt">Thịt</option>
-                                <option value="Rau củ">Rau củ</option>
-                                <option value="Thực phẩm khô">Thực phẩm khô</option>
-                                <option value="Gia vị">Gia vị</option>
-                                <option value="Hải sản">Hải sản</option>
-                                <option value="Tổng hợp">Tổng hợp</option>
-                            </select>
+                            <div class="sup-input" style="display:flex; flex-wrap:wrap; gap:6px; padding:8px 12px; min-height:42px; background:var(--sup-bg); border:1.5px solid var(--sup-bd2); border-radius:.5rem; align-items:center">
+                                @php
+                                    $selectedTypes = array_filter(explode(', ', $this->type));
+                                @endphp
+                                @forelse($selectedTypes as $sType)
+                                    <span style="background:var(--po-bl-s); color:var(--po-bl); padding:4px 10px; border-radius:9999px; font-size:12px; font-weight:700">
+                                        {{ $sType }}
+                                    </span>
+                                @empty
+                                    <span style="color:var(--sup-mu); font-size:13px">
+                                        Chưa có loại thực phẩm nào (Tự động cập nhật khi tích chọn nguyên liệu ở dưới)
+                                    </span>
+                                @endforelse
+                            </div>
+                            <input type="hidden" wire:model="type" required>
                             @error('type') <span class="sup-error">{{ $message }}</span> @enderror
                         </div>
                     </div>

@@ -31,6 +31,44 @@
         --po-r: 12px;
     }
 
+    :root.dark {
+        --po-bl-s: rgba(18, 103, 232, .18);
+        --po-gn-s: rgba(5, 150, 105, .18);
+        --po-or-s: rgba(234, 88, 12, .18);
+        --po-pu-s: rgba(124, 58, 237, .18);
+        --po-rd-s: rgba(220, 38, 38, .18);
+        --po-gn-t: #34D399;
+        --po-rd-t: #F87171;
+        --po-bg: #0b1120;
+        --po-wh: #1e293b;
+        --po-tx: #f1f5f9;
+        --po-su: #cbd5e1;
+        --po-mu: #94a3b8;
+        --po-fa: #64748b;
+        --po-bd: #334155;
+        --po-bd2: #263449;
+        --po-sh: 0 1px 2px rgba(0, 0, 0, .4);
+    }
+
+    .dark .emp-search {
+        background: #0f172a;
+    }
+
+    .dark .emp-table thead tr,
+    .dark .emp-table tbody tr:hover,
+    .dark .emp-btn:hover {
+        background: #172033 !important;
+    }
+
+    .dark .emp-bottom-bar {
+        background: rgba(15, 23, 42, .85);
+        border-color: rgba(51, 65, 85, .8);
+    }
+
+    .fi-main {
+        background: var(--po-bg);
+    }
+
     .emp-page {
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         color: var(--po-tx);
@@ -136,10 +174,10 @@
         font-size: 14px;
     }
 
-    .ki-b { background: #EBF3FF; color: #1267E8; }
-    .ki-g { background: #ECFDF5; color: #059669; }
-    .ki-o { background: #FFF7ED; color: #EA580C; }
-    .ki-p { background: #F5F3FF; color: #7C3AED; }
+    .ki-b { background: var(--po-bl-s); color: var(--po-bl); }
+    .ki-g { background: var(--po-gn-s); color: var(--po-gn); }
+    .ki-o { background: var(--po-or-s); color: var(--po-or); }
+    .ki-p { background: var(--po-pu-s); color: var(--po-pu); }
 
     .kval {
         font-size: 24px;
@@ -202,8 +240,8 @@
     }
 
     .ctrl:focus {
-        border-color: #93C5FD;
-        background: #fff;
+        border-color: var(--po-bl-m);
+        background: var(--po-wh);
     }
 
     /* Steps Tabs */
@@ -220,7 +258,7 @@
         font-size: 13.5px;
         font-weight: 700;
         color: var(--po-mu);
-        background: #fff;
+        background: var(--po-wh);
         border: 1px solid var(--po-bd);
         border-radius: 8px 8px 0 0;
         cursor: pointer;
@@ -247,7 +285,7 @@
         left: 0;
         right: 0;
         height: 2px;
-        background: #fff;
+        background: var(--po-wh);
     }
 
     /* Table styles BYT style */
@@ -260,7 +298,7 @@
     }
 
     .tbar {
-        background: #F8FAFC;
+        background: var(--po-bd2);
         padding: 14px 18px;
         border-bottom: 1px solid var(--po-bd2);
         text-align: center;
@@ -273,13 +311,13 @@
     }
 
     .byt-table th, .byt-table td {
-        border: 1px solid #CBD5E1;
+        border: 1px solid var(--po-bd);
         padding: 10px;
         color: var(--po-tx);
     }
 
     .byt-table th {
-        background: #F1F5F9;
+        background: var(--po-bd2);
         font-weight: 800;
         text-align: center;
         vertical-align: middle;
@@ -288,7 +326,11 @@
     }
 
     .byt-table td {
-        background: #fff;
+        background: var(--po-wh);
+    }
+
+    .emp-row:hover td {
+        background-color: var(--po-bd2) !important;
     }
 
     .text-center { text-align: center !important; }
@@ -298,7 +340,7 @@
 
     /* Group title row step 1 */
     .byt-group-title {
-        background: #F8FAFC !important;
+        background: var(--po-bd2) !important;
         font-weight: 800;
         color: var(--po-su);
         font-size: 13px;
@@ -306,7 +348,7 @@
     }
 
     .byt-group-desc {
-        background: #FAFBFB !important;
+        background: var(--po-bd2) !important;
         font-size: 11px;
         color: var(--po-mu);
         font-style: italic;
@@ -337,14 +379,14 @@
     /* Footer Sign section step 1 */
     .byt-sign-title {
         font-weight: 700;
-        background: #fff !important;
-        border-top: 1.5px solid #94A3B8;
+        background: var(--po-wh) !important;
+        border-top: 1.5px solid var(--po-fa);
     }
 
     .byt-sign-text {
         font-style: italic;
         color: var(--po-mu);
-        background: #fff !important;
+        background: var(--po-wh) !important;
     }
 
     @media (max-width: 900px) {

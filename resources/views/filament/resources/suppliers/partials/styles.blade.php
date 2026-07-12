@@ -29,6 +29,49 @@
                 --sup-r: 14px;
             }
 
+            /* Dark mode: Filament thêm class .dark vào <html>. Đè lại palette để
+               trang không còn là mảng sáng chói giữa app tối. */
+            :root.dark {
+                --sup-bl-s: rgba(18, 103, 232, .18);
+                --sup-gn-s: rgba(5, 150, 105, .18);
+                --sup-or-s: rgba(234, 88, 12, .18);
+                --sup-pu-s: rgba(124, 58, 237, .18);
+                --sup-rd-s: rgba(220, 38, 38, .18);
+                --sup-gn-t: #34D399;
+                --sup-rd: #F87171;
+                --sup-bg: #0b1120;
+                --sup-wh: #1e293b;
+                --sup-tx: #f1f5f9;
+                --sup-su: #cbd5e1;
+                --sup-mu: #94a3b8;
+                --sup-fa: #64748b;
+                --sup-bd: #334155;
+                --sup-bd2: #263449;
+                --sup-sh: 0 1px 2px rgba(0, 0, 0, .4);
+            }
+
+            /* Các bề mặt dùng màu sáng hardcode (không qua biến) — vá riêng cho dark. */
+            .dark .sup-search {
+                background: #0f172a;
+            }
+
+            .dark .sup-table thead tr,
+            .dark .sup-table tbody tr:hover,
+            .dark .sup-btn:hover {
+                background: #172033 !important;
+            }
+
+            .dark .sup-info {
+                background: rgba(18, 103, 232, .12);
+                border-color: rgba(18, 103, 232, .35);
+                color: var(--sup-su);
+            }
+
+            .dark .sup-bottom-bar {
+                background: rgba(15, 23, 42, .85);
+                border-color: rgba(51, 65, 85, .8);
+            }
+
             .fi-main {
                 background: var(--sup-bg);
             }
@@ -184,7 +227,9 @@
             }
 
             .sup-table-card {
-                overflow: hidden;
+                /* Không cắt overflow ở đây, nếu không dropdown filter bị card che cụt.
+                   Việc bo góc bảng chuyển xuống .sup-table-wrap. */
+                overflow: visible;
             }
 
             .sup-toolbar {
@@ -252,12 +297,140 @@
                 min-width: 9.5rem;
             }
 
+            /* Combobox lọc "Loại TP cung cấp": vừa tìm kiếm vừa chọn */
+            .sup-combo {
+                position: relative;
+            }
+
+            .sup-combo-toggle {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: .5rem;
+                cursor: pointer;
+                text-align: left;
+            }
+
+            .sup-combo-placeholder {
+                color: var(--sup-fa);
+            }
+
+            .sup-combo-caret {
+                width: 1rem;
+                height: 1rem;
+                flex: none;
+                color: var(--sup-fa);
+            }
+
+            .sup-combo-panel {
+                position: absolute;
+                z-index: 30;
+                top: calc(100% + .25rem);
+                left: 0;
+                right: 0;
+                background: var(--sup-wh);
+                border: 1px solid var(--sup-bd);
+                border-radius: .65rem;
+                box-shadow: 0 10px 25px -5px rgb(0 0 0 / .12);
+                overflow: hidden;
+            }
+
+            .sup-combo-search {
+                width: 100%;
+                border: none;
+                border-bottom: 1px solid var(--sup-bd);
+                background: transparent;
+                color: var(--sup-su);
+                padding: .6rem .9rem;
+                outline: none;
+                font-size: .875rem;
+            }
+
+            .sup-combo-list {
+                max-height: 13rem;
+                overflow-y: auto;
+                margin: 0;
+                padding: .25rem;
+                list-style: none;
+            }
+
+            .sup-combo-option {
+                display: block;
+                width: 100%;
+                border: none;
+                background: transparent;
+                color: var(--sup-su);
+                text-align: left;
+                padding: .5rem .65rem;
+                border-radius: .45rem;
+                font-size: .875rem;
+                cursor: pointer;
+            }
+
+            .sup-combo-option:hover {
+                background: var(--sup-bg, rgb(0 0 0 / .04));
+            }
+
+            .sup-combo-option-active {
+                font-weight: 700;
+                background: rgb(245 158 11 / .12);
+            }
+
+            /* Hàng chọn nhiều: ô tick bên trái */
+            .sup-combo-check {
+                display: flex;
+                align-items: center;
+                gap: .55rem;
+            }
+
+            .sup-combo-box {
+                flex: none;
+                width: 1.05rem;
+                height: 1.05rem;
+                border: 1.5px solid var(--sup-bd);
+                border-radius: .3rem;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                color: #fff;
+            }
+
+            .sup-combo-box svg {
+                width: .8rem;
+                height: .8rem;
+            }
+
+            .sup-combo-box-on {
+                background: rgb(245 158 11);
+                border-color: rgb(245 158 11);
+            }
+
+            .sup-combo-clear {
+                color: var(--sup-fa);
+                font-size: .8rem;
+                border-bottom: 1px solid var(--sup-bd);
+                border-radius: 0;
+                margin-bottom: .15rem;
+            }
+
+            .sup-combo-empty {
+                padding: .6rem .65rem;
+                color: var(--sup-fa);
+                font-size: .82rem;
+            }
+
+            [x-cloak] {
+                display: none !important;
+            }
+
             .sup-spacer {
                 flex: 1;
             }
 
             .sup-table-wrap {
                 overflow-x: auto;
+                border-bottom-left-radius: var(--sup-r);
+                border-bottom-right-radius: var(--sup-r);
             }
 
             .sup-table {
@@ -654,18 +827,23 @@
 
             .sup-bottom-bar {
                 position: sticky;
-                bottom: -2rem;
-                z-index: 5;
-                margin: 2rem -1.75rem -2rem !important;
-                min-height: 4rem;
-                background: var(--sup-wh);
-                border-top: 1px solid var(--sup-bd);
+                bottom: 1.25rem;
+                z-index: 10;
+                margin: 2rem 0 0 0 !important;
+                min-height: 4.25rem;
+                background: rgba(255, 255, 255, 0.85);
+                backdrop-filter: blur(12px) saturate(190%);
+                -webkit-backdrop-filter: blur(12px) saturate(190%);
+                border: 1px solid rgba(226, 232, 240, 0.8);
+                border-radius: 1rem;
                 display: flex;
                 align-items: center;
                 justify-content: flex-end;
                 gap: .75rem;
-                padding: .8rem 1.75rem !important;
-                box-shadow: 0 -2px 12px rgba(15, 23, 42, .05);
+                padding: .8rem 1.5rem !important;
+                box-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.15), 
+                            0 1px 3px rgba(15, 23, 42, 0.05);
+                transition: all 0.3s ease;
             }
 
             .sup-breadcrumb {

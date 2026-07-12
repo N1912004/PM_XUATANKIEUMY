@@ -29,6 +29,44 @@
         --po-r: 14px;
     }
 
+    :root.dark {
+        --po-bl-s: rgba(18, 103, 232, .18);
+        --po-gn-s: rgba(5, 150, 105, .18);
+        --po-or-s: rgba(234, 88, 12, .18);
+        --po-pu-s: rgba(124, 58, 237, .18);
+        --po-rd-s: rgba(220, 38, 38, .18);
+        --po-gn-t: #34D399;
+        --po-rd-t: #F87171;
+        --po-bg: #0b1120;
+        --po-wh: #1e293b;
+        --po-tx: #f1f5f9;
+        --po-su: #cbd5e1;
+        --po-mu: #94a3b8;
+        --po-fa: #64748b;
+        --po-bd: #334155;
+        --po-bd2: #263449;
+        --po-sh: 0 1px 2px rgba(0, 0, 0, .4);
+    }
+
+    .dark .emp-search {
+        background: #0f172a;
+    }
+
+    .dark .emp-table thead tr,
+    .dark .emp-table tbody tr:hover,
+    .dark .emp-btn:hover {
+        background: #172033 !important;
+    }
+
+    .dark .emp-bottom-bar {
+        background: rgba(15, 23, 42, .85);
+        border-color: rgba(51, 65, 85, .8);
+    }
+
+    .fi-main {
+        background: var(--po-bg);
+    }
+
     .emp-page {
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         color: var(--po-tx);
@@ -82,7 +120,7 @@
 
     .emp-btn:hover {
         background: var(--po-bg);
-        border-color: #CBD5E1;
+        border-color: var(--po-bd);
     }
 
     .emp-btn-primary {
@@ -218,7 +256,7 @@
     }
 
     .mp-sel:hover {
-        border-color: #CBD5E1 !important;
+        border-color: var(--po-bd) !important;
     }
 
     .att-rbtn {
@@ -265,33 +303,33 @@
     }
 
     .es-working {
-        background: #ECFDF5;
-        color: #047857;
-        border-color: #A7F3D0;
+        background: var(--po-gn-s);
+        color: var(--po-gn);
+        border-color: var(--po-gn);
     }
 
     .es-working .es-dot {
-        background: #10B981;
+        background: var(--po-gn);
     }
 
     .es-leave {
-        background: #FFF7ED;
-        color: #C2410C;
-        border-color: #FED7AA;
+        background: var(--po-or-s);
+        color: var(--po-or);
+        border-color: var(--po-or);
     }
 
     .es-leave .es-dot {
-        background: #F97316;
+        background: var(--po-or);
     }
 
     .es-resign {
-        background: #FEF2F2;
-        color: #B91C1C;
-        border-color: #FCA5A5;
+        background: var(--po-rd-s);
+        color: var(--po-rd);
+        border-color: var(--po-rd);
     }
 
     .es-resign .es-dot {
-        background: #EF4444;
+        background: var(--po-rd);
     }
 
     /* Actions Button */
@@ -317,7 +355,7 @@
 
     /* Row Hover */
     .emp-row:hover {
-        background-color: #F8FAFC !important;
+        background-color: var(--po-bd2) !important;
     }
 
     /* Custom Form Layout Styles (Create/Edit) */
@@ -340,7 +378,7 @@
         align-items: center;
         gap: 10px;
         margin-bottom: 18px;
-        border-bottom: 1px solid #F8FAFC;
+        border-bottom: 1px solid var(--po-bd2);
         padding-bottom: 12px;
     }
 
@@ -378,11 +416,11 @@
         width: 100px;
         height: 100px;
         border-radius: 50%;
-        border: 2px dashed #CBD5E1;
+        border: 2px dashed var(--po-fa);
         display: grid;
         place-items: center;
         position: relative;
-        background: #F8FAFC;
+        background: var(--po-bd2);
     }
 
     .pcam {
@@ -398,7 +436,7 @@
         place-items: center;
         font-size: 11px;
         cursor: pointer;
-        border: 2px solid #fff;
+        border: 2px solid var(--po-wh);
         transition: .13s;
     }
 

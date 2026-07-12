@@ -39,7 +39,7 @@ class StockTransferResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('CUNG ỨNG & KHO');
+        return __('NGUYÊN LIỆU & KHO');
     }
 
     public static function form(Form $form): Form
@@ -76,7 +76,28 @@ class StockTransferResource extends Resource
                             ->label('Số lượng chuyển')
                             ->numeric()
                             ->required()
-                            ->minValue(0.001),
+                            ->minValue(0.001)
+                            ->rules([
+                                fn (Forms\Get $get): \Closure => function (string $attribute, $value, \Closure $fail) use ($get) {
+                                    $sourceKitchenId = $get('../../source_kitchen_id');
+                                    $ingredientId = $get('ingredient_id');
+
+                                    if (! $sourceKitchenId || ! $ingredientId || ! $value) {
+                                        return;
+                                    }
+
+                                    $stock = \App\Models\Stock::query()
+                                        ->where('kitchen_id', $sourceKitchenId)
+                                        ->where('ingredient_id', $ingredientId)
+                                        ->first();
+
+                                    $available = $stock ? ((float) $stock->quantity - (float) $stock->frozen_quantity) : 0.0;
+
+                                    if ($available < (float) $value) {
+                                        $fail("Tồn khả dụng không đủ để điều chuyển (còn {$available}).");
+                                    }
+                                },
+                            ]),
                     ])
                     ->columns(2)
                     ->addActionLabel('Thêm mặt hàng')

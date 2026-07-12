@@ -7,7 +7,7 @@
     @endphp
 
     @if (session()->has('message'))
-        <div style="background:#ECFDF5; color:#065F46; padding:12px 16px; border-radius:8px; border:1px solid #A7F3D0; margin-bottom:16px; font-size:13px; font-weight:600; display:flex; align-items:center; gap:8px">
+        <div style="background:var(--po-gn-s); color:var(--po-gn-t); padding:12px 16px; border-radius:8px; border:1px solid var(--po-gn); margin-bottom:16px; font-size:13px; font-weight:600; display:flex; align-items:center; gap:8px">
             <i class="fa-solid fa-circle-check"></i>
             {{ session('message') }}
         </div>
@@ -148,7 +148,7 @@
                 <thead>
                     <!-- Hàng tiêu đề chung chuẩn Bộ Y tế -->
                     <tr>
-                        <th colspan="{{ $activeStep === 'Bước 1' ? 10 : ($activeStep === 'Bước 2' ? 8 : ($activeStep === 'Bước 3' ? 7 : 8)) }}" style="background:#F8FAFC; text-align:center; padding:12px">
+                        <th colspan="{{ $activeStep === 'Bước 1' ? 10 : ($activeStep === 'Bước 2' ? 8 : ($activeStep === 'Bước 3' ? 7 : 8)) }}" style="background:var(--po-bd2); text-align:center; padding:12px">
                             <div style="font-size:13px; font-weight:800; color:var(--po-tx)">
                                 CN NHƠN TRẠCH - CÔNG TY TNHH DỊCH VỤ CJ CATERING VIỆT NAM
                             </div>
@@ -158,10 +158,10 @@
                         </th>
                     </tr>
                     <tr>
-                        <th colspan="{{ $activeStep === 'Bước 1' ? 4 : ($activeStep === 'Bước 2' ? 3 : ($activeStep === 'Bước 3' ? 3 : 3)) }}" style="text-align:left; background:#fff; font-weight:700">
+                        <th colspan="{{ $activeStep === 'Bước 1' ? 4 : ($activeStep === 'Bước 2' ? 3 : ($activeStep === 'Bước 3' ? 3 : 3)) }}" style="text-align:left; background:var(--po-wh); font-weight:700">
                             📍 ĐỊA ĐIỂM KIỂM TRA: {{ $canteen }}
                         </th>
-                        <th colspan="{{ $activeStep === 'Bước 1' ? 6 : ($activeStep === 'Bước 2' ? 5 : ($activeStep === 'Bước 3' ? 4 : 5)) }}" style="text-align:right; background:#fff; font-weight:700">
+                        <th colspan="{{ $activeStep === 'Bước 1' ? 6 : ($activeStep === 'Bước 2' ? 5 : ($activeStep === 'Bước 3' ? 4 : 5)) }}" style="text-align:right; background:var(--po-wh); font-weight:700">
                             👤 NGƯỜI KIỂM TRA: {{ $inspector }}
                         </th>
                     </tr>
@@ -240,13 +240,13 @@
                                     <td class="text-center">{{ $item['invoice'] ?? '—' }}</td>
                                     <td class="text-center">
                                         @if(($item['vet_check'] ?? '') === 'Đạt')
-                                            <span class="px-2 py-0.5 rounded bg-green-50 text-green-700 font-bold" style="font-size:11px">Đạt</span>
+                                            <span class="px-2 py-0.5 rounded font-bold" style="font-size:11px; background:var(--po-gn-s); color:var(--po-gn)">Đạt</span>
                                         @else
                                             —
                                         @endif
                                     </td>
                                     <td class="text-center">
-                                        <span class="px-2 py-0.5 rounded bg-green-50 text-green-700 font-bold" style="font-size:11px">Đạt</span>
+                                        <span class="px-2 py-0.5 rounded font-bold" style="font-size:11px; background:var(--po-gn-s); color:var(--po-gn)">Đạt</span>
                                     </td>
                                     <td class="text-center">{{ $item['quick_test'] ?? '—' }}</td>
                                     <td style="color:var(--po-mu); font-style:italic">{{ $item['notes'] ?? 'Cảm quan tốt, sạch sẽ' }}</td>
@@ -259,7 +259,7 @@
                                 <td class="font-bold">{{ $item['name'] }}</td>
                                 <td class="text-center">{{ $item['time'] ?: '07:00 - 09:30' }}</td>
                                 <td class="text-center">
-                                    <span class="px-2 py-0.5 rounded bg-green-50 text-green-700 font-bold" style="font-size:11px">Đạt</span>
+                                    <span class="px-2 py-0.5 rounded font-bold" style="font-size:11px; background:var(--po-gn-s); color:var(--po-gn)">Đạt</span>
                                 </td>
                                 <td class="text-center font-bold" style="color:var(--po-gn)">{{ $item['temp'] ?: '75°C' }}</td>
                                 <td class="font-bold">{{ $item['cook'] ?: 'Lê Hoàng Cường' }}</td>
@@ -273,7 +273,7 @@
                                 <td class="font-bold">{{ $item['name'] }}</td>
                                 <td class="text-center">{{ $item['time'] ?: '10:30 - 11:00' }}</td>
                                 <td class="text-center">
-                                    <span class="px-2 py-0.5 rounded bg-green-50 text-green-700 font-bold" style="font-size:11px">Đạt</span>
+                                    <span class="px-2 py-0.5 rounded font-bold" style="font-size:11px; background:var(--po-gn-s); color:var(--po-gn)">Đạt</span>
                                 </td>
                                 <td class="text-center font-bold" style="color:var(--po-bl)">{{ $item['sample_kept'] ?: 'Có lưu mẫu' }}</td>
                                 <td class="text-center font-bold" style="color:var(--po-gn)">{{ $item['temp'] ?: '65°C' }}</td>
@@ -314,13 +314,13 @@
                     <!-- Chữ ký xác nhận chân bảng theo biểu mẫu B1 -->
                     @if($activeStep === 'Bước 1' && !empty($auditItems))
                         <tr class="byt-sign-title">
-                            <td colspan="4" style="text-align:left; border-top:1.5px solid #94A3B8; padding:8px 10px">
+                            <td colspan="4" style="text-align:left; border-top:1.5px solid var(--po-fa); padding:8px 10px">
                                 <strong>GHI CHÚ:</strong>
                             </td>
-                            <td colspan="3" style="text-align:center; border-top:1.5px solid #94A3B8; padding:8px 10px">
+                            <td colspan="3" style="text-align:center; border-top:1.5px solid var(--po-fa); padding:8px 10px">
                                 <strong>Đại diện nhà ăn</strong>
                             </td>
-                            <td colspan="3" style="text-align:center; border-top:1.5px solid #94A3B8; padding:8px 10px">
+                            <td colspan="3" style="text-align:center; border-top:1.5px solid var(--po-fa); padding:8px 10px">
                                 <strong>Người kiểm tra</strong>
                             </td>
                         </tr>

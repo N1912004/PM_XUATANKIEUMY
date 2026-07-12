@@ -17,19 +17,19 @@ class ViewIngredient extends ViewRecord
 
     public function getSubheading(): ?string
     {
-        return 'Thông tin chi tiết của nguyên liệu trong danh mục';
+        return __('ingredient.actions.view_desc');
     }
 
     protected function getHeaderActions(): array
     {
         return [
             Actions\Action::make('back')
-                ->label('Quay lại')
+                ->label(__('ingredient.actions.back'))
                 ->icon('heroicon-o-arrow-left')
                 ->url($this->getResource()::getUrl('index'))
                 ->color('gray'),
             Actions\EditAction::make()
-                ->label('Chỉnh sửa')
+                ->label(__('ingredient.actions.edit'))
                 ->icon('heroicon-o-pencil'),
         ];
     }

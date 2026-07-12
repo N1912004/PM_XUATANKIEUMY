@@ -4,7 +4,6 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\IngredientResource\Pages;
 use App\Models\Ingredient;
-use App\Models\Setting;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Infolists;
@@ -13,6 +12,8 @@ use Filament\Resources\Resource;
 use Filament\Support\RawJs;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class IngredientResource extends Resource
 {
@@ -24,70 +25,92 @@ class IngredientResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return __('Danh sách nguyên liệu');
+        return __('ingredient.navigation.ingredient_plural');
     }
 
     public static function getModelLabel(): string
     {
-        return __('Nguyên liệu');
+        return __('ingredient.navigation.ingredient');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('Danh sách nguyên liệu');
+        return __('ingredient.navigation.ingredient_plural');
     }
 
     public static function getNavigationGroup(): ?string
     {
-        return __('CUNG ỨNG & KHO');
+        return __('NGUYÊN LIỆU & KHO');
     }
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\Section::make('Thông tin nguyên liệu')
+                Forms\Components\Section::make(__('ingredient.form.section'))
                     ->schema([
                         Forms\Components\TextInput::make('name')
-                            ->label('Tên nguyên liệu')
+                            ->label(__('ingredient.form.name'))
                             ->required()
-                            ->placeholder('Nhập tên nguyên liệu'),
-                        Forms\Components\TextInput::make('code')
-                            ->label('Mã nguyên liệu')
                             ->unique(ignoreRecord: true)
-                            ->placeholder('Nhập mã nguyên liệu'),
-                        Forms\Components\Select::make('unit')
-                            ->label(__('Đơn vị'))
+                            ->maxLength(255)
+                            ->validationMessages([
+                                'unique' => __('ingredient.validation.name_unique'),
+                            ])
+                            ->placeholder(__('ingredient.form.name_placeholder')),
+                        Forms\Components\TextInput::make('code')
+                            ->label(__('ingredient.form.code'))
                             ->required()
-                            ->options(function () {
-                                $raw = Setting::get('ingredient_units', 'Kg, Quả, Gói, Chai, Thùng, Lít');
-                                $units = array_map('trim', explode(',', $raw));
-
-                                return array_combine($units, $units);
-                            })
-                            ->placeholder(__('Chọn đơn vị')),
-                        Forms\Components\Select::make('type')
-                            ->label(__('Loại nguyên liệu'))
+                            ->unique(ignoreRecord: true)
+                            ->maxLength(50)
+                            ->regex('/^[A-Za-z0-9_-]+$/')
+                            ->validationMessages([
+                                'unique' => __('ingredient.validation.code_unique'),
+                                'regex' => __('ingredient.validation.code_regex'),
+                            ])
+                            ->placeholder(__('ingredient.form.code_placeholder')),
+                        Forms\Components\Select::make('unit_id')
+                            ->label(__('ingredient.form.unit'))
+                            ->relationship('unitRelation', 'name')
                             ->required()
-                            ->options(function () {
-                                $raw = Setting::get('ingredient_types', 'Động vật, Thực vật, Thực phẩm khô, Gia vị');
-                                $types = array_map('trim', explode(',', $raw));
-
-                                return array_combine($types, $types);
-                            })
-                            ->placeholder(__('Chọn loại nguyên liệu')),
+                            ->searchable()
+                            ->preload()
+                            ->createOptionForm([
+                                Forms\Components\TextInput::make('name')
+                                    ->label(__('ingredient.form.unit_name'))
+                                    ->required()
+                                    ->maxLength(255)
+                                    ->unique('units', 'name'),
+                            ])
+                            ->placeholder(__('ingredient.form.unit_placeholder')),
+                        Forms\Components\Select::make('ingredient_type_id')
+                            ->label(__('ingredient.form.type'))
+                            ->relationship('typeRelation', 'name')
+                            ->required()
+                            ->searchable()
+                            ->preload()
+                            ->createOptionForm([
+                                Forms\Components\TextInput::make('name')
+                                    ->label(__('ingredient.form.type_name'))
+                                    ->required()
+                                    ->maxLength(255)
+                                    ->unique('ingredient_types', 'name'),
+                            ])
+                            ->placeholder(__('ingredient.form.type_placeholder')),
                         Forms\Components\TextInput::make('reference_price')
-                            ->label('Đơn giá tham chiếu gốc')
+                            ->label(__('ingredient.form.reference_price'))
                             ->required()
+                            ->numeric()
+                            ->minValue(0)
                             ->default(0)
                             ->prefix('VND')
-                            ->placeholder('Nhập đơn giá tham chiếu cơ bản')
+                            ->placeholder(__('ingredient.form.reference_price_placeholder'))
                             ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
                             ->stripCharacters(['.', ','])
                             ->formatStateUsing(fn ($state) => $state ? round((float) $state) : 0)
                             ->dehydrateStateUsing(fn ($state) => $state ? (float) str_replace([',', '.'], '', (string) $state) : 0),
                         Forms\Components\Toggle::make('status')
-                            ->label('Trạng thái')
+                            ->label(__('ingredient.form.status'))
                             ->default(true)
                             ->onColor('primary')
                             ->offColor('danger')
@@ -109,43 +132,43 @@ class IngredientResource extends Resource
                         Infolists\Components\Grid::make(2)
                             ->schema([
                                 Infolists\Components\TextEntry::make('code')
-                                    ->label('Mã nguyên liệu')
+                                    ->label(__('ingredient.form.code'))
                                     ->weight('bold'),
                                 Infolists\Components\TextEntry::make('name')
-                                    ->label('Tên nguyên liệu')
+                                    ->label(__('ingredient.form.name'))
                                     ->weight('bold'),
                                 Infolists\Components\TextEntry::make('unit')
-                                    ->label('Đơn vị')
+                                    ->label(__('ingredient.form.unit'))
                                     ->weight('bold'),
                                 Infolists\Components\TextEntry::make('type')
-                                    ->label('Loại nguyên liệu')
+                                    ->label(__('ingredient.form.type'))
                                     ->weight('bold'),
                                 Infolists\Components\TextEntry::make('reference_price')
-                                    ->label('Đơn giá tham chiếu gốc')
+                                    ->label(__('ingredient.form.reference_price'))
                                     ->money('VND')
                                     ->weight('bold'),
                                 Infolists\Components\TextEntry::make('status')
-                                    ->label('Trạng thái')
+                                    ->label(__('ingredient.form.status'))
                                     ->badge()
                                     ->color(fn ($state) => $state ? 'success' : 'danger')
-                                    ->formatStateUsing(fn ($state) => $state ? 'Đang hoạt động' : 'Ngừng hoạt động')
+                                    ->formatStateUsing(fn ($state) => $state ? __('ingredient.status.active') : __('ingredient.status.inactive'))
                                     ->weight('bold'),
                                 Infolists\Components\TextEntry::make('suppliers.name')
-                                    ->label('Nhà cung cấp liên kết')
+                                    ->label(__('ingredient.infolist.linked_suppliers'))
                                     ->badge()
                                     ->separator(',')
                                     ->weight('bold')
                                     ->columnSpanFull(),
                                 Infolists\Components\RepeatableEntry::make('suppliers')
-                                    ->label('Bảng báo giá của các nhà cung cấp')
+                                    ->label(__('ingredient.infolist.quotes_table'))
                                     ->schema([
                                         Infolists\Components\TextEntry::make('name')
-                                            ->label('Tên nhà cung cấp')
+                                            ->label(__('ingredient.infolist.supplier_name'))
                                             ->weight('semibold'),
                                         Infolists\Components\TextEntry::make('code')
-                                            ->label('Mã nhà cung cấp'),
+                                            ->label(__('ingredient.infolist.supplier_code')),
                                         Infolists\Components\TextEntry::make('pivot.reference_price')
-                                            ->label('Đơn giá cung cấp')
+                                            ->label(__('ingredient.infolist.supply_price'))
                                             ->money('VND')
                                             ->color('primary')
                                             ->weight('bold'),
@@ -162,26 +185,29 @@ class IngredientResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('index')
-                    ->label('STT')
+                    ->label(__('ingredient.table.index'))
                     ->state(static function (Tables\Contracts\HasTable $livewire, \stdClass $rowLoop): string {
-                        return (string) ($rowLoop->iteration);
+                        $currentPage = method_exists($livewire, 'getTablePage') ? $livewire->getTablePage() : 1;
+                        $recordsPerPage = method_exists($livewire, 'getTableRecordsPerPage') ? $livewire->getTableRecordsPerPage() : 10;
+                        $perPage = is_numeric($recordsPerPage) ? (int) $recordsPerPage : 10;
+                        return (string) ($rowLoop->iteration + ($perPage * ($currentPage - 1)));
                     })
                     ->alignCenter()
                     ->width('56px'),
                 Tables\Columns\TextColumn::make('code')
-                    ->label('MÃ NGUYÊN LIỆU')
+                    ->label(__('ingredient.table.code'))
                     ->searchable()
                     ->sortable()
                     ->color('primary')
                     ->weight('semibold')
                     ->size('sm'),
                 Tables\Columns\TextColumn::make('name')
-                    ->label('TÊN NGUYÊN LIỆU')
+                    ->label(__('ingredient.table.name'))
                     ->searchable()
                     ->sortable()
                     ->weight('bold'),
                 Tables\Columns\TextColumn::make('suppliers_display')
-                    ->label('TÊN NCC')
+                    ->label(__('ingredient.table.supplier'))
                     ->badge()
                     ->state(function ($record) {
                         $names = $record->suppliers->pluck('name')->toArray();
@@ -190,49 +216,49 @@ class IngredientResource extends Resource
                             return $names;
                         }
 
-                        return [...array_slice($names, 0, 2), '+'.($total - 2).' NCC'];
+                        return [...array_slice($names, 0, 2), __('ingredient.table.more_suppliers', ['count' => $total - 2])];
                     })
+                    // Cột ảo (state) không map cột DB → phải tự viết query tìm qua quan hệ n-n suppliers.
+                    // Filament tự OR khối này với search của code/name trong ô tìm kiếm chung.
+                    ->searchable(query: fn (Builder $query, string $search): Builder => $query->whereHas('suppliers', fn (Builder $q) => $q->where('name', 'like', "%{$search}%")))
                     ->color(fn (string $state): string => str_starts_with($state, '+') ? 'gray' : 'success')
                     ->size('sm'),
-                Tables\Columns\TextColumn::make('unit')
-                    ->label('ĐƠN VỊ')
+                Tables\Columns\TextColumn::make('unitRelation.name')
+                    ->label(__('ingredient.table.unit'))
                     ->size('sm'),
-                Tables\Columns\TextColumn::make('type')
-                    ->label('LOẠI NL')
+                Tables\Columns\TextColumn::make('typeRelation.name')
+                    ->label(__('ingredient.table.type'))
                     ->size('sm'),
                 Tables\Columns\TextColumn::make('reference_price')
-                    ->label('ĐƠN GIÁ THAM CHIẾU')
+                    ->label(__('ingredient.table.reference_price'))
                     ->money('VND')
                     ->sortable()
                     ->size('sm'),
                 Tables\Columns\TextColumn::make('status')
-                    ->label('TRẠNG THÁI')
+                    ->label(__('ingredient.table.status'))
                     ->badge()
-                    ->formatStateUsing(fn ($state) => $state ? 'Đang hoạt động' : 'Ngừng hoạt động')
+                    ->formatStateUsing(fn ($state) => $state ? __('ingredient.status.active') : __('ingredient.status.inactive'))
                     ->icon(fn ($state) => $state ? 'heroicon-o-check-circle' : 'heroicon-o-x-circle')
                     ->color(fn ($state) => $state ? 'success' : 'danger'),
             ])
-            ->defaultSort('id', 'asc')
+            ->defaultSort('id', 'desc')
             ->filters([
                 Tables\Filters\SelectFilter::make('supplier_id')
-                    ->label('Nhà cung cấp')
-                    ->relationship('suppliers', 'name'),
-                Tables\Filters\SelectFilter::make('unit')
-                    ->label(__('Đơn vị'))
-                    ->options(function () {
-                        $raw = Setting::get('ingredient_units', 'Kg, Quả, Gói, Chai, Thùng, Lít');
-                        $units = array_map('trim', explode(',', $raw));
-
-                        return array_combine($units, $units);
-                    }),
-                Tables\Filters\SelectFilter::make('type')
-                    ->label(__('Loại NL'))
-                    ->options(function () {
-                        $raw = Setting::get('ingredient_types', 'Động vật, Thực vật, Thực phẩm khô, Gia vị');
-                        $types = array_map('trim', explode(',', $raw));
-
-                        return array_combine($types, $types);
-                    }),
+                    ->label(__('ingredient.filter.supplier'))
+                    ->relationship('suppliers', 'name')
+                    ->searchable()
+                    ->preload(),
+                Tables\Filters\SelectFilter::make('unit_id')
+                    ->label(__('ingredient.filter.unit'))
+                    ->relationship('unitRelation', 'name')
+                    ->searchable()
+                    ->preload(),
+                Tables\Filters\SelectFilter::make('ingredient_type_id')
+                    ->label(__('ingredient.filter.type'))
+                    ->relationship('typeRelation', 'name')
+                    ->searchable()
+                    ->preload(),
+                Tables\Filters\TrashedFilter::make(),
             ])
             ->filtersLayout(Tables\Enums\FiltersLayout::AboveContent)
             ->actions([
@@ -242,10 +268,16 @@ class IngredientResource extends Resource
                     ->iconButton(),
                 Tables\Actions\DeleteAction::make()
                     ->iconButton(),
+                Tables\Actions\RestoreAction::make()
+                    ->iconButton(),
+                Tables\Actions\ForceDeleteAction::make()
+                    ->iconButton(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\RestoreBulkAction::make(),
+                    Tables\Actions\ForceDeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -263,5 +295,13 @@ class IngredientResource extends Resource
             'view' => Pages\ViewIngredient::route('/{record}'),
             'edit' => Pages\EditIngredient::route('/{record}/edit'),
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->withoutGlobalScopes([
+                SoftDeletingScope::class,
+            ]);
     }
 }

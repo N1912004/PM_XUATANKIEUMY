@@ -30,6 +30,25 @@
         --po-r: 12px;
     }
 
+    :root.dark {
+        --po-bl-s: rgba(18, 103, 232, .18);
+        --po-gn-s: rgba(5, 150, 105, .18);
+        --po-or-s: rgba(234, 88, 12, .18);
+        --po-pu-s: rgba(124, 58, 237, .18);
+        --po-rd-s: rgba(220, 38, 38, .18);
+        --po-gn-t: #34D399;
+        --po-rd-t: #F87171;
+        --po-bg: #0b1120;
+        --po-wh: #1e293b;
+        --po-tx: #f1f5f9;
+        --po-su: #cbd5e1;
+        --po-mu: #94a3b8;
+        --po-fa: #64748b;
+        --po-bd: #334155;
+        --po-bd2: #263449;
+        --po-sh: 0 1px 2px rgba(0, 0, 0, .4);
+    }
+
     .emp-page {
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         color: var(--po-tx);
@@ -62,7 +81,7 @@
         padding: 0 16px;
         border: 1px solid var(--po-bd);
         border-radius: 8px;
-        background: #ffffff;
+        background: var(--po-wh);
         cursor: pointer;
         font-size: 13px;
         font-weight: 700;
@@ -75,7 +94,7 @@
 
     .excel-btn:hover {
         background: var(--po-bg);
-        border-color: #CBD5E1;
+        border-color: var(--po-bd);
     }
 
     /* Filter bar */
@@ -84,7 +103,7 @@
         align-items: center;
         flex-wrap: wrap;
         gap: 10px;
-        background: #ffffff;
+        background: var(--po-wh);
         border: 1px solid var(--po-bd);
         border-radius: 14px;
         padding: 12px 16px;
@@ -101,28 +120,28 @@
 
     .date-input {
         height: 36px;
-        border: 1.5px solid #bfdbfe;
+        border: 1.5px solid var(--po-bl-m);
         border-radius: 8px;
         padding: 0 12px;
         font-size: 13px;
         font-weight: 700;
-        color: #1267e8;
-        background: #ebf3ff;
+        background: var(--po-bl-s);
+        color: var(--po-bl);
         cursor: pointer;
         outline: none;
         transition: .13s;
     }
 
     .date-input:focus {
-        border-color: #93c5fd;
+        border-color: var(--po-bl);
     }
 
     .week-btn {
         height: 36px;
         padding: 0 14px;
-        background: #ebf3ff;
-        color: #1267e8;
-        border: 1.5px solid #bfdbfe;
+        background: var(--po-bl-s);
+        color: var(--po-bl);
+        border: 1.5px solid var(--po-bl-m);
         border-radius: 8px;
         font-size: 12.5px;
         font-weight: 700;
@@ -132,16 +151,16 @@
     }
 
     .week-btn:hover {
-        background: #1267e8;
+        background: var(--po-bl-d);
         color: #ffffff;
-        border-color: #1267e8;
+        border-color: var(--po-bl-d);
     }
 
     .shifts-group {
         display: flex;
         align-items: center;
         gap: 5px;
-        background: #f8fafc;
+        background: var(--po-bd2);
         border: 1px solid var(--po-bd);
         border-radius: 8px;
         padding: 4px 10px;
@@ -161,10 +180,10 @@
         user-select: none;
     }
 
-    .shift-ca1 { background: #eff6ff; color: #1e40af; border-color: #bfdbfe; }
-    .shift-ca2 { background: #f0fdf4; color: #065f46; border-color: #a7f3d0; }
-    .shift-ca3 { background: #fef3c7; color: #78350f; border-color: #fde68a; }
-    .shift-ca4 { background: #f5f3ff; color: #4c1d95; border-color: #ddd6fe; }
+    .shift-ca1 { background: var(--po-bl-s); color: var(--po-bl); border-color: var(--po-bl-m); }
+    .shift-ca2 { background: var(--po-gn-s); color: var(--po-gn); border-color: var(--po-gn); }
+    .shift-ca3 { background: var(--po-or-s); color: var(--po-or); border-color: var(--po-or); }
+    .shift-ca4 { background: var(--po-pu-s); color: var(--po-pu); border-color: var(--po-pu); }
 
     .search-container {
         position: relative;
@@ -176,7 +195,7 @@
         gap: 8px;
         border: 1px solid var(--po-bd);
         border-radius: 8px;
-        background: #ffffff;
+        background: var(--po-wh);
         padding: 0 12px;
         height: 36px;
         flex: 1;
@@ -184,7 +203,7 @@
     }
 
     .search-container:focus-within {
-        border-color: #93c5fd;
+        border-color: var(--po-bl-m);
     }
 
     .search-container input {
@@ -217,7 +236,7 @@
         display: flex;
         align-items: center;
         gap: 10px;
-        background: #ffffff;
+        background: var(--po-wh);
         border: 1px solid var(--po-bd);
         border-radius: var(--po-r);
         padding: 14px 16px;
@@ -226,7 +245,7 @@
     }
 
     .stat-card:hover {
-        border-color: #bfdbfe;
+        border-color: var(--po-bl-m);
     }
 
     .stat-icon {
@@ -254,7 +273,7 @@
 
     /* Day block */
     .day-card {
-        background: #ffffff;
+        background: var(--po-wh);
         border: 1px solid var(--po-bd);
         border-radius: var(--po-r);
         overflow: hidden;
@@ -267,14 +286,14 @@
         align-items: center;
         justify-content: space-between;
         padding: 12px 16px;
-        background: linear-gradient(135deg, #eff6ff, #dbeafe);
-        border-bottom: 1px solid #bfdbfe;
+        background: linear-gradient(135deg, var(--po-bl-s), var(--po-bl-m));
+        border-bottom: 1px solid var(--po-bl-m);
     }
 
     .day-title {
         font-size: 14px;
         font-weight: 700;
-        color: #1e40af;
+        color: var(--po-bl);
         display: flex;
         align-items: center;
         gap: 8px;
@@ -282,7 +301,7 @@
 
     .day-badge {
         font-size: 11px;
-        background: #1267e8;
+        background: var(--po-bl);
         color: #ffffff;
         border-radius: 6px;
         padding: 2px 8px;
@@ -326,7 +345,7 @@
         border-radius: 10px;
         margin-bottom: 10px;
         overflow: hidden;
-        background: #ffffff;
+        background: var(--po-wh);
     }
 
     .dish-head {
@@ -334,7 +353,7 @@
         align-items: center;
         justify-content: space-between;
         padding: 9px 13px;
-        background: #F8FAFC;
+        background: var(--po-bd2);
         flex-wrap: wrap;
         gap: 8px;
     }
@@ -354,7 +373,7 @@
     .dish-type-badge {
         font-size: 11px;
         color: var(--po-mu);
-        background: #f1f5f9;
+        background: var(--po-bd2);
         border-radius: 6px;
         padding: 2px 8px;
         font-weight: 600;
@@ -368,8 +387,8 @@
     .dish-portions-badge {
         font-size: 11.5px;
         font-weight: 700;
-        color: #1267e8;
-        background: #ebf3ff;
+        color: var(--po-bl);
+        background: var(--po-bl-s);
         border-radius: 6px;
         padding: 2px 9px;
     }
@@ -377,8 +396,8 @@
     .dish-portions-phan {
         font-size: 11.5px;
         font-weight: 700;
-        color: #059669;
-        background: #ecfdf5;
+        color: var(--po-gn);
+        background: var(--po-gn-s);
         border-radius: 6px;
         padding: 2px 9px;
     }
@@ -415,7 +434,7 @@
     }
 
     .ing-table tbody tr:hover {
-        background: #fafcff;
+        background: var(--po-bd2);
     }
 
     .ing-num {
@@ -580,9 +599,9 @@
                 @foreach($day['shifts'] as $index => $shift)
                     @php 
                         $badgeColors = [
-                            ['bg' => '#eff6ff', 'text' => '#1e40af', 'border' => '#bfdbfe'],
-                            ['bg' => '#f0fdf4', 'text' => '#065f46', 'border' => '#a7f3d0'],
-                            ['bg' => '#fef3c7', 'text' => '#78350f', 'border' => '#fde68a'],
+                            ['bg' => 'var(--po-bl-s)', 'text' => 'var(--po-bl)', 'border' => 'var(--po-bl-m)'],
+                            ['bg' => 'var(--po-gn-s)', 'text' => 'var(--po-gn)', 'border' => 'var(--po-gn)'],
+                            ['bg' => 'var(--po-or-s)', 'text' => 'var(--po-or)', 'border' => 'var(--po-or)'],
                         ];
                         $color = $badgeColors[$index % count($badgeColors)];
                     @endphp

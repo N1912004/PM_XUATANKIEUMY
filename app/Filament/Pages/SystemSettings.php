@@ -53,8 +53,6 @@ class SystemSettings extends Page implements HasForms
             'company_phone' => Setting::get('company_phone'),
             'company_email' => Setting::get('company_email'),
             'primary_color' => Setting::get('primary_color', '#f59e0b'),
-            'ingredient_units' => Setting::get('ingredient_units', 'Kg, Quả, Gói, Chai, Thùng, Lít'),
-            'ingredient_types' => Setting::get('ingredient_types', 'Động vật, Thực vật, Thực phẩm khô, Gia vị'),
         ]);
     }
 
@@ -153,29 +151,6 @@ class SystemSettings extends Page implements HasForms
                                             ->columnSpanFull(),
                                     ]),
                             ]),
-
-                        // Tab 3: Nguyên liệu & Kho
-                        Forms\Components\Tabs\Tab::make(__('settings.tabs.ingredients_stock'))
-                            ->icon('heroicon-o-square-3-stack-3d')
-                            ->schema([
-                                Forms\Components\Section::make(__('settings.ingredients.title'))
-                                    ->description(__('settings.ingredients.desc'))
-                                    ->icon('heroicon-o-squares-2x2')
-                                    ->schema([
-                                        Forms\Components\Textarea::make('ingredient_units')
-                                            ->label(__('settings.ingredients.units'))
-                                            ->placeholder(__('settings.ingredients.units_placeholder'))
-                                            ->helperText(__('settings.ingredients.units_helper'))
-                                            ->required()
-                                            ->rows(3),
-                                        Forms\Components\Textarea::make('ingredient_types')
-                                            ->label(__('settings.ingredients.types'))
-                                            ->placeholder(__('settings.ingredients.types_placeholder'))
-                                            ->helperText(__('settings.ingredients.types_helper'))
-                                            ->required()
-                                            ->rows(3),
-                                    ]),
-                            ]),
                     ])
                     ->contained(false)
                     ->persistTabInQueryString(),
@@ -197,8 +172,6 @@ class SystemSettings extends Page implements HasForms
             'company_address' => 'company',
             'company_phone' => 'company',
             'company_email' => 'company',
-            'ingredient_units' => 'ingredients',
-            'ingredient_types' => 'ingredients',
         ];
 
         foreach ($settingsMap as $key => $group) {
