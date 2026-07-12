@@ -65,6 +65,42 @@
         .dark .icon-box.bg-indigo-50 { background-color: rgba(99, 102, 241, 0.15) !important; }
         .dark .icon-box { border: 1px solid rgba(255, 255, 255, 0.05) !important; }
         
+        /* Vá Dark Mode cho các phần tử Custom trong Dashboard (do không được Tailwind compile) */
+        .dark .bg-gray-50 {
+            background-color: rgba(31, 41, 55, 0.45) !important; /* gray-800/45 */
+        }
+        .dark .bg-gray-50:hover {
+            background-color: rgba(30, 58, 138, 0.15) !important; /* blue-950/15 */
+        }
+        .dark .bg-blue-100 {
+            background-color: rgba(30, 58, 138, 0.6) !important; /* blue-950/60 */
+            color: #93c5fd !important; /* blue-300 */
+        }
+        .dark .text-gray-900,
+        .dark .text-gray-950 {
+            color: #ffffff !important;
+        }
+        .dark .bg-red-50\/20 {
+            background-color: rgba(127, 29, 29, 0.15) !important; /* red-950/15 */
+        }
+        .dark .border-red-100 {
+            border-color: rgba(127, 29, 29, 0.25) !important;
+        }
+        .dark .bg-red-100 {
+            background-color: rgba(127, 29, 29, 0.45) !important;
+            color: #fca5a5 !important;
+        }
+        .dark .action-card {
+            background: linear-gradient(to bottom, #1e293b, #0f172a) !important;
+        }
+        .dark .action-card span {
+            color: #e2e8f0 !important;
+        }
+        .dark .hover\:bg-gray-50:hover {
+            background-color: rgba(255, 255, 255, 0.05) !important; /* màu tối nhẹ khi hover */
+        }
+        
+        
         /* Premium Banner with Solid Fallback CSS Gradient */
         .premium-banner {
             position: relative;

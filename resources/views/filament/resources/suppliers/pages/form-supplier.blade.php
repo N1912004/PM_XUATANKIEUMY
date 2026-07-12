@@ -36,14 +36,14 @@
                             @error('name') <span class="sup-error">{{ $message }}</span> @enderror
                         </div>
                         <div class="sup-field">
-                            <label class="sup-label">Mã NCC</label>
+                            <label class="sup-label">Mã NCC <span class="sup-required">*</span></label>
                             <input wire:model="code" type="text" class="sup-input" placeholder="Nhập mã nhà cung cấp" required>
                             @error('code') <span class="sup-error">{{ $message }}</span> @enderror
                         </div>
 
                         <div class="sup-field">
                             <label class="sup-label">Số điện thoại <span class="sup-required">*</span></label>
-                            <input wire:model="phone" type="text" class="sup-input" placeholder="Nhập số điện thoại" required>
+                            <input wire:model="phone" type="tel" class="sup-input" placeholder="Nhập số điện thoại" required>
                             @error('phone') <span class="sup-error">{{ $message }}</span> @enderror
                         </div>
                         <div class="sup-field">
@@ -59,7 +59,7 @@
                                     $selectedTypes = array_filter(explode(', ', $this->type));
                                 @endphp
                                 @forelse($selectedTypes as $sType)
-                                    <span style="background:#e0f2fe; color:#0369a1; padding:4px 10px; border-radius:9999px; font-size:12px; font-weight:700">
+                                    <span style="background:var(--po-bl-s); color:var(--po-bl); padding:4px 10px; border-radius:9999px; font-size:12px; font-weight:700">
                                         {{ $sType }}
                                     </span>
                                 @empty

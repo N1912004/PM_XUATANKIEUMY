@@ -23,7 +23,7 @@
     <!-- KPIs Stats -->
     <div class="py-krow" style="margin-bottom:16px">
         <div class="py-kcard">
-            <div class="py-kico" style="background:#EBF3FF;color:var(--po-bl)">
+            <div class="py-kico" style="background:var(--po-bl-s);color:var(--po-bl)">
                 <i class="fa-solid fa-file-lines"></i>
             </div>
             <div>
@@ -53,7 +53,7 @@
         </div>
 
         <div class="py-kcard">
-            <div class="py-kico" style="background:#F0FDF4;color:#15803D">
+            <div class="py-kico" style="background:var(--po-gn-s);color:var(--po-gn)">
                 <i class="fa-solid fa-sack-dollar"></i>
             </div>
             <div>
@@ -119,7 +119,7 @@
                         <i class="fa-solid fa-boxes-stacked"></i>
                     </div>
                 @else
-                    <div class="oh-item-ico" style="background:#EBF3FF;color:var(--po-bl)">
+                    <div class="oh-item-ico" style="background:var(--po-bl-s);color:var(--po-bl)">
                         <i class="fa-solid fa-file-lines"></i>
                     </div>
                 @endif

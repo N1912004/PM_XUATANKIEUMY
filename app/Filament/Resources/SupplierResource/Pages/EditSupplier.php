@@ -66,7 +66,14 @@ class EditSupplier extends Page
         $supplier = Supplier::query()->findOrFail($this->supplierId);
         abort_unless(SupplierResource::canEdit($supplier), 403);
 
-        $data = $this->validate($this->rules());
+        // Chuẩn hoá dữ liệu trước khi validate để tăng trải nghiệm người dùng (UX)
+        $this->code = strtoupper(trim($this->code));
+        $this->phone = preg_replace('/[.\-\s]/', '', $this->phone);
+        if ($this->email) {
+            $this->email = strtolower(trim($this->email));
+        }
+
+        $data = $this->validate($this->rules(), $this->messages(), $this->validationAttributes());
 
         $supplier->update($data);
         $this->syncIngredients($supplier);
@@ -120,11 +127,58 @@ class EditSupplier extends Page
     {
         return [
             'name' => ['required', 'string', 'max:255'],
-            'code' => ['required', 'string', 'max:255', Rule::unique('suppliers', 'code')->ignore($this->supplierId)],
-            'phone' => ['required', 'string', 'max:255'],
-            'email' => ['nullable', 'email', 'max:255'],
+            'code' => [
+                'required',
+                'string',
+                'max:255',
+                'regex:/^[A-Z0-9_-]+$/',
+                Rule::unique('suppliers', 'code')->ignore($this->supplierId),
+            ],
+            'phone' => [
+                'required',
+                'string',
+                'regex:/^(0|\+84|84)[235789][0-9]{8,9}$/',
+            ],
+            'email' => [
+                'nullable',
+                'max:255',
+                'regex:/^[a-zA-Z0-9._%+-]+@[a-zA-Z][a-zA-Z0-9.-]*\.[a-zA-Z]{2,}$/',
+                function ($attribute, $value, $fail) {
+                    $domain = strtolower(substr(strrchr($value, "@"), 1));
+                    $typoDomains = ['1gmail.com', 'gamil.com', 'gmail.con', 'yaho.com', 'hotamil.com', 'outlok.com'];
+                    if (in_array($domain, $typoDomains)) {
+                        $fail('Địa chỉ email chứa tên miền không hợp lệ hoặc sai chính tả.');
+                    }
+                },
+            ],
             'type' => ['required', 'string', 'max:255'],
             'status' => ['boolean'],
+        ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    protected function messages(): array
+    {
+        return [
+            'code.regex' => 'Mã nhà cung cấp chỉ được chứa chữ cái không dấu, chữ số, dấu gạch ngang (-) và gạch dưới (_).',
+            'phone.regex' => 'Số điện thoại không đúng định dạng Việt Nam (phải gồm 10-11 số, bắt đầu bằng 0, 84 hoặc +84).',
+            'email.regex' => 'Địa chỉ email không đúng định dạng (tên miền sau ký tự @ phải bắt đầu bằng chữ cái).',
+        ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    protected function validationAttributes(): array
+    {
+        return [
+            'name' => 'tên nhà cung cấp',
+            'code' => 'mã nhà cung cấp',
+            'phone' => 'số điện thoại',
+            'email' => 'địa chỉ email',
+            'type' => 'loại thực phẩm',
         ];
     }
 
@@ -197,5 +251,13 @@ class EditSupplier extends Page
     {
         $types = array_keys($this->getAvailableTypes());
         $this->type = implode(', ', $types);
+
+        // Khởi tạo key trong mảng ingredientCosts cho các nguyên liệu mới được chọn
+        // để Livewire 3 đồng bộ hoàn chỉnh dữ liệu từ Alpine qua @entangle
+        foreach ($this->selectedIngredients as $id => $selected) {
+            if ($selected && ! isset($this->ingredientCosts[$id])) {
+                $this->ingredientCosts[$id] = (float) (Ingredient::find($id)?->reference_price ?? 0);
+            }
+        }
     }
 }

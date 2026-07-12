@@ -17,7 +17,7 @@
     @endphp
 
     @if (session()->has('message'))
-        <div style="background:#ECFDF5; color:#065F46; padding:12px 16px; border-radius:8px; border:1px solid #A7F3D0; margin-bottom:16px; font-size:13px; font-weight:600; display:flex; align-items:center; gap:8px">
+        <div style="background:var(--po-gn-s); color:var(--po-gn-t); padding:12px 16px; border-radius:8px; border:1px solid var(--po-gn); margin-bottom:16px; font-size:13px; font-weight:600; display:flex; align-items:center; gap:8px">
             <i class="fa-solid fa-circle-check"></i>
             {{ session('message') }}
         </div>
@@ -44,7 +44,7 @@
     <!-- KPIs Stats -->
     <div class="py-krow" style="margin-bottom:16px">
         <div class="py-kcard">
-            <div class="py-kico" style="background:#EBF3FF;color:var(--po-bl)">
+            <div class="py-kico" style="background:var(--po-bl-s);color:var(--po-bl)">
                 <i class="fa-solid fa-users"></i>
             </div>
             <div>
@@ -74,7 +74,7 @@
         </div>
 
         <div class="py-kcard">
-            <div class="py-kico" style="background:#F5F3FF;color:#7C3AED">
+            <div class="py-kico" style="background:var(--po-pu-s, rgba(124,58,237,.18));color:#7C3AED">
                 <i class="fa-solid fa-user-minus"></i>
             </div>
             <div>
@@ -84,7 +84,7 @@
         </div>
 
         <div class="py-kcard">
-            <div class="py-kico" style="background:#FEF2F2;color:#DC2626">
+            <div class="py-kico" style="background:var(--po-rd-s);color:var(--po-rd)">
                 <i class="fa-regular fa-clock"></i>
             </div>
             <div>
@@ -145,7 +145,7 @@
         <div class="tsp"></div>
 
         <!-- Chỉ báo số bộ lọc đang áp dụng -->
-        <div style="background:#fff; border:1px solid var(--po-bd); color:var(--po-tx); padding:6px 12px; font-size:12.5px; border-radius:8px; display:inline-flex; align-items:center; gap:6px">
+        <div style="background:var(--po-wh); border:1px solid var(--po-bd); color:var(--po-tx); padding:6px 12px; font-size:12.5px; border-radius:8px; display:inline-flex; align-items:center; gap:6px">
             <i class="fa-solid fa-sliders" style="color:var(--po-mu)"></i> Bộ lọc
             @if($activeFiltersCount > 0)
                 <span style="background:var(--po-bl); color:#fff; width:17px; height:17px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:10px; font-weight:700">
@@ -160,11 +160,11 @@
     </div>
 
     <!-- Employees Table Section -->
-    <div class="po-list-card" style="background:#fff; border:1px solid var(--po-bd2); border-radius:12px; padding:0; box-shadow:var(--po-sh2); overflow:hidden">
+    <div class="po-list-card" style="background:var(--po-wh); border:1px solid var(--po-bd2); border-radius:12px; padding:0; box-shadow:var(--po-sh2); overflow:hidden">
         <div style="overflow-x:auto">
             <table style="width:100%; border-collapse:collapse; text-align:left; font-size:13px">
                 <thead>
-                    <tr style="border-bottom:1.5px solid var(--po-bd2); color:var(--po-mu); font-weight:700; text-transform:uppercase; font-size:11px; background:#F8FAFC">
+                    <tr style="border-bottom:1.5px solid var(--po-bd2); color:var(--po-mu); font-weight:700; text-transform:uppercase; font-size:11px; background:var(--po-bd2)">
                         <th style="padding:14px 12px; width:40px"><input type="checkbox"></th>
                         <th style="padding:14px 12px; width:140px">Mã nhân viên</th>
                         <th style="padding:14px 12px">Họ và tên</th>
@@ -193,7 +193,7 @@
                             }
                             $initials = mb_strtoupper($initials);
                         @endphp
-                        <tr style="border-bottom:1px solid #F1F5F9; color:var(--po-tx)" class="emp-row">
+                        <tr style="border-bottom:1px solid var(--po-bd2); color:var(--po-tx)" class="emp-row">
                             <td style="padding:12px 12px;"><input type="checkbox"></td>
                             <td style="padding:12px 12px; font-weight:600; color:var(--po-mu)">{{ $emp->code }}</td>
                             <td style="padding:12px 12px;">
@@ -232,8 +232,8 @@
                                         <span class="es-dot"></span> Nghỉ việc
                                     </span>
                                 @else
-                                    <span class="es-badge" style="background:#F1F5F9; color:#475569">
-                                        <span class="es-dot" style="background:#64748B"></span> {{ $emp->status }}
+                                    <span class="es-badge" style="background:var(--po-bd2); color:var(--po-su)">
+                                        <span class="es-dot" style="background:var(--po-mu)"></span> {{ $emp->status }}
                                     </span>
                                 @endif
                             </td>
@@ -287,7 +287,7 @@
                     Hiển thị <strong>{{ $employeesList->firstItem() }}</strong> đến <strong>{{ $employeesList->lastItem() }}</strong> trong tổng số <strong>{{ number_format($employeesList->total(), 0, ',', '.') }}</strong> nhân viên
                 </div>
                 <div class="po-pagination" style="display:flex; align-items:center; gap:12px">
-                    <select wire:model.live="perPage" class="po-select" style="min-width:7rem;height:2.1rem;padding:0 .5rem;border-radius:.5rem; border:1px solid var(--po-bd); outline:none; background:#fff">
+                    <select wire:model.live="perPage" class="po-select" style="min-width:7rem;height:2.1rem;padding:0 .5rem;border-radius:.5rem; border:1px solid var(--po-bd); outline:none; background:var(--po-wh); color:var(--po-tx)">
                         <option value="10">10 dòng/trang</option>
                         <option value="20">20 dòng/trang</option>
                         <option value="50">50 dòng/trang</option>
@@ -296,11 +296,11 @@
                     <nav role="navigation" aria-label="Pagination Navigation" style="display:flex; align-items:center; gap:4px">
                         {{-- Previous --}}
                         @if ($employeesList->onFirstPage())
-                            <span aria-disabled="true" style="width:30px; height:30px; border-radius:6px; border:1px solid #E2E8F0; display:flex; align-items:center; justify-content:center; color:#CBD5E1; cursor:not-allowed">
+                            <span aria-disabled="true" style="width:30px; height:30px; border-radius:6px; border:1px solid var(--po-bd); display:flex; align-items:center; justify-content:center; color:var(--po-fa); cursor:not-allowed">
                                 <i class="fa-solid fa-chevron-left" style="font-size: 10px;"></i>
                             </span>
                         @else
-                            <button type="button" wire:click="previousPage" rel="prev" style="width:30px; height:30px; border-radius:6px; border:1px solid #E2E8F0; display:flex; align-items:center; justify-content:center; color:#475569; cursor:pointer; background:#fff">
+                            <button type="button" wire:click="previousPage" rel="prev" style="width:30px; height:30px; border-radius:6px; border:1px solid var(--po-bd); display:flex; align-items:center; justify-content:center; color:var(--po-su); cursor:pointer; background:var(--po-wh)">
                                 <i class="fa-solid fa-chevron-left" style="font-size: 10px;"></i>
                             </button>
                         @endif
@@ -315,17 +315,17 @@
                                     <span>{{ $page }}</span>
                                 </span>
                             @else
-                                <button type="button" wire:click="gotoPage({{ $page }})" style="width:30px; height:30px; border-radius:6px; border:1px solid #E2E8F0; display:flex; align-items:center; justify-content:center; color:#475569; cursor:pointer; background:#fff font-weight:500">{{ $page }}</button>
+                                <button type="button" wire:click="gotoPage({{ $page }})" style="width:30px; height:30px; border-radius:6px; border:1px solid var(--po-bd); display:flex; align-items:center; justify-content:center; color:var(--po-su); cursor:pointer; background:var(--po-wh); font-weight:500">{{ $page }}</button>
                             @endif
                         @endforeach
 
                         {{-- Next --}}
                         @if ($employeesList->hasMorePages())
-                            <button type="button" wire:click="nextPage" rel="next" style="width:30px; height:30px; border-radius:6px; border:1px solid #E2E8F0; display:flex; align-items:center; justify-content:center; color:#475569; cursor:pointer; background:#fff">
+                            <button type="button" wire:click="nextPage" rel="next" style="width:30px; height:30px; border-radius:6px; border:1px solid var(--po-bd); display:flex; align-items:center; justify-content:center; color:var(--po-su); cursor:pointer; background:var(--po-wh)">
                                 <i class="fa-solid fa-chevron-right" style="font-size: 10px;"></i>
                             </button>
                         @else
-                            <span aria-disabled="true" style="width:30px; height:30px; border-radius:6px; border:1px solid #E2E8F0; display:flex; align-items:center; justify-content:center; color:#CBD5E1; cursor:not-allowed">
+                            <span aria-disabled="true" style="width:30px; height:30px; border-radius:6px; border:1px solid var(--po-bd); display:flex; align-items:center; justify-content:center; color:var(--po-fa); cursor:not-allowed">
                                 <i class="fa-solid fa-chevron-right" style="font-size: 10px;"></i>
                             </span>
                         @endif

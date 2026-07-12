@@ -17,7 +17,7 @@
     @endphp
 
     @if (session()->has('message'))
-        <div style="background:#ECFDF5; color:#065F46; padding:12px 16px; border-radius:8px; border:1px solid #A7F3D0; margin-bottom:16px; font-size:13px; font-weight:600; display:flex; align-items:center; gap:8px">
+        <div style="background:var(--po-gn-s); color:var(--po-gn-t); padding:12px 16px; border-radius:8px; border:1px solid var(--po-gn); margin-bottom:16px; font-size:13px; font-weight:600; display:flex; align-items:center; gap:8px">
             <i class="fa-solid fa-circle-check"></i>
             {{ session('message') }}
         </div>
@@ -114,7 +114,7 @@
         <div class="tw">
             <table style="width:100%; border-collapse:collapse; text-align:left; font-size:13px">
                 <thead>
-                    <tr style="border-bottom:1.5px solid var(--po-bd2); color:var(--po-mu); font-weight:700; text-transform:uppercase; font-size:11px; background:#F8FAFC">
+                    <tr style="border-bottom:1.5px solid var(--po-bd2); color:var(--po-mu); font-weight:700; text-transform:uppercase; font-size:11px; background:var(--po-bd2)">
                         <th style="padding:14px 12px; width:40px"><input type="checkbox"></th>
                         <th style="padding:14px 12px; width:100px">Mã NV</th>
                         <th style="padding:14px 12px">Họ và tên</th>
@@ -163,7 +163,7 @@
                             elseif (str_contains($row->type, 'Nghỉ không lương')) $typeClass = 'req-unpaid';
                             elseif (str_contains($row->type, 'Tăng ca')) $typeClass = 'req-ot';
                         @endphp
-                        <tr style="border-bottom:1px solid #F1F5F9; color:var(--po-tx)" class="emp-row">
+                        <tr style="border-bottom:1px solid var(--po-bd2); color:var(--po-tx)" class="emp-row">
                             <td style="padding:12px 12px;"><input type="checkbox"></td>
                             <td style="padding:12px 12px; font-weight:700; color:var(--po-mu)">{{ $row->employee?->code }}</td>
                             <td style="padding:12px 12px;">
@@ -232,9 +232,9 @@
                                 @elseif($row->status === 'Từ chối')
                                     <span class="st-pill st-absent">Từ chối</span>
                                 @elseif($row->status === 'Đã hủy')
-                                    <span class="st-pill" style="background:#F1F5F9; color:#64748B; border-color:#CBD5E1">Đã hủy</span>
+                                    <span class="st-pill" style="background:var(--po-bd2); color:var(--po-su); border-color:var(--po-bd)">Đã hủy</span>
                                 @else
-                                    <span class="st-pill" style="background:#F1F5F9; color:#475569;">{{ $row->status }}</span>
+                                    <span class="st-pill" style="background:var(--po-bd2); color:var(--po-su);">{{ $row->status }}</span>
                                 @endif
                             </td>
                             <td style="padding:12px 12px; text-align:center">
@@ -287,7 +287,7 @@
                     Hiển thị <strong>{{ $itemsList->firstItem() }}</strong> đến <strong>{{ $itemsList->lastItem() }}</strong> trong tổng số <strong>{{ number_format($itemsList->total(), 0, ',', '.') }}</strong> yêu cầu
                 </div>
                 <div class="po-pagination" style="display:flex; align-items:center; gap:12px">
-                    <select wire:model.live="perPage" class="po-select" style="min-width:7rem;height:2.1rem;padding:0 .5rem;border-radius:.5rem; border:1px solid var(--po-bd); outline:none; background:#fff">
+                    <select wire:model.live="perPage" class="po-select" style="min-width:7rem;height:2.1rem;padding:0 .5rem;border-radius:.5rem; border:1px solid var(--po-bd); outline:none; background:var(--po-wh); color:var(--po-tx)">
                         <option value="10">10 dòng/trang</option>
                         <option value="20">20 dòng/trang</option>
                         <option value="50">50 dòng/trang</option>
@@ -297,11 +297,11 @@
                     <nav role="navigation" aria-label="Pagination Navigation" style="display:flex; align-items:center; gap:4px">
                         {{-- Previous --}}
                         @if ($itemsList->onFirstPage())
-                            <span aria-disabled="true" style="width:30px; height:30px; border-radius:6px; border:1px solid #E2E8F0; display:flex; align-items:center; justify-content:center; color:#CBD5E1; cursor:not-allowed">
+                            <span aria-disabled="true" style="width:30px; height:30px; border-radius:6px; border:1px solid var(--po-bd); display:flex; align-items:center; justify-content:center; color:var(--po-fa); cursor:not-allowed">
                                 <i class="fa-solid fa-chevron-left" style="font-size: 10px;"></i>
                             </span>
                         @else
-                            <button type="button" wire:click="previousPage" rel="prev" style="width:30px; height:30px; border-radius:6px; border:1px solid #E2E8F0; display:flex; align-items:center; justify-content:center; color:#475569; cursor:pointer; background:#fff">
+                            <button type="button" wire:click="previousPage" rel="prev" style="width:30px; height:30px; border-radius:6px; border:1px solid var(--po-bd); display:flex; align-items:center; justify-content:center; color:var(--po-su); cursor:pointer; background:var(--po-wh)">
                                 <i class="fa-solid fa-chevron-left" style="font-size: 10px;"></i>
                             </button>
                         @endif
@@ -316,17 +316,17 @@
                                     <span>{{ $page }}</span>
                                 </span>
                             @else
-                                <button type="button" wire:click="gotoPage({{ $page }})" style="width:30px; height:30px; border-radius:6px; border:1px solid #E2E8F0; display:flex; align-items:center; justify-content:center; color:#475569; cursor:pointer; background:#fff font-weight:500">{{ $page }}</button>
+                                <button type="button" wire:click="gotoPage({{ $page }})" style="width:30px; height:30px; border-radius:6px; border:1px solid var(--po-bd); display:flex; align-items:center; justify-content:center; color:var(--po-su); cursor:pointer; background:var(--po-wh); font-weight:500">{{ $page }}</button>
                             @endif
                         @endforeach
 
                         {{-- Next --}}
                         @if ($itemsList->hasMorePages())
-                            <button type="button" wire:click="nextPage" rel="next" style="width:30px; height:30px; border-radius:6px; border:1px solid #E2E8F0; display:flex; align-items:center; justify-content:center; color:#475569; cursor:pointer; background:#fff">
+                            <button type="button" wire:click="nextPage" rel="next" style="width:30px; height:30px; border-radius:6px; border:1px solid var(--po-bd); display:flex; align-items:center; justify-content:center; color:var(--po-su); cursor:pointer; background:var(--po-wh)">
                                 <i class="fa-solid fa-chevron-right" style="font-size: 10px;"></i>
                             </button>
                         @else
-                            <span aria-disabled="true" style="width:30px; height:30px; border-radius:6px; border:1px solid #E2E8F0; display:flex; align-items:center; justify-content:center; color:#CBD5E1; cursor:not-allowed">
+                            <span aria-disabled="true" style="width:30px; height:30px; border-radius:6px; border:1px solid var(--po-bd); display:flex; align-items:center; justify-content:center; color:var(--po-fa); cursor:not-allowed">
                                 <i class="fa-solid fa-chevron-right" style="font-size: 10px;"></i>
                             </span>
                         @endif

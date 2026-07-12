@@ -30,6 +30,25 @@
         --sh2: 0 2px 4px rgba(15,23,42,.02);
     }
 
+    :root.dark {
+        --bl-s: rgba(18, 103, 232, .18);
+        --gn-s: rgba(5, 150, 105, .18);
+        --or-s: rgba(234, 88, 12, .18);
+        --pu-s: rgba(124, 58, 237, .18);
+        --rd-s: rgba(220, 38, 38, .18);
+        --gn-t: #34D399;
+        --rd-t: #F87171;
+        --bg: #0b1120;
+        --wh: #1e293b;
+        --tx: #f1f5f9;
+        --su: #cbd5e1;
+        --mu: #94a3b8;
+        --fa: #64748b;
+        --bd: #334155;
+        --bd2: #263449;
+        --sh: 0 1px 2px rgba(0, 0, 0, .4);
+    }
+
     /* ══ LIST HÀNG NGÀY ══ */
     .lhn-root {
         flex: 1;
@@ -68,6 +87,11 @@
         background: #1e293b;
         color: #60a5fa;
         border-color: #3b82f6;
+    }
+    .dark input[type="date"] {
+        background-color: #1e293b !important;
+        border-color: #334155 !important;
+        color: #ffffff !important;
     }
     .lhn-date-inp:focus {
         box-shadow: 0 0 0 3px rgba(18,103,232,.1);
@@ -202,7 +226,7 @@
         background: #FAFBFC;
     }
     .dark .lhn-ca-head:hover {
-        background: #1e293b/40;
+        background: rgba(30, 41, 59, 0.4);
     }
     .lhn-ca-title {
         display: flex;
@@ -251,7 +275,7 @@
         border-bottom: 1px solid transparent;
     }
     .dark .lhn-mon-head {
-        background: #1e293b/30;
+        background: rgba(30, 41, 59, 0.3);
     }
     .lhn-mon-head.open {
         border-bottom-color: var(--bd);
@@ -259,13 +283,13 @@
     }
     .dark .lhn-mon-head.open {
         border-bottom-color: #1e293b;
-        background: #1e3a8a/30;
+        background: rgba(30, 58, 138, 0.3);
     }
     .lhn-mon-head:hover {
         background: var(--bl-s);
     }
     .dark .lhn-mon-head:hover {
-        background: #1e3a8a/20;
+        background: rgba(30, 58, 138, 0.2);
     }
     .lhn-mon-left {
         display: flex;
@@ -311,7 +335,7 @@
         padding: 2px 9px;
     }
     .dark .lhn-mon-suat {
-        background: #1e3a8a/30;
+        background: rgba(30, 58, 138, 0.3);
         color: #60a5fa;
     }
     .lhn-expand-ico {
@@ -338,7 +362,7 @@
         white-space: nowrap;
     }
     .dark .lhn-ing-table th {
-        background: #1e293b/50;
+        background: rgba(30, 41, 59, 0.5);
         border-color: #1e293b;
         color: #94a3b8;
     }
@@ -360,7 +384,7 @@
         background: #FAFCFF;
     }
     .dark .lhn-ing-table tbody tr:hover {
-        background: #1e293b/10;
+        background: rgba(30, 41, 59, 0.1);
     }
     .lhn-ing-num {
         font-weight: 600;
@@ -381,7 +405,7 @@
         font-size: 13px;
     }
     .dark .lhn-total-row td {
-        background: linear-gradient(135deg, #1e3a8a/30, #1e3a8a/10);
+        background: linear-gradient(135deg, rgba(30, 58, 138, 0.3), rgba(30, 58, 138, 0.1));
     }
 
     /* grand total bar */
@@ -536,7 +560,7 @@
         white-space: nowrap;
     }
     .dark .oh-table th {
-        background: #1e293b/40;
+        background: rgba(30, 41, 59, 0.4);
         border-color: #1e293b;
         color: #94a3b8;
     }
@@ -555,7 +579,7 @@
         background: #FAFCFF;
     }
     .dark .oh-table tbody tr:hover {
-        background: #1e293b/10;
+        background: rgba(30, 41, 59, 0.1);
     }
     .oh-ncc-sel {
         height: 32px;
@@ -634,7 +658,7 @@
         margin-bottom: 7px;
     }
     .dark .oh-ncc-chip {
-        background: #1e293b/30;
+        background: rgba(30, 41, 59, 0.3);
         border-color: #1e293b;
     }
     .oh-ncc-chip-dot {
@@ -697,16 +721,16 @@
                 <button type="button" class="lhn-today-btn" wire:click="goToday">Hôm nay</button>
 
                 <!-- Week view sync -->
-                <div style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:#64748B;padding:0 4px">
+                <div style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--mu);padding:0 4px">
                     <span style="font-weight:600">Tuần:</span>
-                    <input type="date" wire:model.live="weekFrom" style="border:1px solid #E2E8F0;border-radius:6px;padding:3px 8px;font-size:12px;outline:none" class="dark:bg-gray-800 dark:border-gray-700 dark:text-white">
+                    <input type="date" wire:model.live="weekFrom" style="border:1px solid var(--bd);border-radius:6px;padding:3px 8px;font-size:12px;outline:none" class="dark:bg-gray-800 dark:border-gray-700 dark:text-white">
                     <span>–</span>
-                    <input type="date" wire:model.live="weekTo" style="border:1px solid #E2E8F0;border-radius:6px;padding:3px 8px;font-size:12px;outline:none" class="dark:bg-gray-800 dark:border-gray-700 dark:text-white">
+                    <input type="date" wire:model.live="weekTo" style="border:1px solid var(--bd);border-radius:6px;padding:3px 8px;font-size:12px;outline:none" class="dark:bg-gray-800 dark:border-gray-700 dark:text-white">
                 </div>
 
                 <!-- Shift checkboxes styled as badges -->
-                <div style="display:flex;align-items:center;gap:5px;font-size:12px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:4px 10px;" class="dark:bg-gray-800 dark:border-gray-700">
-                    <span style="font-weight:600;color:#64748B">Ca:</span>
+                <div style="display:flex;align-items:center;gap:5px;font-size:12px;background:var(--bg);border:1px solid var(--bd);border-radius:8px;padding:4px 10px;" class="dark:bg-gray-800 dark:border-gray-700">
+                    <span style="font-weight:600;color:var(--mu)">Ca:</span>
                     @foreach($this->getShiftsList() as $index => $sh)
                         @php 
                             $bg = ['#EFF6FF', '#F0FDF4', '#FEF3C7', '#F5F3FF'][$index % 4];
@@ -721,7 +745,7 @@
                 </div>
 
                 <div style="margin-left:auto;display:flex;align-items:center;gap:8px">
-                    <span style="font-size:13.5px;font-weight:700;color:#0F172A" class="dark:text-white">
+                    <span style="font-size:13.5px;font-weight:700;color:var(--tx)" class="dark:text-white">
                         {{ strtoupper(\Carbon\Carbon::parse($date)->locale('vi')->dayName) }} – {{ \Carbon\Carbon::parse($date)->format('d/m/Y') }}
                     </span>
                     <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-150 text-green-700 border border-green-200">Trong kỳ</span>
@@ -893,9 +917,9 @@
                     </div>
                     <div class="form-field" style="min-width:240px">
                         <label>Ca lấy nguyên liệu</label>
-                        <div style="display:flex; gap:6px; flex-wrap:wrap; background:#F8FAFC; border:1px solid var(--bd); border-radius:8px; padding:7px 9px; min-height:38px;" class="dark:bg-gray-800 dark:border-gray-700">
+                        <div style="display:flex; gap:6px; flex-wrap:wrap; background:var(--bg); border:1px solid var(--bd); border-radius:8px; padding:7px 9px; min-height:38px;" class="dark:bg-gray-800 dark:border-gray-700">
                             @foreach($this->getShiftsList() as $sh)
-                                <label style="font-size:11px; font-weight:700; color:#1e40af; display:flex; align-items:center; gap:4px; cursor:pointer;">
+                                <label style="font-size:11px; font-weight:700; color:var(--bl); display:flex; align-items:center; gap:4px; cursor:pointer;">
                                     <input type="checkbox" value="{{ $sh->id }}" wire:model.live="poSelectedShifts" style="border-radius:3px;">
                                     <span>{{ $sh->name }}</span>
                                 </label>
@@ -906,9 +930,9 @@
 
                 <!-- Main grouped tables -->
                 @if(empty($poItems))
-                    <div class="lhn-empty" style="background:#fff; border:1px solid #e2e8f0; border-radius:12px;" class="dark:bg-gray-900 dark:border-gray-800">
+                    <div class="lhn-empty" style="background:var(--wh); border:1px solid var(--bd); border-radius:12px;">
                         <i class="fa-solid fa-basket-shopping" style="font-size:36px; color:#94a3b8; opacity:0.5;"></i>
-                        <h3 style="font-size:15px; font-weight:700; color:#475569; margin:6px 0;">Chưa có nguyên liệu để đặt</h3>
+                        <h3 style="font-size:15px; font-weight:700; color:var(--tx); margin:6px 0;">Chưa có nguyên liệu để đặt</h3>
                         <p style="font-size:12px; color:#94a3b8;">Hãy lập & chốt thực đơn tuần trước, sau đó tạo đơn đặt hàng.</p>
                     </div>
                 @else

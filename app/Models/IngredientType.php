@@ -18,4 +18,9 @@ class IngredientType extends Model
     {
         return $this->hasMany(Ingredient::class, 'ingredient_type_id');
     }
+
+    public function suppliers(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(Supplier::class, 'ingredient_type_supplier');
+    }
 }

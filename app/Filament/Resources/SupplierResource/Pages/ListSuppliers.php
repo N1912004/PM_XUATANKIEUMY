@@ -129,7 +129,7 @@ class ListSuppliers extends Page
     {
         return [
             'suppliers' => Supplier::query()->count(),
-            'types' => Supplier::query()->whereNotNull('type')->distinct('type')->count('type'),
+            'types' => IngredientType::query()->whereHas('suppliers')->count(),
             'ingredients' => Ingredient::query()->whereNotNull('supplier_id')->count(),
             'quotes' => Ingredient::query()->whereNotNull('supplier_id')->where('reference_price', '>', 0)->count(),
         ];

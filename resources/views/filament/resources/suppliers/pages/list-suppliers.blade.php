@@ -2,6 +2,7 @@
     @include('filament.resources.suppliers.partials.styles')
     @php
         $statsData = $this->stats();
+
         $suppliersList = $this->suppliers();
 
         // Dùng đúng class nút gốc của Filament để đồng bộ màu/kiểu với toàn app.

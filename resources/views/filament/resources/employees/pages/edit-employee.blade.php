@@ -18,14 +18,14 @@
                 </p>
             </div>
             <div>
-                <a href="{{ \App\Filament\Resources\EmployeeResource::getUrl('index') }}" class="emp-btn" style="background:#fff; border:1px solid var(--po-bd); color:var(--po-tx)">
+                <a href="{{ \App\Filament\Resources\EmployeeResource::getUrl('index') }}" class="emp-btn" style="background:var(--po-wh); border:1px solid var(--po-bd); color:var(--po-tx)">
                     <i class="fa-solid fa-arrow-left"></i> Quay lại danh sách
                 </a>
             </div>
         </div>
 
         @if ($errors->any())
-            <div style="background:#FEF2F2; color:#991B1B; padding:12px 16px; border-radius:8px; border:1px solid #FCA5A5; margin-bottom:16px; font-size:13px; font-weight:600">
+            <div style="background:var(--po-rd-s); color:var(--po-rd-t); padding:12px 16px; border-radius:8px; border:1px solid var(--po-rd); margin-bottom:16px; font-size:13px; font-weight:600">
                 <div style="font-weight:700; margin-bottom:4px"><i class="fa-solid fa-triangle-exclamation"></i> Có lỗi xảy ra, vui lòng kiểm tra lại:</div>
                 <ul style="list-style-type:disc; padding-left:20px">
                     @foreach ($errors->all() as $error)
@@ -55,7 +55,7 @@
                             @elseif ($avatar_url)
                                 <img src="{{ asset('storage/' . $avatar_url) }}" style="width:100px; height:100px; border-radius:50%; object-fit:cover;">
                             @else
-                                <i class="fa-solid fa-user" style="font-size:44px;color:#CBD5E1"></i>
+                                <i class="fa-solid fa-user" style="font-size:44px;color:var(--po-fa)"></i>
                             @endif
                             <label class="pcam" for="avInput">
                                 <i class="fa-solid fa-camera"></i>
@@ -280,7 +280,7 @@
                 
                 <table class="mf-ing-table" style="width:100%; border-collapse:collapse; font-size:13px; table-layout:fixed;">
                     <thead>
-                        <tr style="border-bottom:1.5px solid var(--po-bd2); color:var(--po-mu); font-weight:700; text-transform:uppercase; font-size:11px; text-align:left; background:#F8FAFC">
+                        <tr style="border-bottom:1.5px solid var(--po-bd2); color:var(--po-mu); font-weight:700; text-transform:uppercase; font-size:11px; text-align:left; background:var(--po-bd2)">
                             <th style="padding:10px 8px; width:50px; text-align:center">STT</th>
                             <th style="padding:10px 8px; width:30%">Tên hồ sơ</th>
                             <th style="padding:10px 8px; width:40%">Tệp đính kèm</th>
@@ -290,7 +290,7 @@
                     </thead>
                     <tbody>
                         @foreach($documents as $idx => $doc)
-                            <tr style="border-bottom:1px solid #F1F5F9" wire:key="doc-row-{{ $idx }}">
+                            <tr style="border-bottom:1px solid var(--po-bd2)" wire:key="doc-row-{{ $idx }}">
                                 <td style="padding:10px 8px; text-align:center; color:var(--po-mu)">{{ $idx + 1 }}</td>
                                 <td style="padding:10px 8px">
                                     <input type="text" wire:model="documents.{{ $idx }}.name" class="ctrl" style="height:32px; border-radius:6px; padding:0 8px; font-size:13px; width:100%" placeholder="Tên hồ sơ (VD: Hợp đồng lao động)">
@@ -299,13 +299,13 @@
                                     <div style="display:flex; align-items:center; gap:8px; overflow:hidden">
                                         <!-- Chọn File đính kèm -->
                                         <input type="file" id="docFile_{{ $idx }}" wire:model="uploadedDocFiles.{{ $idx }}" accept=".pdf,.doc,.docx,.jpg,.png,.webp" class="hidden" style="display:none">
-                                        <label for="docFile_{{ $idx }}" class="emp-btn" style="background:#fff; border:1px solid var(--po-bd); color:#475569; padding:4px 10px; font-size:11.5px; border-radius:6px; cursor:pointer; font-weight:600; display:inline-flex; align-items:center; gap:4px; flex-shrink:0">
+                                        <label for="docFile_{{ $idx }}" class="emp-btn" style="background:var(--po-wh); border:1px solid var(--po-bd); color:var(--po-mu); padding:4px 10px; font-size:11.5px; border-radius:6px; cursor:pointer; font-weight:600; display:inline-flex; align-items:center; gap:4px; flex-shrink:0">
                                             <i class="fa-solid fa-paperclip"></i> Chọn tệp
                                         </label>
 
                                         <!-- Trạng thái file đã có hoặc file tạm -->
                                         @if (isset($uploadedDocFiles[$idx]))
-                                            <span style="font-size:11.5px; color:#059669; font-weight:600; display:inline-flex; align-items:center; gap:3px; max-width:calc(100% - 90px)">
+                                            <span style="font-size:11.5px; color:var(--po-gn); font-weight:600; display:inline-flex; align-items:center; gap:3px; max-width:calc(100% - 90px)">
                                                 <i class="fa-solid fa-file-circle-check" style="flex-shrink:0"></i> 
                                                 <span title="{{ $uploadedDocFiles[$idx]->getClientOriginalName() }}" style="display:inline-block; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; vertical-align:middle">
                                                     {{ $uploadedDocFiles[$idx]->getClientOriginalName() }}
@@ -345,13 +345,13 @@
                         @endforeach
                     </tbody>
                 </table>
-                <button type="button" wire:click.prevent="addDocument" class="emp-btn" style="margin-top:12px; background:#fff; border:1px solid var(--po-bd); color:#475569; padding:6px 12px; font-size:12px; border-radius:8px">
+                <button type="button" wire:click.prevent="addDocument" class="emp-btn" style="margin-top:12px; background:var(--po-wh); border:1px solid var(--po-bd); color:var(--po-mu); padding:6px 12px; font-size:12px; border-radius:8px">
                     <i class="fa-solid fa-plus"></i> Thêm hồ sơ
                 </button>
             </div>
 
             <!-- Footer Action Bar -->
-            <div class="ffoot" style="display:flex; justify-content:space-between; align-items:center; background:#F8FAFC; border-top:1px solid var(--po-bd2); padding:16px 20px; border-radius:0 0 12px 12px; margin-top:20px">
+            <div class="ffoot" style="display:flex; justify-content:space-between; align-items:center; background:var(--po-bd2); border-top:1px solid var(--po-bd2); padding:16px 20px; border-radius:0 0 12px 12px; margin-top:20px">
                 <div>
                     @if(!$isEdit)
                         <label class="smore" style="font-size:13px; font-weight:600; color:var(--po-tx); display:inline-flex; align-items:center; gap:6px; cursor:pointer">
@@ -360,7 +360,7 @@
                     @endif
                 </div>
                 <div style="display:flex; gap:8px">
-                    <a href="{{ \App\Filament\Resources\EmployeeResource::getUrl('index') }}" class="emp-btn" style="background:#fff; border:1px solid var(--po-bd); color:var(--po-tx)">
+                    <a href="{{ \App\Filament\Resources\EmployeeResource::getUrl('index') }}" class="emp-btn" style="background:var(--po-wh); border:1px solid var(--po-bd); color:var(--po-tx)">
                         Hủy bỏ
                     </a>
                     <button type="submit" class="emp-btn emp-btn-primary">

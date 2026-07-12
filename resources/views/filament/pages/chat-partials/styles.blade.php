@@ -37,6 +37,39 @@
         --r: 14px;
     }
 
+    :root.dark {
+        --bl-s: rgba(18, 103, 232, .18);
+        --gn-s: rgba(5, 150, 105, .18);
+        --or-s: rgba(234, 88, 12, .18);
+        --pu-s: rgba(124, 58, 237, .18);
+        --rd-s: rgba(220, 38, 38, .18);
+        --gn-t: #34D399;
+        --rd-t: #F87171;
+        --bg: #0b1120;
+        --wh: #1e293b;
+        --tx: #f1f5f9;
+        --su: #cbd5e1;
+        --mu: #94a3b8;
+        --fa: #64748b;
+        --bd: #334155;
+        --bd2: #263449;
+        --sh: 0 1px 2px rgba(0, 0, 0, .4);
+    }
+
+    .dark .cm {
+        background: #0f172a !important;
+    }
+
+    .dark .mi-box:focus-within {
+        background: var(--wh) !important;
+        border-color: #3b82f6 !important;
+    }
+
+    .dark .mi-att:hover,
+    .dark .cm-ico:hover {
+        background: #334155 !important;
+    }
+
     .chat-page {
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         color: var(--tx);

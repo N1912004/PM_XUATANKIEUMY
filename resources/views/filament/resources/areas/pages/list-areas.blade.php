@@ -9,14 +9,14 @@
     @endphp
 
     @if (session()->has('message'))
-        <div style="background:#ECFDF5; color:#065F46; padding:12px 16px; border-radius:8px; border:1px solid #A7F3D0; margin-bottom:16px; font-size:13px; font-weight:600; display:flex; align-items:center; gap:8px">
+        <div style="background:var(--po-gn-s); color:var(--po-gn-t); padding:12px 16px; border-radius:8px; border:1px solid var(--po-gn); margin-bottom:16px; font-size:13px; font-weight:600; display:flex; align-items:center; gap:8px">
             <i class="fa-solid fa-circle-check"></i>
             {{ session('message') }}
         </div>
     @endif
 
     @if (session()->has('error'))
-        <div style="background:#FEF2F2; color:#991B1B; padding:12px 16px; border-radius:8px; border:1px solid #FCA5A5; margin-bottom:16px; font-size:13px; font-weight:600; display:flex; align-items:center; gap:8px">
+        <div style="background:var(--po-rd-s); color:var(--po-rd-t); padding:12px 16px; border-radius:8px; border:1px solid var(--po-rd); margin-bottom:16px; font-size:13px; font-weight:600; display:flex; align-items:center; gap:8px">
             <i class="fa-solid fa-triangle-exclamation"></i>
             {{ session('error') }}
         </div>
@@ -153,7 +153,7 @@
                 <div class="tw">
                     <table style="width:100%; border-collapse:collapse; text-align:left; font-size:13px">
                         <thead>
-                            <tr style="border-bottom:1.5px solid var(--po-bd2); color:var(--po-mu); font-weight:700; text-transform:uppercase; font-size:11px; background:#F8FAFC">
+                            <tr style="border-bottom:1.5px solid var(--po-bd2); color:var(--po-mu); font-weight:700; text-transform:uppercase; font-size:11px; background:var(--po-bd2)">
                                 <th style="padding:12px 14px; width:100px">Mã</th>
                                 <th style="padding:12px 14px">Khu vực</th>
                                 <th style="padding:12px 14px">Quản lý</th>
@@ -164,7 +164,7 @@
                         </thead>
                         <tbody>
                             @forelse($areas as $row)
-                                <tr style="border-bottom:1px solid #F1F5F9; color:var(--po-tx)" class="emp-row">
+                                <tr style="border-bottom:1px solid var(--po-bd2); color:var(--po-tx)" class="emp-row">
                                     <td style="padding:12px 14px; font-weight:700; color:var(--po-mu)">{{ $row->code }}</td>
                                     <td style="padding:12px 14px;">
                                         <div style="font-weight:700; color:var(--po-tx)">{{ $row->name }}</div>
@@ -222,7 +222,7 @@
             </div>
             
             <!-- Inline Form -->
-            <form wire:submit.prevent="saveKitchen" style="padding:14px 16px; background:#FAFBFC; display:grid; grid-template-columns:repeat(6,1fr); gap:10px; border-bottom:1.5px solid var(--po-bd2)">
+            <form wire:submit.prevent="saveKitchen" style="padding:14px 16px; background:var(--po-bd2); display:grid; grid-template-columns:repeat(6,1fr); gap:10px; border-bottom:1.5px solid var(--po-bd2)">
                 <select wire:model="kitchenAreaId" class="ctrl" required>
                     <option value="">Khu vực *</option>
                     @foreach($areas as $area)
@@ -304,7 +304,7 @@
             <div class="tw">
                 <table style="width:100%; border-collapse:collapse; text-align:left; font-size:13px">
                     <thead>
-                        <tr style="border-bottom:1.5px solid var(--po-bd2); color:var(--po-mu); font-weight:700; text-transform:uppercase; font-size:11px; background:#F8FAFC">
+                        <tr style="border-bottom:1.5px solid var(--po-bd2); color:var(--po-mu); font-weight:700; text-transform:uppercase; font-size:11px; background:var(--po-bd2)">
                             <th style="padding:12px 14px; width:60px">#</th>
                             <th style="padding:12px 14px">Nhà ăn / bếp</th>
                             <th style="padding:12px 14px">Khu vực</th>
@@ -317,7 +317,7 @@
                     </thead>
                     <tbody>
                         @forelse($kitchens as $index => $row)
-                            <tr style="border-bottom:1px solid #F1F5F9; color:var(--po-tx)" class="emp-row">
+                            <tr style="border-bottom:1px solid var(--po-bd2); color:var(--po-tx)" class="emp-row">
                                 <td style="padding:12px 14px; font-weight:600; color:var(--po-mu)">{{ $index + 1 }}</td>
                                 <td style="padding:12px 14px; font-weight:700">{{ $row->name }}</td>
                                 <td style="padding:12px 14px; font-weight:600; color:var(--po-mu)">{{ $row->area?->name }}</td>
@@ -332,7 +332,7 @@
                                     @elseif($row->status === 'Tạm dừng')
                                         <span class="st-pill st-late">Tạm dừng</span>
                                     @else
-                                        <span class="st-pill" style="background:#F1F5F9; color:#64748B; border-color:#CBD5E1">Bảo trì</span>
+                                        <span class="st-pill" style="background:var(--po-bd2); color:var(--po-su); border-color:var(--po-bd)">Bảo trì</span>
                                     @endif
                                 </td>
                                 <td style="padding:12px 14px; text-align:center">

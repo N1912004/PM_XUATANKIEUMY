@@ -29,6 +29,49 @@
                 --sup-r: 14px;
             }
 
+            /* Dark mode: Filament thêm class .dark vào <html>. Đè lại palette để
+               trang không còn là mảng sáng chói giữa app tối. */
+            :root.dark {
+                --sup-bl-s: rgba(18, 103, 232, .18);
+                --sup-gn-s: rgba(5, 150, 105, .18);
+                --sup-or-s: rgba(234, 88, 12, .18);
+                --sup-pu-s: rgba(124, 58, 237, .18);
+                --sup-rd-s: rgba(220, 38, 38, .18);
+                --sup-gn-t: #34D399;
+                --sup-rd: #F87171;
+                --sup-bg: #0b1120;
+                --sup-wh: #1e293b;
+                --sup-tx: #f1f5f9;
+                --sup-su: #cbd5e1;
+                --sup-mu: #94a3b8;
+                --sup-fa: #64748b;
+                --sup-bd: #334155;
+                --sup-bd2: #263449;
+                --sup-sh: 0 1px 2px rgba(0, 0, 0, .4);
+            }
+
+            /* Các bề mặt dùng màu sáng hardcode (không qua biến) — vá riêng cho dark. */
+            .dark .sup-search {
+                background: #0f172a;
+            }
+
+            .dark .sup-table thead tr,
+            .dark .sup-table tbody tr:hover,
+            .dark .sup-btn:hover {
+                background: #172033 !important;
+            }
+
+            .dark .sup-info {
+                background: rgba(18, 103, 232, .12);
+                border-color: rgba(18, 103, 232, .35);
+                color: var(--sup-su);
+            }
+
+            .dark .sup-bottom-bar {
+                background: rgba(15, 23, 42, .85);
+                border-color: rgba(51, 65, 85, .8);
+            }
+
             .fi-main {
                 background: var(--sup-bg);
             }

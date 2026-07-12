@@ -29,6 +29,46 @@
         --po-r: .75rem;
     }
 
+    :root.dark {
+        --po-bl-s: rgba(18, 103, 232, .18);
+        --po-gn-s: rgba(5, 150, 105, .18);
+        --po-or-s: rgba(234, 88, 12, .18);
+        --po-pu-s: rgba(124, 58, 237, .18);
+        --po-rd-s: rgba(220, 38, 38, .18);
+        --po-gn-t: #34D399;
+        --po-rd-t: #F87171;
+        --po-bg: #0b1120;
+        --po-wh: #1e293b;
+        --po-tx: #f1f5f9;
+        --po-su: #cbd5e1;
+        --po-mu: #94a3b8;
+        --po-fa: #64748b;
+        --po-bd: #334155;
+        --po-bd2: #263449;
+        --po-sh: 0 1px 2px rgba(0, 0, 0, .4);
+    }
+
+    .dark .po-search {
+        background: #0f172a;
+    }
+
+    .dark .po-table thead tr,
+    .dark .po-table tbody tr:hover,
+    .dark .po-btn:hover {
+        background: #172033 !important;
+    }
+
+    .dark .po-info {
+        background: rgba(18, 103, 232, .12);
+        border-color: rgba(18, 103, 232, .35);
+        color: var(--po-su);
+    }
+
+    .dark .po-bottom-bar {
+        background: rgba(15, 23, 42, .85);
+        border-color: rgba(51, 65, 85, .8);
+    }
+
     .fi-main {
         background: var(--po-bg);
     }
@@ -1013,11 +1053,11 @@
 
     .po-list-card table td {
         vertical-align: middle !important;
-        border-bottom: 1px solid #F1F5F9 !important;
+        border-bottom: 1px solid var(--po-bd2) !important;
     }
 
     .po-list-card table tbody tr:hover {
-        background-color: #F8FAFC !important;
+        background-color: var(--po-bd2) !important;
     }
 </style>
 @endpush

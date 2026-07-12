@@ -16,7 +16,7 @@
                 </p>
             </div>
             <div>
-                <a href="{{ \App\Filament\Resources\LeaveOvertimeResource::getUrl('index') }}" class="emp-btn" style="background:#fff; border:1px solid var(--po-bd); color:var(--po-tx)">
+                <a href="{{ \App\Filament\Resources\LeaveOvertimeResource::getUrl('index') }}" class="emp-btn" style="background:var(--po-wh); border:1px solid var(--po-bd); color:var(--po-tx)">
                     <i class="fa-solid fa-arrow-left"></i> Quay lại
                 </a>
             </div>
@@ -43,7 +43,7 @@
         </div>
 
         @if ($errors->any())
-            <div style="background:#FEF2F2; color:#991B1B; padding:12px 16px; border-radius:8px; border:1px solid #FCA5A5; margin-bottom:16px; font-size:13px; font-weight:600">
+            <div style="background:var(--po-rd-s); color:var(--po-rd-t); padding:12px 16px; border-radius:8px; border:1px solid var(--po-rd); margin-bottom:16px; font-size:13px; font-weight:600">
                 <div style="font-weight:700; margin-bottom:4px"><i class="fa-solid fa-triangle-exclamation"></i> Có lỗi xảy ra, vui lòng kiểm tra lại:</div>
                 <ul style="list-style-type:disc; padding-left:20px">
                     @foreach ($errors->all() as $error)
@@ -380,8 +380,8 @@
             </div>
 
             <!-- Footer Action Bar -->
-            <div class="ffoot" style="display:flex; justify-content:flex-end; align-items:center; background:#F8FAFC; border-top:1px solid var(--po-bd2); padding:16px 20px; border-radius:12px; margin-top:20px; gap:8px; box-shadow:var(--po-sh2)">
-                <a href="{{ \App\Filament\Resources\LeaveOvertimeResource::getUrl('index') }}" class="emp-btn" style="background:#fff; border:1px solid var(--po-bd); color:var(--po-tx)">
+            <div class="ffoot" style="display:flex; justify-content:flex-end; align-items:center; background:var(--po-bd2); border-top:1px solid var(--po-bd2); padding:16px 20px; border-radius:12px; margin-top:20px; gap:8px; box-shadow:var(--po-sh2)">
+                <a href="{{ \App\Filament\Resources\LeaveOvertimeResource::getUrl('index') }}" class="emp-btn" style="background:var(--po-wh); border:1px solid var(--po-bd); color:var(--po-tx)">
                     Hủy bỏ
                 </a>
                 <button type="submit" class="emp-btn emp-btn-primary">

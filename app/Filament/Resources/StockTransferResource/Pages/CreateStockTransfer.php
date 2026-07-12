@@ -6,6 +6,7 @@ use App\Filament\Resources\StockTransferResource;
 use App\Models\StockTransfer;
 use Filament\Facades\Filament;
 use Filament\Resources\Pages\CreateRecord;
+use Illuminate\Validation\ValidationException;
 
 class CreateStockTransfer extends CreateRecord
 {
