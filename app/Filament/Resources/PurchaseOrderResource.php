@@ -130,8 +130,16 @@ class PurchaseOrderResource extends Resource
                 Tables\Columns\TextColumn::make('index')
                     ->label('STT')
                     ->state(static function (HasTable $livewire, \stdClass $rowLoop): string {
-                        return (string) ($rowLoop->iteration);
-                    }),
+                        $currentPage = method_exists($livewire, 'getTablePage') ? $livewire->getTablePage() : 1;
+                        $recordsPerPage = method_exists($livewire, 'getTableRecordsPerPage') ? $livewire->getTableRecordsPerPage() : 10;
+                        $perPage = is_numeric($recordsPerPage) ? (int) $recordsPerPage : 10;
+                        return (string) ($rowLoop->iteration + ($perPage * ($currentPage - 1)));
+                    })
+                    ->alignCenter()
+                    ->extraAttributes([
+                        'style' => 'font-variant-numeric: tabular-nums; font-weight: 600; color: #64748b;',
+                    ])
+                    ->width('56px'),
                 Tables\Columns\TextColumn::make('code')
                     ->label('MÃ ĐƠN')
                     ->searchable()
@@ -145,13 +153,23 @@ class PurchaseOrderResource extends Resource
                 Tables\Columns\TextColumn::make('estimated_delivery_date')
                     ->label('NGÀY GIAO DỰ KIẾN')
                     ->date('d/m/Y')
+                    ->extraAttributes([
+                        'style' => 'font-variant-numeric: tabular-nums;',
+                    ])
                     ->sortable(),
                 Tables\Columns\TextColumn::make('total_value')
                     ->label('TỔNG GIÁ TRỊ')
-                    ->money('VND')
-                    ->state(fn ($record) => $record->items->sum(fn ($item) => $item->quantity_ordered * $item->unit_price))
-                    ->weight('bold')
-                    ->color('primary'),
+                    ->html()
+                    ->formatStateUsing(function ($state) {
+                        if ($state === null) return '—';
+                        $formatted = number_format($state, 0, ',', '.');
+                        return "<strong>{$formatted}</strong><span style=\"font-size: 10px; font-weight: 500; color: #94a3b8; margin-left: 2px;\">đ</span>";
+                    })
+                    ->alignRight()
+                    ->extraAttributes([
+                        'style' => 'font-variant-numeric: tabular-nums;',
+                    ])
+                    ->state(fn ($record) => $record->items->sum(fn ($item) => $item->quantity_ordered * $item->unit_price)),
                 Tables\Columns\TextColumn::make('status')
                     ->label('TRẠNG THÁI')
                     ->badge()

@@ -127,6 +127,19 @@ class StockTransferResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\TextColumn::make('index')
+                    ->label('STT')
+                    ->state(static function (Tables\Contracts\HasTable $livewire, \stdClass $rowLoop): string {
+                        $currentPage = method_exists($livewire, 'getTablePage') ? $livewire->getTablePage() : 1;
+                        $recordsPerPage = method_exists($livewire, 'getTableRecordsPerPage') ? $livewire->getTableRecordsPerPage() : 10;
+                        $perPage = is_numeric($recordsPerPage) ? (int) $recordsPerPage : 10;
+                        return (string) ($rowLoop->iteration + ($perPage * ($currentPage - 1)));
+                    })
+                    ->alignCenter()
+                    ->extraAttributes([
+                        'style' => 'font-variant-numeric: tabular-nums; font-weight: 600; color: #64748b;',
+                    ])
+                    ->width('56px'),
                 Tables\Columns\TextColumn::make('code')
                     ->label('MÃ PHIẾU')
                     ->searchable()
@@ -149,6 +162,9 @@ class StockTransferResource extends Resource
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('NGÀY TẠO')
                     ->dateTime('H:i d/m/Y')
+                    ->extraAttributes([
+                        'style' => 'font-variant-numeric: tabular-nums;',
+                    ])
                     ->sortable(),
             ])
             ->filters([
