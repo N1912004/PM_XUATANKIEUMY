@@ -115,17 +115,20 @@
         }
         .stat-lbl {
             font-size: 0.75rem;
-            color: #64748b;
+            color: #475569;
             font-weight: 600;
             margin-top: 0.125rem;
         }
         .dark .stat-lbl {
-            color: #94a3b8;
+            color: #cbd5e1;
         }
         .stat-note {
             font-size: 0.65rem;
-            color: #94a3b8;
+            color: #64748b;
             margin-top: 0.25rem;
+        }
+        .dark .stat-note {
+            color: #94a3b8;
         }
 
         /* Tabs bar */
@@ -225,6 +228,15 @@
             background-position: right 0.5rem center;
             background-repeat: no-repeat;
             background-size: 1.25em 1.25em;
+            transition: all 0.2s;
+        }
+        .search-wrapper:focus-within {
+            border-color: rgb(var(--primary-500)) !important;
+            box-shadow: 0 0 0 2px rgba(var(--primary-500), 0.2);
+        }
+        .type-select:focus {
+            border-color: rgb(var(--primary-500)) !important;
+            box-shadow: 0 0 0 2px rgba(var(--primary-500), 0.2);
         }
         .dark .type-select {
             border-color: #334155;
@@ -271,6 +283,7 @@
             padding: 0.75rem 1rem;
             border-bottom: 1px solid #f1f5f9;
             color: #334155;
+            font-variant-numeric: tabular-nums;
         }
         .dark .wh-table td {
             border-color: #1e293b;
@@ -281,6 +294,36 @@
         }
         .dark .wh-table tr:hover td {
             background: rgba(30, 41, 59, 0.2);
+        }
+
+        /* Premium micro-interactions & styles */
+        .wh-table tr:hover .wh-ledger-icon {
+            opacity: 1 !important;
+        }
+        .wh-table tbody {
+            transition: opacity 0.15s ease-in-out;
+        }
+        .wh-table[wire:loading] tbody {
+            opacity: 0.6;
+        }
+        .overflow-x-auto::-webkit-scrollbar {
+            height: 6px;
+        }
+        .overflow-x-auto::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .overflow-x-auto::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        .overflow-x-auto::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        .dark .overflow-x-auto::-webkit-scrollbar-thumb {
+            background: #334155;
+        }
+        .dark .overflow-x-auto::-webkit-scrollbar-thumb:hover {
+            background: #475569;
         }
         
         .form-grid {
@@ -408,42 +451,61 @@
             background: #ffffff;
             color: #0f172a;
             outline: none;
+            transition: all 0.2s;
+        }
+        .table-input:focus {
+            border-color: rgb(var(--primary-500)) !important;
+            box-shadow: 0 0 0 2px rgba(var(--primary-500), 0.2);
         }
         .dark .table-input {
             border-color: #334155;
             background: #1e293b;
             color: #ffffff;
         }
+        
+        .table-select {
+            height: 32px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 0.78rem;
+            padding: 0 0.5rem;
+            background-color: #ffffff;
+            color: #334155;
+            outline: none;
+            transition: all 0.2s;
+        }
+        .table-select:focus {
+            border-color: rgb(var(--primary-500)) !important;
+            box-shadow: 0 0 0 2px rgba(var(--primary-500), 0.2);
+        }
+        .dark .table-select {
+            border-color: #334155;
+            background-color: #1e293b;
+            color: #cbd5e1;
+        }
+
+        .ctrl {
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            background: #ffffff;
+            font-size: 0.8125rem;
+            color: #334155;
+            outline: none;
+            transition: all 0.2s;
+        }
+        .ctrl:focus {
+            border-color: rgb(var(--primary-500)) !important;
+            box-shadow: 0 0 0 2px rgba(var(--primary-500), 0.2);
+        }
+        .dark .ctrl {
+            border-color: #334155;
+            background: #1e293b;
+            color: #cbd5e1;
+        }
 </style>
 @endpush
 
 <x-filament-panels::page>
-    <div class="wh-header-container">
-        <div>
-            <h1 class="wh-title">Kho nguyên liệu</h1>
-            <p class="wh-subtitle">Quản lý tồn kho hiện tại, nhập kho, xuất kho và kiểm tồn cuối ngày</p>
-        </div>
-        <div class="header-buttons">
-            <button type="button" class="wh-action-btn" wire:click="openInTypeModal">
-                <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 13l-7 7-7-7m14-6l-7 7-7-7"/>
-                </svg>
-                <span>Tạo phiếu nhập</span>
-            </button>
-            <button type="button" class="wh-action-btn wh-action-btn-primary" wire:click="openOutTypeModal">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 11l7-7 7 7M5 19l7-7 7 7"/>
-                </svg>
-                <span>Tạo phiếu xuất</span>
-            </button>
-            <button type="button" class="wh-action-btn" wire:click="setTab('check')">
-                <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
-                </svg>
-                <span>Kiểm tồn cuối ngày</span>
-            </button>
-        </div>
-    </div>
 
     <!-- Stats Cards -->
     @php $stats = $this->getStats(); @endphp
@@ -455,8 +517,8 @@
                 </svg>
             </div>
             <div class="stat-val">{{ $stats['items'] }}</div>
-            <div class="stat-lbl">Mặt hàng tồn kho</div>
-            <div class="stat-note">Từ danh sách nguyên liệu</div>
+            <div class="stat-lbl">{{ __('warehouse.stats.stock_items') }}</div>
+            <div class="stat-note">{{ __('warehouse.stats.from_ingredients') }}</div>
         </div>
         <div class="stat-card">
             <div class="stat-icon ico-green">
@@ -464,9 +526,9 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
             </div>
-            <div class="stat-val">{{ number_format($stats['value'], 0, ',', '.') }}đ</div>
-            <div class="stat-lbl">Giá trị tồn</div>
-            <div class="stat-note">Theo đơn giá tham chiếu</div>
+            <div class="stat-val">{{ number_format($stats['value'], 0, ',', '.') }}{{ __('warehouse.common.currency') }}</div>
+            <div class="stat-lbl">{{ __('warehouse.stats.stock_value') }}</div>
+            <div class="stat-note">{{ __('warehouse.stats.by_reference_price') }}</div>
         </div>
         <div class="stat-card">
             <div class="stat-icon ico-orange">
@@ -475,8 +537,8 @@
                 </svg>
             </div>
             <div class="stat-val">{{ $stats['low'] }}</div>
-            <div class="stat-lbl">Sắp hết hàng</div>
-            <div class="stat-note">Dưới tồn tối thiểu</div>
+            <div class="stat-lbl">{{ __('warehouse.stats.low_stock') }}</div>
+            <div class="stat-note">{{ __('warehouse.stats.below_minimum') }}</div>
         </div>
         <div class="stat-card">
             <div class="stat-icon ico-purple">
@@ -485,8 +547,8 @@
                 </svg>
             </div>
             <div class="stat-val">{{ $stats['check'] }}</div>
-            <div class="stat-lbl">Cần kiểm hôm nay</div>
-            <div class="stat-note">Từ tồn kho hiện tại</div>
+            <div class="stat-lbl">{{ __('warehouse.stats.need_check_today') }}</div>
+            <div class="stat-note">{{ __('warehouse.stats.from_current_stock') }}</div>
         </div>
     </div>
 
@@ -496,31 +558,31 @@
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
             </svg>
-            <span>Tồn kho hiện tại</span>
+            <span>{{ __('warehouse.tabs.stock') }}</span>
         </button>
         <button class="tab-btn @if($warehouseTab === 'check') active @endif" wire:click="setTab('check')">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
             </svg>
-            <span>Tồn cuối ngày</span>
+            <span>{{ __('warehouse.tabs.check') }}</span>
         </button>
         <button class="tab-btn @if($warehouseTab === 'in') active @endif" wire:click="setTab('in')">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 13l-7 7-7-7m14-6l-7 7-7-7"/>
             </svg>
-            <span>Nhập kho</span>
+            <span>{{ __('warehouse.tabs.inbound') }}</span>
         </button>
         <button class="tab-btn @if($warehouseTab === 'out') active @endif" wire:click="setTab('out')">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 11l7-7 7 7M5 19l7-7 7 7"/>
             </svg>
-            <span>Xuất kho</span>
+            <span>{{ __('warehouse.tabs.outbound') }}</span>
         </button>
         <button class="tab-btn @if($warehouseTab === 'log') active @endif" wire:click="setTab('log')">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
-            <span>Nhật ký kho</span>
+            <span>{{ __('warehouse.tabs.log') }}</span>
         </button>
 
         @if($warehouseTab === 'stock')
@@ -529,10 +591,10 @@
                     <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                     </svg>
-                    <input type="text" wire:model.live.debounce.300ms="search" placeholder="Tìm nguyên liệu...">
+                    <input type="text" wire:model.live.debounce.300ms="search" placeholder="{{ __('warehouse.placeholders.search_ingredient') }}">
                 </div>
                 <select class="type-select" wire:model.live="selectedType">
-                    <option value="">Tất cả loại</option>
+                    <option value="">{{ __('warehouse.filters.all_types') }}</option>
                     @foreach($this->getIngredientTypeOptions() as $typeName)
                         <option value="{{ $typeName }}">{{ $typeName }}</option>
                     @endforeach
@@ -550,46 +612,89 @@
                     <thead>
                         <tr>
                             <th style="width: 36px; text-align: center;">#</th>
-                            <th>Mã NL</th>
-                            <th>Nguyên liệu</th>
-                            <th>Loại</th>
-                            <th>NCC</th>
-                            <th style="text-align: right;">Tồn hiện tại</th>
-                            <th style="text-align: right;">Tối thiểu</th>
-                            <th style="text-align: right;">Đơn giá</th>
-                            <th style="text-align: right;">Giá trị</th>
-                            <th>Trạng thái</th>
+                            <th>{{ __('warehouse.table.ingredient_code_short') }}</th>
+                            <th>{{ __('warehouse.table.ingredient') }}</th>
+                            <th>{{ __('warehouse.table.type') }}</th>
+                            <th>{{ __('warehouse.table.supplier') }}</th>
+                            <th style="text-align: right;">{{ __('warehouse.table.current_stock') }}</th>
+                            <th style="text-align: right;">{{ __('warehouse.table.minimum') }}</th>
+                            <th style="text-align: right;">{{ __('warehouse.table.unit_price') }}</th>
+                            <th style="text-align: right;">{{ __('warehouse.table.value') }}</th>
+                            <th>{{ __('warehouse.table.status') }}</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($stocksData as $index => $item)
-                            <tr wire:click="openLedger({{ $item['ingredient']['id'] }})" style="cursor: pointer;" title="Click để xem Thẻ kho">
+                            <tr wire:click="openLedger({{ $item['ingredient']['id'] }})" style="cursor: pointer;" title="{{ __('warehouse.tooltips.open_ledger') }}">
                                 <td style="text-align: center;">{{ ($stocksData->currentPage() - 1) * $stocksData->perPage() + $index + 1 }}</td>
                                 <td><span style="font-weight: 700;">{{ $item['ingredient']['code'] }}</span></td>
                                 <td style="font-weight: 700; color: #0f172a;" class="dark:text-white">
-                                    <div>{{ $item['ingredient']['name'] }}</div>
-                                    <div style="font-size: 10px; color: #94a3b8; font-weight: 500; margin-top: 1px;">Click để xem Thẻ kho</div>
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <span>{{ $item['ingredient']['name'] }}</span>
+                                        <svg class="w-3.5 h-3.5 text-gray-400 opacity-0 wh-ledger-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="transition: opacity 0.15s; flex-shrink: 0;" title="{{ __('warehouse.tooltips.open_ledger') }}">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                                        </svg>
+                                    </div>
                                 </td>
                                 <td>{{ $item['ingredient']['type'] }}</td>
-                                <td>{{ $item['ingredient']['supplier']['name'] ?? '—' }}</td>
-                                <td style="text-align: right; font-weight: 750;">{{ number_format($item['quantity'], 2, ',', '.') }} {{ $item['ingredient']['unit'] }}</td>
-                                <td style="text-align: right; color: #64748b;">{{ number_format($item['min_quantity'], 2, ',', '.') }} {{ $item['ingredient']['unit'] }}</td>
-                                <td style="text-align: right;">{{ number_format($item['unit_price'], 0, ',', '.') }}đ</td>
-                                <td style="text-align: right; font-weight: 700; color: rgb(var(--primary-600));" class="dark:text-primary-400">{{ number_format($item['quantity'] * $item['unit_price'], 0, ',', '.') }}đ</td>
+                                <td>{{ str_starts_with($item['ingredient']['supplier']['name'] ?? '', 'test_') ? __('warehouse.common.test_supplier') : ($item['ingredient']['supplier']['name'] ?? '—') }}</td>
+                                <td style="text-align: right; font-weight: 750;">
+                                    {{ number_format($item['quantity'], 2, ',', '.') }}<span style="font-size: 11px; font-weight: 500; color: #94a3b8; margin-left: 2px;">{{ $item['ingredient']['unit'] }}</span>
+                                </td>
+                                <td style="text-align: right; color: #64748b;">
+                                    {{ number_format($item['min_quantity'], 2, ',', '.') }}<span style="font-size: 11px; font-weight: 500; color: #94a3b8; margin-left: 2px;">{{ $item['ingredient']['unit'] }}</span>
+                                </td>
+                                <td style="text-align: right;">
+                                    {{ number_format($item['unit_price'], 0, ',', '.') }}<span style="font-size: 10px; font-weight: 500; color: #94a3b8; margin-left: 1px;">{{ __('warehouse.common.currency') }}</span>
+                                </td>
+                                <td style="text-align: right; font-weight: 700; color: rgb(var(--primary-600));" class="dark:text-primary-400">
+                                    {{ number_format($item['quantity'] * $item['unit_price'], 0, ',', '.') }}<span style="font-size: 10px; font-weight: 500; color: #94a3b8; margin-left: 1px;">{{ __('warehouse.common.currency') }}</span>
+                                </td>
                                 <td>
                                     @if($item['quantity'] == 0)
-                                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-800 dark:bg-red-950/20 dark:text-red-400">Hết hàng</span>
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-800 dark:bg-red-950/20 dark:text-red-400">
+                                            <span class="relative flex h-1.5 w-1.5">
+                                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                                                <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-red-500"></span>
+                                            </span>
+                                            {{ __('warehouse.status.out_of_stock') }}
+                                        </span>
                                     @elseif($item['quantity'] <= $item['min_quantity'])
-                                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-950/20 dark:text-amber-400">Sắp hết</span>
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-950/20 dark:text-amber-400">
+                                            <span class="relative flex h-1.5 w-1.5">
+                                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                                                <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-amber-500"></span>
+                                            </span>
+                                            {{ __('warehouse.status.low_stock') }}
+                                        </span>
                                     @else
-                                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-green-100 text-green-800 dark:bg-green-950/20 dark:text-green-400">Đủ hàng</span>
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-green-100 text-green-800 dark:bg-green-950/20 dark:text-green-400">
+                                            <span class="relative flex h-1.5 w-1.5">
+                                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                                <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-500"></span>
+                                            </span>
+                                            {{ __('warehouse.status.enough_stock') }}
+                                        </span>
                                     @endif
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="10" style="text-align: center; color: #94a3b8; padding: 20px; font-style: italic;">
-                                    Không tìm thấy dữ liệu tồn kho phù hợp.
+                                <td colspan="10" style="text-align: center; padding: 3rem 1.5rem;">
+                                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.75rem;">
+                                        <div style="width: 48px; height: 48px; border-radius: 50%; background: #f1f5f9; display: flex; align-items: center; justify-content: center; color: #94a3b8;" class="dark:bg-slate-800 dark:color-slate-400">
+                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                            </svg>
+                                        </div>
+                                        <div style="font-weight: 700; color: #334155; font-size: 0.875rem;" class="dark:text-slate-300">{{ __('warehouse.empty.no_ingredients') }}</div>
+                                        <div style="color: #64748b; font-size: 0.78rem; max-width: 280px; margin: 0 auto;" class="dark:text-slate-400">{{ __('warehouse.empty.adjust_filters') }}</div>
+                                        @if($search !== '' || $selectedType !== '')
+                                            <button type="button" wire:click="$set('search', ''); $set('selectedType', '')" style="margin-top: 0.25rem; font-size: 0.78rem; font-weight: 600; color: rgb(var(--primary-600)); background: transparent; border: none; cursor: pointer; text-decoration: underline;" class="hover:text-primary-500">
+                                                {{ __('warehouse.actions.clear_filters') }}
+                                            </button>
+                                        @endif
+                                    </div>
                                 </td>
                             </tr>
                         @endforelse
@@ -600,13 +705,17 @@
             @if($stocksData->hasPages() || $stocksData->total() > 10)
                 <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; padding:12px 4px 2px; font-size:12px; color:#64748b;" class="dark:text-gray-400">
                     <div>
-                        Hiển thị {{ $stocksData->firstItem() ?? 0 }}-{{ $stocksData->lastItem() ?? 0 }} trên {{ $stocksData->total() }} mặt hàng tồn kho
+                        {{ __('warehouse.pagination.showing', [
+                            'from' => $stocksData->firstItem() ?? 0,
+                            'to' => $stocksData->lastItem() ?? 0,
+                            'total' => $stocksData->total(),
+                        ]) }}
                     </div>
                     <div style="display:flex; align-items:center; gap:8px;">
                         <select wire:model.live="perPage" style="height:30px; border:1px solid #cbd5e1; border-radius:6px; padding:0 8px; font-size:12px; background:transparent;" class="dark:border-gray-700 dark:bg-gray-800">
-                            <option value="10">10 / trang</option>
-                            <option value="20">20 / trang</option>
-                            <option value="50">50 / trang</option>
+                            <option value="10">{{ __('warehouse.pagination.per_page', ['count' => 10]) }}</option>
+                            <option value="20">{{ __('warehouse.pagination.per_page', ['count' => 20]) }}</option>
+                            <option value="50">{{ __('warehouse.pagination.per_page', ['count' => 50]) }}</option>
                         </select>
 
                         @if($stocksData->hasPages())
@@ -663,14 +772,14 @@
             <div>
                 <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-3 mb-4">
                     <div class="flex items-center gap-2">
-                        <span class="text-xs font-bold text-gray-500">Ngày kiểm:</span>
+                        <span class="text-xs font-bold text-gray-500">{{ __('warehouse.form.check_date') }}:</span>
                         <input type="date" class="date-input" wire:model.live="checkDate" style="height:34px; border: 1px solid #cbd5e1; border-radius: 6px; padding: 0 8px; font-size:12px;">
                     </div>
                     <button type="button" class="wh-action-btn wh-action-btn-primary" wire:click="saveEndDay">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/>
                         </svg>
-                        <span>Lưu tồn cuối ngày</span>
+                        <span>{{ __('warehouse.actions.save_end_day') }}</span>
                     </button>
                 </div>
 
@@ -679,12 +788,12 @@
                         <thead>
                             <tr>
                                 <th style="width: 36px; text-align: center;">#</th>
-                                <th>Nguyên liệu</th>
-                                <th>Đơn vị</th>
-                                <th style="text-align: right;">Tồn hệ thống</th>
-                                <th style="text-align: center; width: 180px;">Tồn cuối ngày thực tế</th>
-                                <th style="text-align: right;">Chênh lệch</th>
-                                <th>Ghi chú</th>
+                                <th>{{ __('warehouse.table.ingredient') }}</th>
+                                <th>{{ __('warehouse.table.unit') }}</th>
+                                <th style="text-align: right;">{{ __('warehouse.table.system_stock') }}</th>
+                                <th style="text-align: center; width: 180px;">{{ __('warehouse.table.actual_end_day_stock') }}</th>
+                                <th style="text-align: right;">{{ __('warehouse.table.difference') }}</th>
+                                <th>{{ __('warehouse.table.note') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -711,7 +820,7 @@
                                     <td>
                                         <input type="text" 
                                                wire:model.blur="checkNotes.{{ $item->id }}" 
-                                               placeholder="Lý do chênh lệch..."
+                                               placeholder="{{ __('warehouse.placeholders.difference_reason') }}"
                                                class="w-full border border-gray-300 rounded px-2 py-1 text-xs dark:bg-gray-800 dark:border-gray-700">
                                     </td>
                                 </tr>
@@ -728,15 +837,15 @@
                     <div style="display:inline-flex; align-items:center; justify-content:center; width:54px; height:54px; border-radius:50%; background:#eff6ff; color:#1e40af; margin-bottom:1rem;">
                         <i class="fa-solid fa-boxes-packing" style="font-size:24px"></i>
                     </div>
-                    <h3 style="font-size: 1rem; font-weight: 700; color:#0f172a;" class="dark:text-white">Luồng nhập kho</h3>
-                    <p style="font-size: 0.78rem; color:#64748b; margin-top:0.25rem; margin-bottom:1.5rem;">Nhập theo Đơn đặt hàng (PO) hoặc Nhập mua ngoài trực tiếp.</p>
+                    <h3 style="font-size: 1rem; font-weight: 700; color:#0f172a;" class="dark:text-white">{{ __('warehouse.inbound.title') }}</h3>
+                    <p style="font-size: 0.78rem; color:#64748b; margin-top:0.25rem; margin-bottom:1.5rem;">{{ __('warehouse.inbound.description') }}</p>
                     <button type="button" class="wh-action-btn wh-action-btn-primary" style="margin: 0 auto;" wire:click="openInTypeModal">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                         </svg>
-                        <span>Tạo phiếu nhập</span>
+                        <span>{{ __('warehouse.actions.create_in') }}</span>
                     </button>
-                    <div style="font-size:0.75rem; color:#94a3b8; margin-top:1rem;">Nhấn Tạo phiếu nhập để bắt đầu.</div>
+                    <div style="font-size:0.75rem; color:#94a3b8; margin-top:1rem;">{{ __('warehouse.inbound.start_hint') }}</div>
                 </div>
             @elseif($inMode === 'po')
                 <!-- PO Inbound Workspace (Ảnh 5) -->
@@ -744,9 +853,9 @@
                     <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-3 mb-4">
                         <div class="flex items-center gap-3">
                             <div class="form-field" style="width: 320px;">
-                                <label style="font-size:0.7rem;">Mã Đơn đặt hàng đang chờ giao</label>
+                                <label style="font-size:0.7rem;">{{ __('warehouse.form.pending_po_code') }}</label>
                                 <select wire:model.live="selectedPOId" style="height: 34px;">
-                                    <option value="">-- Chọn đơn hàng PO --</option>
+                                    <option value="">{{ __('warehouse.placeholders.select_po') }}</option>
                                     @foreach($this->getPendingPOs() as $po)
                                         <option value="{{ $po->id }}">{{ $po->code }} - {{ $po->supplier->name }}</option>
                                     @endforeach
@@ -757,25 +866,25 @@
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                             </svg>
-                            <span>Xác nhận nhập</span>
+                            <span>{{ __('warehouse.actions.confirm_inbound') }}</span>
                         </button>
                     </div>
 
                     @if(empty($poItemsData))
                         <div style="text-align: center; color: #94a3b8; padding: 2rem; font-style: italic;">
-                            Không có sản phẩm nào cần nhập kho trong PO được chọn.
+                            {{ __('warehouse.empty.no_po_items') }}
                         </div>
                     @else
                         <div class="overflow-x-auto">
                             <table class="wh-table">
                                 <thead>
                                     <tr>
-                                        <th>Nguyên liệu</th>
-                                        <th style="text-align: right;">SL dự kiến</th>
-                                        <th style="text-align: center; width:140px;">SL thực nhập</th>
-                                        <th style="text-align: right; width:110px;">Chênh lệch</th>
-                                        <th style="text-align: right; width:140px;">Đơn giá (khóa theo PO)</th>
-                                        <th style="width:200px;">Lý do lệch</th>
+                                        <th>{{ __('warehouse.table.ingredient') }}</th>
+                                        <th style="text-align: right;">{{ __('warehouse.table.expected_qty') }}</th>
+                                        <th style="text-align: center; width:140px;">{{ __('warehouse.table.received_qty') }}</th>
+                                        <th style="text-align: right; width:110px;">{{ __('warehouse.table.difference') }}</th>
+                                        <th style="text-align: right; width:140px;">{{ __('warehouse.table.po_locked_price') }}</th>
+                                        <th style="width:200px;">{{ __('warehouse.table.difference_reason') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -794,11 +903,11 @@
                                                 {{ $diff == 0 ? '—' : ($diff > 0 ? '+' : '').number_format($diff, 2, ',', '.') }}
                                             </td>
                                             <td style="text-align: right; font-weight:600;">
-                                                {{ number_format($item['unit_price'], 0, ',', '.') }}đ
+                                                {{ number_format($item['unit_price'], 0, ',', '.') }}{{ __('warehouse.common.currency') }}
                                             </td>
                                             <td>
                                                 @if($diff != 0)
-                                                    <input type="text" wire:model="poItemsData.{{ $index }}.receive_note" class="table-input" style="width: 100%;" placeholder="Bắt buộc khi lệch...">
+                                                    <input type="text" wire:model="poItemsData.{{ $index }}.receive_note" class="table-input" style="width: 100%;" placeholder="{{ __('warehouse.placeholders.required_when_different') }}">
                                                 @else
                                                     <span style="color:#94a3b8; font-size:11px;">—</span>
                                                 @endif
@@ -815,29 +924,32 @@
                 <div>
                     <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-3 mb-4">
                         <div>
-                            <h3 style="font-weight: 800; font-size:0.9rem;" class="dark:text-white">Nhập mua ngoài / Nhập kho trực tiếp</h3>
-                            <p style="font-size:0.75rem; color:#64748b;">Nhập trực tiếp từ thị trường không qua đơn hàng PO.</p>
+                            <h3 style="font-weight: 800; font-size:0.9rem;" class="dark:text-white">{{ __('warehouse.inbound.direct_title') }}</h3>
+                            <p style="font-size:0.75rem; color:#64748b;">{{ __('warehouse.inbound.direct_description') }}</p>
                         </div>
                         <div class="flex gap-2">
                             <button type="button" class="wh-action-btn" wire:click="addDirectRow">
                                 <svg class="w-4 h-4 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                                 </svg>
-                                <span>Thêm mặt hàng</span>
+                                <span>{{ __('warehouse.actions.add_item') }}</span>
                             </button>
                             <button type="button" class="wh-action-btn wh-action-btn-primary" wire:click="confirmDirectInbound">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                 </svg>
-                                <span>Lưu phiếu nhập</span>
+                                <span>{{ __('warehouse.actions.save_inbound') }}</span>
                             </button>
                         </div>
                     </div>
 
                     <div class="form-field mb-4" style="max-width:320px;">
-                        <label style="color:#ef4444; font-weight:700;">Hóa đơn chứng từ đính kèm (Bắt buộc) *</label>
-                        <input type="file" wire:model="directInvoiceFile" class="ctrl" style="height:36px; padding:4px;">
-                        <div wire:loading wire:target="directInvoiceFile" class="text-xs text-gray-500 mt-1">Đang tải tệp lên...</div>
+                        <label style="color: #374151; font-weight: 600; font-size: 0.8125rem;" class="dark:text-slate-300">
+                            {{ __('warehouse.form.invoice_attachment') }}
+                            <span style="color: #ef4444; font-weight: 700;">{{ __('warehouse.form.required_mark') }}</span>
+                        </label>
+                        <input type="file" wire:model="directInvoiceFile" class="ctrl" style="width: 100%; font-size: 0.78rem; padding: 5px 8px; cursor: pointer;">
+                        <div wire:loading wire:target="directInvoiceFile" class="text-xs text-gray-500 mt-1">{{ __('warehouse.form.uploading') }}</div>
                         @error('directInvoiceFile') <span class="text-xs text-red-500 mt-1 font-semibold">{{ $message }}</span> @enderror
                     </div>
 
@@ -845,9 +957,9 @@
                         <table class="wh-table">
                             <thead>
                                 <tr>
-                                    <th>Nguyên liệu</th>
-                                    <th style="text-align: center; width: 160px;">Số lượng</th>
-                                    <th style="text-align: right; width: 180px;">Đơn giá</th>
+                                    <th>{{ __('warehouse.table.ingredient') }}</th>
+                                    <th style="text-align: center; width: 160px;">{{ __('warehouse.table.quantity') }}</th>
+                                    <th style="text-align: right; width: 180px;">{{ __('warehouse.table.unit_price') }}</th>
                                     <th style="width: 60px; text-align: center;"></th>
                                 </tr>
                             </thead>
@@ -855,8 +967,8 @@
                                 @foreach($directItemsData as $index => $item)
                                     <tr>
                                         <td>
-                                            <select wire:model="directItemsData.{{ $index }}.ingredient_id" style="height:34px; width:100%; border:1px solid #cbd5e1; border-radius:6px;">
-                                                <option value="">-- Chọn nguyên liệu --</option>
+                                            <select wire:model="directItemsData.{{ $index }}.ingredient_id" class="table-select" style="width:100%;">
+                                                <option value="">{{ __('warehouse.placeholders.select_ingredient') }}</option>
                                                 @foreach($this->getIngredientsList() as $ing)
                                                     <option value="{{ $ing->id }}">{{ $ing->code }} - {{ $ing->name }} ({{ $ing->unit }})</option>
                                                 @endforeach
@@ -890,15 +1002,15 @@
                     <div style="display:inline-flex; align-items:center; justify-content:center; width:54px; height:54px; border-radius:50%; background:#fff7ed; color:#ea580c; margin-bottom:1rem;">
                         <i class="fa-solid fa-truck-ramp-box" style="font-size:24px"></i>
                     </div>
-                    <h3 style="font-size: 1rem; font-weight: 700; color:#0f172a;" class="dark:text-white">Luồng xuất kho</h3>
-                    <p style="font-size: 0.78rem; color:#64748b; margin-top:0.25rem; margin-bottom:1.5rem;">Xuất sản xuất hàng ngày hoặc Điều chuyển đi chi nhánh/bếp khác.</p>
+                    <h3 style="font-size: 1rem; font-weight: 700; color:#0f172a;" class="dark:text-white">{{ __('warehouse.outbound.title') }}</h3>
+                    <p style="font-size: 0.78rem; color:#64748b; margin-top:0.25rem; margin-bottom:1.5rem;">{{ __('warehouse.outbound.description') }}</p>
                     <button type="button" class="wh-action-btn wh-action-btn-primary" style="margin: 0 auto;" wire:click="openOutTypeModal">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                         </svg>
-                        <span>Tạo phiếu xuất</span>
+                        <span>{{ __('warehouse.actions.create_out') }}</span>
                     </button>
-                    <div style="font-size:0.75rem; color:#94a3b8; margin-top:1rem;">Nhấn Tạo phiếu xuất để bắt đầu.</div>
+                    <div style="font-size:0.75rem; color:#94a3b8; margin-top:1rem;">{{ __('warehouse.outbound.start_hint') }}</div>
                 </div>
             @elseif($outMode === 'production')
                 <!-- Production Outbound Workspace -->
@@ -906,11 +1018,11 @@
                     <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-3 mb-4 flex-wrap gap-2">
                         <div class="flex items-center gap-3">
                             <div class="form-field" style="width: 160px;">
-                                <label style="font-size:0.7rem;">Ngày xuất</label>
+                                <label style="font-size:0.7rem;">{{ __('warehouse.form.outbound_date') }}</label>
                                 <input type="date" wire:model.live="prodDate" style="height:34px;">
                             </div>
                             <div class="form-field" style="width: 140px;">
-                                <label style="font-size:0.7rem;">Ca làm việc</label>
+                                <label style="font-size:0.7rem;">{{ __('warehouse.form.shift') }}</label>
                                 <select wire:model.live="prodShiftId" style="height:34px;">
                                     @foreach($this->getShiftsList() as $sh)
                                         <option value="{{ $sh->id }}">{{ $sh->name }}</option>
@@ -922,24 +1034,24 @@
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                             </svg>
-                            <span>Xác nhận xuất</span>
+                            <span>{{ __('warehouse.actions.confirm_outbound') }}</span>
                         </button>
                     </div>
-                    <div style="font-size:11px; color:#64748b; margin-bottom:12px;">Hệ thống tự động tổng hợp định lượng từ thực đơn tuần đã chốt.</div>
+                    <div style="font-size:11px; color:#64748b; margin-bottom:12px;">{{ __('warehouse.outbound.production_hint') }}</div>
 
                     @if(empty($prodItemsData))
                         <div style="text-align: center; color: #94a3b8; padding: 2rem; font-style: italic;">
-                            Không có nguyên liệu sản xuất nào được lên lịch cho ngày và ca đã chọn.
+                            {{ __('warehouse.empty.no_production_items') }}
                         </div>
                     @else
                         <div class="overflow-x-auto">
                             <table class="wh-table">
                                 <thead>
                                     <tr>
-                                        <th>Nguyên liệu</th>
-                                        <th style="text-align: right;">Tồn kho hiện tại</th>
-                                        <th style="text-align: right;">Số lượng yêu cầu</th>
-                                        <th style="text-align: center; width: 180px;">Số lượng thực xuất</th>
+                                        <th>{{ __('warehouse.table.ingredient') }}</th>
+                                        <th style="text-align: right;">{{ __('warehouse.table.current_stock') }}</th>
+                                        <th style="text-align: right;">{{ __('warehouse.table.required_qty') }}</th>
+                                        <th style="text-align: center; width: 180px;">{{ __('warehouse.table.actual_out_qty') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -951,7 +1063,7 @@
                                             <td style="text-align: center;">
                                                 <input type="number" step="0.01" wire:model="prodItemsData.{{ $index }}.quantity_actual" class="table-input" style="width: 120px;">
                                                 @if(($prodItemsData[$index]['quantity_actual'] ?? 0) > $item['available_qty'])
-                                                    <div style="color:#ef4444; font-size:10px; font-weight:700; margin-top:2px;">Vượt tồn kho hiện tại</div>
+                                                    <div style="color:#ef4444; font-size:10px; font-weight:700; margin-top:2px;">{{ __('warehouse.validation.over_current_stock') }}</div>
                                                 @endif
                                             </td>
                                         </tr>
@@ -967,9 +1079,9 @@
                     <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-3 mb-4">
                         <div class="flex items-center gap-3">
                             <div class="form-field" style="width: 260px;">
-                                <label style="font-size:0.7rem;">Kho/Bếp nhận</label>
-                                <select wire:model="destKitchenId" style="height:34px;">
-                                    <option value="">-- Chọn bếp nhận --</option>
+                                <label style="font-size: 0.78rem; font-weight: 600; color: #475569;" class="dark:text-slate-300">{{ __('warehouse.form.destination_kitchen') }}</label>
+                                <select wire:model="destKitchenId" class="table-select" style="width: 100%;">
+                                    <option value="">{{ __('warehouse.placeholders.select_destination_kitchen') }}</option>
                                     @foreach($this->getTransferKitchens() as $kit)
                                         <option value="{{ $kit->id }}">{{ $kit->name }}</option>
                                     @endforeach
@@ -981,29 +1093,29 @@
                                 <svg class="w-4 h-4 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                                 </svg>
-                                <span>Thêm mặt hàng</span>
+                                <span>{{ __('warehouse.actions.add_item') }}</span>
                             </button>
                             <button type="button" class="wh-action-btn wh-action-btn-primary" wire:click="confirmTransferOut">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
                                 </svg>
-                                <span>Tạo phiếu điều chuyển</span>
+                                <span>{{ __('warehouse.actions.create_transfer') }}</span>
                             </button>
                         </div>
                     </div>
 
                     <div class="form-field mb-4">
-                        <label>Ghi chú điều chuyển</label>
-                        <input type="text" wire:model="transferNote" placeholder="VD: Điều chuyển khẩn cấp ca trưa..." style="height:36px;">
+                        <label style="font-size: 0.78rem; font-weight: 600; color: #475569;" class="dark:text-slate-300">{{ __('warehouse.form.transfer_note') }}</label>
+                        <input type="text" wire:model="transferNote" class="ctrl" placeholder="{{ __('warehouse.placeholders.transfer_note') }}" style="width: 100%; font-size: 0.78rem; padding: 5px 8px;">
                     </div>
 
                     <div class="overflow-x-auto mb-6">
                         <table class="wh-table">
                             <thead>
                                 <tr>
-                                    <th>Mặt hàng</th>
-                                    <th style="text-align: right; width: 180px;">Tồn hiện tại</th>
-                                    <th style="text-align: center; width: 180px;">Số lượng chuyển</th>
+                                    <th>{{ __('warehouse.table.item') }}</th>
+                                    <th style="text-align: right; width: 180px;">{{ __('warehouse.table.current_stock') }}</th>
+                                    <th style="text-align: center; width: 180px;">{{ __('warehouse.table.transfer_qty') }}</th>
                                     <th style="width: 60px; text-align: center;"></th>
                                 </tr>
                             </thead>
@@ -1011,20 +1123,20 @@
                                 @foreach($transferItemsData as $index => $item)
                                     <tr>
                                         <td>
-                                            <select wire:model.live="transferItemsData.{{ $index }}.ingredient_id" style="height:34px; width:100%; border:1px solid #cbd5e1; border-radius:6px;">
-                                                <option value="">-- Chọn nguyên liệu --</option>
+                                            <select wire:model.live="transferItemsData.{{ $index }}.ingredient_id" class="table-select" style="width:100%;">
+                                                <option value="">{{ __('warehouse.placeholders.select_ingredient') }}</option>
                                                 @foreach($this->getIngredientsList() as $ing)
                                                     <option value="{{ $ing->id }}">{{ $ing->code }} - {{ $ing->name }} ({{ $ing->unit }})</option>
                                                 @endforeach
                                             </select>
                                         </td>
                                         <td style="text-align: right; font-weight:700;">
-                                            {{ number_format($item['available_qty'], 2, ',', '.') }}
+                                            {{ number_format($item['available_qty'], 2, ',', '.') }}<span style="font-size: 11px; font-weight: 500; color: #94a3b8; margin-left: 2px;">{{ $item['unit'] ?? '' }}</span>
                                         </td>
                                         <td style="text-align: center;">
                                             <input type="number" step="0.01" wire:model="transferItemsData.{{ $index }}.quantity" class="table-input" style="width: 120px;">
                                             @if(($transferItemsData[$index]['quantity'] ?? 0) > $item['available_qty'])
-                                                <div style="color:#ef4444; font-size:10px; font-weight:700; margin-top:2px;">Vượt tồn kho hiện tại</div>
+                                                <div style="color:#ef4444; font-size:10px; font-weight:700; margin-top:2px;">{{ __('warehouse.validation.over_current_stock') }}</div>
                                             @endif
                                         </td>
                                         <td style="text-align: center;">
@@ -1043,17 +1155,17 @@
                     <!-- Phiếu điều chuyển gần đây -->
                     @php $recentTransfers = $this->getRecentTransfers(); @endphp
                     @if(!empty($recentTransfers))
-                        <div style="font-weight: 800; margin-bottom: 0.5rem; font-size: 0.9rem;" class="dark:text-white">Phiếu điều chuyển gần đây</div>
+                        <div style="font-weight: 800; margin-bottom: 0.5rem; font-size: 0.9rem;" class="dark:text-white">{{ __('warehouse.transfer.recent') }}</div>
                         <div class="overflow-x-auto">
                             <table class="wh-table">
                                 <thead>
                                     <tr>
-                                        <th>Mã phiếu</th>
-                                        <th>Bếp xuất</th>
-                                        <th>Bếp nhận</th>
-                                        <th>Thời gian</th>
-                                        <th>Trạng thái</th>
-                                        <th style="text-align: center;">Hành động</th>
+                                        <th>{{ __('warehouse.table.voucher_code') }}</th>
+                                        <th>{{ __('warehouse.table.source_kitchen') }}</th>
+                                        <th>{{ __('warehouse.table.destination_kitchen') }}</th>
+                                        <th>{{ __('warehouse.table.time') }}</th>
+                                        <th>{{ __('warehouse.table.status') }}</th>
+                                        <th style="text-align: center;">{{ __('warehouse.table.action') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -1064,18 +1176,35 @@
                                             <td>{{ $tf->destKitchen->name }}</td>
                                             <td>{{ $tf->created_at->format('d/m/Y H:i') }}</td>
                                             <td>
-                                                @if($tf->status === 'Hoàn thành')
-                                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-green-100 text-green-800">Đã nhận</span>
-                                                @elseif($tf->status === 'Hủy')
-                                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-800">Đã hủy</span>
+                                                @if($tf->status === \App\Models\StockTransfer::STATUS_DONE)
+                                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-green-100 text-green-800 dark:bg-green-950/20 dark:text-green-400">
+                                                        <span class="relative flex h-1.5 w-1.5">
+                                                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                                            <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-green-500"></span>
+                                                        </span>
+                                                        {{ $this->transferStatusLabel($tf->status) }}
+                                                    </span>
+                                                @elseif($tf->status === \App\Models\StockTransfer::STATUS_CANCELLED)
+                                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-800 dark:bg-red-950/20 dark:text-red-400">
+                                                        <span class="relative flex h-1.5 w-1.5">
+                                                            <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-red-500"></span>
+                                                        </span>
+                                                        {{ $this->transferStatusLabel($tf->status) }}
+                                                    </span>
                                                 @else
-                                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800">Đang chuyển</span>
+                                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-950/20 dark:text-amber-400">
+                                                        <span class="relative flex h-1.5 w-1.5">
+                                                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                                                            <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-amber-500"></span>
+                                                        </span>
+                                                        {{ $this->transferStatusLabel($tf->status) }}
+                                                    </span>
                                                 @endif
                                             </td>
                                             <td style="text-align: center;">
-                                                @if($tf->status === 'Đang chuyển' && auth()->user()?->currentKitchenId() === $tf->dest_kitchen_id)
+                                                @if($tf->status === \App\Models\StockTransfer::STATUS_IN_TRANSIT && auth()->user()?->currentKitchenId() === $tf->dest_kitchen_id)
                                                     <button type="button" class="wh-action-btn wh-action-btn-primary" style="height:28px; font-size:10px; padding:0 8px; margin:0 auto;" wire:click="confirmTransferReceive({{ $tf->id }})">
-                                                        Xác nhận nhận hàng
+                                                        {{ __('warehouse.actions.confirm_receive') }}
                                                     </button>
                                                 @else
                                                     —
@@ -1095,16 +1224,16 @@
             <!-- Bộ lọc nhật ký: loại giao dịch + nguyên liệu -->
             <div style="display:flex; gap:10px; margin-bottom:12px; flex-wrap:wrap;">
                 <select wire:model.live="logTypeFilter" class="table-input" style="height:34px; min-width:180px;">
-                    <option value="">— Tất cả loại giao dịch —</option>
-                    <option value="Nhập kho">Nhập kho</option>
-                    <option value="Nhập kho ngoài">Nhập kho ngoài</option>
-                    <option value="Xuất kho">Xuất kho</option>
-                    <option value="Xuất chuyển kho">Xuất chuyển kho</option>
-                    <option value="Nhập chuyển kho">Nhập chuyển kho</option>
-                    <option value="Kiểm kê">Kiểm kê</option>
+                    <option value="">{{ __('warehouse.filters.all_transaction_types') }}</option>
+                    <option value="{{ __('warehouse.transaction_types.inbound') }}">{{ __('warehouse.transaction_type_labels.inbound') }}</option>
+                    <option value="{{ __('warehouse.transaction_types.external_inbound') }}">{{ __('warehouse.transaction_type_labels.external_inbound') }}</option>
+                    <option value="{{ __('warehouse.transaction_types.outbound') }}">{{ __('warehouse.transaction_type_labels.outbound') }}</option>
+                    <option value="{{ __('warehouse.transaction_types.transfer_out') }}">{{ __('warehouse.transaction_type_labels.transfer_out') }}</option>
+                    <option value="{{ __('warehouse.transaction_types.transfer_in') }}">{{ __('warehouse.transaction_type_labels.transfer_in') }}</option>
+                    <option value="{{ __('warehouse.transaction_types.stock_check') }}">{{ __('warehouse.transaction_type_labels.stock_check') }}</option>
                 </select>
                 <select wire:model.live="logIngredientFilter" class="table-input" style="height:34px; min-width:200px;">
-                    <option value="">— Tất cả nguyên liệu —</option>
+                    <option value="">{{ __('warehouse.filters.all_ingredients') }}</option>
                     @foreach($this->getIngredientsList() as $ing)
                         <option value="{{ $ing->id }}">{{ $ing->name }}</option>
                     @endforeach
@@ -1114,12 +1243,12 @@
                 <table class="wh-table">
                     <thead>
                         <tr>
-                            <th>Thời gian</th>
-                            <th>Loại giao dịch</th>
-                            <th>Nguyên liệu</th>
-                            <th style="text-align: right;">Số lượng</th>
-                            <th style="text-align: right;">Tồn sau</th>
-                            <th>Chứng từ / Ghi chú</th>
+                            <th>{{ __('warehouse.table.time') }}</th>
+                            <th>{{ __('warehouse.table.transaction_type') }}</th>
+                            <th>{{ __('warehouse.table.ingredient') }}</th>
+                            <th style="text-align: right;">{{ __('warehouse.table.quantity') }}</th>
+                            <th style="text-align: right;">{{ __('warehouse.table.after_stock') }}</th>
+                            <th>{{ __('warehouse.table.voucher_note') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -1129,21 +1258,25 @@
                                 <td>
                                     @php
                                         // 'Kiểm kê' lưu quantity CÓ DẤU (+ thừa / − thiếu); các loại khác dấu theo nhóm nhập/xuất
-                                        $isInflow = $log['type'] === 'Kiểm kê'
+                                        $isInflow = $log['type'] === __('warehouse.transaction_types.stock_check')
                                             ? $log['quantity'] >= 0
-                                            : in_array($log['type'], ['Nhập kho', 'Nhập kho ngoài', 'Nhập chuyển kho']);
+                                            : in_array($log['type'], [
+                                                __('warehouse.transaction_types.inbound'),
+                                                __('warehouse.transaction_types.external_inbound'),
+                                                __('warehouse.transaction_types.transfer_in'),
+                                            ]);
                                     @endphp
-                                    @if($log['type'] === 'Kiểm kê')
+                                    @if($log['type'] === __('warehouse.transaction_types.stock_check'))
                                         <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-950/20 dark:text-amber-400">
-                                            {{ $log['type'] }}
+                                            {{ $this->transactionTypeLabel($log['type']) }}
                                         </span>
                                     @elseif($isInflow)
                                         <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-green-100 text-green-800 dark:bg-green-950/20 dark:text-green-400">
-                                            {{ $log['type'] }}
+                                            {{ $this->transactionTypeLabel($log['type']) }}
                                         </span>
                                     @else
                                         <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-800 dark:bg-red-950/20 dark:text-red-400">
-                                            {{ $log['type'] }}
+                                            {{ $this->transactionTypeLabel($log['type']) }}
                                         </span>
                                     @endif
                                 </td>
@@ -1159,7 +1292,7 @@
                                     {{ $log['note'] }}
                                     @if($log['attachment_url'])
                                         <a href="{{ Storage::disk('public')->url($log['attachment_url']) }}" target="_blank" class="ml-2 text-primary-600 hover:underline font-bold text-xs">
-                                            [Xem chứng từ]
+                                            {{ __('warehouse.actions.view_attachment') }}
                                         </a>
                                     @endif
                                 </td>
@@ -1167,7 +1300,7 @@
                         @empty
                             <tr>
                                 <td colspan="6" style="text-align: center; color: #94a3b8; padding: 20px; font-style: italic;">
-                                    Chưa có giao dịch kho nào được ghi nhận.
+                                    {{ __('warehouse.empty.no_stock_transactions') }}
                                 </td>
                             </tr>
                         @endforelse
@@ -1183,8 +1316,8 @@
             <div class="flow-modal-container">
                 <div class="flex justify-between items-center pb-3 border-b border-gray-200 dark:border-gray-700 mb-4">
                     <div>
-                        <h3 class="font-extrabold text-base text-gray-900 dark:text-white">Chọn loại phiếu nhập</h3>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Kho tạo phiếu nhập theo PO hoặc mua ngoài.</p>
+                        <h3 class="font-extrabold text-base text-gray-900 dark:text-white">{{ __('warehouse.modal.select_inbound_type') }}</h3>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ __('warehouse.modal.inbound_type_desc') }}</p>
                     </div>
                     <button type="button" class="text-gray-400 hover:text-gray-500" wire:click="closeModals">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1200,8 +1333,8 @@
                             </svg>
                         </div>
                         <div>
-                            <div class="font-bold text-gray-900 dark:text-white text-sm">Nhập theo Đơn đặt hàng (PO)</div>
-                            <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Chọn PO đang chờ giao, tự động điền mặt hàng và số lượng dự kiến.</div>
+                            <div class="font-bold text-gray-900 dark:text-white text-sm">{{ __('warehouse.modal.inbound_po') }}</div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ __('warehouse.modal.inbound_po_desc') }}</div>
                         </div>
                     </button>
                     <button type="button" class="flow-modal-choice" wire:click="startInbound('direct')">
@@ -1211,8 +1344,8 @@
                             </svg>
                         </div>
                         <div>
-                            <div class="font-bold text-gray-900 dark:text-white text-sm">Nhập mua ngoài / Nhập kho trực tiếp</div>
-                            <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Tự thêm mặt hàng, số lượng, đơn giá và đính kèm hóa đơn.</div>
+                            <div class="font-bold text-gray-900 dark:text-white text-sm">{{ __('warehouse.modal.inbound_direct') }}</div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ __('warehouse.modal.inbound_direct_desc') }}</div>
                         </div>
                     </button>
                 </div>
@@ -1225,8 +1358,8 @@
             <div class="flow-modal-container">
                 <div class="flex justify-between items-center pb-3 border-b border-gray-200 dark:border-gray-700 mb-4">
                     <div>
-                        <h3 class="font-extrabold text-base text-gray-900 dark:text-white">Chọn loại phiếu xuất</h3>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Kho tạo phiếu xuất sản xuất hoặc điều chuyển.</p>
+                        <h3 class="font-extrabold text-base text-gray-900 dark:text-white">{{ __('warehouse.modal.select_outbound_type') }}</h3>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ __('warehouse.modal.outbound_type_desc') }}</p>
                     </div>
                     <button type="button" class="text-gray-400 hover:text-gray-500" wire:click="closeModals">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1242,8 +1375,8 @@
                             </svg>
                         </div>
                         <div>
-                            <div class="font-bold text-gray-900 dark:text-white text-sm">Xuất kho sản xuất</div>
-                            <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Chọn ngày và ca, tự động tải danh sách nguyên liệu cần thiết.</div>
+                            <div class="font-bold text-gray-900 dark:text-white text-sm">{{ __('warehouse.modal.production_outbound') }}</div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ __('warehouse.modal.production_outbound_desc') }}</div>
                         </div>
                     </button>
                     <button type="button" class="flow-modal-choice" wire:click="startOutbound('transfer')">
@@ -1253,8 +1386,8 @@
                             </svg>
                         </div>
                         <div>
-                            <div class="font-bold text-gray-900 dark:text-white text-sm">Xuất điều chuyển / Chuyển kho</div>
-                            <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Chọn Bếp nhận, thêm nhiều mặt hàng và theo dõi trạng thái vận chuyển.</div>
+                            <div class="font-bold text-gray-900 dark:text-white text-sm">{{ __('warehouse.modal.transfer_outbound') }}</div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ __('warehouse.modal.transfer_outbound_desc') }}</div>
                         </div>
                     </button>
                 </div>
@@ -1269,8 +1402,8 @@
             <div class="flow-modal-container" style="width: min(720px, 94vw);">
                 <div class="flex justify-between items-center pb-3 border-b border-gray-200 dark:border-gray-700 mb-4">
                     <div>
-                        <h3 class="font-extrabold text-base text-gray-900 dark:text-white">Thẻ kho - {{ $ledgerIng->code }} - {{ $ledgerIng->name }}</h3>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Lịch sử biến động nhập xuất nguyên liệu của bếp.</p>
+                        <h3 class="font-extrabold text-base text-gray-900 dark:text-white">{{ __('warehouse.ledger.title', ['code' => $ledgerIng->code, 'name' => $ledgerIng->name]) }}</h3>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ __('warehouse.ledger.description') }}</p>
                     </div>
                     <button type="button" class="text-gray-400 hover:text-gray-500" wire:click="closeLedger">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1283,11 +1416,11 @@
                     <table class="wh-table">
                         <thead>
                             <tr>
-                                <th>Thời gian</th>
-                                <th>Mã phiếu</th>
-                                <th>Loại giao dịch</th>
-                                <th style="text-align: right;">Số lượng</th>
-                                <th style="text-align: right;">Tồn sau</th>
+                                <th>{{ __('warehouse.table.time') }}</th>
+                                <th>{{ __('warehouse.table.voucher_code') }}</th>
+                                <th>{{ __('warehouse.table.transaction_type') }}</th>
+                                <th style="text-align: right;">{{ __('warehouse.table.quantity') }}</th>
+                                <th style="text-align: right;">{{ __('warehouse.table.after_stock') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -1303,16 +1436,20 @@
                                     </td>
                                     <td>
                                         @php
-                                            $isInflow = $log['type'] === 'Kiểm kê'
+                                            $isInflow = $log['type'] === __('warehouse.transaction_types.stock_check')
                                                 ? $log['quantity'] >= 0
-                                                : in_array($log['type'], ['Nhập kho', 'Nhập kho ngoài', 'Nhập chuyển kho']);
+                                                : in_array($log['type'], [
+                                                    __('warehouse.transaction_types.inbound'),
+                                                    __('warehouse.transaction_types.external_inbound'),
+                                                    __('warehouse.transaction_types.transfer_in'),
+                                                ]);
                                         @endphp
-                                        @if($log['type'] === 'Kiểm kê')
-                                            <span class="px-2 rounded bg-amber-50 text-amber-700 font-semibold text-[10px]">{{ $log['type'] }}</span>
+                                        @if($log['type'] === __('warehouse.transaction_types.stock_check'))
+                                            <span class="px-2 rounded bg-amber-50 text-amber-700 font-semibold text-[10px]">{{ $this->transactionTypeLabel($log['type']) }}</span>
                                         @elseif($isInflow)
-                                            <span class="px-2 rounded bg-green-50 text-green-700 font-semibold text-[10px]">{{ $log['type'] }}</span>
+                                            <span class="px-2 rounded bg-green-50 text-green-700 font-semibold text-[10px]">{{ $this->transactionTypeLabel($log['type']) }}</span>
                                         @else
-                                            <span class="px-2 rounded bg-red-50 text-red-700 font-semibold text-[10px]">{{ $log['type'] }}</span>
+                                            <span class="px-2 rounded bg-red-50 text-red-700 font-semibold text-[10px]">{{ $this->transactionTypeLabel($log['type']) }}</span>
                                         @endif
                                     </td>
                                     <td style="text-align: right; font-weight: 700; color: {{ $isInflow ? '#16a34a' : '#ef4444' }}">
@@ -1323,7 +1460,7 @@
                             @empty
                                 <tr>
                                     <td colspan="5" style="text-align: center; color: #94a3b8; padding: 20px; font-style: italic;">
-                                        Không tìm thấy lịch sử giao dịch nào.
+                                        {{ __('warehouse.empty.no_ledger_transactions') }}
                                     </td>
                                 </tr>
                             @endforelse
