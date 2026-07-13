@@ -169,8 +169,13 @@ class ListIngredients extends ListRecords
         }
 
         if ($skipped !== []) {
+            // Notification không chứa nổi hàng nghìn dòng — 30 lý do đầu là đủ,
+            // danh sách đầy đủ đã soát được ở bước Xem trước
             $lines[] = __('ingredient.import.skipped', ['count' => count($skipped)]);
-            $lines = array_merge($lines, $skipped);
+            $lines = array_merge($lines, array_slice($skipped, 0, 30));
+            if (count($skipped) > 30) {
+                $lines[] = __('ingredient.import.preview_more', ['count' => count($skipped) - 30]);
+            }
         }
 
         if ($import->successCount() === 0 && $skipped === []) {

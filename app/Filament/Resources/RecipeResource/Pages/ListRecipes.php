@@ -248,8 +248,13 @@ class ListRecipes extends Page
             $lines[] = "Cập nhật {$updated} món ăn";
         }
         if ($skipped !== []) {
+            // Notification không chứa nổi hàng nghìn dòng — liệt kê 30 lý do đầu,
+            // danh sách đầy đủ đã soát được ở bước Xem trước
             $lines[] = 'Bỏ qua '.count($skipped).' món:';
-            $lines = array_merge($lines, $skipped);
+            $lines = array_merge($lines, array_slice($skipped, 0, 30));
+            if (count($skipped) > 30) {
+                $lines[] = '… và '.(count($skipped) - 30).' dòng khác (xem chi tiết ở bước Xem trước khi nhập lại).';
+            }
         }
 
         if ($created + $updated === 0 && $skipped === []) {

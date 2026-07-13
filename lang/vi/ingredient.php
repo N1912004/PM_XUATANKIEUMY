@@ -88,6 +88,8 @@ return [
         'status_created' => 'Thêm mới',
         'status_updated' => 'Cập nhật',
         'status_skipped' => 'Bỏ qua',
+        'preview_more' => '… và :count dòng khác (tổng số ở badge phía trên là chính xác).',
+        'preview_toggle' => 'bấm để xem :count dòng đầu',
     ],
     'stats' => [
         'total' => 'Tổng nguyên liệu',

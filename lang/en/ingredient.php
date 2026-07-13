@@ -88,6 +88,8 @@ return [
         'status_created' => 'Create',
         'status_updated' => 'Update',
         'status_skipped' => 'Skip',
+        'preview_more' => '… and :count more rows (badge totals above are exact).',
+        'preview_toggle' => 'click to view first :count rows',
     ],
     'stats' => [
         'total' => 'Total Ingredients',
