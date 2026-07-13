@@ -321,20 +321,36 @@
                                 </div>
                             </td>
                             @for($d = 0; $d < 7; $d++)
-                                <td style="padding:10px; text-align:center; background:var(--po-wh)">
-                                    <div style="display:flex; flex-direction:column; gap:6px">
-                                        <!-- Món ăn select -->
-                                        <select wire:model="weekGrid.{{ $d }}.{{ $shift->id }}" class="ctrl" style="font-size:12px; height:32px">
-                                            <option value="">Chọn món...</option>
-                                            @foreach($recipes as $rec)
-                                                <option value="{{ $rec->id }}">{{ $rec->name }}</option>
-                                            @endforeach
-                                        </select>
-                                        <!-- Suất ăn input -->
-                                        <div style="display:flex; align-items:center; gap:4px">
-                                            <input wire:model="weekPortions.{{ $d }}.{{ $shift->id }}" type="number" class="ctrl" style="font-size:11.5px; height:28px; text-align:center; padding:0 4px" placeholder="Suất">
-                                            <span style="font-size:10px; color:var(--po-fa)">suất</span>
-                                        </div>
+                                <td style="padding:8px; text-align:center; background:var(--po-wh); vertical-align:top">
+                                    <div style="display:flex; flex-direction:column; gap:8px">
+                                        {{-- Mỗi ô = danh sách món (nhiều món/ca), thêm bằng nút (+) từng ô --}}
+                                        @foreach(($weekCells[$d][$shift->id] ?? [['recipe_id'=>'','portions'=>200]]) as $ci => $cellItem)
+                                            <div style="display:flex; flex-direction:column; gap:4px; padding:6px; border:1px dashed var(--po-bd); border-radius:8px; background:var(--po-bd2)">
+                                                <div style="display:flex; align-items:center; gap:4px">
+                                                    <select wire:model="weekCells.{{ $d }}.{{ $shift->id }}.{{ $ci }}.recipe_id" class="ctrl" style="font-size:12px; height:30px; flex:1">
+                                                        <option value="">Chọn món...</option>
+                                                        @foreach($recipes as $rec)
+                                                            <option value="{{ $rec->id }}">{{ $rec->name }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                    <button type="button" wire:click="removeWeekDish({{ $d }}, {{ $shift->id }}, {{ $ci }})"
+                                                        title="Bỏ món này"
+                                                        style="width:26px; height:30px; flex-shrink:0; border:none; border-radius:6px; background:var(--po-rd-s); color:var(--po-rd); cursor:pointer; font-size:12px">
+                                                        <i class="fa-solid fa-xmark"></i>
+                                                    </button>
+                                                </div>
+                                                <div style="display:flex; align-items:center; gap:4px">
+                                                    <input wire:model="weekCells.{{ $d }}.{{ $shift->id }}.{{ $ci }}.portions" type="number" class="ctrl" style="font-size:11.5px; height:26px; text-align:center; padding:0 4px" placeholder="Suất">
+                                                    <span style="font-size:10px; color:var(--po-fa)">suất</span>
+                                                </div>
+                                            </div>
+                                        @endforeach
+
+                                        {{-- Nút (+) thêm món cho đúng ô ngày/ca này --}}
+                                        <button type="button" wire:click="addWeekDish({{ $d }}, {{ $shift->id }})"
+                                            style="height:28px; border:1px dashed var(--po-bl-m); border-radius:8px; background:var(--po-bl-s); color:var(--po-bl); cursor:pointer; font-size:11.5px; font-weight:700; display:flex; align-items:center; justify-content:center; gap:4px">
+                                            <i class="fa-solid fa-plus"></i> Thêm món
+                                        </button>
                                     </div>
                                 </td>
                             @endfor

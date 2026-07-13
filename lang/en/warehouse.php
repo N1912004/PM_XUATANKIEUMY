@@ -49,6 +49,7 @@ return [
         'minimum' => 'Minimum',
         'unit_price' => 'Unit price',
         'value' => 'Value',
+        'last_updated' => 'Last updated',
         'status' => 'Status',
         'unit' => 'Unit',
         'system_stock' => 'System stock',

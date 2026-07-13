@@ -620,6 +620,7 @@
                             <th style="text-align: right;">{{ __('warehouse.table.minimum') }}</th>
                             <th style="text-align: right;">{{ __('warehouse.table.unit_price') }}</th>
                             <th style="text-align: right;">{{ __('warehouse.table.value') }}</th>
+                            <th style="text-align: center;">{{ __('warehouse.table.last_updated') }}</th>
                             <th>{{ __('warehouse.table.status') }}</th>
                         </tr>
                     </thead>
@@ -649,6 +650,9 @@
                                 </td>
                                 <td style="text-align: right; font-weight: 700; color: rgb(var(--primary-600));" class="dark:text-primary-400">
                                     {{ number_format($item['quantity'] * $item['unit_price'], 0, ',', '.') }}<span style="font-size: 10px; font-weight: 500; color: #94a3b8; margin-left: 1px;">{{ __('warehouse.common.currency') }}</span>
+                                </td>
+                                <td style="text-align: center; font-size: 11px; color: #64748b; font-variant-numeric: tabular-nums;">
+                                    {{ $item['updated_at']?->format('H:i d/m/Y') ?? '—' }}
                                 </td>
                                 <td>
                                     @if($item['quantity'] == 0)
@@ -680,7 +684,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="10" style="text-align: center; padding: 3rem 1.5rem;">
+                                <td colspan="11" style="text-align: center; padding: 3rem 1.5rem;">
                                     <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.75rem;">
                                         <div style="width: 48px; height: 48px; border-radius: 50%; background: #f1f5f9; display: flex; align-items: center; justify-content: center; color: #94a3b8;" class="dark:bg-slate-800 dark:color-slate-400">
                                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

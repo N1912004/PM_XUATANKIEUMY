@@ -49,6 +49,7 @@ return [
         'minimum' => 'Tối thiểu',
         'unit_price' => 'Đơn giá',
         'value' => 'Giá trị',
+        'last_updated' => 'Cập nhật cuối',
         'status' => 'Trạng thái',
         'unit' => 'Đơn vị',
         'system_stock' => 'Tồn hệ thống',
