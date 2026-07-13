@@ -14,22 +14,9 @@
             <p>Quản lý món ăn theo từng mức giá và cost nguyên liệu trên 1 phần</p>
         </div>
         <div class="ph-r">
-            <label class="btn" style="cursor:pointer">
-                <i class="fa-solid fa-file-import"></i>
-                {{ $importFile ? 'Đã chọn file' : 'Chọn file định lượng' }}
-                <input type="file" wire:model="importFile" accept=".xlsx,.xls" style="display:none">
-            </label>
-            @if($importFile)
-                <button type="button" wire:click="importRecipes" wire:loading.attr="disabled" class="btn btn-p">
-                    <i class="fa-solid fa-upload"></i>
-                    Nhập Excel
-                </button>
-            @endif
-            @error('importFile') <span style="color:#dc2626; font-size:11.5px; align-self:center">{{ $message }}</span> @enderror
-            <a href="{{ route('recipes.export-file') }}" class="btn">
-                <i class="fa-solid fa-download"></i>
-                Xuất dữ liệu
-            </a>
+            {{-- Import/Export cùng pattern trang Nguyên liệu: wizard 2 bước có XEM TRƯỚC (dry-run) --}}
+            {{ $this->importAction }}
+            {{ $this->exportAction }}
             <a href="{{ \App\Filament\Resources\RecipeResource::getUrl('create') }}" class="btn btn-p">
                 <i class="fa-solid fa-plus"></i>
                 Thêm món ăn
@@ -302,4 +289,7 @@
             </div>
         @endif
     </div>
+
+    {{-- Modal của Action import/export (wizard 2 bước) --}}
+    <x-filament-actions::modals />
 </div>
