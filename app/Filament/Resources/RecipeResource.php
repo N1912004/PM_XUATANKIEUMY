@@ -19,6 +19,7 @@ use Filament\Tables;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class RecipeResource extends Resource
 {
@@ -72,12 +73,16 @@ class RecipeResource extends Resource
                             ->required()
                             ->options(fn () => RecipeType::pluck('name', 'name')->all())
                             ->default('Món mặn')
+                            ->searchable()
+                            ->preload()
                             ->native(false),
                         Forms\Components\Select::make('price_level')
                             ->label('Mức giá suất ăn')
                             ->required()
                             ->options(self::mealPriceOptions())
                             ->default(20000)
+                            ->searchable()
+                            ->preload()
                             ->native(false)
                             ->helperText('Đơn giá suất ăn có thể khác nhau theo đơn vị / hợp đồng.'),
                         Forms\Components\Select::make('actual_price')
@@ -85,6 +90,8 @@ class RecipeResource extends Resource
                             ->required()
                             ->options(self::mealPriceOptions())
                             ->default(20000)
+                            ->searchable()
+                            ->preload()
                             ->native(false),
                         Forms\Components\TextInput::make('cost_override')
                             ->label('Cost điều chỉnh (override)')
@@ -360,7 +367,11 @@ class RecipeResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()->with(['ingredients', 'ingredients.supplier', 'recipeType']);
+        return parent::getEloquentQuery()
+            ->with(['ingredients', 'ingredients.supplier', 'recipeType'])
+            ->withoutGlobalScopes([
+                SoftDeletingScope::class,
+            ]);
     }
 
     public static function getPages(): array

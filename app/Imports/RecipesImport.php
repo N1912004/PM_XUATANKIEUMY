@@ -90,6 +90,16 @@ class RecipesImport implements ToCollection
             return;
         }
 
+        // Recipe giờ dùng soft delete: tra cả bản đã xóa mềm — nếu không, import sẽ tạo
+        // bản MỚI trùng tên với bản đã xóa (cùng bẫy ingredients_code_unique trong CLAUDE.md).
+        // Món đã xóa mềm → BỎ QUA kèm hướng dẫn, đồng bộ hành vi với IngredientsImport.
+        $trashed = Recipe::onlyTrashed()->where('name', $dish['name'])->first();
+        if ($trashed) {
+            $this->record($dish['row'], $dish['name'], self::SKIPPED, "Dòng {$dish['row']} — món \"{$dish['name']}\" đang bị XÓA MỀM trong hệ thống. Khôi phục món (bộ lọc Đã xóa → Khôi phục) rồi import lại nếu muốn cập nhật.");
+
+            return;
+        }
+
         try {
             $wasNew = false;
 

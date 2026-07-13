@@ -16,6 +16,7 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -40,6 +41,10 @@ class ListRecipes extends Page
 
     public string $statusFilter = '';
 
+    public string $trashedFilter = '';
+
+    public array $selectedRecipes = [];
+
     public int $perPage = 10;
 
     public ?int $expandedRecipeId = null;
@@ -49,30 +54,47 @@ class ListRecipes extends Page
         'priceFilter' => ['except' => ''],
         'typeFilter' => ['except' => ''],
         'statusFilter' => ['except' => ''],
+        'trashedFilter' => ['except' => ''],
     ];
+
+    public function resetSelection(): void
+    {
+        $this->selectedRecipes = [];
+    }
 
     public function updatedSearch(): void
     {
+        $this->resetSelection();
         $this->resetPage();
     }
 
     public function updatedPriceFilter(): void
     {
+        $this->resetSelection();
         $this->resetPage();
     }
 
     public function updatedTypeFilter(): void
     {
+        $this->resetSelection();
         $this->resetPage();
     }
 
     public function updatedStatusFilter(): void
     {
+        $this->resetSelection();
+        $this->resetPage();
+    }
+
+    public function updatedTrashedFilter(): void
+    {
+        $this->resetSelection();
         $this->resetPage();
     }
 
     public function updatedPerPage(): void
     {
+        $this->resetSelection();
         $this->resetPage();
     }
 
@@ -82,6 +104,8 @@ class ListRecipes extends Page
         $this->priceFilter = '';
         $this->typeFilter = '';
         $this->statusFilter = '';
+        $this->trashedFilter = '';
+        $this->resetSelection();
         $this->resetPage();
     }
 
@@ -111,6 +135,129 @@ class ListRecipes extends Page
             ->success()
             ->send();
 
+        $this->resetPage();
+    }
+
+    public function restoreRecipe(int $recipeId): void
+    {
+        $recipe = Recipe::withTrashed()->find($recipeId);
+
+        if (! $recipe) {
+            return;
+        }
+
+        abort_unless(RecipeResource::canRestore($recipe), 403);
+
+        $recipe->restore();
+
+        Notification::make()
+            ->title('Đã khôi phục món ăn')
+            ->success()
+            ->send();
+
+        $this->resetPage();
+    }
+
+    public function forceDeleteRecipe(int $recipeId): void
+    {
+        $recipe = Recipe::withTrashed()->find($recipeId);
+
+        if (! $recipe) {
+            return;
+        }
+
+        abort_unless(RecipeResource::canForceDelete($recipe), 403);
+
+        $recipe->ingredients()->detach();
+        $recipe->forceDelete();
+
+        Notification::make()
+            ->title('Đã xóa vĩnh viễn món ăn')
+            ->success()
+            ->send();
+
+        $this->resetPage();
+    }
+
+    public function selectPage(array $ids, bool $checked): void
+    {
+        if ($checked) {
+            $this->selectedRecipes = array_unique(array_merge($this->selectedRecipes, $ids));
+        } else {
+            $this->selectedRecipes = array_diff($this->selectedRecipes, $ids);
+        }
+    }
+
+    public function bulkDelete(): void
+    {
+        if (empty($this->selectedRecipes)) {
+            return;
+        }
+
+        $recipes = Recipe::query()->whereIn('id', $this->selectedRecipes)->get();
+        $count = 0;
+        foreach ($recipes as $recipe) {
+            if (RecipeResource::canDelete($recipe)) {
+                $recipe->delete();
+                $count++;
+            }
+        }
+
+        Notification::make()
+            ->title("Đã xóa mềm {$count} món ăn")
+            ->success()
+            ->send();
+
+        $this->resetSelection();
+        $this->resetPage();
+    }
+
+    public function bulkRestore(): void
+    {
+        if (empty($this->selectedRecipes)) {
+            return;
+        }
+
+        $recipes = Recipe::onlyTrashed()->whereIn('id', $this->selectedRecipes)->get();
+        $count = 0;
+        foreach ($recipes as $recipe) {
+            if (RecipeResource::canRestore($recipe)) {
+                $recipe->restore();
+                $count++;
+            }
+        }
+
+        Notification::make()
+            ->title("Đã khôi phục {$count} món ăn")
+            ->success()
+            ->send();
+
+        $this->resetSelection();
+        $this->resetPage();
+    }
+
+    public function bulkForceDelete(): void
+    {
+        if (empty($this->selectedRecipes)) {
+            return;
+        }
+
+        $recipes = Recipe::withTrashed()->whereIn('id', $this->selectedRecipes)->get();
+        $count = 0;
+        foreach ($recipes as $recipe) {
+            if (RecipeResource::canForceDelete($recipe)) {
+                $recipe->ingredients()->detach();
+                $recipe->forceDelete();
+                $count++;
+            }
+        }
+
+        Notification::make()
+            ->title("Đã xóa vĩnh viễn {$count} món ăn")
+            ->success()
+            ->send();
+
+        $this->resetSelection();
         $this->resetPage();
     }
 
@@ -287,9 +434,17 @@ class ListRecipes extends Page
         $notification->send();
     }
 
-    public function buildRecipesQuery(): \Illuminate\Database\Eloquent\Builder
+    public function buildRecipesQuery(): Builder
     {
-        return Recipe::query()
+        $query = Recipe::query();
+
+        if ($this->trashedFilter === 'with') {
+            $query->withTrashed();
+        } elseif ($this->trashedFilter === 'only') {
+            $query->onlyTrashed();
+        }
+
+        return $query
             ->with(['ingredients', 'recipeType'])
             ->when($this->search !== '', function ($query): void {
                 $search = mb_strtolower($this->search);

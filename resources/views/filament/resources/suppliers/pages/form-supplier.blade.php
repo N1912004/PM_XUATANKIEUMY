@@ -101,18 +101,20 @@
                                 <input wire:model="documents.{{ $index }}.expires_at" type="date" class="sup-input">
                             </div>
                             <div class="sup-field" style="flex:2; min-width:200px">
-                                <label class="sup-label">File đính kèm (ảnh/PDF, ≤5MB)</label>
+                                <div style="display:flex; justify-content:space-between; align-items:center; gap:8px">
+                                    <label class="sup-label">File đính kèm (ảnh/PDF, ≤5MB)</label>
+                                    @if(!empty($doc['file_path']))
+                                        <a href="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($doc['file_path']) }}" target="_blank"
+                                            style="font-size:11.5px; color:var(--po-bl); font-weight:700; text-decoration:none; white-space:nowrap">
+                                            <i class="fa-solid fa-paperclip"></i> Xem file hiện tại
+                                        </a>
+                                    @endif
+                                </div>
                                 <input wire:model="documentUploads.{{ $index }}" type="file" accept=".jpg,.jpeg,.png,.webp,.pdf" class="sup-input" style="padding:7px">
                                 @error('documentUploads.'.$index) <span class="sup-error">{{ $message }}</span> @enderror
-                                @if(!empty($doc['file_path']))
-                                    <a href="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($doc['file_path']) }}" target="_blank"
-                                        style="font-size:11.5px; color:var(--po-bl); font-weight:700">
-                                        <i class="fa-solid fa-paperclip"></i> Xem file hiện tại
-                                    </a>
-                                @endif
                             </div>
                             <button type="button" wire:click="removeDocument({{ $index }})"
-                                style="background:#fee2e2; color:#dc2626; border:none; width:34px; height:34px; border-radius:8px; cursor:pointer; flex-shrink:0">
+                                style="background:#fee2e2; color:#dc2626; border:none; width:3rem; height:3rem; border-radius:.7rem; cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center">
                                 <i class="fa-solid fa-trash"></i>
                             </button>
                         </div>

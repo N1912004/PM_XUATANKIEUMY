@@ -648,5 +648,82 @@
         color: var(--rd);
         border-color: #fecaca;
     }
+
+    /* Custom Searchable Dropdown for List Recipes Page */
+    .mn-filter-select {
+        position: relative;
+    }
+    .mn-dropdown-panel {
+        position: absolute;
+        z-index: 50;
+        top: calc(100% + 4px);
+        left: 0;
+        min-width: 220px;
+        background: var(--wh);
+        border: 1px solid var(--bd);
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+        padding: 6px;
+        max-height: 250px;
+        overflow-y: auto;
+    }
+    .dark .mn-dropdown-panel {
+        background: #1e293b;
+        border-color: #334155;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    }
+    .mn-dropdown-search {
+        width: 100%;
+        border: 1px solid var(--bd);
+        border-radius: 6px;
+        padding: 6px 10px;
+        font-size: 13px;
+        outline: none;
+        margin-bottom: 6px;
+        background: var(--bg);
+        color: var(--tx);
+    }
+    .dark .mn-dropdown-search {
+        border-color: #334155;
+        background: #0f172a;
+    }
+    .mn-dropdown-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    .mn-dropdown-item {
+        width: 100%;
+        text-align: left;
+        padding: 6px 8px;
+        border: none;
+        background: transparent;
+        font-size: 13px;
+        color: var(--tx);
+        cursor: pointer;
+        border-radius: 4px;
+        transition: background 0.1s;
+    }
+    .mn-dropdown-item:hover {
+        background: var(--bd2);
+    }
+    .dark .mn-dropdown-item:hover {
+        background: #334155;
+    }
+    .mn-dropdown-item.selected {
+        background: var(--bl-s);
+        color: var(--bl);
+        font-weight: 700;
+    }
+    .dark .mn-dropdown-item.selected {
+        background: rgba(18, 103, 232, 0.25);
+        color: #38bdf8;
+    }
+    .mn-dropdown-empty {
+        padding: 8px;
+        color: var(--fa);
+        font-size: 12px;
+        text-align: center;
+    }
 </style>
 @endpush

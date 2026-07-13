@@ -5,6 +5,7 @@
         $recipesList = $this->recipes();
         $prices = $this->priceOptions();
         $types = $this->typeOptions();
+        $pageIds = $recipesList->pluck('id')->toArray();
     @endphp
 
     <!-- Page Head -->
@@ -28,25 +29,119 @@
             <input wire:model.live.debounce.250ms="search" type="text" placeholder="Tìm kiếm theo tên món ăn hoặc mã món...">
         </div>
 
-        <select wire:model.live="priceFilter" class="mn-sel">
-            <option value="">Mức giá / Đơn giá suất ăn</option>
-            @foreach($prices as $val => $lbl)
-                <option value="{{ $val }}">{{ $lbl }}</option>
-            @endforeach
-        </select>
+        <div class="mn-filter-select"
+            x-data="{
+                open: false,
+                search: '',
+                selected: @entangle('priceFilter').live,
+                options: {{ json_encode($prices) }},
+                get filtered() {
+                    let q = this.search.toLowerCase();
+                    return Object.entries(this.options).filter(([val, lbl]) => lbl.toLowerCase().includes(q));
+                },
+                get label() {
+                    if (this.selected === '' || this.selected === null || this.selected === undefined) return 'Mức giá / Đơn giá suất ăn';
+                    return this.options[this.selected] || 'Mức giá / Đơn giá suất ăn';
+                },
+                selectOption(val) {
+                    this.selected = val;
+                    this.open = false;
+                },
+                toggle() {
+                    this.open = ! this.open;
+                    if (this.open) {
+                        this.search = '';
+                        this.$nextTick(() => this.$refs.search?.focus());
+                    }
+                }
+            }"
+            @click.outside="open = false"
+            @keydown.escape.stop="open = false"
+        >
+            <button type="button" class="mn-sel" style="display: flex; align-items: center; justify-content: space-between; gap: 8px; min-width: 220px; text-align: left;" @click="toggle()">
+                <span x-text="label" style="text-overflow: ellipsis; overflow: hidden; white-space: nowrap;"></span>
+            </button>
+            <div x-show="open" x-cloak class="mn-dropdown-panel" style="min-width: 220px;">
+                <input x-ref="search" x-model="search" type="text" placeholder="Tìm kiếm..." class="mn-dropdown-search">
+                <ul class="mn-dropdown-list">
+                    <li>
+                        <button type="button" class="mn-dropdown-item" :class="(selected === '' || selected === null) && 'selected'" @click="selectOption('')">
+                            Tất cả mức giá
+                        </button>
+                    </li>
+                    <template x-for="[val, lbl] in filtered" :key="val">
+                        <li>
+                            <button type="button" class="mn-dropdown-item" :class="selected == val && 'selected'" @click="selectOption(val)" x-text="lbl">
+                            </button>
+                        </li>
+                    </template>
+                    <li x-show="filtered.length === 0" class="mn-dropdown-empty">Không tìm thấy kết quả</li>
+                </ul>
+            </div>
+        </div>
 
-        <select wire:model.live="typeFilter" class="mn-sel">
-            <option value="">Nhóm món</option>
-            @foreach($types as $val => $lbl)
-                <option value="{{ $val }}">{{ $lbl }}</option>
-            @endforeach
-        </select>
+        <div class="mn-filter-select"
+            x-data="{
+                open: false,
+                search: '',
+                selected: @entangle('typeFilter').live,
+                options: {{ json_encode($types) }},
+                get filtered() {
+                    let q = this.search.toLowerCase();
+                    return Object.entries(this.options).filter(([val, lbl]) => lbl.toLowerCase().includes(q));
+                },
+                get label() {
+                    if (this.selected === '' || this.selected === null || this.selected === undefined) return 'Nhóm món';
+                    return this.options[this.selected] || 'Nhóm món';
+                },
+                selectOption(val) {
+                    this.selected = val;
+                    this.open = false;
+                },
+                toggle() {
+                    this.open = ! this.open;
+                    if (this.open) {
+                        this.search = '';
+                        this.$nextTick(() => this.$refs.search?.focus());
+                    }
+                }
+            }"
+            @click.outside="open = false"
+            @keydown.escape.stop="open = false"
+        >
+            <button type="button" class="mn-sel" style="display: flex; align-items: center; justify-content: space-between; gap: 8px; min-width: 160px; text-align: left;" @click="toggle()">
+                <span x-text="label" style="text-overflow: ellipsis; overflow: hidden; white-space: nowrap;"></span>
+            </button>
+            <div x-show="open" x-cloak class="mn-dropdown-panel" style="min-width: 160px;">
+                <input x-ref="search" x-model="search" type="text" placeholder="Tìm kiếm..." class="mn-dropdown-search">
+                <ul class="mn-dropdown-list">
+                    <li>
+                        <button type="button" class="mn-dropdown-item" :class="(selected === '' || selected === null) && 'selected'" @click="selectOption('')">
+                            Tất cả nhóm món
+                        </button>
+                    </li>
+                    <template x-for="[val, lbl] in filtered" :key="val">
+                        <li>
+                            <button type="button" class="mn-dropdown-item" :class="selected == val && 'selected'" @click="selectOption(val)" x-text="lbl">
+                            </button>
+                        </li>
+                    </template>
+                    <li x-show="filtered.length === 0" class="mn-dropdown-empty">Không tìm thấy kết quả</li>
+                </ul>
+            </div>
+        </div>
 
         <select wire:model.live="statusFilter" class="mn-sel">
             <option value="">Trạng thái</option>
             <option value="active">Đang áp dụng</option>
             <option value="pending">Chờ rà soát</option>
             <option value="inactive">Ngừng áp dụng</option>
+        </select>
+
+        <select wire:model.live="trashedFilter" class="mn-sel">
+            <option value="">Không gồm mục đã xóa</option>
+            <option value="with">Gồm cả mục đã xóa</option>
+            <option value="only">Chỉ mục đã xóa</option>
         </select>
 
         <button wire:click="resetFilters" class="mn-fbtn" title="Cài lại bộ lọc">
@@ -63,12 +158,46 @@
     </div>
 
     <!-- Recipes Main Table -->
+    @if(count($selectedRecipes) > 0)
+        <div class="mn-bulk-actions" style="display:flex;align-items:center;justify-content:space-between;background:var(--bl-s);border:1px solid var(--bl-m);padding:10px 16px;border-radius:8px;margin-bottom:12px;gap:12px; animation: fadeIn 0.2s ease;">
+            <div style="display:flex;align-items:center;gap:8px">
+                <span style="font-weight:600;color:var(--bl);font-size:13px"><i class="fa-solid fa-square-check"></i> Đã chọn {{ count($selectedRecipes) }} món ăn</span>
+            </div>
+            <div style="display:flex;gap:8px">
+                @if($trashedFilter === 'only')
+                    <button type="button" wire:click="bulkRestore" wire:confirm="Bạn có chắc chắn muốn khôi phục toàn bộ các món ăn đã chọn?" class="mn-fbtn" style="background:#fff;border-color:var(--bl);color:var(--bl);height:30px;font-size:12px">
+                        <i class="fa-solid fa-rotate-left"></i> Khôi phục hàng loạt
+                    </button>
+                    <button type="button" wire:click="bulkForceDelete" wire:confirm="HÀNH ĐỘNG NÀY KHÔNG THỂ HOÀN TÁC. Bạn có chắc chắn muốn xóa vĩnh viễn toàn bộ các món ăn đã chọn và định mức nguyên liệu liên quan?" class="mn-fbtn" style="background:var(--rd-s);border-color:#fecaca;color:var(--rd);height:30px;font-size:12px">
+                        <i class="fa-solid fa-trash-can"></i> Xóa vĩnh viễn hàng loạt
+                    </button>
+                @else
+                    <button type="button" wire:click="bulkDelete" wire:confirm="Bạn có chắc chắn muốn xóa mềm toàn bộ các món ăn đã chọn?" class="mn-fbtn" style="background:var(--rd-s);border-color:#fecaca;color:var(--rd);height:30px;font-size:12px">
+                        <i class="fa-solid fa-trash"></i> Xóa hàng loạt
+                    </button>
+                @endif
+            </div>
+        </div>
+    @endif
+
     <div class="mn-card">
         <div style="overflow-x:auto">
             <table class="mn-table">
                 <thead>
                     <tr>
-                        <th></th>
+                        <th style="width: 40px; text-align: center; vertical-align: middle;">
+                            <input type="checkbox" 
+                                   class="fi-checkbox-input rounded border-gray-300 text-primary-600 focus:ring-primary-600 dark:border-gray-700 dark:bg-gray-900 dark:checked:bg-primary-500" 
+                                   style="cursor: pointer;"
+                                   @php
+                                       $allSelected = count(array_intersect($pageIds, $selectedRecipes)) === count($pageIds) && count($pageIds) > 0;
+                                   @endphp
+                                   {{ $allSelected ? 'checked' : '' }}
+                                   wire:click="selectPage({{ json_encode($pageIds) }}, {{ $allSelected ? 'false' : 'true' }})"
+                            >
+                        </th>
+                        <th style="width: 40px; text-align: center;"></th>
+                        <th style="width: 50px; text-align: center;">STT</th>
                         <th>Mã món</th>
                         <th>Tên món ăn</th>
                         <th>Nhóm món</th>
@@ -113,14 +242,30 @@
                                 default => $recipe->status,
                             };
                         @endphp
-                        <tr class="{{ $isExpanded ? 'mn-row-sel' : '' }}">
-                            <td>
+                        <tr class="{{ $isExpanded ? 'mn-row-sel' : '' }}" style="{{ $recipe->trashed() ? 'opacity: 0.6;' : '' }}">
+                            <td style="text-align: center; vertical-align: middle;">
+                                <input type="checkbox" 
+                                       value="{{ $recipe->id }}" 
+                                       class="fi-checkbox-input rounded border-gray-300 text-primary-600 focus:ring-primary-600 dark:border-gray-700 dark:bg-gray-900 dark:checked:bg-primary-500" 
+                                       style="cursor: pointer;"
+                                       wire:model.live="selectedRecipes"
+                                >
+                            </td>
+                            <td style="text-align: center; vertical-align: middle;">
                                 <button type="button" wire:click="toggleExpand({{ $recipe->id }})" class="mn-expand-btn {{ $isExpanded ? 'open' : '' }}">
                                     <i class="fa-solid fa-chevron-right"></i>
                                 </button>
                             </td>
-                            <td><span class="mn-code">{{ $recipe->code }}</span></td>
-                            <td><span class="mn-name">{{ $recipe->name }}</span></td>
+                            <td style="text-align: center; font-weight: 600; color: var(--mu); vertical-align: middle;">
+                                {{ $loop->iteration + ($recipesList->currentPage() - 1) * $recipesList->perPage() }}
+                            </td>
+                            <td><span class="mn-code" style="{{ $recipe->trashed() ? 'text-decoration: line-through; color: var(--mu);' : '' }}">{{ $recipe->code }}</span></td>
+                            <td>
+                                <span class="mn-name" style="{{ $recipe->trashed() ? 'text-decoration: line-through; color: var(--mu);' : '' }}">{{ $recipe->name }}</span>
+                                @if($recipe->trashed())
+                                    <span style="display: inline-block; background: var(--rd-s); color: var(--rd); font-size: 10px; padding: 2px 6px; border-radius: 4px; margin-left: 6px; font-weight: bold; vertical-align: middle;">Đã xóa</span>
+                                @endif
+                            </td>
                             <td><span class="mn-group-pill {{ $typeClass }}">{{ $recipe->type }}</span></td>
                             <td><span class="mn-price">{{ number_format($recipe->price_level, 0, ',', '.') }} d</span></td>
                             <td><span class="mn-price">{{ number_format($recipe->actual_price, 0, ',', '.') }} d</span></td>
@@ -138,18 +283,29 @@
                             <td><span class="mn-date">{{ $recipe->updated_at->format('d/m/Y H:i') }}</span></td>
                             <td>
                                 <div style="display:flex;gap:4px">
-                                    <!-- Xem chi tiết -->
-                                    <a href="{{ \App\Filament\Resources\RecipeResource::getUrl('view', ['record' => $recipe]) }}" class="abt" title="Xem chi tiết">
-                                        <i class="fa-solid fa-eye"></i>
-                                    </a>
-                                    <!-- Chỉnh sửa -->
-                                    <a href="{{ \App\Filament\Resources\RecipeResource::getUrl('edit', ['record' => $recipe]) }}" class="abt" title="Chỉnh sửa">
-                                        <i class="fa-solid fa-pen"></i>
-                                    </a>
-                                    <!-- Xóa món -->
-                                    <button type="button" wire:click="deleteRecipe({{ $recipe->id }})" wire:confirm="Bạn có chắc chắn muốn xóa món ăn này?" class="abt abt-danger" title="Xóa món ăn">
-                                        <i class="fa-solid fa-trash"></i>
-                                    </button>
+                                    @if($recipe->trashed())
+                                        <!-- Khôi phục món ăn -->
+                                        <button type="button" wire:click="restoreRecipe({{ $recipe->id }})" wire:confirm="Bạn có chắc chắn muốn khôi phục món ăn này?" class="abt" style="color: var(--bl); border-color: var(--bl-m);" title="Khôi phục món ăn">
+                                            <i class="fa-solid fa-rotate-left"></i>
+                                        </button>
+                                        <!-- Xóa vĩnh viễn -->
+                                        <button type="button" wire:click="forceDeleteRecipe({{ $recipe->id }})" wire:confirm="HÀNH ĐỘNG NÀY KHÔNG THỂ HOÀN TÁC. Bạn có chắc chắn muốn xóa vĩnh viễn món ăn này và toàn bộ định mức nguyên liệu liên quan?" class="abt abt-danger" title="Xóa vĩnh viễn">
+                                            <i class="fa-solid fa-trash-can"></i>
+                                        </button>
+                                    @else
+                                        <!-- Xem chi tiết -->
+                                        <a href="{{ \App\Filament\Resources\RecipeResource::getUrl('view', ['record' => $recipe]) }}" class="abt" title="Xem chi tiết">
+                                            <i class="fa-solid fa-eye"></i>
+                                        </a>
+                                        <!-- Chỉnh sửa -->
+                                        <a href="{{ \App\Filament\Resources\RecipeResource::getUrl('edit', ['record' => $recipe]) }}" class="abt" title="Chỉnh sửa">
+                                            <i class="fa-solid fa-pen"></i>
+                                        </a>
+                                        <!-- Xóa món -->
+                                        <button type="button" wire:click="deleteRecipe({{ $recipe->id }})" wire:confirm="Bạn có chắc chắn muốn xóa món ăn này?" class="abt abt-danger" title="Xóa món ăn">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    @endif
                                 </div>
                             </td>
                         </tr>
@@ -157,7 +313,7 @@
                         <!-- Accordion Detail Row -->
                         @if($isExpanded)
                             <tr class="mn-expand-row">
-                                <td colspan="12">
+                                <td colspan="14">
                                     <div class="mn-sub">
                                         <div class="mn-sub-inner">
                                             <!-- Sub table -->
@@ -218,7 +374,7 @@
                         @endif
                     @empty
                         <tr>
-                            <td colspan="12" style="text-align:center;padding:30px;color:var(--mu)">Không tìm thấy món ăn nào khớp với bộ lọc.</td>
+                            <td colspan="14" style="text-align:center;padding:30px;color:var(--mu)">Không tìm thấy món ăn nào khớp với bộ lọc.</td>
                         </tr>
                     @endforelse
                 </tbody>
