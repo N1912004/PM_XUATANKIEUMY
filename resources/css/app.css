@@ -34,3 +34,18 @@
 .fi-fo-toggle span {
     transform: none !important;
 }
+
+/* Cùng họ xung đột trên: Tailwind v4 đè utilities lưới responsive của Filament v3
+   (grid-cols-[--cols-default] / lg:grid-cols-[--cols-lg]) → dưới breakpoint lg form
+   vẫn giữ số cột desktop, các field chồng đè lên nhau (thấy rõ ở form Món ăn trên mobile).
+   Khôi phục đúng hành vi gốc của Filament: grid chỉ khai báo cột cho lg (không có sm/md
+   riêng) phải xếp 1 cột dưới 1024px, mỗi field chiếm trọn một hàng. */
+@media (max-width: 1023.98px) {
+    .fi-main .grid[style*='--cols-lg']:not([style*='--cols-sm']):not([style*='--cols-md']) {
+        grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+    }
+
+    .fi-main .grid[style*='--cols-lg']:not([style*='--cols-sm']):not([style*='--cols-md']) > * {
+        grid-column: span 1 / span 1 !important;
+    }
+}
