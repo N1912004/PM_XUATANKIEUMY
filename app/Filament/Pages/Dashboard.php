@@ -101,7 +101,7 @@ class Dashboard extends Page
         $this->lowStockCount = (int) $lowStockQuery->clone()->count();
 
         $this->lowStockIngredients = $lowStockQuery
-            ->with('ingredient:id,name,unit')
+            ->with('ingredient:id,name,unit_id')
             ->orderByRaw('(min_quantity - quantity) DESC')
             ->limit(50)
             ->get(['id', 'ingredient_id', 'quantity', 'min_quantity'])

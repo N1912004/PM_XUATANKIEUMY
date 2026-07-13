@@ -22,31 +22,34 @@ class FoodSafetyStepSheet implements FromArray, ShouldAutoSize, WithEvents, With
      *
      * @var array<string, array{title: string, headings: array<int, string>, keys: array<int, string>}>
      */
+    /**
+     * Cột dựng theo file mẫu "MẪU KIỂM THỰC 3 BƯỚC_.xlsx" (sheet B1–B5, QĐ 1246/QĐ-BYT).
+     */
     protected const STEP_CONFIG = [
         'Bước 1' => [
-            'title' => 'BƯỚC 1 – KIỂM TRA TRƯỚC KHI CHẾ BIẾN (NGUYÊN LIỆU NHẬP)',
-            'headings' => ['TT', 'Tên thực phẩm', 'Thời gian nhập', 'Khối lượng (Kg)', 'Nơi cung cấp', 'Hóa đơn chứng từ', 'ĐK Vệ sinh thú y', 'Cảm quan', 'Test nhanh', 'Ghi chú'],
-            'keys' => ['time', 'quantity', 'supplier', 'invoice', 'vet_check', 'sensory', 'quick_test', 'notes'],
+            'title' => 'BƯỚC 1: KIỂM TRA TRƯỚC KHI CHẾ BIẾN THỨC ĂN',
+            'headings' => ['TT', 'Tên thực phẩm', 'Thời gian nhập (giờ, ngày)', 'Khối lượng (kg/lít)', 'Tên cơ sở cung cấp', 'Địa chỉ, điện thoại', 'Tên người giao', 'Chứng từ, hóa đơn', 'Giấy ĐK VS thú y', 'Giấy kiểm dịch', 'Kiểm tra cảm quan', 'Xét nghiệm nhanh', 'Biện pháp xử lý'],
+            'keys' => ['name', 'time', 'quantity', 'supplier', 'supplier_contact', 'deliverer', 'invoice', 'vet_check', 'quarantine', 'sensory', 'quick_test', 'action'],
         ],
         'Bước 2' => [
-            'title' => 'BƯỚC 2 – KIỂM TRA TRONG QUÁ TRÌNH CHẾ BIẾN',
-            'headings' => ['TT', 'Tên món ăn', 'Thời gian chế biến', 'Cảm quan', 'Nhiệt độ chế biến', 'Người chế biến', 'Ca/Bếp thực hiện', 'Ghi chú'],
-            'keys' => ['time', 'sensory', 'temp', 'cook', 'kitchen', 'notes'],
+            'title' => 'BƯỚC 2: KIỂM TRA KHI CHẾ BIẾN THỨC ĂN',
+            'headings' => ['TT', 'Ca/bữa ăn', 'Tên món ăn', 'Nguyên liệu chính', 'Số lượng/số suất ăn', 'Thời gian sơ chế', 'Thời gian chế biến', 'ĐK vệ sinh: Người tham gia', 'Trang thiết bị dụng cụ', 'Khu vực chế biến', 'Kiểm tra cảm quan', 'Biện pháp xử lý'],
+            'keys' => ['shift', 'name', 'main_ingredients', 'portions', 'prep_time', 'time', 'staff_check', 'equipment_check', 'area_check', 'sensory', 'action'],
         ],
         'Bước 3' => [
-            'title' => 'BƯỚC 3 – KIỂM TRA TRƯỚC KHI ĂN',
-            'headings' => ['TT', 'Tên món ăn', 'Thời gian ăn', 'Cảm quan', 'Lưu mẫu', 'Nhiệt độ', 'Ghi chú'],
-            'keys' => ['time', 'sensory', 'sample_kept', 'temp', 'notes'],
+            'title' => 'BƯỚC 3: KIỂM TRA TRƯỚC KHI ĂN',
+            'headings' => ['TT', 'Ca/bữa ăn', 'Tên món ăn', 'Số lượng suất ăn', 'Thời gian chia món ăn', 'Thời gian bắt đầu ăn', 'Dụng cụ (chia, chứa đựng)', 'Kiểm tra cảm quan', 'Biện pháp xử lý'],
+            'keys' => ['shift', 'name', 'portions', 'time', 'eat_time', 'utensil', 'sensory', 'action'],
         ],
         'Lưu mẫu' => [
-            'title' => 'THEO DÕI LƯU MẪU THỨC ĂN',
-            'headings' => ['TT', 'Tên món ăn', 'Thời gian lưu', 'Khối lượng mẫu', 'Mã số mẫu', 'Nhiệt độ tủ lưu', 'Người lưu', 'Ghi chú (dụng cụ)'],
-            'keys' => ['time', 'quantity', 'sample_code', 'temp', 'staff', 'notes'],
+            'title' => 'BIỂU MẪU THEO DÕI LƯU MẪU THỨC ĂN',
+            'headings' => ['TT', 'Bữa ăn (giờ ăn)', 'Tên món ăn', 'Số lượng suất ăn', 'Khối lượng/thể tích mẫu', 'Dụng cụ chứa mẫu', 'Nhiệt độ bảo quản', 'Thời gian lấy mẫu', 'Thời gian hủy mẫu', 'Ghi chú', 'Người lưu mẫu', 'Người hủy mẫu'],
+            'keys' => ['shift', 'name', 'portions', 'sample_amount', 'container', 'temp', 'time', 'destroy_at', 'notes', 'staff', 'destroyer'],
         ],
         'Hủy mẫu' => [
-            'title' => 'THEO DÕI HỦY MẪU THỨC ĂN',
-            'headings' => ['TT', 'Tên món ăn', 'Thời gian hủy', 'Thời gian lưu giữ', 'Tình trạng mẫu', 'Người hủy', 'Ghi chú'],
-            'keys' => ['time', 'retention', 'status', 'staff', 'notes'],
+            'title' => 'BIỂU MẪU THEO DÕI HỦY MẪU THỨC ĂN',
+            'headings' => ['TT', 'Bữa ăn (giờ ăn)', 'Tên món ăn', 'Số lượng suất ăn', 'Khối lượng/thể tích mẫu', 'Dụng cụ chứa mẫu', 'Nhiệt độ bảo quản', 'Thời gian lấy mẫu', 'Thời gian hủy mẫu', 'Ghi chú', 'Người lưu mẫu', 'Người hủy mẫu'],
+            'keys' => ['shift', 'name', 'portions', 'sample_amount', 'container', 'temp', 'kept_at', 'time', 'notes', 'keeper', 'staff'],
         ],
     ];
 
@@ -92,10 +95,10 @@ class FoodSafetyStepSheet implements FromArray, ShouldAutoSize, WithEvents, With
 
         $rows = [];
 
-        // Block tiêu đề (sẽ được gộp ô trong AfterSheet)
-        $rows[] = $this->pad(['CƠ SỞ: '.$this->canteen], $cols);
-        $rows[] = $this->pad(['BÁO CÁO KIỂM THỰC BA BƯỚC – '.$config['title'].' (QĐ 1246/QĐ-BYT)'], $cols);
-        $rows[] = $this->pad(['Ngày kiểm tra: '.$dateFormatted.'   |   Người kiểm tra: '.$this->inspector], $cols);
+        // Block tiêu đề theo file mẫu B1–B5 (gộp ô trong AfterSheet)
+        $rows[] = $this->pad(['Tên cơ sở: '.$this->canteen], $cols);
+        $rows[] = $this->pad([$config['title'].'  (Ban hành: QĐ 1246/QĐ-BYT ngày 31/3/2017)'], $cols);
+        $rows[] = $this->pad(['Thời gian kiểm tra: '.$dateFormatted.'   |   Địa điểm kiểm tra: '.$this->canteen.'   |   Người kiểm tra: '.$this->inspector], $cols);
         $rows[] = $this->pad([], $cols); // dòng trống
 
         // Dòng heading của bảng
@@ -103,7 +106,7 @@ class FoodSafetyStepSheet implements FromArray, ShouldAutoSize, WithEvents, With
 
         // Dữ liệu
         foreach ($this->items as $index => $item) {
-            $row = [$index + 1, $item['name'] ?? ''];
+            $row = [$index + 1];
             foreach ($config['keys'] as $key) {
                 $row[] = $item[$key] ?? '';
             }

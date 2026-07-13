@@ -3,20 +3,27 @@
 namespace App\Filament\Resources\RecipeResource\Pages;
 
 use App\Filament\Resources\RecipeResource;
+use App\Imports\RecipesImport;
 use App\Models\Recipe;
 use App\Models\RecipeType;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Livewire\WithFileUploads;
 use Livewire\WithPagination;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ListRecipes extends Page
 {
+    use WithFileUploads;
     use WithPagination;
 
     protected static string $resource = RecipeResource::class;
 
     protected static string $view = 'filament.resources.recipes.pages.list-recipes';
+
+    /** File Excel định lượng món ăn chờ import (theo mẫu ĐỊNH LƯỢNG MÓN ĂN.xlsx) */
+    public $importFile = null;
 
     public string $search = '';
 
@@ -97,6 +104,41 @@ class ListRecipes extends Page
             ->success()
             ->send();
 
+        $this->resetPage();
+    }
+
+    /**
+     * Import ngân hàng món ăn từ file Excel theo mẫu "ĐỊNH LƯỢNG MÓN ĂN.xlsx"
+     * (mỗi món kèm bảng định mức gram — hệ thống tự quy đổi kg).
+     */
+    public function importRecipes(): void
+    {
+        abort_unless(RecipeResource::canCreate(), 403);
+
+        $this->validate(
+            ['importFile' => 'required|file|mimes:xlsx,xls|max:10240'],
+            [
+                'importFile.required' => 'Vui lòng chọn file Excel định lượng món ăn.',
+                'importFile.mimes' => 'Chỉ nhận file .xlsx hoặc .xls.',
+                'importFile.max' => 'File tối đa 10MB.',
+            ],
+        );
+
+        $import = new RecipesImport;
+        Excel::import($import, $this->importFile->getRealPath());
+
+        $created = $import->countOf(RecipesImport::CREATED);
+        $updated = $import->countOf(RecipesImport::UPDATED);
+        $skipped = $import->countOf(RecipesImport::SKIPPED);
+
+        $notification = Notification::make()
+            ->title("Import xong: {$created} món mới, {$updated} món cập nhật".($skipped > 0 ? ", {$skipped} món bị bỏ qua" : ''))
+            ->body($skipped > 0 ? implode('<br>', array_map('e', array_slice($import->skippedMessages(), 0, 5))) : null);
+
+        $skipped > 0 ? $notification->warning()->persistent() : $notification->success();
+        $notification->send();
+
+        $this->importFile = null;
         $this->resetPage();
     }
 
