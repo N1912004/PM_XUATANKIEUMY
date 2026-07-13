@@ -11,10 +11,16 @@ use Maatwebsite\Excel\Concerns\WithTitle;
 use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
 
+/**
+ * Xuất Ngân hàng thực đơn — cùng format với IngredientsExport (Danh mục nguyên liệu):
+ * tiêu đề gộp ô cỡ lớn + dòng header nền xanh đậm chữ trắng + viền toàn bảng.
+ */
 class RecipeExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
 {
-    protected const COLS = 10;
+    protected const COLS = 11;
 
     public function title(): string
     {
@@ -27,23 +33,25 @@ class RecipeExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
     public function array(): array
     {
         $rows = [];
-        $rows[] = ['NGÂN HÀNG THỰC ĐƠN', '', '', '', '', '', '', '', '', ''];
-        $rows[] = ['', '', '', '', '', '', '', '', '', ''];
+        $rows[] = array_pad(['NGÂN HÀNG THỰC ĐƠN'], self::COLS, '');
         $rows[] = [
+            'STT',
             'Mã món',
             'Tên món ăn',
             'Nhóm món',
             'Mức giá suất ăn',
             'Đơn giá suất ăn',
             'Số nguyên liệu',
-            'Tổng định lượng / phần',
+            'Tổng định lượng / phần (kg)',
             'Tổng cost nguyên liệu / phần',
             'Trạng thái',
             'Cập nhật',
         ];
 
-        $this->recipes()->each(function (Recipe $recipe) use (&$rows): void {
+        $index = 1;
+        $this->recipes()->each(function (Recipe $recipe) use (&$rows, &$index): void {
             $rows[] = [
+                $index++,
                 $recipe->code,
                 $recipe->name,
                 $recipe->type,
@@ -74,11 +82,49 @@ class RecipeExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
                 $lastCol = Coordinate::stringFromColumnIndex(self::COLS);
                 $lastRow = $sheet->getHighestRow();
 
+                // Tiêu đề lớn gộp ô — cùng cỡ/độ cao với export Danh mục nguyên liệu
                 $sheet->mergeCells("A1:{$lastCol}1");
-                $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
+                $sheet->getRowDimension(1)->setRowHeight(35);
+                $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(16);
                 $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-                $sheet->getStyle("A3:{$lastCol}3")->getFont()->setBold(true);
-                $sheet->getStyle("D4:H{$lastRow}")->getNumberFormat()->setFormatCode('#,##0.00');
+                $sheet->getStyle('A1')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+
+                // Header nền xanh đậm, chữ trắng đậm, canh giữa
+                $sheet->getRowDimension(2)->setRowHeight(25);
+                $sheet->getStyle("A2:{$lastCol}2")->applyFromArray([
+                    'font' => [
+                        'bold' => true,
+                        'color' => ['rgb' => 'FFFFFF'],
+                        'size' => 11,
+                    ],
+                    'fill' => [
+                        'fillType' => Fill::FILL_SOLID,
+                        'startColor' => ['rgb' => '0F4C81'],
+                    ],
+                    'alignment' => [
+                        'horizontal' => Alignment::HORIZONTAL_CENTER,
+                        'vertical' => Alignment::VERTICAL_CENTER,
+                    ],
+                ]);
+
+                // Format số: tiền (E, F, I) và định lượng (H) canh phải; STT/SL NL/Trạng thái canh giữa
+                $sheet->getStyle("E3:F{$lastRow}")->getNumberFormat()->setFormatCode('#,##0.00');
+                $sheet->getStyle("H3:I{$lastRow}")->getNumberFormat()->setFormatCode('#,##0.00');
+                $sheet->getStyle("E3:F{$lastRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+                $sheet->getStyle("H3:I{$lastRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+                $sheet->getStyle("A3:A{$lastRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle("G3:G{$lastRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle("J3:J{$lastRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+                // Viền mảnh toàn bảng (từ header đến dòng cuối)
+                $sheet->getStyle("A2:{$lastCol}{$lastRow}")->applyFromArray([
+                    'borders' => [
+                        'allBorders' => [
+                            'borderStyle' => Border::BORDER_THIN,
+                            'color' => ['rgb' => 'D3D3D3'],
+                        ],
+                    ],
+                ]);
             },
         ];
     }
