@@ -214,7 +214,8 @@ class ListFoodSafetyAudits extends ListRecords
                     'shift' => $shiftLabel,
                     'main_ingredients' => $mainIngredients,
                     'portions' => $portions,
-                    'prep_time' => $audit?->cook_start_at?->format('H:i') ?? '',
+                    // cook_start_at là chuỗi TIME (không cast datetime) — cắt HH:MM như timeRange()
+                    'prep_time' => $audit?->cook_start_at ? substr((string) $audit->cook_start_at, 0, 5) : '',
                     'time' => $this->timeRange($audit?->cook_start_at, $audit?->cook_end_at),
                     'staff_check' => 'Đạt',
                     'equipment_check' => 'Đạt',
