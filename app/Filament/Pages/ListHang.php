@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Exports\ListHangExport;
 use App\Filament\Resources\MenuResource;
 use App\Filament\Resources\PurchaseOrderResource;
 use App\Filament\Resources\StockResource;
@@ -16,6 +17,8 @@ use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class ListHang extends Page
 {
@@ -126,38 +129,16 @@ class ListHang extends Page
     }
 
     /**
-     * Xuất Excel (CSV BOM) danh sách hàng của ngày/ca đang xem: Ca → Món → Nguyên liệu.
+     * Xuất Excel danh sách hàng của ngày/ca đang xem: Ca → Món → Nguyên liệu.
      */
-    public function exportList()
+    public function exportList(): BinaryFileResponse
     {
         abort_unless(StockResource::canViewAny() || MenuResource::canViewAny(), 403);
 
-        $grouped = $this->getGroupedData();
-        $filename = 'list_hang_'.$this->date.'.csv';
-
-        return response()->streamDownload(function () use ($grouped): void {
-            $output = fopen('php://output', 'w');
-            fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
-            fputcsv($output, ['Ca', 'Món ăn', 'Số suất', 'Mã NL', 'Nguyên liệu', 'ĐL (kg/suất)', 'Tổng cần (kg)', 'ĐVT']);
-
-            foreach ($grouped as $shift) {
-                foreach ($shift['dishes'] as $dish) {
-                    foreach ($dish['ingredients'] as $ing) {
-                        fputcsv($output, [
-                            $shift['name'],
-                            $dish['name'],
-                            $dish['portions'],
-                            $ing['code'],
-                            $ing['name'],
-                            $ing['quantity_per_portion'],
-                            $ing['quantity'],
-                            $ing['unit'],
-                        ]);
-                    }
-                }
-            }
-            fclose($output);
-        }, $filename, ['Content-Type' => 'text/csv; charset=UTF-8']);
+        return Excel::download(
+            new ListHangExport($this->getGroupedData(), (string) $this->date),
+            'list_hang_'.$this->date.'.xlsx',
+        );
     }
 
     public function loadPOIngredients(): void
