@@ -72,9 +72,18 @@ class MenuResource extends Resource
                     ->options([
                         'draft' => 'Nháp (Draft)',
                         'sent' => 'Đã gửi khách hàng (Sent)',
+                        'confirmed' => 'Khách đã xác nhận (Confirmed)',
                         'locked' => 'Đã chốt (Locked)',
                     ])
                     ->default('draft'),
+                Forms\Components\TextInput::make('edit_reason')
+                    ->label('Lý do sửa (bắt buộc khi sửa thực đơn ĐÃ CHỐT)')
+                    ->placeholder('VD: Khách đổi món đột xuất')
+                    ->maxLength(255)
+                    ->dehydrated(false)
+                    ->visible(fn (string $operation, ?Menu $record): bool => $operation === 'edit'
+                        && $record !== null
+                        && in_array($record->status, Menu::FINALIZED_STATUSES, true)),
             ]);
     }
 
@@ -116,15 +125,11 @@ class MenuResource extends Resource
                     ->color(fn (string $state): string => match ($state) {
                         'draft' => 'warning',
                         'sent' => 'info',
+                        'confirmed' => 'primary',
                         'locked' => 'success',
                         default => 'gray',
                     })
-                    ->formatStateUsing(fn (string $state): string => match ($state) {
-                        'draft' => 'Nháp',
-                        'sent' => 'Đã gửi khách hàng',
-                        'locked' => 'Đã chốt',
-                        default => $state,
-                    }),
+                    ->formatStateUsing(fn (string $state): string => Menu::STATUS_LABELS[$state] ?? $state),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -139,11 +144,7 @@ class MenuResource extends Resource
                     ->relationship('shift', 'name'),
                 Tables\Filters\SelectFilter::make('status')
                     ->label('Trạng thái')
-                    ->options([
-                        'draft' => 'Nháp',
-                        'sent' => 'Đã gửi khách hàng',
-                        'locked' => 'Đã chốt',
-                    ]),
+                    ->options(Menu::STATUS_LABELS),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

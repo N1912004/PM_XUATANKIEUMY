@@ -8,6 +8,7 @@ use App\Models\Ingredient;
 use App\Models\Menu;
 use App\Models\PurchaseOrder;
 use App\Models\Stock;
+use App\Models\Supplier;
 use Carbon\Carbon;
 use Filament\Pages\Page;
 use Livewire\WithPagination;
@@ -48,6 +49,9 @@ class Dashboard extends Page
     public int $lowStockCount = 0;
 
     public array $recentOrders = [];
+
+    /** Hồ sơ NCC sắp hết hạn (≤30 ngày) hoặc đã quá hạn — cảnh báo cho bộ phận mua hàng */
+    public array $expiringSupplierDocs = [];
 
     public string $greeting = '';
 
@@ -102,6 +106,31 @@ class Dashboard extends Page
             ->limit(50)
             ->get(['id', 'ingredient_id', 'quantity', 'min_quantity'])
             ->toArray();
+
+        // Hồ sơ NCC sắp hết hạn/quá hạn (cột JSON nên duyệt PHP — cùng pattern hồ sơ nhân viên)
+        $threshold = Carbon::today()->addDays(30);
+        $expiring = [];
+        foreach (Supplier::whereNotNull('documents')->get(['id', 'name', 'documents']) as $supplier) {
+            foreach ($supplier->documents ?? [] as $doc) {
+                if (empty($doc['expires_at'])) {
+                    continue;
+                }
+                $expiresAt = Carbon::parse($doc['expires_at']);
+                if ($expiresAt->lte($threshold)) {
+                    $expiring[] = [
+                        'supplier' => $supplier->name,
+                        'document' => $doc['name'] ?? 'Hồ sơ',
+                        'expires_at' => $expiresAt->format('d/m/Y'),
+                        // Khóa sort dạng Y-m-d — chuỗi d/m/Y so sánh lexicographic sẽ sai thứ tự thời gian
+                        'sort_key' => $expiresAt->toDateString(),
+                        'expired' => $expiresAt->isPast(),
+                    ];
+                }
+            }
+        }
+        // Quá hạn lên đầu, trong mỗi nhóm ngày gần nhất trước
+        usort($expiring, fn ($a, $b) => [$b['expired'], $a['sort_key']] <=> [$a['expired'], $b['sort_key']]);
+        $this->expiringSupplierDocs = array_slice($expiring, 0, 20);
 
         // Fetch Recent Purchase Orders
         $this->recentOrders = PurchaseOrder::with('supplier:id,name')

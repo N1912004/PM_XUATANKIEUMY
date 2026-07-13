@@ -51,7 +51,8 @@ class RecipeExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
                 (float) $recipe->actual_price,
                 $recipe->ingredients->count(),
                 (float) $recipe->ingredients->sum('pivot.quantity_per_portion'),
-                (float) $recipe->ingredients->sum(fn ($ingredient): float => (float) $ingredient->pivot->quantity_per_portion * (float) $ingredient->reference_price),
+                // Cost hiệu lực: ưu tiên cost override — khớp với bảng danh sách và Báo cáo
+                $recipe->effectiveCostPerPortion(),
                 match ($recipe->status) {
                     'active' => 'Đang hoạt động',
                     'pending' => 'Chờ rà soát',

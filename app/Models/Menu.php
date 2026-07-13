@@ -24,7 +24,63 @@ class Menu extends Model
      *
      * @var array<int, string>
      */
-    protected const FINALIZED_STATUSES = ['sent', 'locked'];
+    public const FINALIZED_STATUSES = ['sent', 'confirmed', 'locked'];
+
+    /**
+     * Thứ bậc vòng đời trạng thái (BA 07/07/2026): không được hạ cấp trạng thái
+     * khi lưu lại — chỉ đi tiến Nháp → Gửi xác nhận → Khách đã xác nhận → Đã chốt.
+     *
+     * @var array<string, int>
+     */
+    public const STATUS_ORDER = ['draft' => 0, 'sent' => 1, 'confirmed' => 2, 'locked' => 3];
+
+    /**
+     * Nhãn hiển thị tiếng Việt của từng trạng thái.
+     *
+     * @var array<string, string>
+     */
+    public const STATUS_LABELS = [
+        'draft' => 'Nháp',
+        'sent' => 'Đã gửi khách hàng',
+        'confirmed' => 'Khách đã xác nhận',
+        'locked' => 'Đã chốt',
+    ];
+
+    /**
+     * Lý do sửa (transient — không lưu vào bảng menus) do trang lập thực đơn gán trước khi
+     * update; hook audit đọc và ghi vào menu_audit_logs.reason.
+     */
+    public ?string $auditReason = null;
+
+    /**
+     * Thực đơn quá khứ đã hoàn thành (đã chốt + ngày cũ) bị khóa cứng, không cho sửa/xóa.
+     */
+    public function isPastLocked(): bool
+    {
+        return $this->status === 'locked' && $this->date !== null && $this->date->isBefore(today());
+    }
+
+    /**
+     * Bộ guard vòng đời dùng chung cho mọi màn sửa thực đơn: trả về lý do bị chặn
+     * ('past' | 'downgrade' | 'need_reason') hoặc null nếu được phép ghi.
+     * Dùng một chỗ duy nhất để 3 trang lập thực đơn không lệch quy tắc.
+     */
+    public function editBlockReason(string $newStatus, ?string $reason): ?string
+    {
+        if ($this->isPastLocked()) {
+            return 'past';
+        }
+
+        if ((self::STATUS_ORDER[$newStatus] ?? 0) < (self::STATUS_ORDER[$this->status] ?? 0)) {
+            return 'downgrade';
+        }
+
+        if ($this->status === 'locked' && trim((string) $reason) === '') {
+            return 'need_reason';
+        }
+
+        return null;
+    }
 
     protected $fillable = [
         'kitchen_id',
@@ -83,6 +139,7 @@ class Menu extends Model
                     'field' => $field,
                     'old_value' => (string) $menu->getOriginal($field),
                     'new_value' => (string) $menu->getAttribute($field),
+                    'reason' => $menu->auditReason,
                     'edited_at' => $now,
                     'created_at' => $now,
                     'updated_at' => $now,
@@ -107,6 +164,7 @@ class Menu extends Model
                 'field' => null,
                 'old_value' => 'Thực đơn #'.$menu->id,
                 'new_value' => null,
+                'reason' => $menu->auditReason,
                 'edited_at' => now(),
             ]);
         });

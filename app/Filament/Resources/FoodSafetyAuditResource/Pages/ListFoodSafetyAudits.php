@@ -4,8 +4,11 @@ namespace App\Filament\Resources\FoodSafetyAuditResource\Pages;
 
 use App\Exports\FoodSafetyAuditReportExport;
 use App\Filament\Resources\FoodSafetyAuditResource;
+use App\Models\Employee;
 use App\Models\FoodSafetyAudit;
+use App\Models\Kitchen;
 use App\Models\Menu;
+use App\Models\PurchaseOrderItem;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Support\Collection;
@@ -25,9 +28,37 @@ class ListFoodSafetyAudits extends ListRecords
 
     public string $activeStep = 'Bước 1';
 
-    public string $canteen = 'Canteen Summit';
+    public string $canteen = '';
 
-    public string $inspector = 'Nguyễn Văn An';
+    public string $inspector = '';
+
+    public function mount(): void
+    {
+        parent::mount();
+
+        // Địa điểm tự nhận theo bếp của tài khoản đang đăng nhập (BA: không nhập tay)
+        $kitchenId = auth()->user()?->currentKitchenId();
+        $this->canteen = ($kitchenId ? Kitchen::find($kitchenId)?->name : null)
+            ?? Kitchen::first()?->name
+            ?? 'Bếp ăn';
+
+        // Người kiểm tra mặc định: nhân viên liên kết với tài khoản (chọn lại từ danh mục trên UI)
+        $this->inspector = auth()->user()?->employee?->name ?? '';
+    }
+
+    /**
+     * Danh mục nhân viên để chọn Người kiểm tra (BA: chọn từ danh mục, không gõ tay).
+     *
+     * @return array<int, string>
+     */
+    public function getInspectorOptions(): array
+    {
+        return Employee::query()
+            ->where('status', 'Đang làm việc')
+            ->orderBy('name')
+            ->pluck('name', 'id')
+            ->all();
+    }
 
     protected function getHeaderActions(): array
     {
@@ -95,6 +126,22 @@ class ListFoodSafetyAudits extends ListRecords
 
         if ($this->activeStep === 'Bước 1') {
             // Step 1: Input raw ingredients check
+            $ingredientIds = $menus
+                ->flatMap(fn ($menu) => $menu->recipe?->ingredients->pluck('id') ?? collect())
+                ->unique()
+                ->values();
+
+            // NCC + chứng từ lấy theo PO ĐÃ NHẬP KHO gần nhất của từng nguyên liệu
+            // (BA: theo PO/ngày nhập thực tế, không dùng NCC cố định của nguyên liệu)
+            $poInfoByIngredient = PurchaseOrderItem::query()
+                ->whereIn('ingredient_id', $ingredientIds)
+                ->whereHas('purchaseOrder', fn ($q) => $q->whereNotNull('stocked_at'))
+                ->with(['purchaseOrder:id,code,supplier_id,stocked_at', 'purchaseOrder.supplier:id,name'])
+                ->get(['id', 'purchase_order_id', 'ingredient_id'])
+                ->sortByDesc(fn ($item) => $item->purchaseOrder?->stocked_at)
+                ->unique('ingredient_id')
+                ->keyBy('ingredient_id');
+
             $seenIngredients = [];
             foreach ($menus as $menu) {
                 $recipe = $menu->recipe;
@@ -109,14 +156,19 @@ class ListFoodSafetyAudits extends ListRecords
                         continue;
                     }
 
+                    $poInfo = $poInfoByIngredient->get($ingredient->id);
+
                     $seenIngredients[$ingredient->id] = [
                         'name' => $ingredient->name,
                         'type' => $ingredient->type,
-                        'time' => '05:00',
+                        'time' => $poInfo?->purchaseOrder?->stocked_at?->format('H:i') ?? '05:00',
                         'quantity' => $qty,
                         'unit' => $ingredient->unit,
-                        'supplier' => $ingredient->supplier->name ?? 'Cơ sở tự do',
-                        'invoice' => 'HĐ-'.($ingredient->supplier->code ?? 'NCC').'-'.str_replace('-', '', $this->date),
+                        'supplier' => $poInfo?->purchaseOrder?->supplier?->name
+                            ?? $ingredient->supplier->name
+                            ?? 'Cơ sở tự do',
+                        // Chứng từ = mã PO thật đã nhập kho; chưa có PO thì để trống thay vì chuỗi tự chế
+                        'invoice' => $poInfo?->purchaseOrder?->code ?? '—',
                         'vet_check' => ($ingredient->type === 'Động vật') ? 'Đạt' : '—',
                         'sensory' => 'Đạt',
                         'quick_test' => '—',

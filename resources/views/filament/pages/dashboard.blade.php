@@ -411,6 +411,34 @@
                         </div>
                     @endif
                 </div>
+
+                <!-- Supplier Document Expiry Warnings -->
+                @if(count($expiringSupplierDocs) > 0)
+                    <div class="premium-card p-6">
+                        <div class="flex items-center justify-between mb-4 pb-3 border-b border-gray-100 dark:border-gray-800">
+                            <div class="flex items-center gap-2">
+                                <x-heroicon-o-document-check class="h-5 w-5 text-amber-500" />
+                                <h3 class="text-base font-extrabold text-gray-900 dark:text-white">{{ __('Hồ sơ NCC sắp hết hạn / quá hạn') }}</h3>
+                            </div>
+                            <span class="rounded-full bg-amber-100 px-2.5 py-0.5 text-2xs font-extrabold text-amber-700 dark:bg-amber-950/40 dark:text-amber-400">
+                                {{ count($expiringSupplierDocs) }} {{ __('hồ sơ') }}
+                            </span>
+                        </div>
+                        <div class="space-y-3 max-h-[280px] overflow-y-auto pr-1">
+                            @foreach($expiringSupplierDocs as $doc)
+                                <div class="flex items-center justify-between rounded-xl border p-3 {{ $doc['expired'] ? 'border-red-100 bg-red-50/20 dark:border-red-900/20 dark:bg-red-950/10' : 'border-amber-100 bg-amber-50/20 dark:border-amber-900/20 dark:bg-amber-950/10' }}">
+                                    <div>
+                                        <p class="text-sm font-bold text-gray-950 dark:text-white">{{ $doc['document'] }}</p>
+                                        <p class="text-2xs text-gray-500 mt-0.5 font-medium">{{ $doc['supplier'] }}</p>
+                                    </div>
+                                    <span class="text-xs font-bold {{ $doc['expired'] ? 'text-red-600 dark:text-red-400' : 'text-amber-600 dark:text-amber-400' }}">
+                                        {{ $doc['expired'] ? __('Quá hạn') : __('Hết hạn') }} {{ $doc['expires_at'] }}
+                                    </span>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
             </div>
 
             <!-- Right Column -->

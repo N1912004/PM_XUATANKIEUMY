@@ -44,6 +44,9 @@ class AuditLogsRelationManager extends RelationManager
                 Tables\Columns\TextColumn::make('new_value')
                     ->label('Giá trị mới')
                     ->placeholder('—'),
+                Tables\Columns\TextColumn::make('reason')
+                    ->label('Lý do sửa')
+                    ->placeholder('—'),
             ])
             ->defaultSort('edited_at', 'desc')
             ->headerActions([])

@@ -4,9 +4,12 @@
     $record = $getRecord();
     $ingredientsCount = $record->ingredients->count();
     $totalWeight = $record->ingredients->sum('pivot.quantity_per_portion');
-    $totalCost = $record->ingredients->sum(function ($ingredient) {
+    // Cost hiệu lực: ưu tiên cost override (nếu có) để khớp bảng danh sách & Báo cáo;
+    // breakdown % từng nguyên liệu vẫn tính trên cost tự tính bên dưới.
+    $autoCost = $record->ingredients->sum(function ($ingredient) {
         return $ingredient->pivot->quantity_per_portion * $ingredient->reference_price;
     });
+    $totalCost = $record->cost_override !== null ? (float) $record->cost_override : $autoCost;
 
     $colors = ['#1267E8', '#059669', '#7C3AED', '#EA580C', '#ef4444', '#ec4899', '#6b7280'];
     $ingredientsWithCosts = [];

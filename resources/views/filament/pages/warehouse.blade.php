@@ -772,20 +772,36 @@
                                     <tr>
                                         <th>Nguyên liệu</th>
                                         <th style="text-align: right;">SL dự kiến</th>
-                                        <th style="text-align: center; width:160px;">SL thực nhập</th>
-                                        <th style="text-align: right; width:180px;">Đơn giá</th>
+                                        <th style="text-align: center; width:140px;">SL thực nhập</th>
+                                        <th style="text-align: right; width:110px;">Chênh lệch</th>
+                                        <th style="text-align: right; width:140px;">Đơn giá (khóa theo PO)</th>
+                                        <th style="width:200px;">Lý do lệch</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach($poItemsData as $index => $item)
+                                        @php
+                                            // Chênh lệch = thực nhận − đặt; thừa xanh, thiếu đỏ (quy định kiểm hàng BA)
+                                            $diff = (float) ($item['quantity_received'] ?? 0) - (float) $item['quantity_ordered'];
+                                        @endphp
                                         <tr>
                                             <td style="font-weight: 700; color: #0f172a;" class="dark:text-white">{{ $item['name'] }}</td>
                                             <td style="text-align: right; font-weight:600;">{{ number_format($item['quantity_ordered'], 2, ',', '.') }} {{ $item['unit'] }}</td>
                                             <td style="text-align: center;">
-                                                <input type="number" step="0.01" wire:model="poItemsData.{{ $index }}.quantity_received" class="table-input" style="width: 110px;">
+                                                <input type="number" step="0.01" wire:model.live.debounce.400ms="poItemsData.{{ $index }}.quantity_received" class="table-input" style="width: 110px;">
                                             </td>
-                                            <td style="text-align: right;">
-                                                <input type="number" step="1000" wire:model="poItemsData.{{ $index }}.unit_price" class="table-input" style="width: 140px; text-align: right;">
+                                            <td style="text-align: right; font-weight:750; color: {{ $diff > 0 ? '#16a34a' : ($diff < 0 ? '#ef4444' : 'inherit') }}">
+                                                {{ $diff == 0 ? '—' : ($diff > 0 ? '+' : '').number_format($diff, 2, ',', '.') }}
+                                            </td>
+                                            <td style="text-align: right; font-weight:600;">
+                                                {{ number_format($item['unit_price'], 0, ',', '.') }}đ
+                                            </td>
+                                            <td>
+                                                @if($diff != 0)
+                                                    <input type="text" wire:model="poItemsData.{{ $index }}.receive_note" class="table-input" style="width: 100%;" placeholder="Bắt buộc khi lệch...">
+                                                @else
+                                                    <span style="color:#94a3b8; font-size:11px;">—</span>
+                                                @endif
                                             </td>
                                         </tr>
                                     @endforeach
@@ -1076,6 +1092,24 @@
 
         @elseif($warehouseTab === 'log')
             @php $logData = $this->getLogData(); @endphp
+            <!-- Bộ lọc nhật ký: loại giao dịch + nguyên liệu -->
+            <div style="display:flex; gap:10px; margin-bottom:12px; flex-wrap:wrap;">
+                <select wire:model.live="logTypeFilter" class="table-input" style="height:34px; min-width:180px;">
+                    <option value="">— Tất cả loại giao dịch —</option>
+                    <option value="Nhập kho">Nhập kho</option>
+                    <option value="Nhập kho ngoài">Nhập kho ngoài</option>
+                    <option value="Xuất kho">Xuất kho</option>
+                    <option value="Xuất chuyển kho">Xuất chuyển kho</option>
+                    <option value="Nhập chuyển kho">Nhập chuyển kho</option>
+                    <option value="Kiểm kê">Kiểm kê</option>
+                </select>
+                <select wire:model.live="logIngredientFilter" class="table-input" style="height:34px; min-width:200px;">
+                    <option value="">— Tất cả nguyên liệu —</option>
+                    @foreach($this->getIngredientsList() as $ing)
+                        <option value="{{ $ing->id }}">{{ $ing->name }}</option>
+                    @endforeach
+                </select>
+            </div>
             <div class="overflow-x-auto">
                 <table class="wh-table">
                     <thead>
@@ -1093,7 +1127,17 @@
                             <tr>
                                 <td>{{ \Carbon\Carbon::parse($log['created_at'])->format('d/m/Y H:i') }}</td>
                                 <td>
-                                    @if(in_array($log['type'], ['Nhập kho', 'Nhập kho ngoài', 'Nhập chuyển kho']))
+                                    @php
+                                        // 'Kiểm kê' lưu quantity CÓ DẤU (+ thừa / − thiếu); các loại khác dấu theo nhóm nhập/xuất
+                                        $isInflow = $log['type'] === 'Kiểm kê'
+                                            ? $log['quantity'] >= 0
+                                            : in_array($log['type'], ['Nhập kho', 'Nhập kho ngoài', 'Nhập chuyển kho']);
+                                    @endphp
+                                    @if($log['type'] === 'Kiểm kê')
+                                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 dark:bg-amber-950/20 dark:text-amber-400">
+                                            {{ $log['type'] }}
+                                        </span>
+                                    @elseif($isInflow)
                                         <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-green-100 text-green-800 dark:bg-green-950/20 dark:text-green-400">
                                             {{ $log['type'] }}
                                         </span>
@@ -1104,8 +1148,8 @@
                                     @endif
                                 </td>
                                 <td style="font-weight: 700;">{{ $log['ingredient']['name'] ?? '—' }}</td>
-                                <td style="text-align: right; font-weight: 750; color: {{ in_array($log['type'], ['Nhập kho', 'Nhập kho ngoài', 'Nhập chuyển kho']) ? '#16a34a' : '#ef4444' }}">
-                                    {{ in_array($log['type'], ['Nhập kho', 'Nhập kho ngoài', 'Nhập chuyển kho']) ? '+' : '-' }}{{ number_format(abs($log['quantity']), 2, ',', '.') }}
+                                <td style="text-align: right; font-weight: 750; color: {{ $isInflow ? '#16a34a' : '#ef4444' }}">
+                                    {{ $isInflow ? '+' : '-' }}{{ number_format(abs($log['quantity']), 2, ',', '.') }}
                                 </td>
                                 <td style="text-align: right; font-weight: 700;">{{ number_format($log['after_quantity'], 2, ',', '.') }}</td>
                                 <td>
@@ -1258,14 +1302,21 @@
                                         @endif
                                     </td>
                                     <td>
-                                        @if(in_array($log['type'], ['Nhập kho', 'Nhập kho ngoài', 'Nhập chuyển kho']))
+                                        @php
+                                            $isInflow = $log['type'] === 'Kiểm kê'
+                                                ? $log['quantity'] >= 0
+                                                : in_array($log['type'], ['Nhập kho', 'Nhập kho ngoài', 'Nhập chuyển kho']);
+                                        @endphp
+                                        @if($log['type'] === 'Kiểm kê')
+                                            <span class="px-2 rounded bg-amber-50 text-amber-700 font-semibold text-[10px]">{{ $log['type'] }}</span>
+                                        @elseif($isInflow)
                                             <span class="px-2 rounded bg-green-50 text-green-700 font-semibold text-[10px]">{{ $log['type'] }}</span>
                                         @else
                                             <span class="px-2 rounded bg-red-50 text-red-700 font-semibold text-[10px]">{{ $log['type'] }}</span>
                                         @endif
                                     </td>
-                                    <td style="text-align: right; font-weight: 700; color: {{ in_array($log['type'], ['Nhập kho', 'Nhập kho ngoài', 'Nhập chuyển kho']) ? '#16a34a' : '#ef4444' }}">
-                                        {{ in_array($log['type'], ['Nhập kho', 'Nhập kho ngoài', 'Nhập chuyển kho']) ? '+' : '-' }}{{ number_format(abs($log['quantity']), 2, ',', '.') }}
+                                    <td style="text-align: right; font-weight: 700; color: {{ $isInflow ? '#16a34a' : '#ef4444' }}">
+                                        {{ $isInflow ? '+' : '-' }}{{ number_format(abs($log['quantity']), 2, ',', '.') }}
                                     </td>
                                     <td style="text-align: right; font-weight: 700;">{{ number_format($log['after_quantity'], 2, ',', '.') }}</td>
                                 </tr>

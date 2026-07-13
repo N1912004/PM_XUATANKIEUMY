@@ -71,7 +71,56 @@
                             <input type="hidden" wire:model="type" required>
                             @error('type') <span class="sup-error">{{ $message }}</span> @enderror
                         </div>
+
+                        <div class="sup-field sup-field-full">
+                            <label class="sup-label">Ghi chú</label>
+                            <textarea wire:model="notes" class="sup-input" rows="3" placeholder="Ghi chú thêm về nhà cung cấp (không bắt buộc)"></textarea>
+                            @error('notes') <span class="sup-error">{{ $message }}</span> @enderror
+                        </div>
                     </div>
+                </div>
+
+                <!-- Hồ sơ NCC: hợp đồng, chứng nhận ATTP... kèm ngày hết hạn -->
+                <div class="sup-card">
+                    <div class="sup-card-title" style="display:flex; align-items:center; justify-content:space-between">
+                        <span>Hồ sơ nhà cung cấp (hợp đồng, chứng nhận ATTP...)</span>
+                        <button type="button" wire:click="addDocument"
+                            style="background:var(--po-bl-s); color:var(--po-bl); border:none; padding:6px 12px; border-radius:8px; font-size:12px; font-weight:700; cursor:pointer">
+                            <i class="fa-solid fa-plus"></i> Thêm hồ sơ
+                        </button>
+                    </div>
+
+                    @forelse($documents as $index => $doc)
+                        <div style="display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap; padding:10px 0; border-bottom:1px dashed var(--sup-bd2)">
+                            <div class="sup-field" style="flex:2; min-width:180px">
+                                <label class="sup-label">Tên hồ sơ</label>
+                                <input wire:model="documents.{{ $index }}.name" type="text" class="sup-input" placeholder="VD: Chứng nhận ATTP 2026">
+                            </div>
+                            <div class="sup-field" style="min-width:150px">
+                                <label class="sup-label">Ngày hết hạn</label>
+                                <input wire:model="documents.{{ $index }}.expires_at" type="date" class="sup-input">
+                            </div>
+                            <div class="sup-field" style="flex:2; min-width:200px">
+                                <label class="sup-label">File đính kèm (ảnh/PDF, ≤5MB)</label>
+                                <input wire:model="documentUploads.{{ $index }}" type="file" accept=".jpg,.jpeg,.png,.webp,.pdf" class="sup-input" style="padding:7px">
+                                @error('documentUploads.'.$index) <span class="sup-error">{{ $message }}</span> @enderror
+                                @if(!empty($doc['file_path']))
+                                    <a href="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($doc['file_path']) }}" target="_blank"
+                                        style="font-size:11.5px; color:var(--po-bl); font-weight:700">
+                                        <i class="fa-solid fa-paperclip"></i> Xem file hiện tại
+                                    </a>
+                                @endif
+                            </div>
+                            <button type="button" wire:click="removeDocument({{ $index }})"
+                                style="background:#fee2e2; color:#dc2626; border:none; width:34px; height:34px; border-radius:8px; cursor:pointer; flex-shrink:0">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                    @empty
+                        <div style="color:var(--sup-mu); font-size:12.5px; font-style:italic; padding:6px 0">
+                            Chưa có hồ sơ nào. Bấm "Thêm hồ sơ" để khai báo hợp đồng/chứng nhận kèm ngày hết hạn.
+                        </div>
+                    @endforelse
                 </div>
 
                 <!-- Ingredient Mapping Section -->

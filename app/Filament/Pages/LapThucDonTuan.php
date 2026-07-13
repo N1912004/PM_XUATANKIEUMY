@@ -86,6 +86,10 @@ class LapThucDonTuan extends Page implements HasForms
                             ->required()
                             ->helperText('Các món sẽ được xếp theo thứ tính từ ngày này.'),
                     ]),
+                TextInput::make('edit_reason')
+                    ->label('Lý do sửa (bắt buộc khi sửa thực đơn ĐÃ CHỐT)')
+                    ->placeholder('VD: Khách đổi món đột xuất ngày 15/07')
+                    ->maxLength(255),
                 Repeater::make('entries')
                     ->label('Các món trong tuần')
                     ->schema([
@@ -149,52 +153,88 @@ class LapThucDonTuan extends Page implements HasForms
 
         $duplicates = $this->duplicateWarnings($entries, $weekStart, $kitchenId);
 
-        $skippedLocked = 0;
+        $editReason = trim((string) ($state['edit_reason'] ?? ''));
 
-        DB::transaction(function () use ($entries, $weekStart, $kitchenId, $status, &$skippedLocked): void {
+        // Nạp toàn bộ menu hiện có của các ngày liên quan bằng 1 query, tra theo khóa
+        // "date|shift|recipe" — thay cho 1 EXISTS + 1 SELECT mỗi entry (2N round-trip)
+        $entryDates = collect($entries)
+            ->map(fn ($entry) => $weekStart->copy()->addDays((int) $entry['day'])->toDateString())
+            ->unique()
+            ->values();
+
+        $existingByKey = Menu::where('kitchen_id', $kitchenId)
+            ->whereIn('date', $entryDates)
+            ->get()
+            ->keyBy(fn (Menu $menu) => $menu->date->toDateString().'|'.$menu->shift_id.'|'.$menu->recipe_id);
+
+        // Sửa thực đơn ĐÃ CHỐT bắt buộc phải có lý do (lưu vào menu_audit_logs.reason)
+        $touchesLocked = collect($entries)->contains(function ($entry) use ($weekStart, $existingByKey) {
+            $date = $weekStart->copy()->addDays((int) $entry['day'])->toDateString();
+
+            return $existingByKey->get($date.'|'.$entry['shift_id'].'|'.$entry['recipe_id'])?->status === 'locked';
+        });
+
+        if ($touchesLocked && $editReason === '') {
+            Notification::make()
+                ->title('Cần lý do sửa thực đơn đã chốt')
+                ->body('Bạn đang sửa thực đơn ĐÃ CHỐT — vui lòng nhập "Lý do sửa" trước khi lưu.')
+                ->danger()
+                ->send();
+
+            return;
+        }
+
+        $skippedDowngrade = 0;
+        $skippedPast = 0;
+
+        DB::transaction(function () use ($entries, $weekStart, $kitchenId, $status, $editReason, $existingByKey, &$skippedDowngrade, &$skippedPast): void {
             foreach ($entries as $entry) {
                 $date = $weekStart->copy()->addDays((int) $entry['day'])->toDateString();
 
-                // Không hạ cấp thực đơn ĐÃ CHỐT về nháp/gửi khách — locked là căn cứ đã sinh PO/List hàng
-                $existing = Menu::where('kitchen_id', $kitchenId)
-                    ->where('date', $date)
-                    ->where('shift_id', $entry['shift_id'])
-                    ->where('recipe_id', $entry['recipe_id'])
-                    ->first();
+                $existing = $existingByKey->get($date.'|'.$entry['shift_id'].'|'.$entry['recipe_id']);
 
-                if ($existing && $existing->status === 'locked' && $status !== 'locked') {
-                    $skippedLocked++;
+                if ($existing) {
+                    // Guard vòng đời dùng chung (khóa quá khứ / không hạ cấp / lý do khi sửa đã chốt)
+                    $blocked = $existing->editBlockReason($status, $editReason);
+                    if ($blocked !== null) {
+                        $blocked === 'past' ? $skippedPast++ : $skippedDowngrade++;
 
-                    continue;
-                }
+                        continue;
+                    }
 
-                Menu::updateOrCreate(
-                    [
+                    $existing->auditReason = $editReason !== '' ? $editReason : null;
+                    $existing->update([
+                        'estimated_portions' => $entry['estimated_portions'],
+                        'status' => $status,
+                    ]);
+                } else {
+                    Menu::create([
                         'kitchen_id' => $kitchenId,
                         'date' => $date,
                         'shift_id' => $entry['shift_id'],
                         'recipe_id' => $entry['recipe_id'],
-                    ],
-                    [
                         'estimated_portions' => $entry['estimated_portions'],
                         'status' => $status,
-                    ],
-                );
+                    ]);
+                }
             }
         });
 
-        if ($skippedLocked > 0) {
+        if ($skippedDowngrade > 0) {
             Notification::make()
-                ->title("{$skippedLocked} món đã CHỐT được giữ nguyên (không ghi đè về '{$status}')")
+                ->title("{$skippedDowngrade} món được giữ nguyên trạng thái (không hạ cấp về '".(Menu::STATUS_LABELS[$status] ?? $status)."')")
                 ->warning()
                 ->send();
         }
 
-        $label = match ($status) {
-            'sent' => 'Đã gửi khách hàng',
-            'locked' => 'Đã chốt',
-            default => 'Đã lưu nháp',
-        };
+        if ($skippedPast > 0) {
+            Notification::make()
+                ->title("{$skippedPast} món thuộc thực đơn quá khứ đã chốt — bị khóa cứng, không sửa được")
+                ->warning()
+                ->send();
+        }
+
+        $label = $status === 'draft' ? 'Đã lưu nháp' : (Menu::STATUS_LABELS[$status] ?? $status);
 
         Notification::make()
             ->title($label.' thực đơn tuần ('.count($entries).' món)')
@@ -219,6 +259,11 @@ class LapThucDonTuan extends Page implements HasForms
     public function sendToClient(): void
     {
         $this->save('sent');
+    }
+
+    public function confirmByClient(): void
+    {
+        $this->save('confirmed');
     }
 
     public function lockWeek(): void

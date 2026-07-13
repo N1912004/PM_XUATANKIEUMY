@@ -118,7 +118,9 @@ class BaoCao extends Page
 
         // Khoảng nửa mở [start, end+1) — sargable trên MySQL (dùng index) và đúng cả trên
         // SQLite (nơi cột date lưu kèm giờ '00:00:00' khi test)
+        // Báo cáo tài chính chỉ tính thực đơn ĐÃ CHỐT — nháp/đang gửi chưa phải chi phí thực
         $menusQuery = Menu::with(['recipe.ingredients'])
+            ->where('status', 'locked')
             ->where('date', '>=', $start->toDateString())
             ->where('date', '<', $end->copy()->addDay()->toDateString())
             ->whereIn('shift_id', $this->selectedShifts);
@@ -173,6 +175,11 @@ class BaoCao extends Page
                             'unit_cost' => (float) $ingredient->reference_price,
                             'line_cost' => $lineCost * $menu->estimated_portions,
                         ];
+                    }
+
+                    // Cost override (nếu có) thay cho cost tự tính — theo quy định BA về giá vốn món
+                    if ($recipe->cost_override !== null) {
+                        $costPerPortion = (float) $recipe->cost_override;
                     }
 
                     // Tổng giá vốn món = giá vốn/suất × số suất

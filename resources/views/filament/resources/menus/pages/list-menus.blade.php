@@ -85,6 +85,7 @@
                 <option value="">Tất cả trạng thái</option>
                 <option value="draft">Nháp</option>
                 <option value="sent">Đã gửi khách</option>
+                <option value="confirmed">Khách đã xác nhận</option>
                 <option value="locked">Đã chốt</option>
             </select>
             <select wire:model.live="monthFilter" class="mp-sel">
@@ -160,6 +161,8 @@
                     <div class="mp-item-right" wire:click.stop>
                         @if($row['status'] === 'locked')
                             <span class="ms-locked">Đã chốt</span>
+                        @elseif($row['status'] === 'confirmed')
+                            <span class="ms-sent">Khách đã xác nhận</span>
                         @elseif($row['status'] === 'sent')
                             <span class="ms-sent">Đã gửi khách</span>
                         @else
@@ -264,6 +267,7 @@
                 <button type="button" class="emp-btn" wire:click="exportWeekForm"><i class="fa-solid fa-file-excel" style="color:var(--po-gn)"></i> Xuất Excel</button>
                 <button wire:click="saveWeekMenu('draft')" class="emp-btn"><i class="fa-regular fa-floppy-disk"></i> Lưu nháp</button>
                 <button wire:click="saveWeekMenu('sent')" class="emp-btn"><i class="fa-regular fa-paper-plane"></i> Gửi xác nhận</button>
+                <button wire:click="saveWeekMenu('confirmed')" class="emp-btn"><i class="fa-solid fa-check-double"></i> Khách đã xác nhận</button>
                 <button wire:click="saveWeekMenu('locked')" class="emp-btn emp-btn-primary"><i class="fa-solid fa-lock"></i> Chốt thực đơn</button>
             </div>
         </div>
@@ -282,6 +286,10 @@
                 <label>Ngày bắt đầu tuần (Thứ 2) *</label>
                 <input wire:model="weekStartDate" type="date" class="ctrl" required>
             </div>
+            <div class="field" style="min-width:280px; flex:1">
+                <label>Lý do sửa (bắt buộc khi sửa thực đơn ĐÃ CHỐT)</label>
+                <input wire:model="weekEditReason" type="text" class="ctrl" placeholder="VD: Khách đổi món đột xuất">
+            </div>
         </div>
 
         <!-- Grid Matrix Table -->
@@ -290,12 +298,12 @@
                 <thead>
                     <tr style="background:#1267E8; color:#fff">
                         <th style="padding:12px 14px; text-align:left; width:120px">CA / THỨ</th>
-                        @for($d = 0; $d < 6; $d++)
+                        @for($d = 0; $d < 7; $d++)
                             @php
                                 $dayDate = \Illuminate\Support\Carbon::parse($this->weekStartDate)->addDays($d);
                             @endphp
                             <th style="padding:12px 14px; text-align:center">
-                                Thứ {{ $d + 2 }}
+                                {{ $d === 6 ? 'Chủ nhật' : 'Thứ '.($d + 2) }}
                                 <div style="font-size:10.5px; font-weight:500; opacity:.85; margin-top:2px">
                                     {{ $dayDate->format('d/m/Y') }}
                                 </div>
@@ -312,7 +320,7 @@
                                     {{ $shift->time_range }}
                                 </div>
                             </td>
-                            @for($d = 0; $d < 6; $d++)
+                            @for($d = 0; $d < 7; $d++)
                                 <td style="padding:10px; text-align:center; background:var(--po-wh)">
                                     <div style="display:flex; flex-direction:column; gap:6px">
                                         <!-- Món ăn select -->
@@ -350,6 +358,8 @@
                 <button wire:click="switchView('list')" class="emp-btn"><i class="fa-solid fa-arrow-left"></i> Quay lại</button>
                 <button type="button" class="emp-btn" wire:click="exportDayForm"><i class="fa-solid fa-file-excel" style="color:var(--po-gn)"></i> Xuất Excel</button>
                 <button wire:click="saveDayMenu('draft')" class="emp-btn"><i class="fa-regular fa-floppy-disk"></i> Lưu nháp</button>
+                <button wire:click="saveDayMenu('sent')" class="emp-btn"><i class="fa-regular fa-paper-plane"></i> Gửi xác nhận</button>
+                <button wire:click="saveDayMenu('confirmed')" class="emp-btn"><i class="fa-solid fa-check-double"></i> Khách đã xác nhận</button>
                 <button wire:click="saveDayMenu('locked')" class="emp-btn emp-btn-primary"><i class="fa-solid fa-lock"></i> Chốt thực đơn</button>
             </div>
         </div>
@@ -367,6 +377,10 @@
             <div class="field" style="min-width:200px">
                 <label>Ngày lập thực đơn *</label>
                 <input wire:model="dayDate" type="date" class="ctrl" required>
+            </div>
+            <div class="field" style="min-width:280px; flex:1">
+                <label>Lý do sửa (bắt buộc khi sửa thực đơn ĐÃ CHỐT)</label>
+                <input wire:model="dayEditReason" type="text" class="ctrl" placeholder="VD: Khách đổi món đột xuất">
             </div>
         </div>
 

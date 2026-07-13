@@ -68,9 +68,25 @@ class PurchaseOrderResource extends Resource
                         'checking' => 'Đang kiểm (Checking)',
                         'done' => 'Hoàn thành (Done)',
                     ])
-                    ->default('draft'),
+                    ->default('draft')
+                    // State machine chỉ đi tiến draft → sent → checking → done; lùi trạng thái
+                    // (đặc biệt done → khác) phá cơ chế chống nhập kho lặp (stocked_at)
+                    ->rule(fn (?PurchaseOrder $record) => function (string $attribute, $value, \Closure $fail) use ($record): void {
+                        if (! $record) {
+                            return;
+                        }
+                        $order = ['draft' => 0, 'sent' => 1, 'checking' => 2, 'done' => 3];
+                        if (($order[$value] ?? 0) < ($order[$record->status] ?? 0)) {
+                            $fail('Không được lùi trạng thái đơn hàng (vòng đời chỉ đi tiến Nháp → Đã gửi → Đang kiểm → Hoàn thành).');
+                        }
+                    }),
                 Forms\Components\DatePicker::make('estimated_delivery_date')
-                    ->label('Ngày giao dự kiến'),
+                    ->label('Ngày giao dự kiến')
+                    // Quy định nghiệp vụ: chỉ được đặt hàng cho tối đa 2 ngày kế tiếp.
+                    // Chỉ ràng buộc khi tạo mới — đơn cũ (ngày quá khứ) vẫn sửa được các trường khác.
+                    ->minDate(fn (string $operation) => $operation === 'create' ? today() : null)
+                    ->maxDate(fn (string $operation) => $operation === 'create' ? today()->addDays(2) : null)
+                    ->helperText('Chỉ được chọn trong vòng 2 ngày kế tiếp từ hôm nay'),
                 Forms\Components\Textarea::make('note')
                     ->label('Ghi chú')
                     ->columnSpanFull(),

@@ -276,6 +276,28 @@ class ListStocks extends ListRecords
 
         $kitchenId = auth()->user()?->currentKitchenId();
 
+        // Dòng nào lệch tồn (thực tế ≠ hệ thống) BẮT BUỘC ghi lý do — đối chiếu tồn từ DB
+        $systemQty = Stock::query()
+            ->whereIn('id', array_keys($this->actualQuantities))
+            ->when($kitchenId, fn ($q) => $q->where('kitchen_id', $kitchenId))
+            ->pluck('quantity', 'id');
+
+        foreach ($this->actualQuantities as $stockId => $actualQty) {
+            if (! $systemQty->has($stockId)) {
+                continue;
+            }
+            $diff = (float) $actualQty - (float) $systemQty[$stockId];
+            if ($diff != 0 && trim((string) ($this->checkNotes[$stockId] ?? '')) === '') {
+                Notification::make()
+                    ->title('Thiếu lý do chênh lệch kiểm kê')
+                    ->body('Có dòng tồn thực tế lệch với hệ thống — vui lòng ghi lý do vào cột Ghi chú của từng dòng lệch trước khi chốt.')
+                    ->danger()
+                    ->send();
+
+                return;
+            }
+        }
+
         DB::transaction(function () use ($kitchenId): void {
             foreach ($this->actualQuantities as $stockId => $actualQty) {
                 // Khóa dòng tồn và chỉ chấp nhận stock thuộc bếp của user (chống sửa payload chéo bếp)
@@ -291,13 +313,14 @@ class ListStocks extends ListRecords
 
                 $diff = (float) $actualQty - (float) $stock->quantity;
                 if ($diff != 0) {
-                    $type = $diff > 0 ? 'Nhập kho' : 'Xuất kho';
-
+                    // Loại giao dịch 'Kiểm kê' riêng (không trộn với Nhập/Xuất kho thường)
+                    // để nhật ký đối soát phân biệt được điều chỉnh kiểm kê; quantity giữ DẤU
+                    // (+ thừa / − thiếu) — chiều nằm ngay trong số liệu.
                     StockTransaction::create([
                         'kitchen_id' => $stock->kitchen_id,
                         'ingredient_id' => $stock->ingredient_id,
-                        'type' => $type,
-                        'quantity' => abs($diff),
+                        'type' => 'Kiểm kê',
+                        'quantity' => $diff,
                         'after_quantity' => $actualQty,
                         'note' => 'Kiểm kê cuối ngày: '.(($this->checkNotes[$stockId] ?? '') ?: 'Điều chỉnh chênh lệch thực tế'),
                     ]);
@@ -339,6 +362,7 @@ class ListStocks extends ListRecords
                 'quantity_ordered' => (float) $item->quantity_ordered,
                 'quantity_received' => (float) $item->quantity_ordered, // Pre-filled default
                 'unit_price' => (float) $item->unit_price,
+                'receive_note' => '',
             ];
         }
     }
@@ -356,6 +380,26 @@ class ListStocks extends ListRecords
             Notification::make()->title('Vui lòng chọn đơn đặt hàng hợp lệ!')->danger()->send();
 
             return;
+        }
+
+        // Kiểm hàng: dòng nào lệch số lượng (thực nhận ≠ đặt) bắt buộc ghi lý do.
+        // Số ĐẶT đối chiếu từ DB — payload Livewire có thể bị sửa để né việc ghi lý do.
+        $orderedByItemId = PurchaseOrderItem::query()
+            ->where('purchase_order_id', $this->selectedPOId)
+            ->pluck('quantity_ordered', 'id');
+
+        foreach ($this->poItemsData as $itemData) {
+            $qtyReceived = (float) ($itemData['quantity_received'] ?? 0);
+            $qtyOrdered = (float) ($orderedByItemId[$itemData['id'] ?? 0] ?? 0);
+            if ($qtyReceived > 0 && $qtyReceived !== $qtyOrdered && trim((string) ($itemData['receive_note'] ?? '')) === '') {
+                Notification::make()
+                    ->title('Thiếu lý do chênh lệch')
+                    ->body('Dòng "'.e($itemData['name'] ?? '').'" có số thực nhận lệch số đặt — vui lòng ghi lý do trước khi xác nhận.')
+                    ->danger()
+                    ->send();
+
+                return;
+            }
         }
 
         $done = DB::transaction(function (): bool {
@@ -379,7 +423,6 @@ class ListStocks extends ListRecords
 
             foreach ($this->poItemsData as $itemData) {
                 $qtyReceived = (float) ($itemData['quantity_received'] ?? 0);
-                $unitPrice = (float) ($itemData['unit_price'] ?? 0);
 
                 if ($qtyReceived <= 0) {
                     continue;
@@ -395,9 +438,15 @@ class ListStocks extends ListRecords
                     continue;
                 }
 
+                // Đơn giá KHÓA theo giá đã chốt trên PO — không nhận giá từ payload client
+                // (quy định nghiệp vụ: giá nhập kho = giá NCC đã chốt lúc đặt hàng)
+                $unitPrice = (float) $poItem->unit_price;
+
+                $receiveNote = trim((string) ($itemData['receive_note'] ?? '')) ?: null;
+
                 $poItem->update([
                     'quantity_received' => $qtyReceived,
-                    'unit_price' => $unitPrice,
+                    'receive_note' => $receiveNote,
                 ]);
 
                 $stock = Stock::query()
@@ -430,7 +479,7 @@ class ListStocks extends ListRecords
                     'voucher_code' => $po->code,
                     'quantity' => $qtyReceived,
                     'after_quantity' => $newQty,
-                    'note' => "Nhập kho thực tế từ đơn đặt hàng: {$po->code}",
+                    'note' => "Nhập kho thực tế từ đơn đặt hàng: {$po->code}".($receiveNote ? " — Lệch: {$receiveNote}" : ''),
                 ]);
             }
 
@@ -533,8 +582,10 @@ class ListStocks extends ListRecords
             return;
         }
 
+        // Chỉ gom nguyên liệu từ thực đơn ĐÃ CHỐT — nháp/đang gửi chưa được phép xuất kho sản xuất
         $menus = Menu::with(['recipe.ingredients'])
             ->where('kitchen_id', $kitchenId)
+            ->where('status', 'locked')
             ->where('date', $this->prodDate)
             ->where('shift_id', $this->prodShiftId)
             ->get();
@@ -717,6 +768,19 @@ class ListStocks extends ListRecords
             return;
         }
 
+        // Chặn server-side: bếp nhận phải CÙNG KHU VỰC với bếp xuất (không tin select đã lọc ở UI)
+        $sourceAreaId = Kitchen::whereKey($sourceKitchenId)->value('area_id');
+        $destAreaId = Kitchen::whereKey($this->destKitchenId)->value('area_id');
+        if ($sourceAreaId && $destAreaId !== $sourceAreaId) {
+            Notification::make()
+                ->title('Không thể điều chuyển khác khu vực')
+                ->body('Chỉ được điều chuyển nguyên liệu giữa các bếp trong cùng một khu vực quản lý.')
+                ->danger()
+                ->send();
+
+            return;
+        }
+
         foreach ($this->transferItemsData as $itemData) {
             $ingId = $itemData['ingredient_id'];
             $qty = (float) ($itemData['quantity'] ?? 0);
@@ -828,6 +892,12 @@ class ListStocks extends ListRecords
         $query = Kitchen::query();
         if ($kitchenId) {
             $query->where('id', '!=', $kitchenId);
+
+            // Quy định nghiệp vụ: chỉ điều chuyển giữa các bếp CÙNG KHU VỰC quản lý
+            $areaId = Kitchen::whereKey($kitchenId)->value('area_id');
+            if ($areaId) {
+                $query->where('area_id', $areaId);
+            }
         }
 
         return $query->get()->all();
@@ -1000,6 +1070,11 @@ class ListStocks extends ListRecords
         return $query->orderBy('id')->paginate($this->perPage);
     }
 
+    /** Bộ lọc tab Nhật ký kho: theo loại giao dịch và nguyên liệu (phục vụ đối soát) */
+    public string $logTypeFilter = '';
+
+    public string $logIngredientFilter = '';
+
     public function getLogData(): array
     {
         $kitchenId = auth()->user()?->currentKitchenId();
@@ -1007,6 +1082,14 @@ class ListStocks extends ListRecords
 
         if ($kitchenId) {
             $query->where('kitchen_id', $kitchenId);
+        }
+
+        if ($this->logTypeFilter !== '') {
+            $query->where('type', $this->logTypeFilter);
+        }
+
+        if ($this->logIngredientFilter !== '') {
+            $query->where('ingredient_id', (int) $this->logIngredientFilter);
         }
 
         return $query->take(50)->get()->toArray();

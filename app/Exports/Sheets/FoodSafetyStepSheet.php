@@ -114,6 +114,11 @@ class FoodSafetyStepSheet implements FromArray, ShouldAutoSize, WithEvents, With
             $rows[] = $this->pad(['(Chưa có dữ liệu ghi nhận)'], $cols);
         }
 
+        // Khối chữ ký ký bản cứng theo biểu mẫu BYT (được canh/gộp ô trong AfterSheet)
+        $rows[] = $this->pad([], $cols);
+        $rows[] = $this->pad(['ĐẠI DIỆN NHÀ ĂN', '', '', 'NGƯỜI KIỂM TRA'], $cols);
+        $rows[] = $this->pad(['(Ký, ghi rõ họ tên)', '', '', '(Ký, ghi rõ họ tên)'], $cols);
+
         return $rows;
     }
 
@@ -149,6 +154,21 @@ class FoodSafetyStepSheet implements FromArray, ShouldAutoSize, WithEvents, With
                 $sheet->getStyle("A{$headingRow}:{$lastCol}{$headingRow}")->getFont()->setBold(true);
                 $sheet->getStyle("A{$headingRow}:{$lastCol}{$headingRow}")->getAlignment()
                     ->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+                // Khối chữ ký: 2 dòng cuối — gộp nửa trái (Đại diện nhà ăn) / nửa phải (Người kiểm tra)
+                $dataRows = max(count($this->items), 1);
+                $signLabelRow = self::HEADER_ROWS + 1 + $dataRows + 2; // +1 blank, dòng nhãn
+                $signNoteRow = $signLabelRow + 1;
+                $midCol = Coordinate::stringFromColumnIndex(3);
+                $rightStart = Coordinate::stringFromColumnIndex(4);
+                foreach ([$signLabelRow, $signNoteRow] as $r) {
+                    $sheet->mergeCells("A{$r}:{$midCol}{$r}");
+                    $sheet->mergeCells("{$rightStart}{$r}:{$lastCol}{$r}");
+                    $sheet->getStyle("A{$r}:{$lastCol}{$r}")->getAlignment()
+                        ->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                }
+                $sheet->getStyle("A{$signLabelRow}:{$lastCol}{$signLabelRow}")->getFont()->setBold(true);
+                $sheet->getStyle("A{$signNoteRow}:{$lastCol}{$signNoteRow}")->getFont()->setItalic(true);
             },
         ];
     }
