@@ -474,6 +474,11 @@
         align-items: center;
         gap: 16px;
         margin-bottom: 14px;
+        flex-wrap: wrap;
+    }
+    .ph-l {
+        flex: 1;
+        min-width: 250px;
     }
     .ph-l h1 {
         font-size: 1.5rem !important;
@@ -489,17 +494,25 @@
     .ph-r {
         display: flex;
         gap: 8px;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+    .btn,
+    .ph-r button,
+    .ph-r a,
+    .ph-r .fi-ac-action {
+        white-space: nowrap !important;
+        height: 38px !important;
+        line-height: 38px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
     }
     .btn {
-        height: 38px;
         padding: 0 16px;
         border-radius: 8px;
         font-size: 13px;
         font-weight: 700;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 6px;
         cursor: pointer;
         border: 1px solid var(--bd);
         background: var(--wh);
@@ -519,6 +532,26 @@
     .btn-p:hover {
         background: var(--bl-d) !important;
         border-color: var(--bl-d) !important;
+    }
+
+    /* Responsive cho mobile */
+    @media (max-width: 640px) {
+        .ph {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 12px;
+        }
+        .ph-r {
+            width: 100%;
+            justify-content: flex-start;
+        }
+        .btn, 
+        .ph-r button, 
+        .ph-r a, 
+        .ph-r .fi-ac-action {
+            flex: 1;
+            min-width: 120px;
+        }
     }
 
     /* pagination footer */

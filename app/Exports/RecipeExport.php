@@ -22,6 +22,13 @@ class RecipeExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
 {
     protected const COLS = 11;
 
+    protected $query;
+
+    public function __construct($query = null)
+    {
+        $this->query = $query;
+    }
+
     public function title(): string
     {
         return 'Ngân hàng thực đơn';
@@ -134,6 +141,10 @@ class RecipeExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
      */
     private function recipes(): Collection
     {
+        if ($this->query) {
+            return $this->query->with('ingredients')->latest('updated_at')->get();
+        }
+
         return Recipe::query()
             ->with('ingredients')
             ->latest('updated_at')

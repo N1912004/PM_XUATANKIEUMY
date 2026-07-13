@@ -168,7 +168,7 @@ class Dashboard extends Page
                 ->when($kitchenId, fn ($q) => $q->where('kitchen_id', $kitchenId))
                 ->with([
                     'shift:id,name',
-                    'recipe:id,name,type',
+                    'recipe:id,name,recipe_type_id',
                 ])
                 ->orderBy('shift_id')
                 ->paginate(5, ['*'], 'menusPage'),

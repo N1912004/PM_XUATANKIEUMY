@@ -180,9 +180,19 @@ class ListRecipes extends Page
             ->icon('heroicon-o-document-arrow-down')
             ->color('success')
             ->action(fn () => Excel::download(
-                new RecipeExport,
+                new RecipeExport($this->buildRecipesQuery()),
                 'ngan-hang-thuc-don-'.now()->format('Ymd-His').'.xlsx',
             ));
+    }
+
+    /** Nút Thêm món ăn dạng Filament Action để đồng bộ giao diện */
+    public function createAction(): Actions\Action
+    {
+        return Actions\Action::make('create')
+            ->label('Thêm món ăn')
+            ->icon('heroicon-o-plus')
+            ->color('primary')
+            ->url(RecipeResource::getUrl('create'));
     }
 
     /**
@@ -277,7 +287,7 @@ class ListRecipes extends Page
         $notification->send();
     }
 
-    public function recipes(): LengthAwarePaginator
+    public function buildRecipesQuery(): \Illuminate\Database\Eloquent\Builder
     {
         return Recipe::query()
             ->with(['ingredients', 'recipeType'])
@@ -296,7 +306,12 @@ class ListRecipes extends Page
                         ->orWhere('old_type', $this->typeFilter);
                 });
             })
-            ->when($this->statusFilter !== '', fn ($query) => $query->where('status', $this->statusFilter))
+            ->when($this->statusFilter !== '', fn ($query) => $query->where('status', $this->statusFilter));
+    }
+
+    public function recipes(): LengthAwarePaginator
+    {
+        return $this->buildRecipesQuery()
             ->orderBy('id', 'desc')
             ->paginate($this->perPage);
     }

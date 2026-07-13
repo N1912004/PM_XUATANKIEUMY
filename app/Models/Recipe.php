@@ -30,6 +30,10 @@ class Recipe extends Model
      */
     public ?string $cost_override_reason = null;
 
+    protected $appends = [
+        'type',
+    ];
+
     protected $casts = [
         'cost_override' => 'float',
     ];

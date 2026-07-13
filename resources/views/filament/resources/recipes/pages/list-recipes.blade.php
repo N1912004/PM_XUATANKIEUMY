@@ -17,10 +17,7 @@
             {{-- Import/Export cùng pattern trang Nguyên liệu: wizard 2 bước có XEM TRƯỚC (dry-run) --}}
             {{ $this->importAction }}
             {{ $this->exportAction }}
-            <a href="{{ \App\Filament\Resources\RecipeResource::getUrl('create') }}" class="btn btn-p">
-                <i class="fa-solid fa-plus"></i>
-                Thêm món ăn
-            </a>
+            {{ $this->createAction }}
         </div>
     </div>
 
