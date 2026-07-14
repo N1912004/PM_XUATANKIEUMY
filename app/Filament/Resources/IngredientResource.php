@@ -190,6 +190,7 @@ class IngredientResource extends Resource
                         $currentPage = method_exists($livewire, 'getTablePage') ? $livewire->getTablePage() : 1;
                         $recordsPerPage = method_exists($livewire, 'getTableRecordsPerPage') ? $livewire->getTableRecordsPerPage() : 10;
                         $perPage = is_numeric($recordsPerPage) ? (int) $recordsPerPage : 10;
+
                         return (string) ($rowLoop->iteration + ($perPage * ($currentPage - 1)));
                     })
                     ->alignCenter()
@@ -236,8 +237,11 @@ class IngredientResource extends Resource
                     ->label(__('ingredient.table.reference_price'))
                     ->html()
                     ->formatStateUsing(function ($state) {
-                        if ($state === null) return '—';
+                        if ($state === null) {
+                            return '—';
+                        }
                         $formatted = number_format($state, 0, ',', '.');
+
                         return "<strong>{$formatted}</strong><span style=\"font-size: 10px; font-weight: 500; color: #94a3b8; margin-left: 2px;\">đ</span>";
                     })
                     ->alignRight()
@@ -255,7 +259,7 @@ class IngredientResource extends Resource
             ])
             ->defaultSort('id', 'desc')
             ->filters([
-                Tables\Filters\SelectFilter::make('supplier_id')
+                Tables\Filters\SelectFilter::make('suppliers')
                     ->label(__('ingredient.filter.supplier'))
                     ->relationship('suppliers', 'name')
                     ->searchable()

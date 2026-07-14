@@ -161,7 +161,7 @@ class ListFoodSafetyAudits extends ListRecords
                     $seenIngredients[$ingredient->id] = [
                         'name' => $ingredient->name,
                         'type' => $ingredient->type,
-                        'time' => $poInfo?->purchaseOrder?->stocked_at?->format('H:i') ?? '05:00',
+                        'time' => $poInfo?->purchaseOrder?->stocked_at?->format('H:i') ?? '',
                         'quantity' => $qty,
                         'unit' => $ingredient->unit,
                         'supplier' => $poInfo?->purchaseOrder?->supplier?->name
@@ -176,7 +176,7 @@ class ListFoodSafetyAudits extends ListRecords
                         'sensory' => 'Đạt',
                         'quick_test' => '—',
                         'action' => '',
-                        'notes' => 'Cảm quan tốt, sạch sẽ',
+                        'notes' => '',
                     ];
                 }
             }
@@ -234,7 +234,7 @@ class ListFoodSafetyAudits extends ListRecords
                     'portions' => $portions,
                     'time' => $audit?->sample_kept_at?->format('H:i') ?? '',
                     'eat_time' => $audit?->sample_kept_at?->copy()->addMinutes(30)?->format('H:i') ?? '',
-                    'utensil' => $audit->utensil ?? 'Vá, khay, muỗng',
+                    'utensil' => $audit->utensil ?? '',
                     'sensory' => $audit->status ?? '',
                     'sample_kept' => $audit && $audit->sample_kept_by ? 'Có ('.$audit->sample_kept_by.')' : '',
                     'temp' => $audit->temperature ?? '',
@@ -247,7 +247,7 @@ class ListFoodSafetyAudits extends ListRecords
                     'shift' => $shiftLabel,
                     'portions' => $portions,
                     'sample_amount' => '≥100g',
-                    'container' => $audit->utensil ?? 'Hũ Inox',
+                    'container' => $audit->utensil ?? '',
                     'time' => $audit?->sample_kept_at?->format('H:i') ?? '',
                     'destroy_at' => $audit?->sample_kept_at?->copy()->addDay()?->format('H:i (d/m)') ?? '',
                     'quantity' => '',
@@ -255,7 +255,7 @@ class ListFoodSafetyAudits extends ListRecords
                     'temp' => $audit->temperature ?? '',
                     'staff' => $audit->sample_kept_by ?? '',
                     'destroyer' => '',
-                    'notes' => $audit->utensil ?? '',
+                    'notes' => $audit->notes ?? '',
                 ];
             } elseif ($this->activeStep === 'Hủy mẫu') {
                 $dishes[] = [
@@ -263,7 +263,7 @@ class ListFoodSafetyAudits extends ListRecords
                     'shift' => $shiftLabel,
                     'portions' => $portions,
                     'sample_amount' => '≥100g',
-                    'container' => $audit->utensil ?? 'Hũ Inox',
+                    'container' => $audit->utensil ?? '',
                     'temp' => $audit->temperature ?? '',
                     'kept_at' => $audit?->sample_kept_at?->format('H:i') ?? '',
                     'time' => $audit?->sample_kept_at?->copy()->addDay()?->format('H:i (d/m)') ?? '',

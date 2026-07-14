@@ -13,13 +13,70 @@
     ];
     // Toạ độ 8 múi 45°/múi (tâm 110,110 bán kính 110, bắt đầu từ đỉnh 12h)
     $pts = [[110,0],[187.78,32.22],[220,110],[187.78,187.78],[110,220],[32.22,187.78],[0,110],[32.22,32.22]];
-@endphp
 
+    // ĐỌC MÀU CHỦ ĐẠO TỪ SETTINGS (Mặc định là xanh dương #1256C4 nếu chưa có cấu hình)
+    $primaryColor = \App\Models\Setting::get('primary_color', '#1256C4');
+
+    // Helper chuyển HEX sang RGB
+    $hexToRgb = function ($hex) {
+        $hex = str_replace('#', '', $hex);
+        if (strlen($hex) == 3) {
+            $r = hexdec(substr($hex, 0, 1) . substr($hex, 0, 1));
+            $g = hexdec(substr($hex, 1, 1) . substr($hex, 1, 1));
+            $b = hexdec(substr($hex, 2, 1) . substr($hex, 2, 1));
+        } else {
+            $r = hexdec(substr($hex, 0, 2));
+            $g = hexdec(substr($hex, 2, 2));
+            $b = hexdec(substr($hex, 4, 2));
+        }
+        return [$r, $g, $b];
+    };
+
+    // Helper làm tối màu (darken) cho hover
+    $darkenColor = function ($hex, $percent = 12) {
+        $hex = str_replace('#', '', $hex);
+        if (strlen($hex) == 3) {
+            $hex = substr($hex, 0, 1) . substr($hex, 0, 1) . substr($hex, 1, 1) . substr($hex, 1, 1) . substr($hex, 2, 1) . substr($hex, 2, 1);
+        }
+        $r = hexdec(substr($hex, 0, 2));
+        $g = hexdec(substr($hex, 2, 2));
+        $b = hexdec(substr($hex, 4, 2));
+
+        $r = max(0, min(255, (int)($r - ($r * $percent / 100))));
+        $g = max(0, min(255, (int)($g - ($g * $percent / 100))));
+        $b = max(0, min(255, (int)($b - ($b * $percent / 100))));
+
+        return sprintf("#%02x%02x%02x", $r, $g, $b);
+    };
+
+    // Helper làm sáng màu (lighten) cho dải băng
+    $lightenColor = function ($hex, $percent = 10) {
+        $hex = str_replace('#', '', $hex);
+        if (strlen($hex) == 3) {
+            $hex = substr($hex, 0, 1) . substr($hex, 0, 1) . substr($hex, 1, 1) . substr($hex, 1, 1) . substr($hex, 2, 1) . substr($hex, 2, 1);
+        }
+        $r = hexdec(substr($hex, 0, 2));
+        $g = hexdec(substr($hex, 2, 2));
+        $b = hexdec(substr($hex, 4, 2));
+
+        $r = max(0, min(255, (int)($r + ((255 - $r) * $percent / 100))));
+        $g = max(0, min(255, (int)($g + ((255 - $g) * $percent / 100))));
+        $b = max(0, min(255, (int)($b + ((255 - $b) * $percent / 100))));
+
+        return sprintf("#%02x%02x%02x", $r, $g, $b);
+    };
+
+    $rgb = $hexToRgb($primaryColor);
+    $primaryColorRgb = implode(',', $rgb);
+    $primaryColorHover = $darkenColor($primaryColor, 12);
+    $primaryColorBand = $lightenColor($primaryColor, 10);
+@endphp
+<div class="lg-page">
 <style>
     :root {
-        --lg-bl: #1256C4;
-        --lg-bl-d: #0C3F94;
-        --lg-bl-band: #1E63D0;
+        --lg-bl: {{ $primaryColor }};
+        --lg-bl-d: {{ $primaryColorHover }};
+        --lg-bl-band: {{ $primaryColorBand }};
         --lg-rd: #E11D48;
         --lg-ink: #16233B;
         --lg-mu: #5B6B84;
@@ -36,12 +93,34 @@
     /* Sóng trang trí mờ dưới nền như mẫu */
     .lg-page::before, .lg-page::after {
         content: ""; position: absolute; border-radius: 50%; pointer-events: none;
-        border: 1.5px solid rgba(18, 86, 196, .08);
+        border: 1.5px solid rgba({{ $primaryColorRgb }}, .08);
     }
-    .lg-page::before { width: 900px; height: 900px; left: -350px; bottom: -560px; box-shadow: 0 0 0 46px rgba(18,86,196,.05), 0 0 0 100px rgba(18,86,196,.03); }
-    .lg-page::after  { width: 520px; height: 520px; right: -180px; top: -300px; box-shadow: 0 0 0 40px rgba(18,86,196,.04); }
+    .lg-page::before { width: 900px; height: 900px; left: -350px; bottom: -560px; box-shadow: 0 0 0 46px rgba({{ $primaryColorRgb }},.05), 0 0 0 100px rgba({{ $primaryColorRgb }},.03); }
+    .lg-page::after  { width: 520px; height: 520px; right: -180px; top: -300px; box-shadow: 0 0 0 40px rgba({{ $primaryColorRgb }},.04); }
 
     .lg-lang-fixed { position: absolute; top: 26px; right: 40px; z-index: 5; }
+    .lg-lang-fixed .relative { position: relative; }
+    .lg-lang-fixed button {
+        display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 8px;
+        border: 1px solid var(--lg-line); background: var(--lg-card); color: var(--lg-ink);
+        font-weight: 700; font-size: 14px; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        transition: background .15s; outline: none;
+    }
+    .lg-lang-fixed button:hover { background: #f9fafb; }
+    .lg-lang-fixed button svg { width: 16px; height: 16px; transition: transform 0.2s; }
+    .lg-lang-fixed button .rotate-180 { transform: rotate(180deg); }
+    .lg-lang-fixed .absolute {
+        position: absolute; right: 0; margin-top: 8px; width: 160px; border-radius: 12px;
+        background: var(--lg-card); border: 1px solid var(--lg-line); box-shadow: 0 10px 25px rgba(15, 35, 70, 0.15);
+        z-index: 50; padding: 4px 0; overflow: hidden;
+    }
+    .lg-lang-fixed a {
+        display: flex; align-items: center; gap: 12px; padding: 8px 16px; font-size: 14px;
+        font-weight: 600; color: var(--lg-ink); text-decoration: none; transition: background .15s;
+    }
+    .lg-lang-fixed a:hover { background: #f9fafb; }
+    .lg-lang-fixed a.bg-blue-50\/50 { background: rgba({{ $primaryColorRgb }}, 0.08) !important; color: var(--lg-bl) !important; }
+
 
     .lg-shell {
         position: relative; z-index: 1; max-width: 1460px; margin: 0 auto;
@@ -69,7 +148,7 @@
         background: var(--lg-bl-band); color: #fff; padding: 30px 220px 30px 48px;
         font-size: clamp(28px, 2.7vw, 40px); font-weight: 900; letter-spacing: .01em;
         line-height: 1.22; font-style: italic; text-transform: uppercase; white-space: nowrap;
-        box-shadow: 0 14px 34px rgba(18, 86, 196, .25);
+        box-shadow: 0 14px 34px rgba({{ $primaryColorRgb }}, .25);
     }
     .lg-wheel {
         position: relative; z-index: 1; width: min(400px, 58vw); margin-left: clamp(190px, 30vw, 400px);
@@ -129,13 +208,13 @@
         outline: none; transition: border-color .15s, box-shadow .15s;
     }
     .lg-input::placeholder { color: #A6B1C4; }
-    .lg-input:focus { border-color: var(--lg-bl); box-shadow: 0 0 0 4px rgba(18, 86, 196, .12); }
+    .lg-input:focus { border-color: var(--lg-bl); box-shadow: 0 0 0 4px rgba({{ $primaryColorRgb }}, .12); }
     .lg-eye {
         position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
         width: 38px; height: 38px; border: none; background: transparent; cursor: pointer;
         color: #9AA7BC; font-size: 15px; border-radius: 9px;
     }
-    .lg-eye:hover { color: var(--lg-bl); background: rgba(18,86,196,.06); }
+    .lg-eye:hover { color: var(--lg-bl); background: rgba({{ $primaryColorRgb }},.06); }
     .lg-err { display: block; margin-top: 7px; font-size: 12.5px; color: var(--lg-rd); font-weight: 600; }
 
     .lg-row { display: flex; align-items: center; justify-content: space-between; margin: 4px 0 22px; }
@@ -152,13 +231,13 @@
         width: 100%; height: 54px; border: none; border-radius: 12px; cursor: pointer;
         background: var(--lg-bl) !important; color: #fff !important; font-size: 15.5px; font-weight: 800 !important;
         letter-spacing: .1em; text-transform: uppercase;
-        box-shadow: 0 12px 26px rgba(18, 86, 196, .32) !important; transition: background .15s, transform .1s;
+        box-shadow: 0 12px 26px rgba({{ $primaryColorRgb }}, .32) !important; transition: background .15s, transform .1s;
         font-family: inherit;
     }
     .lg-page button.lg-submit[type="submit"]:hover,
-    .lg-page .lg-submit:hover { background: var(--lg-bl-d) !important; box-shadow: 0 12px 26px rgba(18, 86, 196, .32) !important; }
+    .lg-page .lg-submit:hover { background: var(--lg-bl-d) !important; box-shadow: 0 12px 26px rgba({{ $primaryColorRgb }}, .32) !important; }
     .lg-page .lg-submit:active { transform: translateY(1px); }
-    .lg-page .lg-submit:focus-visible { outline: 3px solid rgba(18,86,196,.4); outline-offset: 2px; }
+    .lg-page .lg-submit:focus-visible { outline: 3px solid rgba({{ $primaryColorRgb }},.4); outline-offset: 2px; }
     .lg-page .lg-submit[disabled] { opacity: .75; cursor: wait; }
 
     /* ── Responsive ── */
@@ -184,7 +263,6 @@
     }
 </style>
 
-<div class="lg-page">
     {{-- Chọn ngôn ngữ — góc phải trên cùng của trang như mẫu --}}
     <div class="lg-lang-fixed">
         @include('filament.components.language-switcher')
@@ -203,13 +281,13 @@
             </div>
 
             <div class="lg-hero">
-                <h1>TOÀN THỂ CÁN BỘ CÔNG NHÂN VIÊN CÔNG TY CAM KẾT</h1>
+                <h1>{{ __('login.commit_title') }}</h1>
                 <div class="rule"></div>
-                <p class="en">All company staff and employees are committed to</p>
+                <p class="en">{{ __('login.commit_subtitle') }}</p>
             </div>
 
             <div class="lg-stage">
-                <div class="lg-band">NGON&nbsp; TASTE<br>&amp; ĐẸP BEAUTIFUL</div>
+                <div class="lg-band">{!! __('login.band_text') !!}</div>
 
                 {{-- Vòng tròn 8 múi ảnh món ăn + tâm ISO --}}
                 <div class="lg-wheel">
@@ -249,36 +327,36 @@
                     <div class="ic">
                         <svg viewBox="0 0 24 24"><path d="M12 3l7 2.6v5.2c0 4.6-3 8.3-7 9.7-4-1.4-7-5.1-7-9.7V5.6L12 3z"/><path d="M9 12l2.2 2.2L15.5 9.8"/></svg>
                     </div>
-                    <div class="t">AN TOÀN</div>
-                    <div class="s">Thực phẩm an toàn cho sức khỏe</div>
+                    <div class="t">{{ __('login.values.safety.title') }}</div>
+                    <div class="s">{{ __('login.values.safety.desc') }}</div>
                 </div>
                 <div class="lg-val">
                     <div class="ic">
                         <svg viewBox="0 0 24 24"><circle cx="12" cy="9" r="5.4"/><path d="M10 6.8l1.4 1.4L14.2 5.4"/><path d="M8.6 13.5L7 21l5-2.6L17 21l-1.6-7.5"/></svg>
                     </div>
-                    <div class="t">CHẤT LƯỢNG</div>
-                    <div class="s">Cam kết chất lượng tuyệt đối</div>
+                    <div class="t">{{ __('login.values.quality.title') }}</div>
+                    <div class="s">{{ __('login.values.quality.desc') }}</div>
                 </div>
                 <div class="lg-val">
                     <div class="ic">
                         <svg viewBox="0 0 24 24"><circle cx="9" cy="8.5" r="3"/><path d="M3.5 19c.6-3 2.9-4.6 5.5-4.6s4.9 1.6 5.5 4.6"/><circle cx="16.6" cy="9.5" r="2.4"/><path d="M15.4 14.7c2.5.1 4.4 1.5 5.1 4.3"/></svg>
                     </div>
-                    <div class="t">CHUYÊN NGHIỆP</div>
-                    <div class="s">Đội ngũ chuyên nghiệp, tận tâm</div>
+                    <div class="t">{{ __('login.values.professional.title') }}</div>
+                    <div class="s">{{ __('login.values.professional.desc') }}</div>
                 </div>
                 <div class="lg-val">
                     <div class="ic">
                         <svg viewBox="0 0 24 24"><path d="M2.5 8.5L7 6l5 2.5L16.9 6l4.6 2.5"/><path d="M12 8.5l-3.4 3.3a1.6 1.6 0 002.2 2.3L12 13l2.6 2.5a1.7 1.7 0 002.4-2.4L13.5 9.6"/><path d="M2.5 8.5v6.7L7 17.7M21.5 8.5v6.7L17 17.7"/></svg>
                     </div>
-                    <div class="t">ĐỒNG HÀNH</div>
-                    <div class="s">Đồng hành phát triển bền vững</div>
+                    <div class="t">{{ __('login.values.companion.title') }}</div>
+                    <div class="s">{{ __('login.values.companion.desc') }}</div>
                 </div>
             </div>
 
             <div class="lg-foot">
-                <span>© 2024 Bluefire Co., Ltd. All rights reserved.</span>
-                <span>Version 1.0.0</span>
-                <span>www.bluefire.vn</span>
+                <span>{{ __('login.footer.copyright') }}</span>
+                <span>{{ __('login.footer.version') }}</span>
+                <span>{{ __('login.footer.website') }}</span>
             </div>
         </div>
 
@@ -290,18 +368,18 @@
                 <div class="tg">TASTE&nbsp;BEAUTY</div>
             </div>
 
-            <h2 class="lg-title">Chào mừng bạn trở lại!</h2>
+            <h2 class="lg-title">{{ __('login.card.title') }}</h2>
             <div class="lg-title-rule"></div>
-            <p class="lg-sub">Đăng nhập để truy cập hệ thống quản lý sản xuất và kho vận của Bluefire.</p>
+            <p class="lg-sub">{{ __('login.card.subtitle') }}</p>
 
             {{-- Submit qua authenticate() của Filament — giữ nguyên rate limit / remember / redirect --}}
             <form wire:submit="authenticate" novalidate>
                 <div class="lg-field">
-                    <label class="lg-label" for="lg-email">Tên đăng nhập</label>
+                    <label class="lg-label" for="lg-email">{{ __('login.card.username') }}</label>
                     <div class="lg-inputwrap">
                         <i class="fa-solid fa-user" aria-hidden="true"></i>
                         <input id="lg-email" type="email" class="lg-input"
-                               placeholder="Nhập tên đăng nhập"
+                               placeholder="{{ __('login.card.username_placeholder') }}"
                                wire:model="data.email"
                                autocomplete="email" required autofocus>
                     </div>
@@ -309,11 +387,11 @@
                 </div>
 
                 <div class="lg-field" x-data="{ show: false }">
-                    <label class="lg-label" for="lg-password">Mật khẩu</label>
+                    <label class="lg-label" for="lg-password">{{ __('login.card.password') }}</label>
                     <div class="lg-inputwrap">
                         <i class="fa-solid fa-lock" aria-hidden="true"></i>
                         <input id="lg-password" class="lg-input"
-                               placeholder="Nhập mật khẩu"
+                               placeholder="{{ __('login.card.password_placeholder') }}"
                                wire:model="data.password"
                                autocomplete="current-password" required
                                x-bind:type="show ? 'text' : 'password'">
@@ -328,19 +406,20 @@
                 <div class="lg-row">
                     <label class="lg-remember">
                         <input type="checkbox" wire:model="data.remember" checked>
-                        <span>Ghi nhớ đăng nhập</span>
+                        <span>{{ __('login.card.remember') }}</span>
                     </label>
                     @if (filament()->hasPasswordReset())
-                        <a class="lg-forgot" href="{{ filament()->getRequestPasswordResetUrl() }}">Quên mật khẩu?</a>
+                        <a class="lg-forgot" href="{{ filament()->getRequestPasswordResetUrl() }}">{{ __('login.card.forgot') }}</a>
                     @else
-                        <a class="lg-forgot" href="#" onclick="return false" title="Liên hệ quản trị viên để cấp lại mật khẩu">Quên mật khẩu?</a>
+                        <a class="lg-forgot" href="#" onclick="return false" title="{{ __('login.card.forgot_helper') }}">{{ __('login.card.forgot') }}</a>
                     @endif
                 </div>
 
                 <button type="submit" class="lg-submit" wire:loading.attr="disabled">
-                    <span wire:loading.remove>Đăng nhập</span>
-                    <span wire:loading>Đang đăng nhập…</span>
+                    <span wire:loading.remove>{{ __('login.card.submit') }}</span>
+                    <span wire:loading>{{ __('login.card.submitting') }}</span>
                 </button>
+
             </form>
         </div>
     </div>

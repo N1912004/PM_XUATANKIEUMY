@@ -2,6 +2,8 @@
 
 namespace App\Filament\Pages\Auth;
 
+use Filament\Http\Responses\Auth\Contracts\LoginResponse;
+use Filament\Notifications\Notification;
 use Filament\Pages\Auth\Login as BaseLogin;
 
 /**
@@ -25,5 +27,19 @@ class Login extends BaseLogin
 
         // Mẫu thiết kế: ô "Ghi nhớ đăng nhập" bật sẵn
         $this->data['remember'] = true;
+    }
+
+    public function authenticate(): ?LoginResponse
+    {
+        $response = parent::authenticate();
+
+        if ($response) {
+            Notification::make()
+                ->title(__('login.notifications.login_success'))
+                ->success()
+                ->send();
+        }
+
+        return $response;
     }
 }
