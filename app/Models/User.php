@@ -57,6 +57,39 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         ];
     }
 
+    /** Tên vai trò toàn quyền (khớp config/filament-shield.php). */
+    public const SUPER_ADMIN = 'super_admin';
+
+    /**
+     * Chặn hai thao tác có thể khóa vĩnh viễn hệ thống:
+     * tự xóa chính mình, và xóa tài khoản toàn quyền cuối cùng.
+     *
+     * Đăng ký ở booting() (KHÔNG phải booted()) để listener này chạy TRƯỚC listener
+     * `deleting` của trait HasRoles — trait đó gỡ sạch vai trò của user, nên nếu chạy sau
+     * thì không còn nhận ra đây là tài khoản toàn quyền nữa.
+     */
+    protected static function booting(): void
+    {
+        static::deleting(function (User $user): void {
+            abort_if($user->id === auth()->id(), 403, 'Không thể xóa chính tài khoản đang đăng nhập.');
+
+            if ($user->isSuperAdmin() && static::countSuperAdmins() <= 1) {
+                abort(403, 'Không thể xóa tài khoản toàn quyền cuối cùng của hệ thống.');
+            }
+        });
+    }
+
+    /** Số tài khoản còn giữ vai trò toàn quyền. */
+    public static function countSuperAdmins(): int
+    {
+        return static::role(self::SUPER_ADMIN)->count();
+    }
+
+    public function isSuperAdmin(): bool
+    {
+        return $this->hasRole(self::SUPER_ADMIN);
+    }
+
     /**
      * Chỉ tài khoản đã được gán ít nhất 1 vai trò mới được vào panel quản trị.
      * (Mọi user hiện hữu đều được seed vai trò super_admin nên không bị khóa.)
