@@ -57,8 +57,14 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         ];
     }
 
-    /** Tên vai trò toàn quyền (khớp config/filament-shield.php). */
-    public const SUPER_ADMIN = 'super_admin';
+    /**
+     * Tên vai trò toàn quyền — lấy từ config/filament-shield.php làm NGUỒN DUY NHẤT.
+     * Đổi tên vai trò chỉ cần sửa config: model, resource, command và test đều đọc theo đây.
+     */
+    public static function superAdminRole(): string
+    {
+        return config('filament-shield.super_admin.name', 'super_admin');
+    }
 
     /**
      * Chặn hai thao tác có thể khóa vĩnh viễn hệ thống:
@@ -82,12 +88,12 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
     /** Số tài khoản còn giữ vai trò toàn quyền. */
     public static function countSuperAdmins(): int
     {
-        return static::role(self::SUPER_ADMIN)->count();
+        return static::role(static::superAdminRole())->count();
     }
 
     public function isSuperAdmin(): bool
     {
-        return $this->hasRole(self::SUPER_ADMIN);
+        return $this->hasRole(static::superAdminRole());
     }
 
     /**

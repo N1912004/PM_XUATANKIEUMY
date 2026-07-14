@@ -50,7 +50,7 @@ class UserResource extends Resource
     public static function assignableRoles(): array
     {
         return Role::query()
-            ->when(! static::currentUserCanGrantSuperAdmin(), fn (Builder $q) => $q->where('name', '!=', User::SUPER_ADMIN))
+            ->when(! static::currentUserCanGrantSuperAdmin(), fn (Builder $q) => $q->where('name', '!=', User::superAdminRole()))
             ->orderBy('name')
             ->pluck('name', 'id')
             ->all();
@@ -134,15 +134,15 @@ class UserResource extends Resource
                         ->rules([
                             fn (?User $record) => function (string $attribute, $value, \Closure $fail) use ($record): void {
                                 $names = static::roleNames((array) $value);
-                                $keepsSuperAdmin = \in_array(User::SUPER_ADMIN, $names, true);
+                                $keepsSuperAdmin = \in_array(User::superAdminRole(), $names, true);
 
                                 // Không cho gỡ vai trò toàn quyền của người CUỐI CÙNG còn giữ nó.
                                 if ($record?->isSuperAdmin() && ! $keepsSuperAdmin && User::countSuperAdmins() <= 1) {
-                                    $fail('Đây là tài khoản toàn quyền cuối cùng — không thể gỡ vai trò '.User::SUPER_ADMIN.'.');
+                                    $fail('Đây là tài khoản toàn quyền cuối cùng — không thể gỡ vai trò '.User::superAdminRole().'.');
                                 }
 
                                 if ($keepsSuperAdmin && ! static::currentUserCanGrantSuperAdmin()) {
-                                    $fail('Bạn không có quyền gán vai trò '.User::SUPER_ADMIN.'.');
+                                    $fail('Bạn không có quyền gán vai trò '.User::superAdminRole().'.');
                                 }
                             },
                         ]),
@@ -182,7 +182,7 @@ class UserResource extends Resource
                 Tables\Columns\TextColumn::make('roles.name')
                     ->label('VAI TRÒ')
                     ->badge()
-                    ->color(fn (string $state): string => $state === User::SUPER_ADMIN ? 'danger' : 'success')
+                    ->color(fn (string $state): string => $state === User::superAdminRole() ? 'danger' : 'success')
                     ->placeholder('— Không vào được hệ thống —'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('NGÀY TẠO')
