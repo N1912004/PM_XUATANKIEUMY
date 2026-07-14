@@ -43,46 +43,69 @@
         },
         pick(value) {
             this.selected = value;
-            this.open = false;
+            this.close();
             this.search = '';
         },
 
         /*
-         * Panel dùng position:fixed và tự tính tọa độ theo nút bấm.
-         * Lý do: các ô chọn nằm trong bảng cuộn ngang / card có overflow, nếu dùng
-         * position:absolute thì panel bị CẮT hoặc bị phần tử khác đè lên.
+         * Panel dùng position:fixed + teleport ra <body>: các ô chọn nằm trong bảng cuộn / card
+         * có overflow, nếu để position:absolute thì panel bị CẮT hoặc bị phần tử khác đè lên.
+         *
+         * Toạ độ phải được tính LẠI LIÊN TỤC khi panel mở (requestAnimationFrame), KHÔNG chỉ
+         * nghe @scroll.window: khung nội dung của Filament cuộn BÊN TRONG một container, nên sự
+         * kiện scroll không bao giờ tới window — panel giữ toạ độ cũ và trôi khỏi ô chọn.
          */
-        panel: { top: 0, left: 0, width: 0, flipUp: false },
+        panel: { top: 0, left: 0, width: 0 },
+        frame: null,
         reposition() {
-            const rect = this.$refs.trigger.getBoundingClientRect();
+            const trigger = this.$refs.trigger;
+
+            if (! trigger) {
+                return;
+            }
+
+            const rect = trigger.getBoundingClientRect();
             const panelHeight = 300;
-            const spaceBelow = window.innerHeight - rect.bottom;
+            const flipUp = (window.innerHeight - rect.bottom) < panelHeight && rect.top > panelHeight;
 
             this.panel = {
-                top: spaceBelow < panelHeight && rect.top > panelHeight ? rect.top - panelHeight - 4 : rect.bottom + 4,
+                top: flipUp ? rect.top - panelHeight - 4 : rect.bottom + 4,
                 left: rect.left,
                 width: rect.width,
-                flipUp: spaceBelow < panelHeight && rect.top > panelHeight,
             };
         },
-        toggle() {
-            this.open = ! this.open;
+        track() {
+            this.reposition();
+            this.frame = requestAnimationFrame(() => this.open && this.track());
+        },
+        close() {
+            this.open = false;
 
-            if (this.open) {
-                this.reposition();
-                this.$nextTick(() => this.$refs.searchBox?.focus());
+            if (this.frame) {
+                cancelAnimationFrame(this.frame);
+                this.frame = null;
             }
+        },
+        toggle() {
+            if (this.open) {
+                this.close();
+
+                return;
+            }
+
+            this.open = true;
+            this.track();
+            this.$nextTick(() => this.$refs.searchBox?.focus());
         },
     }"
     class="relative w-full"
-    @keydown.escape.stop="open = false"
-    @scroll.window="open && reposition()"
-    @resize.window="open && reposition()"
+    @keydown.escape.stop="close()"
+    x-on:destroy="close()"
     {{-- Livewire vẽ lại DOM (chọn xong, đổi tab…) → đóng panel, nếu không nó treo lại
          ở TOẠ ĐỘ CŨ và trôi lên đè phần trên của trang.
          Dùng x-on: chứ KHÔNG dùng @livewire:… — Blade sẽ hiểu nhầm thành directive @livewire. --}}
-    x-on:livewire:commit.window="open = false"
-    x-on:livewire:navigated.window="open = false"
+    x-on:livewire:commit.window="close()"
+    x-on:livewire:navigated.window="close()"
 >
     <button
         type="button"
@@ -102,7 +125,7 @@
     <div
         x-show="open"
         x-cloak
-        @click.outside="open = false"
+        @click.outside="close()"
         :style="`position:fixed; top:${panel.top}px; left:${panel.left}px; width:${panel.width}px; z-index:9999;`"
         class="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-2xl dark:border-gray-700 dark:bg-gray-900"
     >
