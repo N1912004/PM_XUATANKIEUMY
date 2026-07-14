@@ -1104,11 +1104,12 @@
                                     @foreach($prodItemsData as $index => $item)
                                         <tr>
                                             <td style="font-weight: 700; color: #0f172a;" class="dark:text-white">{{ $item['name'] }}</td>
-                                            <td style="text-align: right; font-weight:700;">{{ number_format($item['available_qty'], 2, ',', '.') }} {{ $item['unit'] }}</td>
+                                            {{-- payload từ client có thể thiếu key → không được để vỡ trang (500) --}}
+                                            <td style="text-align: right; font-weight:700;">{{ number_format($item['available_qty'] ?? 0, 2, ',', '.') }} {{ $item['unit'] ?? '' }}</td>
                                             <td style="text-align: right; color:#64748b;">{{ number_format($item['quantity_expected'], 2, ',', '.') }} {{ $item['unit'] }}</td>
                                             <td style="text-align: center;">
                                                 <input type="number" step="0.01" wire:model="prodItemsData.{{ $index }}.quantity_actual" class="table-input" style="width: 120px;">
-                                                @if(($prodItemsData[$index]['quantity_actual'] ?? 0) > $item['available_qty'])
+                                                @if(($prodItemsData[$index]['quantity_actual'] ?? 0) > ($item['available_qty'] ?? 0))
                                                     <div style="color:#ef4444; font-size:10px; font-weight:700; margin-top:2px;">{{ __('warehouse.validation.over_current_stock') }}</div>
                                                 @endif
                                             </td>
@@ -1180,11 +1181,11 @@
                                             ])
                                         </td>
                                         <td style="text-align: right; font-weight:700;">
-                                            {{ number_format($item['available_qty'], 2, ',', '.') }}<span style="font-size: 11px; font-weight: 500; color: #94a3b8; margin-left: 2px;">{{ $item['unit'] ?? '' }}</span>
+                                            {{ number_format($item['available_qty'] ?? 0, 2, ',', '.') }}<span style="font-size: 11px; font-weight: 500; color: #94a3b8; margin-left: 2px;">{{ $item['unit'] ?? '' }}</span>
                                         </td>
                                         <td style="text-align: center;">
                                             <input type="number" step="0.01" wire:model="transferItemsData.{{ $index }}.quantity" class="table-input" style="width: 120px;">
-                                            @if(($transferItemsData[$index]['quantity'] ?? 0) > $item['available_qty'])
+                                            @if(($transferItemsData[$index]['quantity'] ?? 0) > ($item['available_qty'] ?? 0))
                                                 <div style="color:#ef4444; font-size:10px; font-weight:700; margin-top:2px;">{{ __('warehouse.validation.over_current_stock') }}</div>
                                             @endif
                                         </td>
