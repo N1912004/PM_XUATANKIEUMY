@@ -3,7 +3,7 @@
 return [
     'commit_title' => 'ALL COMPANY STAFF AND EMPLOYEES ARE COMMITTED TO',
     'commit_subtitle' => 'All company staff and employees are committed to',
-    'band_text' => 'TASTY&nbsp; &amp;<br>BEAUTIFUL',
+    'band_text' => 'TASTY &amp;<br>BEAUTIFUL',
     'values' => [
         'safety' => [
             'title' => 'SAFETY',

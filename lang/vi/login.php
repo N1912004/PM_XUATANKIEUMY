@@ -3,7 +3,7 @@
 return [
     'commit_title' => 'TOÀN THỂ CÁN BỘ CÔNG NHÂN VIÊN CÔNG TY CAM KẾT',
     'commit_subtitle' => 'All company staff and employees are committed to',
-    'band_text' => 'NGON&nbsp; TASTE<br>&amp; ĐẸP BEAUTIFUL',
+    'band_text' => 'NGON&nbsp;TASTE<br>&amp; ĐẸP&nbsp;BEAUTIFUL',
     'values' => [
         'safety' => [
             'title' => 'AN TOÀN',

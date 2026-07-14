@@ -99,8 +99,8 @@
     .lg-page::before { width: 900px; height: 900px; left: -350px; bottom: -560px; box-shadow: 0 0 0 46px rgba({{ $primaryColorRgb }},.05), 0 0 0 100px rgba({{ $primaryColorRgb }},.03); }
     .lg-page::after  { width: 520px; height: 520px; right: -180px; top: -300px; box-shadow: 0 0 0 40px rgba({{ $primaryColorRgb }},.04); }
 
-    .lg-lang-fixed { position: absolute; top: 26px; right: 40px; z-index: 5; }
-    .lg-lang-fixed .relative { position: relative; }
+    .lg-lang-fixed { position: absolute; top: 28px; right: 48px; z-index: 5; }
+    .lg-lang-fixed .relative { position: relative; margin-right: 0 !important; }
     .lg-lang-fixed button {
         display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 8px;
         border: 1px solid var(--lg-line); background: var(--lg-card); color: var(--lg-ink);
@@ -141,7 +141,7 @@
         letter-spacing: .01em; margin: 0; max-width: 34ch; text-wrap: balance;
     }
     .lg-hero .rule { width: 46px; height: 4px; background: var(--lg-bl); border-radius: 2px; margin: 16px 0; }
-    .lg-hero .en { font-style: italic; color: var(--lg-mu-strong); font-size: 16.5px; max-width: 36ch; margin: 0; line-height: 1.6; }
+    .lg-hero .en { font-style: italic; color: var(--lg-mu-strong); font-size: 16.5px; max-width: 50ch; margin: 0; line-height: 1.6; }
 
     .lg-stage { position: relative; margin-top: 8px; min-height: 406px; display: flex; align-items: center; }
     .lg-band {
@@ -150,6 +150,7 @@
         font-size: clamp(28px, 2.7vw, 40px); font-weight: 900; letter-spacing: .01em;
         line-height: 1.22; font-style: italic; text-transform: uppercase; white-space: nowrap;
         box-shadow: 0 14px 34px rgba({{ $primaryColorRgb }}, .25);
+        border-radius: 0 12px 12px 0;
     }
     .lg-wheel {
         position: relative; z-index: 1; width: min(368px, 53.5vw); margin-left: clamp(190px, 30vw, 400px);
@@ -164,7 +165,7 @@
     }
     .lg-wheel-core .nm { font-size: 17px; font-weight: 800; color: var(--lg-bl); line-height: 1.05; margin-top: 3px; }
     .lg-wheel-core .tg { font-size: 6.5px; font-weight: 700; color: var(--lg-rd); letter-spacing: .3em; }
-    .lg-wheel-core .iso { font-size: 11px; font-weight: 800; color: var(--lg-ink); margin-top: 3px; }
+    .lg-wheel-core .iso { font-size: 11.5px; font-weight: 800; color: var(--lg-bl); margin-top: 3px; }
 
     /* 4 giá trị cốt lõi — icon OUTLINE như mẫu, không nền hộp */
     .lg-values { margin-top: auto; padding-top: 30px; display: flex; align-items: stretch; }
@@ -172,8 +173,8 @@
     .lg-val + .lg-val { border-left: 1px solid var(--lg-line); }
     .lg-val .ic { height: 44px; display: grid; place-items: center; margin-bottom: 8px; color: var(--lg-bl); }
     .lg-val .ic svg { width: 38px; height: 38px; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
-    .lg-val .t { font-size: 12.5px; font-weight: 800; color: var(--lg-bl); letter-spacing: .05em; }
-    .lg-val .s { font-size: 11.5px; color: var(--lg-mu); margin-top: 3px; line-height: 1.45; }
+    .lg-val .t { font-size: 13.5px; font-weight: 800; color: var(--lg-bl); letter-spacing: .05em; }
+    .lg-val .s { font-size: 12.5px; color: var(--lg-mu-strong); margin-top: 3px; line-height: 1.45; }
 
     .lg-foot {
         margin-top: 46px; padding-top: 15px; border-top: 1px solid var(--lg-line);
@@ -193,7 +194,7 @@
     .lg-card-logo .tg { font-size: 9.5px; font-weight: 700; color: var(--lg-rd); letter-spacing: .32em; }
 
     .lg-title { text-align: center; font-size: 24px; font-weight: 800; margin: 4px 0 0; letter-spacing: -.01em; }
-    .lg-title-rule { width: 44px; height: 3.5px; background: var(--lg-bl); border-radius: 2px; margin: 12px auto 14px; }
+    .lg-title-rule { width: 60px; height: 2px; background: var(--lg-bl); border-radius: 1px; margin: 12px auto 14px; }
     .lg-sub { text-align: center; color: var(--lg-mu); font-size: 14px; line-height: 1.6; margin: 0 auto 26px; max-width: 34ch; }
 
     .lg-field { margin-bottom: 18px; }
@@ -208,7 +209,7 @@
         padding: 0 46px 0 44px; font-size: 14.5px; color: var(--lg-ink); background: #fff;
         outline: none; transition: border-color .15s, box-shadow .15s;
     }
-    .lg-input::placeholder { color: #A6B1C4; }
+    .lg-input::placeholder { color: #7E8E9F; }
     .lg-input:focus { border-color: var(--lg-bl); box-shadow: 0 0 0 4px rgba({{ $primaryColorRgb }}, .12); }
     .lg-eye {
         position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
@@ -232,11 +233,11 @@
         width: 100%; height: 54px; border: none; border-radius: 12px; cursor: pointer;
         background: var(--lg-bl) !important; color: #fff !important; font-size: 15.5px; font-weight: 800 !important;
         letter-spacing: .1em; text-transform: uppercase;
-        box-shadow: 0 12px 26px rgba({{ $primaryColorRgb }}, .32) !important; transition: background .15s, transform .1s;
+        box-shadow: 0 8px 20px rgba({{ $primaryColorRgb }}, .18) !important; transition: background .15s, transform .1s;
         font-family: inherit;
     }
     .lg-page button.lg-submit[type="submit"]:hover,
-    .lg-page .lg-submit:hover { background: var(--lg-bl-d) !important; box-shadow: 0 12px 26px rgba({{ $primaryColorRgb }}, .32) !important; }
+    .lg-page .lg-submit:hover { background: var(--lg-bl-d) !important; box-shadow: 0 8px 20px rgba({{ $primaryColorRgb }}, .18) !important; }
     .lg-page .lg-submit:active { transform: translateY(1px); }
     .lg-page .lg-submit:focus-visible { outline: 3px solid rgba({{ $primaryColorRgb }},.4); outline-offset: 2px; }
     .lg-page .lg-submit[disabled] { opacity: .75; cursor: wait; }
@@ -264,12 +265,12 @@
     }
 </style>
 
-    {{-- Chọn ngôn ngữ — góc phải trên cùng của trang như mẫu --}}
-    <div class="lg-lang-fixed">
-        @include('filament.components.language-switcher')
-    </div>
-
     <div class="lg-shell">
+
+        {{-- Chọn ngôn ngữ — góc phải trên cùng của trang như mẫu --}}
+        <div class="lg-lang-fixed">
+            @include('filament.components.language-switcher')
+        </div>
 
         {{-- ══════════ CỘT TRÁI: THƯƠNG HIỆU ══════════ --}}
         <div class="lg-left">
