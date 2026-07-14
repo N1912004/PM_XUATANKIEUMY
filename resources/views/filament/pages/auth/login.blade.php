@@ -144,8 +144,10 @@
     .lg-forgot { font-size: 14px; color: var(--lg-ink); text-decoration: none; font-weight: 500; }
     .lg-forgot:hover { color: var(--lg-bl); text-decoration: underline; }
 
-    /* !important để thắng rule global của panel ép mọi nút submit theo primary_color trong Cài đặt
-       (đang là màu xanh lá) — nút đăng nhập phải giữ XANH DƯƠNG theo mẫu thiết kế */
+    /* Selector độ ưu tiên cao (.lg-page button.lg-submit[type]) + !important để THẮNG rule global
+       của panel `button[type="submit"]:not(.fi-btn-color-gray)` ép mọi nút submit theo primary_color
+       trong Cài đặt (đang là xanh lá) — nút đăng nhập phải giữ XANH DƯƠNG theo mẫu thiết kế */
+    .lg-page button.lg-submit[type="submit"],
     .lg-page .lg-submit {
         width: 100%; height: 54px; border: none; border-radius: 12px; cursor: pointer;
         background: var(--lg-bl) !important; color: #fff !important; font-size: 15.5px; font-weight: 800 !important;
@@ -153,7 +155,8 @@
         box-shadow: 0 12px 26px rgba(18, 86, 196, .32) !important; transition: background .15s, transform .1s;
         font-family: inherit;
     }
-    .lg-page .lg-submit:hover { background: var(--lg-bl-d) !important; }
+    .lg-page button.lg-submit[type="submit"]:hover,
+    .lg-page .lg-submit:hover { background: var(--lg-bl-d) !important; box-shadow: 0 12px 26px rgba(18, 86, 196, .32) !important; }
     .lg-page .lg-submit:active { transform: translateY(1px); }
     .lg-page .lg-submit:focus-visible { outline: 3px solid rgba(18,86,196,.4); outline-offset: 2px; }
     .lg-page .lg-submit[disabled] { opacity: .75; cursor: wait; }
