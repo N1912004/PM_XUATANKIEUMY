@@ -6,10 +6,10 @@
         ['photo-1467003909585-2f8a72700288', '#BFDBFE'], // cá hồi / hải sản
         ['photo-1540420773420-3366772f4999', '#BBF7D0'], // rau xanh
         ['photo-1512621776951-a57141f2eefd', '#FECACA'], // salad củ quả
-        ['photo-1555939594-58d7cb561ad1',    '#FED7AA'], // món nướng xiên
+        ['photo-1432139555190-58524dae6a55', '#FED7AA'], // hải sản / cá
         ['photo-1504674900247-0877df9cc836', '#FBCFE8'], // món thịt
-        ['photo-1546069901-ba9599a7e63c',    '#DDD6FE'], // bowl healthy
-        ['photo-1556910103-1c02745aae4d',    '#E2E8F0'], // đầu bếp chế biến
+        ['photo-1546069901-ba9599a7e63c',    '#DDD6FE'], // bowl rau củ
+        ['photo-1565299624946-b28f40a0ae38', '#E2E8F0'], // món ăn nóng
     ];
     // Toạ độ 8 múi 45°/múi (tâm 110,110 bán kính 110, bắt đầu từ đỉnh 12h)
     $pts = [[110,0],[187.78,32.22],[220,110],[187.78,187.78],[110,220],[32.22,187.78],[0,110],[32.22,32.22]];
