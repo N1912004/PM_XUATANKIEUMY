@@ -78,6 +78,11 @@
     @keydown.escape.stop="open = false"
     @scroll.window="open && reposition()"
     @resize.window="open && reposition()"
+    {{-- Livewire vẽ lại DOM (chọn xong, đổi tab…) → đóng panel, nếu không nó treo lại
+         ở TOẠ ĐỘ CŨ và trôi lên đè phần trên của trang.
+         Dùng x-on: chứ KHÔNG dùng @livewire:… — Blade sẽ hiểu nhầm thành directive @livewire. --}}
+    x-on:livewire:commit.window="open = false"
+    x-on:livewire:navigated.window="open = false"
 >
     <button
         type="button"
@@ -92,10 +97,12 @@
         </svg>
     </button>
 
+    {{-- Panel treo thẳng vào <body>: khung cha có overflow hoặc transform sẽ cắt/lệch nó --}}
+    <template x-teleport="body">
     <div
         x-show="open"
         x-cloak
-        @click.away="open = false"
+        @click.outside="open = false"
         :style="`position:fixed; top:${panel.top}px; left:${panel.left}px; width:${panel.width}px; z-index:9999;`"
         class="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-2xl dark:border-gray-700 dark:bg-gray-900"
     >
@@ -135,4 +142,5 @@
             </div>
         </div>
     </div>
+    </template>
 </div>
