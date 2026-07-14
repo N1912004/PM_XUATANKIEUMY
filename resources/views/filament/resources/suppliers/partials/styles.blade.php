@@ -443,6 +443,18 @@
                 background: #F8FAFC;
             }
 
+            /* Bảng chọn nguyên liệu cuộn trong khung — header phải dính lại (nền đặt trên TH,
+               vì nền của TR không đi theo khi sticky). */
+            .sup-table thead.sup-thead-sticky th {
+                position: sticky;
+                top: 0;
+                z-index: 2;
+                background: #F8FAFC;
+            }
+            .dark .sup-table thead.sup-thead-sticky th {
+                background: #172033 !important;
+            }
+
             .sup-table th {
                 text-align: left !important;
                 padding: 10px 12px !important;
