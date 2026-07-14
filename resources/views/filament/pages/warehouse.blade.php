@@ -593,12 +593,15 @@
                     </svg>
                     <input type="text" wire:model.live.debounce.300ms="search" placeholder="{{ __('warehouse.placeholders.search_ingredient') }}">
                 </div>
-                <select class="type-select" wire:model.live="selectedType">
-                    <option value="">{{ __('warehouse.filters.all_types') }}</option>
-                    @foreach($this->getIngredientTypeOptions() as $typeName)
-                        <option value="{{ $typeName }}">{{ $typeName }}</option>
-                    @endforeach
-                </select>
+                <div style="min-width:190px">
+                    @include('filament.components.search-select', [
+                        'name' => 'selectedType',
+                        'live' => true,
+                        'placeholder' => __('warehouse.filters.all_types'),
+                        'emptyLabel' => __('warehouse.filters.all_types'),
+                        'options' => collect($this->getIngredientTypeOptions())->map(fn ($t) => ['value' => $t, 'label' => $t])->all(),
+                    ])
+                </div>
             </div>
         @endif
     </div>
@@ -867,12 +870,16 @@
                         <div class="flex items-center gap-3">
                             <div class="form-field" style="width: 320px;">
                                 <label style="font-size:0.7rem;">{{ __('warehouse.form.pending_po_code') }}</label>
-                                <select wire:model.live="selectedPOId" style="height: 34px;">
-                                    <option value="">{{ __('warehouse.placeholders.select_po') }}</option>
-                                    @foreach($this->getPendingPOs() as $po)
-                                        <option value="{{ $po->id }}">{{ $po->code }} - {{ $po->supplier->name }}</option>
-                                    @endforeach
-                                </select>
+                                @include('filament.components.search-select', [
+                                    'name' => 'selectedPOId',
+                                    'live' => true,
+                                    'placeholder' => __('warehouse.placeholders.select_po'),
+                                    'options' => collect($this->getPendingPOs())->map(fn ($po) => [
+                                        'value' => $po->id,
+                                        'label' => $po->code,
+                                        'sub' => $po->supplier?->name,
+                                    ])->all(),
+                                ])
                             </div>
                         </div>
                         <button type="button" class="wh-action-btn wh-action-btn-primary" wire:click="confirmInboundPO">
@@ -980,12 +987,16 @@
                                 @foreach($directItemsData as $index => $item)
                                     <tr>
                                         <td>
-                                            <select wire:model="directItemsData.{{ $index }}.ingredient_id" class="table-select" style="width:100%;">
-                                                <option value="">{{ __('warehouse.placeholders.select_ingredient') }}</option>
-                                                @foreach($this->getIngredientsList() as $ing)
-                                                    <option value="{{ $ing->id }}">{{ $ing->code }} - {{ $ing->name }} ({{ $ing->unit }})</option>
-                                                @endforeach
-                                            </select>
+                                            @include('filament.components.search-select', [
+                                                'name' => 'directItemsData.'.$index.'.ingredient_id',
+                                                'live' => false,
+                                                'placeholder' => __('warehouse.placeholders.select_ingredient'),
+                                                'options' => collect($this->getIngredientsList())->map(fn ($ing) => [
+                                                    'value' => $ing->id,
+                                                    'label' => $ing->code.' - '.$ing->name,
+                                                    'sub' => $ing->unit,
+                                                ])->all(),
+                                            ])
                                         </td>
                                         <td style="text-align: center;">
                                             <input type="number" step="0.01" wire:model="directItemsData.{{ $index }}.quantity" class="table-input" style="width:110px;">
@@ -1036,11 +1047,13 @@
                             </div>
                             <div class="form-field" style="width: 140px;">
                                 <label style="font-size:0.7rem;">{{ __('warehouse.form.shift') }}</label>
-                                <select wire:model.live="prodShiftId" style="height:34px;">
-                                    @foreach($this->getShiftsList() as $sh)
-                                        <option value="{{ $sh->id }}">{{ $sh->name }}</option>
-                                    @endforeach
-                                </select>
+                                @include('filament.components.search-select', [
+                                    'name' => 'prodShiftId',
+                                    'live' => true,
+                                    'nullable' => false,
+                                    'placeholder' => __('warehouse.form.shift'),
+                                    'options' => collect($this->getShiftsList())->map(fn ($sh) => ['value' => $sh->id, 'label' => $sh->name])->all(),
+                                ])
                             </div>
                         </div>
                         <button type="button" class="wh-action-btn wh-action-btn-primary" wire:click="confirmProductionOut">
@@ -1093,12 +1106,11 @@
                         <div class="flex items-center gap-3">
                             <div class="form-field" style="width: 260px;">
                                 <label style="font-size: 0.78rem; font-weight: 600; color: #475569;" class="dark:text-slate-300">{{ __('warehouse.form.destination_kitchen') }}</label>
-                                <select wire:model="destKitchenId" class="table-select" style="width: 100%;">
-                                    <option value="">{{ __('warehouse.placeholders.select_destination_kitchen') }}</option>
-                                    @foreach($this->getTransferKitchens() as $kit)
-                                        <option value="{{ $kit->id }}">{{ $kit->name }}</option>
-                                    @endforeach
-                                </select>
+                                @include('filament.components.search-select', [
+                                    'name' => 'destKitchenId',
+                                    'placeholder' => __('warehouse.placeholders.select_destination_kitchen'),
+                                    'options' => collect($this->getTransferKitchens())->map(fn ($kit) => ['value' => $kit->id, 'label' => $kit->name])->all(),
+                                ])
                             </div>
                         </div>
                         <div class="flex gap-2">
@@ -1136,12 +1148,16 @@
                                 @foreach($transferItemsData as $index => $item)
                                     <tr>
                                         <td>
-                                            <select wire:model.live="transferItemsData.{{ $index }}.ingredient_id" class="table-select" style="width:100%;">
-                                                <option value="">{{ __('warehouse.placeholders.select_ingredient') }}</option>
-                                                @foreach($this->getIngredientsList() as $ing)
-                                                    <option value="{{ $ing->id }}">{{ $ing->code }} - {{ $ing->name }} ({{ $ing->unit }})</option>
-                                                @endforeach
-                                            </select>
+                                            @include('filament.components.search-select', [
+                                                'name' => 'transferItemsData.'.$index.'.ingredient_id',
+                                                'live' => true,
+                                                'placeholder' => __('warehouse.placeholders.select_ingredient'),
+                                                'options' => collect($this->getIngredientsList())->map(fn ($ing) => [
+                                                    'value' => $ing->id,
+                                                    'label' => $ing->code.' - '.$ing->name,
+                                                    'sub' => $ing->unit,
+                                                ])->all(),
+                                            ])
                                         </td>
                                         <td style="text-align: right; font-weight:700;">
                                             {{ number_format($item['available_qty'], 2, ',', '.') }}<span style="font-size: 11px; font-weight: 500; color: #94a3b8; margin-left: 2px;">{{ $item['unit'] ?? '' }}</span>
@@ -1236,21 +1252,36 @@
             @php $logData = $this->getLogData(); @endphp
             <!-- Bộ lọc nhật ký: loại giao dịch + nguyên liệu -->
             <div style="display:flex; gap:10px; margin-bottom:12px; flex-wrap:wrap;">
-                <select wire:model.live="logTypeFilter" class="table-input" style="height:34px; min-width:180px;">
-                    <option value="">{{ __('warehouse.filters.all_transaction_types') }}</option>
-                    <option value="{{ __('warehouse.transaction_types.inbound') }}">{{ __('warehouse.transaction_type_labels.inbound') }}</option>
-                    <option value="{{ __('warehouse.transaction_types.external_inbound') }}">{{ __('warehouse.transaction_type_labels.external_inbound') }}</option>
-                    <option value="{{ __('warehouse.transaction_types.outbound') }}">{{ __('warehouse.transaction_type_labels.outbound') }}</option>
-                    <option value="{{ __('warehouse.transaction_types.transfer_out') }}">{{ __('warehouse.transaction_type_labels.transfer_out') }}</option>
-                    <option value="{{ __('warehouse.transaction_types.transfer_in') }}">{{ __('warehouse.transaction_type_labels.transfer_in') }}</option>
-                    <option value="{{ __('warehouse.transaction_types.stock_check') }}">{{ __('warehouse.transaction_type_labels.stock_check') }}</option>
-                </select>
-                <select wire:model.live="logIngredientFilter" class="table-input" style="height:34px; min-width:200px;">
-                    <option value="">{{ __('warehouse.filters.all_ingredients') }}</option>
-                    @foreach($this->getIngredientsList() as $ing)
-                        <option value="{{ $ing->id }}">{{ $ing->name }}</option>
-                    @endforeach
-                </select>
+                @php
+                    $logTypes = collect([
+                        'inbound', 'external_inbound', 'outbound', 'transfer_out', 'transfer_in', 'stock_check',
+                    ])->map(fn ($k) => [
+                        'value' => __('warehouse.transaction_types.'.$k),
+                        'label' => __('warehouse.transaction_type_labels.'.$k),
+                    ])->all();
+                @endphp
+                <div style="min-width:200px">
+                    @include('filament.components.search-select', [
+                        'name' => 'logTypeFilter',
+                        'live' => true,
+                        'placeholder' => __('warehouse.filters.all_transaction_types'),
+                        'emptyLabel' => __('warehouse.filters.all_transaction_types'),
+                        'options' => $logTypes,
+                    ])
+                </div>
+                <div style="min-width:220px">
+                    @include('filament.components.search-select', [
+                        'name' => 'logIngredientFilter',
+                        'live' => true,
+                        'placeholder' => __('warehouse.filters.all_ingredients'),
+                        'emptyLabel' => __('warehouse.filters.all_ingredients'),
+                        'options' => collect($this->getIngredientsList())->map(fn ($ing) => [
+                            'value' => $ing->id,
+                            'label' => $ing->name,
+                            'sub' => $ing->code,
+                        ])->all(),
+                    ])
+                </div>
                 {{-- Lọc theo khoảng thời gian để đối soát đúng kỳ --}}
                 <input type="date" wire:model.live="logFromDate" class="table-input" style="height:34px" title="{{ __('warehouse.filters.from_date') }}">
                 <input type="date" wire:model.live="logToDate" class="table-input" style="height:34px" title="{{ __('warehouse.filters.to_date') }}">
