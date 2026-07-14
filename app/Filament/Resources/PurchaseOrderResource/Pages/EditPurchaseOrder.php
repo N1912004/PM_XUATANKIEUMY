@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\PurchaseOrderResource\Pages;
 
+use App\Exports\PurchaseOrdersBatchExport;
 use App\Exports\PurchaseOrderTemplateExport;
 use App\Filament\Resources\PurchaseOrderResource;
 use App\Models\PurchaseOrder;
@@ -9,7 +10,6 @@ use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class EditPurchaseOrder extends EditRecord
 {
@@ -58,9 +58,10 @@ class EditPurchaseOrder extends EditRecord
     }
 
     /**
-     * Xuất Excel gộp tất cả các đơn đặt hàng (nhà cung cấp) cùng đợt
+     * Xuất .xlsx gộp TẤT CẢ đơn đặt hàng cùng đợt — mỗi nhà cung cấp một sheet theo biểu mẫu
+     * (trước đây là CSV dồn nhiều đơn vào một khối văn bản, không gửi được cho NCC).
      */
-    public function exportAllNcc(): StreamedResponse
+    public function exportAllNcc(): BinaryFileResponse
     {
         abort_unless(PurchaseOrderResource::canView($this->record), 403);
 
@@ -69,38 +70,12 @@ class EditPurchaseOrder extends EditRecord
             ->where('kitchen_id', $this->record->kitchen_id)
             ->where('estimated_delivery_date', $this->record->estimated_delivery_date)
             ->get()
-            ->filter(fn ($po) => PurchaseOrderResource::canView($po))
+            ->filter(fn (PurchaseOrder $po): bool => PurchaseOrderResource::canView($po))
             ->values();
 
         // Null-safe: PO có thể chưa có ngày giao dự kiến
-        $fileName = 'PO-DOT-'.($this->record->estimated_delivery_date?->format('Ymd') ?? now()->format('Ymd')).'.csv';
+        $fileName = 'PO-DOT-'.($this->record->estimated_delivery_date?->format('Ymd') ?? now()->format('Ymd')).'.xlsx';
 
-        return response()->streamDownload(function () use ($relatedPOs): void {
-            $output = fopen('php://output', 'w');
-            fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
-
-            foreach ($relatedPOs as $order) {
-                fputcsv($output, ['Mã đơn hàng', $order->code]);
-                fputcsv($output, ['Nhà cung cấp', $order->supplier?->name ?? 'Chưa gán']);
-                fputcsv($output, ['Ngày giao dự kiến', $order->estimated_delivery_date?->format('d/m/Y') ?? '']);
-                fputcsv($output, ['STT', 'Mã nguyên liệu', 'Tên nguyên liệu', 'Đơn vị', 'SL đặt', 'Đơn giá', 'Thành tiền']);
-
-                $i = 1;
-                foreach ($order->items as $item) {
-                    $total = $item->quantity_ordered * $item->unit_price;
-                    fputcsv($output, [
-                        $i++,
-                        $item->ingredient?->code ?? '',
-                        $item->ingredient?->name ?? '',
-                        $item->ingredient?->unit ?? '',
-                        $item->quantity_ordered,
-                        $item->unit_price,
-                        $total,
-                    ]);
-                }
-                fputcsv($output, []); // dòng trống phân cách
-            }
-            fclose($output);
-        }, $fileName, ['Content-Type' => 'text/csv; charset=UTF-8']);
+        return Excel::download(new PurchaseOrdersBatchExport($relatedPOs), $fileName);
     }
 }

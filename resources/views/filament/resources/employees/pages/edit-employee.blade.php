@@ -184,15 +184,12 @@
                 <div class="fg fg4">
                     <div class="field">
                         <label>Phòng ban <span class="req">*</span></label>
+                        {{-- Danh mục động (Danh mục cấu hình → Phòng ban) --}}
                         <select wire:model="department" class="ctrl" required>
                             <option value="">Chọn phòng ban</option>
-                            <option value="Nhân sự">Nhân sự</option>
-                            <option value="Kế toán">Kế toán</option>
-                            <option value="Kho">Kho</option>
-                            <option value="Sản xuất">Sản xuất</option>
-                            <option value="IT">IT</option>
-                            <option value="Kinh doanh">Kinh doanh</option>
-                            <option value="Chăm sóc KH">Chăm sóc KH</option>
+                            @foreach(\App\Models\Catalog::options(\App\Models\Catalog::DEPARTMENT) as $opt)
+                                <option value="{{ $opt }}">{{ $opt }}</option>
+                            @endforeach
                         </select>
                     </div>
                     <div class="field">
@@ -201,7 +198,12 @@
                     </div>
                     <div class="field">
                         <label>Chức vụ <span class="req">*</span></label>
-                        <input wire:model="position" class="ctrl" type="text" placeholder="VD: Chuyên viên, Tổ trưởng..." required>
+                        <select wire:model="position" class="ctrl" required>
+                            <option value="">Chọn chức vụ</option>
+                            @foreach(\App\Models\Catalog::options(\App\Models\Catalog::POSITION) as $opt)
+                                <option value="{{ $opt }}">{{ $opt }}</option>
+                            @endforeach
+                        </select>
                     </div>
                     <div class="field">
                         <label>Cấp bậc</label>

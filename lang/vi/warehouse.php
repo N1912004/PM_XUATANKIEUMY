@@ -52,6 +52,7 @@ return [
         'last_updated' => 'Cập nhật cuối',
         'status' => 'Trạng thái',
         'unit' => 'Đơn vị',
+        'opening_stock' => 'Tồn đầu kỳ',
         'system_stock' => 'Tồn hệ thống',
         'actual_end_day_stock' => 'Tồn cuối ngày thực tế',
         'difference' => 'Chênh lệch',
@@ -83,6 +84,9 @@ return [
         'in_transit' => 'Đang chuyển',
     ],
     'filters' => [
+        'from_date' => 'Từ ngày',
+        'to_date' => 'Đến ngày',
+
         'all_types' => 'Tất cả loại',
         'all_transaction_types' => '— Tất cả loại giao dịch —',
         'all_ingredients' => '— Tất cả nguyên liệu —',
@@ -183,6 +187,12 @@ return [
         'default_out_reason' => 'Sản xuất theo list hàng',
     ],
     'notifications' => [
+        'negative_stock_title' => 'Số lượng tồn không được âm',
+        'negative_stock_body' => 'Kho thực tế không thể âm — kiểm tra lại số đếm thực tế.',
+        'negative_after_check' => 'Chốt kiểm kê sẽ làm tồn kho của :name xuống âm — kiểm tra lại số đếm.',
+        'no_kitchen_title' => 'Tài khoản chưa gắn bếp',
+        'no_kitchen_body' => 'Nghiệp vụ kho gắn với một bếp cụ thể. Vào Quản lý tài khoản → liên kết nhân viên để nhận bếp trực thuộc.',
+
         'missing_check_reason_title' => 'Thiếu lý do chênh lệch kiểm kê',
         'missing_check_reason_body' => 'Có dòng tồn thực tế lệch với hệ thống - vui lòng ghi lý do vào cột Ghi chú của từng dòng lệch trước khi chốt.',
         'end_day_saved' => 'Đã lưu tồn cuối ngày thành công!',
@@ -217,5 +227,10 @@ return [
         'invoice_mimes' => 'Chứng từ chỉ chấp nhận ảnh (JPG/PNG/WEBP) hoặc PDF.',
         'invoice_max' => 'Chứng từ tối đa 5MB.',
         'over_current_stock' => 'Vượt tồn kho hiện tại',
+    ],
+
+    'log' => [
+        'showing' => 'Đang hiển thị :shown / :total giao dịch',
+        'load_more' => 'Xem thêm 50 dòng',
     ],
 ];

@@ -239,9 +239,9 @@
                 <input wire:model="kitchenName" class="ctrl" placeholder="Tên nhà ăn / bếp *" required>
 
                 <select wire:model="kitchenType" class="ctrl" required>
-                    <option value="Bếp sản xuất">Bếp sản xuất</option>
-                    <option value="Điểm chia suất">Điểm chia suất</option>
-                    <option value="Nhà ăn phục vụ">Nhà ăn phục vụ</option>
+                    @foreach(\App\Models\Catalog::options(\App\Models\Catalog::KITCHEN_TYPE) as $opt)
+                        <option value="{{ $opt }}">{{ $opt }}</option>
+                    @endforeach
                 </select>
 
                 <input wire:model="kitchenCapacity" class="ctrl" type="number" placeholder="Công suất / ngày *" min="0" required>
@@ -287,9 +287,9 @@
 
                     <select wire:model.live="kitchenTypeFilter" class="lv-sel" style="height:34px">
                         <option value="">Tất cả loại</option>
-                        <option value="Bếp sản xuất">Bếp sản xuất</option>
-                        <option value="Điểm chia suất">Điểm chia suất</option>
-                        <option value="Nhà ăn phục vụ">Nhà ăn phục vụ</option>
+                        @foreach(\App\Models\Catalog::options(\App\Models\Catalog::KITCHEN_TYPE) as $opt)
+                            <option value="{{ $opt }}">{{ $opt }}</option>
+                        @endforeach
                     </select>
 
                     <select wire:model.live="kitchenStatusFilter" class="lv-sel" style="height:34px">

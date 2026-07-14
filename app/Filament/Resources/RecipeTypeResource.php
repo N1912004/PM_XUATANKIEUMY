@@ -15,7 +15,7 @@ class RecipeTypeResource extends Resource
 {
     protected static ?string $model = RecipeType::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-squares-2x2';
+    protected static ?string $navigationIcon = 'heroicon-o-rectangle-group';
 
     protected static ?int $navigationSort = 7;
 

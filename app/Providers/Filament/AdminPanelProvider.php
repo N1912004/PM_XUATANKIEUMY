@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Pages\Auth\Login;
 use App\Filament\Pages\Dashboard;
 use App\Filament\Pages\EditProfile;
 use App\Http\Middleware\SetLocale;
@@ -39,7 +40,8 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->spa()
-            ->login()
+            // Trang đăng nhập theo mẫu BlueFire (2 cột) — kế thừa nguyên luồng auth Filament
+            ->login(Login::class)
             ->profile(EditProfile::class)
             ->sidebarCollapsibleOnDesktop()
             ->brandName($siteName)
@@ -211,32 +213,53 @@ class AdminPanelProvider extends PanelProvider
                         .fi-sidebar-item-active > a * {
                             color: #ffffff !important;
                         }
+
+                        /*
+                         * Badge (số đếm bên phải menu) khi menu đang active:
+                         * quy tắc "tô trắng mọi phần tử con" ở trên làm CHỮ trong badge thành trắng,
+                         * trong khi NỀN badge vẫn sáng → số biến mất. Đổi nền badge sang trắng-mờ
+                         * để số trắng vẫn đọc được trên nền primary.
+                         */
+                        .fi-sidebar-item.fi-active .fi-sidebar-item-badge,
+                        .fi-sidebar-item-active .fi-sidebar-item-badge,
+                        .fi-sidebar-item.fi-active .fi-sidebar-item-badge .fi-badge,
+                        .fi-sidebar-item-active .fi-sidebar-item-badge .fi-badge {
+                            background-color: rgba(255, 255, 255, 0.25) !important;
+                            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.45) !important;
+                            color: #ffffff !important;
+                        }
+                        .fi-sidebar-item.fi-active .fi-sidebar-item-badge *,
+                        .fi-sidebar-item-active .fi-sidebar-item-badge * {
+                            background-color: transparent !important;
+                            color: #ffffff !important;
+                        }
                         
-                        /* Inactive menu items: Grouped and harmonized color themes by domain */
-                        /* 1. Tổng quan & Giao tiếp (Vibrant Sky Blue) */
-                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href$="/admin"] .fi-sidebar-item-icon,
-                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/chat-nhom"] .fi-sidebar-item-icon,
-                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/areas"] .fi-sidebar-item-icon { color: #0ea5e9 !important; }
+                        /*
+                         * Màu icon sidebar: MỘT màu cho MỘT nhóm nghiệp vụ (menu chưa được active).
+                         * Thêm màn hình mới thì PHẢI thêm slug vào đúng nhóm dưới đây, nếu không
+                         * icon rơi về xám mặc định và sidebar trông lộn xộn.
+                         */
+                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a:is(
+                            [href$="/admin"], [href*="/dashboard"], [href*="/chat-nhom"], [href*="/areas"], [href*="/kitchens"]
+                        ) .fi-sidebar-item-icon { color: #0ea5e9 !important; } /* Tổng quan & Giao tiếp — Sky */
 
-                        /* 2. Vận hành Bếp & Thực đơn (Vibrant Orange) */
-                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/recipes"] .fi-sidebar-item-icon,
-                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/menus"] .fi-sidebar-item-icon,
-                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/bao-cao"] .fi-sidebar-item-icon { color: #f97316 !important; }
+                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a:is(
+                            [href*="/recipes"], [href*="/recipe-types"], [href*="/menus"], [href*="/menu-audit-logs"],
+                            [href*="/lap-thuc-don-tuan"], [href*="/shifts"], [href*="/bao-cao"]
+                        ) .fi-sidebar-item-icon { color: #f97316 !important; } /* Vận hành bếp & Thực đơn — Orange */
 
-                        /* 3. Cung ứng & Kho hàng (Vibrant Emerald) */
-                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/stocks"] .fi-sidebar-item-icon,
-                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/list-hang"] .fi-sidebar-item-icon,
-                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/ingredients"] .fi-sidebar-item-icon,
-                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/suppliers"] .fi-sidebar-item-icon,
-                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/purchase-orders"] .fi-sidebar-item-icon { color: #10b981 !important; }
+                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a:is(
+                            [href*="/stocks"], [href*="/stock-transfers"], [href*="/stock-transactions"], [href*="/list-hang"],
+                            [href*="/ingredients"], [href*="/ingredient-types"], [href*="/units"],
+                            [href*="/suppliers"], [href*="/purchase-orders"]
+                        ) .fi-sidebar-item-icon { color: #10b981 !important; } /* Cung ứng & Kho — Emerald */
 
-                        /* 4. An toàn Vệ sinh thực phẩm (Vibrant Indigo) */
-                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/food-safety-audits"] .fi-sidebar-item-icon { color: #6366f1 !important; }
+                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/food-safety-audits"] .fi-sidebar-item-icon { color: #6366f1 !important; } /* ATTP — Indigo */
 
-                        /* 5. Nhân sự & Chấm công (Vibrant Violet) */
-                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/employees"] .fi-sidebar-item-icon,
-                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/timekeepings"] .fi-sidebar-item-icon,
-                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/leave-overtimes"] .fi-sidebar-item-icon { color: #8b5cf6 !important; }
+                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a:is(
+                            [href*="/employees"], [href*="/timekeepings"], [href*="/leave-overtimes"],
+                            [href*="/users"], [href*="/shield"]
+                        ) .fi-sidebar-item-icon { color: #8b5cf6 !important; } /* Nhân sự & Phân quyền — Violet */
 
                         /* Recipe create/edit form: match BA mockup spacing and cost table emphasis */
                         .fi-resource-recipes .fi-header-heading {

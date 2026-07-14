@@ -14,10 +14,12 @@ use App\Models\Stock;
 use App\Models\StockTransaction;
 use App\Models\StockTransfer;
 use App\Models\StockTransferItem;
+use Carbon\Carbon;
 use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Livewire\WithFileUploads;
@@ -194,6 +196,16 @@ class ListStocks extends ListRecords
         ];
     }
 
+    /**
+     * Bếp mà tài khoản đang thao tác. Trước đây fallback ngầm về Kitchen::first() — tức là
+     * người chưa gắn bếp lại vô tình xuất/nhập kho của một bếp bất kỳ. Nay trả null và các
+     * luồng gọi phải báo rõ "chưa gắn bếp" (super_admin cũng phải gắn nhân viên để vận hành kho).
+     */
+    public function operatingKitchenId(): ?int
+    {
+        return auth()->user()?->currentKitchenId();
+    }
+
     public function setTab(string $tab): void
     {
         $this->warehouseTab = $tab;
@@ -203,13 +215,75 @@ class ListStocks extends ListRecords
         }
     }
 
-    /** Nạp tồn hiện tại của bếp vào form kiểm kê (chỉ khi mở tab). */
+    /** Nạp tồn HỆ THỐNG CỦA NGÀY KIỂM KÊ vào form (chỉ khi mở tab / đổi ngày). */
     protected function initEndDayCheck(): void
     {
+        $system = $this->getSystemQuantities($this->checkDate);
+
         foreach ($this->getCheckStocks() as $stock) {
-            $this->actualQuantities[$stock->id] = $stock->quantity;
+            $this->actualQuantities[$stock->id] = $system[$stock->id] ?? 0.0;
             $this->checkNotes[$stock->id] = '';
         }
+    }
+
+    /** Đổi ngày kiểm kê thì nạp lại số liệu của đúng ngày đó. */
+    public function updatedCheckDate(): void
+    {
+        $this->checkStocksCache = null;
+        $this->systemQtyCache = [];
+        $this->actualQuantities = [];
+        $this->checkNotes = [];
+        $this->initEndDayCheck();
+    }
+
+    /** @var array<string, array<int, float>> Memo tồn hệ thống theo ngày trong 1 render */
+    protected array $systemQtyCache = [];
+
+    /**
+     * Tồn HỆ THỐNG cuối ngày `$date` cho từng dòng kho (BA R18).
+     *
+     * `stocks.quantity` là tồn HIỆN TẠI, nên tồn cuối ngày D = tồn hiện tại trừ đi
+     * toàn bộ biến động phát sinh SAU ngày D (nhật ký ghi dấu: nhập +, xuất −).
+     * Nhờ vậy chọn ngày quá khứ ra đúng số của ngày đó, không phải số hôm nay.
+     *
+     * @return array<int, float> stock_id => tồn cuối ngày
+     */
+    public function getSystemQuantities(?string $date): array
+    {
+        $date ??= now()->toDateString();
+
+        if (isset($this->systemQtyCache[$date])) {
+            return $this->systemQtyCache[$date];
+        }
+
+        $stocks = $this->getCheckStocks();
+        $after = StockTransaction::query()
+            ->whereIn('ingredient_id', $stocks->pluck('ingredient_id'))
+            ->whereIn('kitchen_id', $stocks->pluck('kitchen_id')->unique())
+            ->where('created_at', '>=', Carbon::parse($date)->addDay()->startOfDay())
+            ->groupBy('ingredient_id')
+            ->selectRaw('ingredient_id, SUM(quantity) as delta')
+            ->pluck('delta', 'ingredient_id');
+
+        $result = [];
+        foreach ($stocks as $stock) {
+            $result[$stock->id] = (float) $stock->quantity - (float) ($after[$stock->ingredient_id] ?? 0);
+        }
+
+        return $this->systemQtyCache[$date] = $result;
+    }
+
+    /**
+     * Tồn ĐẦU KỲ của ngày kiểm kê = tồn cuối ngày hôm trước (BA R18: số chốt hôm nay
+     * chính là tồn đầu kỳ hôm sau — hệ quả trực tiếp của cách tính theo nhật ký).
+     *
+     * @return array<int, float>
+     */
+    public function getOpeningQuantities(): array
+    {
+        return $this->getSystemQuantities(
+            Carbon::parse($this->checkDate ?? now())->subDay()->toDateString()
+        );
     }
 
     /** @var Collection|null Memo 1 render cho tab kiểm kê */
@@ -307,11 +381,21 @@ class ListStocks extends ListRecords
 
         $kitchenId = auth()->user()?->currentKitchenId();
 
-        // Dòng nào lệch tồn (thực tế ≠ hệ thống) BẮT BUỘC ghi lý do — đối chiếu tồn từ DB
-        $systemQty = Stock::query()
-            ->whereIn('id', array_keys($this->actualQuantities))
-            ->when($kitchenId, fn ($q) => $q->where('kitchen_id', $kitchenId))
-            ->pluck('quantity', 'id');
+        // Đối chiếu với tồn HỆ THỐNG CỦA NGÀY KIỂM KÊ (tính lại từ DB, không tin payload client)
+        $systemQty = collect($this->getSystemQuantities($this->checkDate));
+
+        // Kho thực tế không thể ÂM — số đếm âm là nhập sai, chặn ngay thay vì ghi vào sổ
+        foreach ($this->actualQuantities as $stockId => $actualQty) {
+            if ((float) $actualQty < 0) {
+                Notification::make()
+                    ->title(__('warehouse.notifications.negative_stock_title'))
+                    ->body(__('warehouse.notifications.negative_stock_body'))
+                    ->danger()
+                    ->send();
+
+                return;
+            }
+        }
 
         foreach ($this->actualQuantities as $stockId => $actualQty) {
             if (! $systemQty->has($stockId)) {
@@ -329,21 +413,41 @@ class ListStocks extends ListRecords
             }
         }
 
-        DB::transaction(function () use ($kitchenId): void {
-            foreach ($this->actualQuantities as $stockId => $actualQty) {
-                // Khóa dòng tồn và chỉ chấp nhận stock thuộc bếp của user (chống sửa payload chéo bếp)
-                $stock = Stock::query()
-                    ->whereKey($stockId)
-                    ->when($kitchenId, fn ($q) => $q->where('kitchen_id', $kitchenId))
-                    ->lockForUpdate()
-                    ->first();
+        $checkDate = $this->checkDate ?? now()->toDateString();
+        $voucherCode = 'KK-'.Carbon::parse($checkDate)->format('Ymd');
 
-                if (! $stock) {
-                    continue;
-                }
+        try {
+            DB::transaction(function () use ($kitchenId, $systemQty, $voucherCode): void {
+                foreach ($this->actualQuantities as $stockId => $actualQty) {
+                    // Khóa dòng tồn và chỉ chấp nhận stock thuộc bếp của user (chống sửa payload chéo bếp)
+                    $stock = Stock::query()
+                        ->with('ingredient')
+                        ->whereKey($stockId)
+                        ->when($kitchenId, fn ($q) => $q->where('kitchen_id', $kitchenId))
+                        ->lockForUpdate()
+                        ->first();
 
-                $diff = (float) $actualQty - (float) $stock->quantity;
-                if ($diff != 0) {
+                    if (! $stock || ! $systemQty->has($stockId)) {
+                        continue;
+                    }
+
+                    // Lệch so với tồn của NGÀY KIỂM KÊ; áp bằng ĐIỀU CHỈNH (+/−) chứ không ghi đè,
+                    // để kiểm kê ngày quá khứ không xóa mất các biến động phát sinh sau đó.
+                    $diff = (float) $actualQty - (float) $systemQty[$stockId];
+
+                    if ($diff == 0) {
+                        continue;
+                    }
+
+                    $newQty = (float) $stock->quantity + $diff;
+
+                    // Điều chỉnh của ngày quá khứ có thể kéo tồn HIỆN TẠI xuống âm — không cho phép
+                    if ($newQty < 0) {
+                        throw new \RuntimeException(__('warehouse.notifications.negative_after_check', [
+                            'name' => $stock->ingredient?->name ?? '',
+                        ]));
+                    }
+
                     // Loại giao dịch 'Kiểm kê' riêng (không trộn với Nhập/Xuất kho thường)
                     // để nhật ký đối soát phân biệt được điều chỉnh kiểm kê; quantity giữ DẤU
                     // (+ thừa / − thiếu) — chiều nằm ngay trong số liệu.
@@ -351,15 +455,20 @@ class ListStocks extends ListRecords
                         'kitchen_id' => $stock->kitchen_id,
                         'ingredient_id' => $stock->ingredient_id,
                         'type' => __('warehouse.transaction_types.stock_check'),
+                        'voucher_code' => $voucherCode,
                         'quantity' => $diff,
-                        'after_quantity' => $actualQty,
+                        'after_quantity' => $newQty,
                         'note' => __('warehouse.notes.end_day_check').': '.(($this->checkNotes[$stockId] ?? '') ?: __('warehouse.notes.actual_difference_adjustment')),
                     ]);
 
-                    $stock->update(['quantity' => $actualQty]);
+                    $stock->update(['quantity' => $newQty]);
                 }
-            }
-        });
+            });
+        } catch (\RuntimeException $e) {
+            Notification::make()->title($e->getMessage())->danger()->send();
+
+            return;
+        }
 
         Notification::make()
             ->title(__('warehouse.notifications.end_day_saved'))
@@ -422,7 +531,8 @@ class ListStocks extends ListRecords
         foreach ($this->poItemsData as $itemData) {
             $qtyReceived = (float) ($itemData['quantity_received'] ?? 0);
             $qtyOrdered = (float) ($orderedByItemId[$itemData['id'] ?? 0] ?? 0);
-            if ($qtyReceived > 0 && $qtyReceived !== $qtyOrdered && trim((string) ($itemData['receive_note'] ?? '')) === '') {
+            // Lệch là phải có lý do — kể cả nhận 0 (thiếu TOÀN BỘ), trường hợp nghiêm trọng nhất
+            if ($qtyReceived !== $qtyOrdered && trim((string) ($itemData['receive_note'] ?? '')) === '') {
                 Notification::make()
                     ->title(__('warehouse.notifications.missing_difference_reason_title'))
                     ->body(__('warehouse.notifications.po_difference_body', ['name' => e($itemData['name'] ?? '')]))
@@ -608,7 +718,7 @@ class ListStocks extends ListRecords
     // Production Outbound Handlers
     public function loadProductionItems(): void
     {
-        $kitchenId = auth()->user()?->currentKitchenId() ?? Kitchen::first()?->id;
+        $kitchenId = $this->operatingKitchenId();
 
         if (! $this->prodDate || ! $this->prodShiftId || ! $kitchenId) {
             $this->prodItemsData = [];
@@ -677,7 +787,13 @@ class ListStocks extends ListRecords
             return;
         }
 
-        $kitchenId = auth()->user()?->currentKitchenId() ?? Kitchen::first()?->id;
+        $kitchenId = $this->operatingKitchenId();
+
+        if (! $kitchenId) {
+            Notification::make()->title(__('warehouse.notifications.no_source_kitchen'))->danger()->send();
+
+            return;
+        }
 
         $shift = Shift::find($this->prodShiftId);
         $shiftName = $shift ? $shift->name : "Ca #{$this->prodShiftId}";
@@ -922,7 +1038,11 @@ class ListStocks extends ListRecords
     public function getPendingPOs(): array
     {
         $kitchenId = auth()->user()?->currentKitchenId();
-        $query = PurchaseOrder::query()->whereIn('status', ['sent', 'checking'])->whereNull('stocked_at');
+        // Bỏ các PO không có dòng nguyên liệu nào — chọn vào chỉ hiện bảng kiểm hàng TRỐNG
+        $query = PurchaseOrder::query()
+            ->whereIn('status', ['sent', 'checking'])
+            ->whereNull('stocked_at')
+            ->whereHas('items');
         if ($kitchenId) {
             $query->where('kitchen_id', $kitchenId);
         }
@@ -1114,29 +1234,64 @@ class ListStocks extends ListRecords
         return $query->orderBy('id')->paginate($this->perPage);
     }
 
-    /** Bộ lọc tab Nhật ký kho: theo loại giao dịch và nguyên liệu (phục vụ đối soát) */
+    /** Bộ lọc tab Nhật ký kho: theo loại giao dịch, nguyên liệu và KHOẢNG THỜI GIAN (đối soát) */
     public string $logTypeFilter = '';
 
     public string $logIngredientFilter = '';
 
+    public string $logFromDate = '';
+
+    public string $logToDate = '';
+
+    public int $logPerPage = 50;
+
+    public function loadMoreLog(): void
+    {
+        $this->logPerPage += 50;
+    }
+
+    /** Đổi bộ lọc thì xem lại từ đầu (tránh giữ trang đã mở rộng của bộ lọc cũ). */
+    public function updatedLogTypeFilter(): void
+    {
+        $this->logPerPage = 50;
+    }
+
+    public function updatedLogIngredientFilter(): void
+    {
+        $this->logPerPage = 50;
+    }
+
+    public function updatedLogFromDate(): void
+    {
+        $this->logPerPage = 50;
+    }
+
+    public function updatedLogToDate(): void
+    {
+        $this->logPerPage = 50;
+    }
+
+    public function getLogTotal(): int
+    {
+        return $this->logQuery()->count();
+    }
+
     public function getLogData(): array
     {
+        return $this->logQuery()->take($this->logPerPage)->get()->toArray();
+    }
+
+    protected function logQuery(): Builder
+    {
         $kitchenId = auth()->user()?->currentKitchenId();
-        $query = StockTransaction::with(['ingredient'])->latest();
 
-        if ($kitchenId) {
-            $query->where('kitchen_id', $kitchenId);
-        }
-
-        if ($this->logTypeFilter !== '') {
-            $query->where('type', $this->logTypeFilter);
-        }
-
-        if ($this->logIngredientFilter !== '') {
-            $query->where('ingredient_id', (int) $this->logIngredientFilter);
-        }
-
-        return $query->take(50)->get()->toArray();
+        return StockTransaction::with(['ingredient'])
+            ->latest()
+            ->when($kitchenId, fn ($q) => $q->where('kitchen_id', $kitchenId))
+            ->when($this->logTypeFilter !== '', fn ($q) => $q->where('type', $this->logTypeFilter))
+            ->when($this->logIngredientFilter !== '', fn ($q) => $q->where('ingredient_id', (int) $this->logIngredientFilter))
+            ->when($this->logFromDate !== '', fn ($q) => $q->where('created_at', '>=', Carbon::parse($this->logFromDate)->startOfDay()))
+            ->when($this->logToDate !== '', fn ($q) => $q->where('created_at', '<', Carbon::parse($this->logToDate)->addDay()->startOfDay()));
     }
 
     public function getStats(): array

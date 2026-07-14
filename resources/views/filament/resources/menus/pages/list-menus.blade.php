@@ -55,9 +55,16 @@
                 </div>
             </div>
             <div class="mp-kcard">
+                <div class="mp-kico" style="background:var(--po-bl-s); color:var(--po-bl)"><i class="fa-solid fa-check-double"></i></div>
+                <div>
+                    <div class="mp-klbl">Khách đã xác nhận</div>
+                    <div class="mp-kval">{{ $stats['confirmed_month'] }}</div>
+                </div>
+            </div>
+            <div class="mp-kcard">
                 <div class="mp-kico" style="background:var(--po-or-s); color:var(--po-or)"><i class="fa-solid fa-clock-rotate-left"></i></div>
                 <div>
-                    <div class="mp-klbl">Chờ xác nhận</div>
+                    <div class="mp-klbl">Còn là nháp</div>
                     <div class="mp-kval">{{ $stats['pending'] }}</div>
                 </div>
             </div>
@@ -291,6 +298,20 @@
                 <input wire:model="weekEditReason" type="text" class="ctrl" placeholder="VD: Khách đổi món đột xuất">
             </div>
         </div>
+
+        {{-- Cảnh báo lặp món so với 3 tuần gần nhất (BA R33) --}}
+        @php $dupWarnings = $this->getWeekDuplicateWarnings(); @endphp
+        @if(!empty($dupWarnings))
+            <div class="tcard" style="padding:12px 16px; margin-bottom:14px; border-left:4px solid var(--po-wn, #f59e0b); background:var(--po-bd2)">
+                <div style="font-weight:700; color:var(--po-wn, #b45309); display:flex; align-items:center; gap:8px">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    Món đã xuất hiện trong 3 tuần gần nhất ({{ count($dupWarnings) }} món)
+                </div>
+                <div style="margin-top:6px; font-size:13px; color:var(--po-tx2)">
+                    {{ implode(' · ', $dupWarnings) }}
+                </div>
+            </div>
+        @endif
 
         <!-- Grid Matrix Table -->
         <div class="tcard" style="overflow-x:auto">

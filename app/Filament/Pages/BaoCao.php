@@ -3,6 +3,7 @@
 namespace App\Filament\Pages;
 
 use App\Exports\FinancialReportExport;
+use App\Models\Kitchen;
 use App\Models\Menu;
 use App\Models\Shift;
 use Carbon\Carbon;
@@ -42,6 +43,9 @@ class BaoCao extends Page
 
     public string $search = '';
 
+    /** Lọc theo bếp; null = tất cả các bếp (chỉ quản lý cấp trên mới cần gộp). */
+    public ?int $kitchenId = null;
+
     public function mount(): void
     {
         // Mặc định tuần hiện tại (T2 → T7) thay vì tuần seeder demo
@@ -60,6 +64,39 @@ class BaoCao extends Page
     public function getAllShifts()
     {
         return $this->allShiftsCache ??= Shift::all();
+    }
+
+    /** Cấp quản lý xem được số liệu toàn hệ thống; còn lại bị khóa vào bếp của mình. */
+    protected function seesAllKitchens(): bool
+    {
+        return auth()->user()?->hasRole(['super_admin', 'Quản trị viên']) ?? false;
+    }
+
+    /**
+     * Bếp bị ÉP cho người dùng thường (null = được xem toàn hệ thống).
+     *
+     * Đây là scope BẮT BUỘC, không phải bộ lọc: `$this->kitchenId` là lựa chọn trên UI nên
+     * client sửa được — không thể dựa vào nó để phân quyền dữ liệu.
+     */
+    protected function enforcedKitchenId(): ?int
+    {
+        return $this->seesAllKitchens() ? null : auth()->user()?->currentKitchenId();
+    }
+
+    /**
+     * Danh sách bếp để lọc — người dùng đã gắn bếp thì chỉ thấy bếp của mình.
+     *
+     * @return array<int, string>
+     */
+    public function getKitchenOptions(): array
+    {
+        $enforced = $this->enforcedKitchenId();
+
+        return Kitchen::query()
+            ->when($enforced, fn ($q, int $kitchenId) => $q->whereKey($kitchenId))
+            ->orderBy('name')
+            ->pluck('name', 'id')
+            ->all();
     }
 
     public function toggleShift(int $id): void
@@ -123,7 +160,19 @@ class BaoCao extends Page
             ->where('status', 'locked')
             ->where('date', '>=', $start->toDateString())
             ->where('date', '<', $end->copy()->addDay()->toDateString())
-            ->whereIn('shift_id', $this->selectedShifts);
+            ->whereIn('shift_id', $this->selectedShifts)
+            // Người dùng thường: KHÓA CỨNG vào bếp của mình (fail-closed — chưa gắn bếp thì
+            // không thấy dữ liệu nào, giống trait BelongsToKitchen). Cấp quản lý mới được gộp
+            // toàn hệ thống và dùng $this->kitchenId như một bộ lọc tùy chọn.
+            ->when($this->enforcedKitchenId(), fn ($q, int $kitchenId) => $q->where('kitchen_id', $kitchenId))
+            ->when(
+                ! $this->seesAllKitchens() && ! auth()->user()?->currentKitchenId(),
+                fn ($q) => $q->whereRaw('1 = 0')
+            )
+            ->when(
+                $this->seesAllKitchens() && $this->kitchenId,
+                fn ($q) => $q->where('kitchen_id', $this->kitchenId)
+            );
 
         if (! empty($this->search)) {
             $searchLower = '%'.strtolower($this->search).'%';
@@ -218,6 +267,42 @@ class BaoCao extends Page
         }
 
         return $this->groupedDataMemo = $days;
+    }
+
+    /**
+     * Tổng khối lượng TỪNG nguyên liệu tiêu thụ trong cả khoảng báo cáo (BA: R22).
+     * Gộp xuyên suốt Ngày → Ca → Món, sắp xếp theo giá trị tiêu thụ giảm dần.
+     *
+     * @return array<int, array{code: string, name: string, unit: string, quantity: float, cost: float}>
+     */
+    public function getIngredientTotals(): array
+    {
+        $totals = [];
+
+        foreach ($this->getGroupedData() as $day) {
+            foreach ($day['shifts'] as $shift) {
+                foreach ($shift['dishes'] as $dish) {
+                    foreach ($dish['ingredients'] as $ing) {
+                        $code = $ing['code'];
+
+                        $totals[$code] ??= [
+                            'code' => $code,
+                            'name' => $ing['name'],
+                            'unit' => $ing['unit'],
+                            'quantity' => 0.0,
+                            'cost' => 0.0,
+                        ];
+
+                        $totals[$code]['quantity'] += (float) $ing['quantity'];
+                        $totals[$code]['cost'] += (float) $ing['line_cost'];
+                    }
+                }
+            }
+        }
+
+        usort($totals, fn (array $a, array $b): int => $b['cost'] <=> $a['cost']);
+
+        return $totals;
     }
 
     public function getStats(): array

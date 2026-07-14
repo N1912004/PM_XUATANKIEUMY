@@ -3,8 +3,8 @@
     @php
         $formCrumb = isset($this->supplierId) ? 'Sửa nhà cung cấp' : 'Thêm nhà cung cấp';
         $formTitle = isset($this->supplierId) ? 'Sửa nhà cung cấp' : 'Thêm nhà cung cấp';
-        $summary = $this->summary();
         $ingredients = $this->ingredients();
+        $summary = $this->summary();
     @endphp
 
     <div class="sup-breadcrumb">
@@ -139,9 +139,28 @@
                         <input wire:model.live.debounce.250ms="ingredientSearch" type="text" placeholder="Tìm nguyên liệu theo tên hoặc mã...">
                     </div>
 
-                    <div class="sup-table-wrap" style="border:1.5px solid var(--sup-bd2);border-radius:.65rem;overflow-x:auto">
+                    {{-- Thống kê: đã tích bao nhiêu / còn bao nhiêu chưa hiện (danh mục có thể hàng trăm dòng) --}}
+                    @php
+                        $chosenCount = collect($selectedIngredients)->filter()->count();
+                        $matchCount = $this->ingredientMatchCount();
+                        $hiddenCount = max(0, $matchCount - count($ingredients));
+                    @endphp
+                    <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:8px; font-size:12.5px; color:var(--sup-mu)">
+                        <span>
+                            Đã chọn <strong style="color:var(--sup-bl)">{{ $chosenCount }}</strong> nguyên liệu
+                            @if($chosenCount > 0)
+                                <span style="font-style:italic">— các mục đã chọn luôn nằm ở đầu bảng</span>
+                            @endif
+                        </span>
+                        @if($hiddenCount > 0)
+                            <span>Còn <strong>{{ number_format($hiddenCount) }}</strong> nguyên liệu chưa hiện — gõ tìm kiếm để thu hẹp</span>
+                        @endif
+                    </div>
+
+                    {{-- Khung cuộn: danh sách dài không kéo trang phình ra (xem ảnh phản hồi) --}}
+                    <div class="sup-table-wrap" style="border:1.5px solid var(--sup-bd2);border-radius:.65rem;overflow:auto;max-height:420px">
                         <table class="sup-table">
-                            <thead>
+                            <thead class="sup-thead-sticky">
                                 <tr>
                                     <th style="width:60px;text-align:center">CHỌN</th>
                                     <th style="width:90px">MÃ NL</th>

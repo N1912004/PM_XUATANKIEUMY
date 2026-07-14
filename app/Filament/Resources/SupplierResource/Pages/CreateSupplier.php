@@ -13,6 +13,9 @@ use Livewire\WithFileUploads;
 
 class CreateSupplier extends Page
 {
+    /** Số dòng nguyên liệu (chưa tích) hiển thị tối đa — bảng render lại mỗi keystroke. */
+    protected const INGREDIENT_LIST_LIMIT = 100;
+
     use ManagesSupplierDocuments;
     use WithFileUploads;
 
@@ -94,9 +97,40 @@ class CreateSupplier extends Page
     }
 
     /**
+     * Danh sách nguyên liệu hiển thị trong bảng chọn.
+     *
+     * Nguyên liệu ĐÃ TÍCH luôn đứng đầu và luôn có mặt (kể cả khi đang gõ tìm kiếm hoặc khi
+     * nằm ngoài giới hạn) — nếu không, tích xong gõ tìm cái khác là dòng đã chọn biến mất
+     * và người dùng tưởng bị mất. Phần còn lại giới hạn số dòng vì bảng render lại mỗi keystroke.
+     *
      * @return array<int, Ingredient>
      */
     public function ingredients(): array
+    {
+        $chosenIds = collect($this->selectedIngredients)->filter()->keys()->all();
+
+        $chosen = $chosenIds === []
+            ? collect()
+            : Ingredient::whereIn('id', $chosenIds)->orderBy('name')->get();
+
+        $others = Ingredient::query()
+            ->when($chosenIds !== [], fn ($query) => $query->whereNotIn('id', $chosenIds))
+            ->when($this->ingredientSearch !== '', function ($query): void {
+                $search = mb_strtolower($this->ingredientSearch);
+                $query->where(function ($query) use ($search): void {
+                    $query->whereRaw('LOWER(name) LIKE ?', ["%{$search}%"])
+                        ->orWhereRaw('LOWER(code) LIKE ?', ["%{$search}%"]);
+                });
+            })
+            ->orderBy('name')
+            ->limit(self::INGREDIENT_LIST_LIMIT)
+            ->get();
+
+        return $chosen->concat($others)->all();
+    }
+
+    /** Tổng số nguyên liệu khớp bộ lọc (để báo cho người dùng biết còn bao nhiêu chưa hiện). */
+    public function ingredientMatchCount(): int
     {
         return Ingredient::query()
             ->when($this->ingredientSearch !== '', function ($query): void {
@@ -106,10 +140,7 @@ class CreateSupplier extends Page
                         ->orWhereRaw('LOWER(code) LIKE ?', ["%{$search}%"]);
                 });
             })
-            ->orderBy('id')
-            ->limit(100) // bảng chọn nguyên liệu render lại mỗi keystroke — giới hạn và dùng ô tìm kiếm để thu hẹp
-            ->get()
-            ->all();
+            ->count();
     }
 
     protected function nextSupplierCode(): string

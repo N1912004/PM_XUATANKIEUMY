@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Employee extends Model
 {
@@ -56,6 +57,12 @@ class Employee extends Model
     public function kitchen(): BelongsTo
     {
         return $this->belongsTo(Kitchen::class);
+    }
+
+    /** Tài khoản đăng nhập gắn với hồ sơ nhân viên này (1-1, có thể chưa có). */
+    public function user(): HasOne
+    {
+        return $this->hasOne(User::class);
     }
 
     public function manager(): BelongsTo

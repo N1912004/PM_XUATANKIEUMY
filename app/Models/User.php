@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
+use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasAvatar;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -13,7 +14,9 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Storage;
 use Spatie\Permission\Traits\HasRoles;
 
-class User extends Authenticatable implements HasAvatar
+// FilamentUser BẮT BUỘC phải implements: nếu thiếu, middleware Filament chỉ cho vào khi
+// APP_ENV=local — canAccessPanel() không bao giờ chạy ở dev, còn PRODUCTION sẽ 403 toàn bộ.
+class User extends Authenticatable implements FilamentUser, HasAvatar
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, HasRoles, Notifiable;
@@ -52,6 +55,45 @@ class User extends Authenticatable implements HasAvatar
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Tên vai trò toàn quyền — lấy từ config/filament-shield.php làm NGUỒN DUY NHẤT.
+     * Đổi tên vai trò chỉ cần sửa config: model, resource, command và test đều đọc theo đây.
+     */
+    public static function superAdminRole(): string
+    {
+        return config('filament-shield.super_admin.name', 'super_admin');
+    }
+
+    /**
+     * Chặn hai thao tác có thể khóa vĩnh viễn hệ thống:
+     * tự xóa chính mình, và xóa tài khoản toàn quyền cuối cùng.
+     *
+     * Đăng ký ở booting() (KHÔNG phải booted()) để listener này chạy TRƯỚC listener
+     * `deleting` của trait HasRoles — trait đó gỡ sạch vai trò của user, nên nếu chạy sau
+     * thì không còn nhận ra đây là tài khoản toàn quyền nữa.
+     */
+    protected static function booting(): void
+    {
+        static::deleting(function (User $user): void {
+            abort_if($user->id === auth()->id(), 403, 'Không thể xóa chính tài khoản đang đăng nhập.');
+
+            if ($user->isSuperAdmin() && static::countSuperAdmins() <= 1) {
+                abort(403, 'Không thể xóa tài khoản toàn quyền cuối cùng của hệ thống.');
+            }
+        });
+    }
+
+    /** Số tài khoản còn giữ vai trò toàn quyền. */
+    public static function countSuperAdmins(): int
+    {
+        return static::role(static::superAdminRole())->count();
+    }
+
+    public function isSuperAdmin(): bool
+    {
+        return $this->hasRole(static::superAdminRole());
     }
 
     /**

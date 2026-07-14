@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\LeaveOvertimeResource\Pages;
+use App\Models\Catalog;
 use App\Models\LeaveOvertime;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -50,13 +51,9 @@ class LeaveOvertimeResource extends Resource
                             ->required(),
                         Forms\Components\Select::make('type')
                             ->label('Loại yêu cầu')
-                            ->options([
-                                'Nghỉ phép năm' => 'Nghỉ phép năm',
-                                'Nghỉ phép bệnh' => 'Nghỉ phép bệnh',
-                                'Nghỉ không lương' => 'Nghỉ không lương',
-                                'Tăng ca ngày thường' => 'Tăng ca ngày thường',
-                                'Tăng ca cuối tuần' => 'Tăng ca cuối tuần',
-                            ])
+                            ->options(fn (): array => Catalog::options(Catalog::LEAVE_TYPE))
+                            ->searchable()
+                            ->native(false)
                             ->required(),
                         Forms\Components\TextInput::make('duration_text')
                             ->label('Số ngày / Số giờ')

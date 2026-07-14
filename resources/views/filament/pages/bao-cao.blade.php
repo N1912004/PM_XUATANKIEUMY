@@ -512,6 +512,19 @@
         </div>
         <button type="button" class="week-btn" wire:click="setThisWeek">Theo tuần thực đơn</button>
 
+        <div class="filter-item">
+            <span class="font-bold">Bếp:</span>
+            <div style="min-width:190px">
+                @include('filament.components.search-select', [
+                    'name' => 'kitchenId',
+                    'live' => true,
+                    'placeholder' => 'Tất cả bếp',
+                    'emptyLabel' => 'Tất cả bếp',
+                    'options' => collect($this->getKitchenOptions())->map(fn ($name, $id) => ['value' => $id, 'label' => $name])->values()->all(),
+                ])
+            </div>
+        </div>
+
         <div class="shifts-group">
             <span class="font-semibold text-gray-500 mr-1" style="font-size: 11px;">Ca:</span>
             
@@ -577,6 +590,54 @@
             </div>
         </div>
     </div>
+
+    {{-- Tổng khối lượng TỪNG nguyên liệu tiêu thụ trong cả kỳ (BA R22) --}}
+    @php $ingredientTotals = $this->getIngredientTotals(); @endphp
+    @if(!empty($ingredientTotals))
+        <div class="day-card" x-data="{ open: false }" style="margin-bottom:16px">
+            <div class="day-header" @click="open = !open" style="cursor:pointer; user-select:none">
+                <div class="day-title">
+                    <i class="fa-solid fa-weight-hanging"></i>
+                    <span>TỔNG NGUYÊN LIỆU TIÊU THỤ CẢ KỲ</span>
+                    <span class="day-badge">{{ count($ingredientTotals) }} nguyên liệu</span>
+                </div>
+                <div style="display:flex; align-items:center; gap:8px">
+                    <i class="fa-solid fa-chevron-down" x-show="!open" style="font-size:12px; color:#1e40af"></i>
+                    <i class="fa-solid fa-chevron-up" x-show="open" style="font-size:12px; color:#1e40af"></i>
+                </div>
+            </div>
+            <div x-show="open" x-collapse style="padding:12px 16px">
+                <table class="ing-table" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th style="width:44px">TT</th>
+                            <th>MÃ</th>
+                            <th>TÊN NGUYÊN LIỆU</th>
+                            <th style="text-align:right">TỔNG TIÊU THỤ</th>
+                            <th style="text-align:right">GIÁ TRỊ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($ingredientTotals as $i => $ing)
+                            <tr>
+                                <td class="ing-num">{{ $i + 1 }}</td>
+                                <td><span class="ing-code-badge">{{ $ing['code'] }}</span></td>
+                                <td class="ing-name">{{ $ing['name'] }}</td>
+                                <td class="ing-kg-val" style="text-align:right">
+                                    @if(in_array($ing['unit'], ['Trái', 'Quả']))
+                                        {{ number_format($ing['quantity'], 0) }} {{ $ing['unit'] }}
+                                    @else
+                                        {{ number_format($ing['quantity'], 2, ',', '.') }} kg
+                                    @endif
+                                </td>
+                                <td style="text-align:right; font-weight:700; color:#dc2626">{{ number_format($ing['cost'], 0, ',', '.') }}đ</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    @endif
 
     <!-- Main Report Content -->
     @php $groupedData = $this->getGroupedData(); @endphp
@@ -664,7 +725,8 @@
                                                         @if($ing['unit'] === 'Trái' || $ing['unit'] === 'Quả')
                                                             {{ number_format($ing['quantity'], 0) }} {{ $ing['unit'] }}
                                                         @else
-                                                            {{ number_format($ing['quantity'] / 1000, 2, ',', '.') }} kg
+                                                            {{-- quantity ĐÃ là kg (suất × định lượng kg/suất) — không chia 1000 lần nữa --}}
+                                                            {{ number_format($ing['quantity'], 2, ',', '.') }} kg
                                                         @endif
                                                     </td>
                                                 </tr>

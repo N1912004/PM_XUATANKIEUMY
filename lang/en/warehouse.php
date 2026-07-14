@@ -52,6 +52,7 @@ return [
         'last_updated' => 'Last updated',
         'status' => 'Status',
         'unit' => 'Unit',
+        'opening_stock' => 'Opening stock',
         'system_stock' => 'System stock',
         'actual_end_day_stock' => 'Actual end-day stock',
         'difference' => 'Difference',
@@ -83,6 +84,9 @@ return [
         'in_transit' => 'In transit',
     ],
     'filters' => [
+        'from_date' => 'From date',
+        'to_date' => 'To date',
+
         'all_types' => 'All types',
         'all_transaction_types' => '— All transaction types —',
         'all_ingredients' => '— All ingredients —',
@@ -183,6 +187,12 @@ return [
         'default_out_reason' => 'Production by goods list',
     ],
     'notifications' => [
+        'negative_stock_title' => 'Stock quantity cannot be negative',
+        'negative_stock_body' => 'Physical stock cannot go below zero — recheck the counted quantity.',
+        'negative_after_check' => 'Closing the stocktake would push :name below zero — recheck the counted quantity.',
+        'no_kitchen_title' => 'Account has no kitchen',
+        'no_kitchen_body' => 'Warehouse operations belong to a specific kitchen. Link an employee in User management to inherit a kitchen.',
+
         'missing_check_reason_title' => 'Missing stock-check difference reason',
         'missing_check_reason_body' => 'Some actual stock differs from system stock - enter a reason in Note for each different row before finalizing.',
         'end_day_saved' => 'End-day stock saved successfully!',
@@ -217,5 +227,10 @@ return [
         'invoice_mimes' => 'Voucher only accepts images (JPG/PNG/WEBP) or PDF.',
         'invoice_max' => 'Voucher maximum size is 5MB.',
         'over_current_stock' => 'Exceeds current stock',
+    ],
+
+    'log' => [
+        'showing' => 'Showing :shown / :total transactions',
+        'load_more' => 'Load 50 more',
     ],
 ];

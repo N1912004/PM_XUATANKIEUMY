@@ -52,14 +52,47 @@
             <label>Cơ sở / địa điểm (theo bếp)</label>
             <input value="{{ $canteen }}" class="ctrl" readonly style="background:var(--po-bd2); cursor:not-allowed" title="Tự nhận theo bếp của tài khoản đăng nhập">
         </div>
-        <div class="field" style="min-width:200px">
+        <div class="field" style="min-width:220px">
             <label>Người kiểm tra</label>
-            <select wire:model.live="inspector" class="ctrl">
-                <option value="">— Chọn nhân viên —</option>
-                @foreach($this->getInspectorOptions() as $empName)
-                    <option value="{{ $empName }}">{{ $empName }}</option>
-                @endforeach
-            </select>
+            <div x-data="{
+                open: false,
+                search: '',
+                selected: @entangle('inspector'),
+                options: {{ json_encode(array_values($this->getInspectorOptions())) }},
+                get filteredOptions() {
+                    if (!this.search) return this.options;
+                    let s = this.search.toLowerCase();
+                    return this.options.filter(name => name.toLowerCase().includes(s));
+                }
+            }" class="relative w-full">
+                <!-- Input hiển thị + Trigger -->
+                <div @click="open = !open" class="ctrl flex items-center justify-between cursor-pointer" style="background:#fff; min-height:38px; border: 1.5px solid var(--po-line); padding: 6px 12px; border-radius: 8px;">
+                    <span x-text="selected ? selected : '— Chọn nhân viên —'" style="font-weight:600;"></span>
+                    <i class="fa-solid fa-chevron-down" style="font-size:11px; color:var(--po-mu);"></i>
+                </div>
+                
+                <!-- Dropdown với ô Search -->
+                <div x-show="open" @click.away="open = false" class="absolute left-0 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg z-50 p-2" style="display:none; max-height:280px; overflow-y:auto; border: 1px solid var(--po-line); box-shadow: 0 10px 25px rgba(15, 35, 70, 0.15);">
+                    <input type="text" x-model="search" placeholder="Tìm kiếm nhân viên..." class="ctrl w-full mb-2" style="height:32px; padding:4px 8px; font-size:13px; border: 1px solid var(--po-line); border-radius:6px; outline:none;">
+                    <div class="flex flex-col gap-1">
+                        <!-- Nút để bỏ chọn (reset filter) -->
+                        <div @click="selected = ''; open = false; search = ''" 
+                             class="px-3 py-1.5 rounded cursor-pointer text-sm font-semibold hover:bg-gray-100 transition text-gray-500 italic">
+                             — Bỏ chọn —
+                        </div>
+                        <template x-for="name in filteredOptions" :key="name">
+                            <div @click="selected = name; open = false; search = ''" 
+                                 class="px-3 py-1.5 rounded cursor-pointer text-sm font-semibold hover:bg-gray-100 transition"
+                                 :style="selected === name ? 'background:rgba(18, 86, 196, 0.08); color:var(--po-bl);' : 'color:var(--po-tx);'"
+                                 x-text="name">
+                            </div>
+                        </template>
+                        <div x-show="filteredOptions.length === 0" class="text-center py-3 text-xs text-gray-400 font-semibold">
+                            Không tìm thấy kết quả
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
         <div style="font-size:12.5px; color:var(--po-mu); padding-bottom:9px; font-weight:600">
             {{ date('d/m/Y', strtotime($date)) }} · {{ $stats['dishes'] }} món · {{ $stats['ingredients'] }} nguyên liệu
@@ -89,9 +122,6 @@
                 <i class="fa-solid fa-tags" style="color:var(--po-pu)"></i> In tem nhãn lưu mẫu
             </button>
         @endif
-        <button wire:click="exportCSV" class="emp-btn" style="height:36px">
-            <i class="fa-solid fa-file-excel" style="color:var(--po-gn)"></i> Xuất bước đang chọn
-        </button>
     </div>
 
     <!-- 4 KPIs Stats -->
@@ -159,11 +189,16 @@
                     <!-- Hàng tiêu đề chung chuẩn Bộ Y tế -->
                     <tr>
                         <th colspan="{{ $activeStep === 'Bước 1' ? 10 : ($activeStep === 'Bước 2' ? 8 : ($activeStep === 'Bước 3' ? 7 : 8)) }}" style="background:var(--po-bd2); text-align:center; padding:12px">
+                            @php
+                                $companyName = \App\Models\Setting::get('company_name', 'CÔNG TY TNHH DỊCH VỤ CJ CATERING VIỆT NAM');
+                                $companyAddress = \App\Models\Setting::get('company_address', 'TỔ 15, ẤP 2 XÃ LONG THỌ, HUYỆN NHƠN TRẠCH, TỈNH ĐỒNG NAI');
+                                $headerTitle = strtoupper($canteen) . ' - ' . strtoupper($companyName);
+                            @endphp
                             <div style="font-size:13px; font-weight:800; color:var(--po-tx)">
-                                CN NHƠN TRẠCH - CÔNG TY TNHH DỊCH VỤ CJ CATERING VIỆT NAM
+                                {{ $headerTitle }}
                             </div>
                             <div style="font-size:11px; font-weight:600; color:var(--po-mu); margin-top:2px">
-                                ĐỊA CHỈ: TỔ 15, ẤP 2 XÃ LONG THỌ, HUYỆN NHƠN TRẠCH, TỈNH ĐỒNG NAI
+                                ĐỊA CHỈ: {{ strtoupper($companyAddress) }}
                             </div>
                         </th>
                     </tr>
@@ -229,21 +264,24 @@
                 <tbody>
                     @forelse($auditItems as $index => $item)
                         @if($activeStep === 'Bước 1')
-                            <!-- Step 1 Rows -->
-                            @if(isset($item['loai']) && str_starts_with($item['name'], 'I.'))
+                            {{-- Dòng tiêu đề nhóm khi đổi PHÂN LOẠI nguyên liệu (items đã sort theo type) --}}
+                            @php $prevType = $index > 0 ? ($auditItems[$index - 1]['type'] ?? null) : null; @endphp
+                            @if(($item['type'] ?? null) !== $prevType)
                                 <tr>
-                                    <td colspan="10" class="byt-group-title">{{ $item['name'] }}</td>
+                                    <td colspan="13" class="byt-group-title">{{ $item['type'] ?: 'Khác' }}</td>
                                 </tr>
-                            @else
+                            @endif
+                            <!-- Step 1 Rows -->
                                 <tr class="emp-row">
                                     <td class="text-center font-bold" style="color:var(--po-mu)">{{ $index + 1 }}</td>
                                     <td class="font-bold">{{ $item['name'] }}</td>
-                                    <td class="text-center">{{ $item['time'] ?? '05:00' }}</td>
+                                    <td class="text-center">{{ $item['time'] ?: '—' }}</td>
                                     <td class="text-right font-bold" style="color:var(--po-bl)">
                                         @if(isset($item['unit']) && ($item['unit'] === 'Quả' || $item['unit'] === 'Trái' || $item['unit'] === 'Cái'))
                                             {{ number_format($item['quantity'], 0) }} {{ $item['unit'] }}
                                         @else
-                                            {{ number_format(($item['quantity'] ?? 0) / 1000, 2, ',', '.') }} kg
+                                            {{-- quantity ĐÃ là kg (suất × định lượng kg/suất) — không chia 1000 --}}
+                                            {{ number_format($item['quantity'] ?? 0, 2, ',', '.') }} kg
                                         @endif
                                     </td>
                                     <td>{{ $item['supplier'] ?? 'Cơ sở tự do' }}</td>
@@ -256,61 +294,88 @@
                                         @endif
                                     </td>
                                     <td class="text-center">
-                                        <span class="px-2 py-0.5 rounded font-bold" style="font-size:11px; background:var(--po-gn-s); color:var(--po-gn)">Đạt</span>
+                                        @if(($item['quarantine'] ?? '') === 'Có')
+                                            <span class="px-2 py-0.5 rounded font-bold" style="font-size:11px; background:var(--po-gn-s); color:var(--po-gn)">Có</span>
+                                        @else
+                                            —
+                                        @endif
                                     </td>
                                     <td class="text-center">{{ $item['quick_test'] ?? '—' }}</td>
-                                    <td style="color:var(--po-mu); font-style:italic">{{ $item['notes'] ?? 'Cảm quan tốt, sạch sẽ' }}</td>
+                                    <td style="color:var(--po-mu); font-style:italic">{{ $item['notes'] ?: '—' }}</td>
                                 </tr>
-                            @endif
                         @elseif($activeStep === 'Bước 2')
                             <!-- Step 2 Rows -->
                             <tr class="emp-row">
                                 <td class="text-center font-bold" style="color:var(--po-mu)">{{ $index + 1 }}</td>
                                 <td class="font-bold">{{ $item['name'] }}</td>
-                                <td class="text-center">{{ $item['time'] ?: '07:00 - 09:30' }}</td>
+                                <td class="text-center">{{ $item['time'] ?: '—' }}</td>
                                 <td class="text-center">
-                                    <span class="px-2 py-0.5 rounded font-bold" style="font-size:11px; background:var(--po-gn-s); color:var(--po-gn)">Đạt</span>
+                                    @if($item['sensory'] === 'Không đạt')
+                                        <span class="px-2 py-0.5 rounded font-bold" style="font-size:11px; background:var(--po-rd-s); color:var(--po-rd)">Không đạt</span>
+                                    @elseif($item['sensory'] === 'Đạt')
+                                        <span class="px-2 py-0.5 rounded font-bold" style="font-size:11px; background:var(--po-gn-s); color:var(--po-gn)">Đạt</span>
+                                    @else
+                                        —
+                                    @endif
                                 </td>
-                                <td class="text-center font-bold" style="color:var(--po-gn)">{{ $item['temp'] ?: '75°C' }}</td>
-                                <td class="font-bold">{{ $item['cook'] ?: 'Lê Hoàng Cường' }}</td>
-                                <td>{{ $item['kitchen'] ?: 'Bếp nấu chính' }}</td>
-                                <td style="color:var(--po-mu); font-style:italic">{{ $item['notes'] ?: 'Chín đều, đạt màu sắc' }}</td>
+                                <td class="text-center font-bold" style="color:var(--po-gn)">{{ $item['temp'] ? $item['temp'] . '°C' : '—' }}</td>
+                                <td class="font-bold">{{ $item['cook'] ?: '—' }}</td>
+                                <td>{{ $item['kitchen'] ?: '—' }}</td>
+                                <td style="color:var(--po-mu); font-style:italic">{{ $item['notes'] ?: '—' }}</td>
                             </tr>
                         @elseif($activeStep === 'Bước 3')
                             <!-- Step 3 Rows -->
                             <tr class="emp-row">
                                 <td class="text-center font-bold" style="color:var(--po-mu)">{{ $index + 1 }}</td>
                                 <td class="font-bold">{{ $item['name'] }}</td>
-                                <td class="text-center">{{ $item['time'] ?: '10:30 - 11:00' }}</td>
+                                <td class="text-center">{{ $item['time'] ?: '—' }}</td>
                                 <td class="text-center">
-                                    <span class="px-2 py-0.5 rounded font-bold" style="font-size:11px; background:var(--po-gn-s); color:var(--po-gn)">Đạt</span>
+                                    @if($item['sensory'] === 'Không đạt')
+                                        <span class="px-2 py-0.5 rounded font-bold" style="font-size:11px; background:var(--po-rd-s); color:var(--po-rd)">Không đạt</span>
+                                    @elseif($item['sensory'] === 'Đạt')
+                                        <span class="px-2 py-0.5 rounded font-bold" style="font-size:11px; background:var(--po-gn-s); color:var(--po-gn)">Đạt</span>
+                                    @else
+                                        —
+                                    @endif
                                 </td>
-                                <td class="text-center font-bold" style="color:var(--po-bl)">{{ $item['sample_kept'] ?: 'Có lưu mẫu' }}</td>
-                                <td class="text-center font-bold" style="color:var(--po-gn)">{{ $item['temp'] ?: '65°C' }}</td>
-                                <td style="color:var(--po-mu); font-style:italic">{{ $item['notes'] ?: 'Nóng sốt, khay sạch' }}</td>
+                                <td class="text-center font-bold" style="color:var(--po-bl)">{{ $item['sample_kept'] ?: '—' }}</td>
+                                <td class="text-center font-bold" style="color:var(--po-gn)">{{ $item['temp'] ? $item['temp'] . '°C' : '—' }}</td>
+                                <td style="color:var(--po-mu); font-style:italic">{{ $item['notes'] ?: '—' }}</td>
                             </tr>
                         @elseif($activeStep === 'Lưu mẫu')
                             <!-- Keep Sample Rows -->
                             <tr class="emp-row">
                                 <td class="text-center font-bold" style="color:var(--po-mu)">{{ $index + 1 }}</td>
                                 <td class="font-bold">{{ $item['name'] }}</td>
-                                <td class="text-center">{{ $item['time'] ?: '10:30' }}</td>
-                                <td class="text-center font-bold">{{ $item['quantity'] ?: '150g' }}</td>
-                                <td class="text-center font-mono font-bold" style="color:var(--po-pu)">{{ $item['sample_code'] ?: 'M-20260518-01' }}</td>
-                                <td class="text-center font-bold" style="color:var(--po-gn)">{{ $item['temp'] ?: '2-8°C' }}</td>
-                                <td class="font-bold">{{ $item['staff'] ?: 'Lê Hoàng Cường' }}</td>
-                                <td style="color:var(--po-mu); font-style:italic">{{ $item['notes'] ?: 'Hộp inox tiệt trùng' }}</td>
+                                <td class="text-center">{{ $item['time'] ?: '—' }}</td>
+                                <td class="text-center font-bold">
+                                    @if($item['time'])
+                                        {{ $item['quantity'] ?: '≥100g' }}
+                                    @else
+                                        —
+                                    @endif
+                                </td>
+                                <td class="text-center font-mono font-bold" style="color:var(--po-pu)">{{ $item['sample_code'] ?: '—' }}</td>
+                                <td class="text-center font-bold" style="color:var(--po-gn)">{{ $item['temp'] ? $item['temp'] . '°C' : '—' }}</td>
+                                <td class="font-bold">{{ $item['staff'] ?: '—' }}</td>
+                                <td style="color:var(--po-mu); font-style:italic">{{ $item['notes'] ?: '—' }}</td>
                             </tr>
                         @elseif($activeStep === 'Hủy mẫu')
                             <!-- Discard Sample Rows -->
                             <tr class="emp-row">
                                 <td class="text-center font-bold" style="color:var(--po-mu)">{{ $index + 1 }}</td>
                                 <td class="font-bold">{{ $item['name'] }}</td>
-                                <td class="text-center">{{ $item['time'] ?: '10:30' }}</td>
-                                <td class="text-center">{{ $item['retention'] ?: '24 giờ' }}</td>
-                                <td class="text-center font-bold" style="color:var(--po-gn)">{{ $item['status'] ?: 'Bình thường' }}</td>
-                                <td class="font-bold">{{ $item['staff'] ?: 'Lê Hoàng Cường' }}</td>
-                                <td style="color:var(--po-mu); font-style:italic">{{ $item['notes'] ?: 'Không mùi vị lạ, tiêu hủy' }}</td>
+                                <td class="text-center">{{ $item['time'] ?: '—' }}</td>
+                                <td class="text-center">
+                                    @if($item['time'])
+                                        {{ $item['retention'] ?: '24 giờ' }}
+                                    @else
+                                        —
+                                    @endif
+                                </td>
+                                <td class="text-center font-bold" style="color:var(--po-gn)">{{ $item['status'] ?: '—' }}</td>
+                                <td class="font-bold">{{ $item['staff'] ?: '—' }}</td>
+                                <td style="color:var(--po-mu); font-style:italic">{{ $item['notes'] ?: '—' }}</td>
                             </tr>
                         @endif
                     @empty
@@ -360,6 +425,7 @@
                     <div class="fsa-label-head">TEM LƯU MẪU THỨC ĂN — {{ $canteen }}</div>
                     <table class="fsa-label-table">
                         <tr><td>Món ăn:</td><td><strong>{{ $item['name'] }}</strong></td></tr>
+                        <tr><td>Ca:</td><td><strong>{{ $item['shift'] ?? '—' }}</strong></td></tr>
                         <tr><td>Mã mẫu:</td><td><strong>{{ $item['sample_code'] ?: '—' }}</strong></td></tr>
                         <tr><td>Ngày:</td><td>{{ date('d/m/Y', strtotime($date)) }}</td></tr>
                         <tr><td>Giờ lưu:</td><td>{{ $item['time'] ?: '—' }}</td></tr>

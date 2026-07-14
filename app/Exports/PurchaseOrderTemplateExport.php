@@ -30,11 +30,11 @@ class PurchaseOrderTemplateExport implements FromArray, ShouldAutoSize, WithEven
 
     protected int $grandTotalRow = 0;
 
-    public function __construct(protected PurchaseOrder $order) {}
+    public function __construct(protected PurchaseOrder $order, protected ?string $sheetTitle = null) {}
 
     public function title(): string
     {
-        return 'Đơn đặt hàng';
+        return $this->sheetTitle ?: 'Đơn đặt hàng';
     }
 
     /**

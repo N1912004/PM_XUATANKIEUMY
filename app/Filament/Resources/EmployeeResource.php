@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\EmployeeResource\Pages;
+use App\Models\Catalog;
 use App\Models\Employee;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -119,18 +120,16 @@ class EmployeeResource extends Resource
                                     ->schema([
                                         Forms\Components\Select::make('department')
                                             ->label('Phòng ban')
-                                            ->options([
-                                                'Nhân sự' => 'Nhân sự',
-                                                'Kế toán' => 'Kế toán',
-                                                'Kho' => 'Kho',
-                                                'Sản xuất' => 'Sản xuất',
-                                            ])
+                                            ->options(fn (): array => Catalog::options(Catalog::DEPARTMENT))
+                                            ->searchable()
+                                            ->native(false)
                                             ->required(),
-                                        Forms\Components\TextInput::make('position')
+                                        Forms\Components\Select::make('position')
                                             ->label('Chức danh / Chức vụ')
-                                            ->placeholder('VD: Tổ trưởng bếp, Thủ kho...')
-                                            ->required()
-                                            ->maxLength(255),
+                                            ->options(fn (): array => Catalog::options(Catalog::POSITION))
+                                            ->searchable()
+                                            ->native(false)
+                                            ->required(),
                                         Forms\Components\Select::make('area_id')
                                             ->label('Khu vực làm việc')
                                             ->relationship('area', 'name')
@@ -224,12 +223,7 @@ class EmployeeResource extends Resource
             ->filters([
                 Tables\Filters\SelectFilter::make('department')
                     ->label('Phòng ban')
-                    ->options([
-                        'Nhân sự' => 'Nhân sự',
-                        'Kế toán' => 'Kế toán',
-                        'Kho' => 'Kho',
-                        'Sản xuất' => 'Sản xuất',
-                    ]),
+                    ->options(fn (): array => Catalog::options(Catalog::DEPARTMENT)),
                 Tables\Filters\SelectFilter::make('area_id')
                     ->label('Khu vực')
                     ->relationship('area', 'name'),

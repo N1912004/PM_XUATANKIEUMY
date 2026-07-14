@@ -49,3 +49,8 @@
         grid-column: span 1 / span 1 !important;
     }
 }
+
+/* Alpine: ẩn phần tử [x-cloak] trước khi Alpine khởi động (panel của ô "vừa tìm vừa chọn"). */
+[x-cloak] {
+    display: none !important;
+}
