@@ -213,6 +213,26 @@ class AdminPanelProvider extends PanelProvider
                         .fi-sidebar-item-active > a * {
                             color: #ffffff !important;
                         }
+
+                        /*
+                         * Badge (số đếm bên phải menu) khi menu đang active:
+                         * quy tắc "tô trắng mọi phần tử con" ở trên làm CHỮ trong badge thành trắng,
+                         * trong khi NỀN badge vẫn sáng → số biến mất. Đổi nền badge sang trắng-mờ
+                         * để số trắng vẫn đọc được trên nền primary.
+                         */
+                        .fi-sidebar-item.fi-active .fi-sidebar-item-badge,
+                        .fi-sidebar-item-active .fi-sidebar-item-badge,
+                        .fi-sidebar-item.fi-active .fi-sidebar-item-badge .fi-badge,
+                        .fi-sidebar-item-active .fi-sidebar-item-badge .fi-badge {
+                            background-color: rgba(255, 255, 255, 0.25) !important;
+                            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.45) !important;
+                            color: #ffffff !important;
+                        }
+                        .fi-sidebar-item.fi-active .fi-sidebar-item-badge *,
+                        .fi-sidebar-item-active .fi-sidebar-item-badge * {
+                            background-color: transparent !important;
+                            color: #ffffff !important;
+                        }
                         
                         /*
                          * Màu icon sidebar: MỘT màu cho MỘT nhóm nghiệp vụ (menu chưa được active).
