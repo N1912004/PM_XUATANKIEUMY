@@ -80,6 +80,7 @@
         --lg-rd: #E11D48;
         --lg-ink: #16233B;
         --lg-mu: #5B6B84;
+        --lg-mu-strong: #46566E; /* xám đậm hơn ~13% cho subtitle — cùng hệ màu, chỉ tăng contrast */
         --lg-line: #DCE4F0;
         --lg-bg: #EDF1F7;
         --lg-card: #FFFFFF;
@@ -136,22 +137,22 @@
 
     .lg-hero { margin-top: 40px; }
     .lg-hero h1 {
-        font-size: clamp(23px, 2.3vw, 30px); font-weight: 800; line-height: 1.35;
+        font-size: clamp(23px, 2.3vw, 30px); font-weight: 800; line-height: 1.48; /* +~4px giãn dòng */
         letter-spacing: .01em; margin: 0; max-width: 34ch; text-wrap: balance;
     }
     .lg-hero .rule { width: 46px; height: 4px; background: var(--lg-bl); border-radius: 2px; margin: 16px 0; }
-    .lg-hero .en { font-style: italic; color: var(--lg-mu); font-size: 16.5px; max-width: 36ch; margin: 0; line-height: 1.6; }
+    .lg-hero .en { font-style: italic; color: var(--lg-mu-strong); font-size: 16.5px; max-width: 36ch; margin: 0; line-height: 1.6; }
 
-    .lg-stage { position: relative; margin-top: 8px; min-height: 430px; display: flex; align-items: center; }
+    .lg-stage { position: relative; margin-top: 8px; min-height: 406px; display: flex; align-items: center; }
     .lg-band {
         position: absolute; left: -48px; top: 50%; transform: translateY(-14%); z-index: 0;
-        background: var(--lg-bl-band); color: #fff; padding: 30px 220px 30px 48px;
+        background: var(--lg-bl-band); color: #fff; padding: 25px 220px 25px 48px;
         font-size: clamp(28px, 2.7vw, 40px); font-weight: 900; letter-spacing: .01em;
         line-height: 1.22; font-style: italic; text-transform: uppercase; white-space: nowrap;
         box-shadow: 0 14px 34px rgba({{ $primaryColorRgb }}, .25);
     }
     .lg-wheel {
-        position: relative; z-index: 1; width: min(400px, 58vw); margin-left: clamp(190px, 30vw, 400px);
+        position: relative; z-index: 1; width: min(368px, 53.5vw); margin-left: clamp(190px, 30vw, 400px);
         filter: drop-shadow(0 18px 40px rgba(15, 35, 70, .2));
     }
     .lg-wheel svg { display: block; width: 100%; height: auto; }
@@ -175,7 +176,7 @@
     .lg-val .s { font-size: 11.5px; color: var(--lg-mu); margin-top: 3px; line-height: 1.45; }
 
     .lg-foot {
-        margin-top: 24px; padding-top: 15px; border-top: 1px solid var(--lg-line);
+        margin-top: 46px; padding-top: 15px; border-top: 1px solid var(--lg-line);
         display: flex; justify-content: center; gap: 30px; flex-wrap: wrap;
         font-size: 12px; color: var(--lg-mu);
     }
@@ -184,7 +185,7 @@
 
     /* ── Cột phải: card đăng nhập ── */
     .lg-card {
-        background: var(--lg-card); border-radius: 22px; padding: 42px 44px 38px;
+        background: var(--lg-card); border-radius: 22px; padding: 32px 44px 28px;
         box-shadow: 0 2px 6px rgba(15, 35, 70, .05), 0 28px 60px rgba(15, 35, 70, .12);
     }
     .lg-card-logo { display: flex; flex-direction: column; align-items: center; gap: 5px; margin-bottom: 18px; }
@@ -363,7 +364,7 @@
         {{-- ══════════ CỘT PHẢI: CARD ĐĂNG NHẬP ══════════ --}}
         <div class="lg-card">
             <div class="lg-card-logo">
-                @include('filament.pages.auth.partials.bluefire-logo', ['height' => 44])
+                @include('filament.pages.auth.partials.bluefire-logo', ['height' => 40])
                 <div class="nm">BlueFire</div>
                 <div class="tg">TASTE&nbsp;BEAUTY</div>
             </div>
