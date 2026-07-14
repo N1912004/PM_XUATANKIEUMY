@@ -29,6 +29,26 @@
             display: flex;
             gap: 0.5rem;
         }
+
+        /* Fix responsive cho Header Actions của Filament khi thu nhỏ màn hình */
+        .fi-header {
+            flex-wrap: wrap !important;
+            gap: 1rem !important;
+        }
+        .fi-header-actions {
+            flex-wrap: wrap !important;
+            gap: 0.5rem !important;
+        }
+        @media (max-width: 1023px) {
+            .fi-header {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+            }
+            .fi-header-actions {
+                width: 100% !important;
+                justify-content: flex-start !important;
+            }
+        }
         .wh-action-btn {
             height: 38px;
             padding: 0 0.875rem;
