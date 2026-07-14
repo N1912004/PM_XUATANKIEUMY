@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\PurchaseOrderResource\Pages;
 
+use App\Exports\PurchaseOrdersListExport;
+use App\Exports\PurchaseOrderTemplateExport;
 use App\Filament\Resources\PurchaseOrderResource;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderItem;
@@ -10,7 +12,8 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Livewire\WithPagination;
-use Symfony\Component\HttpFoundation\StreamedResponse;
+use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class ListPurchaseOrders extends Page
 {
@@ -115,9 +118,11 @@ class ListPurchaseOrders extends Page
 
     public function monthOptions(): array
     {
-        // Distinct months from purchase orders
+        // Distinct months from purchase orders.
+        // substr(created_at, 1, 7) = 'YYYY-MM' — chạy được trên CẢ MySQL lẫn SQLite;
+        // DATE_FORMAT là hàm riêng của MySQL nên làm vỡ suite test (chạy trên SQLite).
         $months = PurchaseOrder::query()
-            ->selectRaw("DATE_FORMAT(created_at, '%Y-%m') as month_val")
+            ->selectRaw('substr(created_at, 1, 7) as month_val')
             ->distinct()
             ->orderBy('month_val', 'desc')
             ->pluck('month_val')
@@ -173,43 +178,21 @@ class ListPurchaseOrders extends Page
             ->paginate($this->perPage);
     }
 
-    public function exportExcel(): StreamedResponse
+    public function exportExcel(): BinaryFileResponse
     {
         abort_unless(PurchaseOrderResource::canViewAny(), 403);
 
-        $fileName = 'don-dat-hang-'.now()->format('Ymd-His').'.csv';
+        // Xuất .xlsx thật qua Laravel Excel (trước đây là CSV) — dùng chung baseQuery() nên
+        // file xuất tôn trọng đúng bộ lọc và phạm vi theo vai trò của bảng đang xem.
+        $orders = $this->baseQuery()
+            ->with(['supplier', 'kitchen', 'items'])
+            ->orderByDesc('id')
+            ->get();
 
-        return response()->streamDownload(function (): void {
-            $output = fopen('php://output', 'w');
-            fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
-            fputcsv($output, ['Mã đơn', 'Nhà cung cấp', 'Bếp ăn', 'Ngày giao dự kiến', 'Tổng giá trị', 'Trạng thái', 'Ghi chú']);
-
-            $this->baseQuery()
-                ->with(['supplier', 'kitchen', 'items'])
-                ->orderBy('id', 'desc')
-                ->chunk(100, function ($orders) use ($output): void {
-                    foreach ($orders as $order) {
-                        $total = $order->items->sum(fn ($item) => $item->quantity_ordered * $item->unit_price);
-                        fputcsv($output, [
-                            $order->code,
-                            $order->supplier?->name ?? '',
-                            $order->kitchen?->name ?? '',
-                            $order->estimated_delivery_date?->format('d/m/Y') ?? '',
-                            $total,
-                            match ($order->status) {
-                                'draft' => 'Nháp',
-                                'sent' => 'Đã gửi NCC',
-                                'checking' => 'Đang kiểm hàng',
-                                'done' => 'Hoàn thành',
-                                default => $order->status,
-                            },
-                            $order->note,
-                        ]);
-                    }
-                });
-
-            fclose($output);
-        }, $fileName, ['Content-Type' => 'text/csv; charset=UTF-8']);
+        return Excel::download(
+            new PurchaseOrdersListExport($orders),
+            'don-dat-hang-'.now()->format('Ymd-His').'.xlsx',
+        );
     }
 
     /**
@@ -271,51 +254,22 @@ class ListPurchaseOrders extends Page
     }
 
     /**
-     * Xuất đơn đặt hàng cụ thể sang định dạng CSV/Excel.
+     * Xuất 1 đơn đặt hàng ra .xlsx theo đúng file mẫu "MẪU ĐƠN ĐẶT HÀNG.xlsx"
+     * (dùng lại PurchaseOrderTemplateExport như nút xuất ở trang chi tiết — một mẫu duy nhất).
      */
-    public function exportSingleOrder(int $orderId): StreamedResponse
+    public function exportSingleOrder(int $orderId): BinaryFileResponse
     {
         $order = PurchaseOrder::with(['supplier', 'kitchen', 'items.ingredient'])->find($orderId);
+
         if (! $order) {
             abort(404);
         }
 
         abort_unless(PurchaseOrderResource::canView($order), 403);
 
-        $fileName = 'PO-'.$order->code.'-'.now()->format('Ymd').'.csv';
-
-        return response()->streamDownload(function () use ($order): void {
-            $output = fopen('php://output', 'w');
-            fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
-            fputcsv($output, ['Mã đơn hàng', $order->code]);
-            fputcsv($output, ['Nhà cung cấp', $order->supplier?->name ?? 'Chưa gán']);
-            fputcsv($output, ['Bếp ăn', $order->kitchen?->name ?? 'Chung']);
-            fputcsv($output, ['Ngày giao dự kiến', $order->estimated_delivery_date?->format('d/m/Y') ?? '']);
-            fputcsv($output, ['Trạng thái', match ($order->status) {
-                'draft' => 'Nháp',
-                'sent' => 'Đã gửi NCC',
-                'checking' => 'Đang kiểm hàng',
-                'done' => 'Hoàn thành',
-                default => $order->status,
-            }]);
-            fputcsv($output, []);
-            fputcsv($output, ['STT', 'Mã nguyên liệu', 'Tên nguyên liệu', 'Đơn vị', 'SL đặt', 'SL thực nhận', 'Đơn giá', 'Thành tiền']);
-
-            $i = 1;
-            foreach ($order->items as $item) {
-                $total = $item->quantity_ordered * $item->unit_price;
-                fputcsv($output, [
-                    $i++,
-                    $item->ingredient?->code ?? '',
-                    $item->ingredient?->name ?? '',
-                    $item->ingredient?->unit ?? '',
-                    $item->quantity_ordered,
-                    $item->quantity_received,
-                    $item->unit_price,
-                    $total,
-                ]);
-            }
-            fclose($output);
-        }, $fileName, ['Content-Type' => 'text/csv; charset=UTF-8']);
+        return Excel::download(
+            new PurchaseOrderTemplateExport($order),
+            'PO-'.$order->code.'-'.now()->format('Ymd').'.xlsx',
+        );
     }
 }

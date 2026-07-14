@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\MenuResource\Pages;
 
+use App\Exports\MenuExport;
 use App\Filament\Resources\MenuResource;
 use App\Models\Kitchen;
 use App\Models\Menu;
@@ -13,6 +14,8 @@ use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Livewire\WithPagination;
+use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class ListMenus extends Page
 {
@@ -150,7 +153,7 @@ class ListMenus extends Page
      * Xuất CSV thực đơn thật (thay nút alert() giả trước đây). Có thể giới hạn phạm vi
      * theo bếp + khoảng ngày (dùng cho nút xuất trên từng card tuần/ngày).
      */
-    public function exportMenus(?int $kitchenId = null, ?string $from = null, ?string $to = null)
+    public function exportMenus(?int $kitchenId = null, ?string $from = null, ?string $to = null): BinaryFileResponse
     {
         abort_unless(MenuResource::canViewAny(), 403);
 
@@ -159,33 +162,17 @@ class ListMenus extends Page
         if ($kitchenId && $from) {
             $query->where('kitchen_id', $kitchenId)
                 ->whereBetween('date', [$from, $to ?: $from]);
-        } elseif ($this->monthFilter) {
-            $query->where('date', 'like', $this->monthFilter.'%');
+            $subtitle = 'Từ '.Carbon::parse($from)->format('d/m/Y').' đến '.Carbon::parse($to ?: $from)->format('d/m/Y');
+        } else {
+            $period = $this->monthFilter ?: now()->format('Y-m');
+            $query->where('date', 'like', $period.'%');
+            $subtitle = 'Tháng '.Carbon::parse($period.'-01')->format('m/Y');
         }
 
-        $records = $query->get();
-        $filename = 'thuc_don_'.($from ?: $this->monthFilter ?: now()->format('Y-m')).'.csv';
+        // Xuất .xlsx thật qua Laravel Excel (trước đây là CSV) — file này còn dùng để gửi khách duyệt.
+        $fileName = 'thuc-don-'.($from ?: $this->monthFilter ?: now()->format('Y-m')).'.xlsx';
 
-        return response()->streamDownload(function () use ($records): void {
-            $output = fopen('php://output', 'w');
-            fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
-            fputcsv($output, ['STT', 'Bếp ăn', 'Ngày', 'Thứ', 'Ca', 'Món ăn', 'Số suất', 'Trạng thái']);
-
-            $statusLabels = Menu::STATUS_LABELS;
-            foreach ($records as $i => $menu) {
-                fputcsv($output, [
-                    $i + 1,
-                    $menu->kitchen?->name,
-                    $menu->date->format('d/m/Y'),
-                    'Thứ '.['Chủ Nhật', 'Hai', 'Ba', 'Tư', 'Năm', 'Sáu', 'Bảy'][$menu->date->dayOfWeek],
-                    $menu->shift?->name,
-                    $menu->recipe?->name,
-                    $menu->estimated_portions,
-                    $statusLabels[$menu->status] ?? $menu->status,
-                ]);
-            }
-            fclose($output);
-        }, $filename, ['Content-Type' => 'text/csv; charset=UTF-8']);
+        return Excel::download(new MenuExport($query->get(), $subtitle), $fileName);
     }
 
     /** Xuất tuần đang soạn trên form (T2 → CN, khớp đủ 7 ngày của grid). */
@@ -219,6 +206,7 @@ class ListMenus extends Page
             ->where('date', '<', $to)
             ->selectRaw('COUNT(*) AS total')
             ->selectRaw("SUM(CASE WHEN status = 'sent' THEN 1 ELSE 0 END) AS sent")
+            ->selectRaw("SUM(CASE WHEN status = 'confirmed' THEN 1 ELSE 0 END) AS confirmed")
             ->selectRaw("SUM(CASE WHEN status = 'locked' THEN 1 ELSE 0 END) AS locked")
             ->first();
 
@@ -233,7 +221,10 @@ class ListMenus extends Page
         return [
             'total_active_weeks' => $activeWeeks,
             'sent_month' => (int) $counts->sent,
-            'pending' => max(0, (int) $counts->total - (int) $counts->sent - (int) $counts->locked),
+            'confirmed_month' => (int) $counts->confirmed,
+            // 'pending' = CÒN LÀ NHÁP. Trước đây trừ thiếu 'confirmed' nên thực đơn khách đã
+            // xác nhận bị đếm nhầm sang nháp — 4 trạng thái phải cộng lại đúng bằng total.
+            'pending' => max(0, (int) $counts->total - (int) $counts->sent - (int) $counts->confirmed - (int) $counts->locked),
             'locked_month' => (int) $counts->locked,
         ];
     }

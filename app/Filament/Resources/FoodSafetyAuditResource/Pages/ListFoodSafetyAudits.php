@@ -78,7 +78,10 @@ class ListFoodSafetyAudits extends ListRecords
             ];
         }
 
+        // Hồ sơ kiểm thực (QĐ 1246) chỉ được lập trên thực đơn ĐÃ CHỐT — thực đơn nháp/đang gửi
+        // chưa phải bữa ăn thực tế, đưa vào biểu mẫu là sai hồ sơ pháp lý.
         $query = Menu::with(['recipe.ingredients'])
+            ->where('status', 'locked')
             ->whereDate('date', $this->date);
 
         if ($this->selectedShift) {
@@ -114,7 +117,9 @@ class ListFoodSafetyAudits extends ListRecords
             return [];
         }
 
+        // Chỉ thực đơn ĐÃ CHỐT (xem chú thích ở getStats)
         $query = Menu::with(['recipe.ingredients.supplier', 'shift'])
+            ->where('status', 'locked')
             ->whereDate('date', $this->date);
 
         if ($this->selectedShift) {

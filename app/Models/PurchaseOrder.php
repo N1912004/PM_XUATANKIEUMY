@@ -10,6 +10,14 @@ use Illuminate\Support\Facades\DB;
 
 class PurchaseOrder extends Model
 {
+    /** Nhãn hiển thị của vòng đời PO — nguồn DUY NHẤT, dùng chung cho UI và các file xuất. */
+    public const STATUS_LABELS = [
+        'draft' => 'Nháp',
+        'sent' => 'Đã gửi NCC',
+        'checking' => 'Đang kiểm hàng',
+        'done' => 'Hoàn thành',
+    ];
+
     use HasFactory;
 
     protected $fillable = [

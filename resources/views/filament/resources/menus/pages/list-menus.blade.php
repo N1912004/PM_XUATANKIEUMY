@@ -55,9 +55,16 @@
                 </div>
             </div>
             <div class="mp-kcard">
+                <div class="mp-kico" style="background:var(--po-bl-s); color:var(--po-bl)"><i class="fa-solid fa-check-double"></i></div>
+                <div>
+                    <div class="mp-klbl">Khách đã xác nhận</div>
+                    <div class="mp-kval">{{ $stats['confirmed_month'] }}</div>
+                </div>
+            </div>
+            <div class="mp-kcard">
                 <div class="mp-kico" style="background:var(--po-or-s); color:var(--po-or)"><i class="fa-solid fa-clock-rotate-left"></i></div>
                 <div>
-                    <div class="mp-klbl">Chờ xác nhận</div>
+                    <div class="mp-klbl">Còn là nháp</div>
                     <div class="mp-kval">{{ $stats['pending'] }}</div>
                 </div>
             </div>
