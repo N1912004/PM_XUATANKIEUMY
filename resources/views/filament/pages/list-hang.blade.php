@@ -988,7 +988,8 @@
                                             <th>Tên nguyên liệu</th>
                                             <th>Thuộc món</th>
                                             <th style="text-align:right;">Số suất</th>
-                                            <th style="text-align:right;">SL hệ thống</th>
+                                            <th style="text-align:right;">Nhu cầu</th>
+                                            <th style="text-align:right;">Tồn kho</th>
                                             <th style="text-align:right; width:110px;">SL đặt tay</th>
                                             <th style="text-align:right;">Đơn giá</th>
                                             <th style="text-align:right; width:130px;">Thành tiền</th>
@@ -1021,6 +1022,10 @@
                                                     </td>
                                                     <td style="text-align:right;">{{ number_format($item['total_suat']) }}</td>
                                                     <td style="text-align:right; font-weight:600;">{{ number_format($item['total_kg'], 3, ',', '.') }} {{ $item['unit'] }}</td>
+                                                    {{-- Tồn kho hiện có: SL đề xuất đã tự trừ phần này để không đặt thừa --}}
+                                                    <td style="text-align:right; color:{{ ($item['stock_qty'] ?? 0) > 0 ? '#16a34a' : '#94a3b8' }}; font-weight:600;">
+                                                        {{ number_format($item['stock_qty'] ?? 0, 3, ',', '.') }} {{ $item['unit'] }}
+                                                    </td>
                                                     <td style="text-align:center;">
                                                         <input type="number" step="0.001" wire:model.live="poItems.{{ $index }}.quantity_manual" class="table-input" style="height:28px;">
                                                     </td>
@@ -1051,7 +1056,7 @@
                                                 ->sum(fn($it) => $it['quantity_manual'] * $it['reference_price']);
                                         @endphp
                                         <tr style="background:#F8FAFC" class="dark:bg-gray-800/40">
-                                            <td colspan="8" style="text-align:right; font-weight:700; color:#64748b;">Tổng nhóm {{ $cat['label'] }}:</td>
+                                            <td colspan="9" style="text-align:right; font-weight:700; color:#64748b;">Tổng nhóm {{ $cat['label'] }}:</td>
                                             <td colspan="3" style="font-weight:800; color:#1267E8; font-size:13px;">{{ number_format($groupTotal, 0, ',', '.') }} đ</td>
                                         </tr>
                                     </tbody>

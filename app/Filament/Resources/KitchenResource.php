@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\KitchenResource\Pages;
+use App\Models\Catalog;
 use App\Models\Kitchen;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -38,11 +39,9 @@ class KitchenResource extends Resource
                                     ->required(),
                                 Forms\Components\Select::make('type')
                                     ->label('Phân loại')
-                                    ->options([
-                                        'Bếp sản xuất' => 'Bếp sản xuất',
-                                        'Bếp ăn' => 'Bếp ăn',
-                                        'Kho trung chuyển' => 'Kho trung chuyển',
-                                    ])
+                                    ->options(fn (): array => Catalog::options(Catalog::KITCHEN_TYPE))
+                                    ->searchable()
+                                    ->native(false)
                                     ->required(),
                                 Forms\Components\TextInput::make('capacity')
                                     ->label('Công suất phục vụ (suất/ngày)')
@@ -116,11 +115,7 @@ class KitchenResource extends Resource
                     ->relationship('area', 'name'),
                 Tables\Filters\SelectFilter::make('type')
                     ->label('Phân loại')
-                    ->options([
-                        'Bếp sản xuất' => 'Bếp sản xuất',
-                        'Bếp ăn' => 'Bếp ăn',
-                        'Kho trung chuyển' => 'Kho trung chuyển',
-                    ]),
+                    ->options(fn (): array => Catalog::options(Catalog::KITCHEN_TYPE)),
                 Tables\Filters\SelectFilter::make('status')
                     ->label('Trạng thái')
                     ->options([

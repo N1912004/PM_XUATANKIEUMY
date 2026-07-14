@@ -80,10 +80,9 @@
                                 <div class="field">
                                     <label>Loại nghỉ phép <span class="req">*</span></label>
                                     <select wire:model="type" class="ctrl" required>
-                                        <option value="Nghỉ phép năm">Nghỉ phép năm</option>
-                                        <option value="Nghỉ phép bệnh">Nghỉ phép bệnh</option>
-                                        <option value="Nghỉ không lương">Nghỉ không lương</option>
-                                        <option value="Nghỉ thai sản">Nghỉ thai sản</option>
+                                        @foreach(\App\Models\Catalog::options(\App\Models\Catalog::LEAVE_TYPE) as $opt)
+                                            <option value="{{ $opt }}">{{ $opt }}</option>
+                                        @endforeach
                                     </select>
                                 </div>
                             </div>

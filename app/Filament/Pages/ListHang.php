@@ -11,6 +11,7 @@ use App\Models\Menu;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderItem;
 use App\Models\Shift;
+use App\Models\Stock;
 use App\Models\Supplier;
 use Carbon\Carbon;
 use Filament\Notifications\Notification;
@@ -172,6 +173,14 @@ class ListHang extends Page
             ->groupBy('ingredient_id')
             ->map(fn ($items) => $items->pluck('purchaseOrder.code')->filter()->unique()->values());
 
+        // Tồn kho khả dụng của bếp — SL đề xuất mua = nhu cầu − tồn còn trong kho (BA R13:
+        // không đặt thừa hàng đang có sẵn). Trừ phần đang bị đóng băng cho phiếu điều chuyển.
+        $stockByIngredient = Stock::query()
+            ->when($kitchenId, fn ($q) => $q->where('kitchen_id', $kitchenId))
+            ->get()
+            ->groupBy('ingredient_id')
+            ->map(fn ($rows) => max(0, $rows->sum(fn (Stock $s) => (float) $s->quantity - (float) ($s->frozen_quantity ?? 0))));
+
         $agg = [];
         foreach ($menus as $menu) {
             $recipe = $menu->recipe;
@@ -189,6 +198,8 @@ class ListHang extends Page
                 if (isset($agg[$ingId])) {
                     $agg[$ingId]['total_suat'] += $menu->estimated_portions;
                     $agg[$ingId]['total_kg'] += $qty;
+                    // Đề xuất mua luôn = tổng nhu cầu − tồn kho (tính lại sau mỗi lần cộng dồn)
+                    $agg[$ingId]['quantity_manual'] = round(max(0, $agg[$ingId]['total_kg'] - $agg[$ingId]['stock_qty']), 3);
                     if (! in_array($recipe->name, $agg[$ingId]['dishes'])) {
                         $agg[$ingId]['dishes'][] = $recipe->name;
                     }
@@ -214,7 +225,8 @@ class ListHang extends Page
                         'unit' => $ing->unit,
                         'total_suat' => $menu->estimated_portions,
                         'total_kg' => $qty,
-                        'quantity_manual' => round($qty, 3),
+                        'stock_qty' => (float) ($stockByIngredient[$ingId] ?? 0),
+                        'quantity_manual' => round(max(0, $qty - (float) ($stockByIngredient[$ingId] ?? 0)), 3),
                         'reference_price' => (float) $ing->reference_price,
                         'supplier_id' => $ing->supplier_id,
                         'split' => 'P1',

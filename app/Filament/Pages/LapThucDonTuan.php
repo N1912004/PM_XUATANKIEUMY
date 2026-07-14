@@ -21,9 +21,19 @@ use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * Bản lập thực đơn tuần dạng repeater (màn CŨ).
+ *
+ * BA R33 yêu cầu lập thực đơn tuần bằng GRID T2→CN có nút (+) từng ô ngày/ca, và nói rõ
+ * "không đặt nút Thêm món trên toolbar chung gây nhầm luồng" — đúng luồng đó nằm ở
+ * MenuResource/Pages/ListMenus (view 'week'). Trang này bị ẨN KHỎI MENU để tránh hai
+ * màn lập thực đơn tuần song song; route vẫn giữ để không vỡ link cũ đã lưu.
+ */
 class LapThucDonTuan extends Page implements HasForms
 {
     use InteractsWithForms;
+
+    protected static bool $shouldRegisterNavigation = false;
 
     protected static ?string $navigationIcon = 'heroicon-o-table-cells';
 
