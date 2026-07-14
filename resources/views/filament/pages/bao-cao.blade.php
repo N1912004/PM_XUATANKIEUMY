@@ -514,12 +514,15 @@
 
         <div class="filter-item">
             <span class="font-bold">Bếp:</span>
-            <select class="date-input" wire:model.live="kitchenId">
-                <option value="">Tất cả bếp</option>
-                @foreach($this->getKitchenOptions() as $id => $name)
-                    <option value="{{ $id }}">{{ $name }}</option>
-                @endforeach
-            </select>
+            <div style="min-width:190px">
+                @include('filament.components.search-select', [
+                    'name' => 'kitchenId',
+                    'live' => true,
+                    'placeholder' => 'Tất cả bếp',
+                    'emptyLabel' => 'Tất cả bếp',
+                    'options' => collect($this->getKitchenOptions())->map(fn ($name, $id) => ['value' => $id, 'label' => $name])->values()->all(),
+                ])
+            </div>
         </div>
 
         <div class="shifts-group">

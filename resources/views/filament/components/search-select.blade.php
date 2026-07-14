@@ -46,13 +46,43 @@
             this.open = false;
             this.search = '';
         },
+
+        /*
+         * Panel dùng position:fixed và tự tính tọa độ theo nút bấm.
+         * Lý do: các ô chọn nằm trong bảng cuộn ngang / card có overflow, nếu dùng
+         * position:absolute thì panel bị CẮT hoặc bị phần tử khác đè lên.
+         */
+        panel: { top: 0, left: 0, width: 0, flipUp: false },
+        reposition() {
+            const rect = this.$refs.trigger.getBoundingClientRect();
+            const panelHeight = 300;
+            const spaceBelow = window.innerHeight - rect.bottom;
+
+            this.panel = {
+                top: spaceBelow < panelHeight && rect.top > panelHeight ? rect.top - panelHeight - 4 : rect.bottom + 4,
+                left: rect.left,
+                width: rect.width,
+                flipUp: spaceBelow < panelHeight && rect.top > panelHeight,
+            };
+        },
+        toggle() {
+            this.open = ! this.open;
+
+            if (this.open) {
+                this.reposition();
+                this.$nextTick(() => this.$refs.searchBox?.focus());
+            }
+        },
     }"
     class="relative w-full"
     @keydown.escape.stop="open = false"
+    @scroll.window="open && reposition()"
+    @resize.window="open && reposition()"
 >
     <button
         type="button"
-        @click="open = ! open; $nextTick(() => open && $refs.searchBox?.focus())"
+        x-ref="trigger"
+        @click="toggle()"
         class="flex w-full items-center justify-between gap-2 rounded-md border border-gray-300 bg-white px-2 py-1.5 text-left text-xs font-semibold text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
         style="height:34px"
     >
@@ -66,7 +96,8 @@
         x-show="open"
         x-cloak
         @click.away="open = false"
-        class="absolute inset-x-0 top-full z-50 mt-1 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-900"
+        :style="`position:fixed; top:${panel.top}px; left:${panel.left}px; width:${panel.width}px; z-index:9999;`"
+        class="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-2xl dark:border-gray-700 dark:bg-gray-900"
     >
         <div class="p-2">
             <input
