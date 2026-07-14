@@ -68,9 +68,25 @@ class PurchaseOrderResource extends Resource
                         'checking' => 'Đang kiểm (Checking)',
                         'done' => 'Hoàn thành (Done)',
                     ])
-                    ->default('draft'),
+                    ->default('draft')
+                    // State machine chỉ đi tiến draft → sent → checking → done; lùi trạng thái
+                    // (đặc biệt done → khác) phá cơ chế chống nhập kho lặp (stocked_at)
+                    ->rule(fn (?PurchaseOrder $record) => function (string $attribute, $value, \Closure $fail) use ($record): void {
+                        if (! $record) {
+                            return;
+                        }
+                        $order = ['draft' => 0, 'sent' => 1, 'checking' => 2, 'done' => 3];
+                        if (($order[$value] ?? 0) < ($order[$record->status] ?? 0)) {
+                            $fail('Không được lùi trạng thái đơn hàng (vòng đời chỉ đi tiến Nháp → Đã gửi → Đang kiểm → Hoàn thành).');
+                        }
+                    }),
                 Forms\Components\DatePicker::make('estimated_delivery_date')
-                    ->label('Ngày giao dự kiến'),
+                    ->label('Ngày giao dự kiến')
+                    // Quy định nghiệp vụ: chỉ được đặt hàng cho tối đa 2 ngày kế tiếp.
+                    // Chỉ ràng buộc khi tạo mới — đơn cũ (ngày quá khứ) vẫn sửa được các trường khác.
+                    ->minDate(fn (string $operation) => $operation === 'create' ? today() : null)
+                    ->maxDate(fn (string $operation) => $operation === 'create' ? today()->addDays(2) : null)
+                    ->helperText('Chỉ được chọn trong vòng 2 ngày kế tiếp từ hôm nay'),
                 Forms\Components\Textarea::make('note')
                     ->label('Ghi chú')
                     ->columnSpanFull(),
@@ -114,8 +130,16 @@ class PurchaseOrderResource extends Resource
                 Tables\Columns\TextColumn::make('index')
                     ->label('STT')
                     ->state(static function (HasTable $livewire, \stdClass $rowLoop): string {
-                        return (string) ($rowLoop->iteration);
-                    }),
+                        $currentPage = method_exists($livewire, 'getTablePage') ? $livewire->getTablePage() : 1;
+                        $recordsPerPage = method_exists($livewire, 'getTableRecordsPerPage') ? $livewire->getTableRecordsPerPage() : 10;
+                        $perPage = is_numeric($recordsPerPage) ? (int) $recordsPerPage : 10;
+                        return (string) ($rowLoop->iteration + ($perPage * ($currentPage - 1)));
+                    })
+                    ->alignCenter()
+                    ->extraAttributes([
+                        'style' => 'font-variant-numeric: tabular-nums; font-weight: 600; color: #64748b;',
+                    ])
+                    ->width('56px'),
                 Tables\Columns\TextColumn::make('code')
                     ->label('MÃ ĐƠN')
                     ->searchable()
@@ -129,13 +153,23 @@ class PurchaseOrderResource extends Resource
                 Tables\Columns\TextColumn::make('estimated_delivery_date')
                     ->label('NGÀY GIAO DỰ KIẾN')
                     ->date('d/m/Y')
+                    ->extraAttributes([
+                        'style' => 'font-variant-numeric: tabular-nums;',
+                    ])
                     ->sortable(),
                 Tables\Columns\TextColumn::make('total_value')
                     ->label('TỔNG GIÁ TRỊ')
-                    ->money('VND')
-                    ->state(fn ($record) => $record->items->sum(fn ($item) => $item->quantity_ordered * $item->unit_price))
-                    ->weight('bold')
-                    ->color('primary'),
+                    ->html()
+                    ->formatStateUsing(function ($state) {
+                        if ($state === null) return '—';
+                        $formatted = number_format($state, 0, ',', '.');
+                        return "<strong>{$formatted}</strong><span style=\"font-size: 10px; font-weight: 500; color: #94a3b8; margin-left: 2px;\">đ</span>";
+                    })
+                    ->alignRight()
+                    ->extraAttributes([
+                        'style' => 'font-variant-numeric: tabular-nums;',
+                    ])
+                    ->state(fn ($record) => $record->items->sum(fn ($item) => $item->quantity_ordered * $item->unit_price)),
                 Tables\Columns\TextColumn::make('status')
                     ->label('TRẠNG THÁI')
                     ->badge()

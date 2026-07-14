@@ -226,7 +226,7 @@
     /* Stats Cards */
     .stats-grid {
         display: grid;
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(5, 1fr);
         gap: 12px;
         margin-top: 14px;
         margin-bottom: 14px;
@@ -567,6 +567,13 @@
             <div>
                 <div class="stat-val">{{ number_format($stats['suat'], 0, ',', '.') }}</div>
                 <div class="stat-lbl">Tổng suất</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon" style="background: #fef2f2; color: #dc2626;"><i class="fa-solid fa-sack-dollar"></i></div>
+            <div>
+                <div class="stat-val">{{ number_format($stats['cost'], 0, ',', '.') }}đ</div>
+                <div class="stat-lbl">Tổng chi phí giá vốn</div>
             </div>
         </div>
     </div>

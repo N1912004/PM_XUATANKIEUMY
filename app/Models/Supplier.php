@@ -19,10 +19,13 @@ class Supplier extends Model
         'phone',
         'email',
         'status',
+        'notes',
+        'documents',
     ];
 
     protected $casts = [
         'status' => 'boolean',
+        'documents' => 'array',
     ];
 
     protected static function booted(): void
@@ -41,6 +44,11 @@ class Supplier extends Model
         return $this->belongsToMany(Ingredient::class, 'ingredient_supplier')
             ->withPivot('reference_price')
             ->withTimestamps();
+    }
+
+    public function priceLogs(): HasMany
+    {
+        return $this->hasMany(SupplierPriceLog::class);
     }
 
     /**

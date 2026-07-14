@@ -3,14 +3,19 @@
 namespace App\Filament\Resources\SupplierResource\Pages;
 
 use App\Filament\Resources\SupplierResource;
+use App\Filament\Resources\SupplierResource\Concerns\ManagesSupplierDocuments;
 use App\Models\Ingredient;
 use App\Models\Supplier;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
 use Illuminate\Validation\Rule;
+use Livewire\WithFileUploads;
 
 class EditSupplier extends Page
 {
+    use ManagesSupplierDocuments;
+    use WithFileUploads;
+
     protected static string $resource = SupplierResource::class;
 
     protected static string $view = 'filament.resources.suppliers.pages.form-supplier';
@@ -28,6 +33,8 @@ class EditSupplier extends Page
     public string $type = '';
 
     public bool $status = true;
+
+    public string $notes = '';
 
     public string $ingredientSearch = '';
 
@@ -48,6 +55,8 @@ class EditSupplier extends Page
         $this->email = (string) $supplier->email;
         $this->type = $supplier->type;
         $this->status = (bool) $supplier->status;
+        $this->notes = (string) $supplier->notes;
+        $this->documents = $supplier->documents ?? [];
 
         foreach ($supplier->ingredients as $ingredient) {
             $this->selectedIngredients[$ingredient->id] = true;
@@ -74,6 +83,7 @@ class EditSupplier extends Page
         }
 
         $data = $this->validate($this->rules(), $this->messages(), $this->validationAttributes());
+        $data['documents'] = $this->processDocuments();
 
         $supplier->update($data);
         $this->syncIngredients($supplier);
@@ -144,7 +154,7 @@ class EditSupplier extends Page
                 'max:255',
                 'regex:/^[a-zA-Z0-9._%+-]+@[a-zA-Z][a-zA-Z0-9.-]*\.[a-zA-Z]{2,}$/',
                 function ($attribute, $value, $fail) {
-                    $domain = strtolower(substr(strrchr($value, "@"), 1));
+                    $domain = strtolower(substr(strrchr($value, '@'), 1));
                     $typoDomains = ['1gmail.com', 'gamil.com', 'gmail.con', 'yaho.com', 'hotamil.com', 'outlok.com'];
                     if (in_array($domain, $typoDomains)) {
                         $fail('Địa chỉ email chứa tên miền không hợp lệ hoặc sai chính tả.');
@@ -153,6 +163,7 @@ class EditSupplier extends Page
             ],
             'type' => ['required', 'string', 'max:255'],
             'status' => ['boolean'],
+            'notes' => ['nullable', 'string', 'max:2000'],
         ];
     }
 
@@ -192,6 +203,9 @@ class EditSupplier extends Page
                 ];
             }
         }
+        // Log lịch sử giá TRƯỚC khi sync (cần đọc pivot cũ để so giá cũ → mới)
+        $this->logPriceChanges($supplier, $syncData);
+
         $supplier->ingredients()->sync($syncData);
 
         // Đồng bộ ngược cột supplier_id và reference_price ở bảng ingredients để tương thích ngược.

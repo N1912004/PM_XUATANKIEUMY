@@ -25,6 +25,11 @@ class Ingredient extends Model
         'status',
     ];
 
+    protected $appends = [
+        'unit',
+        'type',
+    ];
+
     protected $with = [
         'unitRelation',
         'typeRelation',

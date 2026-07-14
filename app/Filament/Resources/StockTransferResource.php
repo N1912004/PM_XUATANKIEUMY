@@ -4,6 +4,8 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\StockTransferResource\Pages;
 use App\Models\Ingredient;
+use App\Models\Kitchen;
+use App\Models\Stock;
 use App\Models\StockTransfer;
 use Filament\Facades\Filament;
 use Filament\Forms;
@@ -55,11 +57,27 @@ class StockTransferResource extends Resource
                     ->default(fn () => Filament::auth()->user()?->currentKitchenId()),
                 Forms\Components\Select::make('dest_kitchen_id')
                     ->label('Bếp nhận (đích)')
-                    ->relationship('destKitchen', 'name')
+                    // Chỉ liệt kê bếp CÙNG KHU VỰC với bếp nguồn (quy định điều chuyển nội khu vực)
+                    ->relationship(
+                        'destKitchen',
+                        'name',
+                        function (Builder $query, Forms\Get $get): Builder {
+                            $sourceAreaId = Kitchen::whereKey($get('source_kitchen_id'))->value('area_id');
+
+                            return $sourceAreaId ? $query->where('area_id', $sourceAreaId) : $query;
+                        }
+                    )
                     ->searchable()
                     ->preload()
                     ->required()
-                    ->different('source_kitchen_id'),
+                    ->different('source_kitchen_id')
+                    ->rule(fn (Forms\Get $get) => function (string $attribute, $value, \Closure $fail) use ($get): void {
+                        $sourceAreaId = Kitchen::whereKey($get('source_kitchen_id'))->value('area_id');
+                        $destAreaId = Kitchen::whereKey($value)->value('area_id');
+                        if ($sourceAreaId && $destAreaId !== $sourceAreaId) {
+                            $fail('Bếp nhận phải thuộc cùng khu vực với bếp xuất.');
+                        }
+                    }),
                 Forms\Components\Textarea::make('note')
                     ->label('Ghi chú')
                     ->columnSpanFull(),
@@ -86,7 +104,7 @@ class StockTransferResource extends Resource
                                         return;
                                     }
 
-                                    $stock = \App\Models\Stock::query()
+                                    $stock = Stock::query()
                                         ->where('kitchen_id', $sourceKitchenId)
                                         ->where('ingredient_id', $ingredientId)
                                         ->first();
@@ -109,6 +127,19 @@ class StockTransferResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\TextColumn::make('index')
+                    ->label('STT')
+                    ->state(static function (Tables\Contracts\HasTable $livewire, \stdClass $rowLoop): string {
+                        $currentPage = method_exists($livewire, 'getTablePage') ? $livewire->getTablePage() : 1;
+                        $recordsPerPage = method_exists($livewire, 'getTableRecordsPerPage') ? $livewire->getTableRecordsPerPage() : 10;
+                        $perPage = is_numeric($recordsPerPage) ? (int) $recordsPerPage : 10;
+                        return (string) ($rowLoop->iteration + ($perPage * ($currentPage - 1)));
+                    })
+                    ->alignCenter()
+                    ->extraAttributes([
+                        'style' => 'font-variant-numeric: tabular-nums; font-weight: 600; color: #64748b;',
+                    ])
+                    ->width('56px'),
                 Tables\Columns\TextColumn::make('code')
                     ->label('MÃ PHIẾU')
                     ->searchable()
@@ -131,6 +162,9 @@ class StockTransferResource extends Resource
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('NGÀY TẠO')
                     ->dateTime('H:i d/m/Y')
+                    ->extraAttributes([
+                        'style' => 'font-variant-numeric: tabular-nums;',
+                    ])
                     ->sortable(),
             ])
             ->filters([

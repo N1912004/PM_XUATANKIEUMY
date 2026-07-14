@@ -14,6 +14,7 @@ class MenuAuditLog extends Model
         'field',
         'old_value',
         'new_value',
+        'reason',
         'edited_at',
     ];
 

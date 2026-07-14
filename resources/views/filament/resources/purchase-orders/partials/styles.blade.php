@@ -79,6 +79,26 @@
         font-family: 'Inter', system-ui, sans-serif;
     }
 
+    .po-page .fa,
+    .po-page .fa-solid,
+    .po-page .fa-regular,
+    .po-page .fa-brands,
+    .po-page .fas,
+    .po-page .far,
+    .po-page .fab {
+        font-family: "Font Awesome 7 Free" !important;
+    }
+
+    .po-page .fa-solid,
+    .po-page .fas {
+        font-weight: 900 !important;
+    }
+
+    .po-page .fa-regular,
+    .po-page .far {
+        font-weight: 400 !important;
+    }
+
     .po-page {
         color: var(--po-tx);
         padding: 1.5rem 1.75rem 2rem !important;

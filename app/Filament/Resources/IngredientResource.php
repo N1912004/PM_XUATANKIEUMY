@@ -193,6 +193,9 @@ class IngredientResource extends Resource
                         return (string) ($rowLoop->iteration + ($perPage * ($currentPage - 1)));
                     })
                     ->alignCenter()
+                    ->extraAttributes([
+                        'style' => 'font-variant-numeric: tabular-nums; font-weight: 600; color: #64748b;',
+                    ])
                     ->width('56px'),
                 Tables\Columns\TextColumn::make('code')
                     ->label(__('ingredient.table.code'))
@@ -231,7 +234,16 @@ class IngredientResource extends Resource
                     ->size('sm'),
                 Tables\Columns\TextColumn::make('reference_price')
                     ->label(__('ingredient.table.reference_price'))
-                    ->money('VND')
+                    ->html()
+                    ->formatStateUsing(function ($state) {
+                        if ($state === null) return '—';
+                        $formatted = number_format($state, 0, ',', '.');
+                        return "<strong>{$formatted}</strong><span style=\"font-size: 10px; font-weight: 500; color: #94a3b8; margin-left: 2px;\">đ</span>";
+                    })
+                    ->alignRight()
+                    ->extraAttributes([
+                        'style' => 'font-variant-numeric: tabular-nums;',
+                    ])
                     ->sortable()
                     ->size('sm'),
                 Tables\Columns\TextColumn::make('status')

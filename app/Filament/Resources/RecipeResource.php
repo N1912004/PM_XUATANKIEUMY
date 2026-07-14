@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\RecipeResource\Pages;
 use App\Models\Ingredient;
 use App\Models\Recipe;
+use App\Models\RecipeType;
 use Filament\Forms;
 use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Form;
@@ -18,6 +19,7 @@ use Filament\Tables;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class RecipeResource extends Resource
 {
@@ -69,14 +71,18 @@ class RecipeResource extends Resource
                         Forms\Components\Select::make('type')
                             ->label('Nhóm món')
                             ->required()
-                            ->options(self::recipeTypeOptions())
+                            ->options(fn () => RecipeType::pluck('name', 'name')->all())
                             ->default('Món mặn')
+                            ->searchable()
+                            ->preload()
                             ->native(false),
                         Forms\Components\Select::make('price_level')
                             ->label('Mức giá suất ăn')
                             ->required()
                             ->options(self::mealPriceOptions())
                             ->default(20000)
+                            ->searchable()
+                            ->preload()
                             ->native(false)
                             ->helperText('Đơn giá suất ăn có thể khác nhau theo đơn vị / hợp đồng.'),
                         Forms\Components\Select::make('actual_price')
@@ -84,7 +90,28 @@ class RecipeResource extends Resource
                             ->required()
                             ->options(self::mealPriceOptions())
                             ->default(20000)
+                            ->searchable()
+                            ->preload()
                             ->native(false),
+                        Forms\Components\TextInput::make('cost_override')
+                            ->label('Cost điều chỉnh (override)')
+                            ->numeric()
+                            ->minValue(0)
+                            ->nullable()
+                            ->live(onBlur: true)
+                            ->helperText('Chỉ dùng trường hợp đặc biệt — bỏ trống để dùng cost TỰ TÍNH từ định mức nguyên liệu.'),
+                        Forms\Components\TextInput::make('cost_override_reason')
+                            ->label('Lý do điều chỉnh cost')
+                            ->dehydrated(false)
+                            ->maxLength(255)
+                            // Bắt buộc lý do khi giá override được đặt/thay đổi so với giá trị đang lưu
+                            ->required(function (Get $get, ?Recipe $record): bool {
+                                $new = $get('cost_override');
+                                $old = $record?->cost_override;
+
+                                return ($new !== null && $new !== '') && (float) $new !== (float) ($old ?? -1);
+                            })
+                            ->helperText('Bắt buộc khi đặt/thay đổi cost điều chỉnh — được lưu vào nhật ký giá.'),
                         Forms\Components\Select::make('price_option')
                             ->label('Tùy chọn đơn giá')
                             ->required()
@@ -129,9 +156,29 @@ class RecipeResource extends Resource
                                     ->afterStateHydrated(fn (Set $set, ?int $state): mixed => $set('ingredient_price', self::ingredientPrice($state)))
                                     ->afterStateUpdated(fn (Set $set, ?int $state): mixed => $set('ingredient_price', self::ingredientPrice($state)))
                                     ->placeholder('Tên nguyên liệu')
+                                    ->columnSpan(3),
+                                Forms\Components\TextInput::make('quantity_gram')
+                                    ->label('Định lượng (g)')
+                                    ->numeric()
+                                    ->placeholder('gram')
+                                    ->suffix('g')
+                                    ->dehydrated(false)
+                                    ->live(onBlur: true)
+                                    ->afterStateHydrated(function (Set $set, $state, Get $get) {
+                                        $kg = (float) $get('quantity_per_portion');
+                                        if ($kg > 0) {
+                                            $set('quantity_gram', $kg * 1000);
+                                        }
+                                    })
+                                    ->afterStateUpdated(function (Set $set, $state) {
+                                        $gram = (float) $state;
+                                        if ($gram > 0) {
+                                            $set('quantity_per_portion', $gram / 1000);
+                                        }
+                                    })
                                     ->columnSpan(2),
                                 Forms\Components\TextInput::make('quantity_per_portion')
-                                    ->label('Định lượng (kg) / 1 phần')
+                                    ->label('Định lượng (kg)')
                                     ->numeric()
                                     ->required()
                                     ->default(0.1)
@@ -139,14 +186,26 @@ class RecipeResource extends Resource
                                     ->step(0.001)
                                     ->suffix('kg')
                                     ->live(onBlur: true)
+                                    ->afterStateHydrated(function (Set $set, $state) {
+                                        $kg = (float) $state;
+                                        if ($kg > 0) {
+                                            $set('quantity_gram', $kg * 1000);
+                                        }
+                                    })
+                                    ->afterStateUpdated(function (Set $set, $state) {
+                                        $kg = (float) $state;
+                                        if ($kg > 0) {
+                                            $set('quantity_gram', $kg * 1000);
+                                        }
+                                    })
                                     ->columnSpan(2),
                                 Forms\Components\TextInput::make('ingredient_price')
-                                    ->label('Đơn giá nguyên liệu')
+                                    ->label('Đơn giá NL')
                                     ->disabled()
                                     ->dehydrated(false)
                                     ->prefixIcon('heroicon-m-lock-closed')
                                     ->formatStateUsing(fn (mixed $state): string => self::formatCurrency((float) $state))
-                                    ->columnSpan(3),
+                                    ->columnSpan(2),
                                 Forms\Components\Placeholder::make('line_total')
                                     ->label('Thành tiền')
                                     ->content(fn (Get $get): string => self::formatCurrency(
@@ -159,7 +218,7 @@ class RecipeResource extends Resource
                                     ->placeholder('Ghi chú')
                                     ->columnSpan(2),
                             ])
-                            ->columns(10)
+                            ->columns(12)
                             ->itemNumbers()
                             ->addActionLabel('Thêm nguyên liệu')
                             ->addActionAlignment(Alignment::End)
@@ -226,8 +285,9 @@ class RecipeResource extends Resource
                     ->label('TỔNG COST NGUYÊN LIỆU / PHẦN')
                     ->formatStateUsing(fn ($state) => number_format($state, 0, ',', '.').' d')
                     ->weight('bold')
-                    ->color('primary')
-                    ->state(fn ($record) => $record->ingredients->sum(fn ($i) => $i->pivot->quantity_per_portion * $i->reference_price)),
+                    ->color(fn ($record) => $record->cost_override !== null ? 'warning' : 'primary')
+                    ->description(fn ($record) => $record->cost_override !== null ? 'Cost điều chỉnh (override)' : null)
+                    ->state(fn ($record) => $record->effectiveCostPerPortion()),
                 Tables\Columns\TextColumn::make('status')
                     ->label('TRẠNG THÁI')
                     ->badge()
@@ -253,9 +313,9 @@ class RecipeResource extends Resource
                 Tables\Filters\SelectFilter::make('price_level')
                     ->label('Mức giá / Đơn giá suất ăn')
                     ->options(self::mealPriceOptions()),
-                Tables\Filters\SelectFilter::make('type')
+                Tables\Filters\SelectFilter::make('recipe_type_id')
                     ->label('Nhóm món')
-                    ->options(self::recipeTypeOptions()),
+                    ->relationship('recipeType', 'name'),
                 Tables\Filters\SelectFilter::make('status')
                     ->label('Trạng thái')
                     ->options([
@@ -307,7 +367,11 @@ class RecipeResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()->with(['ingredients', 'ingredients.supplier']);
+        return parent::getEloquentQuery()
+            ->with(['ingredients', 'ingredients.supplier', 'recipeType'])
+            ->withoutGlobalScopes([
+                SoftDeletingScope::class,
+            ]);
     }
 
     public static function getPages(): array

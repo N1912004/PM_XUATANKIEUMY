@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\RecipeResource\Pages;
 
 use App\Filament\Resources\RecipeResource;
+use App\Models\RecipeCostLog;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Resources\Pages\CreateRecord;
@@ -67,6 +68,20 @@ class CreateRecipe extends CreateRecord
         }
 
         return $data;
+    }
+
+    protected function afterCreate(): void
+    {
+        // Món mới tạo đã đặt cost override → ghi log ngay từ đầu (old = null: chưa từng có)
+        if ($this->record->cost_override !== null) {
+            RecipeCostLog::create([
+                'recipe_id' => $this->record->id,
+                'old_value' => null,
+                'new_value' => $this->record->cost_override,
+                'reason' => trim((string) ($this->data['cost_override_reason'] ?? '')) ?: 'Đặt cost điều chỉnh khi tạo món',
+                'user_id' => auth()->id(),
+            ]);
+        }
     }
 
     protected function getRedirectUrl(): string

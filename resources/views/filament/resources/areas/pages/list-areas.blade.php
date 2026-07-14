@@ -6,6 +6,7 @@
         $areas = $this->areas();
         $kitchens = $this->kitchens();
         $employees = $this->getEmployees();
+        $allAreas = \App\Models\Area::orderBy('name')->get();
     @endphp
 
     @if (session()->has('message'))
@@ -202,6 +203,11 @@
                         </tbody>
                     </table>
                 </div>
+                @if($areas->hasPages())
+                    <div style="padding: 10px 16px; border-top: 1px solid var(--po-bd2); background: var(--po-bd2);">
+                        {{ $areas->links() }}
+                    </div>
+                @endif
             </div>
         </div>
     @else
@@ -225,7 +231,7 @@
             <form wire:submit.prevent="saveKitchen" style="padding:14px 16px; background:var(--po-bd2); display:grid; grid-template-columns:repeat(6,1fr); gap:10px; border-bottom:1.5px solid var(--po-bd2)">
                 <select wire:model="kitchenAreaId" class="ctrl" required>
                     <option value="">Khu vực *</option>
-                    @foreach($areas as $area)
+                    @foreach($allAreas as $area)
                         <option value="{{ $area->id }}">{{ $area->name }} ({{ $area->code }})</option>
                     @endforeach
                 </select>
@@ -274,7 +280,7 @@
                 <div style="display:flex; gap:6px; margin-left:12px">
                     <select wire:model.live="kitchenAreaFilter" class="lv-sel" style="height:34px">
                         <option value="">Tất cả khu vực</option>
-                        @foreach($areas as $area)
+                        @foreach($allAreas as $area)
                             <option value="{{ $area->id }}">{{ $area->name }}</option>
                         @endforeach
                     </select>
@@ -318,7 +324,7 @@
                     <tbody>
                         @forelse($kitchens as $index => $row)
                             <tr style="border-bottom:1px solid var(--po-bd2); color:var(--po-tx)" class="emp-row">
-                                <td style="padding:12px 14px; font-weight:600; color:var(--po-mu)">{{ $index + 1 }}</td>
+                                <td style="padding:12px 14px; font-weight:600; color:var(--po-mu)">{{ ($kitchens->currentPage() - 1) * $kitchens->perPage() + $index + 1 }}</td>
                                 <td style="padding:12px 14px; font-weight:700">{{ $row->name }}</td>
                                 <td style="padding:12px 14px; font-weight:600; color:var(--po-mu)">{{ $row->area?->name }}</td>
                                 <td style="padding:12px 14px;">{{ $row->type }}</td>
@@ -356,6 +362,11 @@
                     </tbody>
                 </table>
             </div>
+            @if($kitchens->hasPages())
+                <div style="padding: 10px 16px; border-top: 1px solid var(--po-bd2); background: var(--po-bd2);">
+                    {{ $kitchens->links() }}
+                </div>
+            @endif
         </div>
     @endif
 </div>

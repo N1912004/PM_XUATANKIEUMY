@@ -249,13 +249,22 @@ class PerformanceTestSeeder extends Seeder
         for ($d = -100; $d <= 30; $d++) {
             $date = Carbon::now()->addDays($d)->format('Y-m-d');
             foreach ($kitchenIds as $kId) {
-                // Seed 2 menus per kitchen per day
+                // Seed 2 menus per kitchen per day — bộ (shift, recipe) phải KHÁC nhau
+                // trong cùng bếp/ngày để không vỡ unique index menus (kitchen,date,shift,recipe)
+                $usedCombos = [];
                 for ($m = 1; $m <= 2; $m++) {
+                    do {
+                        $shiftId = $shiftIds[array_rand($shiftIds)];
+                        $recipeId = $recipeIds[array_rand($recipeIds)];
+                        $combo = $shiftId.'-'.$recipeId;
+                    } while (isset($usedCombos[$combo]));
+                    $usedCombos[$combo] = true;
+
                     $menus[] = [
                         'kitchen_id' => $kId,
                         'date' => $date,
-                        'shift_id' => $shiftIds[array_rand($shiftIds)],
-                        'recipe_id' => $recipeIds[array_rand($recipeIds)],
+                        'shift_id' => $shiftId,
+                        'recipe_id' => $recipeId,
                         'estimated_portions' => rand(100, 500),
                         'status' => $date < Carbon::now()->format('Y-m-d') ? 'locked' : $menuStatuses[array_rand($menuStatuses)],
                         'created_at' => now(),

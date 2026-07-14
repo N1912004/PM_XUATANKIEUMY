@@ -66,6 +66,9 @@ class UnitResource extends Resource
                         return (string) ($rowLoop->iteration + ($perPage * ($currentPage - 1)));
                     })
                     ->alignCenter()
+                    ->extraAttributes([
+                        'style' => 'font-variant-numeric: tabular-nums; font-weight: 600; color: #64748b;',
+                    ])
                     ->width('56px'),
                 Tables\Columns\TextColumn::make('name')
                     ->label(__('ingredient.unit.table_name'))
@@ -75,6 +78,9 @@ class UnitResource extends Resource
                 Tables\Columns\TextColumn::make('created_at')
                     ->label(__('ingredient.unit.created_at'))
                     ->dateTime('d/m/Y H:i')
+                    ->extraAttributes([
+                        'style' => 'font-variant-numeric: tabular-nums;',
+                    ])
                     ->sortable()
                     ->color('gray'),
             ])

@@ -49,12 +49,17 @@
             </select>
         </div>
         <div class="field" style="min-width:200px">
-            <label>Cơ sở / địa điểm</label>
-            <input wire:model.live="canteen" class="ctrl" placeholder="Canteen Summit">
+            <label>Cơ sở / địa điểm (theo bếp)</label>
+            <input value="{{ $canteen }}" class="ctrl" readonly style="background:var(--po-bd2); cursor:not-allowed" title="Tự nhận theo bếp của tài khoản đăng nhập">
         </div>
-        <div class="field" style="min-width:180px">
+        <div class="field" style="min-width:200px">
             <label>Người kiểm tra</label>
-            <input wire:model.live="inspector" class="ctrl" placeholder="Nguyễn Văn An">
+            <select wire:model.live="inspector" class="ctrl">
+                <option value="">— Chọn nhân viên —</option>
+                @foreach($this->getInspectorOptions() as $empName)
+                    <option value="{{ $empName }}">{{ $empName }}</option>
+                @endforeach
+            </select>
         </div>
         <div style="font-size:12.5px; color:var(--po-mu); padding-bottom:9px; font-weight:600">
             {{ date('d/m/Y', strtotime($date)) }} · {{ $stats['dishes'] }} món · {{ $stats['ingredients'] }} nguyên liệu
@@ -79,6 +84,11 @@
             <i class="fa-solid fa-ban"></i> Hủy mẫu
         </button>
         <div class="tsp"></div>
+        @if($activeStep === 'Lưu mẫu')
+            <button type="button" onclick="window.print()" class="emp-btn" style="height:36px">
+                <i class="fa-solid fa-tags" style="color:var(--po-pu)"></i> In tem nhãn lưu mẫu
+            </button>
+        @endif
         <button wire:click="exportCSV" class="emp-btn" style="height:36px">
             <i class="fa-solid fa-file-excel" style="color:var(--po-gn)"></i> Xuất bước đang chọn
         </button>
@@ -341,4 +351,62 @@
             </table>
         </div>
     </div>
+
+    {{-- Tem nhãn lưu mẫu: ẩn trên màn hình, chỉ hiện khi in (nút "In tem nhãn lưu mẫu" ở tab Lưu mẫu) --}}
+    @if($activeStep === 'Lưu mẫu')
+        <div class="fsa-print-labels" style="display:none">
+            @foreach($auditItems as $item)
+                <div class="fsa-label">
+                    <div class="fsa-label-head">TEM LƯU MẪU THỨC ĂN — {{ $canteen }}</div>
+                    <table class="fsa-label-table">
+                        <tr><td>Món ăn:</td><td><strong>{{ $item['name'] }}</strong></td></tr>
+                        <tr><td>Mã mẫu:</td><td><strong>{{ $item['sample_code'] ?: '—' }}</strong></td></tr>
+                        <tr><td>Ngày:</td><td>{{ date('d/m/Y', strtotime($date)) }}</td></tr>
+                        <tr><td>Giờ lưu:</td><td>{{ $item['time'] ?: '—' }}</td></tr>
+                        <tr><td>KL mẫu:</td><td>{{ $item['quantity'] ?: '≥100g' }}</td></tr>
+                        <tr><td>Nhiệt độ lưu:</td><td>{{ $item['temp'] ?: '2-8°C' }}</td></tr>
+                        <tr><td>Người lưu:</td><td>{{ $item['staff'] ?: $inspector }}</td></tr>
+                        <tr><td>Hủy sau:</td><td>24 giờ</td></tr>
+                    </table>
+                </div>
+            @endforeach
+        </div>
+
+        <style>
+            @media print {
+                body * { visibility: hidden !important; }
+                .fsa-print-labels, .fsa-print-labels * { visibility: visible !important; }
+                .fsa-print-labels {
+                    display: flex !important;
+                    flex-wrap: wrap;
+                    gap: 6mm;
+                    position: absolute;
+                    top: 0; left: 0;
+                    width: 100%;
+                    padding: 8mm;
+                    background: #fff;
+                }
+                .fsa-label {
+                    width: 62mm;
+                    border: 1px solid #000;
+                    border-radius: 2mm;
+                    padding: 3mm;
+                    page-break-inside: avoid;
+                    font-size: 9pt;
+                    color: #000;
+                }
+                .fsa-label-head {
+                    font-weight: 700;
+                    font-size: 8pt;
+                    text-align: center;
+                    border-bottom: 1px solid #000;
+                    padding-bottom: 1.5mm;
+                    margin-bottom: 1.5mm;
+                }
+                .fsa-label-table { width: 100%; border-collapse: collapse; }
+                .fsa-label-table td { padding: 0.6mm 0; vertical-align: top; }
+                .fsa-label-table td:first-child { width: 38%; color: #333; }
+            }
+        </style>
+    @endif
 </div>

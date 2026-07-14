@@ -695,15 +695,27 @@
 
 <x-filament-panels::page>
     @if($mode === 'list')
+        {{-- In nhanh: chỉ hiện vùng danh sách (#lh-print-area), ẩn sidebar/khung Filament --}}
+        <style>
+            @media print {
+                body * { visibility: hidden !important; }
+                #lh-print-area, #lh-print-area * { visibility: visible !important; }
+                #lh-print-area { position: absolute; top: 0; left: 0; width: 100%; background: #fff; padding: 8mm; }
+                #lh-print-area .lhn-datebar, #lh-print-area button { display: none !important; }
+            }
+        </style>
         <!-- LIST HÀNG VIEW (MẪU ẢNH 1 & 2) -->
-        <div class="lhn-root">
+        <div class="lhn-root" id="lh-print-area">
             <!-- Header bar -->
             <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
                 <div>
-                    <h1 style="font-size:20px;font-weight:800;margin:0 0 4px" class="dark:text-white">List hàng</h1>
+                    <h1 style="font-size:20px;font-weight:800;margin:0 0 4px" class="dark:text-white">List hàng — {{ \Carbon\Carbon::parse($date)->format('d/m/Y') }}</h1>
                     <p style="font-size:12.5px;color:#64748B;margin:0">Danh sách nguyên liệu cần chuẩn bị theo ngày và ca</p>
                 </div>
                 <div style="display:flex;gap:8px">
+                    <button type="button" wire:click="exportList" class="wh-action-btn" style="height:36px;">
+                        <i class="fa-solid fa-file-excel" style="color:#059669"></i>Xuất Excel
+                    </button>
                     <button type="button" onclick="window.print()" class="wh-action-btn" style="height:36px;">
                         <i class="fa-solid fa-print"></i>In danh sách
                     </button>
@@ -905,7 +917,7 @@
                 <div style="background:var(--wh); border:1px solid var(--bd); border-radius:var(--r); padding:14px 18px; box-shadow:var(--sh2); margin-bottom:14px; display:flex; align-items:flex-end; gap:14px; flex-wrap:wrap;" class="dark:bg-gray-900 dark:border-gray-800">
                     <div class="form-field" style="min-width:160px">
                         <label>Ngày đặt hàng</label>
-                        <input type="date" wire:model.live="poDate">
+                        <input type="date" wire:model.live="poDate" min="{{ today()->toDateString() }}" max="{{ today()->addDays(2)->toDateString() }}">
                     </div>
                     <div class="form-field" style="min-width:160px">
                         <label>Nguồn từ ngày</label>
@@ -980,7 +992,6 @@
                                             <th style="text-align:right; width:110px;">SL đặt tay</th>
                                             <th style="text-align:right;">Đơn giá</th>
                                             <th style="text-align:right; width:130px;">Thành tiền</th>
-                                            <th style="width:110px;">Phiếu</th>
                                             <th style="width:140px;">Nhà cung cấp</th>
                                         </tr>
                                     </thead>
@@ -1022,13 +1033,6 @@
                                                         @endif
                                                     </td>
                                                     <td>
-                                                        <select wire:model="poItems.{{ $index }}.split" style="height:28px; font-size:11px; padding:2px; border-radius:6px; border-color:#cbd5e1; width:100%;">
-                                                            <option value="P1">Phiếu 1</option>
-                                                            <option value="P2">Phiếu 2</option>
-                                                            <option value="P3">Phiếu 3</option>
-                                                        </select>
-                                                    </td>
-                                                    <td>
                                                         <select wire:model.live="poItems.{{ $index }}.supplier_id" style="height:28px; font-size:11px; padding:2px; border-radius:6px; border-color:#cbd5e1; width:100%;">
                                                             @foreach($suppliers as $supplier)
                                                                 <option value="{{ $supplier->id }}">{{ $supplier->name }}</option>
@@ -1064,13 +1068,12 @@
                             ->sum(fn($it) => $it['quantity_manual'] * $it['reference_price']);
                         
                         $checkedItemsCount = collect($poItems)->filter(fn($it) => $it['checked'])->count();
-                        $activeSplitsCount = collect($poItems)->filter(fn($it) => $it['checked'])->pluck('split')->unique()->count();
                     @endphp
                     <div class="lhn-grand" style="margin-top:4px">
                         <div>
                             <div class="lhn-grand-lbl">TỔNG ĐƠN ĐẶT HÀNG – ĐẶT HÀNG {{ \Carbon\Carbon::parse($poDate)->format('d/m/Y') }}</div>
                             <div style="font-size:11px; opacity:.85; margin-top:3px">
-                                {{ collect($poItems)->filter(fn($it) => $it['checked'])->pluck('supplier_id')->unique()->count() }} NCC · {{ $checkedItemsCount }}/{{ count($poItems) }} nguyên liệu · {{ $activeSplitsCount }} phiếu
+                                {{ collect($poItems)->filter(fn($it) => $it['checked'])->pluck('supplier_id')->unique()->count() }} NCC · {{ $checkedItemsCount }}/{{ count($poItems) }} nguyên liệu
                             </div>
                         </div>
                         <div class="lhn-grand-val">{{ number_format($grandTotal, 0, ',', '.') }} đ</div>
@@ -1086,14 +1089,12 @@
                     @php 
                         $totalOrderedKg = collect($poItems)->filter(fn($it) => $it['checked'])->sum('quantity_manual');
                         $suppliersCount = collect($poItems)->filter(fn($it) => $it['checked'])->pluck('supplier_id')->unique()->count();
-                        $splitsCount = collect($poItems)->filter(fn($it) => $it['checked'])->pluck('split')->unique()->count();
                         $grandVal = collect($poItems)->filter(fn($it) => $it['checked'])->sum(fn($it) => $it['quantity_manual'] * $it['reference_price']);
                     @endphp
                     <div class="oh-sum-row"><span class="oh-sum-k">Phạm vi</span><span class="oh-sum-v">Ngày</span></div>
                     <div class="oh-sum-row"><span class="oh-sum-k">Ngày đặt</span><span class="oh-sum-v">{{ \Carbon\Carbon::parse($poDate)->format('d/m/Y') }}</span></div>
                     <div class="oh-sum-row"><span class="oh-sum-k">Nguồn list</span><span class="oh-sum-v">{{ \Carbon\Carbon::parse($poSourceFrom)->format('d/m') }} - {{ \Carbon\Carbon::parse($poSourceTo)->format('d/m') }}</span></div>
                     <div class="oh-sum-row"><span class="oh-sum-k">Ca</span><span class="oh-sum-v">{{ count($poSelectedShifts) }} ca</span></div>
-                    <div class="oh-sum-row"><span class="oh-sum-k">Số phiếu</span><span class="oh-sum-v">{{ $splitsCount }} phiếu</span></div>
                     <div class="oh-sum-row"><span class="oh-sum-k">Số NCC</span><span class="oh-sum-v">{{ $suppliersCount }} NCC</span></div>
                     <div class="oh-sum-row"><span class="oh-sum-k">Tổng NL</span><span class="oh-sum-v">{{ collect($poItems)->filter(fn($it) => $it['checked'])->count() }}/{{ count($poItems) }} loại</span></div>
                     <div class="oh-sum-row"><span class="oh-sum-k">Tổng giá trị</span><span class="oh-sum-v" style="color:var(--bl); font-weight:800; font-size:13.5px;">{{ number_format($grandVal, 0, ',', '.') }} đ</span></div>
@@ -1102,9 +1103,8 @@
                 <!-- NCC Distribution Card -->
                 <div class="oh-sum">
                     <div class="oh-sum-ttl">Phân bổ theo NCC</div>
-                    @php 
+                    @php
                         $byNcc = collect($poItems)->filter(fn($it) => $it['checked'])->groupBy('supplier_id');
-                        $bySplit = collect($poItems)->filter(fn($it) => $it['checked'])->groupBy('split');
                     @endphp
                     
                     @forelse($byNcc as $supId => $items)
@@ -1126,22 +1126,6 @@
                         <div style="font-size:11px; color:#94a3b8; font-style:italic;">Chưa có phân bổ.</div>
                     @endforelse
 
-                    <div class="oh-sum-ttl" style="margin-top:14px;">Tách phiếu</div>
-                    @forelse($bySplit as $spName => $items)
-                        @php 
-                            $total = $items->sum(fn($it) => $it['quantity_manual'] * $it['reference_price']);
-                        @endphp
-                        <div class="oh-ncc-chip">
-                            <div class="oh-ncc-chip-dot" style="background:#059669;"></div>
-                            <div>
-                                <div class="oh-ncc-chip-name">{{ str_replace('P', 'Phiếu ', $spName) }}</div>
-                                <div class="oh-ncc-chip-cnt" style="font-size:9.5px;">{{ $items->count() }} mặt hàng</div>
-                            </div>
-                            <div class="oh-ncc-chip-val">{{ number_format($total, 0, ',', '.') }}d</div>
-                        </div>
-                    @empty
-                        <div style="font-size:11px; color:#94a3b8; font-style:italic;">Chưa có phân phiếu.</div>
-                    @endforelse
                 </div>
 
                 <!-- Info Box -->
@@ -1153,7 +1137,6 @@
                         <li>Mỗi NCC sẽ nhận đơn riêng.</li>
                         <li>Có thể bỏ trống nguyên liệu không đặt.</li>
                         <li>SL đặt tay được ưu tiên khi tạo phiếu.</li>
-                        <li>Chọn Phiếu 1/2/3 để tách đơn.</li>
                     </ul>
                 </div>
             </div>

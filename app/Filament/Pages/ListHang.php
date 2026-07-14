@@ -2,7 +2,10 @@
 
 namespace App\Filament\Pages;
 
+use App\Exports\ListHangExport;
+use App\Filament\Resources\MenuResource;
 use App\Filament\Resources\PurchaseOrderResource;
+use App\Filament\Resources\StockResource;
 use App\Models\Ingredient;
 use App\Models\Menu;
 use App\Models\PurchaseOrder;
@@ -14,6 +17,8 @@ use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class ListHang extends Page
 {
@@ -123,6 +128,19 @@ class ListHang extends Page
         $this->mode = 'list';
     }
 
+    /**
+     * Xuất Excel danh sách hàng của ngày/ca đang xem: Ca → Món → Nguyên liệu.
+     */
+    public function exportList(): BinaryFileResponse
+    {
+        abort_unless(StockResource::canViewAny() || MenuResource::canViewAny(), 403);
+
+        return Excel::download(
+            new ListHangExport($this->getGroupedData(), (string) $this->date),
+            'list_hang_'.$this->date.'.xlsx',
+        );
+    }
+
     public function loadPOIngredients(): void
     {
         $kitchenId = auth()->user()?->currentKitchenId();
@@ -134,8 +152,10 @@ class ListHang extends Page
         }
 
         // Khoảng nửa mở [from, to+1) — dùng index, đúng trên cả MySQL lẫn SQLite (test)
+        // Chỉ tổng hợp từ thực đơn ĐÃ CHỐT — thực đơn nháp/đang gửi chưa phải căn cứ mua hàng
         $menus = Menu::with(['recipe.ingredients.supplier'])
             ->when($kitchenId, fn ($q) => $q->where('kitchen_id', $kitchenId))
+            ->where('status', 'locked')
             ->where('date', '>=', $this->poSourceFrom)
             ->where('date', '<', Carbon::parse($this->poSourceTo)->addDay()->toDateString())
             ->whereIn('shift_id', $this->poSelectedShifts)
@@ -247,6 +267,18 @@ class ListHang extends Page
     {
         abort_unless(PurchaseOrderResource::canCreate(), 403);
 
+        // Quy định nghiệp vụ: ngày đặt hàng chỉ trong vòng 2 ngày kế tiếp từ hôm nay
+        $orderDate = Carbon::parse($this->poDate)->startOfDay();
+        if ($orderDate->lt(today()) || $orderDate->gt(today()->addDays(2))) {
+            Notification::make()
+                ->title('Ngày đặt hàng không hợp lệ')
+                ->body('Chỉ được đặt hàng cho hôm nay hoặc tối đa 2 ngày kế tiếp.')
+                ->danger()
+                ->send();
+
+            return;
+        }
+
         $selectedItems = collect($this->poItems)->filter(fn ($item) => $item['checked'] && (float) ($item['quantity_manual'] ?? 0) > 0);
 
         if ($selectedItems->isEmpty()) {
@@ -262,14 +294,22 @@ class ListHang extends Page
 
         // Đơn giá tra lại từ DB theo ingredient_id — KHÔNG tin reference_price trong payload Livewire
         // (client có thể sửa để tạo PO giá 0đ)
-        $priceByIngredient = Ingredient::whereIn('id', $selectedItems->pluck('ingredient_id')->unique())
+        $ingredientIds = $selectedItems->pluck('ingredient_id')->unique();
+        $priceByIngredient = Ingredient::whereIn('id', $ingredientIds)
             ->pluck('reference_price', 'id');
+
+        // Bảng báo giá theo TỪNG NCC (pivot ingredient_supplier) — ưu tiên hơn giá tham chiếu chung
+        // khi nguyên liệu có giá riêng với NCC được chọn. Key: "supplier_id-ingredient_id".
+        $pivotPrices = DB::table('ingredient_supplier')
+            ->whereIn('ingredient_id', $ingredientIds)
+            ->get(['supplier_id', 'ingredient_id', 'reference_price'])
+            ->keyBy(fn ($row) => $row->supplier_id.'-'.$row->ingredient_id);
 
         $poCount = 0;
         $poCodes = [];
         $skippedNames = [];
 
-        DB::transaction(function () use ($grouped, $kitchenId, $priceByIngredient, &$poCount, &$poCodes, &$skippedNames): void {
+        DB::transaction(function () use ($grouped, $kitchenId, $priceByIngredient, $pivotPrices, &$poCount, &$poCodes, &$skippedNames): void {
             foreach ($grouped as $key => $items) {
                 $parts = explode('-', $key);
                 $supplierId = (int) $parts[0];
@@ -305,12 +345,18 @@ class ListHang extends Page
                 ]);
 
                 foreach ($items as $item) {
+                    // Giá theo NCC (pivot) nếu có báo giá > 0, ngược lại dùng giá tham chiếu chung
+                    $pivotPrice = (float) ($pivotPrices->get($supplierId.'-'.$item['ingredient_id'])->reference_price ?? 0);
+                    $unitPrice = $pivotPrice > 0
+                        ? $pivotPrice
+                        : (float) ($priceByIngredient[$item['ingredient_id']] ?? 0);
+
                     PurchaseOrderItem::create([
                         'purchase_order_id' => $po->id,
                         'ingredient_id' => $item['ingredient_id'],
                         'quantity_ordered' => (float) $item['quantity_manual'],
                         'quantity_received' => 0.0,
-                        'unit_price' => (float) ($priceByIngredient[$item['ingredient_id']] ?? 0),
+                        'unit_price' => $unitPrice,
                     ]);
                 }
 
@@ -363,6 +409,7 @@ class ListHang extends Page
         // để dùng được index và đúng trên cả MySQL lẫn SQLite (test)
         $menusByShift = Menu::with(['recipe.ingredients'])
             ->when($kitchenId, fn ($q) => $q->where('kitchen_id', $kitchenId))
+            ->where('status', 'locked')
             ->where('date', '>=', $this->date)
             ->where('date', '<', Carbon::parse($this->date)->addDay()->toDateString())
             ->whereIn('shift_id', $this->selectedShifts)
@@ -436,7 +483,8 @@ class ListHang extends Page
         $kitchenId = auth()->user()?->currentKitchenId();
 
         // Khoảng nửa mở [ngày, ngày+1) để dùng index (date, shift_id); gộp 2 aggregate vào 1 query
-        $totals = Menu::where('date', '>=', $this->date)
+        $totals = Menu::where('status', 'locked')
+            ->where('date', '>=', $this->date)
             ->where('date', '<', Carbon::parse($this->date)->addDay()->toDateString())
             ->whereIn('shift_id', $this->selectedShifts)
             ->when($kitchenId, fn ($q) => $q->where('kitchen_id', $kitchenId))

@@ -245,6 +245,9 @@ class AdminPanelProvider extends PanelProvider
                             font-weight: 800 !important;
                             color: #111827 !important;
                         }
+                        .dark .fi-resource-recipes .fi-header-heading {
+                            color: #ffffff !important;
+                        }
                         .fi-resource-recipes .fi-header-subheading {
                             color: #64748b !important;
                             font-size: 1rem !important;
@@ -256,6 +259,10 @@ class AdminPanelProvider extends PanelProvider
                             border-radius: 1rem !important;
                             box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05) !important;
                         }
+                        .dark .fi-resource-recipes .recipe-form-section,
+                        .dark .fi-resource-recipes .recipe-cost-section {
+                            border-color: #374151 !important;
+                        }
                         .fi-resource-recipes .recipe-cost-section .fi-fo-repeater-item {
                             border: 0 !important;
                             box-shadow: none !important;
@@ -264,6 +271,9 @@ class AdminPanelProvider extends PanelProvider
                         .fi-resource-recipes .recipe-cost-section .fi-fo-repeater-item-header {
                             background: #f8fafc !important;
                             border-radius: 0.75rem 0.75rem 0 0 !important;
+                        }
+                        .dark .fi-resource-recipes .recipe-cost-section .fi-fo-repeater-item-header {
+                            background: #334155 !important;
                         }
                         .fi-resource-recipes .recipe-line-total {
                             color: #ea580c !important;
@@ -281,6 +291,11 @@ class AdminPanelProvider extends PanelProvider
                             color: #9a3412 !important;
                             font-size: 1.125rem !important;
                             font-weight: 800 !important;
+                        }
+                        .dark .fi-resource-recipes .recipe-total-cost {
+                            background: linear-gradient(90deg, rgba(120, 53, 4, 0.25), rgba(146, 64, 14, 0.25)) !important;
+                            border-color: #7c2d12 !important;
+                            color: #fdba74 !important;
                         }
                         .fi-resource-recipes .recipe-cost-note {
                             color: #64748b !important;

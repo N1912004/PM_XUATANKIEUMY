@@ -7,9 +7,11 @@ use App\Models\Area;
 use App\Models\Employee;
 use App\Models\Kitchen;
 use Filament\Resources\Pages\Page;
+use Livewire\WithPagination;
 
 class ListAreas extends Page
 {
+    use WithPagination;
     protected static string $resource = AreaResource::class;
 
     protected static string $view = 'filament.resources.areas.pages.list-areas';
@@ -78,6 +80,33 @@ class ListAreas extends Page
     public function switchTab($tab)
     {
         $this->activeTab = $tab;
+        $this->resetPage('areasPage');
+        $this->resetPage('kitchensPage');
+    }
+
+    public function updatedAreaSearch(): void
+    {
+        $this->resetPage('areasPage');
+    }
+
+    public function updatedKitchenSearch(): void
+    {
+        $this->resetPage('kitchensPage');
+    }
+
+    public function updatedKitchenAreaFilter(): void
+    {
+        $this->resetPage('kitchensPage');
+    }
+
+    public function updatedKitchenTypeFilter(): void
+    {
+        $this->resetPage('kitchensPage');
+    }
+
+    public function updatedKitchenStatusFilter(): void
+    {
+        $this->resetPage('kitchensPage');
     }
 
     // ==========================================
@@ -171,7 +200,7 @@ class ListAreas extends Page
             });
         }
 
-        return $query->get();
+        return $query->paginate(10, ['*'], 'areasPage');
     }
 
     // ==========================================
@@ -272,7 +301,7 @@ class ListAreas extends Page
             $query->where('status', $this->kitchenStatusFilter);
         }
 
-        return $query->get();
+        return $query->paginate(10, ['*'], 'kitchensPage');
     }
 
     public function resetFilters()

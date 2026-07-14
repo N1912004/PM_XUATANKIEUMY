@@ -16,6 +16,7 @@ class PurchaseOrderItem extends Model
         'quantity_ordered',
         'quantity_received',
         'unit_price',
+        'receive_note',
     ];
 
     public function purchaseOrder(): BelongsTo

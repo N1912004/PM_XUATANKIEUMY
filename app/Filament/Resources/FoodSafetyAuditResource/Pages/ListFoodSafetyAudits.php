@@ -4,8 +4,11 @@ namespace App\Filament\Resources\FoodSafetyAuditResource\Pages;
 
 use App\Exports\FoodSafetyAuditReportExport;
 use App\Filament\Resources\FoodSafetyAuditResource;
+use App\Models\Employee;
 use App\Models\FoodSafetyAudit;
+use App\Models\Kitchen;
 use App\Models\Menu;
+use App\Models\PurchaseOrderItem;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Support\Collection;
@@ -25,9 +28,37 @@ class ListFoodSafetyAudits extends ListRecords
 
     public string $activeStep = 'Bước 1';
 
-    public string $canteen = 'Canteen Summit';
+    public string $canteen = '';
 
-    public string $inspector = 'Nguyễn Văn An';
+    public string $inspector = '';
+
+    public function mount(): void
+    {
+        parent::mount();
+
+        // Địa điểm tự nhận theo bếp của tài khoản đang đăng nhập (BA: không nhập tay)
+        $kitchenId = auth()->user()?->currentKitchenId();
+        $this->canteen = ($kitchenId ? Kitchen::find($kitchenId)?->name : null)
+            ?? Kitchen::first()?->name
+            ?? 'Bếp ăn';
+
+        // Người kiểm tra mặc định: nhân viên liên kết với tài khoản (chọn lại từ danh mục trên UI)
+        $this->inspector = auth()->user()?->employee?->name ?? '';
+    }
+
+    /**
+     * Danh mục nhân viên để chọn Người kiểm tra (BA: chọn từ danh mục, không gõ tay).
+     *
+     * @return array<int, string>
+     */
+    public function getInspectorOptions(): array
+    {
+        return Employee::query()
+            ->where('status', 'Đang làm việc')
+            ->orderBy('name')
+            ->pluck('name', 'id')
+            ->all();
+    }
 
     protected function getHeaderActions(): array
     {
@@ -95,6 +126,22 @@ class ListFoodSafetyAudits extends ListRecords
 
         if ($this->activeStep === 'Bước 1') {
             // Step 1: Input raw ingredients check
+            $ingredientIds = $menus
+                ->flatMap(fn ($menu) => $menu->recipe?->ingredients->pluck('id') ?? collect())
+                ->unique()
+                ->values();
+
+            // NCC + chứng từ lấy theo PO ĐÃ NHẬP KHO gần nhất của từng nguyên liệu
+            // (BA: theo PO/ngày nhập thực tế, không dùng NCC cố định của nguyên liệu)
+            $poInfoByIngredient = PurchaseOrderItem::query()
+                ->whereIn('ingredient_id', $ingredientIds)
+                ->whereHas('purchaseOrder', fn ($q) => $q->whereNotNull('stocked_at'))
+                ->with(['purchaseOrder:id,code,supplier_id,stocked_at', 'purchaseOrder.supplier:id,name,phone,contact_name'])
+                ->get(['id', 'purchase_order_id', 'ingredient_id'])
+                ->sortByDesc(fn ($item) => $item->purchaseOrder?->stocked_at)
+                ->unique('ingredient_id')
+                ->keyBy('ingredient_id');
+
             $seenIngredients = [];
             foreach ($menus as $menu) {
                 $recipe = $menu->recipe;
@@ -109,17 +156,26 @@ class ListFoodSafetyAudits extends ListRecords
                         continue;
                     }
 
+                    $poInfo = $poInfoByIngredient->get($ingredient->id);
+
                     $seenIngredients[$ingredient->id] = [
                         'name' => $ingredient->name,
                         'type' => $ingredient->type,
-                        'time' => '05:00',
+                        'time' => $poInfo?->purchaseOrder?->stocked_at?->format('H:i') ?? '05:00',
                         'quantity' => $qty,
                         'unit' => $ingredient->unit,
-                        'supplier' => $ingredient->supplier->name ?? 'Cơ sở tự do',
-                        'invoice' => 'HĐ-'.($ingredient->supplier->code ?? 'NCC').'-'.str_replace('-', '', $this->date),
+                        'supplier' => $poInfo?->purchaseOrder?->supplier?->name
+                            ?? $ingredient->supplier->name
+                            ?? 'Cơ sở tự do',
+                        'supplier_contact' => $poInfo?->purchaseOrder?->supplier?->phone ?? '',
+                        'deliverer' => $poInfo?->purchaseOrder?->supplier?->contact_name ?? '',
+                        // Chứng từ = mã PO thật đã nhập kho; chưa có PO thì để trống thay vì chuỗi tự chế
+                        'invoice' => $poInfo?->purchaseOrder?->code ?? '—',
                         'vet_check' => ($ingredient->type === 'Động vật') ? 'Đạt' : '—',
+                        'quarantine' => ($ingredient->type === 'Động vật') ? 'Có' : '—',
                         'sensory' => 'Đạt',
                         'quick_test' => '—',
+                        'action' => '',
                         'notes' => 'Cảm quan tốt, sạch sẽ',
                     ];
                 }
@@ -142,41 +198,78 @@ class ListFoodSafetyAudits extends ListRecords
             /** @var FoodSafetyAudit|null $audit */
             $audit = $records->get($recipe->id);
 
+            // Các key bổ sung (shift/portions/main_ingredients/...) phục vụ Excel theo
+            // biểu mẫu B1–B5; các key cũ giữ nguyên cho bảng hiển thị trên trang.
+            $shiftLabel = $menu->shift->name ?? '';
+            $portions = (int) $menu->estimated_portions;
+
             if ($this->activeStep === 'Bước 2') {
+                $mainIngredients = $recipe->ingredients
+                    ->map(fn ($ing) => $ing->name.' '.rtrim(rtrim(number_format($ing->pivot->quantity_per_portion * $portions, 1, ',', '.'), '0'), ',').'kg')
+                    ->take(6)
+                    ->implode(', ');
+
                 $dishes[] = [
                     'name' => $dishName,
+                    'shift' => $shiftLabel,
+                    'main_ingredients' => $mainIngredients,
+                    'portions' => $portions,
+                    // cook_start_at là chuỗi TIME (không cast datetime) — cắt HH:MM như timeRange()
+                    'prep_time' => $audit?->cook_start_at ? substr((string) $audit->cook_start_at, 0, 5) : '',
                     'time' => $this->timeRange($audit?->cook_start_at, $audit?->cook_end_at),
+                    'staff_check' => 'Đạt',
+                    'equipment_check' => 'Đạt',
+                    'area_check' => 'Đạt',
                     'sensory' => $audit->status ?? '',
                     'temp' => $audit->temperature ?? '',
                     'cook' => $audit->inspected_by ?? '',
-                    'kitchen' => $menu->shift->name ?? '',
+                    'kitchen' => $shiftLabel,
+                    'action' => '',
                     'notes' => $audit->notes ?? '',
                 ];
             } elseif ($this->activeStep === 'Bước 3') {
                 $dishes[] = [
                     'name' => $dishName,
+                    'shift' => $shiftLabel,
+                    'portions' => $portions,
                     'time' => $audit?->sample_kept_at?->format('H:i') ?? '',
+                    'eat_time' => $audit?->sample_kept_at?->copy()->addMinutes(30)?->format('H:i') ?? '',
+                    'utensil' => $audit->utensil ?? 'Vá, khay, muỗng',
                     'sensory' => $audit->status ?? '',
                     'sample_kept' => $audit && $audit->sample_kept_by ? 'Có ('.$audit->sample_kept_by.')' : '',
                     'temp' => $audit->temperature ?? '',
+                    'action' => '',
                     'notes' => $audit->notes ?? '',
                 ];
             } elseif ($this->activeStep === 'Lưu mẫu') {
                 $dishes[] = [
                     'name' => $dishName,
+                    'shift' => $shiftLabel,
+                    'portions' => $portions,
+                    'sample_amount' => '≥100g',
+                    'container' => $audit->utensil ?? 'Hũ Inox',
                     'time' => $audit?->sample_kept_at?->format('H:i') ?? '',
+                    'destroy_at' => $audit?->sample_kept_at?->copy()->addDay()?->format('H:i (d/m)') ?? '',
                     'quantity' => '',
                     'sample_code' => $audit->sample_code ?? '',
                     'temp' => $audit->temperature ?? '',
                     'staff' => $audit->sample_kept_by ?? '',
+                    'destroyer' => '',
                     'notes' => $audit->utensil ?? '',
                 ];
             } elseif ($this->activeStep === 'Hủy mẫu') {
                 $dishes[] = [
                     'name' => $dishName,
-                    'time' => $audit?->sample_kept_at?->format('H:i') ?? '',
+                    'shift' => $shiftLabel,
+                    'portions' => $portions,
+                    'sample_amount' => '≥100g',
+                    'container' => $audit->utensil ?? 'Hũ Inox',
+                    'temp' => $audit->temperature ?? '',
+                    'kept_at' => $audit?->sample_kept_at?->format('H:i') ?? '',
+                    'time' => $audit?->sample_kept_at?->copy()->addDay()?->format('H:i (d/m)') ?? '',
                     'retention' => '24 giờ',
                     'status' => $audit->status ?? '',
+                    'keeper' => $audit->sample_kept_by ?? '',
                     'staff' => $audit->sample_kept_by ?? '',
                     'notes' => $audit->notes ?? '',
                 ];
