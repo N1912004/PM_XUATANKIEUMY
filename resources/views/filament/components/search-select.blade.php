@@ -26,6 +26,13 @@
     ])->values();
 @endphp
 
+{{--
+    Panel dùng position:fixed + teleport ra <body> (khung cha có overflow/transform sẽ cắt hoặc lệch nó),
+    và bám dính nút bấm mỗi khung hình khi mở: khung nội dung Filament cuộn BÊN TRONG container nên
+    sự kiện scroll không bao giờ tới window. Chiều cao panel phải đo THẬT — dùng hằng số sẽ khiến panel
+    "lật lên" sai và bay khỏi ô chọn. Gọi window.requestAnimationFrame (không gọi trần) vì trong phạm vi
+    Alpine, hàm global bị bind sai `this` → TypeError: Illegal invocation.
+--}}
 <div
     x-data="{
         open: false,
@@ -47,14 +54,6 @@
             this.search = '';
         },
 
-        /*
-         * Panel dùng position:fixed + teleport ra <body>: các ô chọn nằm trong bảng cuộn / card
-         * có overflow, nếu để position:absolute thì panel bị CẮT hoặc bị phần tử khác đè lên.
-         *
-         * Toạ độ phải được tính LẠI LIÊN TỤC khi panel mở (requestAnimationFrame), KHÔNG chỉ
-         * nghe @scroll.window: khung nội dung của Filament cuộn BÊN TRONG một container, nên sự
-         * kiện scroll không bao giờ tới window — panel giữ toạ độ cũ và trôi khỏi ô chọn.
-         */
         panel: { top: 0, left: 0, width: 0 },
         frame: null,
         reposition() {
@@ -65,24 +64,26 @@
             }
 
             const rect = trigger.getBoundingClientRect();
-            const panelHeight = 300;
-            const flipUp = (window.innerHeight - rect.bottom) < panelHeight && rect.top > panelHeight;
+
+            const height = this.$refs.panelBox ? this.$refs.panelBox.offsetHeight : 0;
+            const spaceBelow = window.innerHeight - rect.bottom - 8;
+            const flipUp = height > 0 && spaceBelow < height && rect.top > height + 8;
 
             this.panel = {
-                top: flipUp ? rect.top - panelHeight - 4 : rect.bottom + 4,
+                top: flipUp ? Math.max(8, rect.top - height - 4) : rect.bottom + 4,
                 left: rect.left,
                 width: rect.width,
             };
         },
         track() {
             this.reposition();
-            this.frame = requestAnimationFrame(() => this.open && this.track());
+            this.frame = window.requestAnimationFrame(() => this.open && this.track());
         },
         close() {
             this.open = false;
 
             if (this.frame) {
-                cancelAnimationFrame(this.frame);
+                window.cancelAnimationFrame(this.frame);
                 this.frame = null;
             }
         },
@@ -95,7 +96,7 @@
 
             this.open = true;
             this.track();
-            this.$nextTick(() => this.$refs.searchBox?.focus());
+            this.$nextTick(() => { if (this.$refs.searchBox) this.$refs.searchBox.focus(); });
         },
     }"
     class="relative w-full"
@@ -123,6 +124,7 @@
     {{-- Panel treo thẳng vào <body>: khung cha có overflow hoặc transform sẽ cắt/lệch nó --}}
     <template x-teleport="body">
     <div
+        x-ref="panelBox"
         x-show="open"
         x-cloak
         @click.outside="close()"
