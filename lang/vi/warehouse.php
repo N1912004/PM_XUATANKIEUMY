@@ -187,6 +187,12 @@ return [
         'default_out_reason' => 'Sản xuất theo list hàng',
     ],
     'notifications' => [
+        'negative_stock_title' => 'Số lượng tồn không được âm',
+        'negative_stock_body' => 'Kho thực tế không thể âm — kiểm tra lại số đếm thực tế.',
+        'negative_after_check' => 'Chốt kiểm kê sẽ làm tồn kho của :name xuống âm — kiểm tra lại số đếm.',
+        'no_kitchen_title' => 'Tài khoản chưa gắn bếp',
+        'no_kitchen_body' => 'Nghiệp vụ kho gắn với một bếp cụ thể. Vào Quản lý tài khoản → liên kết nhân viên để nhận bếp trực thuộc.',
+
         'missing_check_reason_title' => 'Thiếu lý do chênh lệch kiểm kê',
         'missing_check_reason_body' => 'Có dòng tồn thực tế lệch với hệ thống - vui lòng ghi lý do vào cột Ghi chú của từng dòng lệch trước khi chốt.',
         'end_day_saved' => 'Đã lưu tồn cuối ngày thành công!',

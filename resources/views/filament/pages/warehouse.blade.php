@@ -530,6 +530,17 @@
     <!-- Stats Cards -->
     @php $stats = $this->getStats(); @endphp
     <div class="stats-grid">
+
+    {{-- Nghiệp vụ kho gắn với một bếp cụ thể — tài khoản chưa gắn bếp phải biết ngay --}}
+    @if(! $this->operatingKitchenId())
+        <div style="display:flex; gap:10px; align-items:flex-start; padding:12px 16px; margin-bottom:14px; border-radius:8px; border:1px solid #f59e0b; background:#fffbeb; color:#92400e">
+            <i class="fa-solid fa-triangle-exclamation" style="margin-top:2px"></i>
+            <div>
+                <div style="font-weight:700">{{ __('warehouse.notifications.no_kitchen_title') }}</div>
+                <div style="font-size:12.5px">{{ __('warehouse.notifications.no_kitchen_body') }}</div>
+            </div>
+        </div>
+    @endif
         <div class="stat-card">
             <div class="stat-icon ico-blue">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -847,6 +858,7 @@
                                     <td style="text-align: center;">
                                         <input type="number"
                                                step="0.01"
+                                               min="0"
                                                wire:model.blur="actualQuantities.{{ $item->id }}"
                                                class="w-28 text-center border border-gray-300 rounded px-2 py-1 text-xs dark:bg-gray-800 dark:border-gray-700">
                                     </td>

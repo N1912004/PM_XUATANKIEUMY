@@ -196,6 +196,16 @@ class ListStocks extends ListRecords
         ];
     }
 
+    /**
+     * Bếp mà tài khoản đang thao tác. Trước đây fallback ngầm về Kitchen::first() — tức là
+     * người chưa gắn bếp lại vô tình xuất/nhập kho của một bếp bất kỳ. Nay trả null và các
+     * luồng gọi phải báo rõ "chưa gắn bếp" (super_admin cũng phải gắn nhân viên để vận hành kho).
+     */
+    public function operatingKitchenId(): ?int
+    {
+        return auth()->user()?->currentKitchenId();
+    }
+
     public function setTab(string $tab): void
     {
         $this->warehouseTab = $tab;
@@ -374,6 +384,19 @@ class ListStocks extends ListRecords
         // Đối chiếu với tồn HỆ THỐNG CỦA NGÀY KIỂM KÊ (tính lại từ DB, không tin payload client)
         $systemQty = collect($this->getSystemQuantities($this->checkDate));
 
+        // Kho thực tế không thể ÂM — số đếm âm là nhập sai, chặn ngay thay vì ghi vào sổ
+        foreach ($this->actualQuantities as $stockId => $actualQty) {
+            if ((float) $actualQty < 0) {
+                Notification::make()
+                    ->title(__('warehouse.notifications.negative_stock_title'))
+                    ->body(__('warehouse.notifications.negative_stock_body'))
+                    ->danger()
+                    ->send();
+
+                return;
+            }
+        }
+
         foreach ($this->actualQuantities as $stockId => $actualQty) {
             if (! $systemQty->has($stockId)) {
                 continue;
@@ -393,25 +416,37 @@ class ListStocks extends ListRecords
         $checkDate = $this->checkDate ?? now()->toDateString();
         $voucherCode = 'KK-'.Carbon::parse($checkDate)->format('Ymd');
 
-        DB::transaction(function () use ($kitchenId, $systemQty, $voucherCode): void {
-            foreach ($this->actualQuantities as $stockId => $actualQty) {
-                // Khóa dòng tồn và chỉ chấp nhận stock thuộc bếp của user (chống sửa payload chéo bếp)
-                $stock = Stock::query()
-                    ->whereKey($stockId)
-                    ->when($kitchenId, fn ($q) => $q->where('kitchen_id', $kitchenId))
-                    ->lockForUpdate()
-                    ->first();
+        try {
+            DB::transaction(function () use ($kitchenId, $systemQty, $voucherCode): void {
+                foreach ($this->actualQuantities as $stockId => $actualQty) {
+                    // Khóa dòng tồn và chỉ chấp nhận stock thuộc bếp của user (chống sửa payload chéo bếp)
+                    $stock = Stock::query()
+                        ->with('ingredient')
+                        ->whereKey($stockId)
+                        ->when($kitchenId, fn ($q) => $q->where('kitchen_id', $kitchenId))
+                        ->lockForUpdate()
+                        ->first();
 
-                if (! $stock || ! $systemQty->has($stockId)) {
-                    continue;
-                }
+                    if (! $stock || ! $systemQty->has($stockId)) {
+                        continue;
+                    }
 
-                // Lệch so với tồn của NGÀY KIỂM KÊ; áp bằng ĐIỀU CHỈNH (+/−) chứ không ghi đè,
-                // để kiểm kê ngày quá khứ không xóa mất các biến động phát sinh sau đó.
-                $diff = (float) $actualQty - (float) $systemQty[$stockId];
+                    // Lệch so với tồn của NGÀY KIỂM KÊ; áp bằng ĐIỀU CHỈNH (+/−) chứ không ghi đè,
+                    // để kiểm kê ngày quá khứ không xóa mất các biến động phát sinh sau đó.
+                    $diff = (float) $actualQty - (float) $systemQty[$stockId];
 
-                if ($diff != 0) {
+                    if ($diff == 0) {
+                        continue;
+                    }
+
                     $newQty = (float) $stock->quantity + $diff;
+
+                    // Điều chỉnh của ngày quá khứ có thể kéo tồn HIỆN TẠI xuống âm — không cho phép
+                    if ($newQty < 0) {
+                        throw new \RuntimeException(__('warehouse.notifications.negative_after_check', [
+                            'name' => $stock->ingredient?->name ?? '',
+                        ]));
+                    }
 
                     // Loại giao dịch 'Kiểm kê' riêng (không trộn với Nhập/Xuất kho thường)
                     // để nhật ký đối soát phân biệt được điều chỉnh kiểm kê; quantity giữ DẤU
@@ -428,8 +463,12 @@ class ListStocks extends ListRecords
 
                     $stock->update(['quantity' => $newQty]);
                 }
-            }
-        });
+            });
+        } catch (\RuntimeException $e) {
+            Notification::make()->title($e->getMessage())->danger()->send();
+
+            return;
+        }
 
         Notification::make()
             ->title(__('warehouse.notifications.end_day_saved'))
@@ -679,7 +718,7 @@ class ListStocks extends ListRecords
     // Production Outbound Handlers
     public function loadProductionItems(): void
     {
-        $kitchenId = auth()->user()?->currentKitchenId() ?? Kitchen::first()?->id;
+        $kitchenId = $this->operatingKitchenId();
 
         if (! $this->prodDate || ! $this->prodShiftId || ! $kitchenId) {
             $this->prodItemsData = [];
@@ -748,7 +787,13 @@ class ListStocks extends ListRecords
             return;
         }
 
-        $kitchenId = auth()->user()?->currentKitchenId() ?? Kitchen::first()?->id;
+        $kitchenId = $this->operatingKitchenId();
+
+        if (! $kitchenId) {
+            Notification::make()->title(__('warehouse.notifications.no_source_kitchen'))->danger()->send();
+
+            return;
+        }
 
         $shift = Shift::find($this->prodShiftId);
         $shiftName = $shift ? $shift->name : "Ca #{$this->prodShiftId}";
@@ -993,7 +1038,11 @@ class ListStocks extends ListRecords
     public function getPendingPOs(): array
     {
         $kitchenId = auth()->user()?->currentKitchenId();
-        $query = PurchaseOrder::query()->whereIn('status', ['sent', 'checking'])->whereNull('stocked_at');
+        // Bỏ các PO không có dòng nguyên liệu nào — chọn vào chỉ hiện bảng kiểm hàng TRỐNG
+        $query = PurchaseOrder::query()
+            ->whereIn('status', ['sent', 'checking'])
+            ->whereNull('stocked_at')
+            ->whereHas('items');
         if ($kitchenId) {
             $query->where('kitchen_id', $kitchenId);
         }
