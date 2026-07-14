@@ -15,15 +15,17 @@ class CatalogResource extends Resource
 {
     protected static ?string $model = Catalog::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-adjustments-horizontal';
+    protected static bool $shouldRegisterNavigation = false;
 
-    protected static ?string $navigationGroup = 'HỆ THỐNG';
+    // protected static ?string $navigationIcon = 'heroicon-o-adjustments-horizontal';
 
-    protected static ?string $navigationLabel = 'Danh mục cấu hình';
+    // protected static ?string $navigationGroup = 'HỆ THỐNG';
 
-    protected static ?string $modelLabel = 'mục danh mục';
+    // protected static ?string $navigationLabel = 'Danh mục cấu hình';
 
-    protected static ?string $pluralModelLabel = 'danh mục cấu hình';
+    // protected static ?string $modelLabel = 'mục danh mục';
+
+    // protected static ?string $pluralModelLabel = 'danh mục cấu hình';
 
     public static function form(Form $form): Form
     {
