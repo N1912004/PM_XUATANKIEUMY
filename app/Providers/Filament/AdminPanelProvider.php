@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Pages\Auth\Login;
 use App\Filament\Pages\Dashboard;
 use App\Filament\Pages\EditProfile;
 use App\Http\Middleware\SetLocale;
@@ -39,7 +40,8 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->spa()
-            ->login()
+            // Trang đăng nhập theo mẫu BlueFire (2 cột) — kế thừa nguyên luồng auth Filament
+            ->login(Login::class)
             ->profile(EditProfile::class)
             ->sidebarCollapsibleOnDesktop()
             ->brandName($siteName)
