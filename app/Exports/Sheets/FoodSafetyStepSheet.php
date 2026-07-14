@@ -28,8 +28,8 @@ class FoodSafetyStepSheet implements FromArray, ShouldAutoSize, WithEvents, With
     protected const STEP_CONFIG = [
         'Bước 1' => [
             'title' => 'BƯỚC 1: KIỂM TRA TRƯỚC KHI CHẾ BIẾN THỨC ĂN',
-            'headings' => ['TT', 'Tên thực phẩm', 'Thời gian nhập (giờ, ngày)', 'Khối lượng (kg/lít)', 'Tên cơ sở cung cấp', 'Địa chỉ, điện thoại', 'Tên người giao', 'Chứng từ, hóa đơn', 'Giấy ĐK VS thú y', 'Giấy kiểm dịch', 'Kiểm tra cảm quan', 'Xét nghiệm nhanh', 'Biện pháp xử lý'],
-            'keys' => ['name', 'time', 'quantity', 'supplier', 'supplier_contact', 'deliverer', 'invoice', 'vet_check', 'quarantine', 'sensory', 'quick_test', 'action'],
+            'headings' => ['TT', 'Tên thực phẩm', 'Phân loại', 'Thời gian nhập (giờ, ngày)', 'Khối lượng (kg/lít)', 'Tên cơ sở cung cấp', 'Địa chỉ, điện thoại', 'Tên người giao', 'Chứng từ, hóa đơn', 'Giấy ĐK VS thú y', 'Giấy kiểm dịch', 'Kiểm tra cảm quan', 'Xét nghiệm nhanh', 'Biện pháp xử lý'],
+            'keys' => ['name', 'type', 'time', 'quantity', 'supplier', 'supplier_contact', 'deliverer', 'invoice', 'vet_check', 'quarantine', 'sensory', 'quick_test', 'action'],
         ],
         'Bước 2' => [
             'title' => 'BƯỚC 2: KIỂM TRA KHI CHẾ BIẾN THỨC ĂN',

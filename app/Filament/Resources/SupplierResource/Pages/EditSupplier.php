@@ -4,6 +4,7 @@ namespace App\Filament\Resources\SupplierResource\Pages;
 
 use App\Filament\Resources\SupplierResource;
 use App\Filament\Resources\SupplierResource\Concerns\ManagesSupplierDocuments;
+use App\Filament\Resources\SupplierResource\Concerns\ManagesSupplierIngredients;
 use App\Models\Ingredient;
 use App\Models\Supplier;
 use Filament\Notifications\Notification;
@@ -14,6 +15,7 @@ use Livewire\WithFileUploads;
 class EditSupplier extends Page
 {
     use ManagesSupplierDocuments;
+    use ManagesSupplierIngredients;
     use WithFileUploads;
 
     protected static string $resource = SupplierResource::class;

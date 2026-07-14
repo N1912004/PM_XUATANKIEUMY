@@ -52,6 +52,7 @@ return [
         'last_updated' => 'Last updated',
         'status' => 'Status',
         'unit' => 'Unit',
+        'opening_stock' => 'Opening stock',
         'system_stock' => 'System stock',
         'actual_end_day_stock' => 'Actual end-day stock',
         'difference' => 'Difference',
@@ -83,6 +84,9 @@ return [
         'in_transit' => 'In transit',
     ],
     'filters' => [
+        'from_date' => 'From date',
+        'to_date' => 'To date',
+
         'all_types' => 'All types',
         'all_transaction_types' => '— All transaction types —',
         'all_ingredients' => '— All ingredients —',
@@ -217,5 +221,10 @@ return [
         'invoice_mimes' => 'Voucher only accepts images (JPG/PNG/WEBP) or PDF.',
         'invoice_max' => 'Voucher maximum size is 5MB.',
         'over_current_stock' => 'Exceeds current stock',
+    ],
+
+    'log' => [
+        'showing' => 'Showing :shown / :total transactions',
+        'load_more' => 'Load 50 more',
     ],
 ];

@@ -52,6 +52,7 @@ return [
         'last_updated' => 'Cập nhật cuối',
         'status' => 'Trạng thái',
         'unit' => 'Đơn vị',
+        'opening_stock' => 'Tồn đầu kỳ',
         'system_stock' => 'Tồn hệ thống',
         'actual_end_day_stock' => 'Tồn cuối ngày thực tế',
         'difference' => 'Chênh lệch',
@@ -83,6 +84,9 @@ return [
         'in_transit' => 'Đang chuyển',
     ],
     'filters' => [
+        'from_date' => 'Từ ngày',
+        'to_date' => 'Đến ngày',
+
         'all_types' => 'Tất cả loại',
         'all_transaction_types' => '— Tất cả loại giao dịch —',
         'all_ingredients' => '— Tất cả nguyên liệu —',
@@ -217,5 +221,10 @@ return [
         'invoice_mimes' => 'Chứng từ chỉ chấp nhận ảnh (JPG/PNG/WEBP) hoặc PDF.',
         'invoice_max' => 'Chứng từ tối đa 5MB.',
         'over_current_stock' => 'Vượt tồn kho hiện tại',
+    ],
+
+    'log' => [
+        'showing' => 'Đang hiển thị :shown / :total giao dịch',
+        'load_more' => 'Xem thêm 50 dòng',
     ],
 ];

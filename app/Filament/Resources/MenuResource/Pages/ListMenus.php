@@ -289,7 +289,8 @@ class ListMenus extends Page
         $cards = $pageKeys->map(function ($key) {
             $isWeek = $key->card_type === 'week';
             $start = Carbon::parse($key->group_date);
-            $end = $isWeek ? $start->copy()->addDays(5) : $start->copy();
+            // Tuần thực đơn là 7 ngày T2 → CN (trước đây addDays(5) làm rơi mất Chủ nhật)
+            $end = $isWeek ? $start->copy()->addDays(6) : $start->copy();
 
             $menu = Menu::with(['kitchen.area', 'shift'])
                 ->where('kitchen_id', $key->kitchen_id)
@@ -312,7 +313,7 @@ class ListMenus extends Page
                     'start_date' => $start->toDateString(),
                     'end_date' => $end->toDateString(),
                     'meta_company' => $menu->kitchen?->area?->name ?? 'Công ty Summit',
-                    'meta_info' => 'Tổng 6 ngày · '.($menu->kitchen?->id ? '18 ca' : 'Ca ăn'),
+                    'meta_info' => 'Tổng 7 ngày · '.($menu->kitchen?->id ? '18 ca' : 'Ca ăn'),
                     'status' => $menu->status,
                     'date_raw' => $menu->date,
                 ];
@@ -404,6 +405,46 @@ class ListMenus extends Page
 
         $ownKitchenId = $user->currentKitchenId();
         abort_if($ownKitchenId && (int) $kitchenId !== (int) $ownKitchenId, 403, 'Bạn chỉ có thể thao tác trên thực đơn của bếp mình.');
+    }
+
+    /**
+     * Cảnh báo LẶP MÓN so với 3 TUẦN (21 ngày) trước tuần đang lập (BA R33) — tính trên
+     * chính grid tuần, để bếp thấy ngay khi chọn món trùng thực đơn vừa chạy.
+     *
+     * @return array<int, string> tên các món bị lặp
+     */
+    public function getWeekDuplicateWarnings(): array
+    {
+        $recipeIds = [];
+        foreach ($this->weekCells as $byShift) {
+            foreach ($byShift as $items) {
+                foreach ($items as $item) {
+                    $rid = (int) ($item['recipe_id'] ?? 0);
+                    if ($rid > 0) {
+                        $recipeIds[$rid] = true;
+                    }
+                }
+            }
+        }
+
+        if ($recipeIds === []) {
+            return [];
+        }
+
+        $weekStart = Carbon::parse($this->weekStartDate);
+
+        return Menu::query()
+            ->when($this->weekKitchenId, fn ($q) => $q->where('kitchen_id', $this->weekKitchenId))
+            ->where('date', '>=', $weekStart->copy()->subDays(21)->toDateString())
+            ->where('date', '<', $weekStart->toDateString())
+            ->whereIn('recipe_id', array_keys($recipeIds))
+            ->with('recipe')
+            ->get()
+            ->pluck('recipe.name')
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
     }
 
     public function saveWeekMenu($status = null)

@@ -14,7 +14,6 @@ use Filament\Resources\Pages\ListRecords;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ListFoodSafetyAudits extends ListRecords
 {
@@ -181,6 +180,9 @@ class ListFoodSafetyAudits extends ListRecords
                 }
             }
 
+            // Gom theo PHÂN LOẠI nguyên liệu (Động vật / Thực vật / Gia vị...) theo mẫu QĐ 1246
+            uasort($seenIngredients, fn (array $a, array $b): int => [$a['type'], $a['name']] <=> [$b['type'], $b['name']]);
+
             return array_values($seenIngredients);
         }
 
@@ -310,114 +312,6 @@ class ListFoodSafetyAudits extends ListRecords
         }
 
         return $start ?: $end;
-    }
-
-    public function exportCSV(): StreamedResponse
-    {
-        $fileName = 'BaoCao_KiemThuc_3Buoc_'.str_replace('-', '', $this->date).'.csv';
-        $items = $this->getAuditItems();
-
-        $headers = [
-            'Content-type' => 'text/csv; charset=UTF-8',
-            'Content-Disposition' => "attachment; filename=$fileName",
-            'Pragma' => 'no-cache',
-            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
-            'Expires' => '0',
-        ];
-
-        $callback = function () use ($items) {
-            $file = fopen('php://output', 'w');
-
-            // Add UTF-8 BOM for Excel display support
-            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
-
-            // Format depending on the current activeStep
-            if ($this->activeStep === 'Bước 1') {
-                // Header Step 1
-                fputcsv($file, ['TT', 'Tên thực phẩm', 'Thời gian nhập', 'Khối lượng (Kg)', 'Nơi cung cấp', 'Hóa đơn chứng từ', 'ĐK Vệ sinh thú y', 'Cảm quan', 'Test nhanh', 'Ghi chú']);
-
-                foreach ($items as $index => $item) {
-                    fputcsv($file, [
-                        $index + 1,
-                        $item['name'] ?? '',
-                        $item['time'] ?? '',
-                        $item['quantity'] ?? 0,
-                        $item['supplier'] ?? '',
-                        $item['invoice'] ?? '',
-                        $item['vet_check'] ?? '',
-                        $item['sensory'] ?? '',
-                        $item['quick_test'] ?? '',
-                        $item['notes'] ?? '',
-                    ]);
-                }
-            } elseif ($this->activeStep === 'Bước 2') {
-                // Header Step 2
-                fputcsv($file, ['TT', 'Tên món ăn', 'Thời gian chế biến', 'Cảm quan', 'Nhiệt độ chế biến', 'Người chế biến', 'Bếp thực hiện', 'Ghi chú']);
-
-                foreach ($items as $index => $item) {
-                    fputcsv($file, [
-                        $index + 1,
-                        $item['name'] ?? '',
-                        $item['time'] ?? '',
-                        $item['sensory'] ?? '',
-                        $item['temp'] ?? '',
-                        $item['cook'] ?? '',
-                        $item['kitchen'] ?? '',
-                        $item['notes'] ?? '',
-                    ]);
-                }
-            } elseif ($this->activeStep === 'Bước 3') {
-                // Header Step 3
-                fputcsv($file, ['TT', 'Tên món ăn', 'Thời gian ăn', 'Cảm quan', 'Tủ lưu mẫu', 'Nhiệt độ khay', 'Ghi chú']);
-
-                foreach ($items as $index => $item) {
-                    fputcsv($file, [
-                        $index + 1,
-                        $item['name'] ?? '',
-                        $item['time'] ?? '',
-                        $item['sensory'] ?? '',
-                        $item['sample_kept'] ?? '',
-                        $item['temp'] ?? '',
-                        $item['notes'] ?? '',
-                    ]);
-                }
-            } elseif ($this->activeStep === 'Lưu mẫu') {
-                // Header Step 4
-                fputcsv($file, ['TT', 'Tên món ăn', 'Thời gian lưu', 'Khối lượng mẫu', 'Mã số mẫu', 'Nhiệt độ tủ lưu', 'Người lưu', 'Ghi chú']);
-
-                foreach ($items as $index => $item) {
-                    fputcsv($file, [
-                        $index + 1,
-                        $item['name'] ?? '',
-                        $item['time'] ?? '',
-                        $item['quantity'] ?? '',
-                        $item['sample_code'] ?? '',
-                        $item['temp'] ?? '',
-                        $item['staff'] ?? '',
-                        $item['notes'] ?? '',
-                    ]);
-                }
-            } elseif ($this->activeStep === 'Hủy mẫu') {
-                // Header Step 5
-                fputcsv($file, ['TT', 'Tên món ăn', 'Thời gian hủy', 'Thời gian lưu giữ', 'Tình trạng mẫu', 'Người hủy', 'Ghi chú']);
-
-                foreach ($items as $index => $item) {
-                    fputcsv($file, [
-                        $index + 1,
-                        $item['name'] ?? '',
-                        $item['time'] ?? '',
-                        $item['retention'] ?? '',
-                        $item['status'] ?? '',
-                        $item['staff'] ?? '',
-                        $item['notes'] ?? '',
-                    ]);
-                }
-            }
-
-            fclose($file);
-        };
-
-        return response()->streamDownload($callback, $fileName, $headers);
     }
 
     /**

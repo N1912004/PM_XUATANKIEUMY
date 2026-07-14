@@ -17,7 +17,7 @@ class Menu extends Model
      *
      * @var array<int, string>
      */
-    protected const AUDITED_FIELDS = ['date', 'shift_id', 'recipe_id', 'estimated_portions', 'status'];
+    protected const AUDITED_FIELDS = ['kitchen_id', 'date', 'shift_id', 'recipe_id', 'estimated_portions', 'status'];
 
     /**
      * Các trạng thái "đã hoàn tất" mà mọi thay đổi sau đó đều bắt buộc ghi vết.

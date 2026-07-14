@@ -794,6 +794,7 @@
                                 <th style="width: 36px; text-align: center;">#</th>
                                 <th>{{ __('warehouse.table.ingredient') }}</th>
                                 <th>{{ __('warehouse.table.unit') }}</th>
+                                <th style="text-align: right;">{{ __('warehouse.table.opening_stock') }}</th>
                                 <th style="text-align: right;">{{ __('warehouse.table.system_stock') }}</th>
                                 <th style="text-align: center; width: 180px;">{{ __('warehouse.table.actual_end_day_stock') }}</th>
                                 <th style="text-align: right;">{{ __('warehouse.table.difference') }}</th>
@@ -801,8 +802,16 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @php $stocksData = $this->getCheckStocks(); @endphp
+                            @php
+                                $stocksData = $this->getCheckStocks();
+                                $systemQty = $this->getSystemQuantities($checkDate);
+                                $openingQty = $this->getOpeningQuantities();
+                            @endphp
                             @foreach($stocksData as $index => $item)
+                                @php
+                                    $sysQty = $systemQty[$item->id] ?? 0;
+                                    $diff = ($actualQuantities[$item->id] ?? $sysQty) - $sysQty;
+                                @endphp
                                 <tr>
                                     <td style="text-align: center;">{{ $index + 1 }}</td>
                                     <td>
@@ -810,15 +819,15 @@
                                         <div style="font-size:10px; color:#64748b;">{{ $item->ingredient->code }} · {{ $item->ingredient->type }}</div>
                                     </td>
                                     <td>{{ $item->ingredient->unit }}</td>
-                                    <td style="text-align: right; font-weight: 700;">{{ number_format($item->quantity, 2, ',', '.') }}</td>
+                                    <td style="text-align: right; color:#64748b;">{{ number_format($openingQty[$item->id] ?? 0, 2, ',', '.') }}</td>
+                                    <td style="text-align: right; font-weight: 700;">{{ number_format($sysQty, 2, ',', '.') }}</td>
                                     <td style="text-align: center;">
-                                        <input type="number" 
-                                               step="0.01" 
-                                               wire:model.blur="actualQuantities.{{ $item->id }}" 
+                                        <input type="number"
+                                               step="0.01"
+                                               wire:model.blur="actualQuantities.{{ $item->id }}"
                                                class="w-28 text-center border border-gray-300 rounded px-2 py-1 text-xs dark:bg-gray-800 dark:border-gray-700">
                                     </td>
-                                    <td style="text-align: right; font-weight: 700; color: {{ ($actualQuantities[$item->id] ?? $item->quantity) - $item->quantity < 0 ? '#ef4444' : (($actualQuantities[$item->id] ?? $item->quantity) - $item->quantity > 0 ? '#16a34a' : 'inherit') }}">
-                                        @php $diff = ($actualQuantities[$item->id] ?? $item->quantity) - $item->quantity; @endphp
+                                    <td style="text-align: right; font-weight: 700; color: {{ $diff < 0 ? '#ef4444' : ($diff > 0 ? '#16a34a' : 'inherit') }}">
                                         {{ $diff > 0 ? '+' . $diff : $diff }}
                                     </td>
                                     <td>
@@ -1242,6 +1251,9 @@
                         <option value="{{ $ing->id }}">{{ $ing->name }}</option>
                     @endforeach
                 </select>
+                {{-- Lọc theo khoảng thời gian để đối soát đúng kỳ --}}
+                <input type="date" wire:model.live="logFromDate" class="table-input" style="height:34px" title="{{ __('warehouse.filters.from_date') }}">
+                <input type="date" wire:model.live="logToDate" class="table-input" style="height:34px" title="{{ __('warehouse.filters.to_date') }}">
             </div>
             <div class="overflow-x-auto">
                 <table class="wh-table">
@@ -1310,6 +1322,13 @@
                         @endforelse
                     </tbody>
                 </table>
+            </div>
+            @php $logTotal = $this->getLogTotal(); @endphp
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:10px; font-size:12px; color:#64748b">
+                <span>{{ __('warehouse.log.showing', ['shown' => count($logData), 'total' => $logTotal]) }}</span>
+                @if(count($logData) < $logTotal)
+                    <button type="button" wire:click="loadMoreLog" class="wh-action-btn">{{ __('warehouse.log.load_more') }}</button>
+                @endif
             </div>
         @endif
     </div>

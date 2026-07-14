@@ -20,6 +20,7 @@ use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\HtmlString;
 
 class RecipeResource extends Resource
 {
@@ -92,6 +93,7 @@ class RecipeResource extends Resource
                             ->default(20000)
                             ->searchable()
                             ->preload()
+                            ->live() // đổi giá bán → tính lại cảnh báo lãi/lỗ ngay
                             ->native(false),
                         Forms\Components\TextInput::make('cost_override')
                             ->label('Cost điều chỉnh (override)')
@@ -232,6 +234,29 @@ class RecipeResource extends Resource
                             ->hiddenLabel()
                             ->content(fn (Get $get): string => 'Tổng cost đơn giá trên 1 phần:  '.self::formatCurrency(self::recipeIngredientsTotal($get('recipeIngredients') ?? [])))
                             ->extraAttributes(['class' => 'recipe-total-cost'])
+                            ->columnSpanFull(),
+                        // Kiểm soát lãi/lỗ (BA R6): so cost thực tế với đơn giá bán cho khách
+                        Forms\Components\Placeholder::make('margin_check')
+                            ->hiddenLabel()
+                            ->content(function (Get $get): HtmlString {
+                                $cost = self::recipeIngredientsTotal($get('recipeIngredients') ?? []);
+                                $price = (float) ($get('actual_price') ?? 0);
+
+                                if ($price <= 0 || $cost <= 0) {
+                                    return new HtmlString('<span style="color:#64748b">Chọn đơn giá bán suất ăn để kiểm tra lãi/lỗ.</span>');
+                                }
+
+                                $margin = $price - $cost;
+                                $rate = round($margin / $price * 100, 1);
+
+                                if ($margin < 0) {
+                                    return new HtmlString('<span style="color:#dc2626;font-weight:700">⚠ LỖ '.self::formatCurrency(abs($margin)).'/suất — cost đang cao hơn giá bán ('.self::formatCurrency($price).').</span>');
+                                }
+
+                                $color = $rate < 10 ? '#d97706' : '#059669';
+
+                                return new HtmlString('<span style="color:'.$color.';font-weight:700">Lãi gộp '.self::formatCurrency($margin).'/suất ('.$rate.'% giá bán).'.($rate < 10 ? ' Biên lãi mỏng — cân nhắc lại định mức.' : '').'</span>');
+                            })
                             ->columnSpanFull(),
                         Forms\Components\Placeholder::make('cost_note')
                             ->hiddenLabel()

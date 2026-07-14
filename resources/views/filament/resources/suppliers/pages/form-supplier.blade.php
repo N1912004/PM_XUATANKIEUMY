@@ -4,7 +4,6 @@
         $formCrumb = isset($this->supplierId) ? 'Sửa nhà cung cấp' : 'Thêm nhà cung cấp';
         $formTitle = isset($this->supplierId) ? 'Sửa nhà cung cấp' : 'Thêm nhà cung cấp';
         $summary = $this->summary();
-        $ingredients = $this->ingredients();
     @endphp
 
     <div class="sup-breadcrumb">
@@ -132,31 +131,50 @@
                         <span class="sup-help">Chọn nguyên liệu nào thì nhập chi phí/đơn giá cho nguyên liệu đó</span>
                     </div>
 
-                    <div class="sup-search">
+                    {{-- Search-select: gõ tìm → bấm thêm từng nguyên liệu (không checkbox toàn danh sách) --}}
+                    <div class="sup-search" style="position:relative">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
                         </svg>
-                        <input wire:model.live.debounce.250ms="ingredientSearch" type="text" placeholder="Tìm nguyên liệu theo tên hoặc mã...">
+                        <input wire:model.live.debounce.250ms="ingredientSearch" type="text" placeholder="Gõ tên hoặc mã nguyên liệu để thêm...">
                     </div>
 
+                    @php $searchResults = $this->ingredientSearchResults(); @endphp
+                    @if(trim($ingredientSearch) !== '')
+                        <div class="sup-table-wrap" style="border:1.5px solid var(--sup-bd2);border-radius:.65rem;margin-bottom:12px">
+                            @forelse($searchResults as $ing)
+                                <button type="button"
+                                        wire:click="addSupplierIngredient({{ $ing->id }})"
+                                        style="display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;padding:10px 14px;border:0;border-bottom:1px solid var(--sup-bd2);background:transparent;cursor:pointer;text-align:left">
+                                    <span>
+                                        <strong style="color:var(--sup-bl)">{{ $ing->code }}</strong>
+                                        <span class="sup-name" style="margin-left:8px">{{ $ing->name }}</span>
+                                        <span style="color:var(--sup-mu);font-size:12px;margin-left:8px">{{ $ing->unit }} · {{ $ing->type }}</span>
+                                    </span>
+                                    <span style="color:var(--sup-bl);font-weight:700;font-size:12.5px">+ Thêm</span>
+                                </button>
+                            @empty
+                                <div style="text-align:center;padding:18px;color:var(--sup-mu)">Không tìm thấy nguyên liệu nào (hoặc đã được thêm).</div>
+                            @endforelse
+                        </div>
+                    @endif
+
+                    @php $chosenIngredients = $this->chosenIngredients(); @endphp
                     <div class="sup-table-wrap" style="border:1.5px solid var(--sup-bd2);border-radius:.65rem;overflow-x:auto">
                         <table class="sup-table">
                             <thead>
                                 <tr>
-                                    <th style="width:60px;text-align:center">CHỌN</th>
                                     <th style="width:90px">MÃ NL</th>
                                     <th>TÊN NGUYÊN LIỆU</th>
                                     <th style="width:80px">ĐƠN VỊ</th>
                                     <th style="width:110px">LOẠI NL</th>
                                     <th style="width:160px;text-align:right">CHI PHÍ NCC CUNG CẤP</th>
+                                    <th style="width:60px;text-align:center">GỠ</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse($ingredients as $ing)
+                                @forelse($chosenIngredients as $ing)
                                     <tr>
-                                        <td style="text-align:center">
-                                            <input type="checkbox" wire:model.live="selectedIngredients.{{ $ing->id }}" class="sup-check">
-                                        </td>
                                         <td style="font-weight:700;color:var(--sup-bl)">{{ $ing->code }}</td>
                                         <td class="sup-name">{{ $ing->name }}</td>
                                         <td>{{ $ing->unit }}</td>
@@ -177,14 +195,19 @@
                                                        }
                                                    }"
                                                    x-model="formatted"
-                                                   class="sup-input sup-cost" placeholder="Nhập chi phí"
-                                                   @if(!($selectedIngredients[$ing->id] ?? false)) disabled @endif>
+                                                   class="sup-input sup-cost" placeholder="Nhập chi phí">
+                                        </td>
+                                        <td style="text-align:center">
+                                            <button type="button" wire:click="removeSupplierIngredient({{ $ing->id }})"
+                                                    style="border:0;background:transparent;color:#dc2626;cursor:pointer">
+                                                <i class="fa-solid fa-trash"></i>
+                                            </button>
                                         </td>
                                     </tr>
                                 @empty
                                     <tr>
                                         <td colspan="6" style="text-align:center;padding:24px;color:var(--sup-mu)">
-                                            Không tìm thấy nguyên liệu nào.
+                                            Chưa chọn nguyên liệu nào — dùng ô tìm kiếm phía trên để thêm.
                                         </td>
                                     </tr>
                                 @endforelse

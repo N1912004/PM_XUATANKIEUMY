@@ -122,9 +122,6 @@
                 <i class="fa-solid fa-tags" style="color:var(--po-pu)"></i> In tem nhãn lưu mẫu
             </button>
         @endif
-        <button wire:click="exportCSV" class="emp-btn" style="height:36px">
-            <i class="fa-solid fa-file-excel" style="color:var(--po-gn)"></i> Xuất bước đang chọn
-        </button>
     </div>
 
     <!-- 4 KPIs Stats -->
@@ -267,12 +264,14 @@
                 <tbody>
                     @forelse($auditItems as $index => $item)
                         @if($activeStep === 'Bước 1')
-                            <!-- Step 1 Rows -->
-                            @if(isset($item['loai']) && str_starts_with($item['name'], 'I.'))
+                            {{-- Dòng tiêu đề nhóm khi đổi PHÂN LOẠI nguyên liệu (items đã sort theo type) --}}
+                            @php $prevType = $index > 0 ? ($auditItems[$index - 1]['type'] ?? null) : null; @endphp
+                            @if(($item['type'] ?? null) !== $prevType)
                                 <tr>
-                                    <td colspan="10" class="byt-group-title">{{ $item['name'] }}</td>
+                                    <td colspan="13" class="byt-group-title">{{ $item['type'] ?: 'Khác' }}</td>
                                 </tr>
-                            @else
+                            @endif
+                            <!-- Step 1 Rows -->
                                 <tr class="emp-row">
                                     <td class="text-center font-bold" style="color:var(--po-mu)">{{ $index + 1 }}</td>
                                     <td class="font-bold">{{ $item['name'] }}</td>
@@ -281,7 +280,8 @@
                                         @if(isset($item['unit']) && ($item['unit'] === 'Quả' || $item['unit'] === 'Trái' || $item['unit'] === 'Cái'))
                                             {{ number_format($item['quantity'], 0) }} {{ $item['unit'] }}
                                         @else
-                                            {{ number_format(($item['quantity'] ?? 0) / 1000, 2, ',', '.') }} kg
+                                            {{-- quantity ĐÃ là kg (suất × định lượng kg/suất) — không chia 1000 --}}
+                                            {{ number_format($item['quantity'] ?? 0, 2, ',', '.') }} kg
                                         @endif
                                     </td>
                                     <td>{{ $item['supplier'] ?? 'Cơ sở tự do' }}</td>
@@ -303,7 +303,6 @@
                                     <td class="text-center">{{ $item['quick_test'] ?? '—' }}</td>
                                     <td style="color:var(--po-mu); font-style:italic">{{ $item['notes'] ?: '—' }}</td>
                                 </tr>
-                            @endif
                         @elseif($activeStep === 'Bước 2')
                             <!-- Step 2 Rows -->
                             <tr class="emp-row">
@@ -426,6 +425,7 @@
                     <div class="fsa-label-head">TEM LƯU MẪU THỨC ĂN — {{ $canteen }}</div>
                     <table class="fsa-label-table">
                         <tr><td>Món ăn:</td><td><strong>{{ $item['name'] }}</strong></td></tr>
+                        <tr><td>Ca:</td><td><strong>{{ $item['shift'] ?? '—' }}</strong></td></tr>
                         <tr><td>Mã mẫu:</td><td><strong>{{ $item['sample_code'] ?: '—' }}</strong></td></tr>
                         <tr><td>Ngày:</td><td>{{ date('d/m/Y', strtotime($date)) }}</td></tr>
                         <tr><td>Giờ lưu:</td><td>{{ $item['time'] ?: '—' }}</td></tr>

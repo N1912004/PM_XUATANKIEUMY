@@ -292,6 +292,20 @@
             </div>
         </div>
 
+        {{-- Cảnh báo lặp món so với 3 tuần gần nhất (BA R33) --}}
+        @php $dupWarnings = $this->getWeekDuplicateWarnings(); @endphp
+        @if(!empty($dupWarnings))
+            <div class="tcard" style="padding:12px 16px; margin-bottom:14px; border-left:4px solid var(--po-wn, #f59e0b); background:var(--po-bd2)">
+                <div style="font-weight:700; color:var(--po-wn, #b45309); display:flex; align-items:center; gap:8px">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    Món đã xuất hiện trong 3 tuần gần nhất ({{ count($dupWarnings) }} món)
+                </div>
+                <div style="margin-top:6px; font-size:13px; color:var(--po-tx2)">
+                    {{ implode(' · ', $dupWarnings) }}
+                </div>
+            </div>
+        @endif
+
         <!-- Grid Matrix Table -->
         <div class="tcard" style="overflow-x:auto">
             <table class="grid-table" style="width:100%; border-collapse:collapse; min-width:900px">
