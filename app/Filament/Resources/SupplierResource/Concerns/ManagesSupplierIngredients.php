@@ -46,7 +46,14 @@ trait ManagesSupplierIngredients
             ->get();
     }
 
-    /** Thêm 1 nguyên liệu vào danh sách cung cấp; đơn giá gợi ý = giá tham chiếu hiện có. */
+    /**
+     * Thêm 1 nguyên liệu vào danh sách cung cấp; đơn giá gợi ý = giá tham chiếu hiện có.
+     *
+     * LƯU Ý: gán mảng từ PHP KHÔNG kích hoạt hook `updatedSelectedIngredients()` của Livewire
+     * (hook chỉ chạy khi client cập nhật thuộc tính qua wire:model). Vì "Loại thực phẩm cung cấp"
+     * được suy ra từ danh sách nguyên liệu trong chính hook đó, phải gọi tay — nếu không, form
+     * báo "Trường loại thực phẩm là bắt buộc" dù đã chọn đầy đủ nguyên liệu.
+     */
     public function addSupplierIngredient(int $ingredientId): void
     {
         $ingredient = Ingredient::find($ingredientId);
@@ -58,11 +65,15 @@ trait ManagesSupplierIngredients
         $this->selectedIngredients[$ingredientId] = true;
         $this->ingredientCosts[$ingredientId] ??= (float) $ingredient->reference_price;
         $this->ingredientSearch = '';
+
+        $this->updatedSelectedIngredients();
     }
 
     public function removeSupplierIngredient(int $ingredientId): void
     {
         unset($this->selectedIngredients[$ingredientId], $this->ingredientCosts[$ingredientId]);
+
+        $this->updatedSelectedIngredients();
     }
 
     /**
