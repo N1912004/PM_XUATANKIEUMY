@@ -531,9 +531,19 @@
     @php $stats = $this->getStats(); @endphp
     <div class="stats-grid">
 
-    {{-- Nghiệp vụ kho gắn với một bếp cụ thể — tài khoản chưa gắn bếp phải biết ngay --}}
-    @if(! $this->operatingKitchenId())
-        <div style="display:flex; gap:10px; align-items:flex-start; padding:12px 16px; margin-bottom:14px; border-radius:8px; border:1px solid #f59e0b; background:#fffbeb; color:#92400e">
+    {{-- Nếu là quản trị viên/toàn quyền, cho phép chọn bếp linh hoạt --}}
+    @if(auth()->user()?->hasRole(['super_admin', 'Quản trị viên']))
+        <div style="grid-column: 1 / -1; margin-bottom: 6px; display: flex; align-items: center; gap: 10px; background: white; padding: 12px 16px; border-radius: 8px; border: 1px solid #e2e8f0;" class="dark:bg-slate-800 dark:border-slate-700">
+            <span style="font-weight: 600; font-size: 14px; color: #475569;" class="dark:text-slate-300">Đang chọn Bếp ăn:</span>
+            <select wire:model.live="selectedKitchenId" style="padding: 6px 12px; border-radius: 6px; border: 1px solid #cbd5e1; background: white; font-size: 14px; color: #1e293b;" class="dark:bg-slate-900 dark:border-slate-800 dark:text-slate-200">
+                <option value="all">Tất cả các bếp</option>
+                @foreach(\App\Models\Kitchen::orderBy('name')->get() as $kit)
+                    <option value="{{ $kit->id }}">{{ $kit->name }}</option>
+                @endforeach
+            </select>
+        </div>
+    @elseif(! $this->operatingKitchenId())
+        <div style="grid-column: 1 / -1; display:flex; gap:10px; align-items:flex-start; padding:12px 16px; margin-bottom: 6px; border-radius:8px; border:1px solid #f59e0b; background:#fffbeb; color:#92400e">
             <i class="fa-solid fa-triangle-exclamation" style="margin-top:2px"></i>
             <div>
                 <div style="font-weight:700">{{ __('warehouse.notifications.no_kitchen_title') }}</div>
