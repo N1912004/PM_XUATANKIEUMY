@@ -33,6 +33,12 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
+        // 1b. Phân quyền chạy NGAY sau khi tạo admin — hạ tầng vai trò không được phụ thuộc vào
+        // dữ liệu demo (nhân viên/chấm công/nghỉ phép) chạy trót lọt. Nếu để cuối, một lỗi seed
+        // demo bất kỳ sẽ khiến ShieldRoleSeeder không chạy → admin không có vai trò → 403 khi
+        // đăng nhập (canAccessPanel yêu cầu có ít nhất 1 vai trò).
+        $this->call(ShieldRoleSeeder::class);
+
         // 2. Suppliers (Ncc.png)
         $sup1 = Supplier::firstOrCreate(['code' => 'NCC001'], [
             'name' => 'Công ty TNHH Thực phẩm Hưng Thịnh',
@@ -450,7 +456,8 @@ class DatabaseSeeder extends Seeder
         $kitchen1->update(['manager_id' => $emp3->id]);
         $kitchen2->update(['manager_id' => $emp2->id]);
 
-        // 12. Phân quyền: tạo vai trò & gán super_admin cho user hiện có
+        // Chạy lại ShieldRoleSeeder ở cuối để gán vai trò cho các user tạo THÊM trong đợt seed này
+        // (seeder idempotent — chạy 2 lần không sao); lần chạy ở đầu đã đảm bảo admin có quyền.
         $this->call(ShieldRoleSeeder::class);
     }
 }
