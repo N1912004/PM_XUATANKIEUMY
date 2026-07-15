@@ -50,6 +50,8 @@ class ListStocks extends ListRecords
 
     public int $perPage = 10;
 
+    public ?int $selectedKitchenId = null;
+
     // End day check properties
     public ?string $checkDate = null;
 
@@ -125,7 +127,8 @@ class ListStocks extends ListRecords
         $this->prodDate = now()->toDateString();
         $this->outReason = __('warehouse.notes.default_out_reason');
 
-        $kitchenId = auth()->user()?->currentKitchenId();
+        $this->selectedKitchenId = auth()->user()?->currentKitchenId();
+        $kitchenId = $this->selectedKitchenId;
 
         // actualQuantities khởi tạo LAZY khi user mở tab kiểm kê (setTab('check'))
         // — không nạp toàn bộ bảng Stock vào payload Livewire cho mọi lần vào trang
@@ -167,6 +170,12 @@ class ListStocks extends ListRecords
             $this->selectedPOId = (int) $poId;
             $this->loadPOItems();
         }
+    }
+
+    public function updatedSelectedKitchenId($value): void
+    {
+        session(['active_kitchen_id' => $value ? (int) $value : null]);
+        $this->redirect(request()->header('Referer') ?? request()->url());
     }
 
     protected function getHeaderActions(): array
@@ -341,6 +350,15 @@ class ListStocks extends ListRecords
 
     public function startInbound(string $mode): void
     {
+        if (! $this->operatingKitchenId()) {
+            Notification::make()
+                ->title('Vui lòng chọn một bếp cụ thể trước khi thực hiện nghiệp vụ này.')
+                ->warning()
+                ->send();
+
+            return;
+        }
+
         $this->inMode = $mode;
         $this->showInModal = false;
         $this->warehouseTab = 'in';
@@ -362,6 +380,15 @@ class ListStocks extends ListRecords
 
     public function startOutbound(string $mode): void
     {
+        if (! $this->operatingKitchenId()) {
+            Notification::make()
+                ->title('Vui lòng chọn một bếp cụ thể trước khi thực hiện nghiệp vụ này.')
+                ->warning()
+                ->send();
+
+            return;
+        }
+
         $this->outMode = $mode;
         $this->showOutModal = false;
         $this->warehouseTab = 'out';
@@ -380,6 +407,14 @@ class ListStocks extends ListRecords
         abort_unless(StockResource::canEdit(new Stock), 403);
 
         $kitchenId = auth()->user()?->currentKitchenId();
+        if (! $kitchenId) {
+            Notification::make()
+                ->title('Vui lòng chọn một bếp cụ thể trước khi thực hiện nghiệp vụ này.')
+                ->warning()
+                ->send();
+
+            return;
+        }
 
         // Đối chiếu với tồn HỆ THỐNG CỦA NGÀY KIỂM KÊ (tính lại từ DB, không tin payload client)
         $systemQty = collect($this->getSystemQuantities($this->checkDate));

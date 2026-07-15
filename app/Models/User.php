@@ -115,6 +115,15 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
      */
     public function currentKitchenId(): ?int
     {
+        // Tài khoản có vai trò quản trị/toàn quyền có thể xem và đổi bếp linh hoạt qua session
+        if ($this->hasRole(['super_admin', 'Quản trị viên'])) {
+            $activeId = session('active_kitchen_id');
+            if ($activeId === 'all') {
+                return null;
+            }
+            return $activeId ?? Kitchen::first()?->id;
+        }
+
         return $this->employee?->kitchen_id;
     }
 
