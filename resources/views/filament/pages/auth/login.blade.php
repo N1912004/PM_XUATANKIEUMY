@@ -88,11 +88,8 @@
 
     html:has(.lg-page), body:has(.lg-page) { overflow: hidden; height: 100%; }
     .lg-page {
-        height: 100vh; min-height: 100vh; font-family: 'IBM Plex Sans', system-ui, sans-serif;
-        background: var(--lg-bg); color: var(--lg-ink); position: relative;
-        /* Chặn CẢ HAI trục: các vòng tròn trang trí (::before/::after) đặt bottom/top âm
-           kéo dài ra ngoài trang, nếu chỉ chặn overflow-x thì vẫn sinh thanh cuộn dọc + vùng trống. */
-        overflow: hidden;
+        height: 100vh; font-family: 'IBM Plex Sans', system-ui, sans-serif;
+        background: var(--lg-bg); color: var(--lg-ink); position: relative; overflow: hidden;
         -webkit-font-smoothing: antialiased;
     }
     /* Sóng trang trí mờ dưới nền như mẫu */
@@ -129,17 +126,17 @@
 
     .lg-shell {
         position: relative; z-index: 1; max-width: 1460px; margin: 0 auto;
-        min-height: 100vh; padding: 20px 48px 14px;
+        height: 100vh; padding: 24px 48px 16px; box-sizing: border-box;
         display: grid; grid-template-columns: 1.3fr 520px; gap: 56px; align-items: center;
     }
 
     /* ── Cột trái: thương hiệu ── */
-    .lg-left { display: flex; flex-direction: column; min-height: calc(100vh - 46px); padding: 4px 0 0; }
+    .lg-left { display: flex; flex-direction: column; height: 100%; padding: 4px 0 0; box-sizing: border-box; }
     .lg-lockup { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
     .lg-lockup .nm { font-size: 30px; font-weight: 800; color: var(--lg-bl); letter-spacing: -.02em; line-height: 1; }
     .lg-lockup .tg { font-size: 11px; font-weight: 700; color: var(--lg-rd); letter-spacing: .34em; }
 
-    .lg-hero { margin-top: 22px; }
+    .lg-hero { margin-top: 24px; }
     .lg-hero h1 {
         font-size: clamp(23px, 2.3vw, 30px); font-weight: 800; line-height: 1.48; /* +~4px giãn dòng */
         letter-spacing: .01em; margin: 0; max-width: 34ch; text-wrap: balance;
@@ -147,17 +144,17 @@
     .lg-hero .rule { width: 46px; height: 4px; background: var(--lg-bl); border-radius: 2px; margin: 16px 0; }
     .lg-hero .en { font-style: italic; color: var(--lg-mu-strong); font-size: 16.5px; max-width: 50ch; margin: 0; line-height: 1.6; }
 
-    .lg-stage { position: relative; margin-top: 6px; min-height: 320px; display: flex; align-items: center; }
+    .lg-stage { position: relative; margin-top: 8px; min-height: 280px; flex: 1; display: flex; align-items: center; }
     .lg-band {
-        position: absolute; left: -48px; top: 50%; transform: translateY(-14%); z-index: 0;
-        background: var(--lg-bl-band); color: #fff; padding: 25px 220px 25px 48px;
-        font-size: clamp(28px, 2.7vw, 40px); font-weight: 900; letter-spacing: .01em;
+        position: absolute; left: -48px; top: 50%; transform: translateY(-50%); z-index: 0;
+        background: var(--lg-bl-band); color: #fff; padding: 20px 200px 20px 48px;
+        font-size: clamp(26px, 2.5vw, 36px); font-weight: 900; letter-spacing: .01em;
         line-height: 1.22; font-style: italic; text-transform: uppercase; white-space: nowrap;
         box-shadow: 0 14px 34px rgba({{ $primaryColorRgb }}, .25);
         border-radius: 0 12px 12px 0;
     }
     .lg-wheel {
-        position: relative; z-index: 1; width: min(320px, 46vw); margin-left: clamp(190px, 30vw, 400px);
+        position: relative; z-index: 1; width: min(320px, 38vh); margin-left: clamp(160px, 25vw, 360px);
         filter: drop-shadow(0 18px 40px rgba(15, 35, 70, .2));
     }
     .lg-wheel svg { display: block; width: 100%; height: auto; }
@@ -172,7 +169,7 @@
     .lg-wheel-core .iso { font-size: 11.5px; font-weight: 800; color: var(--lg-bl); margin-top: 3px; }
 
     /* 4 giá trị cốt lõi — icon OUTLINE như mẫu, không nền hộp */
-    .lg-values { margin-top: auto; padding-top: 16px; display: flex; align-items: stretch; }
+    .lg-values { margin-top: auto; padding-top: 20px; display: flex; align-items: stretch; }
     .lg-val { flex: 1; text-align: center; padding: 0 14px; }
     .lg-val + .lg-val { border-left: 1px solid var(--lg-line); }
     .lg-val .ic { height: 44px; display: grid; place-items: center; margin-bottom: 8px; color: var(--lg-bl); }
@@ -252,14 +249,15 @@
         .lg-band { padding-right: 130px; }
     }
     @media (max-width: 960px) {
+        .lg-page { height: auto; overflow: auto; }
         .lg-lang-fixed { top: 16px; right: 16px; }
-        .lg-shell { grid-template-columns: 1fr; max-width: 640px; padding: 64px 18px 40px; }
-        .lg-left { min-height: 0; order: 2; }
+        .lg-shell { height: auto; min-height: 100vh; grid-template-columns: 1fr; max-width: 640px; padding: 64px 18px 40px; }
+        .lg-left { height: auto; min-height: 0; order: 2; }
         .lg-card { order: 1; padding: 30px 22px; }
         .lg-hero h1 { max-width: none; }
         .lg-stage { min-height: 0; display: block; }
         .lg-band { position: static; transform: none; margin: 22px -18px; padding: 18px; white-space: normal; font-size: 24px; box-shadow: none; }
-        .lg-wheel { margin: 18px auto 0; }
+        .lg-wheel { margin: 18px auto 0; width: min(368px, 53.5vw); }
         .lg-values { flex-wrap: wrap; gap: 16px 0; }
         .lg-val { flex: 1 1 45%; }
         .lg-val:nth-child(3) { border-left: none; }
