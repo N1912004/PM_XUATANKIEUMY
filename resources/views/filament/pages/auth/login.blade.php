@@ -86,9 +86,13 @@
         --lg-card: #FFFFFF;
     }
 
+    html:has(.lg-page), body:has(.lg-page) { overflow: hidden; height: 100%; }
     .lg-page {
-        min-height: 100vh; font-family: 'IBM Plex Sans', system-ui, sans-serif;
-        background: var(--lg-bg); color: var(--lg-ink); position: relative; overflow-x: hidden;
+        height: 100vh; min-height: 100vh; font-family: 'IBM Plex Sans', system-ui, sans-serif;
+        background: var(--lg-bg); color: var(--lg-ink); position: relative;
+        /* Chặn CẢ HAI trục: các vòng tròn trang trí (::before/::after) đặt bottom/top âm
+           kéo dài ra ngoài trang, nếu chỉ chặn overflow-x thì vẫn sinh thanh cuộn dọc + vùng trống. */
+        overflow: hidden;
         -webkit-font-smoothing: antialiased;
     }
     /* Sóng trang trí mờ dưới nền như mẫu */
@@ -125,7 +129,7 @@
 
     .lg-shell {
         position: relative; z-index: 1; max-width: 1460px; margin: 0 auto;
-        min-height: 100vh; padding: 28px 48px 18px;
+        min-height: 100vh; padding: 20px 48px 14px;
         display: grid; grid-template-columns: 1.3fr 520px; gap: 56px; align-items: center;
     }
 
@@ -135,7 +139,7 @@
     .lg-lockup .nm { font-size: 30px; font-weight: 800; color: var(--lg-bl); letter-spacing: -.02em; line-height: 1; }
     .lg-lockup .tg { font-size: 11px; font-weight: 700; color: var(--lg-rd); letter-spacing: .34em; }
 
-    .lg-hero { margin-top: 40px; }
+    .lg-hero { margin-top: 22px; }
     .lg-hero h1 {
         font-size: clamp(23px, 2.3vw, 30px); font-weight: 800; line-height: 1.48; /* +~4px giãn dòng */
         letter-spacing: .01em; margin: 0; max-width: 34ch; text-wrap: balance;
@@ -143,7 +147,7 @@
     .lg-hero .rule { width: 46px; height: 4px; background: var(--lg-bl); border-radius: 2px; margin: 16px 0; }
     .lg-hero .en { font-style: italic; color: var(--lg-mu-strong); font-size: 16.5px; max-width: 50ch; margin: 0; line-height: 1.6; }
 
-    .lg-stage { position: relative; margin-top: 8px; min-height: 406px; display: flex; align-items: center; }
+    .lg-stage { position: relative; margin-top: 6px; min-height: 320px; display: flex; align-items: center; }
     .lg-band {
         position: absolute; left: -48px; top: 50%; transform: translateY(-14%); z-index: 0;
         background: var(--lg-bl-band); color: #fff; padding: 25px 220px 25px 48px;
@@ -153,7 +157,7 @@
         border-radius: 0 12px 12px 0;
     }
     .lg-wheel {
-        position: relative; z-index: 1; width: min(368px, 53.5vw); margin-left: clamp(190px, 30vw, 400px);
+        position: relative; z-index: 1; width: min(320px, 46vw); margin-left: clamp(190px, 30vw, 400px);
         filter: drop-shadow(0 18px 40px rgba(15, 35, 70, .2));
     }
     .lg-wheel svg { display: block; width: 100%; height: auto; }
@@ -168,7 +172,7 @@
     .lg-wheel-core .iso { font-size: 11.5px; font-weight: 800; color: var(--lg-bl); margin-top: 3px; }
 
     /* 4 giá trị cốt lõi — icon OUTLINE như mẫu, không nền hộp */
-    .lg-values { margin-top: auto; padding-top: 30px; display: flex; align-items: stretch; }
+    .lg-values { margin-top: auto; padding-top: 16px; display: flex; align-items: stretch; }
     .lg-val { flex: 1; text-align: center; padding: 0 14px; }
     .lg-val + .lg-val { border-left: 1px solid var(--lg-line); }
     .lg-val .ic { height: 44px; display: grid; place-items: center; margin-bottom: 8px; color: var(--lg-bl); }
@@ -177,7 +181,7 @@
     .lg-val .s { font-size: 12.5px; color: var(--lg-mu-strong); margin-top: 3px; line-height: 1.45; }
 
     .lg-foot {
-        margin-top: 46px; padding-top: 15px; border-top: 1px solid var(--lg-line);
+        margin-top: 20px; padding-top: 12px; border-top: 1px solid var(--lg-line);
         display: flex; justify-content: center; gap: 30px; flex-wrap: wrap;
         font-size: 12px; color: var(--lg-mu);
     }

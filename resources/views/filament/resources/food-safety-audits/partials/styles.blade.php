@@ -21,6 +21,7 @@
         --po-bg: #F4F7FB;
         --po-bd: #E2E8F0;
         --po-bd2: #F1F5F9;
+        --po-line: #CBD5E1;
         --po-tx: #0F172A;
         --po-su: #334155;
         --po-mu: #64748B;
@@ -47,6 +48,7 @@
         --po-fa: #64748b;
         --po-bd: #334155;
         --po-bd2: #263449;
+        --po-line: #475569;
         --po-sh: 0 1px 2px rgba(0, 0, 0, .4);
     }
 
@@ -251,6 +253,7 @@
         border-bottom: 1.5px solid var(--po-bd2);
         padding-bottom: 2px;
         margin-bottom: 16px;
+        flex-wrap: wrap;
     }
 
     .area-tab {
@@ -288,6 +291,33 @@
         background: var(--po-wh);
     }
 
+    .tsp {
+        flex: 1 1 auto;
+    }
+
+    .fsa-alert {
+        background: var(--po-gn-s);
+        color: var(--po-gn-t);
+        padding: 12px 16px;
+        border-radius: 8px;
+        border: 1px solid var(--po-gn);
+        margin-bottom: 16px;
+        font-size: 13px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .fsa-tab-sheet {
+        border: 1px solid var(--po-bd);
+        border-radius: 6px;
+        padding: 1px 5px;
+        font-size: 10px;
+        color: var(--po-mu);
+        background: var(--po-bd2);
+    }
+
     /* Table styles BYT style */
     .tcard {
         background: var(--po-wh);
@@ -310,6 +340,56 @@
         font-size: 12.5px;
     }
 
+    .fsa-sheet-wrap {
+        padding: 16px;
+        overflow-x: auto;
+    }
+
+    .fsa-sheet-table {
+        min-width: 1220px;
+        font-family: "Times New Roman", Times, serif;
+    }
+
+    .fsa-template-wrap {
+        overflow-x: auto;
+        background: #fff;
+        padding: 12px;
+        --fsa-template-zoom: .28;
+    }
+
+    .fsa-template-html {
+        min-width: max-content;
+        color: #000;
+        zoom: var(--fsa-template-zoom);
+    }
+
+    .fsa-template-B1 { --fsa-template-zoom: .24; }
+    .fsa-template-B2 { --fsa-template-zoom: .22; }
+    .fsa-template-B3 { --fsa-template-zoom: .28; }
+    .fsa-template-B4,
+    .fsa-template-B5 { --fsa-template-zoom: .42; }
+
+    .fsa-template-html table {
+        margin: 0 !important;
+    }
+
+    .fsa-template-html td,
+    .fsa-template-html th {
+        box-sizing: border-box;
+    }
+
+    @media (max-width: 900px) {
+        .fsa-template-wrap {
+            padding: 8px;
+        }
+
+        .fsa-template-B1 { --fsa-template-zoom: .18; }
+        .fsa-template-B2 { --fsa-template-zoom: .17; }
+        .fsa-template-B3 { --fsa-template-zoom: .22; }
+        .fsa-template-B4,
+        .fsa-template-B5 { --fsa-template-zoom: .32; }
+    }
+
     .byt-table th, .byt-table td {
         border: 1px solid var(--po-bd);
         padding: 10px;
@@ -323,10 +403,72 @@
         vertical-align: middle;
         text-transform: uppercase;
         font-size: 11.5px;
+        line-height: 1.25;
     }
 
     .byt-table td {
         background: var(--po-wh);
+        vertical-align: middle;
+        line-height: 1.3;
+    }
+
+    .fsa-company {
+        background: var(--po-wh) !important;
+        font-size: 14px !important;
+        text-transform: none !important;
+        line-height: 1.35 !important;
+    }
+
+    .fsa-company div:first-child {
+        font-weight: 800;
+    }
+
+    .fsa-company div:last-child {
+        color: var(--po-mu);
+        font-size: 12px;
+        margin-top: 2px;
+    }
+
+    .fsa-report-title {
+        background: var(--po-wh) !important;
+        font-size: 18px !important;
+        text-transform: uppercase !important;
+        padding: 14px 10px !important;
+    }
+
+    .fsa-meta-cell {
+        background: var(--po-wh) !important;
+        text-align: left !important;
+        text-transform: none !important;
+        font-size: 12.5px !important;
+    }
+
+    .fsa-issued {
+        background: var(--po-wh) !important;
+        text-align: right !important;
+        font-style: italic;
+        text-transform: none !important;
+    }
+
+    .fsa-blank {
+        background: var(--po-wh) !important;
+    }
+
+    .fsa-muted {
+        color: var(--po-mu) !important;
+        font-style: italic;
+    }
+
+    .fsa-empty {
+        padding: 40px !important;
+        text-align: center;
+        color: var(--po-mu) !important;
+        font-style: italic;
+    }
+
+    .fsa-note {
+        text-align: left;
+        line-height: 1.55 !important;
     }
 
     .emp-row:hover td {

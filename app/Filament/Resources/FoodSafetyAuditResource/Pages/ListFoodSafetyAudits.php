@@ -9,6 +9,9 @@ use App\Models\FoodSafetyAudit;
 use App\Models\Kitchen;
 use App\Models\Menu;
 use App\Models\PurchaseOrderItem;
+use App\Models\Setting;
+use App\Support\FoodSafetyExcelTemplateRenderer;
+use Carbon\Carbon;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Support\Collection;
@@ -20,6 +23,129 @@ class ListFoodSafetyAudits extends ListRecords
     protected static string $resource = FoodSafetyAuditResource::class;
 
     protected static string $view = 'filament.pages.food-safety-audit';
+
+    protected const STEPS = ['Bước 1', 'Bước 2', 'Bước 3', 'Lưu mẫu', 'Hủy mẫu'];
+
+    protected const SHEET_CONFIG = [
+        'Bước 1' => [
+            'sheet' => 'B1',
+            'icon' => 'fa-clipboard-check',
+            'title' => 'BƯỚC 1: KIỂM TRA TRƯỚC KHI CHẾ BIẾN THỨC ĂN',
+            'subtitle' => 'Kiểm tra nguyên liệu nhập trong ngày theo mẫu B1',
+            'columns' => 13,
+            'headRows' => [
+                [
+                    ['text' => 'TT', 'rowspan' => 2, 'width' => '48px'],
+                    ['text' => 'Tên thực phẩm', 'rowspan' => 2, 'width' => '210px'],
+                    ['text' => 'Thời gian nhập (giờ)', 'rowspan' => 2, 'width' => '100px'],
+                    ['text' => 'Khối lượng (kg/lít...)', 'rowspan' => 2, 'width' => '110px'],
+                    ['text' => 'Nơi cung cấp thực phẩm, gia vị các loại', 'colspan' => 3],
+                    ['text' => 'Chứng từ, hóa đơn', 'rowspan' => 2, 'width' => '130px'],
+                    ['text' => 'Giấy ĐK VS thú y', 'rowspan' => 2, 'width' => '100px'],
+                    ['text' => 'Giấy kiểm dịch (trong tỉnh)', 'rowspan' => 2, 'width' => '105px'],
+                    ['text' => 'Kiểm tra cảm quan (Đ/K)', 'rowspan' => 2, 'width' => '130px'],
+                    ['text' => 'Xét nghiệm nhanh (Đ/K)', 'rowspan' => 2, 'width' => '105px'],
+                    ['text' => 'Biện pháp xử lý (ghi chú)', 'rowspan' => 2, 'width' => '150px'],
+                ],
+                [
+                    ['text' => 'Tên cơ sở cung cấp', 'width' => '180px'],
+                    ['text' => 'Địa chỉ, điện thoại', 'width' => '140px'],
+                    ['text' => 'Tên người giao hàng', 'width' => '135px'],
+                ],
+            ],
+            'keys' => ['name', 'time', 'quantity_display', 'supplier', 'supplier_contact', 'deliverer', 'invoice', 'vet_check', 'quarantine', 'sensory', 'quick_test', 'action'],
+        ],
+        'Bước 2' => [
+            'sheet' => 'B2',
+            'icon' => 'fa-utensils',
+            'title' => 'BƯỚC 2: KIỂM TRA KHI CHẾ BIẾN MÓN ĂN',
+            'subtitle' => 'Món ăn, nguyên liệu chính, điều kiện vệ sinh và cảm quan theo mẫu B2',
+            'columns' => 12,
+            'headRows' => [
+                [
+                    ['text' => 'TT', 'rowspan' => 2, 'width' => '48px'],
+                    ['text' => 'Ca/bữa ăn', 'rowspan' => 2, 'width' => '150px'],
+                    ['text' => 'Tên món ăn', 'rowspan' => 2, 'width' => '180px'],
+                    ['text' => 'Nguyên liệu chính để chế biến (tên, số lượng...)', 'rowspan' => 2, 'width' => '320px'],
+                    ['text' => 'Số lượng/số suất ăn', 'rowspan' => 2, 'width' => '105px'],
+                    ['text' => 'Thời gian sơ chế xong', 'rowspan' => 2, 'width' => '115px'],
+                    ['text' => 'Thời gian chế biến xong', 'rowspan' => 2, 'width' => '115px'],
+                    ['text' => 'Kiểm tra điều kiện vệ sinh', 'colspan' => 3],
+                    ['text' => 'Kiểm tra cảm quan thức ăn (Đ/K)', 'rowspan' => 2, 'width' => '130px'],
+                    ['text' => 'Biện pháp xử lý (ghi chú)', 'rowspan' => 2, 'width' => '140px'],
+                ],
+                [
+                    ['text' => 'Người tham gia chế biến (Đ/K)', 'width' => '120px'],
+                    ['text' => 'Trang thiết bị dụng cụ (Đ/K)', 'width' => '120px'],
+                    ['text' => 'Khu vực chế biến và phụ trợ (Đ/K)', 'width' => '135px'],
+                ],
+            ],
+            'keys' => ['shift', 'name', 'main_ingredients', 'portions', 'prep_time', 'finish_time', 'staff_check', 'equipment_check', 'area_check', 'sensory', 'action'],
+        ],
+        'Bước 3' => [
+            'sheet' => 'B3',
+            'icon' => 'fa-users',
+            'title' => 'BƯỚC 3: KIỂM TRA TRƯỚC KHI ĂN',
+            'subtitle' => 'Món ăn, số suất, giờ chia món, giờ ăn, dụng cụ và cảm quan theo mẫu B3',
+            'columns' => 9,
+            'headRows' => [[
+                ['text' => 'TT', 'width' => '48px'],
+                ['text' => 'Ca/bữa ăn', 'width' => '150px'],
+                ['text' => 'Tên món ăn', 'width' => '220px'],
+                ['text' => 'Số lượng suất ăn', 'width' => '110px'],
+                ['text' => 'Thời gian chia món ăn xong', 'width' => '130px'],
+                ['text' => 'Thời gian bắt đầu ăn', 'width' => '125px'],
+                ['text' => 'Dụng cụ (chia, chứa đựng, che đậy, bảo quản)', 'width' => '220px'],
+                ['text' => 'Kiểm tra cảm quan món ăn (Đ/K)', 'width' => '150px'],
+                ['text' => 'Biện pháp xử lý (ghi chú)', 'width' => '155px'],
+            ]],
+            'keys' => ['shift', 'name', 'portions', 'time', 'eat_time', 'utensil', 'sensory', 'action'],
+        ],
+        'Lưu mẫu' => [
+            'sheet' => 'B4',
+            'icon' => 'fa-box-archive',
+            'title' => 'BIỂU MẪU THEO DÕI LƯU VÀ HỦY THỨC ĂN LƯU',
+            'subtitle' => 'Sheet B4: theo dõi lưu và hủy mẫu thức ăn lưu ca trưa/chính',
+            'columns' => 12,
+            'headRows' => [[
+                ['text' => 'TT', 'width' => '45px'],
+                ['text' => 'Bữa ăn (giờ ăn...)', 'width' => '145px'],
+                ['text' => 'Tên món ăn', 'width' => '190px'],
+                ['text' => 'Số lượng suất ăn', 'width' => '95px'],
+                ['text' => 'Khối lượng/thể tích mẫu (khô: 100g, nước: 150ml)', 'width' => '145px'],
+                ['text' => 'Dụng cụ chứa mẫu', 'width' => '115px'],
+                ['text' => 'Nhiệt độ bảo quản mẫu (2-8°C)', 'width' => '110px'],
+                ['text' => 'Thời gian lấy mẫu', 'width' => '135px'],
+                ['text' => 'Thời gian hủy mẫu', 'width' => '135px'],
+                ['text' => 'Ghi chú chất lượng mẫu (Đ/K)', 'width' => '140px'],
+                ['text' => 'Người lưu mẫu', 'width' => '145px'],
+                ['text' => 'Người hủy mẫu', 'width' => '145px'],
+            ]],
+            'keys' => ['shift', 'name', 'portions', 'sample_amount', 'container', 'temp', 'time', 'destroy_at', 'notes', 'staff', 'destroyer'],
+        ],
+        'Hủy mẫu' => [
+            'sheet' => 'B5',
+            'icon' => 'fa-ban',
+            'title' => 'BIỂU MẪU THEO DÕI LƯU VÀ HỦY THỨC ĂN LƯU',
+            'subtitle' => 'Sheet B5: theo dõi lưu và hủy mẫu thức ăn lưu ca chiều/còn lại',
+            'columns' => 12,
+            'headRows' => [[
+                ['text' => 'TT', 'width' => '45px'],
+                ['text' => 'Bữa ăn (giờ ăn...)', 'width' => '145px'],
+                ['text' => 'Tên món ăn', 'width' => '190px'],
+                ['text' => 'Số lượng suất ăn', 'width' => '95px'],
+                ['text' => 'Khối lượng/thể tích mẫu (khô: 100g, nước: 150ml)', 'width' => '145px'],
+                ['text' => 'Dụng cụ chứa mẫu', 'width' => '115px'],
+                ['text' => 'Nhiệt độ bảo quản mẫu (2-8°C)', 'width' => '110px'],
+                ['text' => 'Thời gian lấy mẫu', 'width' => '135px'],
+                ['text' => 'Thời gian hủy mẫu', 'width' => '135px'],
+                ['text' => 'Ghi chú chất lượng mẫu (Đ/K)', 'width' => '140px'],
+                ['text' => 'Người lưu mẫu', 'width' => '145px'],
+                ['text' => 'Người hủy mẫu', 'width' => '145px'],
+            ]],
+            'keys' => ['shift', 'name', 'portions', 'sample_amount', 'container', 'temp', 'kept_at', 'time', 'notes', 'keeper', 'staff'],
+        ],
+    ];
 
     public ?string $date = '2026-05-18'; // Default date from seeder for easy review
 
@@ -111,6 +237,52 @@ class ListFoodSafetyAudits extends ListRecords
         ];
     }
 
+    /**
+     * @return array<int, array{key: string, sheet: string, icon: string}>
+     */
+    public function getStepTabs(): array
+    {
+        return collect(self::STEPS)
+            ->map(fn (string $step): array => [
+                'key' => $step,
+                'sheet' => self::SHEET_CONFIG[$step]['sheet'],
+                'icon' => self::SHEET_CONFIG[$step]['icon'],
+            ])
+            ->all();
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function getSheetView(): array
+    {
+        $config = self::SHEET_CONFIG[$this->activeStep] ?? self::SHEET_CONFIG['Bước 1'];
+        $items = $this->getAuditItems();
+
+        return [
+            ...$config,
+            'items' => $items,
+            'rows' => $this->sheetRows($items, $config),
+            'companyName' => Setting::get('company_name', 'CÔNG TY TNHH DỊCH VỤ CJ CATERING VIỆT NAM'),
+            'companyAddress' => Setting::get('company_address', 'TỔ 15, ẤP 2 XÃ LONG THỌ, HUYỆN NHƠN TRẠCH, TỈNH ĐỒNG NAI'),
+            'dateText' => $this->date ? Carbon::parse($this->date)->format('d/m/Y') : '',
+        ];
+    }
+
+    public function getExcelTemplateHtml(): string
+    {
+        $sheet = $this->getSheetView();
+
+        return app(FoodSafetyExcelTemplateRenderer::class)->render($this->activeStep, [
+            'dateText' => (string) $sheet['dateText'],
+            'canteen' => $this->canteen,
+            'inspector' => $this->inspector,
+            'companyName' => (string) $sheet['companyName'],
+            'companyAddress' => (string) $sheet['companyAddress'],
+            'items' => $sheet['items'],
+        ]);
+    }
+
     public function getAuditItems(): array
     {
         if (! $this->date) {
@@ -161,12 +333,16 @@ class ListFoodSafetyAudits extends ListRecords
                     }
 
                     $poInfo = $poInfoByIngredient->get($ingredient->id);
+                    $quantityDisplay = in_array($ingredient->unit, ['Quả', 'Trái', 'Cái'], true)
+                        ? number_format($qty, 0).' '.$ingredient->unit
+                        : number_format($qty, 2, ',', '.').' kg';
 
                     $seenIngredients[$ingredient->id] = [
                         'name' => $ingredient->name,
                         'type' => $ingredient->type,
                         'time' => $poInfo?->purchaseOrder?->stocked_at?->format('H:i') ?? '',
                         'quantity' => $qty,
+                        'quantity_display' => $quantityDisplay,
                         'unit' => $ingredient->unit,
                         'supplier' => $poInfo?->purchaseOrder?->supplier?->name
                             ?? $ingredient->supplier->name
@@ -185,8 +361,14 @@ class ListFoodSafetyAudits extends ListRecords
                 }
             }
 
-            // Gom theo PHÂN LOẠI nguyên liệu (Động vật / Thực vật / Gia vị...) theo mẫu QĐ 1246
-            uasort($seenIngredients, fn (array $a, array $b): int => [$a['type'], $a['name']] <=> [$b['type'], $b['name']]);
+            // Gom theo đúng thứ tự nhóm trong sheet B1, không theo type thô trong danh mục.
+            uasort($seenIngredients, fn (array $a, array $b): int => [
+                $this->stepOneGroupRank($a),
+                $a['name'],
+            ] <=> [
+                $this->stepOneGroupRank($b),
+                $b['name'],
+            ]);
 
             return array_values($seenIngredients);
         }
@@ -223,16 +405,17 @@ class ListFoodSafetyAudits extends ListRecords
                     'portions' => $portions,
                     // cook_start_at là chuỗi TIME (không cast datetime) — cắt HH:MM như timeRange()
                     'prep_time' => $audit?->cook_start_at ? substr((string) $audit->cook_start_at, 0, 5) : '',
+                    'finish_time' => $audit?->cook_end_at ? substr((string) $audit->cook_end_at, 0, 5) : '',
                     'time' => $this->timeRange($audit?->cook_start_at, $audit?->cook_end_at),
                     'staff_check' => 'Đạt',
                     'equipment_check' => 'Đạt',
                     'area_check' => 'Đạt',
-                    'sensory' => $audit->status ?? '',
-                    'temp' => $audit->temperature ?? '',
-                    'cook' => $audit->inspected_by ?? '',
+                    'sensory' => $audit?->status ?? '',
+                    'temp' => $audit?->temperature ?? '',
+                    'cook' => $audit?->inspected_by ?? '',
                     'kitchen' => $shiftLabel,
                     'action' => '',
-                    'notes' => $audit->notes ?? '',
+                    'notes' => $audit?->notes ?? '',
                 ];
             } elseif ($this->activeStep === 'Bước 3') {
                 $dishes[] = [
@@ -241,49 +424,153 @@ class ListFoodSafetyAudits extends ListRecords
                     'portions' => $portions,
                     'time' => $audit?->sample_kept_at?->format('H:i') ?? '',
                     'eat_time' => $audit?->sample_kept_at?->copy()->addMinutes(30)?->format('H:i') ?? '',
-                    'utensil' => $audit->utensil ?? '',
-                    'sensory' => $audit->status ?? '',
+                    'utensil' => $audit?->utensil ?? '',
+                    'sensory' => $audit?->status ?? '',
                     'sample_kept' => $audit && $audit->sample_kept_by ? 'Có ('.$audit->sample_kept_by.')' : '',
-                    'temp' => $audit->temperature ?? '',
+                    'temp' => $audit?->temperature ?? '',
                     'action' => '',
-                    'notes' => $audit->notes ?? '',
+                    'notes' => $audit?->notes ?? '',
                 ];
             } elseif ($this->activeStep === 'Lưu mẫu') {
                 $dishes[] = [
                     'name' => $dishName,
                     'shift' => $shiftLabel,
                     'portions' => $portions,
-                    'sample_amount' => '≥100g',
-                    'container' => $audit->utensil ?? '',
+                    'sample_amount' => $this->sampleAmount($dishName),
+                    'container' => $audit?->utensil ?: 'Hũ Inox',
                     'time' => $audit?->sample_kept_at?->format('H:i') ?? '',
                     'destroy_at' => $audit?->sample_kept_at?->copy()->addDay()?->format('H:i (d/m)') ?? '',
                     'quantity' => '',
-                    'sample_code' => $audit->sample_code ?? '',
-                    'temp' => $audit->temperature ?? '',
-                    'staff' => $audit->sample_kept_by ?? '',
+                    'sample_code' => $audit?->sample_code ?? '',
+                    'temp' => $audit?->temperature ?: '2-8°C',
+                    'staff' => $audit?->sample_kept_by ?: $this->inspector,
                     'destroyer' => '',
-                    'notes' => $audit->notes ?? '',
+                    'notes' => $audit?->notes ?: 'Đ',
                 ];
             } elseif ($this->activeStep === 'Hủy mẫu') {
                 $dishes[] = [
                     'name' => $dishName,
                     'shift' => $shiftLabel,
                     'portions' => $portions,
-                    'sample_amount' => '≥100g',
-                    'container' => $audit->utensil ?? '',
-                    'temp' => $audit->temperature ?? '',
+                    'sample_amount' => $this->sampleAmount($dishName),
+                    'container' => $audit?->utensil ?: 'Hũ Inox',
+                    'temp' => $audit?->temperature ?: '2-8°C',
                     'kept_at' => $audit?->sample_kept_at?->format('H:i') ?? '',
                     'time' => $audit?->sample_kept_at?->copy()->addDay()?->format('H:i (d/m)') ?? '',
                     'retention' => '24 giờ',
-                    'status' => $audit->status ?? '',
-                    'keeper' => $audit->sample_kept_by ?? '',
-                    'staff' => $audit->sample_kept_by ?? '',
-                    'notes' => $audit->notes ?? '',
+                    'status' => $audit?->status ?? '',
+                    'keeper' => $audit?->sample_kept_by ?: $this->inspector,
+                    'staff' => '',
+                    'notes' => $audit?->notes ?: 'Đ',
                 ];
             }
         }
 
         return $dishes;
+    }
+
+    /**
+     * @param  array<int, array<string, mixed>>  $items
+     * @param  array<string, mixed>  $config
+     * @return array<int, array<string, mixed>>
+     */
+    protected function sheetRows(array $items, array $config): array
+    {
+        $rows = [];
+        $lastGroup = null;
+
+        foreach ($items as $index => $item) {
+            if ($this->activeStep === 'Bước 1') {
+                $group = $this->stepOneGroupTitle($item);
+                if ($group !== $lastGroup) {
+                    $rows[] = [
+                        'type' => 'group',
+                        'label' => $group,
+                        'colspan' => $config['columns'],
+                    ];
+                    $lastGroup = $group;
+                }
+            }
+
+            $cells = [['value' => $index + 1, 'class' => 'text-center fsa-muted']];
+            foreach ($config['keys'] as $key) {
+                $cells[] = [
+                    'value' => $this->displayValue($item[$key] ?? null),
+                    'class' => $this->cellClass($key),
+                ];
+            }
+
+            $rows[] = ['type' => 'data', 'cells' => $cells];
+        }
+
+        return $rows;
+    }
+
+    protected function displayValue(mixed $value): string
+    {
+        if ($value === null || $value === '') {
+            return '—';
+        }
+
+        return (string) $value;
+    }
+
+    protected function cellClass(string $key): string
+    {
+        return match ($key) {
+            'quantity_display', 'portions' => 'text-right font-bold',
+            'time', 'prep_time', 'finish_time', 'eat_time', 'destroy_at', 'kept_at',
+            'vet_check', 'quarantine', 'sensory', 'quick_test', 'staff_check',
+            'equipment_check', 'area_check', 'sample_amount', 'container', 'temp' => 'text-center',
+            'name', 'staff', 'keeper', 'destroyer' => 'font-bold',
+            'action', 'notes' => 'fsa-muted',
+            default => '',
+        };
+    }
+
+    /**
+     * @param  array<string, mixed>  $item
+     */
+    protected function stepOneGroupRank(array $item): int
+    {
+        $label = $this->stepOneGroupTitle($item);
+
+        return match (true) {
+            str_starts_with($label, 'I.') => 10,
+            str_starts_with($label, 'II.') => 20,
+            str_starts_with($label, 'III.') => 30,
+            str_starts_with($label, 'VI.') => 60,
+            default => 90,
+        };
+    }
+
+    /**
+     * @param  array<string, mixed>  $item
+     */
+    protected function stepOneGroupTitle(array $item): string
+    {
+        $type = (string) ($item['type'] ?? '');
+        $name = (string) ($item['name'] ?? '');
+        $normalized = mb_strtolower($type.' '.$name);
+
+        return match (true) {
+            str_contains($normalized, 'động vật'), str_contains($normalized, 'thịt'), str_contains($normalized, 'cá') => 'I. Thực phẩm tươi sống, đông lạnh: thịt, cá, gà,...',
+            str_contains($normalized, 'thực vật'), str_contains($normalized, 'rau'), str_contains($normalized, 'củ'), str_contains($normalized, 'quả'), str_contains($normalized, 'trái cây'), str_contains($normalized, 'gia vị'), str_contains($normalized, 'sả'), str_contains($normalized, 'hành') => 'II. Rau củ, quả, trái cây, các loại,...',
+            str_contains($normalized, 'thực phẩm khô'), str_contains($normalized, 'thực phẩm chế biến'), str_contains($normalized, 'lương thực'), str_contains($normalized, 'bún'), str_contains($normalized, 'đậu'), str_contains($normalized, 'gạo'), str_contains($normalized, 'mỳ') => 'III. Bún, đậu hủ,...',
+            str_contains($normalized, 'trứng') => 'VI. Trứng các loại,...',
+            default => $type,
+        };
+    }
+
+    protected function sampleAmount(string $dishName): string
+    {
+        $name = mb_strtolower($dishName);
+
+        if (str_contains($name, 'canh') || str_contains($name, 'súp') || str_contains($name, 'bún') || str_contains($name, 'nước')) {
+            return '150ml';
+        }
+
+        return '100g';
     }
 
     /**
