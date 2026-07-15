@@ -417,25 +417,25 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // 10. Leave & Overtimes (NghiphepvaTangca.png)
-        LeaveOvertime::firstOrCreate(['employee_id' => $emp1->id, 'start_date' => '15/05/2026'], [
+        LeaveOvertime::firstOrCreate(['employee_id' => $emp1->id, 'start_date' => '2026-05-15'], [
             'type' => 'Nghỉ phép năm',
-            'end_date' => '15/05/2026',
+            'end_date' => '2026-05-15',
             'duration_text' => '1 ngày',
             'reason' => 'Về quê',
             'approver_id' => $emp2->id,
             'status' => 'Chờ duyệt',
         ]);
-        LeaveOvertime::firstOrCreate(['employee_id' => $emp8->id, 'start_date' => '16/05/2026'], [
+        LeaveOvertime::firstOrCreate(['employee_id' => $emp8->id, 'start_date' => '2026-05-16'], [
             'type' => 'Nghỉ phép bệnh',
-            'end_date' => '16/05/2026',
+            'end_date' => '2026-05-16',
             'duration_text' => '1 ngày',
             'reason' => 'Khám bệnh',
             'approver_id' => $emp3->id,
             'status' => 'Chờ duyệt',
         ]);
-        LeaveOvertime::firstOrCreate(['employee_id' => $emp5->id, 'start_date' => '14/05/2026'], [
+        LeaveOvertime::firstOrCreate(['employee_id' => $emp5->id, 'start_date' => '2026-05-14'], [
             'type' => 'Tăng ca ngày thường',
-            'end_date' => '14/05/2026',
+            'end_date' => '2026-05-14',
             'duration_text' => '2.5 giờ',
             'reason' => 'Hoàn thành đơn hàng',
             'approver_id' => $emp1->id,
