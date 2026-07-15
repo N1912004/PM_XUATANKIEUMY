@@ -61,24 +61,24 @@
                     return this.options.filter(name => name.toLowerCase().includes(keyword));
                 }
             }" class="relative w-full">
-                <div @click="open = !open" class="ctrl flex items-center justify-between cursor-pointer" style="background:#fff; min-height:38px; border:1.5px solid var(--po-line); padding:6px 12px; border-radius:8px">
-                    <span x-text="selected ? selected : 'Chọn nhân viên'" style="font-weight:600"></span>
+                <div @click="open = !open" class="ctrl flex items-center justify-between cursor-pointer" style="background:var(--po-wh); min-height:38px; border:1.5px solid var(--po-line); padding:6px 12px; border-radius:8px">
+                    <span x-text="selected ? selected : 'Chọn nhân viên'" style="font-weight:600; color:var(--po-tx)"></span>
                     <i class="fa-solid fa-chevron-down" style="font-size:11px; color:var(--po-mu)"></i>
                 </div>
-                <div x-show="open" @click.away="open = false" class="absolute left-0 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg z-50 p-2" style="display:none; max-height:280px; overflow-y:auto; border:1px solid var(--po-line); box-shadow:0 10px 25px rgba(15,35,70,.15)">
+                <div x-show="open" @click.away="open = false" class="absolute left-0 mt-1 w-full rounded-lg shadow-lg z-50 p-2" style="display:none; max-height:280px; overflow-y:auto; border:1px solid var(--po-line); box-shadow:0 10px 25px rgba(15,35,70,.15); background:var(--po-wh);">
                     <input type="text" x-model="search" placeholder="Tìm kiếm nhân viên..." class="ctrl w-full mb-2" style="height:32px; padding:4px 8px; font-size:13px; border:1px solid var(--po-line); border-radius:6px; outline:none">
                     <div class="flex flex-col gap-1">
-                        <div @click="selected = ''; open = false; search = ''" class="px-3 py-1.5 rounded cursor-pointer text-sm font-semibold hover:bg-gray-100 transition text-gray-500 italic">
+                        <div @click="selected = ''; open = false; search = ''" class="fsa-dropdown-item px-3 py-1.5 rounded cursor-pointer text-sm font-semibold transition italic" style="color:var(--po-mu)">
                             Bỏ chọn
                         </div>
                         <template x-for="name in filteredOptions" :key="name">
                             <div @click="selected = name; open = false; search = ''"
-                                class="px-3 py-1.5 rounded cursor-pointer text-sm font-semibold hover:bg-gray-100 transition"
-                                :style="selected === name ? 'background:rgba(18,86,196,.08); color:var(--po-bl);' : 'color:var(--po-tx);'"
+                                class="fsa-dropdown-item px-3 py-1.5 rounded cursor-pointer text-sm font-semibold transition"
+                                :style="selected === name ? 'background:rgba(18,86,196,.15); color:var(--po-bl);' : ''"
                                 x-text="name">
                             </div>
                         </template>
-                        <div x-show="filteredOptions.length === 0" class="text-center py-3 text-xs text-gray-400 font-semibold">
+                        <div x-show="filteredOptions.length === 0" class="text-center py-3 text-xs font-semibold" style="color:var(--po-mu)">
                             Không tìm thấy kết quả
                         </div>
                     </div>
