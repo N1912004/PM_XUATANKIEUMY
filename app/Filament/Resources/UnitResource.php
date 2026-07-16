@@ -63,6 +63,7 @@ class UnitResource extends Resource
                         $currentPage = method_exists($livewire, 'getTablePage') ? $livewire->getTablePage() : 1;
                         $recordsPerPage = method_exists($livewire, 'getTableRecordsPerPage') ? $livewire->getTableRecordsPerPage() : 10;
                         $perPage = is_numeric($recordsPerPage) ? (int) $recordsPerPage : 10;
+
                         return (string) ($rowLoop->iteration + ($perPage * ($currentPage - 1)));
                     })
                     ->alignCenter()
@@ -123,7 +124,9 @@ class UnitResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ManageUnits::route('/'),
+            'index' => Pages\ListUnits::route('/'),
+            'create' => Pages\CreateUnit::route('/create'),
+            'edit' => Pages\EditUnit::route('/{record}/edit'),
         ];
     }
 }

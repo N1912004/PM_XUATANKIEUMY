@@ -133,7 +133,9 @@ class RecipeTypeResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ManageRecipeTypes::route('/'),
+            'index' => Pages\ListRecipeTypes::route('/'),
+            'create' => Pages\CreateRecipeType::route('/create'),
+            'edit' => Pages\EditRecipeType::route('/{record}/edit'),
         ];
     }
 }

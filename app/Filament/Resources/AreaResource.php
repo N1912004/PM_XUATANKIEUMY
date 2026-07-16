@@ -17,7 +17,7 @@ class AreaResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-map-pin';
 
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 1;
 
     public static function getNavigationLabel(): string
     {
@@ -31,7 +31,7 @@ class AreaResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('CHAT NHÓM');
+        return __('KHU VỰC & NHÀ ĂN');
     }
 
     public static function form(Form $form): Form
@@ -56,8 +56,7 @@ class AreaResource extends Resource
                                     ->label('Quản lý phụ trách')
                                     ->relationship('manager', 'name')
                                     ->searchable()
-                                    ->preload()
-                                    ->required(),
+                                    ->preload(),
                                 Forms\Components\Select::make('status')
                                     ->label('Trạng thái')
                                     ->options([

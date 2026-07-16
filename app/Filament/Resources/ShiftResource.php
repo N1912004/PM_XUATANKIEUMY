@@ -150,7 +150,9 @@ class ShiftResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ManageShifts::route('/'),
+            'index' => Pages\ListShifts::route('/'),
+            'create' => Pages\CreateShift::route('/create'),
+            'edit' => Pages\EditShift::route('/{record}/edit'),
         ];
     }
 }

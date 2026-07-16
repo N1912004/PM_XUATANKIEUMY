@@ -16,7 +16,24 @@ class KitchenResource extends Resource
 {
     protected static ?string $model = Kitchen::class;
 
-    protected static bool $shouldRegisterNavigation = false;
+    protected static ?string $navigationIcon = 'heroicon-o-building-storefront';
+
+    protected static ?int $navigationSort = 2;
+
+    public static function getNavigationLabel(): string
+    {
+        return __('Nhà ăn / bếp');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('Nhà ăn / bếp');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('KHU VỰC & NHÀ ĂN');
+    }
 
     public static function form(Form $form): Form
     {
@@ -52,8 +69,7 @@ class KitchenResource extends Resource
                                     ->label('Quản lý nhà bếp')
                                     ->relationship('manager', 'name')
                                     ->searchable()
-                                    ->preload()
-                                    ->required(),
+                                    ->preload(),
                                 Forms\Components\Select::make('status')
                                     ->label('Trạng thái')
                                     ->options([

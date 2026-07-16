@@ -4,9 +4,9 @@ namespace App\Filament\Resources\IngredientTypeResource\Pages;
 
 use App\Filament\Resources\IngredientTypeResource;
 use Filament\Actions;
-use Filament\Resources\Pages\ManageRecords;
+use Filament\Resources\Pages\ListRecords;
 
-class ManageIngredientTypes extends ManageRecords
+class ListIngredientTypes extends ListRecords
 {
     protected static string $resource = IngredientTypeResource::class;
 
