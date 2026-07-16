@@ -456,6 +456,10 @@ class DatabaseSeeder extends Seeder
         $kitchen1->update(['manager_id' => $emp3->id]);
         $kitchen2->update(['manager_id' => $emp2->id]);
 
+        // Dữ liệu demo đầy đủ cho trang /admin/food-safety-audits:
+        // locked menu + PO đã nhập kho + B2/B3/Lưu mẫu/Hủy mẫu.
+        $this->call(FoodSafetyAuditDemoSeeder::class);
+
         // Chạy lại ShieldRoleSeeder ở cuối để gán vai trò cho các user tạo THÊM trong đợt seed này
         // (seeder idempotent — chạy 2 lần không sao); lần chạy ở đầu đã đảm bảo admin có quyền.
         $this->call(ShieldRoleSeeder::class);

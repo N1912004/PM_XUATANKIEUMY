@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Area;
+use App\Models\Employee;
 use App\Models\FoodSafetyAudit;
 use App\Models\Ingredient;
 use App\Models\Kitchen;
@@ -12,6 +13,7 @@ use App\Models\PurchaseOrderItem;
 use App\Models\Recipe;
 use App\Models\Shift;
 use App\Models\Supplier;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
@@ -39,12 +41,13 @@ class FoodSafetyAuditDemoSeeder extends Seeder
 
             $shift = Shift::query()->firstOrCreate(
                 ['name' => 'CA 1'],
-                ['time_range' => '07:00 - 16:00', 'status' => true],
+                ['time_range' => '07:00 - 16:00'],
             );
 
             $suppliers = $this->suppliers();
             $ingredients = $this->ingredients($suppliers);
             $recipes = $this->recipes($ingredients);
+            $inspector = $this->inspector($area, $kitchen);
 
             foreach ($recipes as $index => $recipe) {
                 Menu::query()->updateOrCreate(
@@ -60,7 +63,7 @@ class FoodSafetyAuditDemoSeeder extends Seeder
                     ],
                 );
 
-                $this->auditRows($recipe, $shift, $index);
+                $this->auditRows($recipe, $shift, $index, $inspector->name);
             }
 
             $this->purchaseOrders($kitchen, $ingredients);
@@ -135,6 +138,32 @@ class FoodSafetyAuditDemoSeeder extends Seeder
 
             return [$key => $ingredient];
         })->all();
+    }
+
+    private function inspector(Area $area, Kitchen $kitchen): Employee
+    {
+        $employee = Employee::query()->updateOrCreate(
+            ['code' => 'DEMO-KT3B-NV001'],
+            [
+                'name' => 'Nguyễn Thị Ánh Ngọc',
+                'email' => 'anhngoc.kt3b@bluefire.test',
+                'phone' => '0909000001',
+                'department' => 'An toàn thực phẩm',
+                'position' => 'Nhân viên kiểm thực',
+                'area_id' => $area->id,
+                'kitchen_id' => $kitchen->id,
+                'start_date' => '2025-01-01',
+                'status' => 'Đang làm việc',
+            ],
+        );
+
+        User::query()
+            ->whereNull('employee_id')
+            ->orderBy('id')
+            ->first()
+            ?->update(['employee_id' => $employee->id]);
+
+        return $employee;
     }
 
     /**
@@ -230,7 +259,7 @@ class FoodSafetyAuditDemoSeeder extends Seeder
         }
     }
 
-    private function auditRows(Recipe $recipe, Shift $shift, int $index): void
+    private function auditRows(Recipe $recipe, Shift $shift, int $index, string $inspector): void
     {
         $prepStart = '07:00:00';
         $cookEnd = '09:30:00';
@@ -239,7 +268,7 @@ class FoodSafetyAuditDemoSeeder extends Seeder
         foreach ([
             'Bước 2' => [
                 'status' => 'Đạt',
-                'inspected_by' => 'Nguyễn Thị Ánh Ngọc',
+                'inspected_by' => $inspector,
                 'cook_start_at' => $prepStart,
                 'cook_end_at' => $cookEnd,
                 'temperature' => (string) (75 + ($index % 5)),
@@ -247,7 +276,7 @@ class FoodSafetyAuditDemoSeeder extends Seeder
             ],
             'Bước 3' => [
                 'status' => 'Đạt',
-                'sample_kept_by' => 'Nguyễn Thị Ánh Ngọc',
+                'sample_kept_by' => $inspector,
                 'sample_kept_at' => $sampleTime,
                 'temperature' => (string) (65 + ($index % 4)),
                 'utensil' => $this->utensil($recipe->name),
@@ -255,7 +284,7 @@ class FoodSafetyAuditDemoSeeder extends Seeder
             ],
             'Lưu mẫu' => [
                 'status' => 'Đạt',
-                'sample_kept_by' => 'Nguyễn Thị Ánh Ngọc',
+                'sample_kept_by' => $inspector,
                 'sample_kept_at' => $sampleTime,
                 'sample_code' => 'LM-20260518-'.str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT),
                 'temperature' => '2-8°C',
@@ -264,7 +293,7 @@ class FoodSafetyAuditDemoSeeder extends Seeder
             ],
             'Hủy mẫu' => [
                 'status' => 'Đạt',
-                'sample_kept_by' => 'Nguyễn Thị Ánh Ngọc',
+                'sample_kept_by' => $inspector,
                 'sample_kept_at' => $sampleTime,
                 'sample_code' => 'LM-20260518-'.str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT),
                 'temperature' => '2-8°C',
