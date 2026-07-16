@@ -67,15 +67,15 @@
 
             <select wire:model.live="departmentFilter" class="lv-sel">
                 <option value="">Phòng ban</option>
-                @foreach($depts as $dept)
-                    <option value="{{ $dept }}">{{ $dept }}</option>
+                @foreach($depts as $deptId => $deptName)
+                    <option value="{{ $deptId }}">{{ $deptName }}</option>
                 @endforeach
             </select>
 
             <select wire:model.live="typeFilter" class="lv-sel">
                 <option value="">Loại yêu cầu</option>
-                @foreach($types as $type)
-                    <option value="{{ $type }}">{{ $type }}</option>
+                @foreach($types as $typeId => $typeName)
+                    <option value="{{ $typeId }}">{{ $typeName }}</option>
                 @endforeach
             </select>
 
@@ -158,10 +158,11 @@
 
                             // Style loại yêu cầu
                             $typeClass = 'req-other';
-                            if (str_contains($row->type, 'Nghỉ phép năm')) $typeClass = 'req-annual';
-                            elseif (str_contains($row->type, 'Nghỉ phép bệnh')) $typeClass = 'req-sick';
-                            elseif (str_contains($row->type, 'Nghỉ không lương')) $typeClass = 'req-unpaid';
-                            elseif (str_contains($row->type, 'Tăng ca')) $typeClass = 'req-ot';
+                            $typeName = $row->leaveType?->name ?? '';
+                            if (str_contains($typeName, 'Nghỉ phép năm')) $typeClass = 'req-annual';
+                            elseif (str_contains($typeName, 'Nghỉ phép bệnh')) $typeClass = 'req-sick';
+                            elseif (str_contains($typeName, 'Nghỉ không lương')) $typeClass = 'req-unpaid';
+                            elseif (str_contains($typeName, 'Tăng ca')) $typeClass = 'req-ot';
                         @endphp
                         <tr style="border-bottom:1px solid var(--po-bd2); color:var(--po-tx)" class="emp-row">
                             <td style="padding:12px 12px;"><input type="checkbox"></td>
@@ -183,9 +184,9 @@
                                     </div>
                                 </div>
                             </td>
-                            <td style="padding:12px 12px;">{{ $row->employee?->department }}</td>
+                            <td style="padding:12px 12px;">{{ $row->employee?->department?->name }}</td>
                             <td style="padding:12px 12px;">
-                                <span class="req-badge {{ $typeClass }}">{{ $row->type }}</span>
+                                <span class="req-badge {{ $typeClass }}">{{ $row->leaveType?->name }}</span>
                             </td>
                             <td style="padding:12px 12px;">
                                 @php
@@ -217,7 +218,7 @@
                                         @endif
                                         <div>
                                             <div style="font-weight:600; color:var(--po-tx); font-size:12px">{{ $row->approver->name }}</div>
-                                            <div style="font-size:10px; color:var(--po-mu)">{{ $row->approver->position }}</div>
+                                            <div style="font-size:10px; color:var(--po-mu)">{{ $row->approver->position?->name }}</div>
                                         </div>
                                     </div>
                                 @else

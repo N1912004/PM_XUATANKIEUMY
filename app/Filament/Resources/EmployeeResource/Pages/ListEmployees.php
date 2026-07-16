@@ -4,7 +4,9 @@ namespace App\Filament\Resources\EmployeeResource\Pages;
 
 use App\Filament\Resources\EmployeeResource;
 use App\Models\Area;
+use App\Models\Department;
 use App\Models\Employee;
+use App\Models\Position;
 use Carbon\Carbon;
 use Filament\Resources\Pages\Page;
 use Livewire\WithPagination;
@@ -71,8 +73,15 @@ class ListEmployees extends Page
     /**
      * Tính toán các thông số thống kê (KPIs)
      */
+    /** @var array<string, int>|null Memo trong 1 request — blade gọi stats() mỗi lần re-render. */
+    protected ?array $statsCache = null;
+
     public function stats(): array
     {
+        if ($this->statsCache !== null) {
+            return $this->statsCache;
+        }
+
         // Gom 4 chỉ số đếm vào 1 query SQL thay vì 4 query riêng lẻ
         $counts = Employee::query()
             ->selectRaw('COUNT(*) AS total')
@@ -107,7 +116,7 @@ class ListEmployees extends Page
             }
         }
 
-        return [
+        return $this->statsCache = [
             'total' => (int) $counts->total,
             'working' => (int) $counts->working,
             'leave' => (int) $counts->on_leave,
@@ -127,8 +136,8 @@ class ListEmployees extends Page
                     ->orWhere('code', 'like', '%'.$this->search.'%')
                     ->orWhere('email', 'like', '%'.$this->search.'%'));
             })
-            ->when($this->departmentFilter !== '', fn ($query) => $query->where('department', $this->departmentFilter))
-            ->when($this->positionFilter !== '', fn ($query) => $query->where('position', $this->positionFilter))
+            ->when($this->departmentFilter !== '', fn ($query) => $query->where('department_id', $this->departmentFilter))
+            ->when($this->positionFilter !== '', fn ($query) => $query->where('position_id', $this->positionFilter))
             ->when($this->areaFilter !== '', fn ($query) => $query->where('area_id', $this->areaFilter))
             ->when($this->statusFilter !== '', fn ($query) => $query->where('status', $this->statusFilter))
             ->orderBy('code', 'asc');
@@ -140,7 +149,7 @@ class ListEmployees extends Page
     public function employees()
     {
         return $this->baseQuery()
-            ->with(['area', 'kitchen'])
+            ->with(['area', 'kitchen', 'department', 'position'])
             ->paginate($this->perPage);
     }
 
@@ -174,7 +183,7 @@ class ListEmployees extends Page
         abort_unless(EmployeeResource::canViewAny(), 403);
 
         // Export tôn trọng đúng bộ lọc/tìm kiếm đang áp dụng trên bảng
-        $employees = $this->baseQuery()->with('area')->get();
+        $employees = $this->baseQuery()->with(['area', 'department', 'position'])->get();
         $fileName = 'DANH_SACH_NHAN_VIEN_'.now()->format('Ymd').'.csv';
 
         return response()->streamDownload(function () use ($employees): void {
@@ -190,8 +199,8 @@ class ListEmployees extends Page
                     $emp->name,
                     $emp->email,
                     $emp->phone,
-                    $emp->department,
-                    $emp->position,
+                    $emp->department?->name ?? '',
+                    $emp->position?->name ?? '',
                     $emp->area?->name ?? '',
                     $emp->start_date ? $emp->start_date->format('d/m/Y') : '',
                     $emp->status,
@@ -202,29 +211,19 @@ class ListEmployees extends Page
     }
 
     /**
-     * Danh sách phòng ban phục vụ bộ lọc
+     * @return array<int, string> [id => name] phòng ban đang bật, cho bộ lọc.
      */
     public function getDepartments(): array
     {
-        return Employee::select('department')
-            ->distinct()
-            ->whereNotNull('department')
-            ->where('department', '!=', '')
-            ->pluck('department')
-            ->toArray();
+        return Department::options();
     }
 
     /**
-     * Danh sách chức vụ phục vụ bộ lọc
+     * @return array<int, string> [id => name] chức danh đang bật, cho bộ lọc.
      */
     public function getPositions(): array
     {
-        return Employee::select('position')
-            ->distinct()
-            ->whereNotNull('position')
-            ->where('position', '!=', '')
-            ->pluck('position')
-            ->toArray();
+        return Position::options();
     }
 
     /**

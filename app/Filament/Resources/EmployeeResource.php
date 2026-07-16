@@ -3,7 +3,6 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\EmployeeResource\Pages;
-use App\Models\Catalog;
 use App\Models\Employee;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -118,17 +117,17 @@ class EmployeeResource extends Resource
                                 Forms\Components\Section::make('Thông tin công việc')
                                     ->columns(2)
                                     ->schema([
-                                        Forms\Components\Select::make('department')
+                                        Forms\Components\Select::make('department_id')
                                             ->label('Phòng ban')
-                                            ->options(fn (): array => Catalog::options(Catalog::DEPARTMENT))
+                                            ->relationship('department', 'name', fn ($query) => $query->where('active', true)->orderBy('sort')->orderBy('name'))
                                             ->searchable()
-                                            ->native(false)
+                                            ->preload()
                                             ->required(),
-                                        Forms\Components\Select::make('position')
+                                        Forms\Components\Select::make('position_id')
                                             ->label('Chức danh / Chức vụ')
-                                            ->options(fn (): array => Catalog::options(Catalog::POSITION))
+                                            ->relationship('position', 'name', fn ($query) => $query->where('active', true)->orderBy('sort')->orderBy('name'))
                                             ->searchable()
-                                            ->native(false)
+                                            ->preload()
                                             ->required(),
                                         Forms\Components\Select::make('area_id')
                                             ->label('Khu vực làm việc')
@@ -189,12 +188,12 @@ class EmployeeResource extends Resource
                     ->sortable()
                     ->weight('bold')
                     ->description(fn ($record) => $record->email),
-                Tables\Columns\TextColumn::make('department')
+                Tables\Columns\TextColumn::make('department.name')
                     ->label('PHÒNG BAN')
                     ->badge()
                     ->color('gray')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('position')
+                Tables\Columns\TextColumn::make('position.name')
                     ->label('VỊ TRÍ')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('area.name')
@@ -227,9 +226,9 @@ class EmployeeResource extends Resource
                     ->sortable(),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('department')
+                Tables\Filters\SelectFilter::make('department_id')
                     ->label('Phòng ban')
-                    ->options(fn (): array => Catalog::options(Catalog::DEPARTMENT)),
+                    ->relationship('department', 'name', fn ($query) => $query->where('active', true)->orderBy('sort')->orderBy('name')),
                 Tables\Filters\SelectFilter::make('area_id')
                     ->label('Khu vực')
                     ->relationship('area', 'name'),

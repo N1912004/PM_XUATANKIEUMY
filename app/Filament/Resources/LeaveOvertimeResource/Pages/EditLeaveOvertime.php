@@ -4,6 +4,7 @@ namespace App\Filament\Resources\LeaveOvertimeResource\Pages;
 
 use App\Filament\Resources\LeaveOvertimeResource;
 use App\Models\Employee;
+use App\Models\LeaveType;
 use Carbon\Carbon;
 use Filament\Resources\Pages\Concerns\InteractsWithRecord;
 use Filament\Resources\Pages\Page;
@@ -22,7 +23,7 @@ class EditLeaveOvertime extends Page
     // Core Fields
     public $employee_id;
 
-    public $type;
+    public $leave_type_id;
 
     public $start_date;
 
@@ -63,7 +64,7 @@ class EditLeaveOvertime extends Page
         $this->record = $this->resolveRecord($record);
 
         $this->employee_id = $this->record->employee_id;
-        $this->type = $this->record->type;
+        $this->leave_type_id = $this->record->leave_type_id;
         $this->duration_text = $this->record->duration_text;
         $this->approver_id = $this->record->approver_id;
         $this->status = $this->record->status;
@@ -73,7 +74,8 @@ class EditLeaveOvertime extends Page
         $this->end_date = $this->record->end_date?->toDateString();
 
         // Xác định tab đang chọn
-        if (str_contains($this->type, 'Tăng ca')) {
+        $leaveType = LeaveType::find($this->leave_type_id);
+        if ($leaveType?->is_ot) {
             $this->formTab = 'ot';
         } else {
             $this->formTab = 'leave';
@@ -120,10 +122,10 @@ class EditLeaveOvertime extends Page
     {
         $this->formTab = $tab;
         if ($tab === 'leave') {
-            $this->type = 'Nghỉ phép năm';
+            $this->leave_type_id = LeaveType::where('name', 'Nghỉ phép năm')->value('id');
             $this->duration_text = '1 ngày';
         } else {
-            $this->type = 'Tăng ca ngày thường';
+            $this->leave_type_id = LeaveType::where('name', 'Tăng ca ngày thường')->value('id');
             $this->duration_text = '3 giờ';
         }
     }
@@ -135,12 +137,12 @@ class EditLeaveOvertime extends Page
         $this->validate([
             'employee_id' => 'required',
             'start_date' => 'required|date',
-            'type' => 'required',
+            'leave_type_id' => 'required',
             'reason' => 'required|min:5',
         ], [
             'employee_id.required' => 'Nhân viên là bắt buộc.',
             'start_date.required' => 'Ngày bắt đầu là bắt buộc.',
-            'type.required' => 'Loại yêu cầu là bắt buộc.',
+            'leave_type_id.required' => 'Loại yêu cầu là bắt buộc.',
             'reason.required' => 'Lý do là bắt buộc.',
             'reason.min' => 'Lý do phải có ít nhất 5 ký tự.',
         ]);
@@ -179,7 +181,7 @@ class EditLeaveOvertime extends Page
 
         $this->record->update([
             'employee_id' => $this->employee_id,
-            'type' => $this->type,
+            'leave_type_id' => $this->leave_type_id,
             'start_date' => $this->start_date,
             'end_date' => $this->formTab === 'leave' ? $this->end_date : $this->start_date,
             'duration_text' => $this->duration_text,

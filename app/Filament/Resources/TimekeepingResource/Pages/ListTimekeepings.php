@@ -4,6 +4,7 @@ namespace App\Filament\Resources\TimekeepingResource\Pages;
 
 use App\Filament\Resources\TimekeepingResource;
 use App\Models\Area;
+use App\Models\Department;
 use App\Models\Employee;
 use App\Models\Shift;
 use App\Models\Timekeeping;
@@ -221,7 +222,7 @@ class ListTimekeepings extends Page
      */
     protected function baseQuery()
     {
-        $query = Timekeeping::with(['employee', 'shift']);
+        $query = Timekeeping::with(['employee.department', 'shift']);
 
         // Bộ lọc phân quyền
         $user = auth()->user();
@@ -256,7 +257,7 @@ class ListTimekeepings extends Page
 
         // Bộ lọc phòng ban
         if ($this->departmentFilter) {
-            $query->whereHas('employee', fn ($q) => $q->where('department', $this->departmentFilter));
+            $query->whereHas('employee', fn ($q) => $q->where('department_id', $this->departmentFilter));
         }
 
         // Bộ lọc khu vực
@@ -308,9 +309,12 @@ class ListTimekeepings extends Page
         return Shift::all();
     }
 
-    public function getDepartments()
+    /**
+     * @return array<int, string> [id => name] phòng ban đang bật, cho bộ lọc.
+     */
+    public function getDepartments(): array
     {
-        return Employee::distinct()->whereNotNull('department')->pluck('department')->toArray();
+        return Department::options();
     }
 
     public function getAreas()
@@ -359,7 +363,7 @@ class ListTimekeepings extends Page
                     $index + 1,
                     $row->employee?->code,
                     $row->employee?->name,
-                    $row->employee?->department,
+                    $row->employee?->department?->name,
                     $row->shift?->name.' ('.$row->shift?->time_range.')',
                     $row->check_in ?: '--',
                     $row->check_out ?: '--',

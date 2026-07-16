@@ -3,7 +3,6 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\LeaveOvertimeResource\Pages;
-use App\Models\Catalog;
 use App\Models\LeaveOvertime;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -49,11 +48,11 @@ class LeaveOvertimeResource extends Resource
                             ->searchable()
                             ->preload()
                             ->required(),
-                        Forms\Components\Select::make('type')
+                        Forms\Components\Select::make('leave_type_id')
                             ->label('Loại yêu cầu')
-                            ->options(fn (): array => Catalog::options(Catalog::LEAVE_TYPE))
+                            ->relationship('leaveType', 'name', fn ($query) => $query->where('active', true)->orderBy('sort')->orderBy('name'))
                             ->searchable()
-                            ->native(false)
+                            ->preload()
                             ->required(),
                         Forms\Components\TextInput::make('duration_text')
                             ->label('Số ngày / Số giờ')
@@ -113,12 +112,12 @@ class LeaveOvertimeResource extends Resource
                     ->sortable()
                     ->weight('bold')
                     ->description(fn ($record) => $record->employee?->email),
-                Tables\Columns\TextColumn::make('employee.department')
+                Tables\Columns\TextColumn::make('employee.department.name')
                     ->label('PHÒNG BAN')
                     ->badge()
                     ->color('gray')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('type')
+                Tables\Columns\TextColumn::make('leaveType.name')
                     ->label('LOẠI YÊU CẦU')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
@@ -170,15 +169,9 @@ class LeaveOvertimeResource extends Resource
                     // Tìm kiếm ajax thay vì render toàn bộ nhân viên vào HTML
                     ->searchable()
                     ->optionsLimit(50),
-                Tables\Filters\SelectFilter::make('type')
+                Tables\Filters\SelectFilter::make('leave_type_id')
                     ->label('Loại yêu cầu')
-                    ->options([
-                        'Nghỉ phép năm' => 'Nghỉ phép năm',
-                        'Nghỉ phép bệnh' => 'Nghỉ phép bệnh',
-                        'Nghỉ không lương' => 'Nghỉ không lương',
-                        'Tăng ca ngày thường' => 'Tăng ca ngày thường',
-                        'Tăng ca cuối tuần' => 'Tăng ca cuối tuần',
-                    ]),
+                    ->relationship('leaveType', 'name', fn ($query) => $query->where('active', true)->orderBy('sort')->orderBy('name')),
                 Tables\Filters\SelectFilter::make('status')
                     ->label('Trạng thái')
                     ->options([

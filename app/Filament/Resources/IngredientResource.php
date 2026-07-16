@@ -316,6 +316,9 @@ class IngredientResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
+            // Eager-load suppliers: cột "Nhà cung cấp" đọc $record->suppliers trong mỗi dòng,
+            // không nạp sẵn thì mỗi dòng bảng phát sinh thêm 1 query (N+1).
+            ->with('suppliers')
             ->withoutGlobalScopes([
                 SoftDeletingScope::class,
             ]);

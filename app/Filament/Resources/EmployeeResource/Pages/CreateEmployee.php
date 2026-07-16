@@ -26,9 +26,9 @@ class CreateEmployee extends Page
 
     public $phone;
 
-    public $department;
+    public $department_id;
 
-    public $position;
+    public $position_id;
 
     public $area_id;
 
@@ -128,8 +128,8 @@ class CreateEmployee extends Page
             'name' => 'required',
             'email' => 'required|email',
             'phone' => 'required',
-            'department' => 'required',
-            'position' => 'required',
+            'department_id' => 'required',
+            'position_id' => 'required',
             'area_id' => 'required',
             'start_date' => 'required|date',
             'status' => 'required',
@@ -145,8 +145,8 @@ class CreateEmployee extends Page
             'email.required' => 'Email là bắt buộc.',
             'email.email' => 'Email không đúng định dạng.',
             'phone.required' => 'Số điện thoại là bắt buộc.',
-            'department.required' => 'Phòng ban là bắt buộc.',
-            'position.required' => 'Chức vụ là bắt buộc.',
+            'department_id.required' => 'Phòng ban là bắt buộc.',
+            'position_id.required' => 'Chức vụ là bắt buộc.',
             'area_id.required' => 'Khu vực là bắt buộc.',
             'start_date.required' => 'Ngày vào làm là bắt buộc.',
             'avatarFile.image' => 'Ảnh đại diện phải là tệp hình ảnh (JPG, PNG, WebP).',
@@ -180,8 +180,8 @@ class CreateEmployee extends Page
             'name' => $this->name,
             'email' => $this->email,
             'phone' => $this->phone,
-            'department' => $this->department,
-            'position' => $this->position,
+            'department_id' => $this->department_id,
+            'position_id' => $this->position_id,
             'area_id' => $this->area_id,
             'kitchen_id' => $this->kitchen_id,
             'start_date' => $this->start_date,

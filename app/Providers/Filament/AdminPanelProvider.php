@@ -260,6 +260,7 @@ class AdminPanelProvider extends PanelProvider
 
                         .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a:is(
                             [href*="/employees"], [href*="/timekeepings"], [href*="/leave-overtimes"],
+                            [href*="/departments"], [href*="/positions"], [href*="/leave-types"],
                             [href*="/users"], [href*="/shield"]
                         ) .fi-sidebar-item-icon { color: #8b5cf6 !important; } /* Nhân sự & Phân quyền — Violet */
 

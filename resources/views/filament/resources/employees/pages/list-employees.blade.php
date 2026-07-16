@@ -106,8 +106,8 @@
             <span style="font-size:11px; font-weight:700; color:var(--po-mu); text-transform:uppercase">Phòng ban</span>
             <select wire:model.live="departmentFilter" class="mp-sel">
                 <option value="">Tất cả</option>
-                @foreach($depts as $dept)
-                    <option value="{{ $dept }}">{{ $dept }}</option>
+                @foreach($depts as $deptId => $deptName)
+                    <option value="{{ $deptId }}">{{ $deptName }}</option>
                 @endforeach
             </select>
         </div>
@@ -116,8 +116,8 @@
             <span style="font-size:11px; font-weight:700; color:var(--po-mu); text-transform:uppercase">Vị trí</span>
             <select wire:model.live="positionFilter" class="mp-sel">
                 <option value="">Tất cả</option>
-                @foreach($positions as $pos)
-                    <option value="{{ $pos }}">{{ $pos }}</option>
+                @foreach($positions as $posId => $posName)
+                    <option value="{{ $posId }}">{{ $posName }}</option>
                 @endforeach
             </select>
         </div>
@@ -214,8 +214,8 @@
                                     </div>
                                 </div>
                             </td>
-                            <td style="padding:12px 12px;">{{ $emp->department }}</td>
-                            <td style="padding:12px 12px;">{{ $emp->position }}</td>
+                            <td style="padding:12px 12px;">{{ $emp->department?->name }}</td>
+                            <td style="padding:12px 12px;">{{ $emp->position?->name }}</td>
                             <td style="padding:12px 12px;">{{ $emp->area?->name }}</td>
                             <td style="padding:12px 12px;">{{ $emp->start_date ? $emp->start_date->format('d/m/Y') : '—' }}</td>
                             <td style="padding:12px 12px;">

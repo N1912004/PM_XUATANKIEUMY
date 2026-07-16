@@ -2,11 +2,11 @@
 
 namespace App\Policies;
 
-use App\Models\Catalog;
+use App\Models\LeaveType;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
-class CatalogPolicy
+class LeaveTypePolicy
 {
     use HandlesAuthorization;
 
@@ -15,15 +15,15 @@ class CatalogPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->can('view_any_catalog');
+        return $user->can('view_any_leave::type');
     }
 
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, Catalog $catalog): bool
+    public function view(User $user, LeaveType $leaveType): bool
     {
-        return $user->can('view_catalog');
+        return $user->can('view_leave::type');
     }
 
     /**
@@ -31,23 +31,23 @@ class CatalogPolicy
      */
     public function create(User $user): bool
     {
-        return $user->can('create_catalog');
+        return $user->can('create_leave::type');
     }
 
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, Catalog $catalog): bool
+    public function update(User $user, LeaveType $leaveType): bool
     {
-        return $user->can('update_catalog');
+        return $user->can('update_leave::type');
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, Catalog $catalog): bool
+    public function delete(User $user, LeaveType $leaveType): bool
     {
-        return $user->can('delete_catalog');
+        return $user->can('delete_leave::type');
     }
 
     /**
@@ -55,15 +55,15 @@ class CatalogPolicy
      */
     public function deleteAny(User $user): bool
     {
-        return $user->can('delete_any_catalog');
+        return $user->can('delete_any_leave::type');
     }
 
     /**
      * Determine whether the user can permanently delete.
      */
-    public function forceDelete(User $user, Catalog $catalog): bool
+    public function forceDelete(User $user, LeaveType $leaveType): bool
     {
-        return $user->can('force_delete_catalog');
+        return $user->can('force_delete_leave::type');
     }
 
     /**
@@ -71,15 +71,15 @@ class CatalogPolicy
      */
     public function forceDeleteAny(User $user): bool
     {
-        return $user->can('force_delete_any_catalog');
+        return $user->can('force_delete_any_leave::type');
     }
 
     /**
      * Determine whether the user can restore.
      */
-    public function restore(User $user, Catalog $catalog): bool
+    public function restore(User $user, LeaveType $leaveType): bool
     {
-        return $user->can('restore_catalog');
+        return $user->can('restore_leave::type');
     }
 
     /**
@@ -87,15 +87,15 @@ class CatalogPolicy
      */
     public function restoreAny(User $user): bool
     {
-        return $user->can('restore_any_catalog');
+        return $user->can('restore_any_leave::type');
     }
 
     /**
      * Determine whether the user can replicate.
      */
-    public function replicate(User $user, Catalog $catalog): bool
+    public function replicate(User $user, LeaveType $leaveType): bool
     {
-        return $user->can('replicate_catalog');
+        return $user->can('replicate_leave::type');
     }
 
     /**
@@ -103,6 +103,6 @@ class CatalogPolicy
      */
     public function reorder(User $user): bool
     {
-        return $user->can('reorder_catalog');
+        return $user->can('reorder_leave::type');
     }
 }

@@ -12,6 +12,7 @@ use Filament\Resources\Pages\Page;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Livewire\WithPagination;
 use Maatwebsite\Excel\Facades\Excel;
@@ -276,18 +277,19 @@ class ListMenus extends Page
         $total = (clone $allKeys)->count();
         $pageKeys = $allKeys->forPage($page, $this->perPage)->get();
 
-        // Bước 2: chỉ nạp chi tiết menu cho ~perPage nhóm của trang này để dựng card
-        $cards = $pageKeys->map(function ($key) {
+        // Bước 2: nạp chi tiết menu cho CẢ TRANG bằng 1 query (thay vì 1 query/card = N+1),
+        // rồi chọn menu đại diện (mới nhất trong khoảng của từng nhóm) trong PHP.
+        $representativeMenus = $this->loadRepresentativeMenus($pageKeys);
+
+        $cards = $pageKeys->map(function ($key) use ($representativeMenus) {
             $isWeek = $key->card_type === 'week';
             $start = Carbon::parse($key->group_date);
             // Tuần thực đơn là 7 ngày T2 → CN (trước đây addDays(5) làm rơi mất Chủ nhật)
             $end = $isWeek ? $start->copy()->addDays(6) : $start->copy();
 
-            $menu = Menu::with(['kitchen.area', 'shift'])
-                ->where('kitchen_id', $key->kitchen_id)
-                ->whereBetween('date', [$start->toDateString(), $end->toDateString()])
-                ->orderByDesc('date')
-                ->first();
+            // Đại diện = menu có date lớn nhất trong [start, end] của bếp này (đã sort date desc).
+            $menu = ($representativeMenus[$key->kitchen_id] ?? collect())
+                ->first(fn (Menu $m) => $m->date->betweenIncluded($start, $end));
 
             if (! $menu) {
                 return null;
@@ -327,6 +329,34 @@ class ListMenus extends Page
         })->filter()->values();
 
         return new LengthAwarePaginator($cards, $total, $this->perPage, $page, ['pageName' => 'page']);
+    }
+
+    /**
+     * Nạp menu chi tiết cho toàn bộ nhóm của trang bằng 1 query rồi gom theo kitchen_id
+     * (mỗi nhóm đã sort date desc) — tránh chạy 1 query/card như trước.
+     *
+     * @param  Collection<int, object>  $pageKeys
+     * @return array<int, Collection<int, Menu>>
+     */
+    protected function loadRepresentativeMenus($pageKeys): array
+    {
+        if ($pageKeys->isEmpty()) {
+            return [];
+        }
+
+        // Khoảng ngày bao trùm mọi nhóm của trang: từ ngày nhỏ nhất tới (ngày lớn nhất + 6)
+        // để phủ trọn tuần của các card tuần.
+        $dates = $pageKeys->map(fn ($key) => Carbon::parse($key->group_date));
+        $rangeStart = $dates->min()->toDateString();
+        $rangeEnd = $dates->max()->copy()->addDays(6)->toDateString();
+
+        return Menu::with(['kitchen.area', 'shift'])
+            ->whereIn('kitchen_id', $pageKeys->pluck('kitchen_id')->unique()->all())
+            ->whereBetween('date', [$rangeStart, $rangeEnd])
+            ->orderByDesc('date')
+            ->get()
+            ->groupBy('kitchen_id')
+            ->all();
     }
 
     // ==========================================

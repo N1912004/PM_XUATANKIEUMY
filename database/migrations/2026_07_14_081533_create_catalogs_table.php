@@ -1,6 +1,5 @@
 <?php
 
-use App\Models\Catalog;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
@@ -31,12 +30,14 @@ return new class extends Migration
             $table->unique(['group', 'name']);
         });
 
-        // Seed đúng các giá trị đang hard-code trong code để không đổi hành vi hiện hữu
+        // Seed đúng các giá trị đang hard-code trong code để không đổi hành vi hiện hữu.
+        // Dùng literal string (không tham chiếu hằng Catalog::*) để migration là snapshot
+        // độc lập — nhóm kitchen_type sau này đã tách sang bảng kitchen_types riêng.
         $seed = [
-            Catalog::KITCHEN_TYPE => ['Bếp sản xuất', 'Bếp ăn', 'Bếp trung tâm', 'Kho trung chuyển', 'Điểm chia suất', 'Nhà ăn phục vụ'],
-            Catalog::DEPARTMENT => ['Nhân sự', 'Kế toán', 'Kho', 'Sản xuất', 'IT', 'Kinh doanh', 'Chăm sóc KH'],
-            Catalog::POSITION => ['Bếp trưởng', 'Bếp phó', 'Tổ trưởng bếp', 'Thủ kho', 'Nhân viên bếp', 'Nhân viên phục vụ', 'Chuyên viên', 'Quản lý'],
-            Catalog::LEAVE_TYPE => ['Nghỉ phép năm', 'Nghỉ phép bệnh', 'Nghỉ không lương', 'Nghỉ thai sản', 'Tăng ca ngày thường', 'Tăng ca cuối tuần'],
+            'kitchen_type' => ['Bếp sản xuất', 'Bếp ăn', 'Bếp trung tâm', 'Kho trung chuyển', 'Điểm chia suất', 'Nhà ăn phục vụ'],
+            'department' => ['Nhân sự', 'Kế toán', 'Kho', 'Sản xuất', 'IT', 'Kinh doanh', 'Chăm sóc KH'],
+            'position' => ['Bếp trưởng', 'Bếp phó', 'Tổ trưởng bếp', 'Thủ kho', 'Nhân viên bếp', 'Nhân viên phục vụ', 'Chuyên viên', 'Quản lý'],
+            'leave_type' => ['Nghỉ phép năm', 'Nghỉ phép bệnh', 'Nghỉ không lương', 'Nghỉ thai sản', 'Tăng ca ngày thường', 'Tăng ca cuối tuần'],
         ];
 
         $rows = [];
@@ -59,10 +60,10 @@ return new class extends Migration
         // và không nằm trong danh sách trên) — nếu bỏ sót, bản ghi cũ sẽ hiển thị giá trị mà
         // form không còn chọn lại được.
         $existing = [
-            Catalog::KITCHEN_TYPE => ['kitchens', 'type'],
-            Catalog::DEPARTMENT => ['employees', 'department'],
-            Catalog::POSITION => ['employees', 'position'],
-            Catalog::LEAVE_TYPE => ['leave_overtimes', 'type'],
+            'kitchen_type' => ['kitchens', 'type'],
+            'department' => ['employees', 'department'],
+            'position' => ['employees', 'position'],
+            'leave_type' => ['leave_overtimes', 'type'],
         ];
 
         foreach ($existing as $group => [$table, $column]) {

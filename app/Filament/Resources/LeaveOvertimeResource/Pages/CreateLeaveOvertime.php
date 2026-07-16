@@ -5,6 +5,7 @@ namespace App\Filament\Resources\LeaveOvertimeResource\Pages;
 use App\Filament\Resources\LeaveOvertimeResource;
 use App\Models\Employee;
 use App\Models\LeaveOvertime;
+use App\Models\LeaveType;
 use Filament\Resources\Pages\Page;
 
 class CreateLeaveOvertime extends Page
@@ -19,7 +20,7 @@ class CreateLeaveOvertime extends Page
     // Core Fields
     public $employee_id;
 
-    public $type = 'Nghỉ phép năm';
+    public $leave_type_id;
 
     public $start_date;
 
@@ -60,8 +61,8 @@ class CreateLeaveOvertime extends Page
         $this->start_date = now()->toDateString();
         $this->end_date = now()->toDateString();
         $this->handover_time = now()->format('Y-m-d\T17:00');
-        // Mặc định theo nhân sự của chính user đang đăng nhập (không lấy bừa Employee đầu tiên)
         $this->employee_id = auth()->user()?->employee_id;
+        $this->leave_type_id = LeaveType::where('name', 'Nghỉ phép năm')->value('id');
         $this->approver_id = null;
     }
 
@@ -69,10 +70,10 @@ class CreateLeaveOvertime extends Page
     {
         $this->formTab = $tab;
         if ($tab === 'leave') {
-            $this->type = 'Nghỉ phép năm';
+            $this->leave_type_id = LeaveType::where('name', 'Nghỉ phép năm')->value('id');
             $this->duration_text = '1 ngày';
         } else {
-            $this->type = 'Tăng ca ngày thường';
+            $this->leave_type_id = LeaveType::where('name', 'Tăng ca ngày thường')->value('id');
             $this->duration_text = '3 giờ';
         }
     }
@@ -84,12 +85,12 @@ class CreateLeaveOvertime extends Page
         $this->validate([
             'employee_id' => 'required',
             'start_date' => 'required|date',
-            'type' => 'required',
+            'leave_type_id' => 'required',
             'reason' => 'required|min:5',
         ], [
             'employee_id.required' => 'Nhân viên là bắt buộc.',
             'start_date.required' => 'Ngày bắt đầu là bắt buộc.',
-            'type.required' => 'Loại yêu cầu là bắt buộc.',
+            'leave_type_id.required' => 'Loại yêu cầu là bắt buộc.',
             'reason.required' => 'Lý do là bắt buộc.',
             'reason.min' => 'Lý do phải có ít nhất 5 ký tự.',
         ]);
@@ -128,7 +129,7 @@ class CreateLeaveOvertime extends Page
 
         LeaveOvertime::create([
             'employee_id' => $this->employee_id,
-            'type' => $this->type,
+            'leave_type_id' => $this->leave_type_id,
             'start_date' => $this->start_date,
             'end_date' => $this->formTab === 'leave' ? $this->end_date : $this->start_date,
             'duration_text' => $this->duration_text,

@@ -184,11 +184,10 @@
                 <div class="fg fg4">
                     <div class="field">
                         <label>Phòng ban <span class="req">*</span></label>
-                        {{-- Danh mục động (Danh mục cấu hình → Phòng ban) --}}
-                        <select wire:model="department" class="ctrl" required>
+                        <select wire:model="department_id" class="ctrl" required>
                             <option value="">Chọn phòng ban</option>
-                            @foreach(\App\Models\Catalog::options(\App\Models\Catalog::DEPARTMENT) as $opt)
-                                <option value="{{ $opt }}">{{ $opt }}</option>
+                            @foreach(\App\Models\Department::options() as $optId => $optName)
+                                <option value="{{ $optId }}">{{ $optName }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -198,10 +197,10 @@
                     </div>
                     <div class="field">
                         <label>Chức vụ <span class="req">*</span></label>
-                        <select wire:model="position" class="ctrl" required>
+                        <select wire:model="position_id" class="ctrl" required>
                             <option value="">Chọn chức vụ</option>
-                            @foreach(\App\Models\Catalog::options(\App\Models\Catalog::POSITION) as $opt)
-                                <option value="{{ $opt }}">{{ $opt }}</option>
+                            @foreach(\App\Models\Position::options() as $optId => $optName)
+                                <option value="{{ $optId }}">{{ $optName }}</option>
                             @endforeach
                         </select>
                     </div>
