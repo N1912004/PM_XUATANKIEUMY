@@ -42,7 +42,7 @@ class FoodSafetyExcelTemplateRenderer
         }
 
         try {
-            $cacheKey = 'food-safety-template-html:v26:' . md5($step . '|' . filemtime($template) . '|' . json_encode($context));
+            $cacheKey = 'food-safety-template-html:v27:' . md5($step . '|' . filemtime($template) . '|' . json_encode($context));
 
             return Cache::remember($cacheKey, now()->addMinutes(10), fn(): string => $this->renderTemplate($template, $config, $context));
         } catch (Throwable $e) {
@@ -839,9 +839,8 @@ class FoodSafetyExcelTemplateRenderer
      */
     private function fillStepTwo($sheet, array $items): void
     {
-        // Bỏ dòng 19 (kẽ hở giữa 2 khối ca trưa/ca chiều của file mẫu) để dải dữ liệu liên tục —
-        // resizeDataRows xóa theo khối liên tục, kẽ hở làm sót lại 1 dòng sample của Excel mẫu.
-        $sheet->removeRow(19, 1);
+        // Bỏ dòng trống ngăn cách (sau khi xóa dòng 6 thì dòng 19 mẫu lùi về dòng 18) để dải dữ liệu liên tục
+        $sheet->removeRow(18, 1);
         $rows = range(8, 25);
         $this->resizeDataRows($sheet, $rows, count($items), 'A', 'L');
         $rows = range(8, 8 + max(1, count($items)) - 1);
@@ -874,8 +873,8 @@ class FoodSafetyExcelTemplateRenderer
      */
     private function fillStepThree($sheet, array $items): void
     {
-        // Bỏ dòng 19 như fillStepTwo — cùng bố cục 2 khối trong file mẫu.
-        $sheet->removeRow(19, 1);
+        // Bỏ dòng trống ngăn cách (sau khi xóa dòng 6 thì dòng 19 mẫu lùi về dòng 17 do B3 dataStart=7) để dải dữ liệu liên tục
+        $sheet->removeRow(17, 1);
         $rows = range(7, 24);
         $this->resizeDataRows($sheet, $rows, count($items), 'A', 'I');
         $rows = range(7, 7 + max(1, count($items)) - 1);
@@ -1271,6 +1270,12 @@ class FoodSafetyExcelTemplateRenderer
                 'size' => 38,
                 'bold' => false,
             ],
+        ]);
+
+        // Căn giữa ngang và dọc cho cột STT (A) và Ca/bữa ăn (B) để đồng nhất hiển thị khi unmerge
+        $sheet->getStyle("A{$config['dataStart']}:B{$dataEnd}")->getAlignment()->applyFromArray([
+            'horizontal' => Alignment::HORIZONTAL_CENTER,
+            'vertical' => Alignment::VERTICAL_CENTER,
         ]);
     }
 
