@@ -37,14 +37,14 @@ class FoodSafetyExcelTemplateRenderer
         $config = self::RANGES[$step] ?? self::RANGES['Bước 1'];
         $template = base_path(self::TEMPLATE);
 
-        if (! is_file($template)) {
+        if (!is_file($template)) {
             return '';
         }
 
         try {
-            $cacheKey = 'food-safety-template-html:v23:'.md5($step.'|'.filemtime($template).'|'.json_encode($context));
+            $cacheKey = 'food-safety-template-html:v26:' . md5($step . '|' . filemtime($template) . '|' . json_encode($context));
 
-            return Cache::remember($cacheKey, now()->addMinutes(10), fn (): string => $this->renderTemplate($template, $config, $context));
+            return Cache::remember($cacheKey, now()->addMinutes(10), fn(): string => $this->renderTemplate($template, $config, $context));
         } catch (Throwable $e) {
             Log::warning('Food safety Excel template render failed', [
                 'step' => $step,
@@ -114,6 +114,48 @@ class FoodSafetyExcelTemplateRenderer
     }
 
     /**
+
+     * @param  array<string, array{dateText: string, canteen: string, inspector: string, companyName: string, companyAddress: string, items?: array<int, array<string, mixed>>}>  $contextsByStep  key = 'Bước 1'…'Hủy mẫu'
+     */
+    public function exportBytes(array $contextsByStep): ?string
+    {
+        $template = base_path(self::TEMPLATE);
+
+        if (!is_file($template)) {
+            return null;
+        }
+
+        $cacheKey = 'food-safety-export-xlsx:v1:' . md5(filemtime($template) . '|' . json_encode($contextsByStep));
+
+        // Cache base64 thay vì bytes thô: driver cache mặc định là DATABASE (bảng `cache`,
+        // cột text utf8) — chuỗi nhị phân xlsx làm INSERT nổ "Incorrect string value".
+        $encoded = Cache::remember($cacheKey, now()->addMinutes(10), function () use ($contextsByStep): string {
+            $workbook = $this->exportWorkbook($contextsByStep);
+
+            if ($workbook === null) {
+                // Không cache kết quả rỗng — thiếu file mẫu là lỗi môi trường, xử lý ở caller.
+                throw new \RuntimeException('Không tìm thấy file Excel mẫu kiểm thực');
+            }
+
+            $tmpPath = tempnam(sys_get_temp_dir(), 'fsa-export-');
+
+            try {
+                $writer = new XlsxWriter($workbook);
+                // Không có công thức trong workbook — tắt precalc để ghi nhanh.
+                $writer->setPreCalculateFormulas(false);
+                $writer->save($tmpPath);
+                $workbook->disconnectWorksheets();
+
+                return base64_encode((string) file_get_contents($tmpPath));
+            } finally {
+                @unlink($tmpPath);
+            }
+        });
+
+        return base64_decode($encoded, true) ?: null;
+    }
+
+    /**
      * Xuất workbook 5 sheet B1–B5 bằng CHÍNH pipeline render trên trang — file Excel tải về
      * khớp 100% biểu mẫu đang hiển thị (format lẫn số liệu). Trả về null nếu thiếu file mẫu.
      *
@@ -123,7 +165,7 @@ class FoodSafetyExcelTemplateRenderer
     {
         $template = base_path(self::TEMPLATE);
 
-        if (! is_file($template)) {
+        if (!is_file($template)) {
             return null;
         }
 
@@ -133,7 +175,7 @@ class FoodSafetyExcelTemplateRenderer
         try {
             $workbook = null;
             foreach (self::RANGES as $step => $config) {
-                if (! isset($contextsByStep[$step])) {
+                if (!isset($contextsByStep[$step])) {
                     continue;
                 }
 
@@ -218,6 +260,10 @@ class FoodSafetyExcelTemplateRenderer
         $groupRows = $landmarks['groupRows'];
         $footerRows = $landmarks['footerRows'];
 
+        $this->applyExportFooterLayout($sheet, $sheetName, $lastColumn, $dataLast, (string) $sheet->getCell('A3')->getValue());
+        $lastRow = $sheet->getHighestRow();
+        $footerRows = $this->footerRowsForExport($sheet, $lastColIdx, $dataLast, $lastRow);
+
         // (#1) Làm phẳng RichText về text thường trước (chỉ duyệt qua các ô tồn tại dữ liệu thực tế)
         foreach ($sheet->getCoordinates(false) as $coord) {
             [$col, $row] = Coordinate::indexesFromString($coord);
@@ -231,9 +277,13 @@ class FoodSafetyExcelTemplateRenderer
             }
         }
 
-        // Áp dụng font chữ Times New Roman 11pt, chữ đen #000000 cho toàn bộ bảng cùng lúc (nhanh hơn hàng nghìn lần)
-        $sheet->getStyle("A1:{$lastColumn}{$lastRow}")->getFont()->setName('Times New Roman')->setSize(11);
-        $sheet->getStyle("A1:{$lastColumn}{$lastRow}")->getFont()->getColor()->setARGB('FF000000');
+        // Áp font Times New Roman 11pt đen cho toàn bảng bằng MỘT applyFromArray duy nhất.
+        // PhpSpreadsheet 1.x: MỖI setter lẻ (setName/setSize/setARGB) = 1 lượt quét cả range,
+        // mỗi style biến thể phải linear-scan + md5 toàn bộ cellXf collection — gộp 3 lệnh
+        // thành 1 giảm 2/3 chi phí ngay trên range lớn nhất (xem thêm ghi chú cuối method).
+        $sheet->getStyle("A1:{$lastColumn}{$lastRow}")->applyFromArray([
+            'font' => ['name' => 'Times New Roman', 'size' => 11, 'color' => ['argb' => 'FF000000']],
+        ]);
 
         // (#2) Gỡ mọi vùng gộp 1×1 vô nghĩa.
         foreach ($sheet->getMergeCells() as $range) {
@@ -256,22 +306,26 @@ class FoodSafetyExcelTemplateRenderer
         }
         for ($row = 1; $row < $headerTop; $row++) {
             if ($this->rowIsMeta($sheet, $row, $landmarks)) {
-                $sheet->getStyle("A{$row}:D{$row}")->getFont()->setSize(11)->setBold(false);
-                $sheet->getStyle("A{$row}:D{$row}")->getAlignment()
-                    ->setHorizontal(Alignment::HORIZONTAL_LEFT)
-                    ->setVertical(Alignment::VERTICAL_CENTER);
+                $sheet->getStyle("A{$row}:D{$row}")->applyFromArray([
+                    'font' => ['size' => 11, 'bold' => false],
+                    'alignment' => ['horizontal' => Alignment::HORIZONTAL_LEFT, 'vertical' => Alignment::VERTICAL_CENTER],
+                ]);
             }
         }
 
-        // (#1) Header bảng: 11pt bold center wrap — đặt từng ô (ô gộp dọc C5:C6… range không áp được).
+        // (#1) Header bảng: 11pt bold center wrap — đặt từng ô (ô gộp dọc C5:C6… range không áp được),
+        // nhưng gộp font + alignment vào MỘT applyFromArray/ô (trước đây 5 setter lẻ = 5 lượt style/ô).
         foreach ($headerRows as $row) {
             for ($col = 1; $col <= $lastColIdx; $col++) {
-                $coord = Coordinate::stringFromColumnIndex($col).$row;
-                $sheet->getStyle($coord)->getFont()->setSize(11)->setBold(true);
-                $sheet->getStyle($coord)->getAlignment()
-                    ->setHorizontal(Alignment::HORIZONTAL_CENTER)
-                    ->setVertical(Alignment::VERTICAL_CENTER)
-                    ->setWrapText(true);
+                $coord = Coordinate::stringFromColumnIndex($col) . $row;
+                $sheet->getStyle($coord)->applyFromArray([
+                    'font' => ['size' => 11, 'bold' => true],
+                    'alignment' => [
+                        'horizontal' => Alignment::HORIZONTAL_CENTER,
+                        'vertical' => Alignment::VERTICAL_CENTER,
+                        'wrapText' => true,
+                    ],
+                ]);
             }
         }
 
@@ -283,10 +337,10 @@ class FoodSafetyExcelTemplateRenderer
         // (#7) Body: vertical center + wrapText; 11pt thường.
         // Áp dụng hàng loạt cho cả vùng body để tăng tốc độ xử lý lên gấp hàng trăm lần
         $bodyRange = "A{$dataFirst}:{$lastColumn}{$dataLast}";
-        $sheet->getStyle($bodyRange)->getFont()->setSize(11)->setBold(false);
-        $sheet->getStyle($bodyRange)->getAlignment()
-            ->setVertical(Alignment::VERTICAL_CENTER)
-            ->setWrapText(true);
+        $sheet->getStyle($bodyRange)->applyFromArray([
+            'font' => ['size' => 11, 'bold' => false],
+            'alignment' => ['vertical' => Alignment::VERTICAL_CENTER, 'wrapText' => true],
+        ]);
 
         // Căn ngang hàng loạt theo cột (nhanh hơn so với chạy vòng lặp cho từng ô)
         $align = self::COL_ALIGN[$sheetName] ?? [];
@@ -301,10 +355,11 @@ class FoodSafetyExcelTemplateRenderer
 
         // (#4) Dòng nhóm (B1/B3...) giữ nền hồng, chữ đậm, căn trái lề
         foreach ($groupRows as $row) {
-            $rowRange = "A{$row}:{$lastColumn}{$row}";
-            $sheet->getStyle($rowRange)->getFont()->setBold(true);
-            $sheet->getStyle($rowRange)->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FF'.self::SECTION_FILL);
-            $sheet->getStyle($rowRange)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+            $sheet->getStyle("A{$row}:{$lastColumn}{$row}")->applyFromArray([
+                'font' => ['bold' => true],
+                'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['argb' => 'FF' . self::SECTION_FILL]],
+                'alignment' => ['horizontal' => Alignment::HORIZONTAL_LEFT],
+            ]);
         }
 
         // Định dạng cột cụ thể theo từng sheet
@@ -328,8 +383,9 @@ class FoodSafetyExcelTemplateRenderer
                 continue;
             }
             if ($bandIndex % 2 === 1) {
-                $sheet->getStyle("A{$row}:{$lastColumn}{$row}")->getFill()
-                    ->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('FF'.self::BAND_FILL);
+                $sheet->getStyle("A{$row}:{$lastColumn}{$row}")->applyFromArray([
+                    'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['argb' => 'FF' . self::BAND_FILL]],
+                ]);
             }
             $bandIndex++;
         }
@@ -343,9 +399,11 @@ class FoodSafetyExcelTemplateRenderer
 
         // (#9) Footer/chữ ký 10pt italic + bỏ khoảng trắng thừa trước "- K : Không Đạt".
         foreach ($footerRows as $row) {
-            $sheet->getStyle("A{$row}:{$lastColumn}{$row}")->getFont()->setSize(10)->setItalic(true);
+            $sheet->getStyle("A{$row}:{$lastColumn}{$row}")->applyFromArray([
+                'font' => ['size' => 10, 'italic' => true],
+            ]);
             for ($col = 1; $col <= $lastColIdx; $col++) {
-                $cell = $sheet->getCell(Coordinate::stringFromColumnIndex($col).$row);
+                $cell = $sheet->getCell(Coordinate::stringFromColumnIndex($col) . $row);
                 $value = (string) $cell->getValue();
                 if (str_contains($value, 'Không Đạt')) {
                     $cell->setValue(preg_replace('/\s{2,}(- K)/u', '   $1', $value));
@@ -366,6 +424,9 @@ class FoodSafetyExcelTemplateRenderer
         }
         for ($row = 1; $row <= $contentLast; $row++) {
             $height = match (true) {
+                $sheetName === 'B2' && $row === $headerTop => 71,
+                $sheetName === 'B2' && $row === $headerBottom => 67,
+                $sheetName === 'B5' && in_array($row, $headerRows, true) => 76,
                 in_array($row, $headerRows, true) => 34,   // header cột có wrap 2 dòng
                 $row < $headerTop => 22,                    // meta + company + tiêu đề
                 in_array($row, $groupRows, true) => 22,     // dòng phân nhóm
@@ -376,7 +437,7 @@ class FoodSafetyExcelTemplateRenderer
         }
 
         // (#5) Freeze ngay sau dải header cột: giữ meta + header đứng yên, phần dữ liệu cuộn.
-        $sheet->freezePane('A'.($headerBottom + 1));
+        $sheet->freezePane('A' . ($headerBottom + 1));
 
         // Mở file ở cỡ vừa mắt: ép zoom 100% (file mẫu lưu 17–49% khiến bảng tí xíu khi mở)
         // và đặt con trỏ về A1 thay vì dòng cuối.
@@ -457,7 +518,7 @@ class FoodSafetyExcelTemplateRenderer
         $footerRows = [];
         for ($row = $dataLast + 1; $row <= $lastRow; $row++) {
             for ($col = 1; $col <= $lastColIdx; $col++) {
-                if (trim((string) $sheet->getCell(Coordinate::stringFromColumnIndex($col).$row)->getValue()) !== '') {
+                if (trim((string) $sheet->getCell(Coordinate::stringFromColumnIndex($col) . $row)->getValue()) !== '') {
                     $footerRows[] = $row;
                     break;
                 }
@@ -465,6 +526,105 @@ class FoodSafetyExcelTemplateRenderer
         }
 
         return compact('headerRows', 'dataFirst', 'dataLast', 'groupRows', 'footerRows', 'companyCell', 'titleCell', 'issuedCell');
+    }
+
+    private function applyExportFooterLayout($sheet, string $sheetName, string $lastColumn, int $dataLast, string $inspectorMeta): void
+    {
+        $inspector = trim(preg_replace('/^Người kiểm tra:\s*/u', '', $inspectorMeta) ?? '');
+        $inspector = $inspector !== '' ? mb_strtoupper($inspector) : '';
+        $highest = $sheet->getHighestRow();
+        $footerStart = $dataLast + 1;
+        $footerEnd = max($highest, $footerStart + 4);
+        $area = "A{$footerStart}:{$lastColumn}{$footerEnd}";
+
+        $this->unmergeArea($sheet, $area);
+        for ($row = $dataLast + 1; $row <= $footerEnd; $row++) {
+            $this->clearRow($sheet, $row, 'A', $lastColumn);
+        }
+
+        $merge = function (string $range) use ($sheet): void {
+            if (!isset($sheet->getMergeCells()[$range])) {
+                $sheet->mergeCells($range);
+            }
+        };
+        $applyFooterGrid = function () use ($sheet, $lastColumn, $footerStart, $footerEnd): void {
+            $sheet->getStyle("A{$footerStart}:{$lastColumn}{$footerEnd}")->applyFromArray([
+                'fill' => [
+                    'fillType' => Fill::FILL_SOLID,
+                    'color' => ['argb' => 'FFFFFFFF'],
+                ],
+                'borders' => [
+                    'allBorders' => [
+                        'borderStyle' => Border::BORDER_THIN,
+                        'color' => ['argb' => 'FFD9D9D9'],
+                    ],
+                ],
+            ]);
+        };
+
+        if ($sheetName === 'B1') {
+            $sheet->setCellValue("B{$footerStart}", 'GHI CHÚ:');
+            $sheet->setCellValue('B' . ($footerStart + 1), 'Đ: Đạt');
+            $sheet->setCellValue('B' . ($footerStart + 2), 'K: Không');
+            $sheet->setCellValue("E{$footerStart}", 'Đại diện nhà ăn');
+            $sheet->setCellValue('E' . ($footerStart + 1), $inspector);
+            $merge('E' . ($footerStart + 1) . ':E' . ($footerStart + 2));
+            $applyFooterGrid();
+
+            return;
+        }
+
+        if ($sheetName === 'B2') {
+            $sheet->setCellValue("B{$footerStart}", 'GHI CHÚ:');
+            $sheet->setCellValue('B' . ($footerStart + 1), 'Đ: Đạt');
+            $sheet->setCellValue('B' . ($footerStart + 2), 'K: Không');
+            $sheet->setCellValue("D{$footerStart}", 'Nhân viên kiểm soát');
+            $sheet->setCellValue('D' . ($footerStart + 1), $inspector);
+            $sheet->setCellValue("K{$footerStart}", 'Nhân viên giám sát');
+            $applyFooterGrid();
+
+            return;
+        }
+
+        if ($sheetName === 'B3') {
+            $sheet->setCellValue("C{$footerStart}", 'Nhân viên kiểm tra');
+            $sheet->setCellValue('C' . ($footerStart + 1), $inspector);
+            $sheet->setCellValue("G{$footerStart}", 'Nhân viên giám sát');
+            $merge("G{$footerStart}:I{$footerStart}");
+            $merge('C' . ($footerStart + 1) . ':C' . ($footerStart + 2));
+            $applyFooterGrid();
+
+            return;
+        }
+
+        if (in_array($sheetName, ['B4', 'B5'], true)) {
+            $sheet->setCellValue("B{$footerStart}", 'GHI CHÚ:');
+            $sheet->setCellValue('B' . ($footerStart + 1), 'Đ: Đạt');
+            $sheet->setCellValue('B' . ($footerStart + 2), 'K: Không');
+            $sheet->setCellValue("D{$footerStart}", 'Nhân viên kiểm tra');
+            $sheet->setCellValue('D' . ($footerStart + 1), $inspector);
+            $sheet->setCellValue("I{$footerStart}", 'Đại diện công ty');
+            $merge("D{$footerStart}:E{$footerStart}");
+            $merge('D' . ($footerStart + 1) . ':E' . ($footerStart + 2));
+            $merge("I{$footerStart}:L{$footerStart}");
+            $merge('I' . ($footerStart + 1) . ':L' . ($footerStart + 1));
+            $applyFooterGrid();
+        }
+    }
+
+    private function footerRowsForExport($sheet, int $lastColIdx, int $dataLast, int $lastRow): array
+    {
+        $footerRows = [];
+        for ($row = $dataLast + 1; $row <= $lastRow; $row++) {
+            for ($col = 1; $col <= $lastColIdx; $col++) {
+                if (trim((string) $sheet->getCell(Coordinate::stringFromColumnIndex($col) . $row)->getValue()) !== '') {
+                    $footerRows[] = $row;
+                    break;
+                }
+            }
+        }
+
+        return $footerRows;
     }
 
     /**
@@ -479,11 +639,15 @@ class FoodSafetyExcelTemplateRenderer
 
     private function styleCell($sheet, string $cell, int $size, bool $bold, bool $italic, string $horizontal): void
     {
-        $sheet->getStyle($cell)->getFont()->setName('Times New Roman')->setSize($size)->setBold($bold)->setItalic($italic);
-        $sheet->getStyle($cell)->getAlignment()
-            ->setHorizontal($horizontal)
-            ->setVertical(Alignment::VERTICAL_CENTER)
-            ->setWrapText(true);
+        // Một applyFromArray thay cho 7 setter lẻ (mỗi setter = 1 lượt style riêng — xem applyExportStyling).
+        $sheet->getStyle($cell)->applyFromArray([
+            'font' => ['name' => 'Times New Roman', 'size' => $size, 'bold' => $bold, 'italic' => $italic],
+            'alignment' => [
+                'horizontal' => $horizontal,
+                'vertical' => Alignment::VERTICAL_CENTER,
+                'wrapText' => true,
+            ],
+        ]);
     }
 
     /**
@@ -493,7 +657,7 @@ class FoodSafetyExcelTemplateRenderer
     private function numericKgCell($sheet, string $cell): void
     {
         $raw = trim((string) $sheet->getCell($cell)->getValue());
-        if (! preg_match('/^([\d.,]+)\s*kg$/iu', $raw, $m)) {
+        if (!preg_match('/^([\d.,]+)\s*kg$/iu', $raw, $m)) {
             return;
         }
 
@@ -513,7 +677,7 @@ class FoodSafetyExcelTemplateRenderer
      */
     private function trimmedTemplatePath(string $template, array $config): string
     {
-        $path = storage_path('framework/cache/fsa-template-'.$config['sheet'].'-'.filemtime($template).'.xlsx');
+        $path = storage_path('framework/cache/fsa-template-' . $config['sheet'] . '-' . filemtime($template) . '.xlsx');
 
         if (is_file($path)) {
             return $path;
@@ -557,10 +721,10 @@ class FoodSafetyExcelTemplateRenderer
             $sheet->garbageCollect();
 
             // Dọn bản trim của mtime cũ rồi ghi atomic (tmp + rename) để 2 request song song không đè nhau.
-            foreach (glob(storage_path('framework/cache/fsa-template-'.$config['sheet'].'-*.xlsx')) ?: [] as $stale) {
+            foreach (glob(storage_path('framework/cache/fsa-template-' . $config['sheet'] . '-*.xlsx')) ?: [] as $stale) {
                 @unlink($stale);
             }
-            $tmpPath = $path.'.'.getmypid().'.tmp';
+            $tmpPath = $path . '.' . getmypid() . '.tmp';
             (new XlsxWriter($spreadsheet))->save($tmpPath);
             rename($tmpPath, $path);
             $spreadsheet->disconnectWorksheets();
@@ -678,11 +842,11 @@ class FoodSafetyExcelTemplateRenderer
         // Bỏ dòng 19 (kẽ hở giữa 2 khối ca trưa/ca chiều của file mẫu) để dải dữ liệu liên tục —
         // resizeDataRows xóa theo khối liên tục, kẽ hở làm sót lại 1 dòng sample của Excel mẫu.
         $sheet->removeRow(19, 1);
-        $rows = range(9, 26);
+        $rows = range(8, 25);
         $this->resizeDataRows($sheet, $rows, count($items), 'A', 'L');
-        $rows = range(9, 9 + max(1, count($items)) - 1);
+        $rows = range(8, 8 + max(1, count($items)) - 1);
         // Gỡ merge dọc cột Ca/bữa ăn của file mẫu để giá trị ca hiển thị đủ trên TỪNG dòng
-        $this->unmergeArea($sheet, 'A'.min($rows).':L'.max($rows));
+        $this->unmergeArea($sheet, 'A' . min($rows) . ':L' . max($rows));
         foreach ($rows as $row) {
             $this->clearRow($sheet, $row, 'A', 'L');
         }
@@ -701,7 +865,7 @@ class FoodSafetyExcelTemplateRenderer
                 $item['area_check'] ?? '',
                 $item['sensory'] ?? '',
                 $item['action'] ?? ($item['notes'] ?? ''),
-            ], null, 'A'.$rows[$index]);
+            ], null, 'A' . $rows[$index]);
         }
     }
 
@@ -712,10 +876,10 @@ class FoodSafetyExcelTemplateRenderer
     {
         // Bỏ dòng 19 như fillStepTwo — cùng bố cục 2 khối trong file mẫu.
         $sheet->removeRow(19, 1);
-        $rows = range(9, 26);
+        $rows = range(7, 24);
         $this->resizeDataRows($sheet, $rows, count($items), 'A', 'I');
-        $rows = range(9, 9 + max(1, count($items)) - 1);
-        $this->unmergeArea($sheet, 'A'.min($rows).':I'.max($rows));
+        $rows = range(7, 7 + max(1, count($items)) - 1);
+        $this->unmergeArea($sheet, 'A' . min($rows) . ':I' . max($rows));
         foreach ($rows as $row) {
             $this->clearRow($sheet, $row, 'A', 'I');
         }
@@ -731,7 +895,7 @@ class FoodSafetyExcelTemplateRenderer
                 $item['utensil'] ?? '',
                 $item['sensory'] ?? '',
                 $item['action'] ?? ($item['notes'] ?? ''),
-            ], null, 'A'.$rows[$index]);
+            ], null, 'A' . $rows[$index]);
         }
     }
 
@@ -743,7 +907,7 @@ class FoodSafetyExcelTemplateRenderer
         $rows = $sheetName === 'B4' ? range(7, 16) : range(7, 14);
         $this->resizeDataRows($sheet, $rows, count($items), 'A', 'L');
         $rows = range(7, 7 + max(1, count($items)) - 1);
-        $this->unmergeArea($sheet, 'A'.min($rows).':L'.max($rows));
+        $this->unmergeArea($sheet, 'A' . min($rows) . ':L' . max($rows));
         foreach ($rows as $row) {
             $this->clearRow($sheet, $row, 'A', 'L');
         }
@@ -762,7 +926,7 @@ class FoodSafetyExcelTemplateRenderer
                 $item['notes'] ?? '',
                 $sheetName === 'B4' ? ($item['staff'] ?? '') : ($item['keeper'] ?? ''),
                 $sheetName === 'B4' ? ($item['destroyer'] ?? '') : ($item['staff'] ?? ''),
-            ], null, 'A'.$rows[$index]);
+            ], null, 'A' . $rows[$index]);
         }
     }
 
@@ -772,7 +936,7 @@ class FoodSafetyExcelTemplateRenderer
         $end = Coordinate::columnIndexFromString($lastColumn);
 
         for ($column = $start; $column <= $end; $column++) {
-            $sheet->setCellValue(Coordinate::stringFromColumnIndex($column).$row, null);
+            $sheet->setCellValue(Coordinate::stringFromColumnIndex($column) . $row, null);
         }
     }
 
@@ -816,7 +980,7 @@ class FoodSafetyExcelTemplateRenderer
     {
         $type = (string) ($item['type'] ?? '');
         $name = (string) ($item['name'] ?? '');
-        $normalized = mb_strtolower($type.' '.$name);
+        $normalized = mb_strtolower($type . ' ' . $name);
 
         return match (true) {
             // 'trứng' phải xét TRƯỚC nhóm I: "trứng gà" chứa 'gà' nên nếu xét sau sẽ bị xếp nhầm nhóm I.
@@ -833,18 +997,18 @@ class FoodSafetyExcelTemplateRenderer
      */
     private function applyHeader($sheet, string $sheetName, array $context): void
     {
-        $company = mb_strtoupper($context['canteen'].'-'.$context['companyName']);
-        $address = 'Địa chỉ: '.$context['companyAddress'];
+        $company = mb_strtoupper($context['canteen'] . '-' . $context['companyName']);
+        $address = 'Địa chỉ: ' . $context['companyAddress'];
 
         // Cả B1 đến B5 đều đồng nhất 3 dòng meta: Thời gian / Địa điểm / Người kiểm tra
-        $sheet->setCellValue('A1', 'Thời gian kiểm tra: '.$context['dateText']);
-        $sheet->setCellValue('A2', 'Địa điểm kiểm tra: '.$context['canteen']);
-        $sheet->setCellValue('A3', 'Người kiểm tra: '.$context['inspector']);
+        $sheet->setCellValue('A1', 'Thời gian kiểm tra: ' . $context['dateText']);
+        $sheet->setCellValue('A2', 'Địa điểm kiểm tra: ' . $context['canteen']);
+        $sheet->setCellValue('A3', 'Người kiểm tra: ' . $context['inspector']);
         $sheet->setCellValue('A4', ''); // Dòng 4 trống để giữ khoảng cách giãn dòng giống B1
 
         // E2 là ô gốc của B1, còn B2-B5 do đẩy lùi dòng 1 lên nên ghi vào E1 (ô đầu của khối gộp)
         $companyCell = ($sheetName === 'B1') ? 'E2' : 'E1';
-        $sheet->setCellValue($companyCell, $company."\n".$address);
+        $sheet->setCellValue($companyCell, $company . "\n" . $address);
     }
 
     private function normalizeB1Header($sheet): void
@@ -915,9 +1079,9 @@ class FoodSafetyExcelTemplateRenderer
             // Cỡ chữ đồng bộ theo chuẩn B1: company 36 (đậm nghiêng), tiêu đề 38 (đậm), Ban hành 36 (nghiêng).
             // Title không được lấn vào cột A–D (đã merge cho meta trái) — B3 từng đặt D4:G5 đè lên A4:D4
             // làm merge xung đột và tiêu đề biến mất.
-            'B2' => ['lastColumn' => 'L', 'metaRows' => 6, 'titleSource' => 'D2', 'company' => 'E1:J2', 'blank' => 'K1:L2', 'title' => 'E4:J5', 'issued' => 'K4:L5', 'companySize' => 36, 'titleSize' => 38],
-            'B3' => ['lastColumn' => 'I', 'metaRows' => 6, 'titleSource' => 'C2', 'company' => 'E1:I2', 'blank' => null, 'title' => 'E4:G5', 'issued' => 'H4:I5', 'companySize' => 36, 'titleSize' => 38],
-            'B4', 'B5' => ['lastColumn' => 'L', 'metaRows' => 5, 'titleSource' => 'E4', 'company' => 'E1:J2', 'blank' => 'K1:L2', 'title' => 'E4:J5', 'issued' => 'K4:L5', 'companySize' => 36, 'titleSize' => 38],
+            'B2' => ['lastColumn' => 'L', 'metaRows' => 5, 'titleSource' => 'D2', 'company' => 'E1:J3', 'blank' => 'K1:L3', 'title' => 'E4:J5', 'issued' => 'K4:L5', 'companySize' => 36, 'titleSize' => 38],
+            'B3' => ['lastColumn' => 'I', 'metaRows' => 5, 'titleSource' => 'C2', 'company' => 'E1:I3', 'blank' => null, 'title' => 'E4:G5', 'issued' => 'H4:I5', 'companySize' => 36, 'titleSize' => 38],
+            'B4', 'B5' => ['lastColumn' => 'L', 'metaRows' => 5, 'titleSource' => 'E4', 'company' => 'E1:J3', 'blank' => 'K1:L3', 'title' => 'E4:J5', 'issued' => 'K4:L5', 'companySize' => 36, 'titleSize' => 38],
             default => null,
         };
 
@@ -932,7 +1096,7 @@ class FoodSafetyExcelTemplateRenderer
             $title = 'BƯỚC 3: KIỂM TRA TRƯỚC KHI ĂN';
         }
 
-        $metaArea = 'A1:'.$config['lastColumn'].$config['metaRows'];
+        $metaArea = 'A1:' . $config['lastColumn'] . $config['metaRows'];
         foreach ($sheet->getMergeCells() as $range) {
             if ($this->rangesTouch($range, $metaArea)) {
                 $sheet->unmergeCells($range);
@@ -952,8 +1116,9 @@ class FoodSafetyExcelTemplateRenderer
             $config['issued'],
         ]);
 
-        // Merge các dòng meta bên lề trái (A->D) từ dòng 1 đến metaRows
-        for ($r = 1; $r <= $config['metaRows']; $r++) {
+        // Merge 3 dòng meta bên lề trái. Các dòng trống dưới meta để nguyên như file user đã chỉnh:
+        // B2/B4/B5 không gộp A4:D5; B3 vẫn được xử lý qua blankRanges bên dưới nếu cần.
+        for ($r = 1; $r <= 3; $r++) {
             $mergeTargets[] = "A{$r}:D{$r}";
         }
 
@@ -970,16 +1135,19 @@ class FoodSafetyExcelTemplateRenderer
 
         $blankRanges = [];
         for ($r = 1; $r <= $config['metaRows']; $r++) {
-            if (! isset($occupiedRows[$r])) {
-                $blankRange = 'E'.$r.':'.$config['lastColumn'].$r;
+            if (!isset($occupiedRows[$r])) {
+                $blankRange = 'E' . $r . ':' . $config['lastColumn'] . $r;
                 $mergeTargets[] = $blankRange;
                 $blankRanges[] = $blankRange;
             }
         }
 
-        // Dòng lề trái từ dòng 4 trở đi là dòng trống (vì lề trái chỉ có 3 dòng chứa text A1->A3)
-        for ($r = 4; $r <= $config['metaRows']; $r++) {
-            $blankRanges[] = "A{$r}:D{$r}";
+        // B3 trong file user vẫn giữ A4:D5 là vùng trống gộp, các sheet còn lại để rời.
+        if ($sheetName === 'B3') {
+            for ($r = 4; $r <= $config['metaRows']; $r++) {
+                $mergeTargets[] = "A{$r}:D{$r}";
+                $blankRanges[] = "A{$r}:D{$r}";
+            }
         }
 
         foreach ($mergeTargets as $target) {
@@ -1006,7 +1174,7 @@ class FoodSafetyExcelTemplateRenderer
             ],
         ]);
 
-        $centerBold = fn (int $size, bool $bold = true, bool $italic = false): array => [
+        $centerBold = fn(int $size, bool $bold = true, bool $italic = false): array => [
             'font' => [
                 'name' => 'Times New Roman',
                 'size' => $size,
@@ -1055,6 +1223,12 @@ class FoodSafetyExcelTemplateRenderer
         $sheet->getStyle($config['title'])->applyFromArray($centerBold($config['titleSize']));
         // "Ban hành" theo chuẩn B1: 36, thường, nghiêng
         $sheet->getStyle($config['issued'])->applyFromArray($centerBold(36, false, true));
+
+        // B2/B3 trong file user đã xóa dòng trống nằm giữa block meta và header bảng:
+        // header bắt đầu ở dòng 6, dữ liệu bắt đầu ở dòng 8.
+        if (in_array($sheetName, ['B2', 'B3'], true)) {
+            $sheet->removeRow(6, 1);
+        }
     }
 
     /**
@@ -1064,8 +1238,8 @@ class FoodSafetyExcelTemplateRenderer
     private function applyUniformTableFont($sheet, string $sheetName, int $itemCount): void
     {
         $config = match ($sheetName) {
-            'B2' => ['headerRows' => [7, 8], 'dataStart' => 9, 'lastColumn' => 'L'],
-            'B3' => ['headerRows' => [7], 'dataStart' => 9, 'lastColumn' => 'I'],
+            'B2' => ['headerRows' => [6, 7], 'dataStart' => 8, 'lastColumn' => 'L'],
+            'B3' => ['headerRows' => [6], 'dataStart' => 7, 'lastColumn' => 'I'],
             'B4', 'B5' => ['headerRows' => [6], 'dataStart' => 7, 'lastColumn' => 'L'],
             default => null,
         };
@@ -1151,12 +1325,12 @@ class FoodSafetyExcelTemplateRenderer
         $lastRow = $sheet->getHighestRow();
         for ($row = 1; $row <= $lastRow; $row++) {
             $text = trim((string) $sheet->getCell("A{$row}")->getValue());
-            if (! preg_match('/^(I|II|III|VI)\./u', $text)) {
+            if (!preg_match('/^(I|II|III|VI)\./u', $text)) {
                 continue;
             }
 
             foreach ($sheet->getMergeCells() as $range) {
-                if (preg_match('/^[A-M]'.$row.':/u', $range)) {
+                if (preg_match('/^[A-M]' . $row . ':/u', $range)) {
                     $sheet->unmergeCells($range);
                 }
             }
@@ -1253,6 +1427,6 @@ class FoodSafetyExcelTemplateRenderer
         $styleHtml = collect($styles[0] ?? [])->implode("\n");
         $bodyHtml = $body[1] ?? $html;
 
-        return '<div class="fsa-template-html">'.$styleHtml.$bodyHtml.'</div>';
+        return '<div class="fsa-template-html">' . $styleHtml . $bodyHtml . '</div>';
     }
 }

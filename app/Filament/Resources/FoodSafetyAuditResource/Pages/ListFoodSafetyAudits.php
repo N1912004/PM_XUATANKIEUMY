@@ -14,7 +14,6 @@ use Carbon\Carbon;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Support\Collection;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx as XlsxWriter;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class ListFoodSafetyAudits extends ListRecords
@@ -723,15 +722,17 @@ class ListFoodSafetyAudits extends ListRecords
 
         $this->activeStep = $previousStep;
 
-        $workbook = app(FoodSafetyExcelTemplateRenderer::class)->exportWorkbook($contexts);
-        abort_unless($workbook !== null, 500, 'Không tìm thấy file Excel mẫu kiểm thực');
+        // exportBytes cache file .xlsx theo hash dữ liệu — xuất lại cùng ngày/ca (dữ liệu chưa
+        // đổi) trả ngay từ cache, không dựng lại workbook.
+        try {
+            $bytes = app(FoodSafetyExcelTemplateRenderer::class)->exportBytes($contexts);
+        } catch (\RuntimeException) {
+            $bytes = null;
+        }
+        abort_unless($bytes !== null, 500, 'Không tìm thấy file Excel mẫu kiểm thực');
 
         $tmpPath = tempnam(sys_get_temp_dir(), 'fsa-export-');
-        $writer = new XlsxWriter($workbook);
-        // Suspend auto-calculation: không có công thức trong workbook, tắt để ghi nhanh & tránh tính lại.
-        $writer->setPreCalculateFormulas(false);
-        $writer->save($tmpPath);
-        $workbook->disconnectWorksheets();
+        file_put_contents($tmpPath, $bytes);
 
         return response()->download($tmpPath, $fileName)->deleteFileAfterSend(true);
     }
