@@ -231,17 +231,17 @@ class DatabaseSeeder extends Seeder
         // Areas & Kitchens (defined early to resolve circular dependencies)
         $area1 = Area::firstOrCreate(['code' => 'KV-DN'], [
             'name' => 'Đồng Nai',
-            'status' => 'Đang hoạt động',
+            'status' => true,
             'notes' => 'Khu vực vận hành Nhơn Trạch',
         ]);
         $area2 = Area::firstOrCreate(['code' => 'KV-HCM'], [
             'name' => 'Hồ Chí Minh',
-            'status' => 'Đang hoạt động',
+            'status' => true,
             'notes' => 'Các điểm phục vụ nội thành',
         ]);
         $area3 = Area::firstOrCreate(['code' => 'KV-BD'], [
             'name' => 'Bình Dương',
-            'status' => 'Tạm dừng',
+            'status' => false,
             'notes' => 'Đang rà soát lại công suất',
         ]);
 
@@ -249,13 +249,13 @@ class DatabaseSeeder extends Seeder
             'area_id' => $area1->id,
             'type' => 'Bếp sản xuất',
             'capacity' => 1800,
-            'status' => 'Đang hoạt động',
+            'status' => true,
         ]);
         $kitchen2 = Kitchen::firstOrCreate(['name' => 'Nhà ăn Summit'], [
             'area_id' => $area1->id,
             'type' => 'Nhà ăn phục vụ',
             'capacity' => 900,
-            'status' => 'Đang hoạt động',
+            'status' => true,
         ]);
 
         // 8. Employees (Nhanvien.png)
@@ -268,7 +268,7 @@ class DatabaseSeeder extends Seeder
             'area_id' => $area1->id,
             'kitchen_id' => null,
             'start_date' => '2022-03-15',
-            'status' => 'Đang làm việc',
+            'status' => 'working',
             'avatar_url' => 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=100&q=80',
         ]);
 
@@ -281,7 +281,7 @@ class DatabaseSeeder extends Seeder
             'area_id' => $area1->id,
             'kitchen_id' => $kitchen2->id,
             'start_date' => '2021-01-10',
-            'status' => 'Đang làm việc',
+            'status' => 'working',
             'avatar_url' => 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=100&q=80',
         ]);
 
@@ -294,7 +294,7 @@ class DatabaseSeeder extends Seeder
             'area_id' => $area1->id,
             'kitchen_id' => $kitchen1->id,
             'start_date' => '2022-06-05',
-            'status' => 'Đang làm việc',
+            'status' => 'working',
             'avatar_url' => 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=100&q=80',
         ]);
 
@@ -307,7 +307,7 @@ class DatabaseSeeder extends Seeder
             'area_id' => $area2->id,
             'kitchen_id' => null,
             'start_date' => '2022-08-20',
-            'status' => 'Nghỉ phép',
+            'status' => 'on_leave',
             'avatar_url' => 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=100&q=80',
         ]);
 
@@ -320,7 +320,7 @@ class DatabaseSeeder extends Seeder
             'area_id' => $area1->id,
             'kitchen_id' => null,
             'start_date' => '2022-11-12',
-            'status' => 'Đang làm việc',
+            'status' => 'working',
             'avatar_url' => 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&q=80',
         ]);
 
@@ -333,7 +333,7 @@ class DatabaseSeeder extends Seeder
             'area_id' => $area1->id,
             'kitchen_id' => null,
             'start_date' => '2023-02-01',
-            'status' => 'Đang làm việc',
+            'status' => 'working',
             'avatar_url' => 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=100&q=80',
         ]);
 
@@ -346,7 +346,7 @@ class DatabaseSeeder extends Seeder
             'area_id' => $area1->id,
             'kitchen_id' => null,
             'start_date' => '2023-04-18',
-            'status' => 'Nghỉ việc',
+            'status' => 'resigned',
             'avatar_url' => 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=100&q=80',
         ]);
 
@@ -359,7 +359,7 @@ class DatabaseSeeder extends Seeder
             'area_id' => $area2->id,
             'kitchen_id' => null,
             'start_date' => '2023-05-22',
-            'status' => 'Đang làm việc',
+            'status' => 'working',
             'avatar_url' => 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=100&q=80',
         ]);
 
@@ -370,56 +370,56 @@ class DatabaseSeeder extends Seeder
             'check_in' => '07:01',
             'check_out' => '16:05',
             'overtime_hours' => '0h',
-            'status' => 'Đúng giờ',
+            'status' => 'on_time',
         ]);
         Timekeeping::firstOrCreate(['employee_id' => $emp2->id, 'date' => $tcDate], [
             'shift_id' => $shift1->id,
             'check_in' => '07:18',
             'check_out' => '16:12',
             'overtime_hours' => '0h',
-            'status' => 'Đi trễ',
+            'status' => 'late',
         ]);
         Timekeeping::firstOrCreate(['employee_id' => $emp3->id, 'date' => $tcDate], [
             'shift_id' => $shift1->id,
             'check_in' => '06:58',
             'check_out' => '18:10',
             'overtime_hours' => '2h10',
-            'status' => 'Tăng ca',
+            'status' => 'on_time',
         ]);
         Timekeeping::firstOrCreate(['employee_id' => $emp4->id, 'date' => $tcDate], [
             'shift_id' => $shift1->id,
             'check_in' => null,
             'check_out' => null,
             'overtime_hours' => '0h',
-            'status' => 'Nghỉ phép',
+            'status' => 'absent',
         ]);
         Timekeeping::firstOrCreate(['employee_id' => $emp5->id, 'date' => $tcDate], [
             'shift_id' => $shift1->id,
             'check_in' => '07:05',
             'check_out' => '17:35',
             'overtime_hours' => '1h30',
-            'status' => 'Tăng ca',
+            'status' => 'on_time',
         ]);
         Timekeeping::firstOrCreate(['employee_id' => $emp6->id, 'date' => $tcDate], [
             'shift_id' => $shift1->id,
             'check_in' => '07:00',
             'check_out' => '16:00',
             'overtime_hours' => '0h',
-            'status' => 'Đúng giờ',
+            'status' => 'on_time',
         ]);
         Timekeeping::firstOrCreate(['employee_id' => $emp7->id, 'date' => $tcDate], [
             'shift_id' => $shift1->id,
             'check_in' => '07:25',
             'check_out' => '16:08',
             'overtime_hours' => '0h',
-            'status' => 'Đi trễ',
+            'status' => 'late',
         ]);
         Timekeeping::firstOrCreate(['employee_id' => $emp8->id, 'date' => $tcDate], [
             'shift_id' => $shift1->id,
             'check_in' => null,
             'check_out' => null,
             'overtime_hours' => '0h',
-            'status' => 'Vắng mặt',
+            'status' => 'absent',
         ]);
 
         // 10. Leave & Overtimes (NghiphepvaTangca.png)
@@ -429,7 +429,7 @@ class DatabaseSeeder extends Seeder
             'duration_text' => '1 ngày',
             'reason' => 'Về quê',
             'approver_id' => $emp2->id,
-            'status' => 'Chờ duyệt',
+            'status' => 'pending',
         ]);
         LeaveOvertime::firstOrCreate(['employee_id' => $emp8->id, 'start_date' => '2026-05-16'], [
             'type' => 'Nghỉ phép bệnh',
@@ -437,7 +437,7 @@ class DatabaseSeeder extends Seeder
             'duration_text' => '1 ngày',
             'reason' => 'Khám bệnh',
             'approver_id' => $emp3->id,
-            'status' => 'Chờ duyệt',
+            'status' => 'pending',
         ]);
         LeaveOvertime::firstOrCreate(['employee_id' => $emp5->id, 'start_date' => '2026-05-14'], [
             'type' => 'Tăng ca ngày thường',
@@ -445,7 +445,7 @@ class DatabaseSeeder extends Seeder
             'duration_text' => '2.5 giờ',
             'reason' => 'Hoàn thành đơn hàng',
             'approver_id' => $emp1->id,
-            'status' => 'Đã duyệt',
+            'status' => 'approved',
         ]);
 
         // 11. Update managers for Areas & Kitchens (Khuvuc.png)
@@ -455,6 +455,10 @@ class DatabaseSeeder extends Seeder
 
         $kitchen1->update(['manager_id' => $emp3->id]);
         $kitchen2->update(['manager_id' => $emp2->id]);
+
+        // Dữ liệu demo đầy đủ cho trang /admin/food-safety-audits:
+        // locked menu + PO đã nhập kho + B2/B3/Lưu mẫu/Hủy mẫu.
+        $this->call(FoodSafetyAuditDemoSeeder::class);
 
         // Chạy lại ShieldRoleSeeder ở cuối để gán vai trò cho các user tạo THÊM trong đợt seed này
         // (seeder idempotent — chạy 2 lần không sao); lần chạy ở đầu đã đảm bảo admin có quyền.

@@ -63,6 +63,7 @@ class IngredientTypeResource extends Resource
                         $currentPage = method_exists($livewire, 'getTablePage') ? $livewire->getTablePage() : 1;
                         $recordsPerPage = method_exists($livewire, 'getTableRecordsPerPage') ? $livewire->getTableRecordsPerPage() : 10;
                         $perPage = is_numeric($recordsPerPage) ? (int) $recordsPerPage : 10;
+
                         return (string) ($rowLoop->iteration + ($perPage * ($currentPage - 1)));
                     })
                     ->alignCenter()
@@ -125,7 +126,9 @@ class IngredientTypeResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ManageIngredientTypes::route('/'),
+            'index' => Pages\ListIngredientTypes::route('/'),
+            'create' => Pages\CreateIngredientType::route('/create'),
+            'edit' => Pages\EditIngredientType::route('/{record}/edit'),
         ];
     }
 }

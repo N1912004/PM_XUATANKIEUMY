@@ -15,11 +15,11 @@ class EmployeeOverview extends BaseWidget
                 ->description('Nhân sự toàn hệ thống')
                 ->descriptionIcon('heroicon-m-users')
                 ->color('primary'),
-            Stat::make('Đang làm việc', Employee::where('status', 'Đang làm việc')->count())
+            Stat::make('Đang làm việc', Employee::where('status', 'working')->count())
                 ->description('Đang hoạt động')
                 ->descriptionIcon('heroicon-m-check-circle')
                 ->color('success'),
-            Stat::make('Nghỉ phép / Nghỉ việc', Employee::whereIn('status', ['Nghỉ phép', 'Nghỉ việc'])->count())
+            Stat::make('Nghỉ phép / Nghỉ việc', Employee::whereIn('status', ['on_leave', 'resigned'])->count())
                 ->description('Vắng mặt / Thôi việc')
                 ->descriptionIcon('heroicon-m-x-circle')
                 ->color('danger'),

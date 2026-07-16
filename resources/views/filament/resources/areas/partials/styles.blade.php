@@ -358,17 +358,132 @@
         background-color: var(--po-bd2) !important;
     }
 
+    /* ============================================================
+       Form kiểu Filament — đồng bộ với form trang Nguyên liệu
+       (Section có tiêu đề + lưới 2 cột + input ring/shadow)
+       ============================================================ */
+    .ff-section {
+        background: var(--po-wh);
+        border-radius: var(--po-r);
+        box-shadow: 0 0 0 1px rgba(15, 23, 42, .05), 0 1px 3px rgba(15, 23, 42, .06);
+        overflow: hidden;
+    }
+
+    :root.dark .ff-section {
+        box-shadow: 0 0 0 1px rgba(255, 255, 255, .06), 0 1px 3px rgba(0, 0, 0, .35);
+    }
+
+    .ff-section-head {
+        padding: 16px 20px 0;
+    }
+
+    .ff-section-title {
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--po-tx);
+        letter-spacing: -.01em;
+    }
+
+    .ff-section-sub {
+        font-size: 12.5px;
+        color: var(--po-mu);
+        margin-top: 3px;
+    }
+
+    .ff-section-body {
+        padding: 18px 20px 20px;
+        display: grid;
+        gap: 18px 20px;
+    }
+
+    .ff-grid-2 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .ff-col-full {
+        grid-column: 1 / -1;
+    }
+
+    .ff-actions {
+        grid-column: 1 / -1;
+        display: flex;
+        gap: 8px;
+        justify-content: flex-end;
+        align-items: center;
+        border-top: 1px solid var(--po-bd2);
+        padding-top: 16px;
+    }
+
+    @media (max-width: 640px) {
+        .ff-grid-2 {
+            grid-template-columns: minmax(0, 1fr);
+        }
+    }
+
+    /* Modal thêm/sửa */
+    .ff-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, .5);
+        backdrop-filter: blur(2px);
+        z-index: 60;
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        padding: 40px 16px;
+        overflow-y: auto;
+    }
+
+    .ff-modal {
+        background: var(--po-wh);
+        border-radius: 14px;
+        width: 100%;
+        max-width: 560px;
+        box-shadow: 0 20px 50px rgba(15, 23, 42, .3);
+        overflow: hidden;
+        margin: auto;
+    }
+
+    .ff-modal-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 18px 20px;
+        border-bottom: 1px solid var(--po-bd2);
+    }
+
+    .ff-modal-close {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        border: 1px solid var(--po-bd);
+        background: var(--po-wh);
+        color: var(--po-mu);
+        cursor: pointer;
+        display: inline-grid;
+        place-items: center;
+        font-size: 14px;
+        flex-shrink: 0;
+        transition: .13s;
+    }
+
+    .ff-modal-close:hover {
+        background: var(--po-bg);
+        color: var(--po-tx);
+    }
+
     /* Form Fields */
     .field {
         display: flex;
         flex-direction: column;
-        gap: 5px;
+        gap: 6px;
     }
 
     .field label {
-        font-size: 12px;
-        font-weight: 700;
-        color: var(--po-su);
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--po-tx);
     }
 
     .field label .req {
@@ -377,27 +492,45 @@
     }
 
     .ctrl {
-        height: 36px;
-        border-radius: 7px;
-        border: 1px solid var(--po-bd);
+        height: 40px;
+        border-radius: 8px;
+        border: none;
         background: var(--po-wh);
-        padding: 0 10px;
-        font-size: 13px;
+        padding: 0 12px;
+        font-size: 13.5px;
         color: var(--po-tx);
         outline: none;
-        transition: .13s;
+        transition: box-shadow .13s;
         width: 100%;
-        box-shadow: none !important;
+        box-shadow: inset 0 0 0 1px rgba(15, 23, 42, .1), 0 1px 2px rgba(15, 23, 42, .05) !important;
+    }
+
+    :root.dark .ctrl {
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .12), 0 1px 2px rgba(0, 0, 0, .25) !important;
+    }
+
+    .ctrl::placeholder {
+        color: var(--po-fa);
     }
 
     .ctrl:focus {
-        border-color: #93C5FD;
-        background: #fff;
+        box-shadow: inset 0 0 0 1px var(--po-bl), 0 0 0 2px var(--po-bl-m) !important;
+    }
+
+    /* Select kiểu Filament: mũi tên tuỳ biến */
+    select.ctrl {
+        appearance: none;
+        -webkit-appearance: none;
+        padding-right: 34px;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath d='M2 3.5l3 3 3-3' stroke='%2394A3B8' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
     }
 
     textarea.ctrl {
         height: auto;
-        padding: 8px 10px;
+        padding: 9px 12px;
+        line-height: 1.5;
     }
 
     /* Status badges dot rounded */

@@ -59,7 +59,7 @@ class PerformanceTestSeeder extends Seeder
             $code = 'KV-'.Str::upper(Str::random(3));
             $area = Area::firstOrCreate(['code' => $code], [
                 'name' => $areaNames[$i],
-                'status' => 'Đang hoạt động',
+                'status' => true,
                 'notes' => 'Khu vực tự động tạo để test hiệu năng '.$areaNames[$i],
             ]);
             $areaIds[] = $area->id;
@@ -74,7 +74,7 @@ class PerformanceTestSeeder extends Seeder
                 'area_id' => $areaId,
                 'type' => $i % 2 == 0 ? 'Bếp sản xuất' : 'Nhà ăn phục vụ',
                 'capacity' => rand(500, 2000),
-                'status' => 'Đang hoạt động',
+                'status' => true,
             ]);
             $kitchenIds[] = $kitchen->id;
             $kitchens[] = $kitchen;
@@ -180,7 +180,7 @@ class PerformanceTestSeeder extends Seeder
                 'area_id' => $kitchen->area_id,
                 'kitchen_id' => $kitchen->id,
                 'start_date' => Carbon::now()->subMonths(rand(1, 36))->format('Y-m-d'),
-                'status' => 'Đang làm việc',
+                'status' => 'working',
                 'avatar_url' => 'https://images.unsplash.com/photo-'.(1500000000000 + rand(1000000, 9000000)).'?auto=format&fit=crop&w=100&q=80',
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -213,20 +213,19 @@ class PerformanceTestSeeder extends Seeder
 
         $timekeepings = [];
         $startDate = Carbon::now()->subDays(100);
-        $statuses = ['Đúng giờ', 'Đi trễ', 'Tăng ca', 'Nghỉ phép', 'Vắng mặt'];
 
         for ($d = 0; $d < 100; $d++) {
             $date = (clone $startDate)->addDays($d)->format('Y-m-d');
             foreach ($employeeIds as $empId) {
-                $status = $statuses[array_rand($statuses)];
+                $statusType = ['on_time', 'late', 'overtime', 'absent', 'absent'][array_rand([0, 1, 2, 3, 4])];
                 $timekeepings[] = [
                     'employee_id' => $empId,
                     'date' => $date,
                     'shift_id' => $shiftIds[array_rand($shiftIds)],
-                    'check_in' => $status === 'Vắng mặt' ? null : '07:'.str_pad(rand(0, 30), 2, '0', STR_PAD_LEFT),
-                    'check_out' => $status === 'Vắng mặt' ? null : '16:'.str_pad(rand(0, 45), 2, '0', STR_PAD_LEFT),
-                    'overtime_hours' => $status === 'Tăng ca' ? rand(1, 3).'h' : '0h',
-                    'status' => $status,
+                    'check_in' => $statusType === 'absent' ? null : '07:'.str_pad(rand(0, 30), 2, '0', STR_PAD_LEFT),
+                    'check_out' => $statusType === 'absent' ? null : '16:'.str_pad(rand(0, 45), 2, '0', STR_PAD_LEFT),
+                    'overtime_hours' => $statusType === 'overtime' ? rand(1, 3).'h' : '0h',
+                    'status' => $statusType === 'overtime' ? 'on_time' : $statusType,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ];
@@ -356,7 +355,7 @@ class PerformanceTestSeeder extends Seeder
         $this->command->info('Seeding 5,000 Food Safety Audits...');
         // 11. Food Safety Audits
         $auditStages = ['Bước 1', 'Bước 2', 'Bước 3', 'Lưu mẫu', 'Hủy mẫu'];
-        $auditStatuses = ['Đạt', 'Không đạt'];
+        $auditStatuses = ['passed', 'failed'];
         $audits = [];
         for ($i = 1; $i <= 5000; $i++) {
             $auditDate = Carbon::now()->subDays(rand(0, 100))->format('Y-m-d');

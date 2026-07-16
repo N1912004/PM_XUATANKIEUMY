@@ -9,11 +9,11 @@ use Illuminate\Support\Facades\DB;
 
 class StockTransfer extends Model
 {
-    public const STATUS_IN_TRANSIT = 'Đang chuyển';
+    public const STATUS_IN_TRANSIT = 'in_transit';
 
-    public const STATUS_DONE = 'Hoàn thành';
+    public const STATUS_DONE = 'completed';
 
-    public const STATUS_CANCELLED = 'Hủy';
+    public const STATUS_CANCELLED = 'cancelled';
 
     protected $fillable = [
         'code',

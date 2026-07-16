@@ -84,7 +84,7 @@ class Dashboard extends Page
         $this->pendingOrders = (int) PurchaseOrder::whereIn('status', ['draft', 'sent', 'checking'])
             ->when($kitchenId, fn ($q) => $q->where('kitchen_id', $kitchenId))
             ->count();
-        $this->activeEmployees = (int) Employee::where('status', 'Đang làm việc')
+        $this->activeEmployees = (int) Employee::where('status', 'working')
             ->when($kitchenId, fn ($q) => $q->where('kitchen_id', $kitchenId))
             ->count();
 

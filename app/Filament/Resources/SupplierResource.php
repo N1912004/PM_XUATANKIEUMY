@@ -91,7 +91,7 @@ class SupplierResource extends Resource
                                 Forms\Components\Section::make('Thiết lập nhanh')
                                     ->schema([
                                         Forms\Components\Toggle::make('status')
-                                            ->label('Trạng thái')
+                                            ->label('Hoạt động')
                                             ->default(true)
                                             ->onColor('success')
                                             ->offColor('danger'),
@@ -124,7 +124,7 @@ class SupplierResource extends Resource
                 Tables\Columns\TextColumn::make('type')
                     ->label('PHÒNG GIAO DỊCH / PHÂN LOẠI')
                     ->badge()
-                    ->color(fn(string $state): string => match ($state) {
+                    ->color(fn (string $state): string => match ($state) {
                         'Thịt' => 'danger',
                         'Rau củ' => 'success',
                         'Thực phẩm khô' => 'warning',
@@ -137,11 +137,9 @@ class SupplierResource extends Resource
                     ->label('SỐ ĐIỆN THOẠI'),
                 Tables\Columns\TextColumn::make('email')
                     ->label('ĐỊA CHỈ EMAIL'),
-                Tables\Columns\TextColumn::make('status')
+                Tables\Columns\IconColumn::make('status')
                     ->label('TRẠNG THÁI')
-                    ->badge()
-                    ->state(fn($record) => $record->status ? 'Đang hoạt động' : 'Tạm ngưng')
-                    ->color(fn($state) => $state === 'Đang hoạt động' ? 'success' : 'danger'),
+                    ->boolean(),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('type')

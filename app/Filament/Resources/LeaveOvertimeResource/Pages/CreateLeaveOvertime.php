@@ -31,7 +31,7 @@ class CreateLeaveOvertime extends Page
 
     public $approver_id;
 
-    public $status = 'Chờ duyệt';
+    public $status = 'pending';
 
     // Leave-specific extra fields
     public $no_count_leave = false;
@@ -136,7 +136,7 @@ class CreateLeaveOvertime extends Page
             'approver_id' => $this->approver_id,
             // Ép trạng thái phía server: $this->status là public property, client có thể sửa
             // payload Livewire thành 'Đã duyệt' để bỏ qua quy trình duyệt
-            'status' => 'Chờ duyệt',
+            'status' => 'pending',
         ]);
 
         session()->flash('message', 'Tạo yêu cầu mới thành công!');

@@ -44,6 +44,8 @@ class AdminPanelProvider extends PanelProvider
             ->login(Login::class)
             ->profile(EditProfile::class)
             ->sidebarCollapsibleOnDesktop()
+            ->sidebarWidth('16rem')
+            ->collapsedSidebarWidth('4rem')
             ->brandName($siteName)
             ->brandLogo(fn () => request()->routeIs('filament.admin.auth.login') ? new HtmlString('') : view('filament.components.brand-logo', ['siteName' => $this->getSetting('site_name', 'Bluefire Catering')]))
             ->darkModeBrandLogo(fn () => request()->routeIs('filament.admin.auth.login') ? new HtmlString('') : view('filament.components.brand-logo', ['siteName' => $this->getSetting('site_name', 'Bluefire Catering')]))
@@ -335,6 +337,8 @@ class AdminPanelProvider extends PanelProvider
             ->navigationGroups([
                 NavigationGroup::make()
                     ->label(fn () => __('TỔNG QUAN')),
+                NavigationGroup::make()
+                    ->label(fn () => __('KHU VỰC & NHÀ ĂN')),
                 NavigationGroup::make()
                     ->label(fn () => __('VẬN HÀNH BẾP')),
                 NavigationGroup::make()

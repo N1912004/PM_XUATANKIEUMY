@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\FoodSafetyAuditResource\Pages;
 
-use App\Exports\FoodSafetyAuditReportExport;
 use App\Filament\Resources\FoodSafetyAuditResource;
 use App\Models\Employee;
 use App\Models\FoodSafetyAudit;
@@ -15,7 +14,6 @@ use Carbon\Carbon;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Support\Collection;
-use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class ListFoodSafetyAudits extends ListRecords
@@ -157,6 +155,17 @@ class ListFoodSafetyAudits extends ListRecords
 
     public string $inspector = '';
 
+    /**
+     * Memo trong 1 request: blade gọi getSheetView() rồi getExcelTemplateHtml() (lại gọi getSheetView),
+     * getStats() cũng cần menus — không memo thì cụm query menus→recipes→ingredients chạy 3 lần.
+     *
+     * @var array<string, Collection<int, Menu>>
+     */
+    protected array $lockedMenusCache = [];
+
+    /** @var array<string, array<int, array<string, mixed>>> */
+    protected array $auditItemsCache = [];
+
     public function mount(): void
     {
         parent::mount();
@@ -179,7 +188,7 @@ class ListFoodSafetyAudits extends ListRecords
     public function getInspectorOptions(): array
     {
         return Employee::query()
-            ->where('status', 'Đang làm việc')
+            ->where('status', 'working')
             ->orderBy('name')
             ->pluck('name', 'id')
             ->all();
@@ -193,6 +202,32 @@ class ListFoodSafetyAudits extends ListRecords
         ];
     }
 
+    /**
+     * Thực đơn ĐÃ CHỐT của ngày/ca đang chọn (memo theo request). Hồ sơ kiểm thực (QĐ 1246)
+     * chỉ được lập trên thực đơn locked — thực đơn nháp/đang gửi chưa phải bữa ăn thực tế,
+     * đưa vào biểu mẫu là sai hồ sơ pháp lý.
+     *
+     * @return Collection<int, Menu>
+     */
+    protected function lockedMenus(): Collection
+    {
+        $cacheKey = $this->date.'|'.$this->selectedShift;
+
+        if (isset($this->lockedMenusCache[$cacheKey])) {
+            return $this->lockedMenusCache[$cacheKey];
+        }
+
+        $query = Menu::with(['recipe.ingredients.supplier', 'shift'])
+            ->where('status', 'locked')
+            ->whereDate('date', $this->date);
+
+        if ($this->selectedShift) {
+            $query->where('shift_id', $this->selectedShift);
+        }
+
+        return $this->lockedMenusCache[$cacheKey] = $query->get();
+    }
+
     public function getStats(): array
     {
         if (! $this->date) {
@@ -204,17 +239,7 @@ class ListFoodSafetyAudits extends ListRecords
             ];
         }
 
-        // Hồ sơ kiểm thực (QĐ 1246) chỉ được lập trên thực đơn ĐÃ CHỐT — thực đơn nháp/đang gửi
-        // chưa phải bữa ăn thực tế, đưa vào biểu mẫu là sai hồ sơ pháp lý.
-        $query = Menu::with(['recipe.ingredients'])
-            ->where('status', 'locked')
-            ->whereDate('date', $this->date);
-
-        if ($this->selectedShift) {
-            $query->where('shift_id', $this->selectedShift);
-        }
-
-        $menus = $query->get();
+        $menus = $this->lockedMenus();
 
         $portions = $menus->sum('estimated_portions');
         $dishes = $menus->pluck('recipe_id')->unique()->count();
@@ -289,16 +314,18 @@ class ListFoodSafetyAudits extends ListRecords
             return [];
         }
 
-        // Chỉ thực đơn ĐÃ CHỐT (xem chú thích ở getStats)
-        $query = Menu::with(['recipe.ingredients.supplier', 'shift'])
-            ->where('status', 'locked')
-            ->whereDate('date', $this->date);
+        $cacheKey = $this->activeStep.'|'.$this->date.'|'.$this->selectedShift;
 
-        if ($this->selectedShift) {
-            $query->where('shift_id', $this->selectedShift);
-        }
+        return $this->auditItemsCache[$cacheKey] ??= $this->buildAuditItems();
+    }
 
-        $menus = $query->get();
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    protected function buildAuditItems(): array
+    {
+        // Chỉ thực đơn ĐÃ CHỐT (xem chú thích ở lockedMenus)
+        $menus = $this->lockedMenus();
 
         if ($this->activeStep === 'Bước 1') {
             // Step 1: Input raw ingredients check
@@ -337,6 +364,13 @@ class ListFoodSafetyAudits extends ListRecords
                         ? number_format($qty, 0).' '.$ingredient->unit
                         : number_format($qty, 2, ',', '.').' kg';
 
+                    // Hàng động vật xác định theo NHÓM I của biểu mẫu (bắt cả loại "CÁ", tên chứa
+                    // thịt/gà/bò...) — so cứng type === 'Động vật' bỏ sót cá/gà khỏi cột thú y/kiểm dịch.
+                    $isAnimalGroup = str_starts_with(
+                        $this->stepOneGroupTitle(['type' => $ingredient->type, 'name' => $ingredient->name]),
+                        'I.',
+                    );
+
                     $seenIngredients[$ingredient->id] = [
                         'name' => $ingredient->name,
                         'type' => $ingredient->type,
@@ -346,14 +380,17 @@ class ListFoodSafetyAudits extends ListRecords
                         'unit' => $ingredient->unit,
                         'supplier' => $poInfo?->purchaseOrder?->supplier?->name
                             ?? $ingredient->supplier->name
-                            ?? 'Cơ sở tự do',
+                            ?? '',
                         'supplier_contact' => $poInfo?->purchaseOrder?->supplier?->phone ?? '',
                         'deliverer' => $poInfo?->purchaseOrder?->supplier?->contact_name ?? '',
                         // Chứng từ = mã PO thật đã nhập kho; chưa có PO thì để trống thay vì chuỗi tự chế
                         'invoice' => $poInfo?->purchaseOrder?->code ?? '—',
-                        'vet_check' => ($ingredient->type === 'Động vật') ? 'Đạt' : '—',
-                        'quarantine' => ($ingredient->type === 'Động vật') ? 'Có' : '—',
-                        'sensory' => 'Đạt',
+                        // Các cột kiểm tra KHÔNG bịa 'Đạt' vô điều kiện: chỉ ghi khi nguyên liệu
+                        // có PO đã nhập kho thật (đã qua kiểm nhận hàng); chưa có chứng từ thì để
+                        // trống chờ người kiểm tra ghi. Giấy thú y/kiểm dịch chỉ áp dụng hàng động vật.
+                        'vet_check' => $isAnimalGroup ? ($poInfo ? 'Đạt' : '') : '—',
+                        'quarantine' => $isAnimalGroup ? ($poInfo ? 'Có' : '') : '—',
+                        'sensory' => $poInfo ? 'Đạt' : '',
                         'quick_test' => '—',
                         'action' => '',
                         'notes' => '',
@@ -375,6 +412,15 @@ class ListFoodSafetyAudits extends ListRecords
 
         // Steps 2 to 5: Dishes list check — lấy dữ liệu THẬT đã ghi nhận (nếu có)
         $records = $this->auditRecordsByRecipe();
+
+        // Cột inspected_by/sample_kept_by là varchar chứa lẫn ID nhân viên (seeder cũ) và tên —
+        // resolve ID số thành tên thật, không in số lên biểu mẫu pháp lý.
+        $employeeNames = $this->employeeNamesFor($records);
+
+        // Đ/K trên biểu mẫu chỉ được ghi khi CÓ bản ghi kiểm thực thật; chưa kiểm thì để trống.
+        $dk = fn (?FoodSafetyAudit $a): string => $a && $a->status
+            ? ($a->status === 'passed' ? 'Đạt' : 'K')
+            : '';
 
         $dishes = [];
         foreach ($menus as $menu) {
@@ -407,12 +453,13 @@ class ListFoodSafetyAudits extends ListRecords
                     'prep_time' => $audit?->cook_start_at ? substr((string) $audit->cook_start_at, 0, 5) : '',
                     'finish_time' => $audit?->cook_end_at ? substr((string) $audit->cook_end_at, 0, 5) : '',
                     'time' => $this->timeRange($audit?->cook_start_at, $audit?->cook_end_at),
-                    'staff_check' => 'Đạt',
-                    'equipment_check' => 'Đạt',
-                    'area_check' => 'Đạt',
+                    // Đ/K điều kiện vệ sinh lấy theo bản ghi kiểm thực thật, không mặc định 'Đạt'
+                    'staff_check' => $dk($audit),
+                    'equipment_check' => $dk($audit),
+                    'area_check' => $dk($audit),
                     'sensory' => $audit?->status ?? '',
                     'temp' => $audit?->temperature ?? '',
-                    'cook' => $audit?->inspected_by ?? '',
+                    'cook' => $this->personName($audit?->inspected_by, $employeeNames),
                     'kitchen' => $shiftLabel,
                     'action' => '',
                     'notes' => $audit?->notes ?? '',
@@ -423,10 +470,12 @@ class ListFoodSafetyAudits extends ListRecords
                     'shift' => $shiftLabel,
                     'portions' => $portions,
                     'time' => $audit?->sample_kept_at?->format('H:i') ?? '',
-                    'eat_time' => $audit?->sample_kept_at?->copy()->addMinutes(30)?->format('H:i') ?? '',
+                    // Giờ bắt đầu ăn: DB chưa có trường riêng — để trống chờ ghi nhận,
+                    // không tự cộng 30 phút (bịa số liệu trên hồ sơ pháp lý).
+                    'eat_time' => '',
                     'utensil' => $audit?->utensil ?? '',
                     'sensory' => $audit?->status ?? '',
-                    'sample_kept' => $audit && $audit->sample_kept_by ? 'Có ('.$audit->sample_kept_by.')' : '',
+                    'sample_kept' => $audit && $audit->sample_kept_by ? 'Có ('.$this->personName($audit->sample_kept_by, $employeeNames).')' : '',
                     'temp' => $audit?->temperature ?? '',
                     'action' => '',
                     'notes' => $audit?->notes ?? '',
@@ -437,15 +486,18 @@ class ListFoodSafetyAudits extends ListRecords
                     'shift' => $shiftLabel,
                     'portions' => $portions,
                     'sample_amount' => $this->sampleAmount($dishName),
-                    'container' => $audit?->utensil ?: 'Hũ Inox',
+                    // Dụng cụ/nhiệt độ/người lưu/ghi chú lấy từ bản ghi lưu mẫu THẬT;
+                    // chưa ghi nhận thì để trống, không điền sẵn 'Hũ Inox'/'2-8°C'/'Đ'.
+                    'container' => $audit?->utensil ?? '',
                     'time' => $audit?->sample_kept_at?->format('H:i') ?? '',
+                    // Hủy mẫu = giờ lấy mẫu + 24h theo quy định lưu mẫu QĐ 1246 — chỉ tính khi có giờ lấy thật
                     'destroy_at' => $audit?->sample_kept_at?->copy()->addDay()?->format('H:i (d/m)') ?? '',
                     'quantity' => '',
                     'sample_code' => $audit?->sample_code ?? '',
-                    'temp' => $audit?->temperature ?: '2-8°C',
-                    'staff' => $audit?->sample_kept_by ?: $this->inspector,
+                    'temp' => $audit?->temperature ?? '',
+                    'staff' => $this->personName($audit?->sample_kept_by, $employeeNames),
                     'destroyer' => '',
-                    'notes' => $audit?->notes ?: 'Đ',
+                    'notes' => $audit?->notes ?? '',
                 ];
             } elseif ($this->activeStep === 'Hủy mẫu') {
                 $dishes[] = [
@@ -453,15 +505,17 @@ class ListFoodSafetyAudits extends ListRecords
                     'shift' => $shiftLabel,
                     'portions' => $portions,
                     'sample_amount' => $this->sampleAmount($dishName),
-                    'container' => $audit?->utensil ?: 'Hũ Inox',
-                    'temp' => $audit?->temperature ?: '2-8°C',
+                    // Như tab Lưu mẫu: chỉ hiển thị giá trị đã ghi nhận thật, không điền sẵn.
+                    'container' => $audit?->utensil ?? '',
+                    'temp' => $audit?->temperature ?? '',
                     'kept_at' => $audit?->sample_kept_at?->format('H:i') ?? '',
+                    // Giờ hủy = giờ lấy mẫu + 24h theo quy định lưu mẫu QĐ 1246
                     'time' => $audit?->sample_kept_at?->copy()->addDay()?->format('H:i (d/m)') ?? '',
                     'retention' => '24 giờ',
                     'status' => $audit?->status ?? '',
-                    'keeper' => $audit?->sample_kept_by ?: $this->inspector,
+                    'keeper' => $this->personName($audit?->sample_kept_by, $employeeNames),
                     'staff' => '',
-                    'notes' => $audit?->notes ?: 'Đ',
+                    'notes' => $audit?->notes ?? '',
                 ];
             }
         }
@@ -562,6 +616,40 @@ class ListFoodSafetyAudits extends ListRecords
         };
     }
 
+    /**
+     * Cột inspected_by/sample_kept_by là varchar chứa lẫn ID nhân viên (dữ liệu cũ) và tên.
+     * Gom toàn bộ giá trị dạng số của các bản ghi rồi tra tên MỘT query, tránh N+1.
+     *
+     * @param  Collection<int, FoodSafetyAudit>  $records
+     * @return array<int, string>
+     */
+    protected function employeeNamesFor(Collection $records): array
+    {
+        $ids = $records
+            ->flatMap(fn (FoodSafetyAudit $a): array => [$a->inspected_by, $a->sample_kept_by])
+            ->filter(fn ($v): bool => $v !== null && $v !== '' && ctype_digit((string) $v))
+            ->unique()
+            ->values();
+
+        return $ids->isEmpty()
+            ? []
+            : Employee::whereIn('id', $ids)->pluck('name', 'id')->all();
+    }
+
+    /**
+     * Trả về tên người từ giá trị varchar hỗn tạp: ID số → tên nhân viên thật; chuỗi tên giữ nguyên.
+     *
+     * @param  array<int, string>  $names
+     */
+    protected function personName(?string $value, array $names): string
+    {
+        if ($value === null || $value === '') {
+            return '';
+        }
+
+        return ctype_digit($value) ? ($names[(int) $value] ?? $value) : $value;
+    }
+
     protected function sampleAmount(string $dishName): string
     {
         $name = mb_strtolower($dishName);
@@ -607,27 +695,45 @@ class ListFoodSafetyAudits extends ListRecords
     }
 
     /**
-     * Xuất báo cáo kiểm thực 3 bước theo biểu mẫu chuẩn Bộ Y tế (QĐ 1246/QĐ-BYT) — file .xlsx.
-     * Mỗi bước là 1 sheet có tiêu đề gộp ô; dữ liệu B2/B3 lấy từ bản ghi kiểm thực đã lưu.
+     * Xuất báo cáo kiểm thực 3 bước (QĐ 1246/QĐ-BYT) — file .xlsx 5 sheet B1–B5, dựng bằng
+     * CHÍNH pipeline render biểu mẫu trên trang nên file tải về khớp 100% màn hình
+     * (format Excel mẫu + dữ liệu thật từng bước).
      */
     public function exportExcel(): BinaryFileResponse
     {
         $fileName = 'BaoCao_KiemThuc_3Buoc_'.str_replace('-', '', (string) $this->date).'.xlsx';
 
-        $steps = ['Bước 1', 'Bước 2', 'Bước 3', 'Lưu mẫu', 'Hủy mẫu'];
-        $itemsByStep = [];
+        // Gom context từng bước — đúng dữ liệu đang hiển thị (menu locked + bản ghi kiểm thực)
+        $contexts = [];
         $previousStep = $this->activeStep;
 
-        foreach ($steps as $step) {
+        foreach (self::STEPS as $step) {
             $this->activeStep = $step;
-            $itemsByStep[$step] = $this->getAuditItems();
+            $sheet = $this->getSheetView();
+            $contexts[$step] = [
+                'dateText' => (string) $sheet['dateText'],
+                'canteen' => $this->canteen,
+                'inspector' => $this->inspector,
+                'companyName' => (string) $sheet['companyName'],
+                'companyAddress' => (string) $sheet['companyAddress'],
+                'items' => $sheet['items'],
+            ];
         }
 
         $this->activeStep = $previousStep;
 
-        return Excel::download(
-            new FoodSafetyAuditReportExport($itemsByStep, (string) $this->date, $this->canteen, $this->inspector),
-            $fileName,
-        );
+        // exportBytes cache file .xlsx theo hash dữ liệu — xuất lại cùng ngày/ca (dữ liệu chưa
+        // đổi) trả ngay từ cache, không dựng lại workbook.
+        try {
+            $bytes = app(FoodSafetyExcelTemplateRenderer::class)->exportBytes($contexts);
+        } catch (\RuntimeException) {
+            $bytes = null;
+        }
+        abort_unless($bytes !== null, 500, 'Không tìm thấy file Excel mẫu kiểm thực');
+
+        $tmpPath = tempnam(sys_get_temp_dir(), 'fsa-export-');
+        file_put_contents($tmpPath, $bytes);
+
+        return response()->download($tmpPath, $fileName)->deleteFileAfterSend(true);
     }
 }

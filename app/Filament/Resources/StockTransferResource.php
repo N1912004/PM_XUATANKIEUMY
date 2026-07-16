@@ -133,6 +133,7 @@ class StockTransferResource extends Resource
                         $currentPage = method_exists($livewire, 'getTablePage') ? $livewire->getTablePage() : 1;
                         $recordsPerPage = method_exists($livewire, 'getTableRecordsPerPage') ? $livewire->getTableRecordsPerPage() : 10;
                         $perPage = is_numeric($recordsPerPage) ? (int) $recordsPerPage : 10;
+
                         return (string) ($rowLoop->iteration + ($perPage * ($currentPage - 1)));
                     })
                     ->alignCenter()
@@ -158,6 +159,12 @@ class StockTransferResource extends Resource
                         StockTransfer::STATUS_DONE => 'success',
                         StockTransfer::STATUS_CANCELLED => 'danger',
                         default => 'gray',
+                    })
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        StockTransfer::STATUS_IN_TRANSIT => 'Đang chuyển',
+                        StockTransfer::STATUS_DONE => 'Hoàn thành',
+                        StockTransfer::STATUS_CANCELLED => 'Hủy',
+                        default => $state,
                     }),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('NGÀY TẠO')

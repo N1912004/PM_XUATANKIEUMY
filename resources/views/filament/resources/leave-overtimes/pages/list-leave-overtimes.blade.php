@@ -82,17 +82,17 @@
             @if($activeTab === 'all')
                 <select wire:model.live="statusFilter" class="lv-sel">
                     <option value="">Trạng thái</option>
-                    <option value="Chờ duyệt">Chờ duyệt</option>
-                    <option value="Đã duyệt">Đã duyệt</option>
-                    <option value="Từ chối">Từ chối</option>
-                    <option value="Đã hủy">Đã hủy</option>
+                    <option value="pending">Chờ duyệt</option>
+                    <option value="approved">Đã duyệt</option>
+                    <option value="rejected">Từ chối</option>
+                    <option value="cancelled">Đã hủy</option>
                 </select>
             @else
                 <select wire:model.live="statusFilter" class="lv-sel">
                     <option value="">Trạng thái</option>
-                    <option value="Đã duyệt">Đã duyệt</option>
-                    <option value="Từ chối">Từ chối</option>
-                    <option value="Đã hủy">Đã hủy</option>
+                    <option value="approved">Đã duyệt</option>
+                    <option value="rejected">Từ chối</option>
+                    <option value="cancelled">Đã hủy</option>
                 </select>
             @endif
 
@@ -225,13 +225,13 @@
                                 @endif
                             </td>
                             <td style="padding:12px 12px;">
-                                @if($row->status === 'Chờ duyệt')
+                                @if($row->status === 'pending')
                                     <span class="st-pill st-late">Chờ duyệt</span>
-                                @elseif($row->status === 'Đã duyệt')
+                                @elseif($row->status === 'approved')
                                     <span class="st-pill st-ok">Đã duyệt</span>
-                                @elseif($row->status === 'Từ chối')
+                                @elseif($row->status === 'rejected')
                                     <span class="st-pill st-absent">Từ chối</span>
-                                @elseif($row->status === 'Đã hủy')
+                                @elseif($row->status === 'cancelled')
                                     <span class="st-pill" style="background:var(--po-bd2); color:var(--po-su); border-color:var(--po-bd)">Đã hủy</span>
                                 @else
                                     <span class="st-pill" style="background:var(--po-bd2); color:var(--po-su);">{{ $row->status }}</span>

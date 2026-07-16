@@ -16,6 +16,7 @@ class PurchaseOrder extends Model
         'sent' => 'Đã gửi NCC',
         'checking' => 'Đang kiểm hàng',
         'done' => 'Hoàn thành',
+        'cancelled' => 'Đã hủy',
     ];
 
     use HasFactory;

@@ -531,6 +531,13 @@
         background: var(--po-wh) !important;
     }
 
+    .fsa-dropdown-item {
+        color: var(--po-tx) !important;
+    }
+    .fsa-dropdown-item:hover {
+        background-color: var(--po-bd2) !important;
+    }
+
     @media (max-width: 900px) {
         .krow {
             grid-template-columns: repeat(2, 1fr) !important;

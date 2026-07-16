@@ -152,11 +152,11 @@ class EmployeeResource extends Resource
                                         Forms\Components\Select::make('status')
                                             ->label('Trạng thái')
                                             ->options([
-                                                'Đang làm việc' => 'Đang làm việc',
-                                                'Nghỉ phép' => 'Nghỉ phép',
-                                                'Nghỉ việc' => 'Nghỉ việc',
+                                                'working' => 'Đang làm việc',
+                                                'on_leave' => 'Nghỉ phép',
+                                                'resigned' => 'Nghỉ việc',
                                             ])
-                                            ->default('Đang làm việc')
+                                            ->default('working')
                                             ->required(),
                                     ]),
                             ]),
@@ -212,10 +212,16 @@ class EmployeeResource extends Resource
                 Tables\Columns\TextColumn::make('status')
                     ->label('TRẠNG THÁI')
                     ->badge()
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'working' => 'Đang làm việc',
+                        'on_leave' => 'Nghỉ phép',
+                        'resigned' => 'Nghỉ việc',
+                        default => $state,
+                    })
                     ->color(fn (string $state): string => match ($state) {
-                        'Đang làm việc' => 'success',
-                        'Nghỉ phép' => 'warning',
-                        'Nghỉ việc' => 'danger',
+                        'working' => 'success',
+                        'on_leave' => 'warning',
+                        'resigned' => 'danger',
                         default => 'gray',
                     })
                     ->sortable(),
@@ -230,9 +236,9 @@ class EmployeeResource extends Resource
                 Tables\Filters\SelectFilter::make('status')
                     ->label('Trạng thái')
                     ->options([
-                        'Đang làm việc' => 'Đang làm việc',
-                        'Nghỉ phép' => 'Nghỉ phép',
-                        'Nghỉ việc' => 'Nghỉ việc',
+                        'working' => 'Đang làm việc',
+                        'on_leave' => 'Nghỉ phép',
+                        'resigned' => 'Nghỉ việc',
                     ]),
             ])
             ->actions([

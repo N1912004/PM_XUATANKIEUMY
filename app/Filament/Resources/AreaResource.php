@@ -17,7 +17,7 @@ class AreaResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-map-pin';
 
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 1;
 
     public static function getNavigationLabel(): string
     {
@@ -31,7 +31,7 @@ class AreaResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('CHAT NHÓM');
+        return __('KHU VỰC & NHÀ ĂN');
     }
 
     public static function form(Form $form): Form
@@ -56,15 +56,10 @@ class AreaResource extends Resource
                                     ->label('Quản lý phụ trách')
                                     ->relationship('manager', 'name')
                                     ->searchable()
-                                    ->preload()
-                                    ->required(),
-                                Forms\Components\Select::make('status')
-                                    ->label('Trạng thái')
-                                    ->options([
-                                        'Đang hoạt động' => 'Đang hoạt động',
-                                        'Tạm dừng' => 'Tạm dừng',
-                                    ])
-                                    ->default('Đang hoạt động')
+                                    ->preload(),
+                                Forms\Components\Toggle::make('status')
+                                    ->label('Hoạt động')
+                                    ->default(true)
                                     ->required(),
                             ]),
                         Forms\Components\Textarea::make('notes')
@@ -106,23 +101,14 @@ class AreaResource extends Resource
                     ->color('primary')
                     ->alignCenter()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('status')
+                Tables\Columns\IconColumn::make('status')
                     ->label('TRẠNG THÁI')
-                    ->badge()
-                    ->color(fn (string $state): string => match ($state) {
-                        'Đang hoạt động' => 'success',
-                        'Tạm dừng' => 'danger',
-                        default => 'gray',
-                    })
+                    ->boolean()
                     ->sortable(),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('status')
-                    ->label('Trạng thái')
-                    ->options([
-                        'Đang hoạt động' => 'Đang hoạt động',
-                        'Tạm dừng' => 'Tạm dừng',
-                    ]),
+                Tables\Filters\TernaryFilter::make('status')
+                    ->label('Trạng thái hoạt động'),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
