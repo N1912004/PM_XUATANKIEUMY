@@ -130,6 +130,39 @@
         display: grid; grid-template-columns: 1.3fr 520px; gap: 56px; align-items: center;
     }
 
+    /* Co dãn tỷ lệ trên màn hình máy tính có chiều cao thấp để tránh tràn trang */
+    @media (min-width: 961px) and (max-height: 760px) {
+        .lg-values { display: none !important; }
+        .lg-hero { margin-top: 12px; }
+        .lg-hero .rule { margin: 8px 0; }
+        .lg-stage { min-height: 180px; }
+        .lg-shell { gap: 32px; padding: 16px 48px 10px; }
+
+        /* Cấu trúc nhỏ gọn cho Card trên Desktop lùn */
+        .lg-card { padding: 20px 32px 18px !important; }
+        .lg-card-logo { display: none !important; }
+        .lg-sub { display: none !important; }
+        .lg-title-rule { display: none !important; }
+        .lg-title { margin-bottom: 16px !important; font-size: 20px !important; }
+        .lg-field { margin-bottom: 12px !important; }
+        .lg-input { height: 44px !important; }
+        .lg-inputwrap > .fa-solid { font-size: 13px !important; }
+        .lg-eye { width: 34px !important; height: 34px !important; font-size: 13px !important; }
+        .lg-submit { height: 46px !important; font-size: 14.5px !important; }
+        .lg-row { margin-bottom: 14px !important; }
+    }
+    @media (min-width: 961px) and (max-height: 620px) {
+        .lg-stage { display: none !important; }
+        .lg-hero h1 { font-size: 20px; line-height: 1.3; }
+        .lg-hero .en { font-size: 14px; }
+        .lg-shell { padding: 10px 48px 6px; }
+        .lg-card { padding: 16px 24px 14px !important; }
+        .lg-field { margin-bottom: 8px !important; }
+        .lg-input { height: 40px !important; }
+        .lg-submit { height: 40px !important; }
+        .lg-row { margin-bottom: 10px !important; }
+    }
+
     /* ── Cột trái: thương hiệu ── */
     .lg-left { display: flex; flex-direction: column; height: 100%; padding: 4px 0 0; box-sizing: border-box; }
     .lg-lockup { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
@@ -159,14 +192,14 @@
     }
     .lg-wheel svg { display: block; width: 100%; height: auto; }
     .lg-wheel-core {
-        position: absolute; inset: 50%; width: 43%; height: 43%; transform: translate(-50%, -50%);
+        position: absolute; inset: 50%; width: 46%; height: 46%; transform: translate(-50%, -50%);
         background: #fff; border-radius: 50%; display: flex; flex-direction: column;
-        align-items: center; justify-content: center; gap: 2px; text-align: center;
+        align-items: center; justify-content: center; gap: 1.5px; text-align: center;
         box-shadow: 0 0 0 5px rgba(255,255,255,.92);
     }
-    .lg-wheel-core .nm { font-size: 17px; font-weight: 800; color: var(--lg-bl); line-height: 1.05; margin-top: 3px; }
-    .lg-wheel-core .tg { font-size: 6.5px; font-weight: 700; color: var(--lg-rd); letter-spacing: .3em; }
-    .lg-wheel-core .iso { font-size: 11.5px; font-weight: 800; color: var(--lg-bl); margin-top: 3px; }
+    .lg-wheel-core .nm { font-size: 15px; font-weight: 800; color: var(--lg-bl); line-height: 1.05; margin-top: 1px; }
+    .lg-wheel-core .tg { font-size: 6px; font-weight: 700; color: var(--lg-rd); letter-spacing: .25em; }
+    .lg-wheel-core .iso { font-size: 9.5px; font-weight: 800; color: var(--lg-bl); margin-top: 2px; }
 
     /* 4 giá trị cốt lõi — icon OUTLINE như mẫu, không nền hộp */
     .lg-values { margin-top: auto; padding-top: 20px; display: flex; align-items: stretch; }
@@ -317,7 +350,7 @@
                         <circle cx="110" cy="110" r="108.5" fill="none" stroke="#fff" stroke-width="3"/>
                     </svg>
                     <div class="lg-wheel-core">
-                        @include('filament.pages.auth.partials.bluefire-logo', ['height' => 30])
+                        @include('filament.pages.auth.partials.bluefire-logo', ['height' => 26])
                         <div class="nm">BlueFire</div>
                         <div class="tg">TASTE BEAUTY</div>
                         <div class="iso">ISO 22000:2018</div>
