@@ -13,8 +13,6 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Catalog extends Model
 {
-    public const KITCHEN_TYPE = 'kitchen_type';
-
     public const DEPARTMENT = 'department';
 
     public const POSITION = 'position';
@@ -23,7 +21,6 @@ class Catalog extends Model
 
     /** @var array<string, string> */
     public const GROUP_LABELS = [
-        self::KITCHEN_TYPE => 'Loại bếp / nhà ăn',
         self::DEPARTMENT => 'Phòng ban',
         self::POSITION => 'Chức danh / chức vụ',
         self::LEAVE_TYPE => 'Loại nghỉ phép / tăng ca',

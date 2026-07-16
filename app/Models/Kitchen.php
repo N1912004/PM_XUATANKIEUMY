@@ -12,6 +12,7 @@ class Kitchen extends Model
         'area_id',
         'name',
         'type',
+        'kitchen_type_id',
         'capacity',
         'manager_id',
         'status',
@@ -20,6 +21,30 @@ class Kitchen extends Model
     public function area(): BelongsTo
     {
         return $this->belongsTo(Area::class);
+    }
+
+    public function kitchenType(): BelongsTo
+    {
+        return $this->belongsTo(KitchenType::class);
+    }
+
+    /**
+     * Tương thích ngược chiều ĐỌC: code cũ (seeder, test, export) đọc $kitchen->type.
+     */
+    public function getTypeAttribute(): ?string
+    {
+        return $this->kitchenType?->name;
+    }
+
+    /**
+     * Tương thích ngược chiều GHI: `'type' => 'Bếp trung tâm'` được ánh xạ sang
+     * kitchen_type_id, tự tạo bản ghi loại nếu chưa có — giống Ingredient/Recipe.
+     */
+    public function setTypeAttribute(?string $value): void
+    {
+        $this->attributes['kitchen_type_id'] = filled($value)
+            ? KitchenType::firstOrCreate(['name' => trim($value)])->id
+            : null;
     }
 
     public function manager(): BelongsTo

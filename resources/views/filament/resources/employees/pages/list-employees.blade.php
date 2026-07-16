@@ -216,7 +216,7 @@
                             </td>
                             <td style="padding:12px 12px;">{{ $emp->department }}</td>
                             <td style="padding:12px 12px;">{{ $emp->position }}</td>
-                            <td style="padding:12px 12px;">{{ $emp->area?->name ?? '—' }}</td>
+                            <td style="padding:12px 12px;">{{ $emp->area?->name }}</td>
                             <td style="padding:12px 12px;">{{ $emp->start_date ? $emp->start_date->format('d/m/Y') : '—' }}</td>
                             <td style="padding:12px 12px;">
                                 @if($emp->status === 'working')

@@ -202,7 +202,7 @@
                                 @endif
                             </td>
                             <td style="padding:12px 12px; font-weight:700; color:var(--po-tx)">{{ $row->duration_text }}</td>
-                            <td style="padding:12px 12px; max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap" title="{{ $row->reason }}">{{ $row->reason ?: '—' }}</td>
+                            <td style="padding:12px 12px; max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap" title="{{ $row->reason }}">{{ $row->reason }}</td>
                             <td style="padding:12px 12px;">
                                 @if($row->approver)
                                     <div style="display:flex; align-items:center; gap:8px">

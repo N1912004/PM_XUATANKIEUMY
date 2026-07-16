@@ -242,7 +242,7 @@ class AdminPanelProvider extends PanelProvider
                          * icon rơi về xám mặc định và sidebar trông lộn xộn.
                          */
                         .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a:is(
-                            [href$="/admin"], [href*="/dashboard"], [href*="/chat-nhom"], [href*="/areas"], [href*="/kitchens"]
+                            [href$="/admin"], [href*="/dashboard"], [href*="/chat-nhom"], [href*="/areas"], [href*="/kitchens"], [href*="/kitchen-types"]
                         ) .fi-sidebar-item-icon { color: #0ea5e9 !important; } /* Tổng quan & Giao tiếp — Sky */
 
                         .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a:is(
