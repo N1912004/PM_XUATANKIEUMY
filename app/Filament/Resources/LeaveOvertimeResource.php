@@ -82,12 +82,12 @@ class LeaveOvertimeResource extends Resource
                         Forms\Components\Select::make('status')
                             ->label('Trạng thái phê duyệt')
                             ->options([
-                                'Chờ duyệt' => 'Chờ duyệt',
-                                'Đã duyệt' => 'Đã duyệt',
-                                'Từ chối' => 'Từ chối',
-                                'Đã hủy' => 'Đã hủy',
+                                'pending' => 'Chờ duyệt',
+                                'approved' => 'Đã duyệt',
+                                'rejected' => 'Từ chối',
+                                'cancelled' => 'Đã hủy',
                             ])
-                            ->default('Chờ duyệt')
+                            ->default('pending')
                             ->required(),
                     ]),
             ]);
@@ -147,11 +147,18 @@ class LeaveOvertimeResource extends Resource
                 Tables\Columns\TextColumn::make('status')
                     ->label('TRẠNG THÁI')
                     ->badge()
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'pending' => 'Chờ duyệt',
+                        'approved' => 'Đã duyệt',
+                        'rejected' => 'Từ chối',
+                        'cancelled' => 'Đã hủy',
+                        default => $state,
+                    })
                     ->color(fn (string $state): string => match ($state) {
-                        'Chờ duyệt' => 'warning',
-                        'Đã duyệt' => 'success',
-                        'Từ chối' => 'danger',
-                        'Đã hủy' => 'gray',
+                        'pending' => 'warning',
+                        'approved' => 'success',
+                        'rejected' => 'danger',
+                        'cancelled' => 'gray',
                         default => 'gray',
                     })
                     ->sortable(),
@@ -175,10 +182,10 @@ class LeaveOvertimeResource extends Resource
                 Tables\Filters\SelectFilter::make('status')
                     ->label('Trạng thái')
                     ->options([
-                        'Chờ duyệt' => 'Chờ duyệt',
-                        'Đã duyệt' => 'Đã duyệt',
-                        'Từ chối' => 'Từ chối',
-                        'Đã hủy' => 'Đã hủy',
+                        'pending' => 'Chờ duyệt',
+                        'approved' => 'Đã duyệt',
+                        'rejected' => 'Từ chối',
+                        'cancelled' => 'Đã hủy',
                     ]),
             ])
             ->actions([

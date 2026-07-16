@@ -67,16 +67,18 @@ class PurchaseOrderResource extends Resource
                         'sent' => 'Đã gửi NCC (Sent)',
                         'checking' => 'Đang kiểm (Checking)',
                         'done' => 'Hoàn thành (Done)',
+                        'cancelled' => 'Đã hủy (Cancelled)',
                     ])
                     ->default('draft')
-                    // State machine chỉ đi tiến draft → sent → checking → done; lùi trạng thái
-                    // (đặc biệt done → khác) phá cơ chế chống nhập kho lặp (stocked_at)
                     ->rule(fn (?PurchaseOrder $record) => function (string $attribute, $value, \Closure $fail) use ($record): void {
                         if (! $record) {
                             return;
                         }
-                        $order = ['draft' => 0, 'sent' => 1, 'checking' => 2, 'done' => 3];
-                        if (($order[$value] ?? 0) < ($order[$record->status] ?? 0)) {
+                        $order = ['draft' => 0, 'sent' => 1, 'checking' => 2, 'done' => 3, 'cancelled' => 4];
+                        if ($record->status === 'done' && $value !== 'done') {
+                            $fail('Đơn hàng đã hoàn thành nhập kho không được phép thay đổi trạng thái.');
+                        }
+                        if (($order[$value] ?? 0) < ($order[$record->status] ?? 0) && $value !== 'cancelled') {
                             $fail('Không được lùi trạng thái đơn hàng (vòng đời chỉ đi tiến Nháp → Đã gửi → Đang kiểm → Hoàn thành).');
                         }
                     }),
@@ -133,6 +135,7 @@ class PurchaseOrderResource extends Resource
                         $currentPage = method_exists($livewire, 'getTablePage') ? $livewire->getTablePage() : 1;
                         $recordsPerPage = method_exists($livewire, 'getTableRecordsPerPage') ? $livewire->getTableRecordsPerPage() : 10;
                         $perPage = is_numeric($recordsPerPage) ? (int) $recordsPerPage : 10;
+
                         return (string) ($rowLoop->iteration + ($perPage * ($currentPage - 1)));
                     })
                     ->alignCenter()
@@ -161,8 +164,11 @@ class PurchaseOrderResource extends Resource
                     ->label('TỔNG GIÁ TRỊ')
                     ->html()
                     ->formatStateUsing(function ($state) {
-                        if ($state === null) return '—';
+                        if ($state === null) {
+                            return '—';
+                        }
                         $formatted = number_format($state, 0, ',', '.');
+
                         return "<strong>{$formatted}</strong><span style=\"font-size: 10px; font-weight: 500; color: #94a3b8; margin-left: 2px;\">đ</span>";
                     })
                     ->alignRight()
@@ -178,6 +184,7 @@ class PurchaseOrderResource extends Resource
                         'sent' => 'info',
                         'checking' => 'warning',
                         'done' => 'success',
+                        'cancelled' => 'danger',
                         default => 'gray',
                     })
                     ->formatStateUsing(fn (string $state): string => match ($state) {
@@ -185,6 +192,7 @@ class PurchaseOrderResource extends Resource
                         'sent' => 'Đã gửi NCC',
                         'checking' => 'Đang kiểm hàng',
                         'done' => 'Hoàn thành',
+                        'cancelled' => 'Đã hủy',
                         default => $state,
                     }),
             ])
@@ -202,6 +210,7 @@ class PurchaseOrderResource extends Resource
                         'sent' => 'Đã gửi NCC',
                         'checking' => 'Đang kiểm hàng',
                         'done' => 'Hoàn thành',
+                        'cancelled' => 'Đã hủy',
                     ]),
             ])
             ->actions([

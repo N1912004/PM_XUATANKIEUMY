@@ -76,9 +76,9 @@ class ListEmployees extends Page
         // Gom 4 chỉ số đếm vào 1 query SQL thay vì 4 query riêng lẻ
         $counts = Employee::query()
             ->selectRaw('COUNT(*) AS total')
-            ->selectRaw("SUM(CASE WHEN status = 'Đang làm việc' THEN 1 ELSE 0 END) AS working")
-            ->selectRaw("SUM(CASE WHEN status = 'Nghỉ phép' THEN 1 ELSE 0 END) AS on_leave")
-            ->selectRaw("SUM(CASE WHEN status = 'Nghỉ việc' THEN 1 ELSE 0 END) AS resigned")
+            ->selectRaw("SUM(CASE WHEN status = 'working' THEN 1 ELSE 0 END) AS working")
+            ->selectRaw("SUM(CASE WHEN status = 'on_leave' THEN 1 ELSE 0 END) AS on_leave")
+            ->selectRaw("SUM(CASE WHEN status = 'resigned' THEN 1 ELSE 0 END) AS resigned")
             ->first();
 
         // Đếm số tài liệu đính kèm sắp hết hạn trong vòng 30 ngày hoặc đã hết hạn

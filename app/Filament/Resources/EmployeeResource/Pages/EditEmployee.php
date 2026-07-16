@@ -257,7 +257,7 @@ class EditEmployee extends Page
 
     public function getManagers()
     {
-        return Employee::where('status', 'Đang làm việc')
+        return Employee::where('status', 'working')
             ->where('id', '!=', $this->record->id)
             ->get();
     }

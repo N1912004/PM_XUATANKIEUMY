@@ -65,7 +65,7 @@ class ListAreas extends Page
     {
         return [
             'total_areas' => Area::count(),
-            'active_areas' => Area::where('status', 'Đang hoạt động')->count(),
+            'active_areas' => Area::where('status', true)->count(),
             'total_kitchens' => Kitchen::count(),
             'managers' => Area::whereNotNull('manager_id')->distinct('manager_id')->count('manager_id'),
         ];

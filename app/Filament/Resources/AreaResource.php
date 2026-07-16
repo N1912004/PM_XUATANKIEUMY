@@ -57,13 +57,9 @@ class AreaResource extends Resource
                                     ->relationship('manager', 'name')
                                     ->searchable()
                                     ->preload(),
-                                Forms\Components\Select::make('status')
-                                    ->label('Trạng thái')
-                                    ->options([
-                                        'Đang hoạt động' => 'Đang hoạt động',
-                                        'Tạm dừng' => 'Tạm dừng',
-                                    ])
-                                    ->default('Đang hoạt động')
+                                Forms\Components\Toggle::make('status')
+                                    ->label('Hoạt động')
+                                    ->default(true)
                                     ->required(),
                             ]),
                         Forms\Components\Textarea::make('notes')
@@ -105,23 +101,14 @@ class AreaResource extends Resource
                     ->color('primary')
                     ->alignCenter()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('status')
+                Tables\Columns\IconColumn::make('status')
                     ->label('TRẠNG THÁI')
-                    ->badge()
-                    ->color(fn (string $state): string => match ($state) {
-                        'Đang hoạt động' => 'success',
-                        'Tạm dừng' => 'danger',
-                        default => 'gray',
-                    })
+                    ->boolean()
                     ->sortable(),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('status')
-                    ->label('Trạng thái')
-                    ->options([
-                        'Đang hoạt động' => 'Đang hoạt động',
-                        'Tạm dừng' => 'Tạm dừng',
-                    ]),
+                Tables\Filters\TernaryFilter::make('status')
+                    ->label('Trạng thái hoạt động'),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),

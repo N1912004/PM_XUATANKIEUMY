@@ -36,7 +36,7 @@ class CreateEmployee extends Page
 
     public $start_date;
 
-    public $status = 'Đang làm việc';
+    public $status = 'working';
 
     public $avatar_url;
 
@@ -229,6 +229,6 @@ class CreateEmployee extends Page
 
     public function getManagers()
     {
-        return Employee::where('status', 'Đang làm việc')->get();
+        return Employee::where('status', 'working')->get();
     }
 }

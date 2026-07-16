@@ -16,6 +16,10 @@ class Area extends Model
         'notes',
     ];
 
+    protected $casts = [
+        'status' => 'boolean',
+    ];
+
     public function manager(): BelongsTo
     {
         return $this->belongsTo(Employee::class, 'manager_id');

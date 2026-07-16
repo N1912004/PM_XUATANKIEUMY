@@ -73,10 +73,11 @@ class FoodSafetyAuditResource extends Resource
                     ->label('Kết luận')
                     ->required()
                     ->options([
-                        'Đạt' => 'Đạt',
-                        'Không đạt' => 'Không đạt',
+                        'pending' => 'Chờ đánh giá',
+                        'passed' => 'Đạt',
+                        'failed' => 'Không đạt',
                     ])
-                    ->default('Đạt'),
+                    ->default('pending'),
                 Forms\Components\TextInput::make('inspected_by')
                     ->label('Người thực hiện')
                     ->maxLength(255)
@@ -139,9 +140,16 @@ class FoodSafetyAuditResource extends Resource
                 Tables\Columns\TextColumn::make('status')
                     ->label('Kết luận')
                     ->badge()
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'pending' => 'Chờ đánh giá',
+                        'passed' => 'Đạt',
+                        'failed' => 'Không đạt',
+                        default => $state,
+                    })
                     ->color(fn (string $state): string => match ($state) {
-                        'Đạt' => 'success',
-                        'Không đạt' => 'danger',
+                        'pending' => 'warning',
+                        'passed' => 'success',
+                        'failed' => 'danger',
                         default => 'gray',
                     })
                     ->searchable(),
@@ -169,8 +177,9 @@ class FoodSafetyAuditResource extends Resource
                 Tables\Filters\SelectFilter::make('status')
                     ->label('Kết luận')
                     ->options([
-                        'Đạt' => 'Đạt',
-                        'Không đạt' => 'Không đạt',
+                        'pending' => 'Chờ đánh giá',
+                        'passed' => 'Đạt',
+                        'failed' => 'Không đạt',
                     ]),
             ])
             ->actions([

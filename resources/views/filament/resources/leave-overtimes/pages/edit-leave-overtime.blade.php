@@ -284,10 +284,10 @@
                                 <div class="field">
                                     <label>Trạng thái phê duyệt <span class="req">*</span></label>
                                     <select wire:model="status" class="ctrl" required>
-                                        <option value="Chờ duyệt">Chờ duyệt</option>
-                                        <option value="Đã duyệt">Đã duyệt</option>
-                                        <option value="Từ chối">Từ chối</option>
-                                        <option value="Đã hủy">Đã hủy</option>
+                                        <option value="pending">Chờ duyệt</option>
+                                        <option value="approved">Đã duyệt</option>
+                                        <option value="rejected">Từ chối</option>
+                                        <option value="cancelled">Đã hủy</option>
                                     </select>
                                 </div>
                             </div>

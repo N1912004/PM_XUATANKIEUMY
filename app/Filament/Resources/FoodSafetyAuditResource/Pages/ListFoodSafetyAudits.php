@@ -188,7 +188,7 @@ class ListFoodSafetyAudits extends ListRecords
     public function getInspectorOptions(): array
     {
         return Employee::query()
-            ->where('status', 'Đang làm việc')
+            ->where('status', 'working')
             ->orderBy('name')
             ->pluck('name', 'id')
             ->all();
@@ -419,7 +419,7 @@ class ListFoodSafetyAudits extends ListRecords
 
         // Đ/K trên biểu mẫu chỉ được ghi khi CÓ bản ghi kiểm thực thật; chưa kiểm thì để trống.
         $dk = fn (?FoodSafetyAudit $a): string => $a && $a->status
-            ? ($a->status === 'Đạt' ? 'Đạt' : 'K')
+            ? ($a->status === 'passed' ? 'Đạt' : 'K')
             : '';
 
         $dishes = [];

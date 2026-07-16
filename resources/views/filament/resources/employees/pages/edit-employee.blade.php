@@ -259,9 +259,9 @@
                     <div class="field">
                         <label>Trạng thái nhân viên <span class="req">*</span></label>
                         <select wire:model="status" class="ctrl" required>
-                            <option value="Đang làm việc">Đang làm việc</option>
-                            <option value="Nghỉ phép">Nghỉ phép</option>
-                            <option value="Nghỉ việc">Nghỉ việc</option>
+                            <option value="working">Đang làm việc</option>
+                            <option value="on_leave">Nghỉ phép</option>
+                            <option value="resigned">Nghỉ việc</option>
                         </select>
                     </div>
                 </div>

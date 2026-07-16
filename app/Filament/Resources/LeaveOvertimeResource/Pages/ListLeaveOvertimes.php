@@ -187,7 +187,7 @@ class ListLeaveOvertimes extends Page
 
         // Tab lọc
         if ($this->activeTab === 'history') {
-            $query->whereIn('status', ['Đã duyệt', 'Từ chối', 'Đã hủy']);
+            $query->whereIn('status', ['approved', 'rejected', 'cancelled']);
         }
 
         return $query->paginate($this->perPage);

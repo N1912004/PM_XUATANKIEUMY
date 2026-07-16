@@ -102,7 +102,7 @@
                                 {{ $row->kitchens->count() }}
                             </td>
                             <td style="padding:12px 14px;">
-                                @if($row->status === 'Đang hoạt động')
+                                @if($row->status)
                                     <span class="st-pill st-ok">Đang hoạt động</span>
                                 @else
                                     <span class="st-pill st-late">Tạm dừng</span>

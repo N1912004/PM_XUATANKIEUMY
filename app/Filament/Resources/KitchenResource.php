@@ -73,10 +73,11 @@ class KitchenResource extends Resource
                                 Forms\Components\Select::make('status')
                                     ->label('Trạng thái')
                                     ->options([
-                                        'Đang hoạt động' => 'Đang hoạt động',
-                                        'Tạm dừng' => 'Tạm dừng',
+                                        'active' => 'Đang hoạt động',
+                                        'paused' => 'Tạm dừng',
+                                        'maintenance' => 'Bảo trì',
                                     ])
-                                    ->default('Đang hoạt động')
+                                    ->default('active')
                                     ->required(),
                             ]),
                     ]),
@@ -118,9 +119,16 @@ class KitchenResource extends Resource
                 Tables\Columns\TextColumn::make('status')
                     ->label('TRẠNG THÁI')
                     ->badge()
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'active' => 'Đang hoạt động',
+                        'paused' => 'Tạm dừng',
+                        'maintenance' => 'Bảo trì',
+                        default => $state,
+                    })
                     ->color(fn (string $state): string => match ($state) {
-                        'Đang hoạt động' => 'success',
-                        'Tạm dừng' => 'danger',
+                        'active' => 'success',
+                        'paused' => 'danger',
+                        'maintenance' => 'gray',
                         default => 'gray',
                     })
                     ->sortable(),
@@ -135,8 +143,9 @@ class KitchenResource extends Resource
                 Tables\Filters\SelectFilter::make('status')
                     ->label('Trạng thái')
                     ->options([
-                        'Đang hoạt động' => 'Đang hoạt động',
-                        'Tạm dừng' => 'Tạm dừng',
+                        'active' => 'Đang hoạt động',
+                        'paused' => 'Tạm dừng',
+                        'maintenance' => 'Bảo trì',
                     ]),
             ])
             ->actions([

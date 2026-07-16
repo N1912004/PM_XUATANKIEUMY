@@ -94,7 +94,7 @@ class ListKitchens extends Page
     {
         return [
             'total_kitchens' => Kitchen::count(),
-            'active_kitchens' => Kitchen::where('status', 'Đang hoạt động')->count(),
+            'active_kitchens' => Kitchen::where('status', 'active')->count(),
             'total_areas' => Area::count(),
             'managers' => Kitchen::whereNotNull('manager_id')->distinct('manager_id')->count('manager_id'),
         ];

@@ -92,9 +92,9 @@
 
                 <select wire:model.live="kitchenStatusFilter" class="lv-sel" style="height:34px">
                     <option value="">Tất cả trạng thái</option>
-                    <option value="Đang hoạt động">Đang hoạt động</option>
-                    <option value="Tạm dừng">Tạm dừng</option>
-                    <option value="Bảo trì">Bảo trì</option>
+                    <option value="active">Đang hoạt động</option>
+                    <option value="paused">Tạm dừng</option>
+                    <option value="maintenance">Bảo trì</option>
                 </select>
             </div>
 
@@ -131,9 +131,9 @@
                             </td>
                             <td style="padding:12px 14px; font-weight:600">{{ $row->manager?->name ?: '—' }}</td>
                             <td style="padding:12px 14px;">
-                                @if($row->status === 'Đang hoạt động')
+                                @if($row->status === 'active')
                                     <span class="st-pill st-ok">Đang hoạt động</span>
-                                @elseif($row->status === 'Tạm dừng')
+                                @elseif($row->status === 'paused')
                                     <span class="st-pill st-late">Tạm dừng</span>
                                 @else
                                     <span class="st-pill" style="background:var(--po-bd2); color:var(--po-su); border-color:var(--po-bd)">Bảo trì</span>

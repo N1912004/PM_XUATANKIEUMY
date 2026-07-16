@@ -26,7 +26,7 @@ class FoodSafetyAuditDemoSeeder extends Seeder
         DB::transaction(function (): void {
             $area = Area::query()->firstOrCreate(
                 ['code' => 'KV-DEMO-KT3B'],
-                ['name' => 'Khu vực demo kiểm thực', 'status' => 'Đang hoạt động'],
+                ['name' => 'Khu vực demo kiểm thực', 'status' => true],
             );
 
             $kitchen = Kitchen::query()->firstOrCreate(
@@ -35,7 +35,7 @@ class FoodSafetyAuditDemoSeeder extends Seeder
                     'area_id' => $area->id,
                     'type' => 'Nhà ăn phục vụ',
                     'capacity' => 1600,
-                    'status' => 'Đang hoạt động',
+                    'status' => 'active',
                 ],
             );
 
@@ -153,7 +153,7 @@ class FoodSafetyAuditDemoSeeder extends Seeder
                 'area_id' => $area->id,
                 'kitchen_id' => $kitchen->id,
                 'start_date' => '2025-01-01',
-                'status' => 'Đang làm việc',
+                'status' => 'working',
             ],
         );
 
@@ -267,7 +267,7 @@ class FoodSafetyAuditDemoSeeder extends Seeder
 
         foreach ([
             'Bước 2' => [
-                'status' => 'Đạt',
+                'status' => 'passed',
                 'inspected_by' => $inspector,
                 'cook_start_at' => $prepStart,
                 'cook_end_at' => $cookEnd,
@@ -275,7 +275,7 @@ class FoodSafetyAuditDemoSeeder extends Seeder
                 'notes' => '',
             ],
             'Bước 3' => [
-                'status' => 'Đạt',
+                'status' => 'passed',
                 'sample_kept_by' => $inspector,
                 'sample_kept_at' => $sampleTime,
                 'temperature' => (string) (65 + ($index % 4)),
@@ -283,7 +283,7 @@ class FoodSafetyAuditDemoSeeder extends Seeder
                 'notes' => '',
             ],
             'Lưu mẫu' => [
-                'status' => 'Đạt',
+                'status' => 'passed',
                 'sample_kept_by' => $inspector,
                 'sample_kept_at' => $sampleTime,
                 'sample_code' => 'LM-20260518-'.str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT),
@@ -292,7 +292,7 @@ class FoodSafetyAuditDemoSeeder extends Seeder
                 'notes' => 'Đ',
             ],
             'Hủy mẫu' => [
-                'status' => 'Đạt',
+                'status' => 'passed',
                 'sample_kept_by' => $inspector,
                 'sample_kept_at' => $sampleTime,
                 'sample_code' => 'LM-20260518-'.str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT),

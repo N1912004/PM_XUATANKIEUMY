@@ -136,9 +136,9 @@
             <span style="font-size:11px; font-weight:700; color:var(--po-mu); text-transform:uppercase">Trạng thái</span>
             <select wire:model.live="statusFilter" class="mp-sel">
                 <option value="">Tất cả</option>
-                <option value="Đang làm việc">Đang làm việc</option>
-                <option value="Nghỉ phép">Nghỉ phép</option>
-                <option value="Nghỉ việc">Nghỉ việc</option>
+                <option value="working">Đang làm việc</option>
+                <option value="on_leave">Nghỉ phép</option>
+                <option value="resigned">Nghỉ việc</option>
             </select>
         </div>
 
@@ -219,15 +219,15 @@
                             <td style="padding:12px 12px;">{{ $emp->area?->name ?? '—' }}</td>
                             <td style="padding:12px 12px;">{{ $emp->start_date ? $emp->start_date->format('d/m/Y') : '—' }}</td>
                             <td style="padding:12px 12px;">
-                                @if($emp->status === 'Đang làm việc')
+                                @if($emp->status === 'working')
                                     <span class="es-badge es-working">
                                         <span class="es-dot"></span> Đang làm việc
                                     </span>
-                                @elseif($emp->status === 'Nghỉ phép')
+                                @elseif($emp->status === 'on_leave')
                                     <span class="es-badge es-leave">
                                         <span class="es-dot"></span> Nghỉ phép
                                     </span>
-                                @elseif($emp->status === 'Nghỉ việc')
+                                @elseif($emp->status === 'resigned')
                                     <span class="es-badge es-resign">
                                         <span class="es-dot"></span> Nghỉ việc
                                     </span>
