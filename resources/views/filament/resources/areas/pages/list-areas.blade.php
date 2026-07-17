@@ -97,7 +97,7 @@
                                 <div style="font-weight:700; color:var(--po-tx)">{{ $row->name }}</div>
                                 <div style="font-size:11px; color:var(--po-mu); margin-top:2px">{{ $row->notes ?: 'Chưa có ghi chú' }}</div>
                             </td>
-                            <td style="padding:12px 14px; font-weight:600">{{ $row->manager?->name ?: '—' }}</td>
+                            <td style="padding:12px 14px; font-weight:600">{{ $row->manager?->name }}</td>
                             <td style="padding:12px 14px; text-align:center; font-weight:800; font-size:15px; color:var(--po-bl)">
                                 {{ $row->kitchens->count() }}
                             </td>

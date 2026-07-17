@@ -79,9 +79,9 @@
 
                                 <div class="field">
                                     <label>Loại nghỉ phép <span class="req">*</span></label>
-                                    <select wire:model="type" class="ctrl" required>
-                                        @foreach(\App\Models\Catalog::options(\App\Models\Catalog::LEAVE_TYPE) as $opt)
-                                            <option value="{{ $opt }}">{{ $opt }}</option>
+                                    <select wire:model="leave_type_id" class="ctrl" required>
+                                        @foreach(\App\Models\LeaveType::options(false) as $optId => $optName)
+                                            <option value="{{ $optId }}">{{ $optName }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -175,10 +175,10 @@
 
                                 <div class="field">
                                     <label>Loại tăng ca <span class="req">*</span></label>
-                                    <select wire:model="type" class="ctrl" required>
-                                        <option value="Tăng ca ngày thường">Tăng ca ngày thường</option>
-                                        <option value="Tăng ca cuối tuần">Tăng ca cuối tuần</option>
-                                        <option value="Tăng ca ngày lễ">Tăng ca ngày lễ</option>
+                                    <select wire:model="leave_type_id" class="ctrl" required>
+                                        @foreach(\App\Models\LeaveType::options(true) as $optId => $optName)
+                                            <option value="{{ $optId }}">{{ $optName }}</option>
+                                        @endforeach
                                     </select>
                                 </div>
 
@@ -302,7 +302,7 @@
                         <div class="lf-sum-ttl">Tóm tắt yêu cầu</div>
                         <div class="lf-sum-row">
                             <span class="lf-sum-k">Loại yêu cầu</span>
-                            <span class="lf-sum-v" style="font-weight:700; color:var(--po-bl)">{{ $type }}</span>
+                            <span class="lf-sum-v" style="font-weight:700; color:var(--po-bl)">{{ \App\Models\LeaveType::find($leave_type_id)?->name }}</span>
                         </div>
                         <div class="lf-sum-row">
                             <span class="lf-sum-k">Thời gian áp dụng</span>

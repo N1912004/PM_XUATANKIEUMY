@@ -125,13 +125,27 @@ class ListSuppliers extends Page
     /**
      * @return array<string, int>
      */
+    /** @var array<string, int>|null Memo trong 1 request — blade gọi stats() mỗi lần re-render. */
+    protected ?array $statsCache = null;
+
     public function stats(): array
     {
-        return [
+        if ($this->statsCache !== null) {
+            return $this->statsCache;
+        }
+
+        // 2 chỉ số trên bảng ingredients gộp vào 1 query thay vì 2 lần đếm riêng.
+        $ingredientCounts = Ingredient::query()
+            ->whereNotNull('supplier_id')
+            ->selectRaw('COUNT(*) AS total')
+            ->selectRaw('SUM(CASE WHEN reference_price > 0 THEN 1 ELSE 0 END) AS quotes')
+            ->first();
+
+        return $this->statsCache = [
             'suppliers' => Supplier::query()->count(),
             'types' => IngredientType::query()->whereHas('suppliers')->count(),
-            'ingredients' => Ingredient::query()->whereNotNull('supplier_id')->count(),
-            'quotes' => Ingredient::query()->whereNotNull('supplier_id')->where('reference_price', '>', 0)->count(),
+            'ingredients' => (int) $ingredientCounts->total,
+            'quotes' => (int) $ingredientCounts->quotes,
         ];
     }
 

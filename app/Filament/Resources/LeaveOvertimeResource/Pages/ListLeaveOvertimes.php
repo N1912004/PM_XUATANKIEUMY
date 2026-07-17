@@ -3,8 +3,9 @@
 namespace App\Filament\Resources\LeaveOvertimeResource\Pages;
 
 use App\Filament\Resources\LeaveOvertimeResource;
-use App\Models\Employee;
+use App\Models\Department;
 use App\Models\LeaveOvertime;
+use App\Models\LeaveType;
 use Carbon\Carbon;
 use Filament\Resources\Pages\Page;
 use Livewire\WithPagination;
@@ -95,21 +96,20 @@ class ListLeaveOvertimes extends Page
         $this->resetPage();
     }
 
-    public function getDepartments()
+    /**
+     * @return array<int, string> [id => name] phòng ban đang bật, cho bộ lọc.
+     */
+    public function getDepartments(): array
     {
-        return Employee::distinct()->whereNotNull('department')->pluck('department')->toArray();
+        return Department::options();
     }
 
-    public function getTypes()
+    /**
+     * @return array<int, string> [id => name] loại nghỉ/tăng ca đang bật, cho bộ lọc.
+     */
+    public function getTypes(): array
     {
-        return [
-            'Nghỉ phép năm',
-            'Nghỉ phép bệnh',
-            'Nghỉ không lương',
-            'Tăng ca ngày thường',
-            'Tăng ca cuối tuần',
-            'Tăng ca ngày lễ',
-        ];
+        return LeaveType::options();
     }
 
     public function deleteLeaveOvertime($id)
@@ -128,7 +128,7 @@ class ListLeaveOvertimes extends Page
      */
     protected function baseQuery()
     {
-        $query = LeaveOvertime::with(['employee', 'approver']);
+        $query = LeaveOvertime::with(['employee.department', 'leaveType', 'approver.position']);
 
         // Phân quyền
         $user = auth()->user();
@@ -165,12 +165,12 @@ class ListLeaveOvertimes extends Page
 
         // Bộ lọc phòng ban
         if ($this->departmentFilter) {
-            $query->whereHas('employee', fn ($q) => $q->where('department', $this->departmentFilter));
+            $query->whereHas('employee', fn ($q) => $q->where('department_id', $this->departmentFilter));
         }
 
         // Bộ lọc loại yêu cầu
         if ($this->typeFilter) {
-            $query->where('type', $this->typeFilter);
+            $query->where('leave_type_id', $this->typeFilter);
         }
 
         // Bộ lọc trạng thái
@@ -219,8 +219,8 @@ class ListLeaveOvertimes extends Page
                     $index + 1,
                     $row->employee?->code,
                     $row->employee?->name,
-                    $row->employee?->department,
-                    $row->type,
+                    $row->employee?->department?->name,
+                    $row->leaveType?->name,
                     $row->start_date?->format('d/m/Y').($row->end_date && ! $row->end_date->equalTo($row->start_date) ? ' - '.$row->end_date->format('d/m/Y') : ''),
                     $row->duration_text,
                     $row->reason,

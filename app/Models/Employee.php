@@ -16,6 +16,8 @@ class Employee extends Model
         'phone',
         'department',
         'position',
+        'department_id',
+        'position_id',
         'area_id',
         'kitchen_id',
         'start_date',
@@ -52,6 +54,35 @@ class Employee extends Model
     public function area(): BelongsTo
     {
         return $this->belongsTo(Area::class);
+    }
+
+    public function department(): BelongsTo
+    {
+        return $this->belongsTo(Department::class);
+    }
+
+    public function position(): BelongsTo
+    {
+        return $this->belongsTo(Position::class);
+    }
+
+    /**
+     * Tương thích ngược chiều GHI: code cũ (seeder, test, import) tạo nhân viên bằng chuỗi
+     * `'department' => 'Kho'` — mutator ánh xạ sang department_id (tự tạo bản ghi danh mục
+     * nếu chưa có). Không thêm accessor đọc vì tên trùng relation department().
+     */
+    public function setDepartmentAttribute(?string $value): void
+    {
+        $this->attributes['department_id'] = filled($value)
+            ? Department::firstOrCreate(['name' => trim($value)])->id
+            : null;
+    }
+
+    public function setPositionAttribute(?string $value): void
+    {
+        $this->attributes['position_id'] = filled($value)
+            ? Position::firstOrCreate(['name' => trim($value)])->id
+            : null;
     }
 
     public function kitchen(): BelongsTo

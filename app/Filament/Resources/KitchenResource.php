@@ -3,7 +3,6 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\KitchenResource\Pages;
-use App\Models\Catalog;
 use App\Models\Kitchen;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -54,11 +53,11 @@ class KitchenResource extends Resource
                                     ->searchable()
                                     ->preload()
                                     ->required(),
-                                Forms\Components\Select::make('type')
+                                Forms\Components\Select::make('kitchen_type_id')
                                     ->label('Phân loại')
-                                    ->options(fn (): array => Catalog::options(Catalog::KITCHEN_TYPE))
+                                    ->relationship('kitchenType', 'name', fn ($query) => $query->where('active', true)->orderBy('sort')->orderBy('name'))
                                     ->searchable()
-                                    ->native(false)
+                                    ->preload()
                                     ->required(),
                                 Forms\Components\TextInput::make('capacity')
                                     ->label('Công suất phục vụ (suất/ngày)')
@@ -102,7 +101,7 @@ class KitchenResource extends Resource
                     ->label('KHU VỰC')
                     ->sortable()
                     ->weight('bold'),
-                Tables\Columns\TextColumn::make('type')
+                Tables\Columns\TextColumn::make('kitchenType.name')
                     ->label('PHÂN LOẠI')
                     ->badge()
                     ->color('gray')
@@ -137,9 +136,9 @@ class KitchenResource extends Resource
                 Tables\Filters\SelectFilter::make('area_id')
                     ->label('Khu vực')
                     ->relationship('area', 'name'),
-                Tables\Filters\SelectFilter::make('type')
+                Tables\Filters\SelectFilter::make('kitchen_type_id')
                     ->label('Phân loại')
-                    ->options(fn (): array => Catalog::options(Catalog::KITCHEN_TYPE)),
+                    ->relationship('kitchenType', 'name', fn ($query) => $query->where('active', true)->orderBy('sort')->orderBy('name')),
                 Tables\Filters\SelectFilter::make('status')
                     ->label('Trạng thái')
                     ->options([

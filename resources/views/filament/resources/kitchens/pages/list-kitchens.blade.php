@@ -85,8 +85,8 @@
 
                 <select wire:model.live="kitchenTypeFilter" class="lv-sel" style="height:34px">
                     <option value="">Tất cả loại</option>
-                    @foreach(\App\Models\Catalog::options(\App\Models\Catalog::KITCHEN_TYPE) as $opt)
-                        <option value="{{ $opt }}">{{ $opt }}</option>
+                    @foreach($this->kitchenTypeOptions() as $ktId => $ktName)
+                        <option value="{{ $ktId }}">{{ $ktName }}</option>
                     @endforeach
                 </select>
 
@@ -125,11 +125,11 @@
                             <td style="padding:12px 14px; font-weight:600; color:var(--po-mu)">{{ ($kitchens->currentPage() - 1) * $kitchens->perPage() + $index + 1 }}</td>
                             <td style="padding:12px 14px; font-weight:700">{{ $row->name }}</td>
                             <td style="padding:12px 14px; font-weight:600; color:var(--po-mu)">{{ $row->area?->name }}</td>
-                            <td style="padding:12px 14px;">{{ $row->type }}</td>
+                            <td style="padding:12px 14px;">{{ $row->kitchenType?->name }}</td>
                             <td style="padding:12px 14px; text-align:right; font-weight:700; color:var(--po-bl)">
                                 {{ number_format($row->capacity, 0, ',', '.') }} suất/ngày
                             </td>
-                            <td style="padding:12px 14px; font-weight:600">{{ $row->manager?->name ?: '—' }}</td>
+                            <td style="padding:12px 14px; font-weight:600">{{ $row->manager?->name }}</td>
                             <td style="padding:12px 14px;">
                                 @if($row->status === 'active')
                                     <span class="st-pill st-ok">Đang hoạt động</span>

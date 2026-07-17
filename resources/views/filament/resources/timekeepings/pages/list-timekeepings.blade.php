@@ -88,7 +88,7 @@
                     <div>
                         <div class="ci-name">{{ $employee->name }}</div>
                         <div class="ci-id">{{ $employee->code }}</div>
-                        <div class="ci-role">Nhân viên · {{ $employee->department ?? '—' }}</div>
+                        <div class="ci-role">Nhân viên · {{ $employee->department?->name ?? '—' }}</div>
                     </div>
                 </div>
 
@@ -226,8 +226,8 @@
                 <span style="font-size:10px; font-weight:600; color:var(--fa); padding:0 2px">Phòng ban</span>
                 <select wire:model.live="departmentFilter" class="att-sel">
                     <option value="">Tất cả</option>
-                    @foreach($depts as $dept)
-                        <option value="{{ $dept }}">{{ $dept }}</option>
+                    @foreach($depts as $deptId => $deptName)
+                        <option value="{{ $deptId }}">{{ $deptName }}</option>
                     @endforeach
                 </select>
             </div>
@@ -324,7 +324,7 @@
                                     </div>
                                 </div>
                             </td>
-                            <td style="padding:12px 12px;">{{ $row->employee?->department }}</td>
+                            <td style="padding:12px 12px;">{{ $row->employee?->department?->name }}</td>
                             <td style="padding:12px 12px;">
                                 <div class="att-ca">
                                     <div class="att-ca-ico {{ $isNightShift ? 'att-ca-night' : 'att-ca-morning' }}">

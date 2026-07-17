@@ -40,7 +40,7 @@
                 </h4>
                 <p class="text-xs text-gray-400 font-bold mt-0.5">{{ $employee->code ?? 'NV000' }}</p>
                 <p class="text-xs text-gray-500 dark:text-gray-400 font-semibold mt-0.5">
-                    {{ $employee->position ?? 'Nhân viên' }} · {{ $employee->department ?? 'Chưa rõ' }}
+                    {{ $employee->position?->name ?? 'Nhân viên' }} · {{ $employee->department?->name ?? 'Chưa rõ' }}
                 </p>
             </div>
         </div>

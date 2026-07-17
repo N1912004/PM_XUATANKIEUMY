@@ -5,6 +5,7 @@ namespace App\Filament\Resources\KitchenResource\Pages;
 use App\Filament\Resources\KitchenResource;
 use App\Models\Area;
 use App\Models\Kitchen;
+use App\Models\KitchenType;
 use Filament\Resources\Pages\Page;
 use Livewire\WithPagination;
 
@@ -72,7 +73,7 @@ class ListKitchens extends Page
 
     public function kitchens()
     {
-        $query = Kitchen::with(['area', 'manager']);
+        $query = Kitchen::with(['area', 'manager', 'kitchenType']);
 
         if ($this->kitchenSearch) {
             $query->where('name', 'like', '%'.$this->kitchenSearch.'%');
@@ -81,13 +82,21 @@ class ListKitchens extends Page
             $query->where('area_id', $this->kitchenAreaFilter);
         }
         if ($this->kitchenTypeFilter) {
-            $query->where('type', $this->kitchenTypeFilter);
+            $query->where('kitchen_type_id', $this->kitchenTypeFilter);
         }
         if ($this->kitchenStatusFilter) {
             $query->where('status', $this->kitchenStatusFilter);
         }
 
         return $query->paginate(10, ['*'], 'kitchensPage');
+    }
+
+    /**
+     * @return array<int, string> [id => name] các loại bếp đang bật, cho dropdown lọc.
+     */
+    public function kitchenTypeOptions(): array
+    {
+        return KitchenType::options();
     }
 
     public function getStats(): array

@@ -202,6 +202,20 @@ class ListFoodSafetyAudits extends ListRecords
         ];
     }
 
+    /** Cấp quản lý được xem hồ sơ kiểm thực của mọi bếp. */
+    protected function seesAllKitchens(): bool
+    {
+        return auth()->user()?->hasRole(['super_admin', 'Quản trị viên']) ?? false;
+    }
+
+    /**
+     * Bếp bị ÉP cho người dùng thường (null = được xem toàn hệ thống).
+     */
+    protected function enforcedKitchenId(): ?int
+    {
+        return $this->seesAllKitchens() ? null : auth()->user()?->currentKitchenId();
+    }
+
     /**
      * Thực đơn ĐÃ CHỐT của ngày/ca đang chọn (memo theo request). Hồ sơ kiểm thực (QĐ 1246)
      * chỉ được lập trên thực đơn locked — thực đơn nháp/đang gửi chưa phải bữa ăn thực tế,
@@ -211,7 +225,8 @@ class ListFoodSafetyAudits extends ListRecords
      */
     protected function lockedMenus(): Collection
     {
-        $cacheKey = $this->date.'|'.$this->selectedShift;
+        $enforcedKitchenId = $this->enforcedKitchenId();
+        $cacheKey = $this->date.'|'.$this->selectedShift.'|'.($enforcedKitchenId ?? 'all');
 
         if (isset($this->lockedMenusCache[$cacheKey])) {
             return $this->lockedMenusCache[$cacheKey];
@@ -219,7 +234,15 @@ class ListFoodSafetyAudits extends ListRecords
 
         $query = Menu::with(['recipe.ingredients.supplier', 'shift'])
             ->where('status', 'locked')
-            ->whereDate('date', $this->date);
+            ->whereDate('date', $this->date)
+            // Người dùng thường: KHÓA CỨNG vào bếp của mình (fail-closed) — hồ sơ pháp lý
+            // QĐ 1246 của bếp này không được lập trên món của bếp khác. Chưa gắn bếp thì
+            // không thấy thực đơn nào. Cấp quản lý xem toàn hệ thống.
+            ->when($enforcedKitchenId, fn ($q, int $kitchenId) => $q->where('kitchen_id', $kitchenId))
+            ->when(
+                ! $this->seesAllKitchens() && ! auth()->user()?->currentKitchenId(),
+                fn ($q) => $q->whereRaw('1 = 0')
+            );
 
         if ($this->selectedShift) {
             $query->where('shift_id', $this->selectedShift);
