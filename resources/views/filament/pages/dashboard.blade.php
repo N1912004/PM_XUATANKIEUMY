@@ -59,10 +59,7 @@
         .dark .action-card:hover {
             box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.2) !important;
         }
-        .dark .icon-box.bg-amber-50 { background-color: rgba(245, 158, 11, 0.15) !important; }
-        .dark .icon-box.bg-green-50 { background-color: rgba(16, 185, 129, 0.15) !important; }
-        .dark .icon-box.bg-blue-50 { background-color: rgba(59, 130, 246, 0.15) !important; }
-        .dark .icon-box.bg-indigo-50 { background-color: rgba(99, 102, 241, 0.15) !important; }
+        .dark .icon-box.bg-blue-50 { background-color: rgba(38, 125, 193, 0.15) !important; }
         .dark .icon-box { border: 1px solid rgba(255, 255, 255, 0.05) !important; }
         
         /* Vá Dark Mode cho các phần tử Custom trong Dashboard (do không được Tailwind compile) */
@@ -194,8 +191,8 @@
         <!-- 1. Header Banner (Rich Gradient & Glassmorphism) -->
         <div class="premium-banner">
             <div class="absolute right-0 top-0 -mr-6 -mt-6 h-40 w-40 rounded-full bg-white/10 blur-2xl"></div>
-            <div class="absolute bottom-0 left-1/4 -mb-10 h-32 w-32 rounded-full bg-indigo-500/30 blur-xl"></div>
-            <div class="absolute top-1/2 left-10 -mt-12 h-16 w-16 rounded-full bg-blue-400/20 blur-lg"></div>
+            <div class="absolute bottom-0 left-1/4 -mb-10 h-32 w-32 rounded-full bg-white/10 blur-xl"></div>
+            <div class="absolute top-1/2 left-10 -mt-12 h-16 w-16 rounded-full bg-white/10 blur-lg"></div>
             
             <div class="relative z-10 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
                 <div class="space-y-2">
@@ -220,9 +217,9 @@
         <!-- 2. Operational Stats Widgets (Premium Styled Cards) -->
         <div class="custom-stats-grid">
             <!-- Portions Today -->
-            <div class="premium-card p-6 border-l-4 border-l-amber-500">
+            <div class="premium-card p-6 border-l-4 border-l-blue-600">
                 <div class="flex items-center justify-between">
-                    <div class="icon-box bg-amber-50 dark:bg-amber-950/20 text-amber-500">
+                    <div class="icon-box bg-blue-50 dark:bg-blue-950/20 text-blue-600">
                         <x-heroicon-o-book-open class="h-6 w-6" />
                     </div>
                     <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">{{ __('Hôm nay') }}</span>
@@ -234,9 +231,9 @@
             </div>
 
             <!-- Ingredients -->
-            <div class="premium-card p-6 border-l-4 border-l-green-500">
+            <div class="premium-card p-6 border-l-4 border-l-blue-600">
                 <div class="flex items-center justify-between">
-                    <div class="icon-box bg-green-50 dark:bg-green-950/20 text-green-500">
+                    <div class="icon-box bg-blue-50 dark:bg-blue-950/20 text-blue-600">
                         <x-heroicon-o-archive-box class="h-6 w-6" />
                     </div>
                     <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">{{ __('Nguyên liệu') }}</span>
@@ -248,9 +245,9 @@
             </div>
 
             <!-- Pending POs -->
-            <div class="premium-card p-6 border-l-4 border-l-blue-500">
+            <div class="premium-card p-6 border-l-4 border-l-blue-600">
                 <div class="flex items-center justify-between">
-                    <div class="icon-box bg-blue-50 dark:bg-blue-950/20 text-blue-500">
+                    <div class="icon-box bg-blue-50 dark:bg-blue-950/20 text-blue-600">
                         <x-heroicon-o-shopping-cart class="h-6 w-6" />
                     </div>
                     <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">{{ __('Đơn hàng') }}</span>
@@ -262,9 +259,9 @@
             </div>
 
             <!-- Active Employees -->
-            <div class="premium-card p-6 border-l-4 border-l-indigo-500">
+            <div class="premium-card p-6 border-l-4 border-l-blue-600">
                 <div class="flex items-center justify-between">
-                    <div class="icon-box bg-indigo-50 dark:bg-indigo-950/20 text-indigo-500">
+                    <div class="icon-box bg-blue-50 dark:bg-blue-950/20 text-blue-600">
                         <x-heroicon-o-users class="h-6 w-6" />
                     </div>
                     <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">{{ __('Bếp ăn') }}</span>
@@ -279,22 +276,22 @@
         <!-- 3. Quick Actions Section -->
         <div class="premium-card p-6">
             <h3 class="text-base font-extrabold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                <x-heroicon-s-bolt class="h-5 w-5 text-yellow-500 animate-bounce" />
+                <x-heroicon-s-bolt class="h-5 w-5 text-blue-600" />
                 {{ __('Lối tắt tác vụ nhanh') }}
             </h3>
             <div class="custom-actions-grid">
-                <a href="{{ url('/admin/menus') }}" class="action-card flex flex-col items-center justify-center p-5 rounded-2xl bg-gradient-to-b from-gray-50 to-white hover:from-amber-50/50 hover:to-amber-50/10 group hover:border-amber-300 dark:from-gray-800/40 dark:to-gray-900/40 dark:hover:from-amber-950/20">
-                    <div class="rounded-full bg-amber-100 dark:bg-amber-900/30 p-3 mb-3 group-hover:scale-110 transition-transform">
-                        <x-heroicon-o-calendar class="h-6 w-6 text-amber-600" />
+                <a href="{{ url('/admin/menus') }}" class="action-card flex flex-col items-center justify-center p-5 rounded-2xl bg-gradient-to-b from-gray-50 to-white hover:from-blue-50/50 hover:to-blue-50/10 group hover:border-blue-300 dark:from-gray-800/40 dark:to-gray-900/40 dark:hover:from-blue-950/20">
+                    <div class="rounded-full bg-blue-100 dark:bg-blue-900/30 p-3 mb-3 group-hover:scale-110 transition-transform">
+                        <x-heroicon-o-calendar class="h-6 w-6 text-blue-600" />
                     </div>
-                    <span class="text-xs font-bold text-gray-800 dark:text-gray-200 group-hover:text-amber-800 dark:group-hover:text-amber-400">{{ __('Lập thực đơn') }}</span>
+                    <span class="text-xs font-bold text-gray-800 dark:text-gray-200 group-hover:text-blue-800 dark:group-hover:text-blue-400">{{ __('Lập thực đơn') }}</span>
                 </a>
-                
-                <a href="{{ url('/admin/purchase-orders') }}" class="action-card flex flex-col items-center justify-center p-5 rounded-2xl bg-gradient-to-b from-gray-50 to-white hover:from-green-50/50 hover:to-green-50/10 group hover:border-green-300 dark:from-gray-800/40 dark:to-gray-900/40 dark:hover:from-green-950/20">
-                    <div class="rounded-full bg-green-100 dark:bg-green-900/30 p-3 mb-3 group-hover:scale-110 transition-transform">
-                        <x-heroicon-o-shopping-bag class="h-6 w-6 text-green-600" />
+
+                <a href="{{ url('/admin/purchase-orders') }}" class="action-card flex flex-col items-center justify-center p-5 rounded-2xl bg-gradient-to-b from-gray-50 to-white hover:from-blue-50/50 hover:to-blue-50/10 group hover:border-blue-300 dark:from-gray-800/40 dark:to-gray-900/40 dark:hover:from-blue-950/20">
+                    <div class="rounded-full bg-blue-100 dark:bg-blue-900/30 p-3 mb-3 group-hover:scale-110 transition-transform">
+                        <x-heroicon-o-shopping-bag class="h-6 w-6 text-blue-600" />
                     </div>
-                    <span class="text-xs font-bold text-gray-800 dark:text-gray-200 group-hover:text-green-800 dark:group-hover:text-green-400">{{ __('Đặt hàng NCC') }}</span>
+                    <span class="text-xs font-bold text-gray-800 dark:text-gray-200 group-hover:text-blue-800 dark:group-hover:text-blue-400">{{ __('Đặt hàng NCC') }}</span>
                 </a>
 
                 <a href="{{ url('/admin/food-safety-audits') }}" class="action-card flex flex-col items-center justify-center p-5 rounded-2xl bg-gradient-to-b from-gray-50 to-white hover:from-blue-50/50 hover:to-blue-50/10 group hover:border-blue-300 dark:from-gray-800/40 dark:to-gray-900/40 dark:hover:from-blue-950/20">
@@ -304,11 +301,11 @@
                     <span class="text-xs font-bold text-gray-800 dark:text-gray-200 group-hover:text-blue-800 dark:group-hover:text-blue-400">{{ __('Kiểm thực ATTP') }}</span>
                 </a>
 
-                <a href="{{ url('/admin/timekeepings') }}" class="action-card flex flex-col items-center justify-center p-5 rounded-2xl bg-gradient-to-b from-gray-50 to-white hover:from-indigo-50/50 hover:to-indigo-50/10 group hover:border-indigo-300 dark:from-gray-800/40 dark:to-gray-900/40 dark:hover:from-indigo-950/20">
-                    <div class="rounded-full bg-indigo-100 dark:bg-indigo-900/30 p-3 mb-3 group-hover:scale-110 transition-transform">
-                        <x-heroicon-o-clock class="h-6 w-6 text-indigo-600" />
+                <a href="{{ url('/admin/timekeepings') }}" class="action-card flex flex-col items-center justify-center p-5 rounded-2xl bg-gradient-to-b from-gray-50 to-white hover:from-blue-50/50 hover:to-blue-50/10 group hover:border-blue-300 dark:from-gray-800/40 dark:to-gray-900/40 dark:hover:from-blue-950/20">
+                    <div class="rounded-full bg-blue-100 dark:bg-blue-900/30 p-3 mb-3 group-hover:scale-110 transition-transform">
+                        <x-heroicon-o-clock class="h-6 w-6 text-blue-600" />
                     </div>
-                    <span class="text-xs font-bold text-gray-800 dark:text-gray-200 group-hover:text-indigo-800 dark:group-hover:text-indigo-400">{{ __('Chấm công NV') }}</span>
+                    <span class="text-xs font-bold text-gray-800 dark:text-gray-200 group-hover:text-blue-800 dark:group-hover:text-blue-400">{{ __('Chấm công NV') }}</span>
                 </a>
             </div>
         </div>
@@ -321,7 +318,7 @@
                 <div class="premium-card p-6">
                     <div class="flex items-center justify-between mb-4 pb-3 border-b border-gray-100 dark:border-gray-800">
                         <div class="flex items-center gap-2">
-                            <x-heroicon-o-book-open class="h-5 w-5 text-blue-500" />
+                            <x-heroicon-o-book-open class="h-5 w-5 text-blue-600" />
                             <h3 class="text-base font-extrabold text-gray-900 dark:text-white">{{ __('Thực đơn ca hôm nay') }}</h3>
                         </div>
                         <a href="{{ url('/admin/menus') }}" class="text-xs font-extrabold transition-colors uppercase tracking-wider custom-dashboard-link">{{ __('Xem tất cả') }}</a>
@@ -447,7 +444,7 @@
                 <div class="premium-card p-6">
                     <div class="flex items-center justify-between mb-4 pb-3 border-b border-gray-100 dark:border-gray-800">
                         <div class="flex items-center gap-2">
-                            <x-heroicon-o-document-text class="h-5 w-5 text-indigo-500" />
+                            <x-heroicon-o-document-text class="h-5 w-5 text-blue-600" />
                             <h3 class="text-base font-extrabold text-gray-900 dark:text-white">{{ __('Đơn hàng mới tạo (PO)') }}</h3>
                         </div>
                         <a href="{{ url('/admin/purchase-orders') }}" class="text-xs font-extrabold transition-colors uppercase tracking-wider custom-dashboard-link">{{ __('Xem tất cả') }}</a>
@@ -508,7 +505,7 @@
                 <div class="premium-card p-6">
                     <div class="flex items-center justify-between mb-4 pb-3 border-b border-gray-100 dark:border-gray-800">
                         <div class="flex items-center gap-2">
-                            <x-heroicon-o-check-badge class="h-5 w-5 text-green-500" />
+                            <x-heroicon-o-check-badge class="h-5 w-5 text-blue-600" />
                             <h3 class="text-base font-extrabold text-gray-900 dark:text-white">{{ __('Nhật ký kiểm thực ATTP hôm nay') }}</h3>
                         </div>
                         <a href="{{ url('/admin/food-safety-audits') }}" class="text-xs font-extrabold transition-colors uppercase tracking-wider custom-dashboard-link">{{ __('Kiểm thực') }}</a>

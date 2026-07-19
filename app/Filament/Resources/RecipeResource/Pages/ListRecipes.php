@@ -270,7 +270,7 @@ class ListRecipes extends Page
         return Actions\Action::make('import')
             ->label('Nhập món ăn (Excel)')
             ->icon('heroicon-o-document-arrow-up')
-            ->color('info')
+            ->color('gray')
             ->visible(fn (): bool => RecipeResource::canCreate())
             ->modalSubmitActionLabel('Xác nhận nhập dữ liệu')
             ->steps([
@@ -325,7 +325,7 @@ class ListRecipes extends Page
         return Actions\Action::make('export')
             ->label('Xuất dữ liệu')
             ->icon('heroicon-o-document-arrow-down')
-            ->color('success')
+            ->color('gray')
             ->action(fn () => Excel::download(
                 new RecipeExport($this->buildRecipesQuery()),
                 'ngan-hang-thuc-don-'.now()->format('Ymd-His').'.xlsx',

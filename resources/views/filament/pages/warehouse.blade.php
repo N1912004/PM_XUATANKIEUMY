@@ -119,10 +119,16 @@
             font-size: 1.125rem;
             margin-bottom: 0.5rem;
         }
-        .ico-blue { background: #eff6ff; color: #1e40af; }
-        .ico-green { background: #f0fdf4; color: #065f46; }
-        .ico-orange { background: #fff7ed; color: #ea580c; }
-        .ico-purple { background: #f5f3ff; color: #7c3aed; }
+        /* KPI icon đồng nhất màu brand — màu chỉ dùng mã hóa trạng thái ở dòng dữ liệu
+           (badge "Sắp hết" amber, chênh lệch xanh/đỏ), không tô ngẫu nhiên trên thẻ thống kê. */
+        .ico-blue,
+        .ico-green,
+        .ico-orange,
+        .ico-purple { background: rgb(var(--primary-50)); color: rgb(var(--primary-600)); }
+        :root.dark .ico-blue,
+        :root.dark .ico-green,
+        :root.dark .ico-orange,
+        :root.dark .ico-purple { background: rgb(var(--primary-950) / .2); color: rgb(var(--primary-400)); }
         
         .stat-val {
             font-size: 1.375rem;
@@ -533,9 +539,9 @@
 
     {{-- Nếu là quản trị viên/toàn quyền, cho phép chọn bếp linh hoạt --}}
     @if(auth()->user()?->hasRole(['super_admin', 'Quản trị viên']))
-        <div style="grid-column: 1 / -1; margin-bottom: 6px; display: flex; align-items: center; gap: 10px; background: white; padding: 12px 16px; border-radius: 8px; border: 1px solid #e2e8f0;" class="dark:bg-slate-800 dark:border-slate-700">
-            <span style="font-weight: 600; font-size: 14px; color: #475569;" class="dark:text-slate-300">Đang chọn Bếp ăn:</span>
-            <select wire:model.live="selectedKitchenId" style="padding: 6px 12px; border-radius: 6px; border: 1px solid #cbd5e1; background: white; font-size: 14px; color: #1e293b;" class="dark:bg-slate-900 dark:border-slate-800 dark:text-slate-200">
+        <div class="col-span-full mb-1.5 flex items-center gap-2.5 rounded-lg border border-gray-200 bg-white px-4 py-3 dark:border-gray-700 dark:bg-gray-800">
+            <span class="text-sm font-semibold text-gray-600 dark:text-gray-300">Đang chọn Bếp ăn:</span>
+            <select wire:model.live="selectedKitchenId" class="rounded-md border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:[color-scheme:dark]">
                 <option value="all">Tất cả các bếp</option>
                 @foreach(\App\Models\Kitchen::orderBy('name')->get() as $kit)
                     <option value="{{ $kit->id }}">{{ $kit->name }}</option>
@@ -1424,7 +1430,7 @@
                 </div>
                 <div class="grid gap-3">
                     <button type="button" class="flow-modal-choice" wire:click="startInbound('po')">
-                        <div class="p-2 bg-blue-50 text-blue-600 rounded-lg dark:bg-blue-950/20 dark:text-blue-400">
+                        <div class="p-2 bg-primary-50 text-primary-600 rounded-lg dark:bg-primary-950/20 dark:text-primary-400">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                             </svg>
@@ -1435,7 +1441,7 @@
                         </div>
                     </button>
                     <button type="button" class="flow-modal-choice" wire:click="startInbound('direct')">
-                        <div class="p-2 bg-emerald-50 text-emerald-600 rounded-lg dark:bg-emerald-950/20 dark:text-emerald-400">
+                        <div class="p-2 bg-primary-50 text-primary-600 rounded-lg dark:bg-primary-950/20 dark:text-primary-400">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
                             </svg>
@@ -1477,7 +1483,7 @@
                         </div>
                     </button>
                     <button type="button" class="flow-modal-choice" wire:click="startOutbound('transfer')">
-                        <div class="p-2 bg-purple-50 text-purple-600 rounded-lg dark:bg-purple-950/20 dark:text-purple-400">
+                        <div class="p-2 bg-blue-50 text-blue-600 rounded-lg dark:bg-blue-950/20 dark:text-blue-400">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
                             </svg>

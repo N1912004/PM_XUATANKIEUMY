@@ -1,10 +1,10 @@
 @push('styles')
 <style>
     :root {
-        --bl: #1267E8;
-        --bl-d: #0C50BB;
-        --bl-s: #EBF3FF;
-        --bl-m: #BFDBFE;
+        --bl: #267DC1;
+        --bl-d: #1F669E;
+        --bl-s: #E9F2F8;
+        --bl-m: #A8CBE6;
         --gn: #059669;
         --gn-s: #ECFDF5;
         --gn-t: #065F46;
@@ -27,12 +27,13 @@
         --mu: #64748B;
         --fa: #94A3B8;
         --wh: #FFFFFF;
+        --bg: #F8FAFC;
         --r: 12px;
         --sh2: 0 2px 4px rgba(15,23,42,.02);
     }
 
     :root.dark {
-        --bl-s: rgba(18, 103, 232, .18);
+        --bl-s: rgba(38, 125, 193, .18);
         --gn-s: rgba(5, 150, 105, .18);
         --or-s: rgba(234, 88, 12, .18);
         --pu-s: rgba(124, 58, 237, .18);
@@ -716,7 +717,7 @@
         font-weight: 700;
     }
     .dark .mn-dropdown-item.selected {
-        background: rgba(18, 103, 232, 0.25);
+        background: rgba(38, 125, 193, 0.25);
         color: #38bdf8;
     }
     .mn-dropdown-empty {

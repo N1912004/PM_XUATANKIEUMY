@@ -201,7 +201,7 @@ class ListStocks extends ListRecords
                 ->action(fn () => $this->setTab('check')),
             Actions\CreateAction::make()
                 ->label(__('warehouse.actions.create_stock'))
-                ->color('success'),
+                ->color('primary'),
         ];
     }
 

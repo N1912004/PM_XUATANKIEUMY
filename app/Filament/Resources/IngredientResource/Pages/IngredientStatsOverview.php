@@ -28,17 +28,17 @@ class IngredientStatsOverview extends StatsOverviewWidget
             Stat::make(__('ingredient.stats.suppliers'), $totalSuppliers)
                 ->description(__('ingredient.stats.suppliers_desc'))
                 ->descriptionIcon('heroicon-o-information-circle')
-                ->color('success')
+                ->color('primary')
                 ->icon('heroicon-o-truck'),
             Stat::make(__('ingredient.stats.units'), $totalUnits)
                 ->description(__('ingredient.stats.units_desc'))
                 ->descriptionIcon('heroicon-o-information-circle')
-                ->color('warning')
+                ->color('primary')
                 ->icon('heroicon-o-chart-bar'),
             Stat::make(__('ingredient.stats.types'), $totalTypes)
                 ->description(__('ingredient.stats.types_desc'))
                 ->descriptionIcon('heroicon-o-information-circle')
-                ->color('info')
+                ->color('primary')
                 ->icon('heroicon-o-tag'),
         ];
     }

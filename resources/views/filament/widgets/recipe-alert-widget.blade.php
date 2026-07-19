@@ -104,7 +104,7 @@
 }
 .fi-ta-filters-form select:focus {
     border-color: #93c5fd !important;
-    box-shadow: 0 0 0 3px rgba(18, 103, 232, 0.07) !important;
+    box-shadow: 0 0 0 3px rgba(38, 125, 193, 0.07) !important;
 }
 
 /* Định dạng các trường filter grid để xếp ngang */
@@ -126,7 +126,7 @@
 .fi-ta-search-field input {
     height: 36px !important;
     border-radius: 8px !important;
-    background-color: #f4f7fb !important;
+    background-color: #F8FAFC !important;
     border-color: #e2e8f0 !important;
     font-size: 13px !important;
     padding-left: 36px !important;
@@ -140,7 +140,7 @@
 .fi-ta-search-field input:focus {
     background-color: #ffffff !important;
     border-color: #93c5fd !important;
-    box-shadow: 0 0 0 3px rgba(18, 103, 232, 0.08) !important;
+    box-shadow: 0 0 0 3px rgba(38, 125, 193, 0.08) !important;
 }
 .dark .fi-ta-search-field input:focus {
     background-color: #1f2937 !important;

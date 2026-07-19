@@ -5,7 +5,7 @@
         $record = $this->record;
         $record->loadMissing(['supplier', 'items.ingredient']); // tránh N+1 khi lặp items
         $relatedPOs = $this->getRelatedPOs();
-        $colors = ['#1267E8', '#059669', '#D97706', '#7C3AED', '#EA580C', '#EC4899'];
+        $colors = ['#267DC1', '#059669', '#D97706', '#7C3AED', '#EA580C', '#EC4899'];
         $currentPOTotal = $record->items->sum(fn($it) => $it->quantity_ordered * $it->unit_price);
         $isWeek = str_contains(mb_strtolower($record->note ?? ''), 'tuần') || str_contains(strtolower($record->code ?? ''), 'tuan');
     @endphp

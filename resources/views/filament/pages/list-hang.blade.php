@@ -1,10 +1,10 @@
 @push('styles')
 <style>
     :root {
-        --bl: #1267E8;
-        --bl-d: #0C50BB;
-        --bl-s: #EBF3FF;
-        --bl-m: #BFDBFE;
+        --bl: #267DC1;
+        --bl-d: #1F669E;
+        --bl-s: #E9F2F8;
+        --bl-m: #A8CBE6;
         --gn: #059669;
         --gn-s: #ECFDF5;
         --gn-t: #065F46;
@@ -31,7 +31,7 @@
     }
 
     :root.dark {
-        --bl-s: rgba(18, 103, 232, .18);
+        --bl-s: rgba(38, 125, 193, .18);
         --gn-s: rgba(5, 150, 105, .18);
         --or-s: rgba(234, 88, 12, .18);
         --pu-s: rgba(124, 58, 237, .18);
@@ -94,7 +94,7 @@
         color: #ffffff !important;
     }
     .lhn-date-inp:focus {
-        box-shadow: 0 0 0 3px rgba(18,103,232,.1);
+        box-shadow: 0 0 0 3px rgba(38, 125, 193,.1);
     }
     .lhn-nav-btn {
         width: 34px;
@@ -417,7 +417,7 @@
         border-radius: var(--r);
         padding: 16px 22px;
         color: #fff;
-        box-shadow: 0 6px 20px rgba(18,103,232,.3);
+        box-shadow: 0 6px 20px rgba(38, 125, 193,.3);
     }
     .lhn-grand-lbl {
         font-size: 14px;
@@ -466,7 +466,7 @@
     .oh-step-active .oh-step-num {
         background: var(--bl);
         color: #fff;
-        box-shadow: 0 3px 8px rgba(18,103,232,.3);
+        box-shadow: 0 3px 8px rgba(38, 125, 193,.3);
     }
     .oh-step-done .oh-step-num {
         background: var(--gn);
@@ -747,7 +747,7 @@
                         @php 
                             $bg = ['#EFF6FF', '#F0FDF4', '#FEF3C7', '#F5F3FF'][$index % 4];
                             $color = ['#1e40af', '#065F46', '#78350F', '#4C1D95'][$index % 4];
-                            $border = ['#BFDBFE', '#A7F3D0', '#FDE68A', '#DDD6FE'][$index % 4];
+                            $border = ['#A8CBE6', '#A7F3D0', '#FDE68A', '#DDD6FE'][$index % 4];
                             $isChecked = in_array($sh->id, $selectedShifts);
                         @endphp
                         <label style="display:flex;align-items:center;gap:4px;background:{{ $bg }};color:{{ $color }};border:1px solid {{ $border }};border-radius:20px;padding:2px 8px;font-size:11.5px;font-weight:600;cursor:pointer; @if(!$isChecked) opacity: 0.45; @endif">
@@ -772,7 +772,7 @@
                     <div><div class="lhn-chip-val">{{ $stats['shifts'] }}</div><div class="lhn-chip-lbl">Ca phục vụ</div></div>
                 </div>
                 <div class="lhn-chip">
-                    <div class="lhn-chip-ico" style="background:#EBF3FF; color:#1267E8;"><i class="fa-solid fa-users"></i></div>
+                    <div class="lhn-chip-ico" style="background:#E9F2F8; color:#267DC1;"><i class="fa-solid fa-users"></i></div>
                     <div><div class="lhn-chip-val">{{ number_format($stats['portions']) }}</div><div class="lhn-chip-lbl">Tổng suất ăn</div></div>
                 </div>
                 <div class="lhn-chip">
@@ -1057,7 +1057,7 @@
                                         @endphp
                                         <tr style="background:#F8FAFC" class="dark:bg-gray-800/40">
                                             <td colspan="9" style="text-align:right; font-weight:700; color:#64748b;">Tổng nhóm {{ $cat['label'] }}:</td>
-                                            <td colspan="3" style="font-weight:800; color:#1267E8; font-size:13px;">{{ number_format($groupTotal, 0, ',', '.') }} đ</td>
+                                            <td colspan="3" style="font-weight:800; color:#267DC1; font-size:13px;">{{ number_format($groupTotal, 0, ',', '.') }} đ</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -1119,7 +1119,7 @@
                         @endphp
                         @if($ncc)
                             <div class="oh-ncc-chip">
-                                <div class="oh-ncc-chip-dot" style="background:#1267E8;"></div>
+                                <div class="oh-ncc-chip-dot" style="background:#267DC1;"></div>
                                 <div>
                                     <div class="oh-ncc-chip-name">{{ $ncc->code ?: 'NCC' }}</div>
                                     <div class="oh-ncc-chip-cnt" style="font-size:9.5px;">{{ $items->count() }} mặt hàng</div>
@@ -1134,7 +1134,7 @@
                 </div>
 
                 <!-- Info Box -->
-                <div style="background:#EBF3FF; color:#1e40af; border: 1px solid #BFDBFE; border-radius:12px; padding:12px; font-size:11.5px; line-height:1.4;">
+                <div style="background:#E9F2F8; color:#1e40af; border: 1px solid #A8CBE6; border-radius:12px; padding:12px; font-size:11.5px; line-height:1.4;">
                     <div style="font-weight:800; display:flex; align-items:center; gap:4px; margin-bottom:6px;">
                         <i class="fa-solid fa-circle-info"></i> Lưu ý
                     </div>

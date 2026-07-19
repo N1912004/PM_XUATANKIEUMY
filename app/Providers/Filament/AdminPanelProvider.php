@@ -81,7 +81,7 @@ class AdminPanelProvider extends PanelProvider
                 fn (): string => Blade::render("@vite(['resources/css/app.css', 'resources/js/app.js'])"),
             )
             ->colors([
-                'primary' => $this->getSetting('primary_color', '#2563eb'),
+                'primary' => $this->getSetting('primary_color', '#267DC1'),
             ])
             ->font('IBM Plex Sans')
             ->renderHook(
@@ -237,32 +237,21 @@ class AdminPanelProvider extends PanelProvider
                         }
                         
                         /*
-                         * Màu icon sidebar: MỘT màu cho MỘT nhóm nghiệp vụ (menu chưa được active).
-                         * Thêm màn hình mới thì PHẢI thêm slug vào đúng nhóm dưới đây, nếu không
-                         * icon rơi về xám mặc định và sidebar trông lộn xộn.
+                         * Icon sidebar: XÁM trung tính cho mọi menu chưa active — màu chỉ dành để
+                         * mã hóa TRẠNG THÁI, không dùng cho phân nhóm điều hướng. Identity toàn hệ
+                         * thống là xanh dương (primary) + cam ở logo. Menu active vẫn nền primary +
+                         * icon trắng (rule ở trên); hover đổi icon sang primary cho phản hồi nhẹ.
                          */
-                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a:is(
-                            [href$="/admin"], [href*="/dashboard"], [href*="/chat-nhom"], [href*="/areas"], [href*="/kitchens"], [href*="/kitchen-types"]
-                        ) .fi-sidebar-item-icon { color: #0ea5e9 !important; } /* Tổng quan & Giao tiếp — Sky */
-
-                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a:is(
-                            [href*="/recipes"], [href*="/recipe-types"], [href*="/menus"], [href*="/menu-audit-logs"],
-                            [href*="/lap-thuc-don-tuan"], [href*="/shifts"], [href*="/bao-cao"]
-                        ) .fi-sidebar-item-icon { color: #f97316 !important; } /* Vận hành bếp & Thực đơn — Orange */
-
-                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a:is(
-                            [href*="/stocks"], [href*="/stock-transfers"], [href*="/stock-transactions"], [href*="/list-hang"],
-                            [href*="/ingredients"], [href*="/ingredient-types"], [href*="/units"],
-                            [href*="/suppliers"], [href*="/purchase-orders"]
-                        ) .fi-sidebar-item-icon { color: #10b981 !important; } /* Cung ứng & Kho — Emerald */
-
-                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/food-safety-audits"] .fi-sidebar-item-icon { color: #6366f1 !important; } /* ATTP — Indigo */
-
-                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a:is(
-                            [href*="/employees"], [href*="/timekeepings"], [href*="/leave-overtimes"],
-                            [href*="/departments"], [href*="/positions"], [href*="/leave-types"],
-                            [href*="/users"], [href*="/shield"]
-                        ) .fi-sidebar-item-icon { color: #8b5cf6 !important; } /* Nhân sự & Phân quyền — Violet */
+                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) .fi-sidebar-item-icon {
+                            color: #64748b !important; /* Slate-500 */
+                        }
+                        .dark .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) .fi-sidebar-item-icon {
+                            color: #94a3b8 !important; /* Slate-400 */
+                        }
+                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) > .fi-sidebar-item-button:hover .fi-sidebar-item-icon,
+                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) > a:hover .fi-sidebar-item-icon {
+                            color: rgb(var(--primary-600)) !important;
+                        }
 
                         /* Recipe create/edit form: match BA mockup spacing and cost table emphasis */
                         .fi-resource-recipes .fi-header-heading {
