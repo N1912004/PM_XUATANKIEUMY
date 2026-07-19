@@ -3,7 +3,7 @@
     // rau xanh, củ quả, món nướng, món thịt, cá, đầu bếp); có màu nền dự phòng khi offline.
     $wheel = [
         ['photo-1490474418585-ba9bad8fd0ea', '#FDE68A'], // trái cây tươi
-        ['photo-1467003909585-2f8a72700288', '#BFDBFE'], // cá hồi / hải sản
+        ['photo-1467003909585-2f8a72700288', '#A8CBE6'], // cá hồi / hải sản
         ['photo-1540420773420-3366772f4999', '#BBF7D0'], // rau xanh
         ['photo-1512621776951-a57141f2eefd', '#FECACA'], // salad củ quả
         ['photo-1432139555190-58524dae6a55', '#FED7AA'], // hải sản / cá
@@ -14,8 +14,8 @@
     // Toạ độ 8 múi 45°/múi (tâm 110,110 bán kính 110, bắt đầu từ đỉnh 12h)
     $pts = [[110,0],[187.78,32.22],[220,110],[187.78,187.78],[110,220],[32.22,187.78],[0,110],[32.22,32.22]];
 
-    // ĐỌC MÀU CHỦ ĐẠO TỪ SETTINGS (Mặc định là xanh dương #1256C4 nếu chưa có cấu hình)
-    $primaryColor = \App\Models\Setting::get('primary_color', '#1256C4');
+    // ĐỌC MÀU CHỦ ĐẠO TỪ SETTINGS (Mặc định brand BlueFire #267DC1 nếu chưa có cấu hình)
+    $primaryColor = \App\Models\Setting::get('primary_color', '#267DC1');
 
     // Helper chuyển HEX sang RGB
     $hexToRgb = function ($hex) {

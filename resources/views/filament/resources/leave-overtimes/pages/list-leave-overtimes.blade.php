@@ -13,7 +13,7 @@
         if ($this->typeFilter !== '') $activeFiltersCount++;
         if ($this->statusFilter !== '') $activeFiltersCount++;
 
-        $avatarColors = ['#1267E8', '#059669', '#D97706', '#7C3AED', '#EA580C', '#EC4899'];
+        $avatarColors = ['#267DC1', '#059669', '#D97706', '#7C3AED', '#EA580C', '#EC4899'];
     @endphp
 
     @if (session()->has('message'))
@@ -131,7 +131,7 @@
                 <tbody>
                     @forelse($itemsList as $row)
                         @php
-                            $rowColor = $row->employee ? $avatarColors[$row->employee->id % count($avatarColors)] : '#1267E8';
+                            $rowColor = $row->employee ? $avatarColors[$row->employee->id % count($avatarColors)] : '#267DC1';
                             $rowInitials = '';
                             if ($row->employee) {
                                 $words = explode(' ', $row->employee->name);

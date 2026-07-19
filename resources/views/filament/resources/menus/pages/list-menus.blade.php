@@ -317,7 +317,7 @@
         <div class="tcard" style="overflow-x:auto">
             <table class="grid-table" style="width:100%; border-collapse:collapse; min-width:900px">
                 <thead>
-                    <tr style="background:#1267E8; color:#fff">
+                    <tr style="background:#267DC1; color:#fff">
                         <th style="padding:12px 14px; text-align:left; width:120px">CA / THỨ</th>
                         @for($d = 0; $d < 7; $d++)
                             @php

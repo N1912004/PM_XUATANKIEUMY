@@ -5,7 +5,7 @@
         $currentUserId = filament()->auth()->id();
         $user = filament()->auth()->user();
         $kitchenName = $user->kitchen?->name ?? 'Vận hành ca sáng';
-        $avatarColors = ['#1267E8', '#059669', '#D97706', '#7C3AED', '#EA580C', '#EC4899'];
+        $avatarColors = ['#267DC1', '#059669', '#D97706', '#7C3AED', '#EA580C', '#EC4899'];
     @endphp
 
     <div

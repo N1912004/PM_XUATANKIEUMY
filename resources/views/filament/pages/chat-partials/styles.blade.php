@@ -1,12 +1,9 @@
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
     :root {
-        --bl: #1267E8;
-        --bl-d: #0C50BB;
-        --bl-s: #EBF3FF;
-        --bl-m: #BFDBFE;
+        --bl: #267DC1;
+        --bl-d: #1F669E;
+        --bl-s: #E9F2F8;
+        --bl-m: #A8CBE6;
         --gn: #059669;
         --gn-s: #ECFDF5;
         --gn-t: #065F46;
@@ -24,7 +21,7 @@
         --sk-s: #F0F9FF;
         --pk: #E11D48;
         --pk-s: #FFF1F2;
-        --bg: #F4F7FB;
+        --bg: #F8FAFC;
         --wh: #fff;
         --tx: #0F172A;
         --su: #334155;
@@ -34,11 +31,11 @@
         --bd2: #F1F5F9;
         --sh: 0 1px 3px rgba(15,23,42,.05), 0 4px 16px rgba(15,23,42,.05);
         --sh2: 0 1px 2px rgba(15,23,42,.04);
-        --r: 14px;
+        --r: 12px;
     }
 
     :root.dark {
-        --bl-s: rgba(18, 103, 232, .18);
+        --bl-s: rgba(38, 125, 193, .18);
         --gn-s: rgba(5, 150, 105, .18);
         --or-s: rgba(234, 88, 12, .18);
         --pu-s: rgba(124, 58, 237, .18);
@@ -71,7 +68,7 @@
     }
 
     .chat-page {
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         color: var(--tx);
         background: transparent;
         height: calc(100vh - 11rem);
@@ -222,7 +219,7 @@
         flex-shrink: 0;
     }
 
-    .g-av-b { background: #EBF3FF; color: #1267E8; }
+    .g-av-b { background: #E9F2F8; color: #267DC1; }
     .g-av-o { background: #FFF7ED; color: #EA580C; }
     .g-av-g { background: #ECFDF5; color: #059669; }
     .g-av-p { background: #F5F3FF; color: #7C3AED; }
@@ -451,7 +448,7 @@
         border-color: transparent;
         border-bottom-left-radius: 12px;
         border-bottom-right-radius: 3px;
-        box-shadow: 0 4px 12px rgba(18, 103, 232, 0.22);
+        box-shadow: 0 4px 12px rgba(38, 125, 193, 0.22);
     }
 
     .msg-time {
@@ -504,7 +501,7 @@
 
     .f-pdf { background: #FEF2F2; color: #DC2626; }
     .f-xls { background: #ECFDF5; color: #059669; }
-    .f-doc { background: #EBF3FF; color: #1267E8; }
+    .f-doc { background: #E9F2F8; color: #267DC1; }
 
     .fi-nm {
         font-size: 12px;
@@ -584,7 +581,7 @@
     .mi-box:focus-within {
         border-color: #93C5FD;
         background: #fff;
-        box-shadow: 0 0 0 3px rgba(18, 103, 232, 0.08);
+        box-shadow: 0 0 0 3px rgba(38, 125, 193, 0.08);
     }
 
     .mi-box input {
@@ -627,12 +624,12 @@
         font-size: 14px;
         transition: .13s;
         flex-shrink: 0;
-        box-shadow: 0 4px 10px rgba(18, 103, 232, 0.2);
+        box-shadow: 0 4px 10px rgba(38, 125, 193, 0.2);
     }
 
     .mi-send:hover {
         transform: scale(1.05);
-        box-shadow: 0 5px 12px rgba(18, 103, 232, 0.3);
+        box-shadow: 0 5px 12px rgba(38, 125, 193, 0.3);
     }
 
     @media (max-width: 768px) {

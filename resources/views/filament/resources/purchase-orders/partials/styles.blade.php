@@ -1,13 +1,12 @@
 @push('styles')
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
     :root {
-        --po-bl: #1267E8;
-        --po-bl-d: #0C50BB;
-        --po-bl-s: #EBF3FF;
-        --po-bl-m: #BFDBFE;
+        --po-bl: #267DC1;
+        --po-bl-d: #1F669E;
+        --po-bl-s: #E9F2F8;
+        --po-bl-m: #A8CBE6;
         --po-gn: #059669;
         --po-gn-s: #ECFDF5;
         --po-gn-t: #065F46;
@@ -30,7 +29,7 @@
     }
 
     :root.dark {
-        --po-bl-s: rgba(18, 103, 232, .18);
+        --po-bl-s: rgba(38, 125, 193, .18);
         --po-gn-s: rgba(5, 150, 105, .18);
         --po-or-s: rgba(234, 88, 12, .18);
         --po-pu-s: rgba(124, 58, 237, .18);
@@ -59,8 +58,8 @@
     }
 
     .dark .po-info {
-        background: rgba(18, 103, 232, .12);
-        border-color: rgba(18, 103, 232, .35);
+        background: rgba(38, 125, 193, .12);
+        border-color: rgba(38, 125, 193, .35);
         color: var(--po-su);
     }
 
@@ -76,7 +75,7 @@
     .po-page,
     .po-page * {
         box-sizing: border-box;
-        font-family: 'Inter', system-ui, sans-serif;
+        font-family: 'IBM Plex Sans', system-ui, sans-serif;
     }
 
     .po-page .fa,
@@ -172,14 +171,14 @@
         background: var(--po-bl) !important;
         border-color: var(--po-bl) !important;
         color: #fff !important;
-        box-shadow: 0 4px 10px rgba(18, 103, 232, .18);
+        box-shadow: 0 4px 10px rgba(38, 125, 193, .18);
     }
 
     .po-btn-primary:hover {
         background: var(--po-bl-d) !important;
         border-color: var(--po-bl-d) !important;
         color: #fff !important;
-        box-shadow: 0 4px 14px rgba(18, 103, 232, .28);
+        box-shadow: 0 4px 14px rgba(38, 125, 193, .28);
     }
 
     /* KPIs Grid */
@@ -217,7 +216,7 @@
         height: 1.4rem;
     }
 
-    .po-ico-blue { background: #EBF3FF; color: var(--po-bl); }
+    .po-ico-blue { background: #E9F2F8; color: var(--po-bl); }
     .po-ico-orange { background: var(--po-or-s); color: var(--po-or); }
     .po-ico-green { background: var(--po-gn-s); color: var(--po-gn); }
     .po-ico-purple { background: #F0FDF4; color: #15803D; }
@@ -289,7 +288,7 @@
     .po-search input:focus {
         border-color: var(--po-bl-m);
         background: var(--po-wh);
-        box-shadow: 0 0 0 3px rgba(18, 103, 232, .06);
+        box-shadow: 0 0 0 3px rgba(38, 125, 193, .06);
     }
 
     .po-select {
@@ -366,7 +365,7 @@
 
     .po-item:hover {
         border-color: var(--po-bl-m);
-        box-shadow: 0 6px 20px rgba(18, 103, 232, .06);
+        box-shadow: 0 6px 20px rgba(38, 125, 193, .06);
         transform: translateY(-1px);
     }
 
@@ -463,7 +462,7 @@
     .os-sent {
         background: #EFF6FF;
         color: #1E40AF;
-        border: 1px solid #BFDBFE;
+        border: 1px solid #A8CBE6;
         border-radius: 999px;
         padding: .15rem .65rem;
         font-size: .72rem;
@@ -886,7 +885,7 @@
 
     .oh-item:hover {
         border-color: var(--po-bl-m);
-        box-shadow: 0 4px 16px rgba(18, 103, 232, .10);
+        box-shadow: 0 4px 16px rgba(38, 125, 193, .10);
         transform: translateY(-1px);
     }
 
@@ -966,7 +965,7 @@
     .os-sent {
         background: #EFF6FF;
         color: #1e40af;
-        border: 1px solid #BFDBFE;
+        border: 1px solid #A8CBE6;
         border-radius: 20px;
         padding: 3px 10px;
         font-size: 11.5px;
@@ -1078,6 +1077,29 @@
 
     .po-list-card table tbody tr:hover {
         background-color: var(--po-bd2) !important;
+    }
+
+    /* Dark mode cho badge trạng thái đơn (.os-*): nền hardcode sáng ở light sẽ chói trên nền
+       tối, nên hạ về nền mờ (alpha) + chữ sáng — đồng bộ pattern với .ms-* / .ci-status-badge. */
+    :root.dark .os-draft {
+        background: rgba(71, 85, 105, .22);
+        color: #cbd5e1;
+        border-color: rgba(148, 163, 184, .35);
+    }
+    :root.dark .os-sent {
+        background: rgba(30, 64, 175, .25);
+        color: #93c5fd;
+        border-color: rgba(59, 130, 246, .4);
+    }
+    :root.dark .os-checking {
+        background: rgba(146, 64, 14, .25);
+        color: #fdba74;
+        border-color: rgba(234, 88, 12, .4);
+    }
+    :root.dark .os-done {
+        background: rgba(6, 95, 70, .25);
+        color: #6ee7b7;
+        border-color: rgba(16, 185, 129, .4);
     }
 </style>
 @endpush

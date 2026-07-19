@@ -11,7 +11,7 @@
     });
     $totalCost = $record->cost_override !== null ? (float) $record->cost_override : $autoCost;
 
-    $colors = ['#1267E8', '#059669', '#7C3AED', '#EA580C', '#ef4444', '#ec4899', '#6b7280'];
+    $colors = ['#267DC1', '#059669', '#7C3AED', '#EA580C', '#ef4444', '#ec4899', '#6b7280'];
     $ingredientsWithCosts = [];
     
     foreach ($record->ingredients as $index => $ingredient) {
@@ -43,7 +43,7 @@
 
 <style>
 .md-detail-container {
-  --bl:#1267E8;--bl-d:#0C50BB;--bl-s:#EBF3FF;--bl-m:#BFDBFE;
+  --bl:#267DC1;--bl-d:#1F669E;--bl-s:#E9F2F8;--bl-m:#A8CBE6;
   --gn:#059669;--gn-s:#ECFDF5;--gn-t:#065F46;
   --or:#EA580C;--or-s:#FFF7ED;--or-t:#9A3412;
   --pu:#7C3AED;--pu-s:#F5F3FF;
@@ -51,12 +51,12 @@
   --am:#D97706;--am-s:#FFFBEB;
   --sk:#0284C7;--sk-s:#F0F9FF;
   --pk:#E11D48;--pk-s:#FFF1F2;
-  --bg:#F4F7FB;--wh:#fff;
+  --bg:#F8FAFC;--wh:#fff;
   --tx:#0F172A;--su:#334155;--mu:#64748B;--fa:#94A3B8;
   --bd:#E2E8F0;--bd2:#F1F5F9;
   --sh:0 1px 3px rgba(15,23,42,.05),0 4px 16px rgba(15,23,42,.05);
   --sh2:0 1px 2px rgba(15,23,42,.04);
-  --r:14px;
+  --r:12px;
 }
 
 /* Tương thích chế độ Dark Mode của Filament */
@@ -80,7 +80,7 @@
 .md-detail-container .md-card{background:var(--wh);border:1px solid var(--bd);border-radius:var(--r);padding:20px 22px;box-shadow:var(--sh2);margin-bottom:14px}
 .md-detail-container .md-card:last-child{margin-bottom:0}
 .md-detail-container .md-hero{display:flex;align-items:flex-start;gap:16px;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--bd2)}
-.md-detail-container .md-hero-ico{width:70px;height:70px;border-radius:16px;background:linear-gradient(135deg,var(--bl-s, #EBF3FF),var(--bl-m, #DBEAFE));display:grid;place-items:center;font-size:30px;flex-shrink:0;color:var(--bl)}
+.md-detail-container .md-hero-ico{width:70px;height:70px;border-radius:16px;background:linear-gradient(135deg,var(--bl-s, #E9F2F8),var(--bl-m, #DBEAFE));display:grid;place-items:center;font-size:30px;flex-shrink:0;color:var(--bl)}
 .md-detail-container .md-hero-name{font-size:22px;font-weight:800;color:var(--tx);margin-bottom:6px}
 .md-detail-container .md-meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 20px}
 .md-detail-container .md-meta-item{display:flex;align-items:baseline;gap:8px;font-size:13px}
@@ -313,7 +313,7 @@
                         stroke-dasharray="{{ $dashArray }}" stroke-dashoffset="{{ $dashOffset }}" stroke-linecap="butt"
                         transform="rotate(-90 65 65)" />
             @endforeach
-            <text x="65" y="61" text-anchor="middle" font-size="12" font-weight="800" fill="#1267E8" font-family="Inter,sans-serif">{{ number_format($totalCost, 0, ',', '.') }}đ</text>
+            <text x="65" y="61" text-anchor="middle" font-size="12" font-weight="800" fill="#267DC1" font-family="Inter,sans-serif">{{ number_format($totalCost, 0, ',', '.') }}đ</text>
             <text x="65" y="75" text-anchor="middle" font-size="8.5" fill="#64748B" font-family="Inter,sans-serif">Tổng cost / phần</text>
           </svg>
         </div>

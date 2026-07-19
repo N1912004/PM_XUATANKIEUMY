@@ -1,12 +1,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
     :root {
-        --po-bl: #1267E8;
-        --po-bl-d: #0C50BB;
-        --po-bl-s: #EBF3FF;
-        --po-bl-m: #BFDBFE;
+        --po-bl: #267DC1;
+        --po-bl-d: #1F669E;
+        --po-bl-s: #E9F2F8;
+        --po-bl-m: #A8CBE6;
         --po-gn: #059669;
         --po-gn-s: #ECFDF5;
         --po-gn-t: #065F46;
@@ -19,7 +18,7 @@
         --po-pu: #7C3AED;
         --po-pu-s: #F5F3FF;
         --po-pu-t: #5B21B6;
-        --po-bg: #F4F7FB;
+        --po-bg: #F8FAFC;
         --po-bd: #E2E8F0;
         --po-bd2: #F1F5F9;
         --po-tx: #0F172A;
@@ -33,7 +32,7 @@
     }
 
     :root.dark {
-        --po-bl-s: rgba(18, 103, 232, .18);
+        --po-bl-s: rgba(38, 125, 193, .18);
         --po-gn-s: rgba(5, 150, 105, .18);
         --po-or-s: rgba(234, 88, 12, .18);
         --po-pu-s: rgba(124, 58, 237, .18);
@@ -71,7 +70,7 @@
     }
 
     .emp-page {
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         color: var(--po-tx);
         background: transparent;
     }
@@ -166,7 +165,7 @@
         font-size: 14px;
     }
 
-    .ki-b { background: #EBF3FF; color: #1267E8; }
+    .ki-b { background: #E9F2F8; color: #267DC1; }
     .ki-g { background: #ECFDF5; color: #059669; }
     .ki-o { background: #FFF7ED; color: #EA580C; }
     .ki-p { background: #F5F3FF; color: #7C3AED; }

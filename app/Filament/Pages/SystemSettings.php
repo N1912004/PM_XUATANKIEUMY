@@ -52,7 +52,7 @@ class SystemSettings extends Page implements HasForms
             'company_address' => Setting::get('company_address'),
             'company_phone' => Setting::get('company_phone'),
             'company_email' => Setting::get('company_email'),
-            'primary_color' => Setting::get('primary_color', '#f59e0b'),
+            'primary_color' => Setting::get('primary_color', '#267DC1'),
         ]);
     }
 

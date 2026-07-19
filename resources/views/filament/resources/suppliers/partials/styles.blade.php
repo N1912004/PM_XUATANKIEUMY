@@ -1,13 +1,12 @@
 @push('styles')
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
             :root {
-                --sup-bl: #1267E8;
-                --sup-bl-d: #0C50BB;
-                --sup-bl-s: #EBF3FF;
-                --sup-bl-m: #BFDBFE;
+                --sup-bl: #267DC1;
+                --sup-bl-d: #1F669E;
+                --sup-bl-s: #E9F2F8;
+                --sup-bl-m: #A8CBE6;
                 --sup-gn: #059669;
                 --sup-gn-s: #ECFDF5;
                 --sup-gn-t: #065F46;
@@ -17,7 +16,7 @@
                 --sup-pu-s: #F5F3FF;
                 --sup-rd: #DC2626;
                 --sup-rd-s: #FEF2F2;
-                --sup-bg: #F4F7FB;
+                --sup-bg: #F8FAFC;
                 --sup-wh: #FFFFFF;
                 --sup-tx: #0F172A;
                 --sup-su: #334155;
@@ -26,13 +25,13 @@
                 --sup-bd: #E2E8F0;
                 --sup-bd2: #F1F5F9;
                 --sup-sh: 0 1px 2px rgba(15, 23, 42, .04);
-                --sup-r: 14px;
+                --sup-r: 12px;
             }
 
             /* Dark mode: Filament thêm class .dark vào <html>. Đè lại palette để
                trang không còn là mảng sáng chói giữa app tối. */
             :root.dark {
-                --sup-bl-s: rgba(18, 103, 232, .18);
+                --sup-bl-s: rgba(38, 125, 193, .18);
                 --sup-gn-s: rgba(5, 150, 105, .18);
                 --sup-or-s: rgba(234, 88, 12, .18);
                 --sup-pu-s: rgba(124, 58, 237, .18);
@@ -62,8 +61,8 @@
             }
 
             .dark .sup-info {
-                background: rgba(18, 103, 232, .12);
-                border-color: rgba(18, 103, 232, .35);
+                background: rgba(38, 125, 193, .12);
+                border-color: rgba(38, 125, 193, .35);
                 color: var(--sup-su);
             }
 
@@ -79,7 +78,7 @@
             .sup-page,
             .sup-page * {
                 box-sizing: border-box;
-                font-family: "Inter", system-ui, sans-serif;
+                font-family: "IBM Plex Sans", system-ui, sans-serif;
             }
 
             .sup-page {
@@ -149,7 +148,7 @@
                 background: linear-gradient(135deg, #1474FF, #0059DD);
                 color: #fff;
                 border-color: transparent;
-                box-shadow: 0 6px 16px rgba(18, 103, 232, .28);
+                box-shadow: 0 6px 16px rgba(38, 125, 193, .28);
             }
 
             .sup-btn-primary:hover {
@@ -737,7 +736,7 @@
             .sup-info {
                 margin-top: 1.1rem;
                 background: #EAF3FF;
-                border: 1px solid #BFDBFE;
+                border: 1px solid #A8CBE6;
                 color: #334155;
                 border-radius: .65rem;
                 padding: .95rem 1rem;
