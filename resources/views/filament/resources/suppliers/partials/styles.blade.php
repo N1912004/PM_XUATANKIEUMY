@@ -196,10 +196,10 @@
                 height: 1rem;
             }
 
-            .sup-ico-blue { background: var(--sup-bl-s); color: var(--sup-bl); }
-            .sup-ico-orange { background: var(--sup-or-s); color: var(--sup-or); }
-            .sup-ico-green { background: var(--sup-gn-s); color: var(--sup-gn); }
-            .sup-ico-purple { background: var(--sup-pu-s); color: var(--sup-pu); }
+            .sup-ico-blue,
+            .sup-ico-orange,
+            .sup-ico-green,
+            .sup-ico-purple { background: var(--sup-bl-s); color: var(--sup-bl); }
 
             .sup-kpi-value {
                 font-size: 2rem;

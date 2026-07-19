@@ -187,7 +187,7 @@ class StockTransferResource extends Resource
                 Tables\Actions\Action::make('confirmReceived')
                     ->label('Xác nhận nhận hàng')
                     ->icon('heroicon-o-check-circle')
-                    ->color('success')
+                    ->color('primary')
                     ->requiresConfirmation()
                     // Chỉ BẾP NHẬN (hoặc quản trị) mới thấy/bấm được nút nhận hàng — bếp xuất không tự xác nhận thay
                     ->visible(function (StockTransfer $record): bool {

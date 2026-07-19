@@ -216,10 +216,12 @@
         height: 1.4rem;
     }
 
-    .po-ico-blue { background: #E9F2F8; color: var(--po-bl); }
-    .po-ico-orange { background: var(--po-or-s); color: var(--po-or); }
-    .po-ico-green { background: var(--po-gn-s); color: var(--po-gn); }
-    .po-ico-purple { background: #F0FDF4; color: #15803D; }
+    /* KPI icon đồng nhất màu brand — màu chỉ dùng mã hóa trạng thái ở dòng dữ liệu
+       (badge trạng thái đơn, số tiền), không tô ngẫu nhiên trên thẻ thống kê tổng quan. */
+    .po-ico-blue,
+    .po-ico-orange,
+    .po-ico-green,
+    .po-ico-purple { background: var(--po-bl-s); color: var(--po-bl); }
 
     .po-kpi-info {
         display: flex;

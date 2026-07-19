@@ -196,7 +196,7 @@ class StockResource extends Resource
                 Tables\Actions\Action::make('externalInbound')
                     ->label('Nhập kho ngoài')
                     ->icon('heroicon-o-inbox-arrow-down')
-                    ->color('success')
+                    ->color('gray')
                     ->modalHeading('Nhập kho ngoài (mua trực tiếp không qua PO)')
                     ->form([
                         Forms\Components\Select::make('kitchen_id')

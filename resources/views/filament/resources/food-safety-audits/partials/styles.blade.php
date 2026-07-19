@@ -175,10 +175,10 @@
         font-size: 14px;
     }
 
-    .ki-b { background: var(--po-bl-s); color: var(--po-bl); }
-    .ki-g { background: var(--po-gn-s); color: var(--po-gn); }
-    .ki-o { background: var(--po-or-s); color: var(--po-or); }
-    .ki-p { background: var(--po-pu-s); color: var(--po-pu); }
+    .ki-b,
+    .ki-g,
+    .ki-o,
+    .ki-p { background: var(--po-bl-s); color: var(--po-bl); }
 
     .kval {
         font-size: 24px;

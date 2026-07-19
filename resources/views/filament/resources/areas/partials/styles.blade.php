@@ -165,10 +165,11 @@
         font-size: 14px;
     }
 
-    .ki-b { background: #E9F2F8; color: #267DC1; }
-    .ki-g { background: #ECFDF5; color: #059669; }
-    .ki-o { background: #FFF7ED; color: #EA580C; }
-    .ki-p { background: #F5F3FF; color: #7C3AED; }
+    /* KPI icon đồng nhất màu brand — màu chỉ để mã hóa trạng thái ở dòng dữ liệu. */
+    .ki-b,
+    .ki-g,
+    .ki-o,
+    .ki-p { background: #E9F2F8; color: #267DC1; }
 
     .kval {
         font-size: 24px;

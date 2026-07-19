@@ -48,7 +48,7 @@
                 </div>
             </div>
             <div class="mp-kcard">
-                <div class="mp-kico" style="background:var(--po-gn-s); color:var(--po-gn)"><i class="fa-solid fa-circle-check"></i></div>
+                <div class="mp-kico" style="background:var(--po-bl-s); color:var(--po-bl)"><i class="fa-solid fa-circle-check"></i></div>
                 <div>
                     <div class="mp-klbl">Đã gửi khách tháng này</div>
                     <div class="mp-kval">{{ $stats['sent_month'] }}</div>
@@ -62,14 +62,14 @@
                 </div>
             </div>
             <div class="mp-kcard">
-                <div class="mp-kico" style="background:var(--po-or-s); color:var(--po-or)"><i class="fa-solid fa-clock-rotate-left"></i></div>
+                <div class="mp-kico" style="background:var(--po-bl-s); color:var(--po-bl)"><i class="fa-solid fa-clock-rotate-left"></i></div>
                 <div>
                     <div class="mp-klbl">Còn là nháp</div>
                     <div class="mp-kval">{{ $stats['pending'] }}</div>
                 </div>
             </div>
             <div class="mp-kcard">
-                <div class="mp-kico" style="background:var(--po-or-s); color:var(--po-or)"><i class="fa-solid fa-lock"></i></div>
+                <div class="mp-kico" style="background:var(--po-bl-s); color:var(--po-bl)"><i class="fa-solid fa-lock"></i></div>
                 <div>
                     <div class="mp-klbl">Đã chốt tháng này</div>
                     <div class="mp-kval">{{ $stats['locked_month'] }}</div>

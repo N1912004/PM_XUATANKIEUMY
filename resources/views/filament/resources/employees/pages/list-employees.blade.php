@@ -54,7 +54,7 @@
         </div>
 
         <div class="py-kcard">
-            <div class="py-kico" style="background:var(--po-gn-s);color:var(--po-gn)">
+            <div class="py-kico" style="background:var(--po-bl-s);color:var(--po-bl)">
                 <i class="fa-solid fa-user-check"></i>
             </div>
             <div>
@@ -64,7 +64,7 @@
         </div>
 
         <div class="py-kcard">
-            <div class="py-kico" style="background:var(--po-or-s);color:var(--po-or)">
+            <div class="py-kico" style="background:var(--po-bl-s);color:var(--po-bl)">
                 <i class="fa-solid fa-umbrella-beach"></i>
             </div>
             <div>
@@ -74,7 +74,7 @@
         </div>
 
         <div class="py-kcard">
-            <div class="py-kico" style="background:var(--po-pu-s, rgba(124,58,237,.18));color:#7C3AED">
+            <div class="py-kico" style="background:var(--po-bl-s);color:var(--po-bl)">
                 <i class="fa-solid fa-user-minus"></i>
             </div>
             <div>
@@ -84,7 +84,7 @@
         </div>
 
         <div class="py-kcard">
-            <div class="py-kico" style="background:var(--po-rd-s);color:var(--po-rd)">
+            <div class="py-kico" style="background:var(--po-bl-s);color:var(--po-bl)">
                 <i class="fa-regular fa-clock"></i>
             </div>
             <div>
