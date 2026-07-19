@@ -539,9 +539,9 @@
 
     {{-- Nếu là quản trị viên/toàn quyền, cho phép chọn bếp linh hoạt --}}
     @if(auth()->user()?->hasRole(['super_admin', 'Quản trị viên']))
-        <div style="grid-column: 1 / -1; margin-bottom: 6px; display: flex; align-items: center; gap: 10px; background: white; padding: 12px 16px; border-radius: 8px; border: 1px solid #e2e8f0;" class="dark:bg-slate-800 dark:border-slate-700">
-            <span style="font-weight: 600; font-size: 14px; color: #475569;" class="dark:text-slate-300">Đang chọn Bếp ăn:</span>
-            <select wire:model.live="selectedKitchenId" style="padding: 6px 12px; border-radius: 6px; border: 1px solid #cbd5e1; background: white; font-size: 14px; color: #1e293b;" class="dark:bg-slate-900 dark:border-slate-800 dark:text-slate-200">
+        <div class="col-span-full mb-1.5 flex items-center gap-2.5 rounded-lg border border-gray-200 bg-white px-4 py-3 dark:border-gray-700 dark:bg-gray-800">
+            <span class="text-sm font-semibold text-gray-600 dark:text-gray-300">Đang chọn Bếp ăn:</span>
+            <select wire:model.live="selectedKitchenId" class="rounded-md border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:[color-scheme:dark]">
                 <option value="all">Tất cả các bếp</option>
                 @foreach(\App\Models\Kitchen::orderBy('name')->get() as $kit)
                     <option value="{{ $kit->id }}">{{ $kit->name }}</option>
