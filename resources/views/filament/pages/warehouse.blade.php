@@ -119,10 +119,16 @@
             font-size: 1.125rem;
             margin-bottom: 0.5rem;
         }
-        .ico-blue { background: #eff6ff; color: #1e40af; }
-        .ico-green { background: #f0fdf4; color: #065f46; }
-        .ico-orange { background: #fff7ed; color: #ea580c; }
-        .ico-purple { background: #f5f3ff; color: #7c3aed; }
+        /* KPI icon đồng nhất màu brand — màu chỉ dùng mã hóa trạng thái ở dòng dữ liệu
+           (badge "Sắp hết" amber, chênh lệch xanh/đỏ), không tô ngẫu nhiên trên thẻ thống kê. */
+        .ico-blue,
+        .ico-green,
+        .ico-orange,
+        .ico-purple { background: rgb(var(--primary-50)); color: rgb(var(--primary-600)); }
+        :root.dark .ico-blue,
+        :root.dark .ico-green,
+        :root.dark .ico-orange,
+        :root.dark .ico-purple { background: rgb(var(--primary-950) / .2); color: rgb(var(--primary-400)); }
         
         .stat-val {
             font-size: 1.375rem;
@@ -1424,7 +1430,7 @@
                 </div>
                 <div class="grid gap-3">
                     <button type="button" class="flow-modal-choice" wire:click="startInbound('po')">
-                        <div class="p-2 bg-blue-50 text-blue-600 rounded-lg dark:bg-blue-950/20 dark:text-blue-400">
+                        <div class="p-2 bg-primary-50 text-primary-600 rounded-lg dark:bg-primary-950/20 dark:text-primary-400">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                             </svg>
@@ -1435,7 +1441,7 @@
                         </div>
                     </button>
                     <button type="button" class="flow-modal-choice" wire:click="startInbound('direct')">
-                        <div class="p-2 bg-emerald-50 text-emerald-600 rounded-lg dark:bg-emerald-950/20 dark:text-emerald-400">
+                        <div class="p-2 bg-primary-50 text-primary-600 rounded-lg dark:bg-primary-950/20 dark:text-primary-400">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
                             </svg>
@@ -1477,7 +1483,7 @@
                         </div>
                     </button>
                     <button type="button" class="flow-modal-choice" wire:click="startOutbound('transfer')">
-                        <div class="p-2 bg-purple-50 text-purple-600 rounded-lg dark:bg-purple-950/20 dark:text-purple-400">
+                        <div class="p-2 bg-blue-50 text-blue-600 rounded-lg dark:bg-blue-950/20 dark:text-blue-400">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
                             </svg>
