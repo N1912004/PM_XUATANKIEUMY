@@ -7,20 +7,6 @@
     $totalWeight = $record->ingredients->sum('pivot.quantity_per_portion');
     // Cost hiệu lực: ưu tiên cost override (nếu có) để khớp bảng danh sách & Báo cáo.
     $totalCost = $record->effectiveCostPerPortion();
-
-    // Lịch sử cập nhật giá nguyên liệu
-    $priceHistory = [];
-    foreach ($record->ingredients as $ingredient) {
-        $supplierName = $ingredient->supplier?->name ?? __('recipe.detail.supplier');
-        $priceHistory[] = [
-            'time' => $ingredient->updated_at,
-            'message' => __('recipe.detail.price_synced_from', ['supplier' => $supplierName]),
-        ];
-    }
-    usort($priceHistory, function ($a, $b) {
-        return $b['time'] <=> $a['time'];
-    });
-    $priceHistory = array_slice($priceHistory, 0, 5);
 @endphp
 
 <style>
@@ -28,7 +14,6 @@
   --bl:#267DC1;--bl-d:#1F669E;--bl-s:#E9F2F8;--bl-m:#A8CBE6;
   --gn:#059669;--gn-s:#ECFDF5;--gn-t:#065F46;
   --or:#EA580C;--or-s:#FFF7ED;--or-t:#9A3412;
-  --pu:#7C3AED;--pu-s:#F5F3FF;
   --rd:#DC2626;--rd-s:#FEF2F2;--rd-t:#991B1B;
   --am:#D97706;--am-s:#FFFBEB;
   --sk:#0284C7;--sk-s:#F0F9FF;
@@ -57,7 +42,7 @@
   --or-s: rgba(120, 53, 4, 0.3);
 }
 
-.md-detail-container .md-layout{display:grid;grid-template-columns:1fr 288px;gap:16px;align-items:start}
+.md-detail-container .md-layout{display:grid;grid-template-columns:1fr;gap:16px;align-items:start}
 .md-detail-container .md-layout > div{min-width:0}
 .md-detail-container .md-card{background:var(--wh);border:1px solid var(--bd);border-radius:var(--r);padding:20px 22px;box-shadow:var(--sh2);margin-bottom:14px}
 .md-detail-container .md-card:last-child{margin-bottom:0}
@@ -117,22 +102,11 @@
 .md-detail-container .md-note{display:flex;align-items:flex-start;gap:8px;background:var(--bd2, #F8FAFC);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--mu);margin-top:10px;line-height:1.6}
 .dark .md-detail-container .md-note{background:#111827}
 .md-detail-container .md-note i{color:var(--bl);font-size:13px;flex-shrink:0;margin-top:1px}
-.md-detail-container .md-cost-rp{background:var(--wh);border:1px solid var(--bd);border-radius:var(--r);padding:16px;box-shadow:var(--sh2);margin-bottom:14px}
-.md-detail-container .md-cost-rp-ttl{font-size:13px;font-weight:700;color:var(--tx);margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--bd2)}
-.md-detail-container .md-hist-item{display:flex;align-items:flex-start;gap:8px;margin-bottom:10px;position:relative}
-.md-detail-container .md-hist-item:not(:last-child)::after{content:'';position:absolute;left:7px;top:18px;width:1.5px;height:calc(100% - 8px);background:var(--bd2)}
-.md-detail-container .md-hist-dot{width:14px;height:14px;border-radius:50%;flex-shrink:0;margin-top:2px;z-index:1}
-.md-detail-container .md-hist-body{flex:1;min-width:0}
-.md-detail-container .md-hist-dt{font-size:11px;color:var(--fa);margin-top:2px}
-.md-detail-container .md-hist-action{font-size:12px;font-weight:600;color:var(--tx)}
-.md-detail-container .md-hist-by{font-size:11px;color:var(--mu);float:right}
-
 .md-detail-container .ms-active{background:var(--gn-s, #ECFDF5);color:var(--gn-t, #065F46);border:1px solid var(--gn, #A7F3D0);border-radius:20px;padding:3px 10px;font-size:11.5px;font-weight:700;display:inline-block}
 .md-detail-container .ms-review{background:var(--or-s, #FFF7ED);color:var(--or, #92400E);border:1px solid var(--or, #FED7AA);border-radius:20px;padding:3px 10px;font-size:11.5px;font-weight:700;display:inline-block}
 .md-detail-container .ms-inactive{background:var(--bd2, #F1F5F9);color:var(--su, #475569);border:1px solid var(--bd);border-radius:20px;padding:3px 10px;font-size:11.5px;font-weight:700;display:inline-block}
 
 @media(max-width:960px){
-  .md-detail-container .md-layout{grid-template-columns:1fr}
   .md-detail-container .md-stat-row{grid-template-columns:1fr}
 }
 
@@ -323,35 +297,5 @@
       </div>
     </div>
 
-    <!-- RIGHT -->
-    <div>
-      <!-- Lịch sử cập nhật giá nguyên liệu -->
-      <div class="md-cost-rp" style="margin-bottom:0">
-        <div class="md-cost-rp-ttl">{{ __('recipe.detail.price_history') }}</div>
-        @if (count($priceHistory) > 0)
-          @foreach ($priceHistory as $index => $history)
-            @php
-              $dotColor = match($index % 3) {
-                  0 => 'var(--gn)', // green
-                  1 => 'var(--bl)', // blue
-                  default => 'var(--pu)' // purple
-              };
-            @endphp
-            <div class="md-hist-item">
-              <div class="md-hist-dot" style="background:{{ $dotColor }}"></div>
-              <div class="md-hist-body">
-                <div style="display:flex;justify-content:space-between">
-                  <div class="md-hist-action">{{ $history['time']->format('d/m/Y H:i') }}</div>
-                  <span class="md-hist-by" style="font-size:11px;color:var(--fa)">admin</span>
-                </div>
-                <div class="md-hist-dt">{{ $history['message'] }}</div>
-              </div>
-            </div>
-          @endforeach
-        @else
-          <div style="font-size:12px;color:var(--fa);text-align:center;padding:10px 0">{{ __('recipe.detail.no_price_history') }}</div>
-        @endif
-      </div>
-    </div>
   </div>
 </div>
