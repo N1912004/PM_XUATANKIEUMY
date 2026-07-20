@@ -300,13 +300,13 @@
                                 @endif
                             </td>
                             <td><span class="mn-group-pill {{ $typeClass }}">{{ $recipe->type }}</span></td>
-                            <td><span class="mn-price">{{ number_format($recipe->selling_price_per_portion, 0, ',', '.') }} d</span></td>
-                            <td><span class="mn-price">{{ number_format($recipe->cost_per_portion, 0, ',', '.') }} d</span></td>
+                            <td><span class="mn-price">{{ __('recipe.currency.amount', ['value' => number_format($recipe->selling_price_per_portion, 0, ',', '.')]) }}</span></td>
+                            <td><span class="mn-price">{{ __('recipe.currency.amount', ['value' => number_format($recipe->cost_per_portion, 0, ',', '.')]) }}</span></td>
                             <td><span class="mn-num">{{ $ingredientsCount }}</span></td>
                             <td><span class="mn-kg">{{ str_replace('.', ',', round($recipeWeight, 2)) }} kg</span></td>
                             <td>
                                 <span class="mn-cost" style="{{ $recipe->cost_override !== null ? 'color:var(--or)' : '' }}">
-                                    {{ number_format($recipeCost, 0, ',', '.') }} d
+                                    {{ __('recipe.currency.amount', ['value' => number_format($recipeCost, 0, ',', '.')]) }}
                                 </span>
                                 @if($recipe->cost_override !== null)
                                     <span style="display:block;font-size:10px;color:var(--or)">{{ __('recipe.labels.adjusted') }}</span>

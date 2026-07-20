@@ -305,11 +305,11 @@ class RecipeResource extends Resource
                     }),
                 Tables\Columns\TextColumn::make('selling_price_per_portion')
                     ->label(__('recipe.table.selling_price_per_portion'))
-                    ->formatStateUsing(fn ($state) => number_format($state, 0, ',', '.').' d')
+                    ->formatStateUsing(fn ($state): string => self::formatCurrency((float) $state))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('cost_per_portion')
                     ->label(__('recipe.table.cost_per_portion'))
-                    ->formatStateUsing(fn ($state) => number_format($state, 0, ',', '.').' d')
+                    ->formatStateUsing(fn ($state): string => self::formatCurrency((float) $state))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('ingredients_count')
                     ->label(__('recipe.table.ingredients_count'))
@@ -320,7 +320,7 @@ class RecipeResource extends Resource
                     ->state(fn ($record) => str_replace('.', ',', round($record->ingredients->sum('pivot.quantity_per_portion'), 2)).' kg'),
                 Tables\Columns\TextColumn::make('total_cost')
                     ->label(__('recipe.table.total_cost'))
-                    ->formatStateUsing(fn ($state) => number_format($state, 0, ',', '.').' d')
+                    ->formatStateUsing(fn ($state): string => self::formatCurrency((float) $state))
                     ->weight('bold')
                     ->color(fn ($record) => $record->cost_override !== null ? 'warning' : 'primary')
                     ->description(fn ($record) => $record->cost_override !== null ? __('recipe.fields.cost_override') : null)
