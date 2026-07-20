@@ -49,38 +49,17 @@ class ShiftResource extends Resource
                     ->maxLength(255),
                 Forms\Components\Grid::make(2)
                     ->schema([
-                        Forms\Components\TimePicker::make('start_time')
-                            ->label(__('catalog.shift.fields.start_time'))
+                        Forms\Components\TimePicker::make('time_from')
+                            ->label(__('catalog.shift.fields.time_from'))
+                            ->seconds(false)
+                            ->required(),
+                        Forms\Components\TimePicker::make('time_to')
+                            ->label(__('catalog.shift.fields.time_to'))
                             ->seconds(false)
                             ->required()
-                            ->afterStateHydrated(function (Forms\Components\TimePicker $component, ?Shift $record) {
-                                if ($record && $record->time_range) {
-                                    $parts = explode(' - ', $record->time_range);
-                                    if (count($parts) === 2) {
-                                        $component->state($parts[0]);
-                                    }
-                                }
-                            })
-                            ->dehydrated(false),
-                        Forms\Components\TimePicker::make('end_time')
-                            ->label(__('catalog.shift.fields.end_time'))
-                            ->seconds(false)
-                            ->required()
-                            ->afterStateHydrated(function (Forms\Components\TimePicker $component, ?Shift $record) {
-                                if ($record && $record->time_range) {
-                                    $parts = explode(' - ', $record->time_range);
-                                    if (count($parts) === 2) {
-                                        $component->state($parts[1]);
-                                    }
-                                }
-                            })
-                            ->dehydrated(false),
+                            ->different('time_from')
+                            ->helperText(__('catalog.shift.helpers.constraints')),
                     ]),
-                Forms\Components\Hidden::make('time_range')
-                    ->dehydrateStateUsing(fn ($state, Forms\Get $get) => $get('start_time') && $get('end_time')
-                            ? substr($get('start_time'), 0, 5).' - '.substr($get('end_time'), 0, 5)
-                            : null
-                    ),
             ]);
     }
 
