@@ -37,7 +37,7 @@ class Shift extends Model
                 ]);
             }
 
-            if (static::durationMinutes($timeFrom, $timeTo) > 12 * 60) {
+            if (static::durationMinutesBetween($timeFrom, $timeTo) > 12 * 60) {
                 throw ValidationException::withMessages([
                     'time_to' => __('catalog.shift.validation.max_duration'),
                 ]);
@@ -83,8 +83,15 @@ class Shift extends Model
         return "{$matches[1]}:{$matches[2]}:00";
     }
 
-    private static function durationMinutes(string $timeFrom, string $timeTo): int
+    public static function durationMinutesBetween(mixed $timeFrom, mixed $timeTo): ?int
     {
+        $timeFrom = static::normalizeTime($timeFrom);
+        $timeTo = static::normalizeTime($timeTo);
+
+        if ($timeFrom === null || $timeTo === null) {
+            return null;
+        }
+
         $from = static::timeToMinutes($timeFrom);
         $to = static::timeToMinutes($timeTo);
 
