@@ -31,7 +31,7 @@ class RecipesImport implements ToCollection
 
     public function collection(Collection $rows): void
     {
-        $current = null;      // ['row' => int, 'name' => ..., 'price' => ..., 'group' => ..., 'ingredients' => [...]]
+        $current = null;      // ['row' => int, 'name' => ..., 'price' => ..., 'cost' => ..., 'group' => ..., 'ingredients' => [...]]
         $carriedGroup = null; // Nhóm NL (cột C) chỉ ghi ở dòng đầu nhóm — carry xuống các món sau
 
         // Bỏ 2 dòng tiêu đề (dòng 1 trống/tựa lớn, dòng 2 là header cột)
@@ -53,6 +53,7 @@ class RecipesImport implements ToCollection
                     'row' => $excelRow,
                     'name' => $dishName,
                     'price' => (float) preg_replace('/[^0-9.]/', '', (string) ($row[1] ?? 0)),
+                    'cost' => (float) preg_replace('/[^0-9.]/', '', (string) ($row[8] ?? 0)),
                     'group' => $carriedGroup ?: 'Món mặn',
                     'ingredients' => [],
                 ];
@@ -112,10 +113,13 @@ class RecipesImport implements ToCollection
                     $recipe->code = 'MON'.strtoupper(uniqid());
                 }
 
+                $calculatedCost = collect($dish['ingredients'])
+                    ->sum(fn (array $item): float => $item['quantity_kg'] * $item['price']);
+
                 $recipe->fill([
                     'type' => $dish['group'],
                     'selling_price_per_portion' => $dish['price'],
-                    'standard_price_per_portion' => $dish['price'],
+                    'cost_per_portion' => $dish['cost'] > 0 ? $dish['cost'] : $calculatedCost,
                     // Món import về trạng thái Chờ rà soát để bếp trưởng duyệt định lượng/giá
                     'status' => 'pending',
                 ])->save();

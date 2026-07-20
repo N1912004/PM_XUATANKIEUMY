@@ -77,26 +77,27 @@ class RecipeResource extends Resource
                             ->searchable()
                             ->preload()
                             ->native(false),
-                        Forms\Components\TextInput::make('standard_price_per_portion')
-                            ->label(__('recipe.fields.standard_price_per_portion'))
-                            ->required()
-                            ->default(20000)
-                            ->numeric()
-                            ->minValue(0)
-                            ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
-                            ->stripCharacters(['.', ','])
-                            ->suffix(__('recipe.currency.unit'))
-                            ->helperText(__('recipe.helpers.standard_price_per_portion')),
                         Forms\Components\TextInput::make('selling_price_per_portion')
                             ->label(__('recipe.fields.selling_price_per_portion'))
                             ->required()
                             ->default(20000)
                             ->numeric()
                             ->minValue(0)
+                            ->formatStateUsing(fn (mixed $state): string => number_format((float) $state, 0, '', ''))
+                            ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
+                            ->stripCharacters(['.', ','])
+                            ->suffix(__('recipe.currency.unit')),
+                        Forms\Components\TextInput::make('cost_per_portion')
+                            ->label(__('recipe.fields.cost_per_portion'))
+                            ->required()
+                            ->default(20000)
+                            ->numeric()
+                            ->minValue(0)
+                            ->formatStateUsing(fn (mixed $state): string => number_format((float) $state, 0, '', ''))
                             ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
                             ->stripCharacters(['.', ','])
                             ->suffix(__('recipe.currency.unit'))
-                            ->live(onBlur: true), // đổi giá bán → tính lại cảnh báo lãi/lỗ ngay
+                            ->live(onBlur: true),
                         /* Tạm ẩn luồng cost điều chỉnh theo yêu cầu nghiệp vụ.
                         Forms\Components\TextInput::make('cost_override')
                             ->label(__('recipe.fields.cost_override'))
@@ -118,14 +119,14 @@ class RecipeResource extends Resource
                             })
                             ->helperText(__('recipe.helpers.cost_override_reason')),
                         */
-                        Forms\Components\Select::make('price_option')
+                        Forms\Components\Select::make('price_option_id')
                             ->label(__('recipe.fields.price_option'))
                             ->required()
                             ->options([
-                                'Không' => __('recipe.options.no'),
-                                'Có' => __('recipe.options.yes'),
+                                0 => __('recipe.options.no'),
+                                1 => __('recipe.options.yes'),
                             ])
-                            ->default('Không')
+                            ->default(0)
                             ->native(false),
                         Forms\Components\Select::make('status')
                             ->label(__('recipe.fields.status'))
@@ -137,9 +138,10 @@ class RecipeResource extends Resource
                             ])
                             ->default('active')
                             ->native(false),
-                        Forms\Components\TextInput::make('description')
+                        Forms\Components\Textarea::make('description')
                             ->label(__('recipe.fields.description'))
                             ->placeholder(__('recipe.placeholders.description'))
+                            ->rows(3)
                             ->columnSpan(2),
                     ]),
 
@@ -296,12 +298,12 @@ class RecipeResource extends Resource
                         'Món chay' => 'warning',
                         default => 'gray',
                     }),
-                Tables\Columns\TextColumn::make('standard_price_per_portion')
-                    ->label(__('recipe.table.standard_price_per_portion'))
-                    ->formatStateUsing(fn ($state) => number_format($state, 0, ',', '.').' d')
-                    ->sortable(),
                 Tables\Columns\TextColumn::make('selling_price_per_portion')
                     ->label(__('recipe.table.selling_price_per_portion'))
+                    ->formatStateUsing(fn ($state) => number_format($state, 0, ',', '.').' d')
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('cost_per_portion')
+                    ->label(__('recipe.table.cost_per_portion'))
                     ->formatStateUsing(fn ($state) => number_format($state, 0, ',', '.').' d')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('ingredients_count')
@@ -333,16 +335,45 @@ class RecipeResource extends Resource
                         'inactive' => __('recipe.status.inactive_applied'),
                         default => $state,
                     }),
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->label(__('recipe.table.updated_at'))
+                Tables\Columns\TextColumn::make('created_at')
+                    ->label(__('recipe.table.created_at'))
                     ->dateTime('d/m/Y H:i')
                     ->sortable(),
             ])
             ->searchPlaceholder(__('recipe.placeholders.search'))
             ->filters([
-                Tables\Filters\SelectFilter::make('standard_price_per_portion')
-                    ->label(__('recipe.filters.price'))
-                    ->options(self::mealPriceOptions()),
+                Tables\Filters\Filter::make('selling_price_range')
+                    ->form([
+                        Forms\Components\TextInput::make('selling_price_from')
+                            ->label(__('recipe.filters.selling_price_from'))
+                            ->numeric()
+                            ->suffix(__('recipe.currency.unit')),
+                        Forms\Components\TextInput::make('selling_price_to')
+                            ->label(__('recipe.filters.selling_price_to'))
+                            ->numeric()
+                            ->suffix(__('recipe.currency.unit')),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when($data['selling_price_from'] ?? null, fn ($q, $from) => $q->where('selling_price_per_portion', '>=', (float) $from))
+                            ->when($data['selling_price_to'] ?? null, fn ($q, $to) => $q->where('selling_price_per_portion', '<=', (float) $to));
+                    }),
+                Tables\Filters\Filter::make('cost_price_range')
+                    ->form([
+                        Forms\Components\TextInput::make('cost_price_from')
+                            ->label(__('recipe.filters.cost_price_from'))
+                            ->numeric()
+                            ->suffix(__('recipe.currency.unit')),
+                        Forms\Components\TextInput::make('cost_price_to')
+                            ->label(__('recipe.filters.cost_price_to'))
+                            ->numeric()
+                            ->suffix(__('recipe.currency.unit')),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when($data['cost_price_from'] ?? null, fn ($q, $from) => $q->where('cost_per_portion', '>=', (float) $from))
+                            ->when($data['cost_price_to'] ?? null, fn ($q, $to) => $q->where('cost_per_portion', '<=', (float) $to));
+                    }),
                 Tables\Filters\SelectFilter::make('recipe_type_id')
                     ->label(__('recipe.fields.type'))
                     ->relationship('recipeType', 'name'),
@@ -430,22 +461,6 @@ class RecipeResource extends Resource
             'Món chay' => 'Món chay',
             'Tráng miệng' => 'Tráng miệng',
             'Món khác' => 'Món khác',
-        ];
-    }
-
-    /**
-     * @return array<int, string>
-     */
-    private static function mealPriceOptions(): array
-    {
-        return [
-            15000 => 'Mức 15.000 đ',
-            20000 => 'Mức 20.000 đ',
-            25000 => 'Mức 25.000 đ',
-            30000 => 'Mức 30.000 đ',
-            35000 => 'Mức 35.000 đ',
-            40000 => 'Mức 40.000 đ',
-            50000 => 'Mức 50.000 đ',
         ];
     }
 
