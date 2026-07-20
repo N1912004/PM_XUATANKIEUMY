@@ -198,7 +198,7 @@
                         </th>
                         <th style="width: 40px; text-align: center;"></th>
                         <th style="width: 50px; text-align: center;">STT</th>
-                        <th>{{ __('recipe.table.code') }}</th><th>{{ __('recipe.table.name') }}</th><th>{{ __('recipe.table.type') }}</th><th>{{ __('recipe.table.price_level') }}</th><th>{{ __('recipe.table.actual_price') }}</th><th>{{ __('recipe.table.ingredients_count') }}</th><th>{{ __('recipe.table.total_weight') }}</th><th>{{ __('recipe.table.total_cost') }}</th><th>{{ __('recipe.table.status') }}</th><th>{{ __('recipe.table.updated_at') }}</th><th>{{ __('recipe.table.actions') }}</th>
+                        <th>{{ __('recipe.table.code') }}</th><th>{{ __('recipe.table.name') }}</th><th>{{ __('recipe.table.type') }}</th><th>{{ __('recipe.table.standard_price_per_portion') }}</th><th>{{ __('recipe.table.selling_price_per_portion') }}</th><th>{{ __('recipe.table.ingredients_count') }}</th><th>{{ __('recipe.table.total_weight') }}</th><th>{{ __('recipe.table.total_cost') }}</th><th>{{ __('recipe.table.status') }}</th><th>{{ __('recipe.table.updated_at') }}</th><th>{{ __('recipe.table.actions') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -257,8 +257,8 @@
                                 @endif
                             </td>
                             <td><span class="mn-group-pill {{ $typeClass }}">{{ $recipe->type }}</span></td>
-                            <td><span class="mn-price">{{ number_format($recipe->price_level, 0, ',', '.') }} d</span></td>
-                            <td><span class="mn-price">{{ number_format($recipe->actual_price, 0, ',', '.') }} d</span></td>
+                            <td><span class="mn-price">{{ number_format($recipe->standard_price_per_portion, 0, ',', '.') }} d</span></td>
+                            <td><span class="mn-price">{{ number_format($recipe->selling_price_per_portion, 0, ',', '.') }} d</span></td>
                             <td><span class="mn-num">{{ $ingredientsCount }}</span></td>
                             <td><span class="mn-kg">{{ str_replace('.', ',', round($recipeWeight, 2)) }} kg</span></td>
                             <td>

@@ -114,8 +114,8 @@ class RecipesImport implements ToCollection
 
                 $recipe->fill([
                     'type' => $dish['group'],
-                    'actual_price' => $dish['price'],
-                    'price_level' => $dish['price'],
+                    'selling_price_per_portion' => $dish['price'],
+                    'standard_price_per_portion' => $dish['price'],
                     // Món import về trạng thái Chờ rà soát để bếp trưởng duyệt định lượng/giá
                     'status' => 'pending',
                 ])->save();

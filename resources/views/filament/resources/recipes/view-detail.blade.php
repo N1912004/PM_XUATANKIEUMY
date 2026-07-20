@@ -185,8 +185,8 @@
                 <span class="md-meta-v">{{ $record->code }}</span>
               </div>
               <div class="md-meta-item">
-                <span class="md-meta-k">{{ __('recipe.detail.actual_price') }}</span>
-                <span class="md-meta-v">{{ $record->price_option === 'Có' ? __('recipe.detail.by_unit') : __('recipe.detail.currency', ['value' => number_format($record->actual_price, 0, ',', '.')]) }}</span>
+                <span class="md-meta-k">{{ __('recipe.detail.selling_price_per_portion') }}</span>
+                <span class="md-meta-v">{{ $record->price_option === 'Có' ? __('recipe.detail.by_unit') : __('recipe.detail.currency', ['value' => number_format($record->selling_price_per_portion, 0, ',', '.')]) }}</span>
               </div>
               <div class="md-meta-item">
                 <span class="md-meta-k">{{ __('recipe.detail.type') }}</span>
@@ -202,8 +202,8 @@
                 </span>
               </div>
               <div class="md-meta-item">
-                <span class="md-meta-k">{{ __('recipe.detail.price_level') }}</span>
-                <span class="md-meta-v">{{ __('recipe.detail.currency', ['value' => number_format($record->price_level, 0, ',', '.')]) }}</span>
+                <span class="md-meta-k">{{ __('recipe.detail.standard_price_per_portion') }}</span>
+                <span class="md-meta-v">{{ __('recipe.detail.currency', ['value' => number_format($record->standard_price_per_portion, 0, ',', '.')]) }}</span>
               </div>
               <div class="md-meta-item">
                 <span class="md-meta-k">{{ __('recipe.detail.updated_at') }}</span>
@@ -340,7 +340,7 @@
           </li>
           <li style="font-size:12px;color:var(--su);display:flex;gap:5px;align-items:flex-start">
             <span style="color:var(--bl)">•</span>
-            {{ __('recipe.fields.actual_price') }}
+            {{ __('recipe.fields.selling_price_per_portion') }}
           </li>
         </ul>
       </div>

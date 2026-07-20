@@ -58,7 +58,15 @@ class ShiftResource extends Resource
                             ->seconds(false)
                             ->required()
                             ->different('time_from')
-                            ->helperText(__('catalog.shift.helpers.constraints')),
+                            ->rules([
+                                fn (Forms\Get $get): \Closure => function (string $attribute, mixed $value, \Closure $fail) use ($get): void {
+                                    $durationMinutes = Shift::durationMinutesBetween($get('time_from'), $value);
+
+                                    if ($durationMinutes !== null && $durationMinutes > 12 * 60) {
+                                        $fail(__('catalog.shift.validation.max_duration'));
+                                    }
+                                },
+                            ]),
                     ]),
             ]);
     }
