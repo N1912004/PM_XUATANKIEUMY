@@ -13,8 +13,6 @@ class CreateRecipe extends CreateRecord
 {
     protected static string $resource = RecipeResource::class;
 
-    private bool $savingDraft = false;
-
     public function getTitle(): string|Htmlable
     {
         return __('recipe.pages.create.title');
@@ -34,14 +32,6 @@ class CreateRecipe extends CreateRecord
             $this->getCancelFormAction()
                 ->label(__('recipe.actions.cancel'))
                 ->icon('heroicon-m-x-mark'),
-            Action::make('saveDraft')
-                ->label(__('recipe.actions.save_draft'))
-                ->icon('heroicon-m-archive-box')
-                ->color('gray')
-                ->action(function (): void {
-                    $this->savingDraft = true;
-                    $this->create();
-                }),
             $this->getCreateFormAction()
                 ->label(__('recipe.actions.create'))
                 ->icon('heroicon-m-plus')
@@ -55,19 +45,6 @@ class CreateRecipe extends CreateRecord
     protected function getFormActions(): array
     {
         return [];
-    }
-
-    /**
-     * @param  array<string, mixed>  $data
-     * @return array<string, mixed>
-     */
-    protected function mutateFormDataBeforeCreate(array $data): array
-    {
-        if ($this->savingDraft) {
-            $data['status'] = 'pending';
-        }
-
-        return $data;
     }
 
     protected function afterCreate(): void

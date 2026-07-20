@@ -453,7 +453,7 @@ class ListRecipes extends Page
                         ->orWhereRaw('LOWER(code) LIKE ?', ["%{$search}%"]);
                 });
             })
-            ->when($this->priceFilter !== '', fn ($query) => $query->where('price_level', $this->priceFilter))
+            ->when($this->priceFilter !== '', fn ($query) => $query->where('standard_price_per_portion', $this->priceFilter))
             ->when($this->typeFilter !== '', function ($query): void {
                 // Lọc theo cột type tương thích ngược (qua bảng recipe_types hoặc fallback old_type)
                 $query->where(function ($q): void {

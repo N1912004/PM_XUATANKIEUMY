@@ -15,6 +15,7 @@ use Filament\Infolists;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
 use Filament\Support\Enums\Alignment;
+use Filament\Support\RawJs;
 use Filament\Tables;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Table;
@@ -65,9 +66,8 @@ class RecipeResource extends Resource
                         Forms\Components\TextInput::make('code')
                             ->label(__('recipe.fields.code'))
                             ->required()
-                            ->default(fn (): string => self::nextRecipeCode())
-                            ->disabled()
-                            ->dehydrated()
+                            ->placeholder(__('recipe.placeholders.code'))
+                            ->maxLength(255)
                             ->unique(ignoreRecord: true),
                         Forms\Components\Select::make('type')
                             ->label(__('recipe.fields.type'))
@@ -77,24 +77,27 @@ class RecipeResource extends Resource
                             ->searchable()
                             ->preload()
                             ->native(false),
-                        Forms\Components\Select::make('price_level')
-                            ->label(__('recipe.fields.price_level'))
+                        Forms\Components\TextInput::make('standard_price_per_portion')
+                            ->label(__('recipe.fields.standard_price_per_portion'))
                             ->required()
-                            ->options(self::mealPriceOptions())
                             ->default(20000)
-                            ->searchable()
-                            ->preload()
-                            ->native(false)
-                            ->helperText(__('recipe.helpers.price_level')),
-                        Forms\Components\Select::make('actual_price')
-                            ->label(__('recipe.fields.actual_price'))
+                            ->numeric()
+                            ->minValue(0)
+                            ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
+                            ->stripCharacters(['.', ','])
+                            ->suffix(__('recipe.currency.unit'))
+                            ->helperText(__('recipe.helpers.standard_price_per_portion')),
+                        Forms\Components\TextInput::make('selling_price_per_portion')
+                            ->label(__('recipe.fields.selling_price_per_portion'))
                             ->required()
-                            ->options(self::mealPriceOptions())
                             ->default(20000)
-                            ->searchable()
-                            ->preload()
-                            ->live() // đổi giá bán → tính lại cảnh báo lãi/lỗ ngay
-                            ->native(false),
+                            ->numeric()
+                            ->minValue(0)
+                            ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
+                            ->stripCharacters(['.', ','])
+                            ->suffix(__('recipe.currency.unit'))
+                            ->live(onBlur: true), // đổi giá bán → tính lại cảnh báo lãi/lỗ ngay
+                        /* Tạm ẩn luồng cost điều chỉnh theo yêu cầu nghiệp vụ.
                         Forms\Components\TextInput::make('cost_override')
                             ->label(__('recipe.fields.cost_override'))
                             ->numeric()
@@ -114,6 +117,7 @@ class RecipeResource extends Resource
                                 return ($new !== null && $new !== '') && (float) $new !== (float) ($old ?? -1);
                             })
                             ->helperText(__('recipe.helpers.cost_override_reason')),
+                        */
                         Forms\Components\Select::make('price_option')
                             ->label(__('recipe.fields.price_option'))
                             ->required()
@@ -139,7 +143,7 @@ class RecipeResource extends Resource
                             ->columnSpan(2),
                     ]),
 
-                Forms\Components\Section::make(__('recipe.sections.ingredients_cost'))
+                Forms\Components\Section::make()
                     ->extraAttributes(['class' => 'recipe-cost-section'])
                     ->schema([
                         Forms\Components\Repeater::make('recipeIngredients')
@@ -227,20 +231,20 @@ class RecipeResource extends Resource
                             ->deleteAction(fn (Action $action): Action => $action->icon('heroicon-m-trash')->label(''))
                             ->reorderable(false)
                             ->collapsible(false)
-                            ->itemLabel(fn (array $state): ?string => filled($state['ingredient_id'] ?? null)
-                                ? Ingredient::query()->find($state['ingredient_id'])?->name
-                                : __('recipe.fields.ingredient')),
+                            ->itemLabel(fn (): HtmlString => new HtmlString(
+                                '<span class="recipe-stt-label">'.e(__('recipe.fields.row_number')).'</span>'
+                            )),
                         Forms\Components\Placeholder::make('total_cost')
                             ->hiddenLabel()
                             ->content(fn (Get $get): string => __('recipe.messages.total_cost', ['cost' => self::formatCurrency(self::recipeIngredientsTotal($get('recipeIngredients') ?? []))]))
                             ->extraAttributes(['class' => 'recipe-total-cost'])
                             ->columnSpanFull(),
-                        // Kiểm soát lãi/lỗ (BA R6): so cost thực tế với đơn giá bán cho khách
+                        /* Tạm ẩn cảnh báo lãi/lỗ trên form món ăn.
                         Forms\Components\Placeholder::make('margin_check')
                             ->hiddenLabel()
                             ->content(function (Get $get): HtmlString {
                                 $cost = self::recipeIngredientsTotal($get('recipeIngredients') ?? []);
-                                $price = (float) ($get('actual_price') ?? 0);
+                                $price = (float) ($get('selling_price_per_portion') ?? 0);
 
                                 if ($price <= 0 || $cost <= 0) {
                                     return new HtmlString('<span style="color:#64748b">'.e(__('recipe.messages.select_sale_price')).'</span>');
@@ -258,6 +262,7 @@ class RecipeResource extends Resource
                                 return new HtmlString('<span style="color:'.$color.';font-weight:700">'.e(__('recipe.messages.gross_margin', ['margin' => self::formatCurrency($margin), 'rate' => $rate])).($rate < 10 ? ' '.e(__('recipe.messages.thin_margin')) : '').'</span>');
                             })
                             ->columnSpanFull(),
+                        */
                         Forms\Components\Placeholder::make('cost_note')
                             ->hiddenLabel()
                             ->content(__('recipe.messages.ingredient_price_source'))
@@ -291,12 +296,12 @@ class RecipeResource extends Resource
                         'Món chay' => 'warning',
                         default => 'gray',
                     }),
-                Tables\Columns\TextColumn::make('price_level')
-                    ->label(__('recipe.table.price_level'))
+                Tables\Columns\TextColumn::make('standard_price_per_portion')
+                    ->label(__('recipe.table.standard_price_per_portion'))
                     ->formatStateUsing(fn ($state) => number_format($state, 0, ',', '.').' d')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('actual_price')
-                    ->label(__('recipe.table.actual_price'))
+                Tables\Columns\TextColumn::make('selling_price_per_portion')
+                    ->label(__('recipe.table.selling_price_per_portion'))
                     ->formatStateUsing(fn ($state) => number_format($state, 0, ',', '.').' d')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('ingredients_count')
@@ -335,7 +340,7 @@ class RecipeResource extends Resource
             ])
             ->searchPlaceholder(__('recipe.placeholders.search'))
             ->filters([
-                Tables\Filters\SelectFilter::make('price_level')
+                Tables\Filters\SelectFilter::make('standard_price_per_portion')
                     ->label(__('recipe.filters.price'))
                     ->options(self::mealPriceOptions()),
                 Tables\Filters\SelectFilter::make('recipe_type_id')
@@ -444,11 +449,6 @@ class RecipeResource extends Resource
         ];
     }
 
-    private static function nextRecipeCode(): string
-    {
-        return 'MON'.str_pad((string) ((Recipe::query()->max('id') ?? 0) + 1), 5, '0', STR_PAD_LEFT);
-    }
-
     /** @var array<int, float> Memo giá theo request — Placeholder line_total gọi hàm này cho từng dòng repeater mỗi re-render */
     private static array $priceMemo = [];
 
@@ -473,6 +473,8 @@ class RecipeResource extends Resource
 
     private static function formatCurrency(float $value): string
     {
-        return number_format($value, 0, ',', '.').' đ';
+        return __('recipe.currency.amount', [
+            'value' => number_format($value, 0, ',', '.'),
+        ]);
     }
 }

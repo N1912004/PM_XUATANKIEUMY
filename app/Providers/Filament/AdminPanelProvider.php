@@ -282,18 +282,61 @@ class AdminPanelProvider extends PanelProvider
                             border: 0 !important;
                             box-shadow: none !important;
                             background: transparent !important;
+                            display: grid !important;
+                            grid-template-columns: 3.5rem minmax(0, 1fr) 2.5rem !important;
+                            gap: 1rem !important;
+                            align-items: center !important;
+                            padding: 1rem !important;
                         }
                         .fi-resource-recipes .recipe-cost-section .fi-fo-repeater-item-header {
-                            background: #f8fafc !important;
-                            border-radius: 0.75rem 0.75rem 0 0 !important;
+                            display: contents !important;
                         }
-                        .dark .fi-resource-recipes .recipe-cost-section .fi-fo-repeater-item-header {
-                            background: #334155 !important;
+                        .fi-resource-recipes .recipe-cost-section .fi-fo-repeater-item-header > h4 {
+                            grid-column: 1 !important;
+                            grid-row: 1 !important;
+                            align-self: start !important;
+                            text-align: center !important;
+                            line-height: 2.625rem !important;
+                            white-space: nowrap !important;
+                        }
+                        .fi-resource-recipes .recipe-cost-section .recipe-stt-label {
+                            display: block !important;
+                            margin-bottom: 0.5rem !important;
+                            line-height: 1.5rem !important;
+                            font-weight: 600 !important;
+                        }
+                        .fi-resource-recipes .recipe-cost-section .fi-fo-repeater-item-header > ul {
+                            grid-column: 3 !important;
+                            grid-row: 1 !important;
+                            align-self: start !important;
+                            justify-self: center !important;
+                            margin-inline-start: 0 !important;
+                            margin-top: 2rem !important;
+                        }
+                        .fi-resource-recipes .recipe-cost-section .fi-fo-repeater-item-content {
+                            grid-column: 2 !important;
+                            grid-row: 1 !important;
+                            padding: 0 !important;
+                            min-width: 0 !important;
+                        }
+                        @media (max-width: 640px) {
+                            .fi-resource-recipes .recipe-cost-section .fi-fo-repeater-item {
+                                grid-template-columns: 2.75rem minmax(0, 1fr) 2.5rem !important;
+                                gap: 0.5rem !important;
+                                padding: 0.75rem !important;
+                            }
                         }
                         .fi-resource-recipes .recipe-line-total {
+                            display: flex !important;
+                            align-items: center !important;
+                            min-height: 2.625rem !important;
                             color: #ea580c !important;
                             font-weight: 800 !important;
-                            padding-top: 0.625rem !important;
+                            padding-top: 0 !important;
+                            white-space: nowrap !important;
+                        }
+                        .fi-resource-recipes .recipe-cost-section .fi-fo-field-wrp:has(.recipe-line-total) .fi-fo-field-wrp-label {
+                            white-space: nowrap !important;
                         }
                         .fi-resource-recipes .recipe-total-cost {
                             display: flex !important;
