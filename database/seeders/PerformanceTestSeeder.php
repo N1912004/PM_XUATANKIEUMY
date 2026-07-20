@@ -207,8 +207,7 @@ class PerformanceTestSeeder extends Seeder
             $shift1 = Shift::firstOrCreate(['name' => 'CA 1'], ['time_range' => '07:00 - 16:00']);
             $shift2 = Shift::firstOrCreate(['name' => 'CA 2'], ['time_range' => '16:00 - 00:00']);
             $shift3 = Shift::firstOrCreate(['name' => 'CA 3'], ['time_range' => '00:00 - 07:00']);
-            $shift4 = Shift::firstOrCreate(['name' => 'CA 4'], ['time_range' => 'Ca đặc biệt']);
-            $shiftIds = [$shift1->id, $shift2->id, $shift3->id, $shift4->id];
+            $shiftIds = [$shift1->id, $shift2->id, $shift3->id];
         }
 
         $timekeepings = [];

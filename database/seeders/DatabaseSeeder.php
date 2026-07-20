@@ -186,10 +186,6 @@ class DatabaseSeeder extends Seeder
         $shift3 = Shift::firstOrCreate(['name' => 'CA 3'], [
             'time_range' => '00:00 - 07:00',
         ]);
-        $shift4 = Shift::firstOrCreate(['name' => 'CA 4'], [
-            'time_range' => 'Ca đặc biệt',
-        ]);
-
         // 6. Menus (18/05/2026 - T2)
         $dateStr = '2026-05-18';
         Menu::firstOrCreate([
