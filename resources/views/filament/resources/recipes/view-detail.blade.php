@@ -205,7 +205,11 @@
               </div>
               <div class="md-meta-item">
                 <span class="md-meta-k">{{ __('recipe.fields.price_option') }}</span>
-                <span class="md-meta-v">{{ $record->price_option_id ? __('recipe.options.by_contract') : __('recipe.options.by_unit') }}</span>
+                <span class="md-meta-v">{{ match ($record->price_option) {
+                  \App\Models\Recipe::PRICE_OPTION_BY_UNIT => __('recipe.options.by_unit'),
+                  \App\Models\Recipe::PRICE_OPTION_BY_CONTRACT => __('recipe.options.by_contract'),
+                  default => __('recipe.options.none'),
+                } }}</span>
               </div>
               <div class="md-meta-item">
                 <span class="md-meta-k">{{ __('recipe.detail.selling_price_per_portion') }}</span>

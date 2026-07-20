@@ -13,8 +13,20 @@ class Recipe extends Model
 {
     use HasFactory, SoftDeletes;
 
+    public const PRICE_OPTION_NONE = 'none';
+
+    public const PRICE_OPTION_BY_UNIT = 'by_unit';
+
+    public const PRICE_OPTION_BY_CONTRACT = 'by_contract';
+
+    public const PRICE_OPTIONS = [
+        self::PRICE_OPTION_NONE,
+        self::PRICE_OPTION_BY_UNIT,
+        self::PRICE_OPTION_BY_CONTRACT,
+    ];
+
     protected $attributes = [
-        'price_option_id' => false,
+        'price_option' => self::PRICE_OPTION_NONE,
     ];
 
     protected $fillable = [
@@ -25,7 +37,7 @@ class Recipe extends Model
         'selling_price_per_portion',
         'cost_per_portion',
         'cost_override',
-        'price_option_id',
+        'price_option',
         'status',
         'description',
     ];
@@ -41,7 +53,6 @@ class Recipe extends Model
 
     protected $casts = [
         'cost_override' => 'float',
-        'price_option_id' => 'boolean',
     ];
 
     public function recipeIngredients(): HasMany
