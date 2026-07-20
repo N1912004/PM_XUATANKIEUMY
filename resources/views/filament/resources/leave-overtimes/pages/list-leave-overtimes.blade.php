@@ -1,4 +1,4 @@
-<div class="emp-page">
+<div class="emp-page w-full space-y-6">
     @include('filament.resources.leave-overtimes.partials.styles')
 
     @php

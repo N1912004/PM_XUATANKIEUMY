@@ -1,4 +1,4 @@
-<div class="po-page">
+<div class="po-page w-full space-y-6">
     @include('filament.resources.recipes.partials.styles')
 
     @php

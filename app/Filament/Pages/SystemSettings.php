@@ -33,9 +33,9 @@ class SystemSettings extends Page implements HasForms
 
     protected static string $view = 'filament.pages.system-settings';
 
-    public function getMaxContentWidth(): MaxWidth|string|null
+    public function getMaxContentWidth(): MaxWidth
     {
-        return MaxWidth::ThreeExtraLarge;
+        return MaxWidth::Full;
     }
 
     /** @var array<string, mixed> */

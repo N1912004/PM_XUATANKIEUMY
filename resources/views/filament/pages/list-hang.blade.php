@@ -705,7 +705,7 @@
             }
         </style>
         <!-- LIST HÀNG VIEW (MẪU ẢNH 1 & 2) -->
-        <div class="lhn-root" id="lh-print-area">
+        <div class="lhn-root w-full space-y-6" id="lh-print-area">
             <!-- Header bar -->
             <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
                 <div>
