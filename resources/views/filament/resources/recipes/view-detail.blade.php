@@ -94,6 +94,21 @@
 .dark .md-detail-container .md-ing-table th{background:#111827}
 .md-detail-container .md-ing-table td{padding:11px 12px;font-size:13px;border-bottom:1px solid var(--bd2);color:var(--tx)}
 .md-detail-container .md-ing-table tr:last-child td{border-bottom:none}
+.md-detail-container .md-ing-note-cell{width:200px;min-width:160px;max-width:200px;color:var(--fa)}
+.md-detail-container .md-ing-note{white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word}
+.md-detail-container .md-note-details{min-width:0;max-width:100%;width:100%}
+.md-detail-container .md-note-summary{cursor:pointer;list-style:none;display:flex;align-items:baseline;gap:5px;min-width:0;max-width:100%;overflow:hidden}
+.md-detail-container .md-note-summary::-webkit-details-marker{display:none}
+.md-detail-container .md-note-summary::before{content:'▸';color:var(--bl);font-weight:700;flex:0 0 auto}
+.md-detail-container .md-note-details[open] .md-note-summary::before{content:'▾'}
+.md-detail-container .md-note-summary:focus-visible{outline:2px solid var(--bl);outline-offset:2px;border-radius:3px}
+.md-detail-container .md-note-preview{display:block;min-width:0;width:0;flex:1 1 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.md-detail-container .md-note-toggle{color:var(--bl);font-weight:600;white-space:nowrap;flex:0 0 auto}
+.md-detail-container .md-note-show-less{display:none}
+.md-detail-container .md-note-details[open] .md-note-preview,
+.md-detail-container .md-note-details[open] .md-note-show-more{display:none}
+.md-detail-container .md-note-details[open] .md-note-show-less{display:inline}
+.md-detail-container .md-note-full{margin-top:5px;color:var(--tx)}
 .md-detail-container .md-total-bar{display:flex;align-items:center;justify-content:center;gap:16px;background:linear-gradient(135deg,#EFF6FF,#DBEAFE);border-radius:10px;padding:14px;margin-top:12px}
 .dark .md-detail-container .md-total-bar{background:rgba(30, 58, 138, 0.2)}
 .md-detail-container .md-total-lbl{font-size:14px;font-weight:600;color:var(--bl)}
@@ -190,7 +205,7 @@
               </div>
               <div class="md-meta-item">
                 <span class="md-meta-k">{{ __('recipe.fields.price_option') }}</span>
-                <span class="md-meta-v">{{ $record->price_option_id ? __('recipe.options.yes') : __('recipe.options.no') }}</span>
+                <span class="md-meta-v">{{ $record->price_option_id ? __('recipe.options.by_contract') : __('recipe.options.by_unit') }}</span>
               </div>
               <div class="md-meta-item">
                 <span class="md-meta-k">{{ __('recipe.detail.selling_price_per_portion') }}</span>
@@ -263,6 +278,7 @@
                   $qty = $ingredient->pivot->quantity_per_portion;
                   $price = $ingredient->reference_price;
                   $itemTotal = $qty * $price;
+                  $note = trim((string) $ingredient->pivot->note);
                 @endphp
                 <tr>
                   <td style="font-weight:600;color:var(--mu)">{{ $index + 1 }}</td>
@@ -271,7 +287,20 @@
                   <td>{{ __('recipe.detail.currency', ['value' => number_format($price, 0, ',', '.')]) }}</td>
                   <td style="font-weight:700;color:var(--or)">{{ __('recipe.detail.currency', ['value' => number_format($itemTotal, 0, ',', '.')]) }}</td>
                   <td style="font-size:12px;color:var(--mu)">{{ $ingredient->supplier?->name ?? '—' }}</td>
-                  <td style="color:var(--fa)">{{ $ingredient->pivot->note ?? '–' }}</td>
+                  <td class="md-ing-note-cell">
+                    @if (\Illuminate\Support\Str::length($note) > 80)
+                      <details class="md-note-details">
+                        <summary class="md-note-summary">
+                          <span class="md-note-preview">{{ \Illuminate\Support\Str::substr($note, 0, 80) }}</span>
+                          <span class="md-note-toggle md-note-show-more">{{ __('recipe.detail.show_more') }}</span>
+                          <span class="md-note-toggle md-note-show-less">{{ __('recipe.detail.show_less') }}</span>
+                        </summary>
+                        <div class="md-ing-note md-note-full">{{ $note }}</div>
+                      </details>
+                    @else
+                      <span class="md-ing-note">{{ $note !== '' ? $note : '–' }}</span>
+                    @endif
+                  </td>
                 </tr>
               @endforeach
             </tbody>

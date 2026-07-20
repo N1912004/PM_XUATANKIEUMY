@@ -17,7 +17,7 @@ return [
         'cost_override' => 'Chỉ dùng trường hợp đặc biệt — bỏ trống để dùng cost TỰ TÍNH từ định mức nguyên liệu.',
         'cost_override_reason' => 'Bắt buộc khi đặt/thay đổi cost điều chỉnh — được lưu vào nhật ký giá.',
     ],
-    'options' => ['yes' => 'Có', 'no' => 'Không'],
+    'options' => ['by_unit' => 'Theo đơn vị', 'by_contract' => 'Theo hợp đồng'],
     'currency' => ['unit' => 'đ', 'amount' => ':value đ'],
     'status' => ['active' => 'Đang hoạt động', 'pending' => 'Chờ rà soát', 'inactive' => 'Ngừng hoạt động', 'active_applied' => 'Đang áp dụng', 'inactive_applied' => 'Ngưng áp dụng'],
     'messages' => [

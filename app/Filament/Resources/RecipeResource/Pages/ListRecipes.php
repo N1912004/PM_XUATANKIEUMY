@@ -53,7 +53,7 @@ class ListRecipes extends Page
 
     public int $perPage = 10;
 
-    public ?int $expandedRecipeId = null;
+    // public ?int $expandedRecipeId = null;
 
     protected $queryString = [
         'search' => ['except' => ''],
@@ -139,6 +139,7 @@ class ListRecipes extends Page
         $this->resetPage();
     }
 
+    /* Accordion detail is temporarily hidden.
     public function toggleExpand(int $recipeId): void
     {
         if ($this->expandedRecipeId === $recipeId) {
@@ -147,6 +148,7 @@ class ListRecipes extends Page
             $this->expandedRecipeId = $recipeId;
         }
     }
+    */
 
     public function deleteRecipe(int $recipeId): void
     {

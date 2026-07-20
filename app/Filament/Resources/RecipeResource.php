@@ -123,8 +123,8 @@ class RecipeResource extends Resource
                             ->label(__('recipe.fields.price_option'))
                             ->required()
                             ->options([
-                                0 => __('recipe.options.no'),
-                                1 => __('recipe.options.yes'),
+                                0 => __('recipe.options.by_unit'),
+                                1 => __('recipe.options.by_contract'),
                             ])
                             ->default(0)
                             ->native(false),
@@ -221,9 +221,11 @@ class RecipeResource extends Resource
                                     ))
                                     ->extraAttributes(['class' => 'recipe-line-total'])
                                     ->columnSpan(1),
-                                Forms\Components\TextInput::make('note')
+                                Forms\Components\Textarea::make('note')
                                     ->label(__('recipe.fields.note'))
                                     ->placeholder(__('recipe.placeholders.note'))
+                                    ->rows(2)
+                                    ->maxLength(255)
                                     ->columnSpan(2),
                             ])
                             ->columns(12)

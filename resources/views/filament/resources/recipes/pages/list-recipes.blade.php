@@ -236,7 +236,9 @@
                                    wire:click="selectPage({{ json_encode($pageIds) }}, {{ $allSelected ? 'false' : 'true' }})"
                             >
                         </th>
+                        {{--
                         <th style="width: 40px; text-align: center;"></th>
+                        --}}
                         <th style="width: 50px; text-align: center;">STT</th>
                         <th>{{ __('recipe.table.code') }}</th><th>{{ __('recipe.table.name') }}</th><th>{{ __('recipe.table.type') }}</th><th>{{ __('recipe.table.selling_price_per_portion') }}</th><th>{{ __('recipe.table.cost_per_portion') }}</th><th>{{ __('recipe.table.ingredients_count') }}</th><th>{{ __('recipe.table.total_weight') }}</th><th>{{ __('recipe.table.total_cost') }}</th><th>{{ __('recipe.table.status') }}</th><th>{{ __('recipe.table.created_at') }}</th><th>{{ __('recipe.table.actions') }}</th>
                     </tr>
@@ -244,7 +246,6 @@
                 <tbody>
                     @forelse($recipesList as $recipe)
                         @php
-                            $isExpanded = $expandedRecipeId === $recipe->id;
                             $recipeCost = $recipe->effectiveCostPerPortion();
                             $recipeWeight = $recipe->ingredients->sum('pivot.quantity_per_portion');
                             $ingredientsCount = $recipe->ingredients->count();
@@ -272,7 +273,7 @@
                                 default => $recipe->status,
                             };
                         @endphp
-                        <tr class="{{ $isExpanded ? 'mn-row-sel' : '' }}" style="{{ $recipe->trashed() ? 'opacity: 0.6;' : '' }}">
+                        <tr style="{{ $recipe->trashed() ? 'opacity: 0.6;' : '' }}">
                             <td style="text-align: center; vertical-align: middle;">
                                 <input type="checkbox" 
                                        value="{{ $recipe->id }}" 
@@ -281,11 +282,13 @@
                                        wire:model.live="selectedRecipes"
                                 >
                             </td>
+                            {{--
                             <td style="text-align: center; vertical-align: middle;">
                                 <button type="button" wire:click="toggleExpand({{ $recipe->id }})" class="mn-expand-btn {{ $isExpanded ? 'open' : '' }}">
                                     <i class="fa-solid fa-chevron-right"></i>
                                 </button>
                             </td>
+                            --}}
                             <td style="text-align: center; font-weight: 600; color: var(--mu); vertical-align: middle;">
                                 {{ $loop->iteration + ($recipesList->currentPage() - 1) * $recipesList->perPage() }}
                             </td>
@@ -340,10 +343,10 @@
                             </td>
                         </tr>
 
-                        <!-- Accordion Detail Row -->
+                        {{-- Accordion Detail Row
                         @if($isExpanded)
                             <tr class="mn-expand-row">
-                                <td colspan="14">
+                                <td colspan="13">
                                     <div class="mn-sub">
                                         <div class="mn-sub-inner">
                                             <!-- Sub table -->
@@ -399,9 +402,10 @@
                                 </td>
                             </tr>
                         @endif
+                        --}}
                     @empty
                         <tr>
-                            <td colspan="14" style="text-align:center;padding:30px;color:var(--mu)">{{ __('recipe.empty.no_filtered_dishes') }}</td>
+                            <td colspan="13" style="text-align:center;padding:30px;color:var(--mu)">{{ __('recipe.empty.no_filtered_dishes') }}</td>
                         </tr>
                     @endforelse
                 </tbody>
