@@ -3,7 +3,7 @@
 $vi = require __DIR__.'/../vi/purchase_order.php';
 
 return array_replace_recursive($vi, [
-    'navigation' => ['label' => 'Ordering', 'model' => 'Purchase order', 'plural' => 'Purchase orders', 'group' => 'SUPPLY'],
+    'navigation' => ['label' => 'Ordering', 'model' => 'Purchase order', 'plural' => 'Purchase orders', 'group' => 'SUPPLY & WAREHOUSE'],
     'list' => ['title' => 'Purchase orders', 'subtitle' => 'Manage ingredient purchase orders by supplier from finalized item lists'],
     'fields' => ['code' => 'Order code', 'supplier' => 'Supplier', 'supplier_abbr' => 'Supplier', 'status' => 'Status', 'estimated_delivery_date' => 'Estimated delivery date', 'note' => 'Notes', 'ingredient' => 'Ingredient', 'quantity_ordered' => 'Qty ordered', 'quantity_received' => 'Qty received', 'unit_price' => 'Unit price', 'kitchen' => 'Kitchen'],
     'form' => ['details' => 'Order details', 'ordered_items' => 'Ordered items'],

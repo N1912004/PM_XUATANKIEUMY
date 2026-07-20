@@ -328,11 +328,13 @@ class AdminPanelProvider extends PanelProvider
                 NavigationGroup::make()
                     ->label(fn () => __('TỔNG QUAN')),
                 NavigationGroup::make()
+                    ->label(fn () => __('NGUYÊN LIỆU & KHO')),
+                NavigationGroup::make()
+                    ->label(fn () => __('CUNG ỨNG & KHO')),
+                NavigationGroup::make()
                     ->label(fn () => __('KHU VỰC & NHÀ ĂN')),
                 NavigationGroup::make()
                     ->label(fn () => __('VẬN HÀNH BẾP')),
-                NavigationGroup::make()
-                    ->label(fn () => __('CUNG ỨNG & KHO')),
                 NavigationGroup::make()
                     ->label(fn () => __('NHÂN SỰ')),
                 NavigationGroup::make()
