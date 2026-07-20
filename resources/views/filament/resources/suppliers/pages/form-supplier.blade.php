@@ -1,4 +1,4 @@
-<div class="sup-page">
+<div class="sup-page w-full space-y-6">
     @include('filament.resources.suppliers.partials.styles')
     @php
         $formCrumb = isset($this->supplierId) ? __('supplier.form.edit_title') : __('supplier.form.create_title');

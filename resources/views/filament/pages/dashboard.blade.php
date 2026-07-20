@@ -187,7 +187,7 @@
         }
     </style>
 
-    <div class="custom-dashboard-container space-y-6">
+    <div class="custom-dashboard-container w-full space-y-6">
         <!-- 1. Header Banner (Rich Gradient & Glassmorphism) -->
         <div class="premium-banner">
             <div class="absolute right-0 top-0 -mr-6 -mt-6 h-40 w-40 rounded-full bg-white/10 blur-2xl"></div>

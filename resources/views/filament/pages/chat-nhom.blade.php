@@ -1,4 +1,4 @@
-<div>
+<div class="w-full space-y-6">
     @include('filament.pages.chat-partials.styles')
 
     @php

@@ -16,6 +16,7 @@ use Filament\Navigation\MenuItem;
 use Filament\Navigation\NavigationGroup;
 use Filament\Panel;
 use Filament\PanelProvider;
+use Filament\Support\Enums\MaxWidth;
 use Filament\View\PanelsRenderHook;
 use Filament\Widgets;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
@@ -40,11 +41,12 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->spa()
+            ->maxContentWidth(MaxWidth::Full)
             // Trang đăng nhập theo mẫu BlueFire (2 cột) — kế thừa nguyên luồng auth Filament
             ->login(Login::class)
             ->profile(EditProfile::class)
             ->sidebarCollapsibleOnDesktop()
-            ->sidebarWidth('16rem')
+            ->sidebarWidth('15rem')
             ->collapsedSidebarWidth('4rem')
             ->brandName($siteName)
             ->brandLogo(fn () => request()->routeIs('filament.admin.auth.login') ? new HtmlString('') : view('filament.components.brand-logo', ['siteName' => $this->getSetting('site_name', 'Bluefire Catering')]))
