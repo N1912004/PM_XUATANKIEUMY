@@ -35,7 +35,13 @@ class ListRecipes extends Page
 
     public string $search = '';
 
-    public string $priceFilter = '';
+    public string $sellingPriceFrom = '';
+
+    public string $sellingPriceTo = '';
+
+    public string $costPriceFrom = '';
+
+    public string $costPriceTo = '';
 
     public string $typeFilter = '';
 
@@ -51,7 +57,10 @@ class ListRecipes extends Page
 
     protected $queryString = [
         'search' => ['except' => ''],
-        'priceFilter' => ['except' => ''],
+        'sellingPriceFrom' => ['except' => ''],
+        'sellingPriceTo' => ['except' => ''],
+        'costPriceFrom' => ['except' => ''],
+        'costPriceTo' => ['except' => ''],
         'typeFilter' => ['except' => ''],
         'statusFilter' => ['except' => ''],
         'trashedFilter' => ['except' => ''],
@@ -68,7 +77,25 @@ class ListRecipes extends Page
         $this->resetPage();
     }
 
-    public function updatedPriceFilter(): void
+    public function updatedSellingPriceFrom(): void
+    {
+        $this->resetSelection();
+        $this->resetPage();
+    }
+
+    public function updatedSellingPriceTo(): void
+    {
+        $this->resetSelection();
+        $this->resetPage();
+    }
+
+    public function updatedCostPriceFrom(): void
+    {
+        $this->resetSelection();
+        $this->resetPage();
+    }
+
+    public function updatedCostPriceTo(): void
     {
         $this->resetSelection();
         $this->resetPage();
@@ -101,7 +128,10 @@ class ListRecipes extends Page
     public function resetFilters(): void
     {
         $this->search = '';
-        $this->priceFilter = '';
+        $this->sellingPriceFrom = '';
+        $this->sellingPriceTo = '';
+        $this->costPriceFrom = '';
+        $this->costPriceTo = '';
         $this->typeFilter = '';
         $this->statusFilter = '';
         $this->trashedFilter = '';
@@ -453,7 +483,22 @@ class ListRecipes extends Page
                         ->orWhereRaw('LOWER(code) LIKE ?', ["%{$search}%"]);
                 });
             })
-            ->when($this->priceFilter !== '', fn ($query) => $query->where('standard_price_per_portion', $this->priceFilter))
+            ->when($this->sellingPriceFrom !== '' && $this->sellingPriceFrom !== null, function ($query): void {
+                $val = (float) str_replace(['.', ','], '', (string) $this->sellingPriceFrom);
+                $query->where('selling_price_per_portion', '>=', $val);
+            })
+            ->when($this->sellingPriceTo !== '' && $this->sellingPriceTo !== null, function ($query): void {
+                $val = (float) str_replace(['.', ','], '', (string) $this->sellingPriceTo);
+                $query->where('selling_price_per_portion', '<=', $val);
+            })
+            ->when($this->costPriceFrom !== '' && $this->costPriceFrom !== null, function ($query): void {
+                $val = (float) str_replace(['.', ','], '', (string) $this->costPriceFrom);
+                $query->where('cost_per_portion', '>=', $val);
+            })
+            ->when($this->costPriceTo !== '' && $this->costPriceTo !== null, function ($query): void {
+                $val = (float) str_replace(['.', ','], '', (string) $this->costPriceTo);
+                $query->where('cost_per_portion', '<=', $val);
+            })
             ->when($this->typeFilter !== '', function ($query): void {
                 // Lọc theo cột type tương thích ngược (qua bảng recipe_types hoặc fallback old_type)
                 $query->where(function ($q): void {
@@ -469,19 +514,6 @@ class ListRecipes extends Page
         return $this->buildRecipesQuery()
             ->orderBy('id', 'desc')
             ->paginate($this->perPage);
-    }
-
-    public function priceOptions(): array
-    {
-        return [
-            15000 => '15.000 đ',
-            20000 => '20.000 đ',
-            25000 => '25.000 đ',
-            30000 => '30.000 đ',
-            35000 => '35.000 đ',
-            40000 => '40.000 đ',
-            50000 => '50.000 đ',
-        ];
     }
 
     public function typeOptions(): array

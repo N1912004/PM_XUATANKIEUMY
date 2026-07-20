@@ -52,7 +52,7 @@ class RecipeExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
             'Tổng định lượng / phần (kg)',
             'Tổng cost nguyên liệu / phần',
             'Trạng thái',
-            'Cập nhật',
+            'Ngày tạo',
         ];
 
         $index = 1;
@@ -62,8 +62,8 @@ class RecipeExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
                 $recipe->code,
                 $recipe->name,
                 $recipe->type,
-                (float) $recipe->standard_price_per_portion,
                 (float) $recipe->selling_price_per_portion,
+                (float) $recipe->cost_per_portion,
                 $recipe->ingredients->count(),
                 (float) $recipe->ingredients->sum('pivot.quantity_per_portion'),
                 // Cost hiệu lực: ưu tiên cost override — khớp với bảng danh sách và Báo cáo
@@ -74,7 +74,7 @@ class RecipeExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
                     'inactive' => 'Ngừng hoạt động',
                     default => $recipe->status,
                 },
-                $recipe->updated_at?->format('d/m/Y H:i'),
+                $recipe->created_at?->format('d/m/Y H:i'),
             ];
         });
 
@@ -142,12 +142,12 @@ class RecipeExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
     private function recipes(): Collection
     {
         if ($this->query) {
-            return $this->query->with('ingredients')->latest('updated_at')->get();
+            return $this->query->with('ingredients')->latest('created_at')->get();
         }
 
         return Recipe::query()
             ->with('ingredients')
-            ->latest('updated_at')
+            ->latest('created_at')
             ->get();
     }
 }

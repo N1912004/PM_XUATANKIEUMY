@@ -144,8 +144,8 @@ class DatabaseSeeder extends Seeder
         $recipe1 = Recipe::firstOrCreate(['code' => 'MON001'], [
             'name' => 'Vịt kho riềng sả',
             'type' => 'Món 1',
-            'standard_price_per_portion' => 35000.00,
-            'selling_price_per_portion' => 32000.00,
+            'selling_price_per_portion' => 35000.00,
+            'cost_per_portion' => 32000.00,
             'status' => 'active',
         ]);
         $recipe1->ingredients()->syncWithoutDetaching([
@@ -157,8 +157,8 @@ class DatabaseSeeder extends Seeder
         $recipe2 = Recipe::firstOrCreate(['code' => 'MON002'], [
             'name' => 'Trứng luộc sốt me',
             'type' => 'Món 2',
-            'standard_price_per_portion' => 15000.00,
-            'selling_price_per_portion' => 12000.00,
+            'selling_price_per_portion' => 15000.00,
+            'cost_per_portion' => 12000.00,
             'status' => 'active',
         ]);
         $recipe2->ingredients()->syncWithoutDetaching([
@@ -168,8 +168,8 @@ class DatabaseSeeder extends Seeder
         $recipe3 = Recipe::firstOrCreate(['code' => 'MON003'], [
             'name' => 'Su su xào',
             'type' => 'Rau xào/Luộc',
-            'standard_price_per_portion' => 10000.00,
-            'selling_price_per_portion' => 8000.00,
+            'selling_price_per_portion' => 10000.00,
+            'cost_per_portion' => 8000.00,
             'status' => 'active',
         ]);
         $recipe3->ingredients()->syncWithoutDetaching([

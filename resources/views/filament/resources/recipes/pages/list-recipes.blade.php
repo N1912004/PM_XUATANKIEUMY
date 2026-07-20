@@ -3,7 +3,6 @@
 
     @php
         $recipesList = $this->recipes();
-        $prices = $this->priceOptions();
         $types = $this->typeOptions();
         $pageIds = $recipesList->pluck('id')->toArray();
     @endphp
@@ -29,55 +28,96 @@
             <input wire:model.live.debounce.250ms="search" type="text" placeholder="{{ __('recipe.placeholders.search_name_code') }}">
         </div>
 
-        <div class="mn-filter-select"
-            x-data="{
-                open: false,
-                search: '',
-                selected: @entangle('priceFilter').live,
-                options: {{ json_encode($prices) }},
-                get filtered() {
-                    let q = this.search.toLowerCase();
-                    return Object.entries(this.options).filter(([val, lbl]) => lbl.toLowerCase().includes(q));
-                },
-                get label() {
-                    if (this.selected === '' || this.selected === null || this.selected === undefined) return @js(__('recipe.filters.price'));
-                    return this.options[this.selected] || @js(__('recipe.filters.price'));
-                },
-                selectOption(val) {
-                    this.selected = val;
-                    this.open = false;
-                },
-                toggle() {
-                    this.open = ! this.open;
-                    if (this.open) {
-                        this.search = '';
-                        this.$nextTick(() => this.$refs.search?.focus());
+        {{-- Filter giá bán cho khách (Từ - Đến) --}}
+        <div class="mn-range-grp" title="{{ __('recipe.filters.selling_price') }}">
+            <span class="mn-range-label">{{ __('recipe.filters.selling_price') }}:</span>
+            <input
+                x-data="{
+                    val: @entangle('sellingPriceFrom').live,
+                    format(v) {
+                        if (v === null || v === undefined || v === '') return '';
+                        let n = v.toString().replace(/\D/g, '');
+                        return n ? new Intl.NumberFormat('vi-VN').format(n) : '';
+                    },
+                    onInput(e) {
+                        let digits = e.target.value.replace(/\D/g, '');
+                        this.val = digits;
+                        e.target.value = this.format(digits);
                     }
-                }
-            }"
-            @click.outside="open = false"
-            @keydown.escape.stop="open = false"
-        >
-            <button type="button" class="mn-sel" style="display: flex; align-items: center; justify-content: space-between; gap: 8px; min-width: 220px; text-align: left;" @click="toggle()">
-                <span x-text="label" style="text-overflow: ellipsis; overflow: hidden; white-space: nowrap;"></span>
-            </button>
-            <div x-show="open" x-cloak class="mn-dropdown-panel" style="min-width: 220px;">
-                <input x-ref="search" x-model="search" type="text" placeholder="{{ __('recipe.placeholders.search_short') }}" class="mn-dropdown-search">
-                <ul class="mn-dropdown-list">
-                    <li>
-                        <button type="button" class="mn-dropdown-item" :class="(selected === '' || selected === null) && 'selected'" @click="selectOption('')">
-                            {{ __('recipe.filters.all_prices') }}
-                        </button>
-                    </li>
-                    <template x-for="[val, lbl] in filtered" :key="val">
-                        <li>
-                            <button type="button" class="mn-dropdown-item" :class="selected == val && 'selected'" @click="selectOption(val)" x-text="lbl">
-                            </button>
-                        </li>
-                    </template>
-                    <li x-show="filtered.length === 0" class="mn-dropdown-empty">{{ __('recipe.empty.no_results') }}</li>
-                </ul>
-            </div>
+                }"
+                x-effect="$el.value = format(val)"
+                @input="onInput($event)"
+                type="text"
+                placeholder="{{ __('recipe.filters.from') }}"
+                class="mn-num-input"
+            >
+            <span class="mn-range-sep">-</span>
+            <input
+                x-data="{
+                    val: @entangle('sellingPriceTo').live,
+                    format(v) {
+                        if (v === null || v === undefined || v === '') return '';
+                        let n = v.toString().replace(/\D/g, '');
+                        return n ? new Intl.NumberFormat('vi-VN').format(n) : '';
+                    },
+                    onInput(e) {
+                        let digits = e.target.value.replace(/\D/g, '');
+                        this.val = digits;
+                        e.target.value = this.format(digits);
+                    }
+                }"
+                x-effect="$el.value = format(val)"
+                @input="onInput($event)"
+                type="text"
+                placeholder="{{ __('recipe.filters.to') }}"
+                class="mn-num-input"
+            >
+        </div>
+
+        {{-- Filter giá cost chuẩn (Từ - Đến) --}}
+        <div class="mn-range-grp" title="{{ __('recipe.filters.cost_price') }}">
+            <span class="mn-range-label">{{ __('recipe.filters.cost_price') }}:</span>
+            <input
+                x-data="{
+                    val: @entangle('costPriceFrom').live,
+                    format(v) {
+                        if (v === null || v === undefined || v === '') return '';
+                        let n = v.toString().replace(/\D/g, '');
+                        return n ? new Intl.NumberFormat('vi-VN').format(n) : '';
+                    },
+                    onInput(e) {
+                        let digits = e.target.value.replace(/\D/g, '');
+                        this.val = digits;
+                        e.target.value = this.format(digits);
+                    }
+                }"
+                x-effect="$el.value = format(val)"
+                @input="onInput($event)"
+                type="text"
+                placeholder="{{ __('recipe.filters.from') }}"
+                class="mn-num-input"
+            >
+            <span class="mn-range-sep">-</span>
+            <input
+                x-data="{
+                    val: @entangle('costPriceTo').live,
+                    format(v) {
+                        if (v === null || v === undefined || v === '') return '';
+                        let n = v.toString().replace(/\D/g, '');
+                        return n ? new Intl.NumberFormat('vi-VN').format(n) : '';
+                    },
+                    onInput(e) {
+                        let digits = e.target.value.replace(/\D/g, '');
+                        this.val = digits;
+                        e.target.value = this.format(digits);
+                    }
+                }"
+                x-effect="$el.value = format(val)"
+                @input="onInput($event)"
+                type="text"
+                placeholder="{{ __('recipe.filters.to') }}"
+                class="mn-num-input"
+            >
         </div>
 
         <div class="mn-filter-select"
@@ -198,7 +238,7 @@
                         </th>
                         <th style="width: 40px; text-align: center;"></th>
                         <th style="width: 50px; text-align: center;">STT</th>
-                        <th>{{ __('recipe.table.code') }}</th><th>{{ __('recipe.table.name') }}</th><th>{{ __('recipe.table.type') }}</th><th>{{ __('recipe.table.standard_price_per_portion') }}</th><th>{{ __('recipe.table.selling_price_per_portion') }}</th><th>{{ __('recipe.table.ingredients_count') }}</th><th>{{ __('recipe.table.total_weight') }}</th><th>{{ __('recipe.table.total_cost') }}</th><th>{{ __('recipe.table.status') }}</th><th>{{ __('recipe.table.updated_at') }}</th><th>{{ __('recipe.table.actions') }}</th>
+                        <th>{{ __('recipe.table.code') }}</th><th>{{ __('recipe.table.name') }}</th><th>{{ __('recipe.table.type') }}</th><th>{{ __('recipe.table.selling_price_per_portion') }}</th><th>{{ __('recipe.table.cost_per_portion') }}</th><th>{{ __('recipe.table.ingredients_count') }}</th><th>{{ __('recipe.table.total_weight') }}</th><th>{{ __('recipe.table.total_cost') }}</th><th>{{ __('recipe.table.status') }}</th><th>{{ __('recipe.table.created_at') }}</th><th>{{ __('recipe.table.actions') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -257,8 +297,8 @@
                                 @endif
                             </td>
                             <td><span class="mn-group-pill {{ $typeClass }}">{{ $recipe->type }}</span></td>
-                            <td><span class="mn-price">{{ number_format($recipe->standard_price_per_portion, 0, ',', '.') }} d</span></td>
                             <td><span class="mn-price">{{ number_format($recipe->selling_price_per_portion, 0, ',', '.') }} d</span></td>
+                            <td><span class="mn-price">{{ number_format($recipe->cost_per_portion, 0, ',', '.') }} d</span></td>
                             <td><span class="mn-num">{{ $ingredientsCount }}</span></td>
                             <td><span class="mn-kg">{{ str_replace('.', ',', round($recipeWeight, 2)) }} kg</span></td>
                             <td>
@@ -270,7 +310,7 @@
                                 @endif
                             </td>
                             <td><span class="{{ $statusClass }}">{{ $statusText }}</span></td>
-                            <td><span class="mn-date">{{ $recipe->updated_at->format('d/m/Y H:i') }}</span></td>
+                            <td><span class="mn-date">{{ $recipe->created_at->format('d/m/Y H:i') }}</span></td>
                             <td>
                                 <div style="display:flex;gap:4px">
                                     @if($recipe->trashed())

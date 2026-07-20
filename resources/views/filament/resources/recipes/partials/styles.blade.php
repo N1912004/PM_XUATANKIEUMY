@@ -115,6 +115,44 @@
     .mn-srch input::placeholder {
         color: var(--fa);
     }
+    .mn-range-grp {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        background: var(--wh);
+        border: 1px solid var(--bd);
+        border-radius: 8px;
+        padding: 0 10px;
+        height: 36px;
+        transition: .13s;
+    }
+    .mn-range-grp:focus-within {
+        border-color: var(--bl-m);
+    }
+    .mn-range-label {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--su);
+        white-space: nowrap;
+        margin-right: 2px;
+    }
+    .mn-num-input {
+        border: none !important;
+        background: transparent !important;
+        outline: none !important;
+        font-size: 12px !important;
+        color: var(--tx) !important;
+        width: 95px !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+    }
+    .mn-num-input::placeholder {
+        color: var(--fa);
+    }
+    .mn-range-sep {
+        color: var(--fa);
+        font-size: 12px;
+    }
     .mn-sel {
         height: 36px !important;
         padding: 0 28px 0 11px !important;

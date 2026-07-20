@@ -2,29 +2,11 @@
 
 @php
     $record = $getRecord();
+    $description = trim((string) $record->description);
     $ingredientsCount = $record->ingredients->count();
     $totalWeight = $record->ingredients->sum('pivot.quantity_per_portion');
-    // Cost hiệu lực: ưu tiên cost override (nếu có) để khớp bảng danh sách & Báo cáo;
-    // breakdown % từng nguyên liệu vẫn tính trên cost tự tính bên dưới.
-    $autoCost = $record->ingredients->sum(function ($ingredient) {
-        return $ingredient->pivot->quantity_per_portion * $ingredient->reference_price;
-    });
-    $totalCost = $record->cost_override !== null ? (float) $record->cost_override : $autoCost;
-
-    $colors = ['#267DC1', '#059669', '#7C3AED', '#EA580C', '#ef4444', '#ec4899', '#6b7280'];
-    $ingredientsWithCosts = [];
-    
-    foreach ($record->ingredients as $index => $ingredient) {
-        $cost = $ingredient->pivot->quantity_per_portion * $ingredient->reference_price;
-        $percentage = $totalCost > 0 ? ($cost / $totalCost) * 100 : 0;
-        
-        $ingredientsWithCosts[] = [
-            'name' => $ingredient->name,
-            'cost' => $cost,
-            'percentage' => round($percentage, 1),
-            'color' => $colors[$index % count($colors)],
-        ];
-    }
+    // Cost hiệu lực: ưu tiên cost override (nếu có) để khớp bảng danh sách & Báo cáo.
+    $totalCost = $record->effectiveCostPerPortion();
 
     // Lịch sử cập nhật giá nguyên liệu
     $priceHistory = [];
@@ -86,6 +68,21 @@
 .md-detail-container .md-meta-item{display:flex;align-items:baseline;gap:8px;font-size:13px}
 .md-detail-container .md-meta-k{color:var(--mu);min-width:110px;flex-shrink:0}
 .md-detail-container .md-meta-v{font-weight:600;color:var(--tx)}
+.md-detail-container .md-meta-item-full{grid-column:1/-1;align-items:flex-start}
+.md-detail-container .md-description{font-weight:400;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere}
+.md-detail-container .md-description-details{min-width:0;flex:1}
+.md-detail-container .md-description-summary{cursor:pointer;list-style:none;color:var(--tx);display:flex;align-items:baseline;gap:6px;min-width:0;width:100%}
+.md-detail-container .md-description-summary::-webkit-details-marker{display:none}
+.md-detail-container .md-description-summary::before{content:'▸';display:inline-block;color:var(--bl);font-weight:700;flex:0 0 auto}
+.md-detail-container .md-description-details[open] .md-description-summary::before{content:'▾'}
+.md-detail-container .md-description-summary:focus-visible{outline:2px solid var(--bl);outline-offset:3px;border-radius:3px}
+.md-detail-container .md-description-preview{display:block;min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.md-detail-container .md-description-toggle{color:var(--bl);font-weight:600;white-space:nowrap;flex:0 0 auto}
+.md-detail-container .md-description-show-less{display:none}
+.md-detail-container .md-description-details[open] .md-description-preview,
+.md-detail-container .md-description-details[open] .md-description-show-more{display:none}
+.md-detail-container .md-description-details[open] .md-description-show-less{display:inline}
+.md-detail-container .md-description-full{margin-top:6px;color:var(--tx)}
 .md-detail-container .md-stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
 .md-detail-container .md-stat{background:var(--bg);border-radius:10px;padding:14px;text-align:center}
 .md-detail-container .md-stat-ico{font-size:22px;margin-bottom:6px}
@@ -118,11 +115,6 @@
 .md-detail-container .ms-active{background:var(--gn-s, #ECFDF5);color:var(--gn-t, #065F46);border:1px solid var(--gn, #A7F3D0);border-radius:20px;padding:3px 10px;font-size:11.5px;font-weight:700;display:inline-block}
 .md-detail-container .ms-review{background:var(--or-s, #FFF7ED);color:var(--or, #92400E);border:1px solid var(--or, #FED7AA);border-radius:20px;padding:3px 10px;font-size:11.5px;font-weight:700;display:inline-block}
 .md-detail-container .ms-inactive{background:var(--bd2, #F1F5F9);color:var(--su, #475569);border:1px solid var(--bd);border-radius:20px;padding:3px 10px;font-size:11.5px;font-weight:700;display:inline-block}
-
-.md-detail-container .dl-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;font-size:11.5px}
-.md-detail-container .dl-left{display:flex;align-items:center;gap:6px;color:var(--su)}
-.md-detail-container .dl-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.md-detail-container .dl-pct{font-weight:600;color:var(--tx)}
 
 @media(max-width:960px){
   .md-detail-container .md-layout{grid-template-columns:1fr}
@@ -185,29 +177,39 @@
                 <span class="md-meta-v">{{ $record->code }}</span>
               </div>
               <div class="md-meta-item">
-                <span class="md-meta-k">{{ __('recipe.detail.selling_price_per_portion') }}</span>
-                <span class="md-meta-v">{{ $record->price_option === 'Có' ? __('recipe.detail.by_unit') : __('recipe.detail.currency', ['value' => number_format($record->selling_price_per_portion, 0, ',', '.')]) }}</span>
+                <span class="md-meta-k">{{ __('recipe.detail.cost_per_portion') }}</span>
+                <span class="md-meta-v">{{ __('recipe.detail.currency', ['value' => number_format($record->cost_per_portion, 0, ',', '.')]) }}</span>
               </div>
               <div class="md-meta-item">
                 <span class="md-meta-k">{{ __('recipe.detail.type') }}</span>
                 <span class="md-meta-v">{{ $record->type }}</span>
               </div>
               <div class="md-meta-item">
-                <span class="md-meta-k">{{ __('recipe.detail.created_by') }}</span>
-                <span class="md-meta-v" style="display:flex;align-items:center;gap:6px">
-                  <div style="width:20px;height:20px;border-radius:50%;overflow:hidden;flex-shrink:0">
-                    <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=40&h=40&fit=crop&crop=face" style="width:100%;height:100%;object-fit:cover">
-                  </div>
-                  {{ auth()->user()?->name ?? __('recipe.detail.unknown_user') }}
-                </span>
+                <span class="md-meta-k">{{ __('recipe.fields.price_option') }}</span>
+                <span class="md-meta-v">{{ $record->price_option_id ? __('recipe.options.yes') : __('recipe.options.no') }}</span>
               </div>
               <div class="md-meta-item">
-                <span class="md-meta-k">{{ __('recipe.detail.standard_price_per_portion') }}</span>
-                <span class="md-meta-v">{{ __('recipe.detail.currency', ['value' => number_format($record->standard_price_per_portion, 0, ',', '.')]) }}</span>
+                <span class="md-meta-k">{{ __('recipe.detail.selling_price_per_portion') }}</span>
+                <span class="md-meta-v">{{ __('recipe.detail.currency', ['value' => number_format($record->selling_price_per_portion, 0, ',', '.')]) }}</span>
               </div>
               <div class="md-meta-item">
-                <span class="md-meta-k">{{ __('recipe.detail.updated_at') }}</span>
-                <span class="md-meta-v">{{ $record->updated_at->format('d/m/Y H:i') }}</span>
+                <span class="md-meta-k">{{ __('recipe.detail.created_at') }}</span>
+                <span class="md-meta-v">{{ $record->created_at->format('d/m/Y H:i') }}</span>
+              </div>
+              <div class="md-meta-item md-meta-item-full">
+                <span class="md-meta-k">{{ __('recipe.fields.description') }}</span>
+                @if (\Illuminate\Support\Str::length($description) > 160)
+                  <details class="md-description-details">
+                    <summary class="md-description-summary">
+                      <span class="md-description-preview">{{ \Illuminate\Support\Str::substr($description, 0, 160) }}</span>
+                      <span class="md-description-toggle md-description-show-more">{{ __('recipe.detail.show_more') }}</span>
+                      <span class="md-description-toggle md-description-show-less">{{ __('recipe.detail.show_less') }}</span>
+                    </summary>
+                    <div class="md-description md-description-full">{{ $description }}</div>
+                  </details>
+                @else
+                  <span class="md-meta-v md-description">{{ $description !== '' ? $description : '—' }}</span>
+                @endif
               </div>
             </div>
           </div>
@@ -286,65 +288,6 @@
 
     <!-- RIGHT -->
     <div>
-      <!-- Tóm tắt cost -->
-      <div class="md-cost-rp">
-        <div class="md-cost-rp-ttl">{{ __('recipe.detail.cost_summary') }}</div>
-        <div style="display:flex;justify-content:center;margin-bottom:12px">
-          @php
-            $r = 48;
-            $circumference = 2 * 3.14159265 * $r;
-            $currentOffset = 0;
-          @endphp
-          <svg width="130" height="130" viewBox="0 0 130 130">
-            <circle cx="65" cy="65" r="{{ $r }}" fill="none" stroke="#F1F5F9" stroke-width="16"/>
-            @foreach ($ingredientsWithCosts as $item)
-                @php
-                    $percentage = $totalCost > 0 ? ($item['cost'] / $totalCost) : 0;
-                    $dashArray = ($percentage * $circumference) . ' ' . ($circumference - ($percentage * $circumference));
-                    $dashOffset = -$currentOffset;
-                    $currentOffset += $percentage * $circumference;
-                @endphp
-                <circle cx="65" cy="65" r="{{ $r }}" fill="none" stroke="{{ $item['color'] }}" stroke-width="16" 
-                        stroke-dasharray="{{ $dashArray }}" stroke-dashoffset="{{ $dashOffset }}" stroke-linecap="butt"
-                        transform="rotate(-90 65 65)" />
-            @endforeach
-            <text x="65" y="61" text-anchor="middle" font-size="12" font-weight="800" fill="#267DC1" font-family="Inter,sans-serif">{{ __('recipe.detail.currency', ['value' => number_format($totalCost, 0, ',', '.')]) }}</text>
-            <text x="65" y="75" text-anchor="middle" font-size="8.5" fill="#64748B" font-family="Inter,sans-serif">{{ __('recipe.detail.chart_total') }}</text>
-          </svg>
-        </div>
-        
-        <div style="display:flex;flex-direction:column;gap:5px">
-          @foreach ($ingredientsWithCosts as $item)
-            <div class="dl-row">
-              <div class="dl-left">
-                <span class="dl-dot" style="background:{{ $item['color'] }}"></span>
-                {{ $item['name'] }}
-              </div>
-              <span class="dl-pct" style="font-size:11px">{{ __('recipe.detail.currency', ['value' => number_format($item['cost'], 0, ',', '.')]) }} &nbsp;{{ $item['percentage'] }}%</span>
-            </div>
-          @endforeach
-        </div>
-      </div>
-
-      <!-- Thông tin tìm kiếm -->
-      <div class="md-cost-rp">
-        <div class="md-cost-rp-ttl" style="display:flex;align-items:center;gap:7px">
-          <i class="fa-solid fa-magnifying-glass" style="font-size:13px;color:var(--bl)"></i>
-          {{ __('recipe.detail.search_information') }}
-        </div>
-        <div style="font-size:12px;color:var(--mu);line-height:1.6;margin-bottom:8px">{{ __('recipe.detail.search_hint') }}</div>
-        <ul class="lf-rule" style="list-style:none;padding:0;display:flex;flex-direction:column;gap:4px">
-          <li style="font-size:12px;color:var(--su);display:flex;gap:5px;align-items:flex-start">
-            <span style="color:var(--bl)">•</span>
-            {{ __('recipe.fields.name') }}
-          </li>
-          <li style="font-size:12px;color:var(--su);display:flex;gap:5px;align-items:flex-start">
-            <span style="color:var(--bl)">•</span>
-            {{ __('recipe.fields.selling_price_per_portion') }}
-          </li>
-        </ul>
-      </div>
-
       <!-- Lịch sử cập nhật giá nguyên liệu -->
       <div class="md-cost-rp" style="margin-bottom:0">
         <div class="md-cost-rp-ttl">{{ __('recipe.detail.price_history') }}</div>

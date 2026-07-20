@@ -125,8 +125,8 @@ class PerformanceTestSeeder extends Seeder
                     'code' => 'MON'.str_pad($i, 3, '0', STR_PAD_LEFT),
                     'name' => 'Món ăn Test '.$i,
                     'type' => $types[array_rand($types)],
-                    'standard_price_per_portion' => rand(10, 50) * 1000,
                     'selling_price_per_portion' => rand(10, 50) * 1000,
+                    'cost_per_portion' => rand(10, 50) * 1000,
                     'status' => 'active',
                 ]);
                 $recipeIds[] = $recipe->id;
