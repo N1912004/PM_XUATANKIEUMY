@@ -555,35 +555,35 @@
     @php $stats = $this->getStats(); @endphp
     <div class="stats-grid">
         <div class="stat-card">
-            <div class="stat-icon" style="background: #eff6ff; color: #1e40af;"><i class="fa-regular fa-calendar"></i></div>
+            <div class="stat-icon" style="background: #E9F2F8; color: #267DC1;"><i class="fa-regular fa-calendar"></i></div>
             <div>
                 <div class="stat-val">{{ $stats['days'] }}</div>
                 <div class="stat-lbl">{{ __('report.stats.menu_days') }}</div>
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon" style="background: #fff7ed; color: #ea580c;"><i class="fa-solid fa-utensils"></i></div>
+            <div class="stat-icon" style="background: #E9F2F8; color: #267DC1;"><i class="fa-solid fa-utensils"></i></div>
             <div>
                 <div class="stat-val">{{ $stats['dishes'] }}</div>
                 <div class="stat-lbl">{{ __('report.stats.dishes') }}</div>
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon" style="background: #f5f3ff; color: #7c3aed;"><i class="fa-solid fa-seedling"></i></div>
+            <div class="stat-icon" style="background: #E9F2F8; color: #267DC1;"><i class="fa-solid fa-seedling"></i></div>
             <div>
                 <div class="stat-val">{{ $stats['ingredients'] }}</div>
                 <div class="stat-lbl">{{ __('report.stats.ingredient_rows') }}</div>
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon" style="background: #ecfdf5; color: #059669;"><i class="fa-solid fa-users"></i></div>
+            <div class="stat-icon" style="background: #E9F2F8; color: #267DC1;"><i class="fa-solid fa-users"></i></div>
             <div>
                 <div class="stat-val">{{ number_format($stats['suat'], 0, ',', '.') }}</div>
                 <div class="stat-lbl">{{ __('report.stats.portions') }}</div>
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon" style="background: #fef2f2; color: #dc2626;"><i class="fa-solid fa-sack-dollar"></i></div>
+            <div class="stat-icon" style="background: #E9F2F8; color: #267DC1;"><i class="fa-solid fa-sack-dollar"></i></div>
             <div>
                 <div class="stat-val">{{ number_format($stats['cost'], 0, ',', '.') }}{{ __('report.currency') }}</div>
                 <div class="stat-lbl">{{ __('report.stats.cost') }}</div>

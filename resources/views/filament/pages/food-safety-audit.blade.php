@@ -101,7 +101,7 @@
         <div class="tsp"></div>
         @if($activeStep === 'Lưu mẫu')
             <button type="button" onclick="window.print()" class="emp-btn" aria-label="{{ __('food_safety.accessibility.print_labels') }}" style="height:36px">
-                <i class="fa-solid fa-tags" style="color:var(--po-pu)"></i>
+                <i class="fa-solid fa-tags" style="color:var(--po-bl)"></i>
                 {{ __('food_safety.actions.print_labels') }}
             </button>
         @endif

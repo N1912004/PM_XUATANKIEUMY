@@ -33,7 +33,7 @@
         </div>
 
         <div class="py-kcard">
-            <div class="py-kico" style="background:var(--po-or-s);color:var(--po-or)">
+            <div class="py-kico" style="background:var(--po-bl-s);color:var(--po-bl)">
                 <i class="fa-solid fa-boxes-stacked"></i>
             </div>
             <div>
@@ -43,7 +43,7 @@
         </div>
 
         <div class="py-kcard">
-            <div class="py-kico" style="background:var(--po-gn-s);color:var(--po-gn)">
+            <div class="py-kico" style="background:var(--po-bl-s);color:var(--po-bl)">
                 <i class="fa-solid fa-circle-check"></i>
             </div>
             <div>
@@ -53,7 +53,7 @@
         </div>
 
         <div class="py-kcard">
-            <div class="py-kico" style="background:var(--po-gn-s);color:var(--po-gn)">
+            <div class="py-kico" style="background:var(--po-bl-s);color:var(--po-bl)">
                 <i class="fa-solid fa-sack-dollar"></i>
             </div>
             <div>
