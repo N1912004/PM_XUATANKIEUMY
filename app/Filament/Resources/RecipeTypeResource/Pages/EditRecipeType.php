@@ -19,7 +19,7 @@ class EditRecipeType extends EditRecord
                     $record = $this->getRecord();
                     if ($record->recipes()->exists()) {
                         Notification::make()
-                            ->title('Không thể xóa nhóm món này vì đang có '.$record->recipes()->count().' công thức/món ăn sử dụng.')
+                            ->title(__('recipe.recipe_type.errors.in_use', ['count' => $record->recipes()->count()]))
                             ->danger()
                             ->send();
                         $action->cancel();

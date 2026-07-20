@@ -12,7 +12,7 @@ class ListLeaveTypes extends ListRecords
 
     public function getTitle(): string
     {
-        return __('Loại nghỉ phép / Tăng ca');
+        return __('leave_overtime.type_navigation');
     }
 
     protected function getHeaderActions(): array

@@ -118,7 +118,7 @@ class ListLeaveOvertimes extends Page
         if ($item) {
             abort_unless(LeaveOvertimeResource::canDelete($item), 403);
             $item->delete();
-            session()->flash('message', 'Xóa yêu cầu thành công.');
+            session()->flash('message', __('leave_overtime.messages.deleted'));
         }
     }
 

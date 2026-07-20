@@ -13,11 +13,11 @@
       $emptyLabel  : nhãn dòng bỏ chọn
 --}}
 @php
-    $placeholder ??= '— Chọn —';
+    $placeholder ??= __('common.select.placeholder');
     $live ??= false;
     $nullable ??= true;
     $emptyLabel ??= $placeholder;
-    $searchPlaceholder ??= 'Gõ để tìm...';
+    $searchPlaceholder ??= __('common.select.search_placeholder');
 
     $normalized = collect($options)->map(fn ($option): array => [
         'value' => (string) ($option['value'] ?? ''),
@@ -163,7 +163,7 @@
             </template>
 
             <div x-show="filtered.length === 0" class="px-2 py-3 text-center text-xs font-semibold text-gray-400">
-                Không tìm thấy kết quả
+                {{ __('common.select.no_results') }}
             </div>
         </div>
     </div>

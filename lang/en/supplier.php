@@ -1,0 +1,28 @@
+<?php
+
+$vi = require __DIR__.'/../vi/supplier.php';
+
+return array_replace_recursive($vi, [
+    'navigation' => ['label' => 'Suppliers', 'model' => 'Supplier', 'plural' => 'Suppliers', 'group' => 'SUPPLY & WAREHOUSE'],
+    'breadcrumb' => ['home' => 'Catering'],
+    'list' => ['title' => 'Suppliers', 'subtitle' => 'Manage supplier information, supplied food types, and ingredient pricing'],
+    'form' => ['information' => 'Supplier information', 'quick_settings' => 'Quick settings', 'create_title' => 'Add supplier', 'edit_title' => 'Edit supplier', 'subtitle' => 'Enter supplier information and configure its ingredient price list'],
+    'fields' => ['name' => 'Supplier name', 'name_short' => 'Supplier name', 'code' => 'Supplier code', 'code_short' => 'Supplier code', 'type' => 'Category', 'food_types' => 'Supplied food types', 'contact_name' => 'Representative', 'phone' => 'Phone number', 'email' => 'Email address', 'notes' => 'Notes', 'active' => 'Active', 'status' => 'Status'],
+    'placeholders' => ['name' => 'Enter supplier name', 'code' => 'Enter supplier code', 'type' => 'Select category', 'contact_name' => 'Enter representative name', 'phone' => 'Enter phone number', 'email' => 'Enter email address', 'email_short' => 'Enter email', 'notes' => 'Enter detailed supplier notes...', 'notes_optional' => 'Additional supplier notes (optional)', 'search' => 'Search supplier name, phone, or email...', 'search_type' => 'Search food types...'],
+    'types' => ['meat' => 'Meat', 'vegetables' => 'Vegetables', 'dry_food' => 'Dry food', 'spices' => 'Spices', 'seafood' => 'Seafood', 'general' => 'General'],
+    'table' => ['index' => 'NO.', 'code' => 'SUPPLIER CODE', 'name' => 'SUPPLIER NAME', 'name_short' => 'Supplier name', 'type' => 'TRANSACTION OFFICE / CATEGORY', 'contact_name' => 'REPRESENTATIVE', 'phone' => 'PHONE NUMBER', 'email' => 'EMAIL ADDRESS', 'food_types' => 'Supplied food types', 'ingredient_count' => 'Ingredients', 'status' => 'STATUS', 'actions' => 'Actions'],
+    'filters' => ['active_status' => 'Operating status', 'food_types' => 'Supplied food types', 'all' => 'All', 'selected_types' => ':count types selected'],
+    'status' => ['active' => 'Active', 'inactive' => 'Inactive', 'locked' => 'Locked'],
+    'actions' => ['export_excel' => 'Export Excel', 'create' => 'Add supplier', 'clear_filters' => 'Clear filters', 'clear_all' => 'Clear all', 'edit' => 'Edit', 'delete' => 'Delete', 'cancel' => 'Cancel', 'save_draft' => 'Save draft', 'save' => 'Save supplier'],
+    'kpi' => ['total' => 'Total suppliers', 'food_types' => 'Food types', 'linked_ingredients' => 'Linked ingredients', 'quoted_prices' => 'Entered quotations', 'managed' => 'Managed', 'by_supply_group' => 'By supply group', 'supplier_ingredient' => 'Supplier ↔ ingredient', 'by_ingredient' => 'By ingredient'],
+    'empty' => ['no_matching_type' => 'No matching food type found', 'no_food_types' => 'No food types yet (automatically updated from the ingredients selected below)', 'no_suppliers' => 'No suppliers found.'],
+    'documents' => ['title' => 'Supplier documents (contracts, food safety certificates...)', 'add' => 'Add document', 'name' => 'Document name', 'name_example' => 'Example: Food safety certificate 2026', 'expires_at' => 'Expiration date', 'attachment' => 'Attachment (image/PDF, ≤5MB)', 'view_current' => 'View current file', 'empty' => 'No documents yet. Click "Add document" to add a contract or certificate with its expiration date.'],
+    'summary' => ['title' => 'Information summary', 'code' => 'Supplier code', 'type' => 'Food type', 'ingredient_count' => 'Ingredient count', 'total_quote' => 'Total quotation', 'note' => 'Note', 'note_text' => 'Enter the supplier details and select the correct ingredients and prices for downstream operations.'],
+    'pagination' => ['summary' => 'Showing :from-:to of :total suppliers'],
+    'currency' => ['amount' => ':value VND'],
+    'ingredients' => ['title' => 'Supplied ingredients & unit prices', 'help' => 'Select an ingredient and enter the supplier price for it', 'search' => 'Search ingredients by name or code...', 'selected_prefix' => 'Selected', 'selected_suffix' => 'ingredients', 'selected_first' => '— selected items always appear first', 'hidden' => ':count ingredients are hidden — search to narrow the list', 'select' => 'SELECT', 'code' => 'CODE', 'name' => 'INGREDIENT NAME', 'unit' => 'UNIT', 'type' => 'TYPE', 'cost' => 'SUPPLIER PRICE', 'cost_placeholder' => 'Enter price', 'empty' => 'No ingredients found.', 'data_principle' => 'Data principle', 'data_principle_text' => 'A supplier may provide multiple ingredients. Each selected ingredient requires a corresponding <strong>price/unit price</strong> for item lists, ordering, and later cost reconciliation.'],
+    'confirm' => ['delete' => 'Are you sure you want to delete this supplier?'],
+    'notifications' => ['saved' => 'Supplier saved', 'deleted' => 'Supplier deleted'],
+    'validation' => ['email_typo' => 'The email address contains an invalid or misspelled domain.', 'code_format' => 'The supplier code may contain only unaccented letters, numbers, hyphens (-), and underscores (_).', 'phone_format' => 'The phone number is not a valid Vietnamese number (10–11 digits beginning with 0, 84, or +84).', 'email_format' => 'The email address format is invalid (the domain after @ must begin with a letter).', 'document_mimes' => 'Documents must be images or PDF files.', 'document_max' => 'Documents must not exceed 5MB.'],
+    'attributes' => ['name' => 'supplier name', 'code' => 'supplier code', 'phone' => 'phone number', 'email' => 'email address', 'type' => 'food type'],
+]);

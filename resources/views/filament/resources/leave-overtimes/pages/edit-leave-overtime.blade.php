@@ -10,14 +10,14 @@
         <!-- Header Section -->
         <div class="emp-head" style="margin-bottom: 20px;">
             <div>
-                <h1 class="emp-title">{{ $isEdit ? 'Chỉnh sửa yêu cầu' : 'Tạo yêu cầu mới' }}</h1>
+                <h1 class="emp-title">{{ $isEdit ? __('leave_overtime.ui.edit_title') : __('leave_overtime.ui.create_title') }}</h1>
                 <p class="emp-subtitle">
-                    {{ $isEdit ? 'Cập nhật chi tiết yêu cầu nghỉ phép hoặc tăng ca của nhân viên' : 'Vui lòng nhập thông tin để gửi yêu cầu nghỉ phép hoặc tăng ca' }}
+                    {{ $isEdit ? __('leave_overtime.ui.edit_description') : __('leave_overtime.ui.create_description') }}
                 </p>
             </div>
             <div>
                 <a href="{{ \App\Filament\Resources\LeaveOvertimeResource::getUrl('index') }}" class="emp-btn" style="background:var(--po-wh); border:1px solid var(--po-bd); color:var(--po-tx)">
-                    <i class="fa-solid fa-arrow-left"></i> Quay lại
+                    <i class="fa-solid fa-arrow-left"></i> {{ __('leave_overtime.ui.back') }}
                 </a>
             </div>
         </div>
@@ -27,24 +27,24 @@
             @if($isEdit)
                 <button type="button" class="lf-tab active" style="cursor: default">
                     @if($formTab === 'leave')
-                        <i class="fa-regular fa-calendar"></i> Nghỉ phép
+                        <i class="fa-regular fa-calendar"></i> {{ __('leave_overtime.ui.leave') }}
                     @else
-                        <i class="fa-regular fa-clock"></i> Tăng ca
+                        <i class="fa-regular fa-clock"></i> {{ __('leave_overtime.ui.overtime') }}
                     @endif
                 </button>
             @else
                 <button type="button" wire:click="switchFormTab('leave')" class="lf-tab {{ $formTab === 'leave' ? 'active' : '' }}">
-                    <i class="fa-regular fa-calendar"></i> Nghỉ phép
+                    <i class="fa-regular fa-calendar"></i> {{ __('leave_overtime.ui.leave') }}
                 </button>
                 <button type="button" wire:click="switchFormTab('ot')" class="lf-tab {{ $formTab === 'ot' ? 'active' : '' }}">
-                    <i class="fa-regular fa-clock"></i> Tăng ca
+                    <i class="fa-regular fa-clock"></i> {{ __('leave_overtime.ui.overtime') }}
                 </button>
             @endif
         </div>
 
         @if ($errors->any())
             <div style="background:var(--po-rd-s); color:var(--po-rd-t); padding:12px 16px; border-radius:8px; border:1px solid var(--po-rd); margin-bottom:16px; font-size:13px; font-weight:600">
-                <div style="font-weight:700; margin-bottom:4px"><i class="fa-solid fa-triangle-exclamation"></i> Có lỗi xảy ra, vui lòng kiểm tra lại:</div>
+                <div style="font-weight:700; margin-bottom:4px"><i class="fa-solid fa-triangle-exclamation"></i> {{ __('leave_overtime.ui.form_error') }}</div>
                 <ul style="list-style-type:disc; padding-left:20px">
                     @foreach ($errors->all() as $error)
                         <li>{{ $error }}</li>
@@ -63,14 +63,14 @@
                         <div class="fc">
                             <div class="fch" style="background: var(--po-pu-s); color: var(--po-pu);">
                                 <div class="fci"><i class="fa-regular fa-calendar"></i></div>
-                                <div class="fct">1. Thông tin nghỉ phép</div>
+                                <div class="fct">{{ __('leave_overtime.ui.leave_info') }}</div>
                             </div>
 
                             <div class="fg fg2" style="margin-bottom:14px">
                                 <div class="field">
-                                    <label>Nhân viên <span class="req">*</span></label>
+                                    <label>{{ __('leave_overtime.ui.employee') }} <span class="req">*</span></label>
                                     <select wire:model="employee_id" class="ctrl" required>
-                                        <option value="">Chọn nhân viên</option>
+                                        <option value="">{{ __('leave_overtime.ui.select_employee') }}</option>
                                         @foreach($employees as $emp)
                                             <option value="{{ $emp->id }}">{{ $emp->name }} ({{ $emp->code }})</option>
                                         @endforeach
@@ -78,7 +78,7 @@
                                 </div>
 
                                 <div class="field">
-                                    <label>Loại nghỉ phép <span class="req">*</span></label>
+                                    <label>{{ __('leave_overtime.ui.leave_type') }} <span class="req">*</span></label>
                                     <select wire:model="leave_type_id" class="ctrl" required>
                                         @foreach(\App\Models\LeaveType::options(false) as $optId => $optName)
                                             <option value="{{ $optId }}">{{ $optName }}</option>
@@ -89,18 +89,18 @@
 
                             <div class="fg fg2" style="margin-bottom:14px">
                                 <div class="field">
-                                    <label>Thời gian nghỉ <span class="req">*</span></label>
+                                    <label>{{ __('leave_overtime.ui.leave_time') }} <span class="req">*</span></label>
                                     <div style="display:flex; align-items:center; gap:8px">
                                         <input wire:model="start_date" type="date" class="ctrl" required style="flex:1">
-                                        <span style="color:var(--po-mu)">đến</span>
+                                        <span style="color:var(--po-mu)">{{ __('leave_overtime.ui.to') }}</span>
                                         <input wire:model="end_date" type="date" class="ctrl" required style="flex:1">
                                     </div>
                                 </div>
 
                                 <div class="field">
-                                    <label>Số ngày nghỉ</label>
+                                    <label>{{ __('leave_overtime.ui.leave_days') }}</label>
                                     <div style="display:flex; align-items:center; gap:8px">
-                                        <input wire:model="duration_text" type="text" class="ctrl" placeholder="VD: 3 ngày" style="flex:1">
+                                        <input wire:model="duration_text" type="text" class="ctrl" placeholder="{{ __('leave_overtime.ui.leave_duration_placeholder') }}" style="flex:1">
                                     </div>
                                 </div>
                             </div>
@@ -108,20 +108,20 @@
                             <div class="field" style="margin-bottom:14px">
                                 <label style="display:inline-flex; align-items:center; gap:8px; font-weight:500; cursor:pointer">
                                     <input wire:model="no_count_leave" type="checkbox" style="width:16px; height:16px; border-radius:4px; border:1px solid var(--po-bd)">
-                                    Nghỉ không tính phép
+                                    {{ __('leave_overtime.ui.unpaid') }}
                                 </label>
                             </div>
 
                             <div class="fg fg2" style="margin-bottom:14px">
                                 <div class="field">
-                                    <label>Thời gian bàn giao công việc</label>
+                                    <label>{{ __('leave_overtime.ui.handover_time') }}</label>
                                     <input wire:model="handover_time" type="datetime-local" class="ctrl">
                                 </div>
                             </div>
 
                             <div class="field">
-                                <label>Lý do nghỉ <span class="req">*</span></label>
-                                <textarea wire:model="reason" class="ctrl" placeholder="Nhập lý do nghỉ phép" rows="4" required maxlength="200"></textarea>
+                                <label>{{ __('leave_overtime.ui.leave_reason') }} <span class="req">*</span></label>
+                                <textarea wire:model="reason" class="ctrl" placeholder="{{ __('leave_overtime.ui.leave_reason_placeholder') }}" rows="4" required maxlength="200"></textarea>
                                 <div style="display:flex; justify-content:flex-end; font-size:11px; color:var(--po-fa); margin-top:4px">
                                     <span>{{ strlen($reason) }}/200</span>
                                 </div>
@@ -131,23 +131,23 @@
                         <div class="fc">
                             <div class="fch">
                                 <div class="fci" style="background:var(--po-bl-s);color:var(--po-bl)"><i class="fa-regular fa-address-book"></i></div>
-                                <div class="fct">2. Thông tin liên hệ khi cần</div>
+                                <div class="fct">{{ __('leave_overtime.ui.contact_info') }}</div>
                             </div>
 
                             <div class="fg fg2" style="margin-bottom:14px">
                                 <div class="field">
-                                    <label>Người liên hệ</label>
-                                    <input wire:model="contact_name" type="text" class="ctrl" placeholder="Nhập tên người liên hệ">
+                                    <label>{{ __('leave_overtime.ui.contact') }}</label>
+                                    <input wire:model="contact_name" type="text" class="ctrl" placeholder="{{ __('leave_overtime.ui.contact_placeholder') }}">
                                 </div>
                                 <div class="field">
-                                    <label>Số điện thoại</label>
-                                    <input wire:model="contact_phone" type="tel" class="ctrl" placeholder="Nhập số điện thoại">
+                                    <label>{{ __('leave_overtime.ui.phone') }}</label>
+                                    <input wire:model="contact_phone" type="tel" class="ctrl" placeholder="{{ __('leave_overtime.ui.phone_placeholder') }}">
                                 </div>
                             </div>
 
                             <div class="field">
-                                <label>Ghi chú thêm (nếu có)</label>
-                                <textarea wire:model="notes" class="ctrl" placeholder="Nhập ghi chú thêm" rows="3" maxlength="200"></textarea>
+                                <label>{{ __('leave_overtime.ui.optional_notes') }}</label>
+                                <textarea wire:model="notes" class="ctrl" placeholder="{{ __('leave_overtime.ui.notes_placeholder') }}" rows="3" maxlength="200"></textarea>
                                 <div style="display:flex; justify-content:flex-end; font-size:11px; color:var(--po-fa); margin-top:4px">
                                     <span>{{ strlen($notes) }}/200</span>
                                 </div>
@@ -159,14 +159,14 @@
                         <div class="fc">
                             <div class="fch" style="background: var(--po-bl-s); color: var(--po-bl);">
                                 <div class="fci"><i class="fa-regular fa-clock"></i></div>
-                                <div class="fct">1. Thông tin tăng ca</div>
+                                <div class="fct">{{ __('leave_overtime.ui.overtime_info') }}</div>
                             </div>
 
                             <div class="fg fg3" style="margin-bottom:14px">
                                 <div class="field">
-                                    <label>Nhân viên <span class="req">*</span></label>
+                                    <label>{{ __('leave_overtime.ui.employee') }} <span class="req">*</span></label>
                                     <select wire:model="employee_id" class="ctrl" required>
-                                        <option value="">Chọn nhân viên</option>
+                                        <option value="">{{ __('leave_overtime.ui.select_employee') }}</option>
                                         @foreach($employees as $emp)
                                             <option value="{{ $emp->id }}">{{ $emp->name }} ({{ $emp->code }})</option>
                                         @endforeach
@@ -174,7 +174,7 @@
                                 </div>
 
                                 <div class="field">
-                                    <label>Loại tăng ca <span class="req">*</span></label>
+                                    <label>{{ __('leave_overtime.ui.overtime_type') }} <span class="req">*</span></label>
                                     <select wire:model="leave_type_id" class="ctrl" required>
                                         @foreach(\App\Models\LeaveType::options(true) as $optId => $optName)
                                             <option value="{{ $optId }}">{{ $optName }}</option>
@@ -183,41 +183,41 @@
                                 </div>
 
                                 <div class="field">
-                                    <label>Ngày tăng ca <span class="req">*</span></label>
+                                    <label>{{ __('leave_overtime.ui.overtime_date') }} <span class="req">*</span></label>
                                     <input wire:model="start_date" type="date" class="ctrl" required>
                                 </div>
                             </div>
 
                             <div class="fg fg2" style="margin-bottom:14px">
                                 <div class="field">
-                                    <label>Thời gian tăng ca <span class="req">*</span></label>
+                                    <label>{{ __('leave_overtime.ui.overtime_time') }} <span class="req">*</span></label>
                                     <div style="display:flex; align-items:center; gap:8px">
                                         <input wire:model="ot_start_time" type="time" class="ctrl" required style="flex:1">
-                                        <span style="color:var(--po-mu)">đến</span>
+                                        <span style="color:var(--po-mu)">{{ __('leave_overtime.ui.to') }}</span>
                                         <input wire:model="ot_end_time" type="time" class="ctrl" required style="flex:1">
                                     </div>
                                 </div>
 
                                 <div class="field">
-                                    <label>Số giờ tăng ca</label>
-                                    <input wire:model="duration_text" type="text" class="ctrl" placeholder="VD: 3 giờ">
+                                    <label>{{ __('leave_overtime.ui.overtime_hours') }}</label>
+                                    <input wire:model="duration_text" type="text" class="ctrl" placeholder="{{ __('leave_overtime.ui.overtime_duration_placeholder') }}">
                                 </div>
                             </div>
 
                             <div class="fg fg2" style="margin-bottom:14px">
                                 <div class="field">
-                                    <label>Địa điểm / khu vực làm việc</label>
+                                    <label>{{ __('leave_overtime.ui.location') }}</label>
                                     <select wire:model="ot_location" class="ctrl">
-                                        <option value="Bếp trung tâm - Khu A">Bếp trung tâm - Khu A</option>
-                                        <option value="Kho nguyên liệu">Kho nguyên liệu</option>
-                                        <option value="Van phòng HQ">Van phòng HQ</option>
+                                        <option value="Bếp trung tâm - Khu A">{{ __('leave_overtime.locations.central_kitchen_a') }}</option>
+                                        <option value="Kho nguyên liệu">{{ __('leave_overtime.locations.ingredient_warehouse') }}</option>
+                                        <option value="Van phòng HQ">{{ __('leave_overtime.locations.head_office') }}</option>
                                     </select>
                                 </div>
 
                                 <div class="field">
-                                    <label>Người quản lý duyệt <span class="req">*</span></label>
+                                    <label>{{ __('leave_overtime.ui.approver') }} <span class="req">*</span></label>
                                     <select wire:model="approver_id" class="ctrl" required>
-                                        <option value="">Chọn người duyệt</option>
+                                        <option value="">{{ __('leave_overtime.ui.select_approver') }}</option>
                                         @foreach($employees as $emp)
                                             <option value="{{ $emp->id }}">{{ $emp->name }} ({{ $emp->code }})</option>
                                         @endforeach
@@ -226,21 +226,21 @@
                             </div>
 
                             <div class="field" style="margin-bottom:14px">
-                                <label>Lý do tăng ca <span class="req">*</span></label>
-                                <textarea wire:model="reason" class="ctrl" placeholder="Lý do tăng ca..." rows="3" required></textarea>
+                                <label>{{ __('leave_overtime.ui.overtime_reason') }} <span class="req">*</span></label>
+                                <textarea wire:model="reason" class="ctrl" placeholder="{{ __('leave_overtime.ui.overtime_reason_placeholder') }}" rows="3" required></textarea>
                             </div>
 
                             <div class="field" style="margin-bottom:14px">
-                                <label>Công việc thực hiện</label>
-                                <textarea wire:model="ot_work_description" class="ctrl" placeholder="Mô tả công việc sẽ thực hiện..." rows="3"></textarea>
+                                <label>{{ __('leave_overtime.ui.work') }}</label>
+                                <textarea wire:model="ot_work_description" class="ctrl" placeholder="{{ __('leave_overtime.ui.work_placeholder') }}" rows="3"></textarea>
                             </div>
 
                             <div class="field" style="margin-bottom:14px">
-                                <label>Đính kèm file</label>
+                                <label>{{ __('leave_overtime.ui.attachment') }}</label>
                                 <div class="lf-upload">
                                     <div class="lf-upload-ico"><i class="fa-solid fa-cloud-arrow-up"></i></div>
-                                    <span>Kéo thả file vào đây hoặc <span style="color:var(--po-bl);font-weight:700;text-decoration:underline">nhấn để chọn file</span></span>
-                                    <small>PDF, XLSX, JPG, PNG tối da 5MB</small>
+                                    <span>{{ __('leave_overtime.ui.file_drag') }} <span style="color:var(--po-bl);font-weight:700;text-decoration:underline">{{ __('leave_overtime.ui.file_choose') }}</span></span>
+                                    <small>{{ __('leave_overtime.ui.file_types') }}</small>
                                 </div>
                             </div>
                         </div>
@@ -248,17 +248,17 @@
                         <div class="fc">
                             <div class="fch">
                                 <div class="fci" style="background:var(--po-bl-s);color:var(--po-bl)"><i class="fa-regular fa-handshake"></i></div>
-                                <div class="fct">2. Xác nhận &amp; bàn giao</div>
+                                <div class="fct">{{ __('leave_overtime.ui.confirmation') }}</div>
                             </div>
 
                             <div class="fg fg2" style="margin-bottom:14px">
                                 <div class="field">
-                                    <label>Người phối hợp</label>
-                                    <input wire:model="co_worker" type="text" class="ctrl" placeholder="Nhập tên người phối hợp">
+                                    <label>{{ __('leave_overtime.ui.coworker') }}</label>
+                                    <input wire:model="co_worker" type="text" class="ctrl" placeholder="{{ __('leave_overtime.ui.coworker_placeholder') }}">
                                 </div>
                                 <div class="field">
-                                    <label>Ghi chú thêm</label>
-                                    <input wire:model="notes" type="text" class="ctrl" placeholder="Ghi chú thêm...">
+                                    <label>{{ __('leave_overtime.ui.notes') }}</label>
+                                    <input wire:model="notes" type="text" class="ctrl" placeholder="{{ __('leave_overtime.ui.notes_placeholder') }}">
                                 </div>
                             </div>
                         </div>
@@ -269,25 +269,25 @@
                         <div class="fc">
                             <div class="fch" style="background: var(--po-gn-s); color: var(--po-gn-t);">
                                 <div class="fci"><i class="fa-solid fa-circle-check"></i></div>
-                                <div class="fct">Phê duyệt &amp; Trạng thái yêu cầu</div>
+                                <div class="fct">{{ __('leave_overtime.ui.approval') }}</div>
                             </div>
                             <div class="fg fg2">
                                 <div class="field">
-                                    <label>Người duyệt <span class="req">*</span></label>
+                                    <label>{{ __('leave_overtime.fields.approver') }} <span class="req">*</span></label>
                                     <select wire:model="approver_id" class="ctrl" required>
-                                        <option value="">Chọn người duyệt</option>
+                                        <option value="">{{ __('leave_overtime.ui.select_approver') }}</option>
                                         @foreach($employees as $emp)
                                             <option value="{{ $emp->id }}">{{ $emp->name }} ({{ $emp->code }})</option>
                                         @endforeach
                                     </select>
                                 </div>
                                 <div class="field">
-                                    <label>Trạng thái phê duyệt <span class="req">*</span></label>
+                                    <label>{{ __('leave_overtime.fields.status') }} <span class="req">*</span></label>
                                     <select wire:model="status" class="ctrl" required>
-                                        <option value="pending">Chờ duyệt</option>
-                                        <option value="approved">Đã duyệt</option>
-                                        <option value="rejected">Từ chối</option>
-                                        <option value="cancelled">Đã hủy</option>
+                                        <option value="pending">{{ __('leave_overtime.status.pending') }}</option>
+                                        <option value="approved">{{ __('leave_overtime.status.approved') }}</option>
+                                        <option value="rejected">{{ __('leave_overtime.status.rejected') }}</option>
+                                        <option value="cancelled">{{ __('leave_overtime.status.cancelled') }}</option>
                                     </select>
                                 </div>
                             </div>
@@ -299,13 +299,13 @@
                 <!-- RIGHT SUMMARY -->
                 <div style="display:flex; flex-direction:column; gap:16px">
                     <div class="lf-sum">
-                        <div class="lf-sum-ttl">Tóm tắt yêu cầu</div>
+                        <div class="lf-sum-ttl">{{ __('leave_overtime.ui.summary') }}</div>
                         <div class="lf-sum-row">
-                            <span class="lf-sum-k">Loại yêu cầu</span>
+                            <span class="lf-sum-k">{{ __('leave_overtime.fields.type') }}</span>
                             <span class="lf-sum-v" style="font-weight:700; color:var(--po-bl)">{{ \App\Models\LeaveType::find($leave_type_id)?->name }}</span>
                         </div>
                         <div class="lf-sum-row">
-                            <span class="lf-sum-k">Thời gian áp dụng</span>
+                            <span class="lf-sum-k">{{ __('leave_overtime.ui.applicable_time') }}</span>
                             <span class="lf-sum-v">
                                 {{ $start_date ? date('d/m/Y', strtotime($start_date)) : '—' }}
                                 @if($formTab === 'leave' && $end_date)
@@ -314,36 +314,36 @@
                             </span>
                         </div>
                         <div class="lf-sum-row">
-                            <span class="lf-sum-k">{{ $formTab === 'leave' ? 'Số ngày nghỉ' : 'Số giờ tăng ca' }}</span>
+                            <span class="lf-sum-k">{{ $formTab === 'leave' ? __('leave_overtime.ui.leave_days') : __('leave_overtime.ui.overtime_hours') }}</span>
                             <span class="lf-sum-v" style="font-weight:700">{{ $duration_text ?: '—' }}</span>
                         </div>
                         
                         @if($formTab === 'leave')
                             <div class="lf-sum-row">
-                                <span class="lf-sum-k">Thời gian bàn giao</span>
+                                <span class="lf-sum-k">{{ __('leave_overtime.ui.handover_time_short') }}</span>
                                 <span class="lf-sum-v">
                                     {{ $handover_time ? date('d/m/Y H:i', strtotime($handover_time)) : '—' }}
                                 </span>
                             </div>
                             <div class="lf-sum-row">
-                                <span class="lf-sum-k">Người liên hệ</span>
+                                <span class="lf-sum-k">{{ __('leave_overtime.ui.contact') }}</span>
                                 <span class="lf-sum-v">
                                     {{ $contact_name ?: '—' }} {{ $contact_phone ? '(' . $contact_phone . ')' : '' }}
                                 </span>
                             </div>
                         @else
                             <div class="lf-sum-row">
-                                <span class="lf-sum-k">Giờ tăng ca</span>
+                                <span class="lf-sum-k">{{ __('leave_overtime.ui.overtime_period') }}</span>
                                 <span class="lf-sum-v">{{ $ot_start_time }} – {{ $ot_end_time }}</span>
                             </div>
                             <div class="lf-sum-row">
-                                <span class="lf-sum-k">Địa điểm</span>
+                                <span class="lf-sum-k">{{ __('leave_overtime.ui.location_short') }}</span>
                                 <span class="lf-sum-v">{{ $ot_location }}</span>
                             </div>
                         @endif
 
                         <div class="lf-sum-row" style="border-bottom:none">
-                            <span class="lf-sum-k">Lý do</span>
+                            <span class="lf-sum-k">{{ __('leave_overtime.ui.reason') }}</span>
                             <span class="lf-sum-v" style="max-height:80px; overflow-y:auto; font-style:italic">
                                 {{ $reason ?: '—' }}
                             </span>
@@ -352,27 +352,27 @@
 
                     @if($formTab === 'leave')
                         <div class="lf-quota">
-                            <div class="lf-quota-ttl">Số dư phép năm</div>
+                            <div class="lf-quota-ttl">{{ __('leave_overtime.ui.annual_balance') }}</div>
                             <div class="lf-quota-row">
-                                <span class="lf-quota-k">Tổng số ngày phép</span>
-                                <span class="lf-quota-v">12 ngày</span>
+                                <span class="lf-quota-k">{{ __('leave_overtime.ui.annual_total') }}</span>
+                                <span class="lf-quota-v">{{ __('leave_overtime.ui.days_count', ['count' => 12]) }}</span>
                             </div>
                             <div class="lf-quota-row">
-                                <span class="lf-quota-k">Đã sử dụng</span>
-                                <span class="lf-quota-v">3 ngày</span>
+                                <span class="lf-quota-k">{{ __('leave_overtime.ui.used') }}</span>
+                                <span class="lf-quota-v">{{ __('leave_overtime.ui.days_count', ['count' => 3]) }}</span>
                             </div>
                             <div class="lf-quota-row" style="border-bottom:none">
-                                <span class="lf-quota-k">Số dư còn lại</span>
-                                <span class="lf-quota-v" style="color:var(--po-bl); font-weight:800">9 ngày</span>
+                                <span class="lf-quota-k">{{ __('leave_overtime.ui.remaining') }}</span>
+                                <span class="lf-quota-v" style="color:var(--po-bl); font-weight:800">{{ __('leave_overtime.ui.days_count', ['count' => 9]) }}</span>
                             </div>
                         </div>
                     @endif
 
                     <div class="lf-notice">
-                        <div class="lf-notice-ttl">Lưu ý</div>
+                        <div class="lf-notice-ttl">{{ __('leave_overtime.ui.notice') }}</div>
                         <ul class="lf-rule">
-                            <li><i class="fa-solid fa-circle" style="font-size:5px; color:var(--po-mu)"></i> Yêu cầu sẽ được gửi trực tiếp đến người quản lý được chỉ định để phê duyệt.</li>
-                            <li><i class="fa-solid fa-circle" style="font-size:5px; color:var(--po-mu)"></i> Vui lòng hoàn thành bàn giao công việc cần thiết trước thời gian áp dụng yêu cầu.</li>
+                            <li><i class="fa-solid fa-circle" style="font-size:5px; color:var(--po-mu)"></i> {{ __('leave_overtime.ui.notice_approval') }}</li>
+                            <li><i class="fa-solid fa-circle" style="font-size:5px; color:var(--po-mu)"></i> {{ __('leave_overtime.ui.notice_handover') }}</li>
                         </ul>
                     </div>
                 </div>
@@ -381,10 +381,10 @@
             <!-- Footer Action Bar -->
             <div class="ffoot" style="display:flex; justify-content:flex-end; align-items:center; background:var(--po-bd2); border-top:1px solid var(--po-bd2); padding:16px 20px; border-radius:12px; margin-top:20px; gap:8px; box-shadow:var(--po-sh2)">
                 <a href="{{ \App\Filament\Resources\LeaveOvertimeResource::getUrl('index') }}" class="emp-btn" style="background:var(--po-wh); border:1px solid var(--po-bd); color:var(--po-tx)">
-                    Hủy bỏ
+                    {{ __('leave_overtime.actions.cancel') }}
                 </a>
                 <button type="submit" class="emp-btn emp-btn-primary">
-                    <i class="fa-regular fa-paper-plane"></i> Gửi yêu cầu
+                    <i class="fa-regular fa-paper-plane"></i> {{ __('leave_overtime.ui.submit') }}
                 </button>
             </div>
         </form>

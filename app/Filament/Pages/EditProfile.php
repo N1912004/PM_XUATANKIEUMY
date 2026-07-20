@@ -13,7 +13,7 @@ class EditProfile extends BaseEditProfile
     {
         return Notification::make()
             ->success()
-            ->title('Đã cập nhật hồ sơ thành công!');
+            ->title(__('user.messages.profile_updated'));
     }
 
     protected function afterSave(): void
@@ -25,10 +25,10 @@ class EditProfile extends BaseEditProfile
     {
         return $form
             ->schema([
-                Forms\Components\Section::make('Ảnh đại diện')
+                Forms\Components\Section::make(__('user.sections.avatar'))
                     ->schema([
                         Forms\Components\FileUpload::make('avatar_url')
-                            ->label('Ảnh hồ sơ')
+                            ->label(__('user.sections.avatar'))
                             ->image()
                             ->avatar()
                             ->disk('public')
@@ -42,11 +42,11 @@ class EditProfile extends BaseEditProfile
                             ->imagePreviewHeight('200')
                             ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
                             ->maxSize(2048)
-                            ->helperText('Tải lên ảnh JPG, PNG hoặc WebP. Tối đa 2MB.')
+                            ->helperText(__('employee.upload.hint'))
                             ->alignCenter(),
                     ]),
 
-                Forms\Components\Section::make('Thông tin tài khoản')
+                Forms\Components\Section::make(__('user.sections.account'))
                     ->schema([
                         $this->getNameFormComponent(),
                         $this->getEmailFormComponent(),

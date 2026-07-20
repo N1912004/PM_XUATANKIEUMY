@@ -52,17 +52,17 @@ class ListHang extends Page
 
     public static function getNavigationGroup(): ?string
     {
-        return __('CUNG ỨNG & KHO');
+        return __('list_hang.navigation.group');
     }
 
     public static function getNavigationLabel(): string
     {
-        return __('Danh sách hàng');
+        return __('list_hang.title');
     }
 
     public function getTitle(): string
     {
-        return __('Danh sách hàng');
+        return __('list_hang.title');
     }
 
     public function mount(): void
@@ -283,7 +283,7 @@ class ListHang extends Page
         $orderDate = Carbon::parse($this->poDate)->startOfDay();
         if ($orderDate->lt(today()) || $orderDate->gt(today()->addDays(2))) {
             Notification::make()
-                ->title('Ngày đặt hàng không hợp lệ')
+                ->title(__('list_hang.notifications.invalid_order_date'))
                 ->body('Chỉ được đặt hàng cho hôm nay hoặc tối đa 2 ngày kế tiếp.')
                 ->danger()
                 ->send();
@@ -294,7 +294,7 @@ class ListHang extends Page
         $selectedItems = collect($this->poItems)->filter(fn ($item) => $item['checked'] && (float) ($item['quantity_manual'] ?? 0) > 0);
 
         if ($selectedItems->isEmpty()) {
-            Notification::make()->title('Không có nguyên liệu nào được chọn để tạo PO!')->warning()->send();
+            Notification::make()->title(__('list_hang.notifications.no_selected_items'))->warning()->send();
 
             return;
         }
@@ -378,7 +378,7 @@ class ListHang extends Page
         });
 
         $notification = Notification::make()
-            ->title('Tạo PO thành công!')
+            ->title(__('list_hang.notifications.po_created'))
             ->body("Đã tạo tự động {$poCount} đơn đặt hàng nháp: ".implode(', ', $poCodes))
             ->success()
             ->persistent();

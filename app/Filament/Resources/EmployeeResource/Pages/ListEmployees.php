@@ -171,7 +171,7 @@ class ListEmployees extends Page
         if ($emp) {
             abort_unless(EmployeeResource::canDelete($emp), 403);
             $emp->delete();
-            session()->flash('message', 'Đã xóa nhân viên thành công!');
+            session()->flash('message', __('employee.messages.deleted'));
         }
     }
 

@@ -36,11 +36,11 @@
             </div>
             <div>
                 <h4 class="text-base font-extrabold text-gray-900 dark:text-white leading-tight">
-                    {{ $employee->name ?? 'Chưa liên kết nhân viên' }}
+                    {{ $employee->name ?? __('timekeeping.messages.linked_employee_missing') }}
                 </h4>
                 <p class="text-xs text-gray-400 font-bold mt-0.5">{{ $employee->code ?? 'NV000' }}</p>
                 <p class="text-xs text-gray-500 dark:text-gray-400 font-semibold mt-0.5">
-                    {{ $employee->position?->name ?? 'Nhân viên' }} · {{ $employee->department?->name ?? 'Chưa rõ' }}
+                    {{ $employee->position?->name ?? __('timekeeping.ui.employee') }} · {{ $employee->department?->name ?? __('timekeeping.ui.unknown') }}
                 </p>
             </div>
         </div>
@@ -53,7 +53,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                 </svg>
                 <div>
-                    <div class="text-[10px] text-gray-400 uppercase tracking-wider">Hôm nay</div>
+                    <div class="text-[10px] text-gray-400 uppercase tracking-wider">{{ __('timekeeping.ui.today') }}</div>
                     <div class="text-gray-900 dark:text-white font-extrabold text-xs">{{ $todayDateFormatted }} ({{ $todayDayName }})</div>
                 </div>
             </div>
@@ -64,9 +64,9 @@
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
                 <div>
-                    <div class="text-[10px] text-gray-400 uppercase tracking-wider">Ca làm việc</div>
+                    <div class="text-[10px] text-gray-400 uppercase tracking-wider">{{ __('timekeeping.fields.shift') }}</div>
                     <div class="text-gray-900 dark:text-white font-extrabold text-xs">
-                        {{ $timekeeping && $timekeeping->shift ? $timekeeping->shift->name : 'Chưa xếp ca' }}
+                        {{ $timekeeping && $timekeeping->shift ? $timekeeping->shift->name : __('timekeeping.attendance.not_assigned') }}
                         {{ $timekeeping && $timekeeping->shift && $timekeeping->shift->time_range ? ' · ' . $timekeeping->shift->time_range : '' }}
                     </div>
                 </div>
@@ -74,14 +74,14 @@
 
             <!-- Status item -->
             <div>
-                <div class="text-[10px] text-gray-400 uppercase tracking-wider mb-1">Trạng thái</div>
+                <div class="text-[10px] text-gray-400 uppercase tracking-wider mb-1">{{ __('timekeeping.fields.status') }}</div>
                 <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold 
                     @if($timekeeping && $timekeeping->status === 'Đúng giờ') bg-green-50 text-green-700 dark:bg-green-950/20 dark:text-green-400 border border-green-200 dark:border-green-800/30
                     @elseif($timekeeping && $timekeeping->status === 'Đi trễ') bg-amber-50 text-amber-700 dark:bg-amber-950/20 dark:text-amber-400 border border-amber-200 dark:border-amber-800/30
                     @elseif($timekeeping && $timekeeping->status === 'Tăng ca') bg-blue-50 text-blue-700 dark:bg-blue-950/20 dark:text-blue-400 border border-blue-200 dark:border-blue-800/30
                     @else bg-gray-50 text-gray-700 dark:bg-gray-950/20 dark:text-gray-400 border border-gray-200 dark:border-gray-850/30
                     @endif">
-                    {{ $timekeeping->status ?? 'Chưa chấm công' }}
+                    {{ $timekeeping->status ?? __('timekeeping.status.unrecorded') }}
                 </span>
             </div>
         </div>
@@ -123,7 +123,7 @@
                     </svg>
                     <div class="text-left">
                         <div class="text-sm font-extrabold text-green-800 dark:text-green-400">Check-in</div>
-                        <div class="text-[11px] text-green-650 dark:text-green-550 font-bold">Đã check-in lúc {{ \Carbon\Carbon::parse($timekeeping->check_in)->format('H:i') }}</div>
+                        <div class="text-[11px] text-green-650 dark:text-green-550 font-bold">{{ __('timekeeping.ui.recorded_at', ['time' => \Carbon\Carbon::parse($timekeeping->check_in)->format('H:i')]) }}</div>
                     </div>
                 </div>
             @else
@@ -133,8 +133,8 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h3a3 3 0 013 3v1"/>
                     </svg>
                     <div class="text-left">
-                        <div class="text-sm font-extrabold">Nhấn Check-in</div>
-                        <div class="text-[10px] opacity-90">Ghi nhận giờ bắt đầu làm</div>
+                        <div class="text-sm font-extrabold">{{ __('timekeeping.ui.press_check_in') }}</div>
+                        <div class="text-[10px] opacity-90">{{ __('timekeeping.ui.check_in_description') }}</div>
                     </div>
                 </button>
             @endif
@@ -147,7 +147,7 @@
                     </svg>
                     <div class="text-left">
                         <div class="text-sm font-extrabold text-green-800 dark:text-green-400">Check-out</div>
-                        <div class="text-[11px] text-green-650 dark:text-green-550 font-bold">Đã check-out lúc {{ \Carbon\Carbon::parse($timekeeping->check_out)->format('H:i') }}</div>
+                        <div class="text-[11px] text-green-650 dark:text-green-550 font-bold">{{ __('timekeeping.ui.recorded_at', ['time' => \Carbon\Carbon::parse($timekeeping->check_out)->format('H:i')]) }}</div>
                     </div>
                 </div>
             @elseif($timekeeping && $timekeeping->check_in)
@@ -157,8 +157,8 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h3a3 3 0 013 3v1"/>
                     </svg>
                     <div class="text-left">
-                        <div class="text-sm font-extrabold">Nhấn Check-out</div>
-                        <div class="text-[10px] opacity-90">Ghi nhận giờ kết thúc làm</div>
+                        <div class="text-sm font-extrabold">{{ __('timekeeping.ui.press_check_out') }}</div>
+                        <div class="text-[10px] opacity-90">{{ __('timekeeping.ui.check_out_description') }}</div>
                     </div>
                 </button>
             @else
@@ -168,7 +168,7 @@
                     </svg>
                     <div class="text-left">
                         <div class="text-sm font-extrabold">Check-out</div>
-                        <div class="text-[11px] font-bold">Chưa thể thực hiện</div>
+                        <div class="text-[11px] font-bold">{{ __('timekeeping.ui.cannot_perform') }}</div>
                     </div>
                 </div>
             @endif
@@ -181,7 +181,7 @@
             <svg class="w-5 h-5 text-emerald-600 dark:text-emerald-450 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
             </svg>
-            <span>Thời gian đã được lưu vào hệ thống chấm công ngày {{ $todayDateFormatted }}.</span>
+            <span>{{ __('timekeeping.attendance.saved_today', ['date' => $todayDateFormatted]) }}</span>
         </div>
     @endif
 </div>

@@ -26,17 +26,17 @@
     <!-- Header Section -->
     <div class="emp-head">
         <div>
-            <h1 class="emp-title">Nhân viên</h1>
-            <p class="emp-subtitle">Quản lý thông tin và hồ sơ nhân viên trong công ty</p>
+            <h1 class="emp-title">{{ __('employee.navigation') }}</h1>
+            <p class="emp-subtitle">{{ __('employee.ui.subtitle') }}</p>
         </div>
         <div class="emp-actions">
             <button wire:click="exportEmployees" class="emp-btn">
                 <i class="fa-solid fa-download" style="font-size: 13px;"></i>
-                Xuất dữ liệu
+                {{ __('employee.actions.export') }}
             </button>
             <a href="{{ \App\Filament\Resources\EmployeeResource::getUrl('create') }}" class="emp-btn emp-btn-primary">
                 <i class="fa-solid fa-plus"></i>
-                Thêm nhân viên
+                {{ __('employee.actions.create') }}
             </a>
         </div>
     </div>
@@ -48,7 +48,7 @@
                 <i class="fa-solid fa-users"></i>
             </div>
             <div>
-                <div class="py-klbl">Tổng nhân viên</div>
+                <div class="py-klbl">{{ __('employee.ui.total') }}</div>
                 <div class="py-kval">{{ $statsData['total'] }}</div>
             </div>
         </div>
@@ -58,7 +58,7 @@
                 <i class="fa-solid fa-user-check"></i>
             </div>
             <div>
-                <div class="py-klbl">Đang làm việc</div>
+                <div class="py-klbl">{{ __('employee.status.working') }}</div>
                 <div class="py-kval">{{ $statsData['working'] }}</div>
             </div>
         </div>
@@ -68,7 +68,7 @@
                 <i class="fa-solid fa-umbrella-beach"></i>
             </div>
             <div>
-                <div class="py-klbl">Nghỉ phép</div>
+                <div class="py-klbl">{{ __('employee.status.on_leave') }}</div>
                 <div class="py-kval">{{ $statsData['leave'] }}</div>
             </div>
         </div>
@@ -78,7 +78,7 @@
                 <i class="fa-solid fa-user-minus"></i>
             </div>
             <div>
-                <div class="py-klbl">Nghỉ việc</div>
+                <div class="py-klbl">{{ __('employee.status.resigned') }}</div>
                 <div class="py-kval">{{ $statsData['resign'] }}</div>
             </div>
         </div>
@@ -88,9 +88,9 @@
                 <i class="fa-regular fa-clock"></i>
             </div>
             <div>
-                <div class="py-klbl">Hồ sơ sắp hết hạn</div>
+                <div class="py-klbl">{{ __('employee.ui.expiring_documents') }}</div>
                 <div class="py-kval">{{ $statsData['exp_docs'] }}</div>
-                <span style="font-size:11px; color:var(--po-mu)">Đã hết hạn hoặc còn ≤ 30 ngày</span>
+                <span style="font-size:11px; color:var(--po-mu)">{{ __('employee.ui.expires_within') }}</span>
             </div>
         </div>
     </div>
@@ -99,13 +99,13 @@
     <div class="mp-bar" style="margin-bottom:14px">
         <div class="mp-srch" style="max-width: 240px !important;">
             <i class="fa-solid fa-magnifying-glass"></i>
-            <input wire:model.live.debounce.250ms="search" type="text" placeholder="Tìm kiếm nhân viên...">
+            <input wire:model.live.debounce.250ms="search" type="text" placeholder="{{ __('employee.placeholders.search') }}">
         </div>
 
         <div style="display:flex; align-items:center; gap:6px;">
-            <span style="font-size:11px; font-weight:700; color:var(--po-mu); text-transform:uppercase">Phòng ban</span>
+            <span style="font-size:11px; font-weight:700; color:var(--po-mu); text-transform:uppercase">{{ __('employee.fields.department') }}</span>
             <select wire:model.live="departmentFilter" class="mp-sel">
-                <option value="">Tất cả</option>
+                <option value="">{{ __('employee.ui.all') }}</option>
                 @foreach($depts as $deptId => $deptName)
                     <option value="{{ $deptId }}">{{ $deptName }}</option>
                 @endforeach
@@ -113,9 +113,9 @@
         </div>
 
         <div style="display:flex; align-items:center; gap:6px;">
-            <span style="font-size:11px; font-weight:700; color:var(--po-mu); text-transform:uppercase">Vị trí</span>
+            <span style="font-size:11px; font-weight:700; color:var(--po-mu); text-transform:uppercase">{{ __('employee.fields.position') }}</span>
             <select wire:model.live="positionFilter" class="mp-sel">
-                <option value="">Tất cả</option>
+                <option value="">{{ __('employee.ui.all') }}</option>
                 @foreach($positions as $posId => $posName)
                     <option value="{{ $posId }}">{{ $posName }}</option>
                 @endforeach
@@ -123,9 +123,9 @@
         </div>
 
         <div style="display:flex; align-items:center; gap:6px;">
-            <span style="font-size:11px; font-weight:700; color:var(--po-mu); text-transform:uppercase">Khu vực</span>
+            <span style="font-size:11px; font-weight:700; color:var(--po-mu); text-transform:uppercase">{{ __('employee.fields.area') }}</span>
             <select wire:model.live="areaFilter" class="mp-sel">
-                <option value="">Tất cả</option>
+                <option value="">{{ __('employee.ui.all') }}</option>
                 @foreach($areas as $area)
                     <option value="{{ $area->id }}">{{ $area->name }}</option>
                 @endforeach
@@ -133,12 +133,12 @@
         </div>
 
         <div style="display:flex; align-items:center; gap:6px;">
-            <span style="font-size:11px; font-weight:700; color:var(--po-mu); text-transform:uppercase">Trạng thái</span>
+            <span style="font-size:11px; font-weight:700; color:var(--po-mu); text-transform:uppercase">{{ __('employee.fields.status') }}</span>
             <select wire:model.live="statusFilter" class="mp-sel">
-                <option value="">Tất cả</option>
-                <option value="working">Đang làm việc</option>
-                <option value="on_leave">Nghỉ phép</option>
-                <option value="resigned">Nghỉ việc</option>
+                <option value="">{{ __('employee.ui.all') }}</option>
+                <option value="working">{{ __('employee.status.working') }}</option>
+                <option value="on_leave">{{ __('employee.status.on_leave') }}</option>
+                <option value="resigned">{{ __('employee.status.resigned') }}</option>
             </select>
         </div>
 
@@ -146,7 +146,7 @@
 
         <!-- Chỉ báo số bộ lọc đang áp dụng -->
         <div style="background:var(--po-wh); border:1px solid var(--po-bd); color:var(--po-tx); padding:6px 12px; font-size:12.5px; border-radius:8px; display:inline-flex; align-items:center; gap:6px">
-            <i class="fa-solid fa-sliders" style="color:var(--po-mu)"></i> Bộ lọc
+            <i class="fa-solid fa-sliders" style="color:var(--po-mu)"></i> {{ __('employee.ui.filters') }}
             @if($activeFiltersCount > 0)
                 <span style="background:var(--po-bl); color:#fff; width:17px; height:17px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:10px; font-weight:700">
                     {{ $activeFiltersCount }}
@@ -154,7 +154,7 @@
             @endif
         </div>
 
-        <button wire:click="resetFilters" class="att-rbtn" title="Cài lại bộ lọc">
+        <button wire:click="resetFilters" class="att-rbtn" title="{{ __('employee.ui.reset_filters') }}">
             <i class="fa-solid fa-rotate-right"></i>
         </button>
     </div>
@@ -166,14 +166,14 @@
                 <thead>
                     <tr style="border-bottom:1.5px solid var(--po-bd2); color:var(--po-mu); font-weight:700; text-transform:uppercase; font-size:11px; background:var(--po-bd2)">
                         <th style="padding:14px 12px; width:40px"><input type="checkbox"></th>
-                        <th style="padding:14px 12px; width:140px">Mã nhân viên</th>
-                        <th style="padding:14px 12px">Họ và tên</th>
-                        <th style="padding:14px 12px">Phòng ban</th>
-                        <th style="padding:14px 12px">Vị trí</th>
-                        <th style="padding:14px 12px">Khu vực</th>
-                        <th style="padding:14px 12px; width:130px">Ngày vào làm</th>
-                        <th style="padding:14px 12px; width:160px">Trạng thái</th>
-                        <th style="padding:14px 12px; width:120px; text-align:center">Hành động</th>
+                        <th style="padding:14px 12px; width:140px">{{ __('employee.table.code') }}</th>
+                        <th style="padding:14px 12px">{{ __('employee.table.name') }}</th>
+                        <th style="padding:14px 12px">{{ __('employee.table.department') }}</th>
+                        <th style="padding:14px 12px">{{ __('employee.table.position') }}</th>
+                        <th style="padding:14px 12px">{{ __('employee.table.area') }}</th>
+                        <th style="padding:14px 12px; width:130px">{{ __('employee.table.start_date') }}</th>
+                        <th style="padding:14px 12px; width:160px">{{ __('employee.table.status') }}</th>
+                        <th style="padding:14px 12px; width:120px; text-align:center">{{ __('employee.table.actions') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -221,15 +221,15 @@
                             <td style="padding:12px 12px;">
                                 @if($emp->status === 'working')
                                     <span class="es-badge es-working">
-                                        <span class="es-dot"></span> Đang làm việc
+                                        <span class="es-dot"></span> {{ __('employee.status.working') }}
                                     </span>
                                 @elseif($emp->status === 'on_leave')
                                     <span class="es-badge es-leave">
-                                        <span class="es-dot"></span> Nghỉ phép
+                                        <span class="es-dot"></span> {{ __('employee.status.on_leave') }}
                                     </span>
                                 @elseif($emp->status === 'resigned')
                                     <span class="es-badge es-resign">
-                                        <span class="es-dot"></span> Nghỉ việc
+                                        <span class="es-dot"></span> {{ __('employee.status.resigned') }}
                                     </span>
                                 @else
                                     <span class="es-badge" style="background:var(--po-bd2); color:var(--po-su)">
@@ -240,17 +240,17 @@
                             <td style="padding:12px 12px; text-align:center">
                                 <div style="display:inline-flex; gap:5px">
                                     <!-- Xem chi tiết (Edit) -->
-                                    <a href="{{ \App\Filament\Resources\EmployeeResource::getUrl('edit', ['record' => $emp]) }}" class="abt" title="Xem chi tiết">
+                                    <a href="{{ \App\Filament\Resources\EmployeeResource::getUrl('edit', ['record' => $emp]) }}" class="abt" title="{{ __('employee.actions.view') }}">
                                         <i class="fa-solid fa-eye"></i>
                                     </a>
 
                                     <!-- Chỉnh sửa -->
-                                    <a href="{{ \App\Filament\Resources\EmployeeResource::getUrl('edit', ['record' => $emp]) }}" class="abt" title="Chỉnh sửa">
+                                    <a href="{{ \App\Filament\Resources\EmployeeResource::getUrl('edit', ['record' => $emp]) }}" class="abt" title="{{ __('employee.actions.edit') }}">
                                         <i class="fa-solid fa-pencil"></i>
                                     </a>
 
                                     <!-- Xóa nhân viên -->
-                                    <button wire:click="deleteEmployee({{ $emp->id }})" wire:confirm="Bạn có chắc chắn muốn xóa nhân viên này?" class="abt" title="Xóa nhân viên">
+                                    <button wire:click="deleteEmployee({{ $emp->id }})" wire:confirm="{{ __('employee.ui.confirm_delete') }}" class="abt" title="{{ __('employee.ui.delete') }}">
                                         <i class="fa-solid fa-ellipsis-vertical"></i>
                                     </button>
                                 </div>
@@ -262,8 +262,8 @@
                                 <div style="font-size:24px; color:var(--po-mu); margin-bottom:8px">
                                     <i class="fa-solid fa-users-slash"></i>
                                 </div>
-                                <div style="font-weight:700; color:var(--po-tx)">Không tìm thấy nhân viên nào</div>
-                                <div style="font-size:12px; color:var(--po-mu)">Hãy thử điều chỉnh bộ lọc hoặc từ khóa tìm kiếm khác.</div>
+                                <div style="font-weight:700; color:var(--po-tx)">{{ __('employee.ui.empty') }}</div>
+                                <div style="font-size:12px; color:var(--po-mu)">{{ __('employee.ui.empty_hint') }}</div>
                             </td>
                         </tr>
                     @endforelse
@@ -284,16 +284,16 @@
             @endphp
             <div class="po-footer" style="border-top:1px solid var(--po-bd2); padding:14px 18px; display:flex; justify-content:space-between; align-items:center; font-size:12.5px; color:var(--po-mu)">
                 <div>
-                    Hiển thị <strong>{{ $employeesList->firstItem() }}</strong> đến <strong>{{ $employeesList->lastItem() }}</strong> trong tổng số <strong>{{ number_format($employeesList->total(), 0, ',', '.') }}</strong> nhân viên
+                    {{ __('employee.ui.pagination', ['from' => $employeesList->firstItem(), 'to' => $employeesList->lastItem(), 'total' => number_format($employeesList->total(), 0, ',', '.')]) }}
                 </div>
                 <div class="po-pagination" style="display:flex; align-items:center; gap:12px">
                     <select wire:model.live="perPage" class="po-select" style="min-width:7rem;height:2.1rem;padding:0 .5rem;border-radius:.5rem; border:1px solid var(--po-bd); outline:none; background:var(--po-wh); color:var(--po-tx)">
-                        <option value="10">10 dòng/trang</option>
-                        <option value="20">20 dòng/trang</option>
-                        <option value="50">50 dòng/trang</option>
+                        <option value="10">{{ __('employee.ui.rows_per_page', ['count' => 10]) }}</option>
+                        <option value="20">{{ __('employee.ui.rows_per_page', ['count' => 20]) }}</option>
+                        <option value="50">{{ __('employee.ui.rows_per_page', ['count' => 50]) }}</option>
                     </select>
 
-                    <nav role="navigation" aria-label="Pagination Navigation" style="display:flex; align-items:center; gap:4px">
+                    <nav role="navigation" aria-label="{{ __('common.pagination.navigation') }}" style="display:flex; align-items:center; gap:4px">
                         {{-- Previous --}}
                         @if ($employeesList->onFirstPage())
                             <span aria-disabled="true" style="width:30px; height:30px; border-radius:6px; border:1px solid var(--po-bd); display:flex; align-items:center; justify-content:center; color:var(--po-fa); cursor:not-allowed">

@@ -21,22 +21,22 @@ class RecipeTypeResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('NGUYÊN LIỆU & KHO');
+        return __('recipe.recipe_type.navigation_group');
     }
 
     public static function getNavigationLabel(): string
     {
-        return __('Nhóm món');
+        return __('recipe.recipe_type.label');
     }
 
     public static function getModelLabel(): string
     {
-        return __('Nhóm món');
+        return __('recipe.recipe_type.label');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('Nhóm món');
+        return __('recipe.recipe_type.label');
     }
 
     public static function form(Form $form): Form
@@ -44,15 +44,15 @@ class RecipeTypeResource extends Resource
         return $form
             ->schema([
                 Forms\Components\TextInput::make('name')
-                    ->label('Tên nhóm món')
-                    ->placeholder('Nhập tên nhóm món (VD: Món canh, Món mặn...)')
+                    ->label(__('recipe.recipe_type.fields.name'))
+                    ->placeholder(__('recipe.recipe_type.placeholders.name'))
                     ->required()
                     ->unique(ignoreRecord: true)
                     ->maxLength(255)
                     ->columnSpanFull(),
                 Forms\Components\Textarea::make('description')
-                    ->label('Mô tả')
-                    ->placeholder('Nhập mô tả chi tiết về nhóm món này (không bắt buộc)')
+                    ->label(__('recipe.recipe_type.fields.description'))
+                    ->placeholder(__('recipe.recipe_type.placeholders.description'))
                     ->maxLength(1000)
                     ->columnSpanFull(),
             ]);
@@ -63,7 +63,7 @@ class RecipeTypeResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('index')
-                    ->label('STT')
+                    ->label(__('recipe.recipe_type.table.index'))
                     ->state(static function (Tables\Contracts\HasTable $livewire, \stdClass $rowLoop): string {
                         $currentPage = method_exists($livewire, 'getTablePage') ? $livewire->getTablePage() : 1;
                         $recordsPerPage = method_exists($livewire, 'getTableRecordsPerPage') ? $livewire->getTableRecordsPerPage() : 10;
@@ -77,16 +77,16 @@ class RecipeTypeResource extends Resource
                     ])
                     ->width('56px'),
                 Tables\Columns\TextColumn::make('name')
-                    ->label('TÊN NHÓM MÓN')
+                    ->label(__('recipe.recipe_type.table.name'))
                     ->searchable()
                     ->sortable()
                     ->weight('bold'),
                 Tables\Columns\TextColumn::make('description')
-                    ->label('MÔ TẢ')
+                    ->label(__('recipe.recipe_type.table.description'))
                     ->limit(50)
                     ->color('gray'),
                 Tables\Columns\TextColumn::make('created_at')
-                    ->label('NGÀY TẠO')
+                    ->label(__('recipe.recipe_type.table.created_at'))
                     ->dateTime('d/m/Y H:i')
                     ->extraAttributes([
                         'style' => 'font-variant-numeric: tabular-nums;',
@@ -106,7 +106,7 @@ class RecipeTypeResource extends Resource
                     ->before(function (Tables\Actions\DeleteAction $action, $record): void {
                         if ($record->recipes()->exists()) {
                             Notification::make()
-                                ->title('Không thể xóa nhóm món này vì đang có '.$record->recipes()->count().' công thức/món ăn sử dụng.')
+                                ->title(__('recipe.recipe_type.errors.in_use', ['count' => $record->recipes()->count()]))
                                 ->danger()
                                 ->send();
                             $action->cancel();
@@ -120,7 +120,7 @@ class RecipeTypeResource extends Resource
                             $inUse = $records->filter(fn ($r) => $r->recipes()->exists());
                             if ($inUse->isNotEmpty()) {
                                 Notification::make()
-                                    ->title('Không thể xóa hàng loạt. Các nhóm món sau đang được sử dụng: '.$inUse->pluck('name')->implode(', '))
+                                    ->title(__('recipe.recipe_type.errors.bulk_in_use', ['names' => $inUse->pluck('name')->implode(', ')]))
                                     ->danger()
                                     ->send();
                                 $action->cancel();

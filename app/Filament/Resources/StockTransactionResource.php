@@ -10,6 +10,7 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 
 class StockTransactionResource extends Resource
 {
@@ -24,33 +25,33 @@ class StockTransactionResource extends Resource
         return $form
             ->schema([
                 Forms\Components\Select::make('type')
-                    ->label('Loại giao dịch')
+                    ->label(__('warehouse.table.transaction_type'))
                     ->required()
                     ->options([
-                        'Nhập kho' => 'Nhập kho',
-                        'Xuất kho' => 'Xuất kho',
-                        'Kiểm kê' => 'Kiểm kê',
+                        'Nhập kho' => __('warehouse.transaction_type_labels.inbound'),
+                        'Xuất kho' => __('warehouse.transaction_type_labels.outbound'),
+                        'Kiểm kê' => __('warehouse.transaction_type_labels.stock_check'),
                     ]),
                 Forms\Components\TextInput::make('voucher_code')
-                    ->label('Mã phiếu')
+                    ->label(__('warehouse.table.voucher_code'))
                     ->maxLength(255)
                     ->default(null),
                 Forms\Components\Select::make('ingredient_id')
-                    ->label('Nguyên liệu')
+                    ->label(__('warehouse.table.ingredient'))
                     ->relationship('ingredient', 'name')
                     ->searchable()
                     ->preload()
                     ->required(),
                 Forms\Components\TextInput::make('quantity')
-                    ->label('Số lượng thay đổi (+/-)')
+                    ->label(__('warehouse.resource.transaction.quantity_change_signed'))
                     ->required()
                     ->numeric(),
                 Forms\Components\TextInput::make('after_quantity')
-                    ->label('Tồn kho sau giao dịch')
+                    ->label(__('warehouse.resource.transaction.after_quantity'))
                     ->required()
                     ->numeric(),
                 Forms\Components\TextInput::make('note')
-                    ->label('Ghi chú')
+                    ->label(__('warehouse.table.note'))
                     ->maxLength(255)
                     ->default(null),
             ]);
@@ -61,11 +62,11 @@ class StockTransactionResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('created_at')
-                    ->label('Thời gian')
+                    ->label(__('warehouse.table.time'))
                     ->dateTime('d/m/Y H:i')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('type')
-                    ->label('Loại giao dịch')
+                    ->label(__('warehouse.table.transaction_type'))
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         'Nhập kho' => 'success',
@@ -75,36 +76,36 @@ class StockTransactionResource extends Resource
                     })
                     ->searchable(),
                 Tables\Columns\TextColumn::make('voucher_code')
-                    ->label('Mã phiếu')
+                    ->label(__('warehouse.table.voucher_code'))
                     ->searchable(),
                 Tables\Columns\TextColumn::make('ingredient.name')
-                    ->label('Nguyên liệu')
+                    ->label(__('warehouse.table.ingredient'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('quantity')
-                    ->label('Số lượng thay đổi')
+                    ->label(__('warehouse.resource.transaction.quantity_change'))
                     ->numeric()
                     ->sortable()
                     ->color(fn (float $state): string => $state >= 0 ? 'success' : 'danger')
                     ->formatStateUsing(fn (float $state): string => $state >= 0 ? "+{$state}" : "{$state}"),
                 Tables\Columns\TextColumn::make('after_quantity')
-                    ->label('Tồn sau giao dịch')
+                    ->label(__('warehouse.resource.transaction.after_quantity'))
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('note')
-                    ->label('Ghi chú')
+                    ->label(__('warehouse.table.note'))
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('type')
-                    ->label('Loại giao dịch')
+                    ->label(__('warehouse.table.transaction_type'))
                     ->options([
-                        'Nhập kho' => 'Nhập kho',
-                        'Xuất kho' => 'Xuất kho',
-                        'Kiểm kê' => 'Kiểm kê',
+                        'Nhập kho' => __('warehouse.transaction_type_labels.inbound'),
+                        'Xuất kho' => __('warehouse.transaction_type_labels.outbound'),
+                        'Kiểm kê' => __('warehouse.transaction_type_labels.stock_check'),
                     ]),
                 Tables\Filters\SelectFilter::make('ingredient_id')
-                    ->label('Nguyên liệu')
+                    ->label(__('warehouse.table.ingredient'))
                     ->relationship('ingredient', 'name'),
             ])
             ->actions([
@@ -133,12 +134,12 @@ class StockTransactionResource extends Resource
         return false;
     }
 
-    public static function canEdit(\Illuminate\Database\Eloquent\Model $record): bool
+    public static function canEdit(Model $record): bool
     {
         return false;
     }
 
-    public static function canDelete(\Illuminate\Database\Eloquent\Model $record): bool
+    public static function canDelete(Model $record): bool
     {
         return false;
     }

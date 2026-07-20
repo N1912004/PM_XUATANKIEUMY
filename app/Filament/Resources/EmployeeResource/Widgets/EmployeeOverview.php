@@ -11,16 +11,16 @@ class EmployeeOverview extends BaseWidget
     protected function getStats(): array
     {
         return [
-            Stat::make('Tổng nhân viên', Employee::count())
-                ->description('Nhân sự toàn hệ thống')
+            Stat::make(__('employee.widgets.total'), Employee::count())
+                ->description(__('employee.widgets.total_description'))
                 ->descriptionIcon('heroicon-m-users')
                 ->color('primary'),
-            Stat::make('Đang làm việc', Employee::where('status', 'working')->count())
-                ->description('Đang hoạt động')
+            Stat::make(__('employee.widgets.working'), Employee::where('status', 'working')->count())
+                ->description(__('employee.widgets.working_description'))
                 ->descriptionIcon('heroicon-m-check-circle')
                 ->color('success'),
-            Stat::make('Nghỉ phép / Nghỉ việc', Employee::whereIn('status', ['on_leave', 'resigned'])->count())
-                ->description('Vắng mặt / Thôi việc')
+            Stat::make(__('employee.widgets.absent'), Employee::whereIn('status', ['on_leave', 'resigned'])->count())
+                ->description(__('employee.widgets.absent_description'))
                 ->descriptionIcon('heroicon-m-x-circle')
                 ->color('danger'),
         ];

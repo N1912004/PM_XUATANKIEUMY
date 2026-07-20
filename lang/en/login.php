@@ -43,4 +43,9 @@ return [
     'notifications' => [
         'login_success' => 'Logged in successfully!',
     ],
+    'accessibility' => [
+        'food_wheel' => 'Food image wheel — ISO 22000:2018 certification',
+        'show_password' => 'Show password',
+        'hide_password' => 'Hide password',
+    ],
 ];

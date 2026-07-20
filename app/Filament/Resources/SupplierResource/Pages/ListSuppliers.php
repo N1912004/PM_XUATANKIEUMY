@@ -78,7 +78,7 @@ class ListSuppliers extends Page
         $supplier->delete();
 
         Notification::make()
-            ->title('Đã xóa nhà cung cấp')
+            ->title(__('supplier.notifications.deleted'))
             ->success()
             ->send();
 

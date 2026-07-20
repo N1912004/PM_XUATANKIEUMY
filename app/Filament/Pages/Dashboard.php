@@ -59,17 +59,15 @@ class Dashboard extends Page
 
     public function mount(): void
     {
-        $this->todayFormatted = Carbon::today()->locale(app()->getLocale())->isoFormat(
-            app()->getLocale() === 'vi' ? 'dddd, [Ngày] DD/MM/Y' : 'dddd, MMMM DD, Y'
-        );
+        $this->todayFormatted = Carbon::today()->locale(app()->getLocale())->isoFormat(__('dashboard.date_format'));
 
         $hour = (int) date('H');
         if ($hour < 12) {
-            $this->greeting = 'Chào buổi sáng';
+            $this->greeting = 'dashboard.greeting.morning';
         } elseif ($hour < 18) {
-            $this->greeting = 'Chào buổi chiều';
+            $this->greeting = 'dashboard.greeting.afternoon';
         } else {
-            $this->greeting = 'Chào buổi tối';
+            $this->greeting = 'dashboard.greeting.evening';
         }
 
         // Ngày hôm nay dạng chuỗi 'Y-m-d' để so sánh trực tiếp trên cột DATE.
@@ -119,7 +117,7 @@ class Dashboard extends Page
                 if ($expiresAt->lte($threshold)) {
                     $expiring[] = [
                         'supplier' => $supplier->name,
-                        'document' => $doc['name'] ?? 'Hồ sơ',
+                        'document' => $doc['name'] ?? __('dashboard.supplier_document'),
                         'expires_at' => $expiresAt->format('d/m/Y'),
                         // Khóa sort dạng Y-m-d — chuỗi d/m/Y so sánh lexicographic sẽ sai thứ tự thời gian
                         'sort_key' => $expiresAt->toDateString(),

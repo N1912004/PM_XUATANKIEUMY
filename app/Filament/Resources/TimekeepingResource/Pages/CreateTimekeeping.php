@@ -46,14 +46,14 @@ class CreateTimekeeping extends Page
             'check_out' => 'nullable|date_format:H:i',
             'status' => 'required',
         ], [
-            'employee_id.required' => 'Nhân viên là bắt buộc.',
-            'employee_id.exists' => 'Nhân viên không hợp lệ.',
-            'date.required' => 'Ngày làm việc là bắt buộc.',
-            'shift_id.required' => 'Ca làm việc là bắt buộc.',
-            'shift_id.exists' => 'Ca làm việc không hợp lệ.',
-            'check_in.date_format' => 'Giờ vào phải theo định dạng HH:MM (VD: 07:01).',
-            'check_out.date_format' => 'Giờ ra phải theo định dạng HH:MM (VD: 16:05).',
-            'status.required' => 'Trạng thái là bắt buộc.',
+            'employee_id.required' => __('timekeeping.validation.employee_required'),
+            'employee_id.exists' => __('timekeeping.validation.employee_exists'),
+            'date.required' => __('timekeeping.validation.date_required'),
+            'shift_id.required' => __('timekeeping.validation.shift_required'),
+            'shift_id.exists' => __('timekeeping.validation.shift_exists'),
+            'check_in.date_format' => __('timekeeping.validation.check_in_format'),
+            'check_out.date_format' => __('timekeeping.validation.check_out_format'),
+            'status.required' => __('timekeeping.validation.status_required'),
         ]);
 
         Timekeeping::create([
@@ -66,7 +66,7 @@ class CreateTimekeeping extends Page
             'status' => $this->status,
         ]);
 
-        session()->flash('message', 'Thêm mới bản ghi chấm công thành công!');
+        session()->flash('message', __('timekeeping.messages.created'));
 
         return redirect($this->getResource()::getUrl('index'));
     }

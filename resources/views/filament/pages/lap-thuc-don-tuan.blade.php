@@ -4,16 +4,16 @@
 
         <div class="flex flex-wrap items-center gap-3">
             <x-filament::button type="submit" color="gray" icon="heroicon-m-document">
-                Lưu nháp
+                {{ __('menu.actions.save_draft') }}
             </x-filament::button>
             <x-filament::button wire:click="sendToClient" color="info" icon="heroicon-m-paper-airplane">
-                Gửi khách hàng
+                {{ __('menu.actions.send_customer') }}
             </x-filament::button>
             <x-filament::button wire:click="confirmByClient" color="warning" icon="heroicon-m-check-badge">
-                Khách đã xác nhận
+                {{ __('menu.actions.customer_confirmed') }}
             </x-filament::button>
             <x-filament::button wire:click="lockWeek" color="success" icon="heroicon-m-lock-closed">
-                Chốt thực đơn
+                {{ __('menu.actions.lock') }}
             </x-filament::button>
         </div>
     </form>

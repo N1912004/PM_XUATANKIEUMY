@@ -20,22 +20,22 @@ class ShiftResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return __('Cấu hình ca làm việc');
+        return __('catalog.shift.navigation');
     }
 
     public static function getModelLabel(): string
     {
-        return __('Ca làm việc');
+        return __('catalog.shift.label');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('Ca làm việc');
+        return __('catalog.shift.label');
     }
 
     public static function getNavigationGroup(): ?string
     {
-        return __('VẬN HÀNH BẾP');
+        return __('catalog.groups.kitchen_operations');
     }
 
     public static function form(Form $form): Form
@@ -43,14 +43,14 @@ class ShiftResource extends Resource
         return $form
             ->schema([
                 Forms\Components\TextInput::make('name')
-                    ->label('Tên ca')
-                    ->placeholder('Ví dụ: Ca 1')
+                    ->label(__('catalog.shift.fields.name'))
+                    ->placeholder(__('catalog.shift.placeholders.name'))
                     ->required()
                     ->maxLength(255),
                 Forms\Components\Grid::make(2)
                     ->schema([
                         Forms\Components\TimePicker::make('start_time')
-                            ->label('Giờ bắt đầu')
+                            ->label(__('catalog.shift.fields.start_time'))
                             ->seconds(false)
                             ->required()
                             ->afterStateHydrated(function (Forms\Components\TimePicker $component, ?Shift $record) {
@@ -63,7 +63,7 @@ class ShiftResource extends Resource
                             })
                             ->dehydrated(false),
                         Forms\Components\TimePicker::make('end_time')
-                            ->label('Giờ kết thúc')
+                            ->label(__('catalog.shift.fields.end_time'))
                             ->seconds(false)
                             ->required()
                             ->afterStateHydrated(function (Forms\Components\TimePicker $component, ?Shift $record) {
@@ -89,7 +89,7 @@ class ShiftResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('index')
-                    ->label('TT')
+                    ->label(__('catalog.common.index'))
                     ->state(static function (Tables\Contracts\HasTable $livewire, \stdClass $rowLoop): string {
                         $currentPage = method_exists($livewire, 'getTablePage') ? $livewire->getTablePage() : 1;
                         $recordsPerPage = method_exists($livewire, 'getTableRecordsPerPage') ? $livewire->getTableRecordsPerPage() : 10;
@@ -103,19 +103,19 @@ class ShiftResource extends Resource
                     ])
                     ->width('56px'),
                 Tables\Columns\TextColumn::make('name')
-                    ->label('Tên ca')
+                    ->label(__('catalog.shift.fields.name'))
                     ->searchable()
                     ->sortable()
                     ->weight('bold'),
                 Tables\Columns\TextColumn::make('time_range')
-                    ->label('Khung giờ')
+                    ->label(__('catalog.shift.table.time_range'))
                     ->searchable()
                     ->sortable()
                     ->extraAttributes([
                         'style' => 'font-variant-numeric: tabular-nums;',
                     ]),
                 Tables\Columns\TextColumn::make('created_at')
-                    ->label('Ngày tạo')
+                    ->label(__('catalog.common.created_at'))
                     ->dateTime('d/m/Y H:i')
                     ->extraAttributes([
                         'style' => 'font-variant-numeric: tabular-nums;',

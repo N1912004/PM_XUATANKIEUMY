@@ -43,4 +43,9 @@ return [
     'notifications' => [
         'login_success' => 'Đăng nhập thành công!',
     ],
+    'accessibility' => [
+        'food_wheel' => 'Bánh xe hình ảnh món ăn — chứng nhận ISO 22000:2018',
+        'show_password' => 'Hiện mật khẩu',
+        'hide_password' => 'Ẩn mật khẩu',
+    ],
 ];

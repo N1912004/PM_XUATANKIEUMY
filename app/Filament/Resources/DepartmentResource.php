@@ -21,22 +21,22 @@ class DepartmentResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('NHÂN SỰ');
+        return __('catalog.groups.hr');
     }
 
     public static function getNavigationLabel(): string
     {
-        return __('Phòng ban');
+        return __('catalog.department.label');
     }
 
     public static function getModelLabel(): string
     {
-        return __('Phòng ban');
+        return __('catalog.department.label');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('Phòng ban');
+        return __('catalog.department.label');
     }
 
     public static function form(Form $form): Form
@@ -44,20 +44,20 @@ class DepartmentResource extends Resource
         return $form
             ->schema([
                 Forms\Components\TextInput::make('name')
-                    ->label('Tên phòng ban')
-                    ->placeholder('Nhập tên phòng ban (VD: Phòng hành chính, Phòng kỹ thuật...)')
+                    ->label(__('catalog.department.fields.name'))
+                    ->placeholder(__('catalog.department.placeholders.name'))
                     ->required()
                     ->unique(ignoreRecord: true)
                     ->maxLength(255)
                     ->columnSpanFull(),
                 Forms\Components\TextInput::make('sort')
-                    ->label('Thứ tự hiển thị')
+                    ->label(__('catalog.common.sort_order'))
                     ->numeric()
                     ->default(0),
                 Forms\Components\Toggle::make('active')
-                    ->label('Đang sử dụng')
+                    ->label(__('catalog.common.in_use'))
                     ->default(true)
-                    ->helperText('Tắt thì không còn xuất hiện ở các form chọn phòng ban, dữ liệu cũ giữ nguyên.'),
+                    ->helperText(__('catalog.department.helpers.active')),
             ]);
     }
 
@@ -66,7 +66,7 @@ class DepartmentResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('index')
-                    ->label('STT')
+                    ->label(__('catalog.common.index'))
                     ->state(static function (Tables\Contracts\HasTable $livewire, \stdClass $rowLoop): string {
                         $currentPage = method_exists($livewire, 'getTablePage') ? $livewire->getTablePage() : 1;
                         $recordsPerPage = method_exists($livewire, 'getTableRecordsPerPage') ? $livewire->getTableRecordsPerPage() : 10;
@@ -80,26 +80,26 @@ class DepartmentResource extends Resource
                     ])
                     ->width('56px'),
                 Tables\Columns\TextColumn::make('name')
-                    ->label('TÊN PHÒNG BAN')
+                    ->label(__('catalog.department.table.name'))
                     ->searchable()
                     ->sortable()
                     ->weight('bold'),
                 Tables\Columns\TextColumn::make('sort')
-                    ->label('THỨ TỰ')
+                    ->label(__('catalog.common.sort_order_upper'))
                     ->sortable()
                     ->alignCenter(),
                 Tables\Columns\IconColumn::make('active')
-                    ->label('ĐANG DÙNG')
+                    ->label(__('catalog.common.in_use_upper'))
                     ->boolean(),
                 Tables\Columns\TextColumn::make('employees_count')
-                    ->label('SỐ NHÂN VIÊN')
+                    ->label(__('catalog.department.table.count'))
                     ->counts('employees')
                     ->alignCenter()
                     ->sortable()
                     ->color('primary')
                     ->weight('bold'),
                 Tables\Columns\TextColumn::make('created_at')
-                    ->label('NGÀY TẠO')
+                    ->label(__('catalog.common.created_at'))
                     ->dateTime('d/m/Y H:i')
                     ->extraAttributes([
                         'style' => 'font-variant-numeric: tabular-nums;',
@@ -110,7 +110,7 @@ class DepartmentResource extends Resource
             ->defaultSort('sort')
             ->filters([
                 Tables\Filters\TernaryFilter::make('active')
-                    ->label('Đang sử dụng'),
+                    ->label(__('catalog.common.in_use')),
             ])
             ->actions([
                 Tables\Actions\EditAction::make()
@@ -120,7 +120,7 @@ class DepartmentResource extends Resource
                     ->before(function (Tables\Actions\DeleteAction $action, $record): void {
                         if ($record->employees()->exists()) {
                             Notification::make()
-                                ->title('Không thể xóa phòng ban này vì đang có '.$record->employees()->count().' nhân viên trực thuộc.')
+                                ->title(__('catalog.department.errors.in_use', ['count' => $record->employees()->count()]))
                                 ->danger()
                                 ->send();
                             $action->cancel();
@@ -134,7 +134,7 @@ class DepartmentResource extends Resource
                             $inUse = $records->filter(fn ($r) => $r->employees()->exists());
                             if ($inUse->isNotEmpty()) {
                                 Notification::make()
-                                    ->title('Không thể xóa hàng loạt. Các phòng ban sau đang có nhân viên: '.$inUse->pluck('name')->implode(', '))
+                                    ->title(__('catalog.department.errors.bulk_in_use', ['names' => $inUse->pluck('name')->implode(', ')]))
                                     ->danger()
                                     ->send();
                                 $action->cancel();

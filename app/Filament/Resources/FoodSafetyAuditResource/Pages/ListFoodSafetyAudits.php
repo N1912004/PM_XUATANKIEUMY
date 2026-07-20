@@ -174,7 +174,7 @@ class ListFoodSafetyAudits extends ListRecords
         $kitchenId = auth()->user()?->currentKitchenId();
         $this->canteen = ($kitchenId ? Kitchen::find($kitchenId)?->name : null)
             ?? Kitchen::first()?->name
-            ?? 'Bếp ăn';
+            ?? __('food_safety.labels.default_kitchen');
 
         // Người kiểm tra mặc định: nhân viên liên kết với tài khoản (chọn lại từ danh mục trên UI)
         $this->inspector = auth()->user()?->employee?->name ?? '';
@@ -198,7 +198,7 @@ class ListFoodSafetyAudits extends ListRecords
     {
         return [
             Actions\CreateAction::make()
-                ->label('Tạo dữ liệu'),
+                ->label(__('food_safety.actions.create_data')),
         ];
     }
 
@@ -286,13 +286,20 @@ class ListFoodSafetyAudits extends ListRecords
     }
 
     /**
-     * @return array<int, array{key: string, sheet: string, icon: string}>
+     * @return array<int, array{key: string, label: string, sheet: string, icon: string}>
      */
     public function getStepTabs(): array
     {
         return collect(self::STEPS)
             ->map(fn (string $step): array => [
                 'key' => $step,
+                'label' => match ($step) {
+                    'Bước 1' => __('food_safety.stages.step_1'),
+                    'Bước 2' => __('food_safety.stages.step_2'),
+                    'Bước 3' => __('food_safety.stages.step_3'),
+                    'Lưu mẫu' => __('food_safety.stages.sample_storage'),
+                    'Hủy mẫu' => __('food_safety.stages.sample_disposal'),
+                },
                 'sheet' => self::SHEET_CONFIG[$step]['sheet'],
                 'icon' => self::SHEET_CONFIG[$step]['icon'],
             ])
@@ -752,7 +759,7 @@ class ListFoodSafetyAudits extends ListRecords
         } catch (\RuntimeException) {
             $bytes = null;
         }
-        abort_unless($bytes !== null, 500, 'Không tìm thấy file Excel mẫu kiểm thực');
+        abort_unless($bytes !== null, 500, __('food_safety.errors.template_not_found'));
 
         $tmpPath = tempnam(sys_get_temp_dir(), 'fsa-export-');
         file_put_contents($tmpPath, $bytes);

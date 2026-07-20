@@ -9,13 +9,13 @@
 
     <div class="po-head">
         <div>
-            <h1 class="po-title">Đặt hàng</h1>
-            <p class="po-subtitle">Quản lý đơn đặt hàng nguyên liệu theo nhà cung cấp từ list hàng đã chốt</p>
+            <h1 class="po-title">{{ __('purchase_order.list.title') }}</h1>
+            <p class="po-subtitle">{{ __('purchase_order.list.subtitle') }}</p>
         </div>
         <div class="po-actions">
             <a href="{{ url('/admin/list-hang') }}" class="po-btn po-btn-primary">
                 <i class="fa-solid fa-plus"></i>
-                Tạo đơn đặt hàng
+                {{ __('purchase_order.actions.create') }}
             </a>
         </div>
     </div>
@@ -27,7 +27,7 @@
                 <i class="fa-solid fa-file-lines"></i>
             </div>
             <div>
-                <div class="py-klbl">Tổng đơn tháng này</div>
+                <div class="py-klbl">{{ __('purchase_order.kpi.month_total') }}</div>
                 <div class="py-kval">{{ $statsData['total_orders'] }}</div>
             </div>
         </div>
@@ -37,7 +37,7 @@
                 <i class="fa-solid fa-boxes-stacked"></i>
             </div>
             <div>
-                <div class="py-klbl">Chờ kiểm hàng</div>
+                <div class="py-klbl">{{ __('purchase_order.kpi.awaiting_check') }}</div>
                 <div class="py-kval">{{ $statsData['pending_orders'] }}</div>
             </div>
         </div>
@@ -47,7 +47,7 @@
                 <i class="fa-solid fa-circle-check"></i>
             </div>
             <div>
-                <div class="py-klbl">Đã hoàn thành</div>
+                <div class="py-klbl">{{ __('purchase_order.kpi.completed') }}</div>
                 <div class="py-kval">{{ $statsData['done_orders'] }}</div>
             </div>
         </div>
@@ -57,7 +57,7 @@
                 <i class="fa-solid fa-sack-dollar"></i>
             </div>
             <div>
-                <div class="py-klbl">Tổng giá trị tháng</div>
+                <div class="py-klbl">{{ __('purchase_order.kpi.month_value') }}</div>
                 <div class="py-kval" style="font-size:18px">
                     {{ number_format($statsData['total_value'] / 1000000, 0) }} tr
                 </div>
@@ -69,7 +69,7 @@
     <div class="mp-bar" style="margin-bottom:14px">
         <div class="mp-srch">
             <i class="fa-solid fa-magnifying-glass"></i>
-            <input wire:model.live.debounce.250ms="search" type="text" placeholder="Tìm kiếm đơn hàng, NCC...">
+            <input wire:model.live.debounce.250ms="search" type="text" placeholder="{{ __('purchase_order.placeholders.search') }}">
         </div>
 
         <select wire:model.live="monthFilter" class="mp-sel">
@@ -79,22 +79,22 @@
         </select>
 
         <select wire:model.live="typeFilter" class="mp-sel">
-            <option value="">Tất cả loại</option>
-            <option value="week">Đặt hàng tuần</option>
-            <option value="day">Đặt hàng ngày</option>
+            <option value="">{{ __('purchase_order.filters.all_types') }}</option>
+            <option value="week">{{ __('purchase_order.types.week') }}</option>
+            <option value="day">{{ __('purchase_order.types.day') }}</option>
         </select>
 
         <select wire:model.live="statusFilter" class="mp-sel" id="ohStFilter">
-            <option value="">Tất cả trạng thái</option>
-            <option value="draft">Nháp</option>
-            <option value="sent">Đã gửi</option>
-            <option value="checking">Đang kiểm hàng</option>
-            <option value="done">Hoàn thành</option>
+            <option value="">{{ __('purchase_order.filters.all_statuses') }}</option>
+            <option value="draft">{{ __('purchase_order.status.draft') }}</option>
+            <option value="sent">{{ __('purchase_order.status.sent_short') }}</option>
+            <option value="checking">{{ __('purchase_order.status.checking') }}</option>
+            <option value="done">{{ __('purchase_order.status.done') }}</option>
         </select>
 
         <div class="tsp"></div>
 
-        <button wire:click="resetFilters" class="att-rbtn" title="Cài lại bộ lọc">
+        <button wire:click="resetFilters" class="att-rbtn" title="{{ __('purchase_order.actions.reset_filters') }}">
             <i class="fa-solid fa-rotate-right"></i>
         </button>
     </div>
@@ -108,7 +108,7 @@
             @endphp
             <div class="oh-item" style="position:relative">
                 {{-- Stretched link: cả dòng bấm được, điều hướng chuẩn (SPA-safe) thay vì onclick JS --}}
-                <a href="{{ \App\Filament\Resources\PurchaseOrderResource::getUrl('edit', ['record' => $order]) }}" wire:navigate aria-label="Xem chi tiết đơn {{ $order->code }}" style="position:absolute; inset:0; z-index:0"></a>
+                <a href="{{ \App\Filament\Resources\PurchaseOrderResource::getUrl('edit', ['record' => $order]) }}" wire:navigate aria-label="{{ __('purchase_order.actions.view_order', ['code' => $order->code]) }}" style="position:absolute; inset:0; z-index:0"></a>
                 <!-- Status Icon -->
                 @if($order->status === 'done')
                     <div class="oh-item-ico" style="background:var(--po-gn-s);color:var(--po-gn)">
@@ -130,7 +130,7 @@
                         {{ $order->code }}
                     </div>
                     <div style="font-size:12px;color:var(--po-mu);margin-top:2px">
-                        NCC: {{ $order->supplier?->name ?? 'Chưa gán' }}
+                        {{ __('purchase_order.fields.supplier_abbr') }}: {{ $order->supplier?->name ?? __('purchase_order.labels.unassigned') }}
                     </div>
                     <div class="oh-item-meta">
                         <span>
@@ -138,17 +138,17 @@
                             {{ $order->estimated_delivery_date ? $order->estimated_delivery_date->format('d/m/Y') : '--' }}
                         </span>
                         @if($isWeek)
-                            <span class="ot-kho" style="font-size:11px">Tuần</span>
+                            <span class="ot-kho" style="font-size:11px">{{ __('purchase_order.types.week_short') }}</span>
                         @else
-                            <span class="ot-uot" style="font-size:11px">Ngày</span>
+                            <span class="ot-uot" style="font-size:11px">{{ __('purchase_order.types.day_short') }}</span>
                         @endif
                         <span>
                             <i class="fa-solid fa-seedling"></i>
-                            {{ $order->items_count }} nguyên liệu
+                            {{ __('purchase_order.labels.ingredient_count', ['count' => $order->items_count]) }}
                         </span>
                         <span>
                             <i class="fa-regular fa-clock"></i>
-                            Tạo: {{ $order->created_at->format('d/m/Y H:i') }}
+                            {{ __('purchase_order.labels.created_at', ['date' => $order->created_at->format('d/m/Y H:i')]) }}
                         </span>
                     </div>
                 </div>
@@ -157,41 +157,41 @@
                 <div class="oh-item-right" style="position:relative; z-index:1">
                     <!-- Status Badge -->
                     @if($order->status === 'done')
-                        <span class="os-done">Hoàn thành</span>
+                        <span class="os-done">{{ __('purchase_order.status.done') }}</span>
                     @elseif($order->status === 'checking')
-                        <span class="os-checking">Đang kiểm hàng</span>
+                        <span class="os-checking">{{ __('purchase_order.status.checking') }}</span>
                     @elseif($order->status === 'sent')
-                        <span class="os-sent">Đã gửi NCC</span>
+                        <span class="os-sent">{{ __('purchase_order.status.sent') }}</span>
                     @else
-                        <span class="os-draft">Nháp</span>
+                        <span class="os-draft">{{ __('purchase_order.status.draft') }}</span>
                     @endif
 
                     <!-- Value -->
                     <div class="oh-item-val">
-                        {{ number_format($orderTotal / 1000, 0, ',', '.') }} nghìn đ
+                        {{ __('purchase_order.currency.thousand', ['value' => number_format($orderTotal / 1000, 0, ',', '.')]) }}
                     </div>
 
                     <!-- Actions -->
                     <div style="display:flex;gap:5px">
                         <!-- Xem chi tiết -->
-                        <a href="{{ \App\Filament\Resources\PurchaseOrderResource::getUrl('edit', ['record' => $order]) }}" class="abt" title="Xem chi tiết">
+                        <a href="{{ \App\Filament\Resources\PurchaseOrderResource::getUrl('edit', ['record' => $order]) }}" class="abt" title="{{ __('purchase_order.actions.view_details') }}">
                             <i class="fa-solid fa-eye"></i>
                         </a>
 
                         <!-- Kiểm hàng (chuyển hướng sang kho tab nhập PO) -->
                         @if(in_array($order->status, ['sent', 'checking']) && is_null($order->stocked_at))
-                            <a href="{{ url('/admin/stocks?tab=in&inMode=po&po_id=' . $order->id) }}" class="abt" title="Kiểm hàng" style="color:var(--po-or)">
+                            <a href="{{ url('/admin/stocks?tab=in&inMode=po&po_id=' . $order->id) }}" class="abt" title="{{ __('purchase_order.actions.check_goods') }}" style="color:var(--po-or)">
                                 <i class="fa-solid fa-clipboard-check"></i>
                             </a>
                         @endif
 
                         <!-- Xuất Excel của đơn này -->
-                        <button wire:click="exportSingleOrder({{ $order->id }})" class="abt" title="Xuất Excel">
+                        <button wire:click="exportSingleOrder({{ $order->id }})" class="abt" title="{{ __('purchase_order.actions.export_excel') }}">
                             <i class="fa-solid fa-file-excel" style="color:var(--po-gn)"></i>
                         </button>
 
                         <!-- Menu/Xóa đơn -->
-                        <button wire:click="deleteOrder({{ $order->id }})" wire:confirm="Bạn có chắc chắn muốn xóa đơn hàng này?" class="abt" title="Xóa đơn hàng">
+                        <button wire:click="deleteOrder({{ $order->id }})" wire:confirm="{{ __('purchase_order.confirm.delete') }}" class="abt" title="{{ __('purchase_order.actions.delete') }}">
                             <i class="fa-solid fa-ellipsis-vertical"></i>
                         </button>
                     </div>
@@ -202,8 +202,8 @@
                 <div class="po-empty-icon">
                     <i class="fa-solid fa-circle-info" style="font-size: 24px;"></i>
                 </div>
-                <div class="po-empty-title">Không tìm thấy đơn hàng nào</div>
-                <div class="po-empty-sub">Hãy thử điều chỉnh bộ lọc hoặc nhập từ khóa tìm kiếm khác.</div>
+                <div class="po-empty-title">{{ __('purchase_order.empty.title') }}</div>
+                <div class="po-empty-sub">{{ __('purchase_order.empty.subtitle') }}</div>
             </div>
         @endforelse
     </div>
@@ -221,7 +221,7 @@
         @endphp
         <div class="po-footer">
             <div>
-                Hiển thị {{ $ordersList->firstItem() }} - {{ $ordersList->lastItem() }} trong tổng số {{ number_format($ordersList->total(), 0, ',', '.') }} đơn hàng
+                {{ __('purchase_order.pagination.summary', ['from' => $ordersList->firstItem(), 'to' => $ordersList->lastItem(), 'total' => number_format($ordersList->total(), 0, ',', '.')]) }}
             </div>
             <div class="po-pagination">
                 <select wire:model.live="perPage" class="po-select" style="min-width:7rem;height:2rem;padding:0 .5rem;border-radius:.5rem">

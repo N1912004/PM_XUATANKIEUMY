@@ -12,7 +12,7 @@ class ListPositions extends ListRecords
 
     public function getTitle(): string
     {
-        return __('Chức vụ');
+        return __('catalog.position.label');
     }
 
     protected function getHeaderActions(): array

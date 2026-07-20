@@ -14,37 +14,37 @@ class ViewRecipe extends ViewRecord
 
     public function getTitle(): string|Htmlable
     {
-        return 'Chi tiết món ăn';
+        return __('recipe.pages.view.title');
     }
 
     public function getSubheading(): string|Htmlable|null
     {
-        return 'Theo dõi cost nguyên liệu và thông tin định lượng trên 1 phần';
+        return __('recipe.pages.view.subtitle');
     }
 
     protected function getHeaderActions(): array
     {
         return [
             Actions\Action::make('back')
-                ->label('Quay lại')
+                ->label(__('recipe.actions.back'))
                 ->icon('heroicon-m-arrow-left')
                 ->color('gray')
                 ->outlined()
                 ->url(fn (): string => $this->getResource()::getUrl('index')),
             Actions\EditAction::make()
-                ->label('Chỉnh sửa')
+                ->label(__('recipe.actions.edit'))
                 ->icon('heroicon-m-pencil-square')
                 ->color('gray')
                 ->outlined(),
             Actions\Action::make('approve')
-                ->label('Duyệt áp dụng')
+                ->label(__('recipe.actions.approve'))
                 ->icon('heroicon-m-check')
                 ->color('primary')
                 ->requiresConfirmation()
                 ->action(function (): void {
                     $this->record->update(['status' => 'active']);
                     Notification::make()
-                        ->title('Đã duyệt món ăn thành công!')
+                        ->title(__('recipe.notifications.approved'))
                         ->success()
                         ->send();
                 })

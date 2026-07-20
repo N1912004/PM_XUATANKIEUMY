@@ -352,7 +352,7 @@ class ListStocks extends ListRecords
     {
         if (! $this->operatingKitchenId()) {
             Notification::make()
-                ->title('Vui lòng chọn một bếp cụ thể trước khi thực hiện nghiệp vụ này.')
+                ->title(__('warehouse.notifications.select_specific_kitchen'))
                 ->warning()
                 ->send();
 
@@ -382,7 +382,7 @@ class ListStocks extends ListRecords
     {
         if (! $this->operatingKitchenId()) {
             Notification::make()
-                ->title('Vui lòng chọn một bếp cụ thể trước khi thực hiện nghiệp vụ này.')
+                ->title(__('warehouse.notifications.select_specific_kitchen'))
                 ->warning()
                 ->send();
 
@@ -409,7 +409,7 @@ class ListStocks extends ListRecords
         $kitchenId = auth()->user()?->currentKitchenId();
         if (! $kitchenId) {
             Notification::make()
-                ->title('Vui lòng chọn một bếp cụ thể trước khi thực hiện nghiệp vụ này.')
+                ->title(__('warehouse.notifications.select_specific_kitchen'))
                 ->warning()
                 ->send();
 

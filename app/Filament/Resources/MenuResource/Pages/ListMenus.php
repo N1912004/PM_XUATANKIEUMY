@@ -146,7 +146,7 @@ class ListMenus extends Page
         return $months->mapWithKeys(function (string $ym): array {
             [$y, $m] = explode('-', $ym);
 
-            return [$ym => "Tháng {$m}/{$y}"];
+            return [$ym => __('menu.month_label', ['month' => $m, 'year' => $y])];
         })->all();
     }
 
@@ -425,7 +425,7 @@ class ListMenus extends Page
         }
 
         $ownKitchenId = $user->currentKitchenId();
-        abort_if($ownKitchenId && (int) $kitchenId !== (int) $ownKitchenId, 403, 'Bạn chỉ có thể thao tác trên thực đơn của bếp mình.');
+        abort_if($ownKitchenId && (int) $kitchenId !== (int) $ownKitchenId, 403, __('menu.errors.own_kitchen_only'));
     }
 
     /**
@@ -552,7 +552,9 @@ class ListMenus extends Page
             }
         });
 
-        session()->flash('message', 'Lưu thực đơn tuần thành công!'.($skippedLocked > 0 ? " ({$skippedLocked} ca đã chốt/không hợp lệ được giữ nguyên — nếu sửa thực đơn ĐÃ CHỐT hãy nhập Lý do sửa)" : ''));
+        session()->flash('message', $skippedLocked > 0
+            ? __('menu.notifications.week_saved_with_skipped', ['count' => $skippedLocked])
+            : __('menu.notifications.week_saved'));
         $this->switchView('list');
     }
 
@@ -637,7 +639,7 @@ class ListMenus extends Page
                 $this->assertKitchenAccess($menu->kitchen_id);
 
                 if ($menu->status === 'locked') {
-                    session()->flash('error', 'Không thể xóa món thuộc thực đơn đã chốt!');
+                    session()->flash('error', __('menu.errors.locked_item_delete'));
 
                     return;
                 }
@@ -729,7 +731,9 @@ class ListMenus extends Page
             }
         });
 
-        session()->flash('message', 'Lưu thực đơn ngày thành công!'.($skippedLocked > 0 ? " ({$skippedLocked} món đã chốt được giữ nguyên)" : ''));
+        session()->flash('message', $skippedLocked > 0
+            ? __('menu.notifications.day_saved_with_skipped', ['count' => $skippedLocked])
+            : __('menu.notifications.day_saved'));
         $this->switchView('list');
     }
 

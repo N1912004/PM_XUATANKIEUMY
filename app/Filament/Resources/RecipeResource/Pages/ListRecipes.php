@@ -131,7 +131,7 @@ class ListRecipes extends Page
         $recipe->delete();
 
         Notification::make()
-            ->title('Đã xóa món ăn khỏi ngân hàng thực đơn')
+            ->title(__('recipe.notifications.deleted'))
             ->success()
             ->send();
 
@@ -151,7 +151,7 @@ class ListRecipes extends Page
         $recipe->restore();
 
         Notification::make()
-            ->title('Đã khôi phục món ăn')
+            ->title(__('recipe.notifications.restored'))
             ->success()
             ->send();
 
@@ -172,7 +172,7 @@ class ListRecipes extends Page
         $recipe->forceDelete();
 
         Notification::make()
-            ->title('Đã xóa vĩnh viễn món ăn')
+            ->title(__('recipe.notifications.force_deleted'))
             ->success()
             ->send();
 
@@ -204,7 +204,7 @@ class ListRecipes extends Page
         }
 
         Notification::make()
-            ->title("Đã xóa mềm {$count} món ăn")
+            ->title(__('recipe.notifications.bulk_deleted', ['count' => $count]))
             ->success()
             ->send();
 
@@ -228,7 +228,7 @@ class ListRecipes extends Page
         }
 
         Notification::make()
-            ->title("Đã khôi phục {$count} món ăn")
+            ->title(__('recipe.notifications.bulk_restored', ['count' => $count]))
             ->success()
             ->send();
 
@@ -253,7 +253,7 @@ class ListRecipes extends Page
         }
 
         Notification::make()
-            ->title("Đã xóa vĩnh viễn {$count} món ăn")
+            ->title(__('recipe.notifications.bulk_force_deleted', ['count' => $count]))
             ->success()
             ->send();
 
@@ -268,17 +268,17 @@ class ListRecipes extends Page
     public function importAction(): Actions\Action
     {
         return Actions\Action::make('import')
-            ->label('Nhập món ăn (Excel)')
+            ->label(__('recipe.import.action'))
             ->icon('heroicon-o-document-arrow-up')
             ->color('gray')
             ->visible(fn (): bool => RecipeResource::canCreate())
-            ->modalSubmitActionLabel('Xác nhận nhập dữ liệu')
+            ->modalSubmitActionLabel(__('recipe.import.confirm'))
             ->steps([
                 Step::make('Tải tệp lên')
                     ->icon('heroicon-o-document-arrow-up')
                     ->schema([
                         FileUpload::make('excel_file')
-                            ->label('File định lượng món ăn (.xlsx)')
+                            ->label(__('recipe.import.file_label'))
                             ->acceptedFileTypes([
                                 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
                                 'application/vnd.ms-excel',
@@ -289,7 +289,7 @@ class ListRecipes extends Page
                     ]),
                 Step::make('Xem trước')
                     ->icon('heroicon-o-eye')
-                    ->description('Kết quả chạy thử trên dữ liệu thật — chưa ghi vào hệ thống')
+                    ->description(__('recipe.import.preview_description'))
                     ->schema([
                         Placeholder::make('preview')
                             ->hiddenLabel()
@@ -308,7 +308,7 @@ class ListRecipes extends Page
                     $this->resetPage();
                 } catch (\Exception $e) {
                     Notification::make()
-                        ->title('Lỗi nhập file định lượng món ăn')
+                        ->title(__('recipe.import.error_title'))
                         ->body(e($e->getMessage()))
                         ->danger()
                         ->persistent()
@@ -323,7 +323,7 @@ class ListRecipes extends Page
     public function exportAction(): Actions\Action
     {
         return Actions\Action::make('export')
-            ->label('Xuất dữ liệu')
+            ->label(__('recipe.actions.export'))
             ->icon('heroicon-o-document-arrow-down')
             ->color('gray')
             ->action(fn () => Excel::download(
@@ -336,7 +336,7 @@ class ListRecipes extends Page
     public function createAction(): Actions\Action
     {
         return Actions\Action::make('create')
-            ->label('Thêm món ăn')
+            ->label(__('recipe.actions.add'))
             ->icon('heroicon-o-plus')
             ->color('primary')
             ->url(RecipeResource::getUrl('create'));
@@ -362,13 +362,13 @@ class ListRecipes extends Page
         };
 
         if ($path === null || ! is_file($path)) {
-            return new HtmlString(e('Chưa có tệp để xem trước — vui lòng quay lại bước tải tệp.'));
+            return new HtmlString(e(__('recipe.import.no_preview_file')));
         }
 
         try {
             $import = $this->previewCache[$path] ??= $this->dryRun($path);
         } catch (\Throwable $e) {
-            return new HtmlString(e('Không đọc được tệp: '.$e->getMessage()));
+            return new HtmlString(e(__('recipe.import.cannot_read_file', ['message' => $e->getMessage()])));
         }
 
         return view('filament.resources.recipes.partials.import-preview', ['import' => $import]);
@@ -399,23 +399,23 @@ class ListRecipes extends Page
 
         $lines = [];
         if ($created > 0) {
-            $lines[] = "Thêm mới {$created} món ăn";
+            $lines[] = __('recipe.import.created_count', ['count' => $created]);
         }
         if ($updated > 0) {
-            $lines[] = "Cập nhật {$updated} món ăn";
+            $lines[] = __('recipe.import.updated_count', ['count' => $updated]);
         }
         if ($skipped !== []) {
             // Notification không chứa nổi hàng nghìn dòng — liệt kê 30 lý do đầu,
             // danh sách đầy đủ đã soát được ở bước Xem trước
-            $lines[] = 'Bỏ qua '.count($skipped).' món:';
+            $lines[] = __('recipe.import.skipped_count', ['count' => count($skipped)]);
             $lines = array_merge($lines, array_slice($skipped, 0, 30));
             if (count($skipped) > 30) {
-                $lines[] = '… và '.(count($skipped) - 30).' dòng khác (xem chi tiết ở bước Xem trước khi nhập lại).';
+                $lines[] = __('recipe.import.more_skipped', ['count' => count($skipped) - 30]);
             }
         }
 
         if ($created + $updated === 0 && $skipped === []) {
-            Notification::make()->title('File không có món ăn nào để nhập')->warning()->send();
+            Notification::make()->title(__('recipe.import.empty'))->warning()->send();
 
             return;
         }
@@ -424,11 +424,11 @@ class ListRecipes extends Page
         $notification = Notification::make()->body(implode('<br>', array_map('e', $lines)));
 
         if ($skipped === []) {
-            $notification->title('Nhập món ăn thành công')->success();
+            $notification->title(__('recipe.import.success'))->success();
         } elseif ($created + $updated > 0) {
-            $notification->title('Nhập xong — một phần bị bỏ qua')->warning()->persistent();
+            $notification->title(__('recipe.import.partial'))->warning()->persistent();
         } else {
-            $notification->title('Không nhập được món nào')->danger()->persistent();
+            $notification->title(__('recipe.import.failed'))->danger()->persistent();
         }
 
         $notification->send();

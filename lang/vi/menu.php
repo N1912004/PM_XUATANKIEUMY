@@ -1,0 +1,33 @@
+<?php
+
+return [
+    'navigation' => ['label' => 'Lập thực đơn', 'group' => 'VẬN HÀNH BẾP'],
+    'model' => ['singular' => 'Thực đơn', 'plural' => 'Lập thực đơn'],
+    'fields' => ['date' => 'Ngày áp dụng', 'shift' => 'Ca làm việc', 'recipe' => 'Món ăn', 'recipe_name' => 'Tên món ăn', 'recipe_type' => 'Nhóm món', 'estimated_portions' => 'Số suất ăn dự kiến', 'status' => 'Trạng thái', 'audit_reason' => 'Lý do sửa (bắt buộc khi sửa thực đơn ĐÃ CHỐT)', 'kitchen' => 'Bếp ăn'],
+    'placeholders' => ['audit_reason' => 'VD: Khách đổi món đột xuất', 'search' => 'Tìm kiếm theo công ty, tuần...', 'select_dish' => 'Chọn món ăn...', 'portions' => 'Suất'],
+    'status' => ['draft' => 'Nháp', 'sent' => 'Đã gửi khách hàng', 'confirmed' => 'Khách đã xác nhận', 'locked' => 'Đã chốt', 'draft_detailed' => 'Nháp (Draft)', 'sent_detailed' => 'Đã gửi khách hàng (Sent)', 'confirmed_detailed' => 'Khách đã xác nhận (Confirmed)', 'locked_detailed' => 'Đã chốt (Locked)'],
+    'month_label' => 'Tháng :month/:year',
+    'errors' => ['past_locked_delete' => 'Thực đơn quá khứ đã chốt — không thể xóa', 'own_kitchen_only' => 'Bạn chỉ có thể thao tác trên thực đơn của bếp mình.', 'locked_item_delete' => 'Không thể xóa món thuộc thực đơn đã chốt!', 'audit_reason_required' => 'Cần lý do sửa thực đơn đã chốt'],
+    'notifications' => ['week_saved' => 'Lưu thực đơn tuần thành công!', 'week_saved_with_skipped' => 'Lưu thực đơn tuần thành công! (:count ca đã chốt/không hợp lệ được giữ nguyên — nếu sửa thực đơn ĐÃ CHỐT hãy nhập Lý do sửa)', 'day_saved' => 'Lưu thực đơn ngày thành công!', 'day_saved_with_skipped' => 'Lưu thực đơn ngày thành công! (:count món đã chốt được giữ nguyên)'],
+    'weekly' => [
+        'title' => 'Lập thực đơn tuần',
+        'fields' => ['week_start' => 'Ngày bắt đầu tuần (Thứ 2)', 'items' => 'Các món trong tuần', 'day' => 'Thứ'],
+        'helpers' => ['week_start' => 'Các món sẽ được xếp theo thứ tính từ ngày này.'],
+        'placeholders' => ['audit_reason' => 'VD: Khách đổi món đột xuất ngày 15/07'],
+        'notifications' => ['no_items' => 'Chưa có món nào để lưu!', 'downgrade_skipped' => ':count món được giữ nguyên trạng thái (không hạ cấp về ":status")', 'past_skipped' => ':count món thuộc thực đơn quá khứ đã chốt — bị khóa cứng, không sửa được', 'saved' => ':status thực đơn tuần (:count món)', 'duplicate_warning' => 'Cảnh báo lặp món trong 3 tuần gần nhất'],
+    ],
+    'audit' => ['label' => 'Lịch sử sửa thực đơn', 'deleted_menu' => 'Đã xóa', 'fields' => ['occurred_at' => 'Thời điểm', 'menu' => 'Thực đơn', 'user' => 'Người sửa', 'action' => 'Hành động', 'field' => 'Trường', 'old_value' => 'Giá trị cũ', 'new_value' => 'Giá trị mới', 'reason' => 'Lý do sửa', 'date_range' => 'Khoảng thời gian', 'from_date' => 'Từ ngày', 'to_date' => 'Đến ngày'], 'actions' => ['updated' => 'Sửa', 'deleted' => 'Xóa']],
+    'actions' => ['save_draft' => 'Lưu nháp', 'send_customer' => 'Gửi khách hàng', 'send_confirmation' => 'Gửi xác nhận', 'customer_confirmed' => 'Khách đã xác nhận', 'lock' => 'Chốt thực đơn', 'reset_filters' => 'Cài lại bộ lọc', 'edit' => 'Chỉnh sửa', 'export_excel' => 'Xuất Excel', 'back' => 'Quay lại', 'remove_dish' => 'Bỏ món này', 'create_week' => 'Tạo thực đơn tuần', 'create_day' => 'Tạo thực đơn ngày', 'open_edit' => 'Mở chỉnh sửa', 'view_week' => 'Xem thực đơn tuần', 'add_dish' => 'Thêm món ăn'],
+    'list' => ['title' => 'Lập thực đơn', 'subtitle' => 'Quản lý thực đơn tuần / ngày theo từng công ty khách và ca phục vụ'],
+    'kpi' => ['running_weekly' => 'Thực đơn tuần đang chạy', 'sent_this_month' => 'Đã gửi khách tháng này', 'customer_confirmed' => 'Khách đã xác nhận', 'still_draft' => 'Còn là nháp', 'locked_this_month' => 'Đã chốt tháng này'],
+    'filters' => ['all_types' => 'Tất cả loại', 'all_statuses' => 'Tất cả trạng thái', 'locked_menus' => 'Danh sách thực đơn đã chốt'],
+    'types' => ['week' => 'Thực đơn tuần', 'day' => 'Thực đơn ngày'],
+    'empty' => ['no_locked_menus' => 'Không có thực đơn đã chốt', 'title' => 'Không tìm thấy thực đơn nào', 'subtitle' => 'Hãy thử đổi tháng hoặc từ khóa tìm kiếm.'],
+    'labels' => ['applies_on' => 'Áp dụng: :date', 'portions' => 'suất', 'date_kitchen' => 'Ngày :date · :kitchen', 'dish_index' => 'Món :index'],
+    'locked_edit' => ['title' => 'Thực đơn đã chốt vẫn có thể chỉnh sửa', 'description' => 'Chọn tuần đã chốt, chọn ngày cần sửa, cập nhật món ăn rồi bấm Lưu thay đổi. Trạng thái vẫn giữ là Đã chốt.'],
+    'pagination' => ['summary' => 'Hiển thị :from-:to trên :total thực đơn', 'per_page' => ':count / trang'],
+    'week_form' => ['title' => 'Lập thực đơn tuần mới', 'subtitle' => 'Thiết lập món ăn và công suất suất ăn cho từng thứ trong tuần', 'shift_day' => 'CA / THỨ', 'duplicate_warning' => 'Món đã xuất hiện trong 3 tuần gần nhất (:count món)'],
+    'day_form' => ['title' => 'Thực đơn ngày – :date', 'subtitle' => 'Khai báo chi tiết thực đơn và số lượng suất ăn cụ thể theo từng ca ăn trong ngày', 'date' => 'Ngày lập thực đơn'],
+    'days' => ['sunday' => 'Chủ nhật', 'weekday' => 'Thứ :day'],
+    'summary' => ['title' => 'Tóm tắt thực đơn ngày', 'shifts' => 'Ca phục vụ', 'none' => 'Chưa có', 'lock_notice' => 'Lưu ý khi chốt', 'lock_notice_inventory' => 'Thực đơn sau khi chốt sẽ được gửi đến bộ phận kho để chuẩn bị xuất nguyên liệu.', 'lock_notice_audit' => 'Mọi thay đổi sau khi chốt sẽ được lưu vết lịch sử chi tiết (Audit log).'],
+];

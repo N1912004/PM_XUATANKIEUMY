@@ -22,17 +22,17 @@ class BaoCao extends Page
 
     public static function getNavigationLabel(): string
     {
-        return __('Báo cáo');
+        return __('report.title');
     }
 
     public function getTitle(): string
     {
-        return __('Báo cáo');
+        return __('report.title');
     }
 
     public static function getNavigationGroup(): ?string
     {
-        return __('VẬN HÀNH BẾP');
+        return __('report.navigation.group');
     }
 
     public ?string $fromDate = null;

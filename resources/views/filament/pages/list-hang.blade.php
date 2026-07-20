@@ -709,18 +709,18 @@
             <!-- Header bar -->
             <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
                 <div>
-                    <h1 style="font-size:20px;font-weight:800;margin:0 0 4px" class="dark:text-white">List hàng — {{ \Carbon\Carbon::parse($date)->format('d/m/Y') }}</h1>
-                    <p style="font-size:12.5px;color:#64748B;margin:0">Danh sách nguyên liệu cần chuẩn bị theo ngày và ca</p>
+                    <h1 style="font-size:20px;font-weight:800;margin:0 0 4px" class="dark:text-white">{{ __('list_hang.heading', ['date' => \Carbon\Carbon::parse($date)->format('d/m/Y')]) }}</h1>
+                    <p style="font-size:12.5px;color:#64748B;margin:0">{{ __('list_hang.subtitle') }}</p>
                 </div>
                 <div style="display:flex;gap:8px">
                     <button type="button" wire:click="exportList" class="wh-action-btn" style="height:36px;">
-                        <i class="fa-solid fa-file-excel" style="color:#059669"></i>Xuất Excel
+                        <i class="fa-solid fa-file-excel" style="color:#059669"></i>{{ __('list_hang.actions.export') }}
                     </button>
                     <button type="button" onclick="window.print()" class="wh-action-btn" style="height:36px;">
-                        <i class="fa-solid fa-print"></i>In danh sách
+                        <i class="fa-solid fa-print"></i>{{ __('list_hang.actions.print') }}
                     </button>
                     <button type="button" wire:click="goOrderCreate" class="wh-action-btn wh-action-btn-primary" style="height:36px;">
-                        <i class="fa-solid fa-cart-plus"></i>Tạo đơn đặt hàng
+                        <i class="fa-solid fa-cart-plus"></i>{{ __('list_hang.actions.create_po') }}
                     </button>
                 </div>
             </div>
@@ -730,11 +730,11 @@
                 <button type="button" class="lhn-nav-btn" wire:click="changeDay(-1)">&#8249;</button>
                 <input type="date" class="lhn-date-inp" wire:model.live="date">
                 <button type="button" class="lhn-nav-btn" wire:click="changeDay(1)">&#8250;</button>
-                <button type="button" class="lhn-today-btn" wire:click="goToday">Hôm nay</button>
+                <button type="button" class="lhn-today-btn" wire:click="goToday">{{ __('list_hang.actions.today') }}</button>
 
                 <!-- Week view sync -->
                 <div style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--mu);padding:0 4px">
-                    <span style="font-weight:600">Tuần:</span>
+                    <span style="font-weight:600">{{ __('list_hang.filters.week') }}:</span>
                     <input type="date" wire:model.live="weekFrom" style="border:1px solid var(--bd);border-radius:6px;padding:3px 8px;font-size:12px;outline:none" class="dark:bg-gray-800 dark:border-gray-700 dark:text-white">
                     <span>–</span>
                     <input type="date" wire:model.live="weekTo" style="border:1px solid var(--bd);border-radius:6px;padding:3px 8px;font-size:12px;outline:none" class="dark:bg-gray-800 dark:border-gray-700 dark:text-white">
@@ -760,7 +760,7 @@
                     <span style="font-size:13.5px;font-weight:700;color:var(--tx)" class="dark:text-white">
                         {{ strtoupper(\Carbon\Carbon::parse($date)->locale('vi')->dayName) }} – {{ \Carbon\Carbon::parse($date)->format('d/m/Y') }}
                     </span>
-                    <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-150 text-green-700 border border-green-200">Trong kỳ</span>
+                    <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-150 text-green-700 border border-green-200">{{ __('list_hang.filters.in_period') }}</span>
                 </div>
             </div>
 
@@ -769,19 +769,19 @@
             <div class="lhn-chips">
                 <div class="lhn-chip">
                     <div class="lhn-chip-ico" style="background:#FEF2F2; color:#DC2626;"><i class="fa-solid fa-calendar-day"></i></div>
-                    <div><div class="lhn-chip-val">{{ $stats['shifts'] }}</div><div class="lhn-chip-lbl">Ca phục vụ</div></div>
+                    <div><div class="lhn-chip-val">{{ $stats['shifts'] }}</div><div class="lhn-chip-lbl">{{ __('list_hang.stats.shifts') }}</div></div>
                 </div>
                 <div class="lhn-chip">
                     <div class="lhn-chip-ico" style="background:#E9F2F8; color:#267DC1;"><i class="fa-solid fa-users"></i></div>
-                    <div><div class="lhn-chip-val">{{ number_format($stats['portions']) }}</div><div class="lhn-chip-lbl">Tổng suất ăn</div></div>
+                    <div><div class="lhn-chip-val">{{ number_format($stats['portions']) }}</div><div class="lhn-chip-lbl">{{ __('list_hang.stats.portions') }}</div></div>
                 </div>
                 <div class="lhn-chip">
                     <div class="lhn-chip-ico" style="background:#FFF7ED; color:#EA580C;"><i class="fa-solid fa-bowl-food"></i></div>
-                    <div><div class="lhn-chip-val">{{ $stats['dishes'] }}</div><div class="lhn-chip-lbl">Món cần nấu</div></div>
+                    <div><div class="lhn-chip-val">{{ $stats['dishes'] }}</div><div class="lhn-chip-lbl">{{ __('list_hang.stats.dishes') }}</div></div>
                 </div>
                 <div class="lhn-chip">
                     <div class="lhn-chip-ico" style="background:#ECFDF5; color:#059669;"><i class="fa-solid fa-leaf"></i></div>
-                    <div><div class="lhn-chip-val">{{ $stats['ingredients'] }}</div><div class="lhn-chip-lbl">Loại nguyên liệu</div></div>
+                    <div><div class="lhn-chip-val">{{ $stats['ingredients'] }}</div><div class="lhn-chip-lbl">{{ __('list_hang.stats.ingredients') }}</div></div>
                 </div>
             </div>
 
@@ -795,9 +795,9 @@
                             <span class="text-xs text-gray-500 font-semibold">({{ $shiftData['time_range'] }})</span>
                         </div>
                         <div class="lhn-ca-meta">
-                            <span class="font-bold text-gray-900 dark:text-white">{{ number_format($shiftData['total_portions']) }} suất</span>
+                            <span class="font-bold text-gray-900 dark:text-white">{{ __('list_hang.counts.portions', ['count' => number_format($shiftData['total_portions'])]) }}</span>
                             <span class="text-gray-400">·</span>
-                            <span class="text-gray-600 dark:text-gray-300">{{ $shiftData['total_dishes'] }} món</span>
+                            <span class="text-gray-600 dark:text-gray-300">{{ __('list_hang.counts.dishes', ['count' => $shiftData['total_dishes']]) }}</span>
                             <i class="fa-solid fa-chevron-down text-gray-400 transition" :class="open ? 'transform rotate-180' : ''"></i>
                         </div>
                     </div>
@@ -812,7 +812,7 @@
                                         <span class="lhn-mon-type">{{ $dish['type'] }}</span>
                                     </div>
                                     <div class="lhn-mon-right">
-                                        <span class="lhn-mon-suat">{{ number_format($dish['portions']) }} suất</span>
+                                        <span class="lhn-mon-suat">{{ __('list_hang.counts.portions', ['count' => number_format($dish['portions'])]) }}</span>
                                         <span class="text-gray-400">·</span>
                                         <span>{{ count($dish['ingredients']) }} NL</span>
                                         <i class="fa-solid fa-chevron-down lhn-expand-ico transition" :class="expanded ? 'transform rotate-180' : ''"></i>
@@ -825,10 +825,10 @@
                                         <thead>
                                             <tr>
                                                 <th style="width: 50px; text-align:center;">#</th>
-                                                <th>Nguyên liệu</th>
-                                                <th style="text-align: right; width: 140px;">Số suất</th>
-                                                <th style="text-align: right; width: 140px;">ĐL (g)</th>
-                                                <th style="text-align: right; width: 180px;">Số KG</th>
+                                                <th>{{ __('list_hang.table.ingredient') }}</th>
+                                                <th style="text-align: right; width: 140px;">{{ __('list_hang.table.portions') }}</th>
+                                                <th style="text-align: right; width: 140px;">{{ __('list_hang.table.quantity_g') }}</th>
+                                                <th style="text-align: right; width: 180px;">{{ __('list_hang.table.quantity_kg') }}</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -845,8 +845,8 @@
                                                 </tr>
                                             @endforeach
                                             <tr class="lhn-total-row">
-                                                <td colspan="4" style="text-align: right; padding: 10px 12px; font-weight: 800; color:#1e40af;">Tổng {{ $dish['name'] }}:</td>
-                                                <td style="text-align: right; padding: 10px 12px; font-weight: 850; color:#1e40af;">{{ number_format($dish['portions']) }} suất</td>
+                                                <td colspan="4" style="text-align: right; padding: 10px 12px; font-weight: 800; color:#1e40af;">{{ __('list_hang.table.dish_total', ['dish' => $dish['name']]) }}:</td>
+                                                <td style="text-align: right; padding: 10px 12px; font-weight: 850; color:#1e40af;">{{ __('list_hang.counts.portions', ['count' => number_format($dish['portions'])]) }}</td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -858,8 +858,8 @@
             @empty
                 <div class="lhn-empty">
                     <i class="fa-solid fa-clipboard-question"></i>
-                    <h3>Chưa lập thực đơn</h3>
-                    <p>Không tìm thấy thực đơn nào được lập cho ngày và ca đã chọn.</p>
+                    <h3>{{ __('list_hang.empty.no_menu') }}</h3>
+                    <p>{{ __('list_hang.empty.no_menu_description') }}</p>
                 </div>
             @endforelse
         </div>
@@ -871,15 +871,15 @@
                 <!-- Header -->
                 <div class="flex justify-between items-start mb-4">
                     <div>
-                        <h1 style="font-size:20px; font-weight:800; margin:0;" class="dark:text-white">Tạo đơn đặt hàng</h1>
-                        <p style="font-size: 12px; color: #64748b; margin-top:2px;">Tổng hợp nguyên liệu từ list hàng &rarr; phân NCC &rarr; tạo đơn</p>
+                        <h1 style="font-size:20px; font-weight:800; margin:0;" class="dark:text-white">{{ __('list_hang.po.title') }}</h1>
+                        <p style="font-size: 12px; color: #64748b; margin-top:2px;">{{ __('list_hang.po.subtitle') }}</p>
                     </div>
                     <div class="flex gap-2">
                         <button type="button" class="wh-action-btn" wire:click="goBackToList">
-                            <i class="fa-solid fa-arrow-left"></i>Quay lại
+                            <i class="fa-solid fa-arrow-left"></i>{{ __('list_hang.actions.back') }}
                         </button>
                         <button type="button" class="wh-action-btn wh-action-btn-primary" wire:click="createOrders">
-                            <i class="fa-solid fa-paper-plane"></i>Tạo & gửi đơn
+                            <i class="fa-solid fa-paper-plane"></i>{{ __('list_hang.actions.create_send') }}
                         </button>
                     </div>
                 </div>
@@ -889,7 +889,7 @@
                     <div class="oh-step oh-step-done">
                         <div class="oh-step-num"><i class="fa-solid fa-check" style="font-size:11px"></i></div>
                         <div>
-                            <div class="oh-step-lbl">Chọn List hàng</div>
+                            <div class="oh-step-lbl">{{ __('list_hang.po.steps.select_list') }}</div>
                             <div style="font-size:11px; color:#64748b;">
                                 {{ \Carbon\Carbon::parse($poSourceFrom)->format('d/m') }} - {{ \Carbon\Carbon::parse($poSourceTo)->format('d/m') }}
                             </div>
@@ -899,16 +899,16 @@
                     <div class="oh-step oh-step-active">
                         <div class="oh-step-num">2</div>
                         <div>
-                            <div class="oh-step-lbl">Phân NCC & xác nhận</div>
-                            <div style="font-size:11px; color:#64748b;">Gán nhà cung cấp</div>
+                            <div class="oh-step-lbl">{{ __('list_hang.po.steps.assign_supplier') }}</div>
+                            <div style="font-size:11px; color:#64748b;">{{ __('list_hang.po.steps.assign_supplier_description') }}</div>
                         </div>
                     </div>
                     <div class="oh-step-line"></div>
                     <div class="oh-step oh-step-pending">
                         <div class="oh-step-num">3</div>
                         <div>
-                            <div class="oh-step-lbl">Tạo đơn</div>
-                            <div style="font-size:11px; color:#64748b;">Xuất & gửi NCC</div>
+                            <div class="oh-step-lbl">{{ __('list_hang.po.steps.create') }}</div>
+                            <div style="font-size:11px; color:#64748b;">{{ __('list_hang.po.steps.create_description') }}</div>
                         </div>
                     </div>
                 </div>
@@ -916,19 +916,19 @@
                 <!-- Date source selectors -->
                 <div style="background:var(--wh); border:1px solid var(--bd); border-radius:var(--r); padding:14px 18px; box-shadow:var(--sh2); margin-bottom:14px; display:flex; align-items:flex-end; gap:14px; flex-wrap:wrap;" class="dark:bg-gray-900 dark:border-gray-800">
                     <div class="form-field" style="min-width:160px">
-                        <label>Ngày đặt hàng</label>
+                        <label>{{ __('list_hang.po.fields.order_date') }}</label>
                         <input type="date" wire:model.live="poDate" min="{{ today()->toDateString() }}" max="{{ today()->addDays(2)->toDateString() }}">
                     </div>
                     <div class="form-field" style="min-width:160px">
-                        <label>Nguồn từ ngày</label>
+                        <label>{{ __('list_hang.po.fields.source_from') }}</label>
                         <input type="date" wire:model.live="poSourceFrom">
                     </div>
                     <div class="form-field" style="min-width:160px">
-                        <label>Nguồn đến ngày</label>
+                        <label>{{ __('list_hang.po.fields.source_to') }}</label>
                         <input type="date" wire:model.live="poSourceTo">
                     </div>
                     <div class="form-field" style="min-width:240px">
-                        <label>Ca lấy nguyên liệu</label>
+                        <label>{{ __('list_hang.po.fields.shift') }}</label>
                         <div style="display:flex; gap:6px; flex-wrap:wrap; background:var(--bg); border:1px solid var(--bd); border-radius:8px; padding:7px 9px; min-height:38px;" class="dark:bg-gray-800 dark:border-gray-700">
                             @foreach($this->getShiftsList() as $sh)
                                 <label style="font-size:11px; font-weight:700; color:var(--bl); display:flex; align-items:center; gap:4px; cursor:pointer;">
@@ -944,15 +944,15 @@
                 @if(empty($poItems))
                     <div class="lhn-empty" style="background:var(--wh); border:1px solid var(--bd); border-radius:12px;">
                         <i class="fa-solid fa-basket-shopping" style="font-size:36px; color:#94a3b8; opacity:0.5;"></i>
-                        <h3 style="font-size:15px; font-weight:700; color:var(--tx); margin:6px 0;">Chưa có nguyên liệu để đặt</h3>
-                        <p style="font-size:12px; color:#94a3b8;">Hãy lập & chốt thực đơn tuần trước, sau đó tạo đơn đặt hàng.</p>
+                        <h3 style="font-size:15px; font-weight:700; color:var(--tx); margin:6px 0;">{{ __('list_hang.empty.no_order_items') }}</h3>
+                        <p style="font-size:12px; color:#94a3b8;">{{ __('list_hang.empty.no_order_items_description') }}</p>
                     </div>
                 @else
                     @php 
                         $categories = [
-                            'thit' => ['label' => 'Thịt & Thủy hải sản', 'icon' => '🍖', 'class' => 'loai-thit'],
-                            'uot' => ['label' => 'Rau củ quả & Nông sản', 'icon' => '🥬', 'class' => 'loai-uot'],
-                            'kho' => ['label' => 'Hàng khô & Gia vị', 'icon' => '🧂', 'class' => 'loai-kho']
+                            'thit' => ['label' => __('list_hang.categories.meat'), 'icon' => '🍖', 'class' => 'loai-thit'],
+                            'uot' => ['label' => __('list_hang.categories.produce'), 'icon' => '🥬', 'class' => 'loai-uot'],
+                            'kho' => ['label' => __('list_hang.categories.dry'), 'icon' => '🧂', 'class' => 'loai-kho']
                         ];
                         $suppliers = $this->getActiveSuppliers();
                     @endphp
@@ -966,12 +966,12 @@
                                 <div class="oh-group-head">
                                     <div class="oh-group-title">
                                         <span class="loai-badge {{ $cat['class'] }}">{{ $cat['icon'] }} {{ $cat['label'] }}</span>
-                                        <span style="font-size:12px; color:#64748b; font-weight:400;">{{ $catItems->count() }} nguyên liệu</span>
+                                        <span style="font-size:12px; color:#64748b; font-weight:400;">{{ __('list_hang.counts.ingredients', ['count' => $catItems->count()]) }}</span>
                                     </div>
                                     <div style="display:flex; align-items:center; gap:10px;">
-                                        <span style="font-size:12px; color:#64748b;">Gán nhanh NCC:</span>
+                                        <span style="font-size:12px; color:#64748b;">{{ __('list_hang.po.quick_supplier') }}:</span>
                                         <select class="oh-ncc-sel" onchange="@this.bulkAssignSupplier('{{ $key }}', this.value)" style="height:28px; padding-top:2px;">
-                                            <option value="">-- Chọn NCC --</option>
+                                            <option value="">{{ __('list_hang.po.select_supplier') }}</option>
                                             @foreach($suppliers as $supplier)
                                                 <option value="{{ $supplier->id }}">{{ $supplier->name }}</option>
                                             @endforeach
@@ -984,16 +984,16 @@
                                     <thead>
                                         <tr>
                                             <th style="width:36px; text-align:center;">#</th>
-                                            <th style="width:50px; text-align:center;">Đặt</th>
-                                            <th>Tên nguyên liệu</th>
-                                            <th>Thuộc món</th>
-                                            <th style="text-align:right;">Số suất</th>
-                                            <th style="text-align:right;">Nhu cầu</th>
-                                            <th style="text-align:right;">Tồn kho</th>
-                                            <th style="text-align:right; width:110px;">SL đặt tay</th>
-                                            <th style="text-align:right;">Đơn giá</th>
-                                            <th style="text-align:right; width:130px;">Thành tiền</th>
-                                            <th style="width:140px;">Nhà cung cấp</th>
+                                            <th style="width:50px; text-align:center;">{{ __('list_hang.table.order') }}</th>
+                                            <th>{{ __('list_hang.table.ingredient_name') }}</th>
+                                            <th>{{ __('list_hang.table.dishes') }}</th>
+                                            <th style="text-align:right;">{{ __('list_hang.table.portions') }}</th>
+                                            <th style="text-align:right;">{{ __('list_hang.table.demand') }}</th>
+                                            <th style="text-align:right;">{{ __('list_hang.table.stock') }}</th>
+                                            <th style="text-align:right; width:110px;">{{ __('list_hang.table.manual_quantity') }}</th>
+                                            <th style="text-align:right;">{{ __('list_hang.table.unit_price') }}</th>
+                                            <th style="text-align:right; width:130px;">{{ __('list_hang.table.total') }}</th>
+                                            <th style="width:140px;">{{ __('list_hang.table.supplier') }}</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -1009,10 +1009,10 @@
                                                         @if(!empty($item['ordered_info']['total']))
                                                             <div style="margin-top:4px; display:flex; gap:4px; flex-wrap:wrap;">
                                                                 @foreach($item['ordered_info']['codes'] as $orderCode)
-                                                                    <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold whitespace-nowrap bg-amber-100 text-amber-800 border border-amber-250">Đã đặt · {{ $orderCode }}</span>
+                                                                    <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold whitespace-nowrap bg-amber-100 text-amber-800 border border-amber-250">{{ __('list_hang.po.ordered_code', ['code' => $orderCode]) }}</span>
                                                                 @endforeach
                                                                 @if($item['ordered_info']['total'] > count($item['ordered_info']['codes']))
-                                                                    <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold whitespace-nowrap bg-slate-100 text-slate-600 border border-slate-200" title="Tổng {{ $item['ordered_info']['total'] }} đơn đã đặt cho nguyên liệu này trong ngày">+{{ $item['ordered_info']['total'] - count($item['ordered_info']['codes']) }} đơn khác</span>
+                                                                    <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold whitespace-nowrap bg-slate-100 text-slate-600 border border-slate-200" title="{{ __('list_hang.po.ordered_title', ['count' => $item['ordered_info']['total']]) }}">{{ __('list_hang.po.other_orders', ['count' => $item['ordered_info']['total'] - count($item['ordered_info']['codes'])]) }}</span>
                                                                 @endif
                                                             </div>
                                                         @endif
@@ -1029,10 +1029,10 @@
                                                     <td style="text-align:center;">
                                                         <input type="number" step="0.001" wire:model.live="poItems.{{ $index }}.quantity_manual" class="table-input" style="height:28px;">
                                                     </td>
-                                                    <td style="text-align:right; color:#64748b;">{{ number_format($item['reference_price'], 0, ',', '.') }} đ/{{ $item['unit'] }}</td>
+                                                    <td style="text-align:right; color:#64748b;">{{ number_format($item['reference_price'], 0, ',', '.') }} {{ __('list_hang.currency') }}/{{ $item['unit'] }}</td>
                                                     <td style="text-align:right; font-weight:700; color:#ea580c;">
                                                         @if($item['checked'])
-                                                            {{ number_format($item['quantity_manual'] * $item['reference_price'], 0, ',', '.') }} đ
+                                                            {{ number_format($item['quantity_manual'] * $item['reference_price'], 0, ',', '.') }} {{ __('list_hang.currency') }}
                                                         @else
                                                             —
                                                         @endif
@@ -1056,8 +1056,8 @@
                                                 ->sum(fn($it) => $it['quantity_manual'] * $it['reference_price']);
                                         @endphp
                                         <tr style="background:#F8FAFC" class="dark:bg-gray-800/40">
-                                            <td colspan="9" style="text-align:right; font-weight:700; color:#64748b;">Tổng nhóm {{ $cat['label'] }}:</td>
-                                            <td colspan="3" style="font-weight:800; color:#267DC1; font-size:13px;">{{ number_format($groupTotal, 0, ',', '.') }} đ</td>
+                                            <td colspan="9" style="text-align:right; font-weight:700; color:#64748b;">{{ __('list_hang.po.group_total', ['group' => $cat['label']]) }}:</td>
+                                            <td colspan="3" style="font-weight:800; color:#267DC1; font-size:13px;">{{ number_format($groupTotal, 0, ',', '.') }} {{ __('list_hang.currency') }}</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -1076,12 +1076,12 @@
                     @endphp
                     <div class="lhn-grand" style="margin-top:4px">
                         <div>
-                            <div class="lhn-grand-lbl">TỔNG ĐƠN ĐẶT HÀNG – ĐẶT HÀNG {{ \Carbon\Carbon::parse($poDate)->format('d/m/Y') }}</div>
+                            <div class="lhn-grand-lbl">{{ __('list_hang.po.grand_total', ['date' => \Carbon\Carbon::parse($poDate)->format('d/m/Y')]) }}</div>
                             <div style="font-size:11px; opacity:.85; margin-top:3px">
-                                {{ collect($poItems)->filter(fn($it) => $it['checked'])->pluck('supplier_id')->unique()->count() }} NCC · {{ $checkedItemsCount }}/{{ count($poItems) }} nguyên liệu
+                                {{ __('list_hang.po.selection_summary', ['suppliers' => collect($poItems)->filter(fn($it) => $it['checked'])->pluck('supplier_id')->unique()->count(), 'selected' => $checkedItemsCount, 'total' => count($poItems)]) }}
                             </div>
                         </div>
-                        <div class="lhn-grand-val">{{ number_format($grandTotal, 0, ',', '.') }} đ</div>
+                        <div class="lhn-grand-val">{{ number_format($grandTotal, 0, ',', '.') }} {{ __('list_hang.currency') }}</div>
                     </div>
                 @endif
             </div>
@@ -1090,24 +1090,24 @@
             <div style="width: 280px; flex-shrink: 0;">
                 <!-- Summary Card -->
                 <div class="oh-sum">
-                    <div class="oh-sum-ttl">Tóm tắt đơn hàng</div>
+                    <div class="oh-sum-ttl">{{ __('list_hang.summary.title') }}</div>
                     @php 
                         $totalOrderedKg = collect($poItems)->filter(fn($it) => $it['checked'])->sum('quantity_manual');
                         $suppliersCount = collect($poItems)->filter(fn($it) => $it['checked'])->pluck('supplier_id')->unique()->count();
                         $grandVal = collect($poItems)->filter(fn($it) => $it['checked'])->sum(fn($it) => $it['quantity_manual'] * $it['reference_price']);
                     @endphp
-                    <div class="oh-sum-row"><span class="oh-sum-k">Phạm vi</span><span class="oh-sum-v">Ngày</span></div>
-                    <div class="oh-sum-row"><span class="oh-sum-k">Ngày đặt</span><span class="oh-sum-v">{{ \Carbon\Carbon::parse($poDate)->format('d/m/Y') }}</span></div>
-                    <div class="oh-sum-row"><span class="oh-sum-k">Nguồn list</span><span class="oh-sum-v">{{ \Carbon\Carbon::parse($poSourceFrom)->format('d/m') }} - {{ \Carbon\Carbon::parse($poSourceTo)->format('d/m') }}</span></div>
+                    <div class="oh-sum-row"><span class="oh-sum-k">{{ __('list_hang.summary.scope') }}</span><span class="oh-sum-v">{{ __('list_hang.summary.day') }}</span></div>
+                    <div class="oh-sum-row"><span class="oh-sum-k">{{ __('list_hang.summary.order_date') }}</span><span class="oh-sum-v">{{ \Carbon\Carbon::parse($poDate)->format('d/m/Y') }}</span></div>
+                    <div class="oh-sum-row"><span class="oh-sum-k">{{ __('list_hang.summary.source') }}</span><span class="oh-sum-v">{{ \Carbon\Carbon::parse($poSourceFrom)->format('d/m') }} - {{ \Carbon\Carbon::parse($poSourceTo)->format('d/m') }}</span></div>
                     <div class="oh-sum-row"><span class="oh-sum-k">Ca</span><span class="oh-sum-v">{{ count($poSelectedShifts) }} ca</span></div>
-                    <div class="oh-sum-row"><span class="oh-sum-k">Số NCC</span><span class="oh-sum-v">{{ $suppliersCount }} NCC</span></div>
-                    <div class="oh-sum-row"><span class="oh-sum-k">Tổng NL</span><span class="oh-sum-v">{{ collect($poItems)->filter(fn($it) => $it['checked'])->count() }}/{{ count($poItems) }} loại</span></div>
-                    <div class="oh-sum-row"><span class="oh-sum-k">Tổng giá trị</span><span class="oh-sum-v" style="color:var(--bl); font-weight:800; font-size:13.5px;">{{ number_format($grandVal, 0, ',', '.') }} đ</span></div>
+                    <div class="oh-sum-row"><span class="oh-sum-k">{{ __('list_hang.summary.suppliers') }}</span><span class="oh-sum-v">{{ $suppliersCount }} NCC</span></div>
+                    <div class="oh-sum-row"><span class="oh-sum-k">{{ __('list_hang.summary.ingredients') }}</span><span class="oh-sum-v">{{ __('list_hang.summary.ingredient_types', ['selected' => collect($poItems)->filter(fn($it) => $it['checked'])->count(), 'total' => count($poItems)]) }}</span></div>
+                    <div class="oh-sum-row"><span class="oh-sum-k">{{ __('list_hang.summary.value') }}</span><span class="oh-sum-v" style="color:var(--bl); font-weight:800; font-size:13.5px;">{{ number_format($grandVal, 0, ',', '.') }} {{ __('list_hang.currency') }}</span></div>
                 </div>
 
                 <!-- NCC Distribution Card -->
                 <div class="oh-sum">
-                    <div class="oh-sum-ttl">Phân bổ theo NCC</div>
+                    <div class="oh-sum-ttl">{{ __('list_hang.summary.by_supplier') }}</div>
                     @php
                         $byNcc = collect($poItems)->filter(fn($it) => $it['checked'])->groupBy('supplier_id');
                     @endphp
@@ -1122,13 +1122,13 @@
                                 <div class="oh-ncc-chip-dot" style="background:#267DC1;"></div>
                                 <div>
                                     <div class="oh-ncc-chip-name">{{ $ncc->code ?: 'NCC' }}</div>
-                                    <div class="oh-ncc-chip-cnt" style="font-size:9.5px;">{{ $items->count() }} mặt hàng</div>
+                                    <div class="oh-ncc-chip-cnt" style="font-size:9.5px;">{{ __('list_hang.counts.items', ['count' => $items->count()]) }}</div>
                                 </div>
                                 <div class="oh-ncc-chip-val">{{ number_format($total, 0, ',', '.') }}d</div>
                             </div>
                         @endif
                     @empty
-                        <div style="font-size:11px; color:#94a3b8; font-style:italic;">Chưa có phân bổ.</div>
+                        <div style="font-size:11px; color:#94a3b8; font-style:italic;">{{ __('list_hang.empty.no_allocation') }}</div>
                     @endforelse
 
                 </div>
@@ -1136,12 +1136,12 @@
                 <!-- Info Box -->
                 <div style="background:#E9F2F8; color:#1e40af; border: 1px solid #A8CBE6; border-radius:12px; padding:12px; font-size:11.5px; line-height:1.4;">
                     <div style="font-weight:800; display:flex; align-items:center; gap:4px; margin-bottom:6px;">
-                        <i class="fa-solid fa-circle-info"></i> Lưu ý
+                        <i class="fa-solid fa-circle-info"></i> {{ __('list_hang.notes.title') }}
                     </div>
                     <ul style="list-style-type: disc; padding-left: 14px; display:grid; gap:4px;">
-                        <li>Mỗi NCC sẽ nhận đơn riêng.</li>
-                        <li>Có thể bỏ trống nguyên liệu không đặt.</li>
-                        <li>SL đặt tay được ưu tiên khi tạo phiếu.</li>
+                        <li>{{ __('list_hang.notes.separate_orders') }}</li>
+                        <li>{{ __('list_hang.notes.optional_items') }}</li>
+                        <li>{{ __('list_hang.notes.manual_priority') }}</li>
                     </ul>
                 </div>
             </div>

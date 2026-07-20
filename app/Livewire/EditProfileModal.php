@@ -29,9 +29,9 @@ class EditProfileModal extends Component implements HasActions, HasForms
     public function editProfileAction(): Action
     {
         return Action::make('editProfile')
-            ->modalHeading('Cài đặt tài khoản')
-            ->modalSubmitActionLabel('Lưu thay đổi')
-            ->modalCancelActionLabel('Hủy')
+            ->modalHeading(__('user.profile.heading'))
+            ->modalSubmitActionLabel(__('user.profile.save'))
+            ->modalCancelActionLabel(__('common.actions.cancel'))
             ->modalWidth(MaxWidth::TwoExtraLarge)
             ->fillForm(fn () => auth()->user()?->toArray() ?? [])
             ->form([
@@ -39,7 +39,7 @@ class EditProfileModal extends Component implements HasActions, HasForms
                     ->schema([
                         // Left column: Avatar upload (1/3 width)
                         FileUpload::make('avatar_url')
-                            ->label('Ảnh hồ sơ')
+                            ->label(__('user.profile.avatar'))
                             ->image()
                             ->avatar()
                             ->disk('public')
@@ -53,7 +53,7 @@ class EditProfileModal extends Component implements HasActions, HasForms
                             ->imagePreviewHeight('150')
                             ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
                             ->maxSize(2048)
-                            ->helperText('Hỗ trợ JPG, PNG, WebP. Tối đa 2MB.')
+                            ->helperText(__('user.profile.avatar_help'))
                             ->alignCenter()
                             ->columnSpan(1),
 
@@ -62,12 +62,12 @@ class EditProfileModal extends Component implements HasActions, HasForms
                             ->columnSpan(2)
                             ->schema([
                                 TextInput::make('name')
-                                    ->label('Họ và tên')
+                                    ->label(__('user.profile.name'))
                                     ->required()
                                     ->maxLength(255),
 
                                 TextInput::make('email')
-                                    ->label('Địa chỉ email')
+                                    ->label(__('user.profile.email'))
                                     ->email()
                                     ->required()
                                     ->maxLength(255)
@@ -76,7 +76,7 @@ class EditProfileModal extends Component implements HasActions, HasForms
                                 Grid::make(2)
                                     ->schema([
                                         TextInput::make('password')
-                                            ->label('Mật khẩu mới')
+                                            ->label(__('user.profile.new_password'))
                                             ->password()
                                             ->autocomplete('new-password')
                                             ->dehydrateStateUsing(fn ($state) => bcrypt($state))
@@ -84,7 +84,7 @@ class EditProfileModal extends Component implements HasActions, HasForms
                                             ->confirmed(),
 
                                         TextInput::make('password_confirmation')
-                                            ->label('Xác nhận mật khẩu mới')
+                                            ->label(__('user.profile.password_confirmation'))
                                             ->password()
                                             ->requiredWith('password')
                                             ->dehydrated(false),
@@ -99,7 +99,7 @@ class EditProfileModal extends Component implements HasActions, HasForms
 
                     Notification::make()
                         ->success()
-                        ->title('Đã cập nhật hồ sơ thành công!')
+                        ->title(__('user.messages.profile_updated'))
                         ->send();
 
                     $this->redirect(request()->header('Referer') ?: filament()->getUrl());

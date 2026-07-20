@@ -22,67 +22,67 @@ class TimekeepingResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return __('Chấm công');
+        return __('timekeeping.navigation');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('Chấm công');
+        return __('timekeeping.navigation');
     }
 
     public static function getNavigationGroup(): ?string
     {
-        return __('NHÂN SỰ');
+        return __('timekeeping.group');
     }
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\Section::make('Thông tin ca làm việc')
+                Forms\Components\Section::make(__('timekeeping.sections.shift'))
                     ->columns(3)
                     ->schema([
                         Forms\Components\Select::make('employee_id')
-                            ->label('Nhân viên')
+                            ->label(__('timekeeping.fields.employee'))
                             ->relationship('employee', 'name')
                             ->searchable()
                             ->preload()
                             ->required(),
                         Forms\Components\DatePicker::make('date')
-                            ->label('Ngày làm việc')
+                            ->label(__('timekeeping.fields.date'))
                             ->required()
                             ->default(now()),
                         Forms\Components\Select::make('shift_id')
-                            ->label('Ca làm việc')
+                            ->label(__('timekeeping.fields.shift'))
                             ->relationship('shift', 'name')
                             ->searchable()
                             ->preload()
                             ->required(),
                     ]),
-                Forms\Components\Section::make('Thời gian ghi nhận')
+                Forms\Components\Section::make(__('timekeeping.sections.recorded_time'))
                     ->columns(3)
                     ->schema([
                         Forms\Components\TimePicker::make('check_in')
-                            ->label('Giờ vào (Check-in)')
+                            ->label(__('timekeeping.fields.check_in'))
                             ->placeholder('HH:MM:SS')
                             ->seconds(false),
                         Forms\Components\TimePicker::make('check_out')
-                            ->label('Giờ ra (Check-out)')
+                            ->label(__('timekeeping.fields.check_out'))
                             ->placeholder('HH:MM:SS')
                             ->seconds(false),
                         Forms\Components\TextInput::make('overtime_hours')
-                            ->label('Số giờ tăng ca')
+                            ->label(__('timekeeping.fields.overtime'))
                             ->numeric()
                             ->default(0),
                         Forms\Components\Select::make('status')
-                            ->label('Trạng thái')
+                            ->label(__('timekeeping.fields.status'))
                             ->required()
                             ->options([
-                                'Đúng giờ' => 'Đúng giờ',
-                                'Đi trễ' => 'Đi trễ',
-                                'Tăng ca' => 'Tăng ca',
-                                'Nghỉ phép' => 'Nghỉ phép',
-                                'Vắng mặt' => 'Vắng mặt',
+                                'Đúng giờ' => __('timekeeping.status.on_time'),
+                                'Đi trễ' => __('timekeeping.status.late'),
+                                'Tăng ca' => __('timekeeping.status.overtime'),
+                                'Nghỉ phép' => __('timekeeping.status.leave'),
+                                'Vắng mặt' => __('timekeeping.status.absent'),
                             ])
                             ->default('Đúng giờ'),
                     ]),
@@ -94,51 +94,51 @@ class TimekeepingResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('index')
-                    ->label('STT')
+                    ->label(__('timekeeping.table.index'))
                     ->state(static function (HasTable $livewire, \stdClass $rowLoop): string {
                         return (string) ($rowLoop->iteration);
                     }),
                 Tables\Columns\TextColumn::make('employee.code')
-                    ->label('MÃ NV')
+                    ->label(__('timekeeping.table.employee_code'))
                     ->searchable()
                     ->sortable()
                     ->weight('bold'),
                 Tables\Columns\TextColumn::make('employee.name')
-                    ->label('HỌ VÀ TÊN')
+                    ->label(__('timekeeping.table.name'))
                     ->searchable()
                     ->sortable()
                     ->weight('bold')
                     ->description(fn ($record) => $record->employee?->email),
                 Tables\Columns\TextColumn::make('employee.department')
-                    ->label('PHÒNG BAN')
+                    ->label(__('timekeeping.table.department'))
                     ->badge()
                     ->color('gray')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('shift.name')
-                    ->label('CA LÀM VIỆC')
+                    ->label(__('timekeeping.table.shift'))
                     ->description(fn ($record) => $record->shift?->time_range)
                     ->sortable(),
                 Tables\Columns\TextColumn::make('check_in')
-                    ->label('CHECK-IN')
+                    ->label(__('timekeeping.table.check_in'))
                     ->color(fn ($state) => $state && strcmp($state, '07:05:00') <= 0 ? 'success' : 'danger')
                     ->weight('bold')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('check_out')
-                    ->label('CHECK-OUT')
+                    ->label(__('timekeeping.table.check_out'))
                     ->weight('bold')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('total_hours')
-                    ->label('TỔNG GIỜ')
+                    ->label(__('timekeeping.table.total'))
                     ->state(fn ($record) => $record->check_in && $record->check_out ? '8h54' : '—')
                     ->weight('bold'),
                 Tables\Columns\TextColumn::make('overtime_hours')
-                    ->label('TĂNG CA')
+                    ->label(__('timekeeping.table.overtime'))
                     ->formatStateUsing(fn ($state) => $state ? $state.'h' : '0h')
                     ->color(fn ($state) => $state > 0 ? 'primary' : 'gray')
                     ->weight('bold')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('status')
-                    ->label('TRẠNG THÁI')
+                    ->label(__('timekeeping.table.status'))
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         'Đúng giờ' => 'success',
@@ -152,22 +152,22 @@ class TimekeepingResource extends Resource
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('employee_id')
-                    ->label('Nhân viên')
+                    ->label(__('timekeeping.fields.employee'))
                     ->relationship('employee', 'name')
                     // Tìm kiếm ajax thay vì render toàn bộ nhân viên vào HTML (~1MB với 1000+ NV)
                     ->searchable()
                     ->optionsLimit(50),
                 Tables\Filters\SelectFilter::make('shift_id')
-                    ->label('Ca làm việc')
+                    ->label(__('timekeeping.fields.shift'))
                     ->relationship('shift', 'name'),
                 Tables\Filters\SelectFilter::make('status')
-                    ->label('Trạng thái')
+                    ->label(__('timekeeping.fields.status'))
                     ->options([
-                        'Đúng giờ' => 'Đúng giờ',
-                        'Đi trễ' => 'Đi trễ',
-                        'Tăng ca' => 'Tăng ca',
-                        'Nghỉ phép' => 'Nghỉ phép',
-                        'Vắng mặt' => 'Vắng mặt',
+                        'Đúng giờ' => __('timekeeping.status.on_time'),
+                        'Đi trễ' => __('timekeeping.status.late'),
+                        'Tăng ca' => __('timekeeping.status.overtime'),
+                        'Nghỉ phép' => __('timekeeping.status.leave'),
+                        'Vắng mặt' => __('timekeeping.status.absent'),
                     ]),
             ])
             ->actions([

@@ -25,22 +25,22 @@ class PurchaseOrderResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return __('Đặt hàng');
+        return __('purchase_order.navigation.label');
     }
 
     public static function getModelLabel(): string
     {
-        return __('Đơn đặt hàng');
+        return __('purchase_order.navigation.model');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('Đặt hàng');
+        return __('purchase_order.navigation.plural');
     }
 
     public static function getNavigationGroup(): ?string
     {
-        return __('CUNG ỨNG');
+        return __('purchase_order.navigation.group');
     }
 
     public static function form(Form $form): Form
@@ -48,26 +48,26 @@ class PurchaseOrderResource extends Resource
         return $form
             ->schema([
                 Forms\Components\TextInput::make('code')
-                    ->label('Mã đơn hàng')
+                    ->label(__('purchase_order.fields.code'))
                     ->required()
                     ->unique(ignoreRecord: true)
                     ->maxLength(255),
                 static::kitchenSelect(),
                 Forms\Components\Select::make('supplier_id')
-                    ->label('Nhà cung cấp')
+                    ->label(__('purchase_order.fields.supplier'))
                     ->relationship('supplier', 'name')
                     ->searchable()
                     ->preload()
                     ->required(),
                 Forms\Components\Select::make('status')
-                    ->label('Trạng thái')
+                    ->label(__('purchase_order.fields.status'))
                     ->required()
                     ->options([
-                        'draft' => 'Nháp (Draft)',
-                        'sent' => 'Đã gửi NCC (Sent)',
-                        'checking' => 'Đang kiểm (Checking)',
-                        'done' => 'Hoàn thành (Done)',
-                        'cancelled' => 'Đã hủy (Cancelled)',
+                        'draft' => __('purchase_order.status.draft_with_code'),
+                        'sent' => __('purchase_order.status.sent_with_code'),
+                        'checking' => __('purchase_order.status.checking_with_code'),
+                        'done' => __('purchase_order.status.done_with_code'),
+                        'cancelled' => __('purchase_order.status.cancelled_with_code'),
                     ])
                     ->default('draft')
                     ->rule(fn (?PurchaseOrder $record) => function (string $attribute, $value, \Closure $fail) use ($record): void {
@@ -76,50 +76,50 @@ class PurchaseOrderResource extends Resource
                         }
                         $order = ['draft' => 0, 'sent' => 1, 'checking' => 2, 'done' => 3, 'cancelled' => 4];
                         if ($record->status === 'done' && $value !== 'done') {
-                            $fail('Đơn hàng đã hoàn thành nhập kho không được phép thay đổi trạng thái.');
+                            $fail(__('purchase_order.validation.completed_status_locked'));
                         }
                         if (($order[$value] ?? 0) < ($order[$record->status] ?? 0) && $value !== 'cancelled') {
-                            $fail('Không được lùi trạng thái đơn hàng (vòng đời chỉ đi tiến Nháp → Đã gửi → Đang kiểm → Hoàn thành).');
+                            $fail(__('purchase_order.validation.status_cannot_go_back'));
                         }
                     }),
                 Forms\Components\DatePicker::make('estimated_delivery_date')
-                    ->label('Ngày giao dự kiến')
+                    ->label(__('purchase_order.fields.estimated_delivery_date'))
                     // Quy định nghiệp vụ: chỉ được đặt hàng cho tối đa 2 ngày kế tiếp.
                     // Chỉ ràng buộc khi tạo mới — đơn cũ (ngày quá khứ) vẫn sửa được các trường khác.
                     ->minDate(fn (string $operation) => $operation === 'create' ? today() : null)
                     ->maxDate(fn (string $operation) => $operation === 'create' ? today()->addDays(2) : null)
-                    ->helperText('Chỉ được chọn trong vòng 2 ngày kế tiếp từ hôm nay'),
+                    ->helperText(__('purchase_order.help.delivery_date')),
                 Forms\Components\Textarea::make('note')
-                    ->label('Ghi chú')
+                    ->label(__('purchase_order.fields.note'))
                     ->columnSpanFull(),
 
-                Forms\Components\Section::make('Chi tiết đơn hàng')
+                Forms\Components\Section::make(__('purchase_order.form.details'))
                     ->schema([
                         Forms\Components\Repeater::make('items')
                             ->relationship('items')
                             ->schema([
                                 Forms\Components\Select::make('ingredient_id')
-                                    ->label('Nguyên liệu')
+                                    ->label(__('purchase_order.fields.ingredient'))
                                     ->options(Ingredient::pluck('name', 'id'))
                                     ->required()
                                     ->searchable()
                                     ->preload(),
                                 Forms\Components\TextInput::make('quantity_ordered')
-                                    ->label('SL đặt')
+                                    ->label(__('purchase_order.fields.quantity_ordered'))
                                     ->numeric()
                                     ->required(),
                                 Forms\Components\TextInput::make('quantity_received')
-                                    ->label('SL nhận')
+                                    ->label(__('purchase_order.fields.quantity_received'))
                                     ->numeric()
                                     ->default(0.00),
                                 Forms\Components\TextInput::make('unit_price')
-                                    ->label('Đơn giá')
+                                    ->label(__('purchase_order.fields.unit_price'))
                                     ->numeric()
                                     ->default(0.00),
                             ])
                             ->columns(4)
-                            ->label('Mặt hàng đặt')
-                            ->createItemButtonLabel('Thêm mặt hàng'),
+                            ->label(__('purchase_order.form.ordered_items'))
+                            ->createItemButtonLabel(__('purchase_order.actions.add_item')),
                     ])
                     ->columnSpanFull(),
             ]);
@@ -130,7 +130,7 @@ class PurchaseOrderResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('index')
-                    ->label('STT')
+                    ->label(__('purchase_order.table.index'))
                     ->state(static function (HasTable $livewire, \stdClass $rowLoop): string {
                         $currentPage = method_exists($livewire, 'getTablePage') ? $livewire->getTablePage() : 1;
                         $recordsPerPage = method_exists($livewire, 'getTableRecordsPerPage') ? $livewire->getTableRecordsPerPage() : 10;
@@ -144,24 +144,24 @@ class PurchaseOrderResource extends Resource
                     ])
                     ->width('56px'),
                 Tables\Columns\TextColumn::make('code')
-                    ->label('MÃ ĐƠN')
+                    ->label(__('purchase_order.table.code'))
                     ->searchable()
                     ->sortable()
                     ->weight('bold'),
                 static::kitchenColumn(),
                 Tables\Columns\TextColumn::make('supplier.name')
-                    ->label('NHÀ CUNG CẤP')
+                    ->label(__('purchase_order.table.supplier'))
                     ->sortable()
                     ->weight('bold'),
                 Tables\Columns\TextColumn::make('estimated_delivery_date')
-                    ->label('NGÀY GIAO DỰ KIẾN')
+                    ->label(__('purchase_order.table.estimated_delivery_date'))
                     ->date('d/m/Y')
                     ->extraAttributes([
                         'style' => 'font-variant-numeric: tabular-nums;',
                     ])
                     ->sortable(),
                 Tables\Columns\TextColumn::make('total_value')
-                    ->label('TỔNG GIÁ TRỊ')
+                    ->label(__('purchase_order.table.total_value'))
                     ->html()
                     ->formatStateUsing(function ($state) {
                         if ($state === null) {
@@ -177,7 +177,7 @@ class PurchaseOrderResource extends Resource
                     ])
                     ->state(fn ($record) => $record->items->sum(fn ($item) => $item->quantity_ordered * $item->unit_price)),
                 Tables\Columns\TextColumn::make('status')
-                    ->label('TRẠNG THÁI')
+                    ->label(__('purchase_order.table.status'))
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         'draft' => 'gray',
@@ -188,29 +188,29 @@ class PurchaseOrderResource extends Resource
                         default => 'gray',
                     })
                     ->formatStateUsing(fn (string $state): string => match ($state) {
-                        'draft' => 'Nháp',
-                        'sent' => 'Đã gửi NCC',
-                        'checking' => 'Đang kiểm hàng',
-                        'done' => 'Hoàn thành',
-                        'cancelled' => 'Đã hủy',
+                        'draft' => __('purchase_order.status.draft'),
+                        'sent' => __('purchase_order.status.sent'),
+                        'checking' => __('purchase_order.status.checking'),
+                        'done' => __('purchase_order.status.done'),
+                        'cancelled' => __('purchase_order.status.cancelled'),
                         default => $state,
                     }),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('kitchen_id')
-                    ->label('Bếp ăn')
+                    ->label(__('purchase_order.fields.kitchen'))
                     ->relationship('kitchen', 'name'),
                 Tables\Filters\SelectFilter::make('supplier_id')
-                    ->label('Nhà cung cấp')
+                    ->label(__('purchase_order.fields.supplier'))
                     ->relationship('supplier', 'name'),
                 Tables\Filters\SelectFilter::make('status')
-                    ->label('Trạng thái')
+                    ->label(__('purchase_order.fields.status'))
                     ->options([
-                        'draft' => 'Nháp',
-                        'sent' => 'Đã gửi NCC',
-                        'checking' => 'Đang kiểm hàng',
-                        'done' => 'Hoàn thành',
-                        'cancelled' => 'Đã hủy',
+                        'draft' => __('purchase_order.status.draft'),
+                        'sent' => __('purchase_order.status.sent'),
+                        'checking' => __('purchase_order.status.checking'),
+                        'done' => __('purchase_order.status.done'),
+                        'cancelled' => __('purchase_order.status.cancelled'),
                     ]),
             ])
             ->actions([

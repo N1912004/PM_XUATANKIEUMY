@@ -4,7 +4,7 @@
     @php
         $currentUserId = filament()->auth()->id();
         $user = filament()->auth()->user();
-        $kitchenName = $user->kitchen?->name ?? 'Vận hành ca sáng';
+        $kitchenName = $user->kitchen?->name ?? __('chat.default_kitchen');
         $avatarColors = ['#267DC1', '#059669', '#D97706', '#7C3AED', '#EA580C', '#EC4899'];
     @endphp
 
@@ -25,13 +25,13 @@
             <!-- LEFT PANEL: GROUP LIST -->
             <div class="cl">
                 <div class="cl-head">
-                    <h1>Chat nhóm</h1>
-                    <p>Truy cập các nhóm chat được phân quyền để trao đổi tin nhắn và gửi file nội bộ</p>
+                    <h1>{{ __('chat.title') }}</h1>
+                    <p>{{ __('chat.subtitle') }}</p>
                 </div>
                 <div class="grp-srch">
                     <div class="gsbox">
                         <i class="fa-solid fa-magnifying-glass"></i>
-                        <input type="text" placeholder="Tìm nhóm chat...">
+                        <input type="text" placeholder="{{ __('chat.search_placeholder') }}">
                     </div>
                     <div class="filt-ico">
                         <i class="fa-solid fa-sliders"></i>
@@ -43,8 +43,8 @@
                         <div class="g-av g-av-b"><i class="fa-solid fa-users"></i></div>
                         <div class="g-info">
                             <div class="g-name">{{ $kitchenName }}</div>
-                            <div class="g-desc">Trao đổi công việc ca sáng</div>
-                            <div class="g-meta">18 thành viên <span class="g-dot"></span> 2 phút trước</div>
+                            <div class="g-desc">{{ __('chat.groups.morning_shift') }}</div>
+                            <div class="g-meta">{{ __('chat.members', ['count' => 18]) }} <span class="g-dot"></span> {{ __('chat.time.minutes_ago', ['count' => 2]) }}</div>
                         </div>
                         <div class="g-right"><div class="g-badge">5</div></div>
                     </div>
@@ -52,9 +52,9 @@
                     <div class="grp-item">
                         <div class="g-av g-av-o"><i class="fa-solid fa-utensils"></i></div>
                         <div class="g-info">
-                            <div class="g-name">Bếp trung tâm</div>
-                            <div class="g-desc">Trao đổi công việc bếp</div>
-                            <div class="g-meta">15 thành viên <span class="g-dot"></span> 15 phút trước</div>
+                            <div class="g-name">{{ __('chat.groups.central_kitchen') }}</div>
+                            <div class="g-desc">{{ __('chat.groups.kitchen_work') }}</div>
+                            <div class="g-meta">{{ __('chat.members', ['count' => 15]) }} <span class="g-dot"></span> {{ __('chat.time.minutes_ago', ['count' => 15]) }}</div>
                         </div>
                         <div class="g-right"><div class="g-badge">3</div></div>
                     </div>
@@ -62,9 +62,9 @@
                     <div class="grp-item">
                         <div class="g-av g-av-g"><i class="fa-solid fa-boxes-stacked"></i></div>
                         <div class="g-info">
-                            <div class="g-name">Kho nguyên liệu</div>
-                            <div class="g-desc">Nhập xuất &amp; tồn kho</div>
-                            <div class="g-meta">12 thành viên <span class="g-dot"></span> 1 giờ trước</div>
+                            <div class="g-name">{{ __('chat.groups.ingredient_warehouse') }}</div>
+                            <div class="g-desc">{{ __('chat.groups.inventory_work') }}</div>
+                            <div class="g-meta">{{ __('chat.members', ['count' => 12]) }} <span class="g-dot"></span> {{ __('chat.time.hours_ago', ['count' => 1]) }}</div>
                         </div>
                         <div class="g-right"><div class="g-badge">2</div></div>
                     </div>
@@ -72,9 +72,9 @@
                     <div class="grp-item">
                         <div class="g-av g-av-p"><i class="fa-solid fa-user-tie"></i></div>
                         <div class="g-info">
-                            <div class="g-name">Nhân sự nội bộ</div>
-                            <div class="g-desc">Trao đổi công việc nhân sự</div>
-                            <div class="g-meta">22 thành viên <span class="g-dot"></span> 2 giờ trước</div>
+                            <div class="g-name">{{ __('chat.groups.internal_hr') }}</div>
+                            <div class="g-desc">{{ __('chat.groups.hr_work') }}</div>
+                            <div class="g-meta">{{ __('chat.members', ['count' => 22]) }} <span class="g-dot"></span> {{ __('chat.time.hours_ago', ['count' => 2]) }}</div>
                         </div>
                         <div class="g-right"></div>
                     </div>
@@ -82,9 +82,9 @@
                     <div class="grp-item">
                         <div class="g-av g-av-k"><i class="fa-solid fa-diagram-project"></i></div>
                         <div class="g-info">
-                            <div class="g-name">Dự án triển khai</div>
-                            <div class="g-desc">Cập nhật tiến độ dự án</div>
-                            <div class="g-meta">10 thành viên <span class="g-dot"></span> Hôm qua</div>
+                            <div class="g-name">{{ __('chat.groups.implementation_project') }}</div>
+                            <div class="g-desc">{{ __('chat.groups.project_progress') }}</div>
+                            <div class="g-meta">{{ __('chat.members', ['count' => 10]) }} <span class="g-dot"></span> {{ __('chat.time.yesterday') }}</div>
                         </div>
                         <div class="g-right"></div>
                     </div>
@@ -99,7 +99,7 @@
                     </div>
                     <div class="cm-ginfo">
                         <div class="cm-gname">{{ $kitchenName }}</div>
-                        <div class="cm-gmeta">18 thành viên <span class="cm-onl"></span> 6 đang hoạt động</div>
+                        <div class="cm-gmeta">{{ __('chat.members', ['count' => 18]) }} <span class="cm-onl"></span> {{ __('chat.active_members', ['count' => 6]) }}</div>
                     </div>
                     <button type="button" class="cm-ico"><i class="fa-solid fa-magnifying-glass"></i></button>
                     <button type="button" class="cm-ico"><i class="fa-solid fa-paperclip"></i></button>
@@ -108,7 +108,7 @@
 
                 <!-- Messages area -->
                 <div x-ref="messages" class="msgs" id="msgArea">
-                    <div class="day-sep">Hôm nay</div>
+                    <div class="day-sep">{{ __('chat.today') }}</div>
 
                     <!-- MOCK MESSAGE 1 (Trần Thị Bình) -->
                     <div class="msg-row">
@@ -117,7 +117,7 @@
                         </div>
                         <div class="msg-body">
                             <div class="msg-sender">Trần Thị Bình</div>
-                            <div class="bubble">Chào cả team, ca sáng hôm nay mọi người chú ý kiểm tra nhiệt độ bảo quản nguyên liệu nhé.</div>
+                            <div class="bubble">{{ __('chat.demo_messages.temperature_reminder') }}</div>
                             <div class="msg-time">06:45</div>
                         </div>
                     </div>
@@ -129,7 +129,7 @@
                         </div>
                         <div class="msg-body">
                             <div class="msg-sender">Lê Hoàng Cường</div>
-                            <div class="bubble">Mình đã cập nhật file hướng dẫn vận hành mới. Mọi người xem và thực hiện theo nhé.</div>
+                            <div class="bubble">{{ __('chat.demo_messages.operations_guide') }}</div>
                             <div class="file-bbl">
                                 <div class="fic f-pdf">PDF</div>
                                 <div style="flex:1; min-width:0">
@@ -149,7 +149,7 @@
                         </div>
                         <div class="msg-body">
                             <div class="msg-sender">Phạm Thị Dung</div>
-                            <div class="bubble">Hình ảnh kiểm tra khu vực bếp sáng nay.</div>
+                            <div class="bubble">{{ __('chat.demo_messages.kitchen_photo') }}</div>
                             <div class="img-bbl">
                                 <img src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=320&h=180&fit=crop" alt="Bep">
                             </div>
@@ -207,7 +207,7 @@
                         <input
                             type="text"
                             wire:model="newMessage"
-                            placeholder="Nhập nội dung..."
+                            placeholder="{{ __('chat.message_placeholder') }}"
                             autocomplete="off"
                         >
                         <span class="mi-emoji">☺</span>

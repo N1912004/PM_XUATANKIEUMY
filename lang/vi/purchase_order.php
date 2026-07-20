@@ -1,0 +1,25 @@
+<?php
+
+return [
+    'navigation' => ['label' => 'Đặt hàng', 'model' => 'Đơn đặt hàng', 'plural' => 'Đặt hàng', 'group' => 'CUNG ỨNG'],
+    'list' => ['title' => 'Đặt hàng', 'subtitle' => 'Quản lý đơn đặt hàng nguyên liệu theo nhà cung cấp từ list hàng đã chốt'],
+    'fields' => ['code' => 'Mã đơn hàng', 'supplier' => 'Nhà cung cấp', 'supplier_abbr' => 'NCC', 'status' => 'Trạng thái', 'estimated_delivery_date' => 'Ngày giao dự kiến', 'note' => 'Ghi chú', 'ingredient' => 'Nguyên liệu', 'quantity_ordered' => 'SL đặt', 'quantity_received' => 'SL nhận', 'unit_price' => 'Đơn giá', 'kitchen' => 'Bếp ăn'],
+    'form' => ['details' => 'Chi tiết đơn hàng', 'ordered_items' => 'Mặt hàng đặt'],
+    'help' => ['delivery_date' => 'Chỉ được chọn trong vòng 2 ngày kế tiếp từ hôm nay'],
+    'status' => ['draft' => 'Nháp', 'sent' => 'Đã gửi NCC', 'sent_short' => 'Đã gửi', 'checking' => 'Đang kiểm hàng', 'done' => 'Hoàn thành', 'cancelled' => 'Đã hủy', 'draft_with_code' => 'Nháp (Draft)', 'sent_with_code' => 'Đã gửi NCC (Sent)', 'checking_with_code' => 'Đang kiểm (Checking)', 'done_with_code' => 'Hoàn thành (Done)', 'cancelled_with_code' => 'Đã hủy (Cancelled)'],
+    'types' => ['week' => 'Đặt hàng tuần', 'day' => 'Đặt hàng ngày', 'week_short' => 'Tuần', 'day_short' => 'Ngày'],
+    'table' => ['index' => 'STT', 'code' => 'MÃ ĐƠN', 'supplier' => 'NHÀ CUNG CẤP', 'estimated_delivery_date' => 'NGÀY GIAO DỰ KIẾN', 'total_value' => 'TỔNG GIÁ TRỊ', 'status' => 'TRẠNG THÁI', 'ingredient_name' => 'Tên nguyên liệu', 'type' => 'Loại', 'quantity' => 'Số lượng', 'unit_price' => 'Đơn giá', 'line_total' => 'Thành tiền'],
+    'actions' => ['create' => 'Tạo đơn đặt hàng', 'add_item' => 'Thêm mặt hàng', 'reset_filters' => 'Cài lại bộ lọc', 'view_order' => 'Xem chi tiết đơn :code', 'view_details' => 'Xem chi tiết', 'check_goods' => 'Kiểm hàng', 'export_excel' => 'Xuất Excel', 'delete' => 'Xóa đơn hàng', 'back' => 'Quay lại', 'export_all_suppliers' => 'Xuất Excel (tất cả NCC)', 'export_current_supplier' => 'Xuất Excel NCC này'],
+    'filters' => ['all_types' => 'Tất cả loại', 'all_statuses' => 'Tất cả trạng thái', 'month' => 'Tháng :month'],
+    'placeholders' => ['search' => 'Tìm kiếm đơn hàng, NCC...'],
+    'kpi' => ['month_total' => 'Tổng đơn tháng này', 'awaiting_check' => 'Chờ kiểm hàng', 'completed' => 'Đã hoàn thành', 'month_value' => 'Tổng giá trị tháng'],
+    'labels' => ['unassigned' => 'Chưa gán', 'ingredient_count' => ':count nguyên liệu', 'created_at' => 'Tạo: :date'],
+    'detail' => ['order_title' => 'Đơn :code', 'subtitle' => 'Gộp nguyên liệu theo nhà cung cấp · Ngày đặt :date', 'supplier_total' => 'Tổng đơn :supplier:'],
+    'ingredient_types' => ['meat_wet' => 'Thịt/Ướt', 'dry' => 'Hàng Khô', 'meat' => 'Thịt', 'vegetable_wet' => 'Rau/Ướt'],
+    'empty' => ['title' => 'Không tìm thấy đơn hàng nào', 'subtitle' => 'Hãy thử điều chỉnh bộ lọc hoặc nhập từ khóa tìm kiếm khác.'],
+    'confirm' => ['delete' => 'Bạn có chắc chắn muốn xóa đơn hàng này?'],
+    'notifications' => ['deleted' => 'Đã xóa đơn đặt hàng'],
+    'currency' => ['thousand' => ':value nghìn đ', 'amount' => ':value đ'],
+    'pagination' => ['summary' => 'Hiển thị :from - :to trong tổng số :total đơn hàng'],
+    'validation' => ['completed_status_locked' => 'Đơn hàng đã hoàn thành nhập kho không được phép thay đổi trạng thái.', 'status_cannot_go_back' => 'Không được lùi trạng thái đơn hàng (vòng đời chỉ đi tiến Nháp → Đã gửi → Đang kiểm → Hoàn thành).'],
+];

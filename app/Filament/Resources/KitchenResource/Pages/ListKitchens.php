@@ -58,7 +58,7 @@ class ListKitchens extends Page
         $kitchen = Kitchen::find($id);
         if ($kitchen) {
             $kitchen->delete();
-            session()->flash('message', 'Xóa nhà ăn/bếp thành công.');
+            session()->flash('message', __('catalog.kitchen.notifications.deleted'));
         }
     }
 

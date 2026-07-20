@@ -11,8 +11,8 @@
     <!-- Page Head -->
     <div class="ph">
         <div class="ph-l">
-            <h1>Ngân hàng thực đơn</h1>
-            <p>Quản lý món ăn theo từng mức giá và cost nguyên liệu trên 1 phần</p>
+            <h1>{{ __('recipe.list.title') }}</h1>
+            <p>{{ __('recipe.list.subtitle') }}</p>
         </div>
         <div class="ph-r">
             {{-- Import/Export cùng pattern trang Nguyên liệu: wizard 2 bước có XEM TRƯỚC (dry-run) --}}
@@ -26,7 +26,7 @@
     <div class="mn-bar">
         <div class="mn-srch">
             <i class="fa-solid fa-magnifying-glass"></i>
-            <input wire:model.live.debounce.250ms="search" type="text" placeholder="Tìm kiếm theo tên món ăn hoặc mã món...">
+            <input wire:model.live.debounce.250ms="search" type="text" placeholder="{{ __('recipe.placeholders.search_name_code') }}">
         </div>
 
         <div class="mn-filter-select"
@@ -40,8 +40,8 @@
                     return Object.entries(this.options).filter(([val, lbl]) => lbl.toLowerCase().includes(q));
                 },
                 get label() {
-                    if (this.selected === '' || this.selected === null || this.selected === undefined) return 'Mức giá / Đơn giá suất ăn';
-                    return this.options[this.selected] || 'Mức giá / Đơn giá suất ăn';
+                    if (this.selected === '' || this.selected === null || this.selected === undefined) return @js(__('recipe.filters.price'));
+                    return this.options[this.selected] || @js(__('recipe.filters.price'));
                 },
                 selectOption(val) {
                     this.selected = val;
@@ -62,11 +62,11 @@
                 <span x-text="label" style="text-overflow: ellipsis; overflow: hidden; white-space: nowrap;"></span>
             </button>
             <div x-show="open" x-cloak class="mn-dropdown-panel" style="min-width: 220px;">
-                <input x-ref="search" x-model="search" type="text" placeholder="Tìm kiếm..." class="mn-dropdown-search">
+                <input x-ref="search" x-model="search" type="text" placeholder="{{ __('recipe.placeholders.search_short') }}" class="mn-dropdown-search">
                 <ul class="mn-dropdown-list">
                     <li>
                         <button type="button" class="mn-dropdown-item" :class="(selected === '' || selected === null) && 'selected'" @click="selectOption('')">
-                            Tất cả mức giá
+                            {{ __('recipe.filters.all_prices') }}
                         </button>
                     </li>
                     <template x-for="[val, lbl] in filtered" :key="val">
@@ -75,7 +75,7 @@
                             </button>
                         </li>
                     </template>
-                    <li x-show="filtered.length === 0" class="mn-dropdown-empty">Không tìm thấy kết quả</li>
+                    <li x-show="filtered.length === 0" class="mn-dropdown-empty">{{ __('recipe.empty.no_results') }}</li>
                 </ul>
             </div>
         </div>
@@ -91,8 +91,8 @@
                     return Object.entries(this.options).filter(([val, lbl]) => lbl.toLowerCase().includes(q));
                 },
                 get label() {
-                    if (this.selected === '' || this.selected === null || this.selected === undefined) return 'Nhóm món';
-                    return this.options[this.selected] || 'Nhóm món';
+                    if (this.selected === '' || this.selected === null || this.selected === undefined) return @js(__('recipe.fields.type'));
+                    return this.options[this.selected] || @js(__('recipe.fields.type'));
                 },
                 selectOption(val) {
                     this.selected = val;
@@ -113,11 +113,11 @@
                 <span x-text="label" style="text-overflow: ellipsis; overflow: hidden; white-space: nowrap;"></span>
             </button>
             <div x-show="open" x-cloak class="mn-dropdown-panel" style="min-width: 160px;">
-                <input x-ref="search" x-model="search" type="text" placeholder="Tìm kiếm..." class="mn-dropdown-search">
+                <input x-ref="search" x-model="search" type="text" placeholder="{{ __('recipe.placeholders.search_short') }}" class="mn-dropdown-search">
                 <ul class="mn-dropdown-list">
                     <li>
                         <button type="button" class="mn-dropdown-item" :class="(selected === '' || selected === null) && 'selected'" @click="selectOption('')">
-                            Tất cả nhóm món
+                            {{ __('recipe.filters.all_groups') }}
                         </button>
                     </li>
                     <template x-for="[val, lbl] in filtered" :key="val">
@@ -126,54 +126,54 @@
                             </button>
                         </li>
                     </template>
-                    <li x-show="filtered.length === 0" class="mn-dropdown-empty">Không tìm thấy kết quả</li>
+                    <li x-show="filtered.length === 0" class="mn-dropdown-empty">{{ __('recipe.empty.no_results') }}</li>
                 </ul>
             </div>
         </div>
 
         <select wire:model.live="statusFilter" class="mn-sel">
-            <option value="">Trạng thái</option>
-            <option value="active">Đang áp dụng</option>
-            <option value="pending">Chờ rà soát</option>
-            <option value="inactive">Ngừng áp dụng</option>
+            <option value="">{{ __('recipe.fields.status') }}</option>
+            <option value="active">{{ __('recipe.status.active_applied') }}</option>
+            <option value="pending">{{ __('recipe.status.pending') }}</option>
+            <option value="inactive">{{ __('recipe.status.inactive') }}</option>
         </select>
 
         <select wire:model.live="trashedFilter" class="mn-sel">
-            <option value="">Không gồm mục đã xóa</option>
-            <option value="with">Gồm cả mục đã xóa</option>
-            <option value="only">Chỉ mục đã xóa</option>
+            <option value="">{{ __('recipe.trash.without') }}</option>
+            <option value="with">{{ __('recipe.trash.with') }}</option>
+            <option value="only">{{ __('recipe.trash.only') }}</option>
         </select>
 
-        <button wire:click="resetFilters" class="mn-fbtn" title="Cài lại bộ lọc">
+        <button wire:click="resetFilters" class="mn-fbtn" title="{{ __('recipe.actions.reset_filters') }}">
             <i class="fa-solid fa-sliders"></i>
-            Bộ lọc
+            {{ __('recipe.filters.title') }}
         </button>
-        <span wire:click="resetFilters" class="mn-clr">Xóa bộ lọc</span>
+        <span wire:click="resetFilters" class="mn-clr">{{ __('recipe.actions.clear_filters') }}</span>
     </div>
 
     <!-- Info Banner -->
     <div class="mn-info">
         <i class="fa-solid fa-circle-info"></i>
-        Đơn giá nguyên liệu được lấy từ module Nguyên liệu / Nhà cung cấp và dùng để tự động tính cost nguyên liệu trên 1 phần.
+        {{ __('recipe.messages.ingredient_price_source') }}
     </div>
 
     <!-- Recipes Main Table -->
     @if(count($selectedRecipes) > 0)
         <div class="mn-bulk-actions" style="display:flex;align-items:center;justify-content:space-between;background:var(--bl-s);border:1px solid var(--bl-m);padding:10px 16px;border-radius:8px;margin-bottom:12px;gap:12px; animation: fadeIn 0.2s ease;">
             <div style="display:flex;align-items:center;gap:8px">
-                <span style="font-weight:600;color:var(--bl);font-size:13px"><i class="fa-solid fa-square-check"></i> Đã chọn {{ count($selectedRecipes) }} món ăn</span>
+                <span style="font-weight:600;color:var(--bl);font-size:13px"><i class="fa-solid fa-square-check"></i> {{ __('recipe.bulk.selected', ['count' => count($selectedRecipes)]) }}</span>
             </div>
             <div style="display:flex;gap:8px">
                 @if($trashedFilter === 'only')
-                    <button type="button" wire:click="bulkRestore" wire:confirm="Bạn có chắc chắn muốn khôi phục toàn bộ các món ăn đã chọn?" class="mn-fbtn" style="background:#fff;border-color:var(--bl);color:var(--bl);height:30px;font-size:12px">
-                        <i class="fa-solid fa-rotate-left"></i> Khôi phục hàng loạt
+                    <button type="button" wire:click="bulkRestore" wire:confirm="{{ __('recipe.confirm.bulk_restore') }}" class="mn-fbtn" style="background:#fff;border-color:var(--bl);color:var(--bl);height:30px;font-size:12px">
+                        <i class="fa-solid fa-rotate-left"></i> {{ __('recipe.bulk.restore') }}
                     </button>
-                    <button type="button" wire:click="bulkForceDelete" wire:confirm="HÀNH ĐỘNG NÀY KHÔNG THỂ HOÀN TÁC. Bạn có chắc chắn muốn xóa vĩnh viễn toàn bộ các món ăn đã chọn và định mức nguyên liệu liên quan?" class="mn-fbtn" style="background:var(--rd-s);border-color:#fecaca;color:var(--rd);height:30px;font-size:12px">
-                        <i class="fa-solid fa-trash-can"></i> Xóa vĩnh viễn hàng loạt
+                    <button type="button" wire:click="bulkForceDelete" wire:confirm="{{ __('recipe.confirm.bulk_force_delete') }}" class="mn-fbtn" style="background:var(--rd-s);border-color:#fecaca;color:var(--rd);height:30px;font-size:12px">
+                        <i class="fa-solid fa-trash-can"></i> {{ __('recipe.bulk.force_delete') }}
                     </button>
                 @else
-                    <button type="button" wire:click="bulkDelete" wire:confirm="Bạn có chắc chắn muốn xóa mềm toàn bộ các món ăn đã chọn?" class="mn-fbtn" style="background:var(--rd-s);border-color:#fecaca;color:var(--rd);height:30px;font-size:12px">
-                        <i class="fa-solid fa-trash"></i> Xóa hàng loạt
+                    <button type="button" wire:click="bulkDelete" wire:confirm="{{ __('recipe.confirm.bulk_delete') }}" class="mn-fbtn" style="background:var(--rd-s);border-color:#fecaca;color:var(--rd);height:30px;font-size:12px">
+                        <i class="fa-solid fa-trash"></i> {{ __('recipe.bulk.delete') }}
                     </button>
                 @endif
             </div>
@@ -198,17 +198,7 @@
                         </th>
                         <th style="width: 40px; text-align: center;"></th>
                         <th style="width: 50px; text-align: center;">STT</th>
-                        <th>Mã món</th>
-                        <th>Tên món ăn</th>
-                        <th>Nhóm món</th>
-                        <th>Mức giá suất ăn</th>
-                        <th>Đơn giá suất ăn</th>
-                        <th>Số nguyên liệu</th>
-                        <th>Tổng định lượng / phần</th>
-                        <th>Tổng cost nguyên liệu / phần</th>
-                        <th>Trạng thái</th>
-                        <th>Cập nhật</th>
-                        <th>Hành động</th>
+                        <th>{{ __('recipe.table.code') }}</th><th>{{ __('recipe.table.name') }}</th><th>{{ __('recipe.table.type') }}</th><th>{{ __('recipe.table.price_level') }}</th><th>{{ __('recipe.table.actual_price') }}</th><th>{{ __('recipe.table.ingredients_count') }}</th><th>{{ __('recipe.table.total_weight') }}</th><th>{{ __('recipe.table.total_cost') }}</th><th>{{ __('recipe.table.status') }}</th><th>{{ __('recipe.table.updated_at') }}</th><th>{{ __('recipe.table.actions') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -236,9 +226,9 @@
                                 default => 'ms-inactive',
                             };
                             $statusText = match ($recipe->status) {
-                                'active' => 'Đang hoạt động',
-                                'pending' => 'Chờ rà soát',
-                                'inactive' => 'Ngừng hoạt động',
+                                'active' => __('recipe.status.active'),
+                                'pending' => __('recipe.status.pending'),
+                                'inactive' => __('recipe.status.inactive'),
                                 default => $recipe->status,
                             };
                         @endphp
@@ -263,7 +253,7 @@
                             <td>
                                 <span class="mn-name" style="{{ $recipe->trashed() ? 'text-decoration: line-through; color: var(--mu);' : '' }}">{{ $recipe->name }}</span>
                                 @if($recipe->trashed())
-                                    <span style="display: inline-block; background: var(--rd-s); color: var(--rd); font-size: 10px; padding: 2px 6px; border-radius: 4px; margin-left: 6px; font-weight: bold; vertical-align: middle;">Đã xóa</span>
+                                    <span style="display: inline-block; background: var(--rd-s); color: var(--rd); font-size: 10px; padding: 2px 6px; border-radius: 4px; margin-left: 6px; font-weight: bold; vertical-align: middle;">{{ __('recipe.trash.deleted') }}</span>
                                 @endif
                             </td>
                             <td><span class="mn-group-pill {{ $typeClass }}">{{ $recipe->type }}</span></td>
@@ -276,7 +266,7 @@
                                     {{ number_format($recipeCost, 0, ',', '.') }} d
                                 </span>
                                 @if($recipe->cost_override !== null)
-                                    <span style="display:block;font-size:10px;color:var(--or)">Đã điều chỉnh</span>
+                                    <span style="display:block;font-size:10px;color:var(--or)">{{ __('recipe.labels.adjusted') }}</span>
                                 @endif
                             </td>
                             <td><span class="{{ $statusClass }}">{{ $statusText }}</span></td>
@@ -285,24 +275,24 @@
                                 <div style="display:flex;gap:4px">
                                     @if($recipe->trashed())
                                         <!-- Khôi phục món ăn -->
-                                        <button type="button" wire:click="restoreRecipe({{ $recipe->id }})" wire:confirm="Bạn có chắc chắn muốn khôi phục món ăn này?" class="abt" style="color: var(--bl); border-color: var(--bl-m);" title="Khôi phục món ăn">
+                                        <button type="button" wire:click="restoreRecipe({{ $recipe->id }})" wire:confirm="{{ __('recipe.confirm.restore') }}" class="abt" style="color: var(--bl); border-color: var(--bl-m);" title="{{ __('recipe.actions.restore') }}">
                                             <i class="fa-solid fa-rotate-left"></i>
                                         </button>
                                         <!-- Xóa vĩnh viễn -->
-                                        <button type="button" wire:click="forceDeleteRecipe({{ $recipe->id }})" wire:confirm="HÀNH ĐỘNG NÀY KHÔNG THỂ HOÀN TÁC. Bạn có chắc chắn muốn xóa vĩnh viễn món ăn này và toàn bộ định mức nguyên liệu liên quan?" class="abt abt-danger" title="Xóa vĩnh viễn">
+                                        <button type="button" wire:click="forceDeleteRecipe({{ $recipe->id }})" wire:confirm="{{ __('recipe.confirm.force_delete') }}" class="abt abt-danger" title="{{ __('recipe.actions.force_delete') }}">
                                             <i class="fa-solid fa-trash-can"></i>
                                         </button>
                                     @else
                                         <!-- Xem chi tiết -->
-                                        <a href="{{ \App\Filament\Resources\RecipeResource::getUrl('view', ['record' => $recipe]) }}" class="abt" title="Xem chi tiết">
+                                        <a href="{{ \App\Filament\Resources\RecipeResource::getUrl('view', ['record' => $recipe]) }}" class="abt" title="{{ __('recipe.actions.view') }}">
                                             <i class="fa-solid fa-eye"></i>
                                         </a>
                                         <!-- Chỉnh sửa -->
-                                        <a href="{{ \App\Filament\Resources\RecipeResource::getUrl('edit', ['record' => $recipe]) }}" class="abt" title="Chỉnh sửa">
+                                        <a href="{{ \App\Filament\Resources\RecipeResource::getUrl('edit', ['record' => $recipe]) }}" class="abt" title="{{ __('recipe.actions.edit') }}">
                                             <i class="fa-solid fa-pen"></i>
                                         </a>
                                         <!-- Xóa món -->
-                                        <button type="button" wire:click="deleteRecipe({{ $recipe->id }})" wire:confirm="Bạn có chắc chắn muốn xóa món ăn này?" class="abt abt-danger" title="Xóa món ăn">
+                                        <button type="button" wire:click="deleteRecipe({{ $recipe->id }})" wire:confirm="{{ __('recipe.confirm.delete') }}" class="abt abt-danger" title="{{ __('recipe.actions.delete') }}">
                                             <i class="fa-solid fa-trash"></i>
                                         </button>
                                     @endif
@@ -318,15 +308,12 @@
                                         <div class="mn-sub-inner">
                                             <!-- Sub table -->
                                             <div class="mn-sub-table-wrap">
-                                                <div class="mn-sub-ttl">Chi tiết nguyên liệu của {{ $recipe->name }}</div>
+                                                <div class="mn-sub-ttl">{{ __('recipe.detail.ingredients_of', ['name' => $recipe->name]) }}</div>
                                                 <table class="mn-sub-table">
                                                     <thead>
                                                         <tr>
                                                             <th style="width:50px">STT</th>
-                                                            <th>Nguyên liệu</th>
-                                                            <th>Định lượng (kg) / 1 phần</th>
-                                                            <th>Đơn giá nguyên liệu</th>
-                                                            <th>Thành tiền</th>
+                                                            <th>{{ __('recipe.fields.ingredient') }}</th><th>{{ __('recipe.detail.quantity_per_portion') }}</th><th>{{ __('recipe.fields.ingredient_price') }}</th><th>{{ __('recipe.fields.line_total') }}</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
@@ -340,12 +327,12 @@
                                                                 <td style="font-weight:600;color:var(--mu)">{{ $index + 1 }}</td>
                                                                 <td style="font-weight:600">{{ $ing->name }}</td>
                                                                 <td>{{ (float) $qty }} kg</td>
-                                                                <td>{{ number_format($price, 0, ',', '.') }} đ</td>
-                                                                <td style="font-weight:700;color:var(--or)">{{ number_format($total, 0, ',', '.') }} đ</td>
+                                                                <td>{{ __('recipe.detail.currency', ['value' => number_format($price, 0, ',', '.')]) }}</td>
+                                                                <td style="font-weight:700;color:var(--or)">{{ __('recipe.detail.currency', ['value' => number_format($total, 0, ',', '.')]) }}</td>
                                                             </tr>
                                                         @empty
                                                             <tr>
-                                                                <td colspan="5" style="text-align:center;color:var(--fa)">Món ăn này chưa khai báo định mức nguyên liệu.</td>
+                                                                <td colspan="5" style="text-align:center;color:var(--fa)">{{ __('recipe.empty.no_ingredient_quantities') }}</td>
                                                             </tr>
                                                         @endforelse
                                                     </tbody>
@@ -354,16 +341,16 @@
 
                                             <!-- Summary block right -->
                                             <div class="mn-sub-summary">
-                                                <div class="mn-sub-sum-lbl">Tổng định lượng / phần:</div>
+                                                <div class="mn-sub-sum-lbl">{{ __('recipe.detail.total_weight_label') }}</div>
                                                 <div class="mn-sub-sum-val">{{ str_replace('.', ',', round($recipeWeight, 2)) }} kg</div>
                                                 
-                                                <div class="mn-sub-cost-lbl">Tổng cost đơn giá trên 1 phần:</div>
-                                                <div class="mn-sub-cost-val">{{ number_format($recipeCost, 0, ',', '.') }} đ</div>
+                                                <div class="mn-sub-cost-lbl">{{ __('recipe.detail.total_cost_label') }}</div>
+                                                <div class="mn-sub-cost-val">{{ __('recipe.detail.currency', ['value' => number_format($recipeCost, 0, ',', '.')]) }}</div>
                                                 
                                                 @if($recipe->cost_override !== null)
                                                     <div style="margin-top:10px;padding:6px 8px;background:var(--or-s);border:1px solid #fed7aa;border-radius:6px;font-size:11px;color:var(--or-t)">
-                                                        <strong>Lý do điều chỉnh:</strong><br>
-                                                        {{ $recipe->recipeCostLogs->first()?->reason ?? 'Không ghi nhận lý do' }}
+                                                        <strong>{{ __('recipe.detail.adjustment_reason') }}</strong><br>
+                                                        {{ $recipe->recipeCostLogs->first()?->reason ?? __('recipe.detail.no_adjustment_reason') }}
                                                     </div>
                                                 @endif
                                             </div>
@@ -374,7 +361,7 @@
                         @endif
                     @empty
                         <tr>
-                            <td colspan="14" style="text-align:center;padding:30px;color:var(--mu)">Không tìm thấy món ăn nào khớp với bộ lọc.</td>
+                            <td colspan="14" style="text-align:center;padding:30px;color:var(--mu)">{{ __('recipe.empty.no_filtered_dishes') }}</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -394,10 +381,10 @@
             @endphp
             <div class="tf">
                 <div>
-                    Hiển thị <strong>{{ $recipesList->firstItem() }}</strong> đến <strong>{{ $recipesList->lastItem() }}</strong> trong tổng số <strong>{{ number_format($recipesList->total(), 0, ',', '.') }}</strong> món ăn
+                    {{ __('recipe.pagination.summary', ['from' => $recipesList->firstItem(), 'to' => $recipesList->lastItem(), 'total' => number_format($recipesList->total(), 0, ',', '.')]) }}
                 </div>
                 <div class="pgwrap">
-                    <span style="font-size:12px;color:var(--mu)">Số dòng mỗi trang</span>
+                    <span style="font-size:12px;color:var(--mu)">{{ __('recipe.pagination.per_page') }}</span>
                     <select wire:model.live="perPage" class="pgsel">
                         <option value="10">10</option>
                         <option value="20">20</option>

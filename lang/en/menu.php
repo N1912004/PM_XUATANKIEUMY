@@ -1,0 +1,33 @@
+<?php
+
+return [
+    'navigation' => ['label' => 'Menu Planning', 'group' => 'KITCHEN OPERATIONS'],
+    'model' => ['singular' => 'Menu', 'plural' => 'Menu Planning'],
+    'fields' => ['date' => 'Effective date', 'shift' => 'Shift', 'recipe' => 'Dish', 'recipe_name' => 'Dish name', 'recipe_type' => 'Dish group', 'estimated_portions' => 'Estimated portions', 'status' => 'Status', 'audit_reason' => 'Edit reason (required when editing a LOCKED menu)', 'kitchen' => 'Kitchen'],
+    'placeholders' => ['audit_reason' => 'E.g. Customer requested a last-minute dish change', 'search' => 'Search by company or week...', 'select_dish' => 'Select dish...', 'portions' => 'Portions'],
+    'status' => ['draft' => 'Draft', 'sent' => 'Sent to customer', 'confirmed' => 'Customer confirmed', 'locked' => 'Locked', 'draft_detailed' => 'Draft', 'sent_detailed' => 'Sent to customer', 'confirmed_detailed' => 'Customer confirmed', 'locked_detailed' => 'Locked'],
+    'month_label' => 'Month :month/:year',
+    'errors' => ['past_locked_delete' => 'A past locked menu cannot be deleted', 'own_kitchen_only' => 'You may only manage menus for your own kitchen.', 'locked_item_delete' => 'A dish in a locked menu cannot be deleted!', 'audit_reason_required' => 'An edit reason is required for a locked menu'],
+    'notifications' => ['week_saved' => 'Weekly menu saved successfully!', 'week_saved_with_skipped' => 'Weekly menu saved successfully! (:count locked or invalid shifts were left unchanged; enter an edit reason to modify a LOCKED menu)', 'day_saved' => 'Daily menu saved successfully!', 'day_saved_with_skipped' => 'Daily menu saved successfully! (:count locked dishes were left unchanged)'],
+    'weekly' => [
+        'title' => 'Weekly Menu Planning',
+        'fields' => ['week_start' => 'Week start date (Monday)', 'items' => 'Dishes for the week', 'day' => 'Day'],
+        'helpers' => ['week_start' => 'Dishes are assigned to weekdays starting from this date.'],
+        'placeholders' => ['audit_reason' => 'E.g. Customer requested a last-minute change on 15/07'],
+        'notifications' => ['no_items' => 'There are no dishes to save!', 'downgrade_skipped' => ':count dishes kept their status (cannot downgrade to ":status")', 'past_skipped' => ':count dishes belong to past locked menus and cannot be edited', 'saved' => ':status weekly menu (:count dishes)', 'duplicate_warning' => 'Duplicate dish warning for the last 3 weeks'],
+    ],
+    'audit' => ['label' => 'Menu Edit History', 'deleted_menu' => 'Deleted', 'fields' => ['occurred_at' => 'Time', 'menu' => 'Menu', 'user' => 'Edited by', 'action' => 'Action', 'field' => 'Field', 'old_value' => 'Old value', 'new_value' => 'New value', 'reason' => 'Edit reason', 'date_range' => 'Date range', 'from_date' => 'From', 'to_date' => 'To'], 'actions' => ['updated' => 'Edited', 'deleted' => 'Deleted']],
+    'actions' => ['save_draft' => 'Save draft', 'send_customer' => 'Send to customer', 'send_confirmation' => 'Send for confirmation', 'customer_confirmed' => 'Customer confirmed', 'lock' => 'Lock menu', 'reset_filters' => 'Reset filters', 'edit' => 'Edit', 'export_excel' => 'Export Excel', 'back' => 'Back', 'remove_dish' => 'Remove this dish', 'create_week' => 'Create weekly menu', 'create_day' => 'Create daily menu', 'open_edit' => 'Open editor', 'view_week' => 'View weekly menu', 'add_dish' => 'Add dish'],
+    'list' => ['title' => 'Menu planning', 'subtitle' => 'Manage weekly and daily menus by customer company and service shift'],
+    'kpi' => ['running_weekly' => 'Active weekly menus', 'sent_this_month' => 'Sent this month', 'customer_confirmed' => 'Customer confirmed', 'still_draft' => 'Still draft', 'locked_this_month' => 'Locked this month'],
+    'filters' => ['all_types' => 'All types', 'all_statuses' => 'All statuses', 'locked_menus' => 'Locked menus'],
+    'types' => ['week' => 'Weekly menu', 'day' => 'Daily menu'],
+    'empty' => ['no_locked_menus' => 'No locked menus', 'title' => 'No menus found', 'subtitle' => 'Try another month or search term.'],
+    'labels' => ['applies_on' => 'Applies on: :date', 'portions' => 'portions', 'date_kitchen' => 'Date :date · :kitchen', 'dish_index' => 'Dish :index'],
+    'locked_edit' => ['title' => 'Locked menus can still be edited', 'description' => 'Select a locked week and date, update its dishes, then save the changes. The menu remains locked.'],
+    'pagination' => ['summary' => 'Showing :from-:to of :total menus', 'per_page' => ':count / page'],
+    'week_form' => ['title' => 'Create weekly menu', 'subtitle' => 'Set dishes and portion capacity for each day of the week', 'shift_day' => 'SHIFT / DAY', 'duplicate_warning' => ':count dishes appeared in the last 3 weeks'],
+    'day_form' => ['title' => 'Daily menu – :date', 'subtitle' => 'Enter menu details and portions for each service shift', 'date' => 'Menu date'],
+    'days' => ['sunday' => 'Sunday', 'weekday' => 'Day :day'],
+    'summary' => ['title' => 'Daily menu summary', 'shifts' => 'Service shifts', 'none' => 'None', 'lock_notice' => 'Before locking', 'lock_notice_inventory' => 'After locking, the menu is sent to inventory staff to prepare ingredient outbound.', 'lock_notice_audit' => 'Every change after locking is recorded in the detailed audit log.'],
+];

@@ -21,60 +21,60 @@ class KitchenResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return __('Nhà ăn / bếp');
+        return __('catalog.kitchen.label');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('Nhà ăn / bếp');
+        return __('catalog.kitchen.label');
     }
 
     public static function getNavigationGroup(): ?string
     {
-        return __('KHU VỰC & NHÀ ĂN');
+        return __('catalog.groups.area_kitchen');
     }
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\Section::make('Thông tin nhà ăn / bếp')
+                Forms\Components\Section::make(__('catalog.kitchen_section'))
                     ->schema([
                         Forms\Components\Grid::make(2)
                             ->schema([
                                 Forms\Components\TextInput::make('name')
-                                    ->label('Tên nhà ăn / bếp')
+                                    ->label(__('catalog.kitchen.fields.name'))
                                     ->required()
-                                    ->placeholder('VD: Bếp chính Nhơn Trạch')
+                                    ->placeholder(__('catalog.kitchen.placeholders.name'))
                                     ->maxLength(255),
                                 Forms\Components\Select::make('area_id')
-                                    ->label('Thuộc khu vực')
+                                    ->label(__('catalog.kitchen.fields.area'))
                                     ->relationship('area', 'name')
                                     ->searchable()
                                     ->preload()
                                     ->required(),
                                 Forms\Components\Select::make('kitchen_type_id')
-                                    ->label('Phân loại')
+                                    ->label(__('catalog.kitchen.fields.type'))
                                     ->relationship('kitchenType', 'name', fn ($query) => $query->where('active', true)->orderBy('sort')->orderBy('name'))
                                     ->searchable()
                                     ->preload()
                                     ->required(),
                                 Forms\Components\TextInput::make('capacity')
-                                    ->label('Công suất phục vụ (suất/ngày)')
+                                    ->label(__('catalog.kitchen.fields.capacity'))
                                     ->numeric()
                                     ->default(0)
                                     ->required(),
                                 Forms\Components\Select::make('manager_id')
-                                    ->label('Quản lý nhà bếp')
+                                    ->label(__('catalog.kitchen.fields.manager'))
                                     ->relationship('manager', 'name')
                                     ->searchable()
                                     ->preload(),
                                 Forms\Components\Select::make('status')
-                                    ->label('Trạng thái')
+                                    ->label(__('catalog.common.status'))
                                     ->options([
-                                        'active' => 'Đang hoạt động',
-                                        'paused' => 'Tạm dừng',
-                                        'maintenance' => 'Bảo trì',
+                                        'active' => __('catalog.kitchen_status.active'),
+                                        'paused' => __('catalog.kitchen_status.paused'),
+                                        'maintenance' => __('catalog.kitchen_status.maintenance'),
                                     ])
                                     ->default('active')
                                     ->required(),
@@ -88,40 +88,40 @@ class KitchenResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('index')
-                    ->label('STT')
+                    ->label(__('catalog.common.index'))
                     ->state(static function (HasTable $livewire, \stdClass $rowLoop): string {
                         return (string) ($rowLoop->iteration);
                     }),
                 Tables\Columns\TextColumn::make('name')
-                    ->label('TÊN NHÀ BẾP / NHÀ ĂN')
+                    ->label(__('catalog.kitchen.table.name'))
                     ->searchable()
                     ->sortable()
                     ->weight('bold'),
                 Tables\Columns\TextColumn::make('area.name')
-                    ->label('KHU VỰC')
+                    ->label(__('catalog.kitchen.table.area'))
                     ->sortable()
                     ->weight('bold'),
                 Tables\Columns\TextColumn::make('kitchenType.name')
-                    ->label('PHÂN LOẠI')
+                    ->label(__('catalog.kitchen.table.type'))
                     ->badge()
                     ->color('gray')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('capacity')
-                    ->label('CÔNG SUẤT (SUẤT/NGÀY)')
+                    ->label(__('catalog.kitchen.table.capacity'))
                     ->numeric()
                     ->sortable()
                     ->weight('bold')
                     ->color('primary'),
                 Tables\Columns\TextColumn::make('manager.name')
-                    ->label('QUẢN LÝ')
+                    ->label(__('catalog.kitchen.table.manager'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('status')
-                    ->label('TRẠNG THÁI')
+                    ->label(__('catalog.common.status'))
                     ->badge()
                     ->formatStateUsing(fn (string $state): string => match ($state) {
-                        'active' => 'Đang hoạt động',
-                        'paused' => 'Tạm dừng',
-                        'maintenance' => 'Bảo trì',
+                        'active' => __('catalog.kitchen_status.active'),
+                        'paused' => __('catalog.kitchen_status.paused'),
+                        'maintenance' => __('catalog.kitchen_status.maintenance'),
                         default => $state,
                     })
                     ->color(fn (string $state): string => match ($state) {
@@ -134,17 +134,17 @@ class KitchenResource extends Resource
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('area_id')
-                    ->label('Khu vực')
+                    ->label(__('catalog.kitchen.fields.area'))
                     ->relationship('area', 'name'),
                 Tables\Filters\SelectFilter::make('kitchen_type_id')
-                    ->label('Phân loại')
+                    ->label(__('catalog.kitchen.fields.type'))
                     ->relationship('kitchenType', 'name', fn ($query) => $query->where('active', true)->orderBy('sort')->orderBy('name')),
                 Tables\Filters\SelectFilter::make('status')
-                    ->label('Trạng thái')
+                    ->label(__('catalog.common.status'))
                     ->options([
-                        'active' => 'Đang hoạt động',
-                        'paused' => 'Tạm dừng',
-                        'maintenance' => 'Bảo trì',
+                        'active' => __('catalog.kitchen_status.active'),
+                        'paused' => __('catalog.kitchen_status.paused'),
+                        'maintenance' => __('catalog.kitchen_status.maintenance'),
                     ]),
             ])
             ->actions([

@@ -19,37 +19,37 @@
 
     <div class="emp-head" style="margin-bottom:14px">
         <div>
-            <h1 class="emp-title">Kiểm thực 3 bước</h1>
-            <p class="emp-subtitle">Hiển thị 5 biểu mẫu B1-B5 theo file Excel chuẩn QĐ 1246/2017-BYT</p>
+            <h1 class="emp-title">{{ __('food_safety.page.title') }}</h1>
+            <p class="emp-subtitle">{{ __('food_safety.page.subtitle') }}</p>
         </div>
         <div class="emp-actions">
-            <button wire:click="exportExcel" class="emp-btn emp-btn-primary">
+            <button wire:click="exportExcel" class="emp-btn emp-btn-primary" aria-label="{{ __('food_safety.accessibility.export_excel') }}">
                 <i class="fa-solid fa-file-excel"></i>
-                Xuất Excel
+                {{ __('food_safety.actions.export_excel') }}
             </button>
         </div>
     </div>
 
     <div class="filter-card" style="margin-bottom:16px">
         <div class="field" style="min-width:180px">
-            <label>Ngày kiểm thực</label>
+            <label>{{ __('food_safety.filters.date') }}</label>
             <input type="date" wire:model.live="date" class="ctrl">
         </div>
         <div class="field" style="min-width:150px">
-            <label>Ca phục vụ</label>
+            <label>{{ __('food_safety.filters.shift') }}</label>
             <select wire:model.live="selectedShift" class="ctrl">
-                <option value="">Tất cả ca</option>
+                <option value="">{{ __('food_safety.filters.all_shifts') }}</option>
                 @foreach(\App\Models\Shift::all() as $s)
                     <option value="{{ $s->id }}">{{ $s->name }}</option>
                 @endforeach
             </select>
         </div>
         <div class="field" style="min-width:200px">
-            <label>Cơ sở / địa điểm</label>
+            <label>{{ __('food_safety.filters.location') }}</label>
             <input value="{{ $canteen }}" class="ctrl" readonly style="background:var(--po-bd2); cursor:not-allowed">
         </div>
         <div class="field" style="min-width:220px">
-            <label>Người kiểm tra</label>
+            <label>{{ __('food_safety.filters.inspector') }}</label>
             <div x-data="{
                 open: false,
                 search: '',
@@ -61,15 +61,15 @@
                     return this.options.filter(name => name.toLowerCase().includes(keyword));
                 }
             }" class="relative w-full">
-                <div @click="open = !open" class="ctrl flex items-center justify-between cursor-pointer" style="background:var(--po-wh); min-height:38px; border:1.5px solid var(--po-line); padding:6px 12px; border-radius:8px">
-                    <span x-text="selected ? selected : 'Chọn nhân viên'" style="font-weight:600; color:var(--po-tx)"></span>
+                <div @click="open = !open" class="ctrl flex items-center justify-between cursor-pointer" role="combobox" tabindex="0" :aria-expanded="open" aria-label="{{ __('food_safety.accessibility.inspector_picker') }}" style="background:var(--po-wh); min-height:38px; border:1.5px solid var(--po-line); padding:6px 12px; border-radius:8px">
+                    <span x-text="selected ? selected : @js(__('food_safety.placeholders.select_employee'))" style="font-weight:600; color:var(--po-tx)"></span>
                     <i class="fa-solid fa-chevron-down" style="font-size:11px; color:var(--po-mu)"></i>
                 </div>
                 <div x-show="open" @click.away="open = false" class="absolute left-0 mt-1 w-full rounded-lg shadow-lg z-50 p-2" style="display:none; max-height:280px; overflow-y:auto; border:1px solid var(--po-line); box-shadow:0 10px 25px rgba(15,35,70,.15); background:var(--po-wh);">
-                    <input type="text" x-model="search" placeholder="Tìm kiếm nhân viên..." class="ctrl w-full mb-2" style="height:32px; padding:4px 8px; font-size:13px; border:1px solid var(--po-line); border-radius:6px; outline:none">
+                    <input type="text" x-model="search" placeholder="{{ __('food_safety.placeholders.search_employee') }}" class="ctrl w-full mb-2" style="height:32px; padding:4px 8px; font-size:13px; border:1px solid var(--po-line); border-radius:6px; outline:none">
                     <div class="flex flex-col gap-1">
                         <div @click="selected = ''; open = false; search = ''" class="fsa-dropdown-item px-3 py-1.5 rounded cursor-pointer text-sm font-semibold transition italic" style="color:var(--po-mu)">
-                            Bỏ chọn
+                            {{ __('food_safety.actions.clear_selection') }}
                         </div>
                         <template x-for="name in filteredOptions" :key="name">
                             <div @click="selected = name; open = false; search = ''"
@@ -79,30 +79,30 @@
                             </div>
                         </template>
                         <div x-show="filteredOptions.length === 0" class="text-center py-3 text-xs font-semibold" style="color:var(--po-mu)">
-                            Không tìm thấy kết quả
+                            {{ __('food_safety.empty.no_employee_results') }}
                         </div>
                     </div>
                 </div>
             </div>
         </div>
         <div style="font-size:12.5px; color:var(--po-mu); padding-bottom:9px; font-weight:600">
-            {{ $sheet['dateText'] }} · {{ $stats['dishes'] }} món · {{ $stats['ingredients'] }} nguyên liệu
+            {{ __('food_safety.labels.filter_summary', ['date' => $sheet['dateText'], 'dishes' => $stats['dishes'], 'ingredients' => $stats['ingredients']]) }}
         </div>
     </div>
 
     <div class="area-tabs">
         @foreach($this->getStepTabs() as $tab)
-            <button wire:click="$set('activeStep', '{{ $tab['key'] }}')" class="area-tab {{ $activeStep === $tab['key'] ? 'active' : '' }}">
+            <button wire:click="$set('activeStep', '{{ $tab['key'] }}')" class="area-tab {{ $activeStep === $tab['key'] ? 'active' : '' }}" aria-pressed="{{ $activeStep === $tab['key'] ? 'true' : 'false' }}">
                 <i class="fa-solid {{ $tab['icon'] }}"></i>
-                {{ $tab['key'] }}
+                {{ $tab['label'] }}
                 <span class="fsa-tab-sheet">{{ $tab['sheet'] }}</span>
             </button>
         @endforeach
         <div class="tsp"></div>
         @if($activeStep === 'Lưu mẫu')
-            <button type="button" onclick="window.print()" class="emp-btn" style="height:36px">
+            <button type="button" onclick="window.print()" class="emp-btn" aria-label="{{ __('food_safety.accessibility.print_labels') }}" style="height:36px">
                 <i class="fa-solid fa-tags" style="color:var(--po-pu)"></i>
-                In tem nhãn
+                {{ __('food_safety.actions.print_labels') }}
             </button>
         @endif
     </div>
@@ -111,26 +111,26 @@
         <div class="kcard">
             <div class="ktop"><div class="kico ki-b"><i class="fa-solid fa-seedling"></i></div></div>
             <div class="kval">{{ $stats['ingredients'] }}</div>
-            <div class="klbl">Nguyên liệu B1</div>
-            <div class="knote">Từ món trong ngày</div>
+            <div class="klbl">{{ __('food_safety.kpi.ingredients_b1') }}</div>
+            <div class="knote">{{ __('food_safety.kpi.from_daily_dishes') }}</div>
         </div>
         <div class="kcard">
             <div class="ktop"><div class="kico ki-g"><i class="fa-solid fa-bowl-food"></i></div></div>
             <div class="kval">{{ $stats['dishes'] }}</div>
-            <div class="klbl">Món ăn</div>
-            <div class="knote">Phân theo ca</div>
+            <div class="klbl">{{ __('food_safety.kpi.dishes') }}</div>
+            <div class="knote">{{ __('food_safety.kpi.by_shift') }}</div>
         </div>
         <div class="kcard">
             <div class="ktop"><div class="kico ki-o"><i class="fa-solid fa-users"></i></div></div>
             <div class="kval">{{ number_format($stats['portions']) }}</div>
-            <div class="klbl">Tổng suất</div>
-            <div class="knote">Theo từng món</div>
+            <div class="klbl">{{ __('food_safety.kpi.total_portions') }}</div>
+            <div class="knote">{{ __('food_safety.kpi.by_dish') }}</div>
         </div>
         <div class="kcard">
             <div class="ktop"><div class="kico ki-p"><i class="fa-solid fa-file-excel"></i></div></div>
             <div class="kval">{{ $stats['forms'] }}</div>
-            <div class="klbl">Biểu mẫu</div>
-            <div class="knote">B1 đến B5</div>
+            <div class="klbl">{{ __('food_safety.kpi.forms') }}</div>
+            <div class="knote">{{ __('food_safety.kpi.b1_to_b5') }}</div>
         </div>
     </div>
 
@@ -209,7 +209,7 @@
                         @endif
                     @empty
                         <tr>
-                            <td colspan="{{ $colspan }}" class="fsa-empty">Không tìm thấy dữ liệu kiểm thực phù hợp.</td>
+                            <td colspan="{{ $colspan }}" class="fsa-empty">{{ __('food_safety.empty.no_audit_data') }}</td>
                         </tr>
                     @endforelse
 

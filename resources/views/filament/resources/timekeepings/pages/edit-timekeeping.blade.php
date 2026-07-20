@@ -11,21 +11,21 @@
         <!-- Header Section -->
         <div class="emp-head" style="margin-bottom: 20px;">
             <div>
-                <h1 class="emp-title">{{ $isEdit ? 'Chỉnh sửa bản ghi chấm công' : 'Thêm bản ghi chấm công' }}</h1>
+                <h1 class="emp-title">{{ $isEdit ? __('timekeeping.ui.edit_title') : __('timekeeping.ui.create_title') }}</h1>
                 <p class="emp-subtitle">
-                    {{ $isEdit ? 'Cập nhật thông tin chi tiết giờ công của nhân viên' : 'Tạo mới bản ghi chấm công thủ công cho nhân viên' }}
+                    {{ $isEdit ? __('timekeeping.ui.edit_description') : __('timekeeping.ui.create_description') }}
                 </p>
             </div>
             <div>
                 <a href="{{ \App\Filament\Resources\TimekeepingResource::getUrl('index') }}" class="emp-btn" style="background:var(--po-wh); border:1px solid var(--po-bd); color:var(--po-tx)">
-                    <i class="fa-solid fa-arrow-left"></i> Quay lại danh sách
+                    <i class="fa-solid fa-arrow-left"></i> {{ __('timekeeping.ui.back') }}
                 </a>
             </div>
         </div>
 
         @if ($errors->any())
             <div style="background:var(--po-rd-s); color:var(--po-rd-t); padding:12px 16px; border-radius:8px; border:1px solid var(--po-rd); margin-bottom:16px; font-size:13px; font-weight:600">
-                <div style="font-weight:700; margin-bottom:4px"><i class="fa-solid fa-triangle-exclamation"></i> Có lỗi xảy ra, vui lòng kiểm tra lại:</div>
+                <div style="font-weight:700; margin-bottom:4px"><i class="fa-solid fa-triangle-exclamation"></i> {{ __('timekeeping.ui.form_error') }}</div>
                 <ul style="list-style-type:disc; padding-left:20px">
                     @foreach ($errors->all() as $error)
                         <li>{{ $error }}</li>
@@ -41,14 +41,14 @@
                     <div class="fci" style="background:var(--po-bl-s);color:var(--po-bl)">
                         <i class="fa-regular fa-clock"></i>
                     </div>
-                    <div class="fct">Thông tin chi tiết chấm công</div>
+                    <div class="fct">{{ __('timekeeping.ui.details') }}</div>
                 </div>
 
                 <div class="fg fg3">
                     <div class="field">
-                        <label>Nhân viên <span class="req">*</span></label>
+                        <label>{{ __('timekeeping.fields.employee') }} <span class="req">*</span></label>
                         <select wire:model="employee_id" class="ctrl" required>
-                            <option value="">Chọn nhân viên</option>
+                            <option value="">{{ __('timekeeping.fields.employee') }}</option>
                             @foreach($employees as $emp)
                                 <option value="{{ $emp->id }}">{{ $emp->name }} ({{ $emp->code }})</option>
                             @endforeach
@@ -56,14 +56,14 @@
                     </div>
 
                     <div class="field">
-                        <label>Ngày làm việc <span class="req">*</span></label>
+                        <label>{{ __('timekeeping.fields.date') }} <span class="req">*</span></label>
                         <input wire:model="date" class="ctrl" type="date" required>
                     </div>
 
                     <div class="field">
-                        <label>Ca làm việc <span class="req">*</span></label>
+                        <label>{{ __('timekeeping.fields.shift') }} <span class="req">*</span></label>
                         <select wire:model="shift_id" class="ctrl" required>
-                            <option value="">Chọn ca</option>
+                            <option value="">{{ __('timekeeping.fields.shift') }}</option>
                             @foreach($shifts as $shift)
                                 <option value="{{ $shift->id }}">{{ $shift->name }} ({{ $shift->time_range }})</option>
                             @endforeach
@@ -71,28 +71,28 @@
                     </div>
 
                     <div class="field">
-                        <label>Giờ vào (Check-in)</label>
+                        <label>{{ __('timekeeping.fields.check_in') }}</label>
                         <input wire:model="check_in" class="ctrl" type="text" placeholder="HH:MM (VD: 07:01)">
                     </div>
 
                     <div class="field">
-                        <label>Giờ ra (Check-out)</label>
+                        <label>{{ __('timekeeping.fields.check_out') }}</label>
                         <input wire:model="check_out" class="ctrl" type="text" placeholder="HH:MM (VD: 16:05)">
                     </div>
 
                     <div class="field">
-                        <label>Số giờ tăng ca</label>
+                        <label>{{ __('timekeeping.fields.overtime') }}</label>
                         <input wire:model="overtime_hours" class="ctrl" type="text" placeholder="VD: 0h, 1h30">
                     </div>
 
                     <div class="field">
-                        <label>Trạng thái <span class="req">*</span></label>
+                        <label>{{ __('timekeeping.fields.status') }} <span class="req">*</span></label>
                         <select wire:model="status" class="ctrl" required>
-                            <option value="Đúng giờ">Đúng giờ</option>
-                            <option value="Đi trễ">Đi trễ</option>
-                            <option value="Tăng ca">Tăng ca</option>
-                            <option value="Nghỉ phép">Nghỉ phép</option>
-                            <option value="Vắng mặt">Vắng mặt</option>
+                            <option value="Đúng giờ">{{ __('timekeeping.status.on_time') }}</option>
+                            <option value="Đi trễ">{{ __('timekeeping.status.late') }}</option>
+                            <option value="Tăng ca">{{ __('timekeeping.status.overtime') }}</option>
+                            <option value="Nghỉ phép">{{ __('timekeeping.status.leave') }}</option>
+                            <option value="Vắng mặt">{{ __('timekeeping.status.absent') }}</option>
                         </select>
                     </div>
                 </div>
@@ -101,10 +101,10 @@
             <!-- Footer Action Bar -->
             <div class="ffoot" style="display:flex; justify-content:flex-end; align-items:center; background:var(--po-bd2); border-top:1px solid var(--po-bd2); padding:16px 20px; border-radius:0 0 12px 12px; margin-top:20px; gap:8px">
                 <a href="{{ \App\Filament\Resources\TimekeepingResource::getUrl('index') }}" class="emp-btn" style="background:var(--po-wh); border:1px solid var(--po-bd); color:var(--po-tx)">
-                    Hủy bỏ
+                    {{ __('timekeeping.actions.cancel') }}
                 </a>
                 <button type="submit" class="emp-btn emp-btn-primary">
-                    <i class="fa-regular fa-floppy-disk"></i> Lưu bản ghi
+                    <i class="fa-regular fa-floppy-disk"></i> {{ __('timekeeping.ui.save') }}
                 </button>
             </div>
         </form>
