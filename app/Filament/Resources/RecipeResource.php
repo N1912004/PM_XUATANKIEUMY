@@ -22,6 +22,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\HtmlString;
+use Illuminate\Validation\Rule;
 
 class RecipeResource extends Resource
 {
@@ -119,14 +120,16 @@ class RecipeResource extends Resource
                             })
                             ->helperText(__('recipe.helpers.cost_override_reason')),
                         */
-                        Forms\Components\Select::make('price_option_id')
+                        Forms\Components\Select::make('price_option')
                             ->label(__('recipe.fields.price_option'))
                             ->required()
                             ->options([
-                                0 => __('recipe.options.no'),
-                                1 => __('recipe.options.yes'),
+                                Recipe::PRICE_OPTION_NONE => __('recipe.options.none'),
+                                Recipe::PRICE_OPTION_BY_UNIT => __('recipe.options.by_unit'),
+                                Recipe::PRICE_OPTION_BY_CONTRACT => __('recipe.options.by_contract'),
                             ])
-                            ->default(0)
+                            ->rules([Rule::in(Recipe::PRICE_OPTIONS)])
+                            ->default(Recipe::PRICE_OPTION_NONE)
                             ->native(false),
                         Forms\Components\Select::make('status')
                             ->label(__('recipe.fields.status'))
@@ -221,9 +224,11 @@ class RecipeResource extends Resource
                                     ))
                                     ->extraAttributes(['class' => 'recipe-line-total'])
                                     ->columnSpan(1),
-                                Forms\Components\TextInput::make('note')
+                                Forms\Components\Textarea::make('note')
                                     ->label(__('recipe.fields.note'))
                                     ->placeholder(__('recipe.placeholders.note'))
+                                    ->rows(2)
+                                    ->maxLength(255)
                                     ->columnSpan(2),
                             ])
                             ->columns(12)

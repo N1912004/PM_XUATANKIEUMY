@@ -273,6 +273,7 @@
     .mn-table tbody tr:hover {
         background: var(--bd2);
     }
+    /* Accordion detail is temporarily hidden.
     .mn-table tbody tr.mn-row-sel {
         background: var(--bl-s);
     }
@@ -302,6 +303,7 @@
         border-color: var(--bl-m);
         transform: rotate(90deg);
     }
+    */
     .mn-code {
         font-size: 11.5px;
         font-weight: 600;
