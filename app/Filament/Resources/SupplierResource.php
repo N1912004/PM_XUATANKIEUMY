@@ -16,7 +16,7 @@ class SupplierResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-truck';
 
-    protected static ?int $navigationSort = 5;
+    protected static ?int $navigationSort = 2;
 
     public static function getNavigationLabel(): string
     {

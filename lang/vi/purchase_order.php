@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'navigation' => ['label' => 'Đặt hàng', 'model' => 'Đơn đặt hàng', 'plural' => 'Đặt hàng', 'group' => 'CUNG ỨNG'],
+    'navigation' => ['label' => 'Đặt hàng', 'model' => 'Đơn đặt hàng', 'plural' => 'Đặt hàng', 'group' => 'CUNG ỨNG & KHO'],
     'list' => ['title' => 'Đặt hàng', 'subtitle' => 'Quản lý đơn đặt hàng nguyên liệu theo nhà cung cấp từ list hàng đã chốt'],
     'fields' => ['code' => 'Mã đơn hàng', 'supplier' => 'Nhà cung cấp', 'supplier_abbr' => 'NCC', 'status' => 'Trạng thái', 'estimated_delivery_date' => 'Ngày giao dự kiến', 'note' => 'Ghi chú', 'ingredient' => 'Nguyên liệu', 'quantity_ordered' => 'SL đặt', 'quantity_received' => 'SL nhận', 'unit_price' => 'Đơn giá', 'kitchen' => 'Bếp ăn'],
     'form' => ['details' => 'Chi tiết đơn hàng', 'ordered_items' => 'Mặt hàng đặt'],
