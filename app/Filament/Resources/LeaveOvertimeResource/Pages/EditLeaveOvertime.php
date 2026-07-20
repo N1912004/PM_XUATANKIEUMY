@@ -140,11 +140,11 @@ class EditLeaveOvertime extends Page
             'leave_type_id' => 'required',
             'reason' => 'required|min:5',
         ], [
-            'employee_id.required' => 'Nhân viên là bắt buộc.',
-            'start_date.required' => 'Ngày bắt đầu là bắt buộc.',
-            'leave_type_id.required' => 'Loại yêu cầu là bắt buộc.',
-            'reason.required' => 'Lý do là bắt buộc.',
-            'reason.min' => 'Lý do phải có ít nhất 5 ký tự.',
+            'employee_id.required' => __('leave_overtime.validation.employee_required'),
+            'start_date.required' => __('leave_overtime.validation.start_required'),
+            'leave_type_id.required' => __('leave_overtime.validation.type_required'),
+            'reason.required' => __('leave_overtime.validation.reason_required'),
+            'reason.min' => __('leave_overtime.validation.reason_min'),
         ]);
 
         $fullReason = $this->reason;
@@ -190,7 +190,7 @@ class EditLeaveOvertime extends Page
             'status' => $this->status,
         ]);
 
-        session()->flash('message', 'Cập nhật yêu cầu thành công!');
+        session()->flash('message', __('leave_overtime.messages.updated'));
 
         return redirect($this->getResource()::getUrl('index'));
     }

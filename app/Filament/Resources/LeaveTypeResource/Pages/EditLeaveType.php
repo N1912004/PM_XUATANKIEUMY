@@ -19,7 +19,7 @@ class EditLeaveType extends EditRecord
                     $record = $this->getRecord();
                     if ($record->leaveOvertimes()->exists()) {
                         Notification::make()
-                            ->title('Không thể xóa loại này vì đang có '.$record->leaveOvertimes()->count().' đơn từ sử dụng.')
+                            ->title(__('leave_overtime.type.cannot_delete', ['count' => $record->leaveOvertimes()->count()]))
                             ->danger()
                             ->send();
                         $action->cancel();

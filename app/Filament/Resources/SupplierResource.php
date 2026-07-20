@@ -20,22 +20,22 @@ class SupplierResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return __('Nhà cung cấp');
+        return __('supplier.navigation.label');
     }
 
     public static function getModelLabel(): string
     {
-        return __('Nhà cung cấp');
+        return __('supplier.navigation.model');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('Nhà cung cấp');
+        return __('supplier.navigation.plural');
     }
 
     public static function getNavigationGroup(): ?string
     {
-        return __('CUNG ỨNG & KHO');
+        return __('supplier.navigation.group');
     }
 
     public static function form(Form $form): Form
@@ -44,54 +44,54 @@ class SupplierResource extends Resource
             ->schema([
                 Forms\Components\Grid::make(3)
                     ->schema([
-                        Forms\Components\Section::make('Thông tin nhà cung cấp')
+                        Forms\Components\Section::make(__('supplier.form.information'))
                             ->columnSpan(2)
                             ->schema([
                                 Forms\Components\TextInput::make('name')
-                                    ->label('Tên nhà cung cấp')
+                                    ->label(__('supplier.fields.name'))
                                     ->required()
-                                    ->placeholder('Nhập tên nhà cung cấp'),
+                                    ->placeholder(__('supplier.placeholders.name')),
                                 Forms\Components\TextInput::make('code')
-                                    ->label('Mã nhà cung cấp')
+                                    ->label(__('supplier.fields.code'))
                                     ->required()
                                     ->unique(ignoreRecord: true)
-                                    ->placeholder('Nhập mã nhà cung cấp'),
+                                    ->placeholder(__('supplier.placeholders.code')),
                                 Forms\Components\Select::make('type')
-                                    ->label('Phân loại')
+                                    ->label(__('supplier.fields.type'))
                                     ->required()
                                     ->options([
-                                        'Thịt' => 'Thịt',
-                                        'Rau củ' => 'Rau củ',
-                                        'Thực phẩm khô' => 'Thực phẩm khô',
-                                        'Gia vị' => 'Gia vị',
-                                        'Hải sản' => 'Hải sản',
-                                        'Tổng hợp' => 'Tổng hợp',
+                                        'Thịt' => __('supplier.types.meat'),
+                                        'Rau củ' => __('supplier.types.vegetables'),
+                                        'Thực phẩm khô' => __('supplier.types.dry_food'),
+                                        'Gia vị' => __('supplier.types.spices'),
+                                        'Hải sản' => __('supplier.types.seafood'),
+                                        'Tổng hợp' => __('supplier.types.general'),
                                     ])
-                                    ->placeholder('Chọn phân loại'),
+                                    ->placeholder(__('supplier.placeholders.type')),
                                 Forms\Components\TextInput::make('contact_name')
-                                    ->label('Người đại diện')
-                                    ->placeholder('Nhập tên người đại diện'),
+                                    ->label(__('supplier.fields.contact_name'))
+                                    ->placeholder(__('supplier.placeholders.contact_name')),
                                 Forms\Components\TextInput::make('phone')
-                                    ->label('Số điện thoại')
+                                    ->label(__('supplier.fields.phone'))
                                     ->tel()
-                                    ->placeholder('Nhập số điện thoại'),
+                                    ->placeholder(__('supplier.placeholders.phone')),
                                 Forms\Components\TextInput::make('email')
-                                    ->label('Địa chỉ email')
+                                    ->label(__('supplier.fields.email'))
                                     ->email()
-                                    ->placeholder('Nhập địa chỉ email'),
+                                    ->placeholder(__('supplier.placeholders.email')),
                                 Forms\Components\Textarea::make('notes')
-                                    ->label('Ghi chú')
-                                    ->placeholder('Nhập ghi chú chi tiết về nhà cung cấp...')
+                                    ->label(__('supplier.fields.notes'))
+                                    ->placeholder(__('supplier.placeholders.notes'))
                                     ->columnSpanFull(),
                             ])
                             ->columns(2),
                         Forms\Components\Group::make()
                             ->columnSpan(1)
                             ->schema([
-                                Forms\Components\Section::make('Thiết lập nhanh')
+                                Forms\Components\Section::make(__('supplier.form.quick_settings'))
                                     ->schema([
                                         Forms\Components\Toggle::make('status')
-                                            ->label('Hoạt động')
+                                            ->label(__('supplier.fields.active'))
                                             ->default(true)
                                             ->onColor('success')
                                             ->offColor('danger'),
@@ -107,22 +107,22 @@ class SupplierResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('index')
-                    ->label('STT')
+                    ->label(__('supplier.table.index'))
                     ->state(static function (Tables\Contracts\HasTable $livewire, \stdClass $rowLoop): string {
                         return (string) ($rowLoop->iteration);
                     }),
                 Tables\Columns\TextColumn::make('code')
-                    ->label('MÃ NCC')
+                    ->label(__('supplier.table.code'))
                     ->searchable()
                     ->sortable()
                     ->weight('bold'),
                 Tables\Columns\TextColumn::make('name')
-                    ->label('TÊN NHÀ CUNG CẤP')
+                    ->label(__('supplier.table.name'))
                     ->searchable()
                     ->sortable()
                     ->weight('bold'),
                 Tables\Columns\TextColumn::make('type')
-                    ->label('PHÒNG GIAO DỊCH / PHÂN LOẠI')
+                    ->label(__('supplier.table.type'))
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         'Thịt' => 'danger',
@@ -132,30 +132,30 @@ class SupplierResource extends Resource
                         default => 'gray',
                     }),
                 Tables\Columns\TextColumn::make('contact_name')
-                    ->label('NGƯỜI ĐẠI DIỆN'),
+                    ->label(__('supplier.table.contact_name')),
                 Tables\Columns\TextColumn::make('phone')
-                    ->label('SỐ ĐIỆN THOẠI'),
+                    ->label(__('supplier.table.phone')),
                 Tables\Columns\TextColumn::make('email')
-                    ->label('ĐỊA CHỈ EMAIL'),
+                    ->label(__('supplier.table.email')),
                 Tables\Columns\IconColumn::make('status')
-                    ->label('TRẠNG THÁI')
+                    ->label(__('supplier.table.status'))
                     ->boolean(),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('type')
-                    ->label('Phân loại')
+                    ->label(__('supplier.fields.type'))
                     ->options([
-                        'Thịt' => 'Thịt',
-                        'Rau củ' => 'Rau củ',
-                        'Thực phẩm khô' => 'Thực phẩm khô',
-                        'Gia vị' => 'Gia vị',
-                        'Hải sản' => 'Hải sản',
-                        'Tổng hợp' => 'Tổng hợp',
+                        'Thịt' => __('supplier.types.meat'),
+                        'Rau củ' => __('supplier.types.vegetables'),
+                        'Thực phẩm khô' => __('supplier.types.dry_food'),
+                        'Gia vị' => __('supplier.types.spices'),
+                        'Hải sản' => __('supplier.types.seafood'),
+                        'Tổng hợp' => __('supplier.types.general'),
                     ]),
                 Tables\Filters\TernaryFilter::make('status')
-                    ->label('Trạng thái hoạt động')
-                    ->trueLabel('Đang hoạt động')
-                    ->falseLabel('Tạm ngưng'),
+                    ->label(__('supplier.filters.active_status'))
+                    ->trueLabel(__('supplier.status.active'))
+                    ->falseLabel(__('supplier.status.inactive')),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),

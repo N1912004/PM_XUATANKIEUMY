@@ -1,0 +1,42 @@
+<?php
+
+return [
+    'navigation' => 'Nhân viên',
+    'group' => 'NHÂN SỰ',
+    'create_title' => 'Thêm nhân viên mới',
+    'edit_title' => 'Chỉnh sửa nhân viên',
+    'create_description' => 'Nhập thông tin để tạo hồ sơ nhân viên mới trong hệ thống',
+    'edit_description' => 'Cập nhật thông tin và hồ sơ nhân viên trong hệ thống',
+    'sections' => ['avatar' => 'Ảnh đại diện', 'personal' => 'Thông tin cá nhân', 'work' => 'Thông tin công việc', 'address' => 'Địa chỉ & liên hệ khẩn cấp', 'documents' => 'Hồ sơ đính kèm'],
+    'fields' => [
+        'name' => 'Họ và tên', 'code' => 'Mã nhân viên', 'gender' => 'Giới tính', 'birth_date' => 'Ngày sinh',
+        'identity_number' => 'Số CCCD / CMND', 'phone' => 'Số điện thoại', 'email' => 'Email', 'department' => 'Phòng ban',
+        'position' => 'Chức danh / Chức vụ', 'area' => 'Khu vực làm việc', 'kitchen' => 'Bếp ăn trực thuộc', 'start_date' => 'Ngày vào làm',
+        'status' => 'Trạng thái', 'avatar' => 'Ảnh hồ sơ cá nhân', 'issue_date' => 'Ngày cấp', 'issue_place' => 'Nơi cấp',
+        'marital_status' => 'Tình trạng hôn nhân', 'nationality' => 'Quốc tịch', 'ethnicity' => 'Dân tộc', 'religion' => 'Tôn giáo',
+        'permanent_address' => 'Địa chỉ thường trú', 'temporary_address' => 'Địa chỉ tạm trú', 'emergency_contact' => 'Người liên hệ khẩn cấp',
+        'emergency_phone' => 'SĐT liên hệ khẩn cấp',
+    ],
+    'placeholders' => ['name' => 'VD: Nguyễn Văn An', 'code' => 'VD: NV001', 'identity_number' => 'Số giấy tờ tùy thân', 'phone' => 'Liên hệ cá nhân', 'email' => 'Nhập email', 'search' => 'Tìm kiếm nhân viên...'],
+    'options' => ['male' => 'Nam', 'female' => 'Nữ', 'other' => 'Khác', 'single' => 'Độc thân', 'married' => 'Kết hôn', 'vietnam' => 'Việt Nam', 'foreign' => 'Nước ngoài'],
+    'status' => ['working' => 'Đang làm việc', 'on_leave' => 'Nghỉ phép', 'resigned' => 'Nghỉ việc'],
+    'table' => ['index' => 'STT', 'avatar' => 'AVATAR', 'code' => 'MÃ NHÂN VIÊN', 'name' => 'HỌ VÀ TÊN', 'department' => 'PHÒNG BAN', 'position' => 'VỊ TRÍ', 'area' => 'KHU VỰC', 'kitchen' => 'BẾP ĂN', 'start_date' => 'NGÀY VÀO LÀM', 'status' => 'TRẠNG THÁI', 'actions' => 'THAO TÁC'],
+    'actions' => ['create' => 'Thêm nhân viên', 'save' => 'Lưu nhân viên', 'update' => 'Cập nhật nhân viên', 'cancel' => 'Hủy bỏ', 'view' => 'Xem chi tiết', 'edit' => 'Chỉnh sửa', 'export' => 'Xuất dữ liệu'],
+    'messages' => ['created' => 'Thêm mới nhân viên thành công!', 'updated' => 'Cập nhật nhân viên thành công!', 'deleted' => 'Đã xóa nhân viên thành công!', 'unnamed_document' => 'Tài liệu không tên'],
+    'upload' => ['hint' => 'Tải lên ảnh JPG, PNG hoặc WebP. Tối đa 2MB.', 'compact_hint' => 'JPG, PNG, WebP tối đa 2MB', 'uploading' => 'Đang tải ảnh lên...'],
+    'validation' => [
+        'code_required' => 'Mã nhân viên là bắt buộc.', 'code_unique' => 'Mã nhân viên đã tồn tại.', 'name_required' => 'Họ và tên là bắt buộc.',
+        'email_required' => 'Email là bắt buộc.', 'email_email' => 'Email không đúng định dạng.', 'phone_required' => 'Số điện thoại là bắt buộc.',
+        'department_required' => 'Phòng ban là bắt buộc.', 'position_required' => 'Chức vụ là bắt buộc.', 'area_required' => 'Khu vực là bắt buộc.',
+        'start_date_required' => 'Ngày vào làm là bắt buộc.', 'avatar_image' => 'Ảnh đại diện phải là tệp hình ảnh (JPG, PNG, WebP).',
+        'avatar_max' => 'Ảnh đại diện tối đa 2MB.', 'document_mimes' => 'Tệp đính kèm phải là PDF, Word hoặc hình ảnh.',
+        'document_max' => 'Tệp đính kèm tối đa 5MB.', 'document_expiry_date' => 'Ngày hết hạn hồ sơ không đúng định dạng.',
+    ],
+    'ui' => [
+        'division_hint' => 'VD: PNS',
+        'back' => 'Quay lại danh sách', 'form_error' => 'Có lỗi xảy ra, vui lòng kiểm tra lại:', 'full_name' => 'Họ tên đầy đủ', 'internal_code' => 'Mã số định danh nội bộ', 'select_marital' => 'Chọn tình trạng', 'id_issue_place' => 'Cơ quan cấp CCCD/CMND', 'ethnicity_hint' => 'Theo hồ sơ (VD: Kinh)', 'religion_hint' => 'Theo hồ sơ (nếu có)', 'permanent_hint' => 'Theo hộ khẩu / CCCD', 'current_address' => 'Nơi ở hiện tại', 'relationship' => 'Quan hệ', 'relationship_hint' => 'Cha / Mẹ / Vợ / Chồng...',
+        'select_department' => 'Chọn phòng ban', 'division' => 'Bộ phận', 'select_position' => 'Chọn chức vụ', 'level' => 'Cấp bậc', 'select_level' => 'Chọn cấp bậc', 'employee_level' => 'Nhân viên', 'specialist' => 'Chuyên viên', 'team_leader' => 'Tổ trưởng', 'manager' => 'Quản lý', 'department_head' => 'Trưởng phòng', 'employment_type' => 'Hình thức làm việc', 'select_employment_type' => 'Chọn hình thức', 'full_time' => 'Toàn thời gian', 'part_time' => 'Bán thời gian', 'seasonal' => 'Thời vụ', 'select_area' => 'Chọn khu vực', 'no_kitchen' => 'Không có / Văn phòng', 'direct_manager' => 'Quản lý trực tiếp', 'select_manager' => 'Chọn quản lý', 'employee_status' => 'Trạng thái nhân viên',
+        'document_tracking' => 'Theo dõi hồ sơ', 'document_help' => 'Nhập tên hồ sơ, đính kèm tệp và chọn ngày hết hạn để theo dõi.', 'document_name' => 'Tên hồ sơ', 'attachment' => 'Tệp đính kèm', 'expiry_date' => 'Ngày hết hạn', 'actions' => 'Thao tác', 'document_placeholder' => 'Tên hồ sơ (VD: Hợp đồng lao động)', 'choose_file' => 'Chọn tệp', 'no_file' => 'Chưa có tệp', 'uploading' => 'Đang tải...', 'delete_document' => 'Xóa tài liệu này', 'add_document' => 'Thêm hồ sơ', 'create_another' => 'Tạo thêm sau khi lưu',
+        'subtitle' => 'Quản lý thông tin và hồ sơ nhân viên trong công ty', 'total' => 'Tổng nhân viên', 'expiring_documents' => 'Hồ sơ sắp hết hạn', 'expires_within' => 'Đã hết hạn hoặc còn ≤ 30 ngày', 'all' => 'Tất cả', 'filters' => 'Bộ lọc', 'reset_filters' => 'Cài lại bộ lọc', 'confirm_delete' => 'Bạn có chắc chắn muốn xóa nhân viên này?', 'delete' => 'Xóa nhân viên', 'empty' => 'Không tìm thấy nhân viên nào', 'empty_hint' => 'Hãy thử điều chỉnh bộ lọc hoặc từ khóa tìm kiếm khác.', 'pagination' => 'Hiển thị :from đến :to trong tổng số :total nhân viên', 'rows_per_page' => ':count dòng/trang',
+    ],
+];

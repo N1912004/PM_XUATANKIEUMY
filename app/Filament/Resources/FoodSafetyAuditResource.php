@@ -20,22 +20,22 @@ class FoodSafetyAuditResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return __('Kiểm thực 3 bước');
+        return __('food_safety.navigation.label');
     }
 
     public static function getModelLabel(): string
     {
-        return __('Nhật ký kiểm thực');
+        return __('food_safety.navigation.model');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('Kiểm thực 3 bước');
+        return __('food_safety.navigation.plural');
     }
 
     public static function getNavigationGroup(): ?string
     {
-        return __('VẬN HÀNH BẾP');
+        return __('food_safety.navigation.group');
     }
 
     public static function form(Form $form): Form
@@ -43,82 +43,82 @@ class FoodSafetyAuditResource extends Resource
         return $form
             ->schema([
                 Forms\Components\DatePicker::make('date')
-                    ->label('Ngày kiểm tra')
+                    ->label(__('food_safety.fields.audit_date'))
                     ->required(),
                 Forms\Components\Select::make('shift_id')
-                    ->label('Ca phục vụ')
+                    ->label(__('food_safety.fields.shift'))
                     ->relationship('shift', 'name')
                     ->searchable()
                     ->preload()
                     ->required(),
                 Forms\Components\Select::make('stage')
-                    ->label('Bước kiểm thực')
+                    ->label(__('food_safety.fields.stage'))
                     ->required()
                     ->live()
                     ->options([
-                        'Bước 1' => 'Bước 1 – Kiểm tra trước chế biến',
-                        'Bước 2' => 'Bước 2 – Kiểm tra khi chế biến',
-                        'Bước 3' => 'Bước 3 – Kiểm tra trước khi ăn',
-                        'Lưu mẫu' => 'Theo dõi lưu mẫu',
-                        'Hủy mẫu' => 'Theo dõi hủy mẫu',
+                        'Bước 1' => __('food_safety.stages.step_1_long'),
+                        'Bước 2' => __('food_safety.stages.step_2_long'),
+                        'Bước 3' => __('food_safety.stages.step_3_long'),
+                        'Lưu mẫu' => __('food_safety.stages.sample_storage_long'),
+                        'Hủy mẫu' => __('food_safety.stages.sample_disposal_long'),
                     ]),
                 Forms\Components\Select::make('recipe_id')
-                    ->label('Món ăn')
+                    ->label(__('food_safety.fields.dish'))
                     ->relationship('recipe', 'name')
                     ->searchable()
                     ->preload()
-                    ->helperText('Áp dụng cho kiểm thực theo từng món (Bước 2, 3, lưu mẫu).')
+                    ->helperText(__('food_safety.help.dish'))
                     ->visible(fn (Forms\Get $get): bool => in_array($get('stage'), ['Bước 2', 'Bước 3', 'Lưu mẫu', 'Hủy mẫu'])),
                 Forms\Components\Select::make('status')
-                    ->label('Kết luận')
+                    ->label(__('food_safety.fields.conclusion'))
                     ->required()
                     ->options([
-                        'pending' => 'Chờ đánh giá',
-                        'passed' => 'Đạt',
-                        'failed' => 'Không đạt',
+                        'pending' => __('food_safety.status.pending'),
+                        'passed' => __('food_safety.status.passed'),
+                        'failed' => __('food_safety.status.failed'),
                     ])
                     ->default('pending'),
                 Forms\Components\TextInput::make('inspected_by')
-                    ->label('Người thực hiện')
+                    ->label(__('food_safety.fields.inspector'))
                     ->maxLength(255)
                     ->default(null),
 
                 // Bước 2 – giờ bắt đầu / hoàn thành chế biến, nhiệt độ (ghi nhận THẬT)
                 Forms\Components\TimePicker::make('cook_start_at')
-                    ->label('Giờ bắt đầu chế biến')
+                    ->label(__('food_safety.fields.cook_start'))
                     ->seconds(false)
                     ->visible(fn (Forms\Get $get): bool => $get('stage') === 'Bước 2'),
                 Forms\Components\TimePicker::make('cook_end_at')
-                    ->label('Giờ hoàn thành chế biến')
+                    ->label(__('food_safety.fields.cook_end'))
                     ->seconds(false)
                     ->visible(fn (Forms\Get $get): bool => $get('stage') === 'Bước 2'),
                 Forms\Components\TextInput::make('temperature')
-                    ->label('Nhiệt độ')
+                    ->label(__('food_safety.fields.temperature'))
                     ->placeholder('VD: 85°C')
                     ->maxLength(50)
                     ->visible(fn (Forms\Get $get): bool => in_array($get('stage'), ['Bước 2', 'Bước 3'])),
 
                 // Bước 3 / Lưu mẫu – người lưu mẫu + thời điểm lưu mẫu (ghi nhận THẬT)
                 Forms\Components\TextInput::make('sample_kept_by')
-                    ->label('Người lưu mẫu')
+                    ->label(__('food_safety.fields.sample_keeper'))
                     ->maxLength(255)
                     ->visible(fn (Forms\Get $get): bool => in_array($get('stage'), ['Bước 3', 'Lưu mẫu', 'Hủy mẫu'])),
                 Forms\Components\DateTimePicker::make('sample_kept_at')
-                    ->label('Thời điểm lưu mẫu')
+                    ->label(__('food_safety.fields.sample_kept_at'))
                     ->seconds(false)
                     ->visible(fn (Forms\Get $get): bool => in_array($get('stage'), ['Bước 3', 'Lưu mẫu', 'Hủy mẫu'])),
                 Forms\Components\TextInput::make('sample_code')
-                    ->label('Mã số mẫu lưu')
+                    ->label(__('food_safety.fields.sample_code'))
                     ->maxLength(255)
                     ->visible(fn (Forms\Get $get): bool => in_array($get('stage'), ['Lưu mẫu', 'Hủy mẫu'])),
                 Forms\Components\TextInput::make('utensil')
-                    ->label('Dụng cụ chứa đựng / ăn uống')
+                    ->label(__('food_safety.fields.utensils'))
                     ->maxLength(255)
                     ->visible(fn (Forms\Get $get): bool => in_array($get('stage'), ['Bước 3', 'Lưu mẫu'])),
 
                 Forms\Components\Textarea::make('notes')
-                    ->label('Ghi nhận chi tiết/chỉ tiêu')
-                    ->placeholder('Ví dụ: cảm quan tốt, nhiệt độ tủ lưu 4°C...')
+                    ->label(__('food_safety.fields.notes'))
+                    ->placeholder(__('food_safety.placeholders.notes'))
                     ->columnSpanFull(),
             ]);
     }
@@ -128,22 +128,22 @@ class FoodSafetyAuditResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('date')
-                    ->label('Ngày kiểm')
+                    ->label(__('food_safety.table.audit_date'))
                     ->date('d/m/Y')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('shift.name')
                     ->label('Ca')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('stage')
-                    ->label('Bước kiểm thực')
+                    ->label(__('food_safety.table.stage'))
                     ->searchable(),
                 Tables\Columns\TextColumn::make('status')
-                    ->label('Kết luận')
+                    ->label(__('food_safety.table.conclusion'))
                     ->badge()
                     ->formatStateUsing(fn (string $state): string => match ($state) {
-                        'pending' => 'Chờ đánh giá',
-                        'passed' => 'Đạt',
-                        'failed' => 'Không đạt',
+                        'pending' => __('food_safety.status.pending'),
+                        'passed' => __('food_safety.status.passed'),
+                        'failed' => __('food_safety.status.failed'),
                         default => $state,
                     })
                     ->color(fn (string $state): string => match ($state) {
@@ -154,7 +154,7 @@ class FoodSafetyAuditResource extends Resource
                     })
                     ->searchable(),
                 Tables\Columns\TextColumn::make('inspected_by')
-                    ->label('Người thực hiện')
+                    ->label(__('food_safety.table.inspector'))
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
@@ -163,23 +163,23 @@ class FoodSafetyAuditResource extends Resource
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('shift_id')
-                    ->label('Ca phục vụ')
+                    ->label(__('food_safety.fields.shift'))
                     ->relationship('shift', 'name'),
                 Tables\Filters\SelectFilter::make('stage')
-                    ->label('Bước kiểm thực')
+                    ->label(__('food_safety.fields.stage'))
                     ->options([
-                        'Bước 1' => 'Bước 1',
-                        'Bước 2' => 'Bước 2',
-                        'Bước 3' => 'Bước 3',
-                        'Lưu mẫu' => 'Lưu mẫu',
-                        'Hủy mẫu' => 'Hủy mẫu',
+                        'Bước 1' => __('food_safety.stages.step_1'),
+                        'Bước 2' => __('food_safety.stages.step_2'),
+                        'Bước 3' => __('food_safety.stages.step_3'),
+                        'Lưu mẫu' => __('food_safety.stages.sample_storage'),
+                        'Hủy mẫu' => __('food_safety.stages.sample_disposal'),
                     ]),
                 Tables\Filters\SelectFilter::make('status')
-                    ->label('Kết luận')
+                    ->label(__('food_safety.fields.conclusion'))
                     ->options([
-                        'pending' => 'Chờ đánh giá',
-                        'passed' => 'Đạt',
-                        'failed' => 'Không đạt',
+                        'pending' => __('food_safety.status.pending'),
+                        'passed' => __('food_safety.status.passed'),
+                        'failed' => __('food_safety.status.failed'),
                     ]),
             ])
             ->actions([

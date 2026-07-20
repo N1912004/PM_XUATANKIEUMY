@@ -20,7 +20,7 @@ class EditMenu extends EditRecord
                 ->before(function (Actions\DeleteAction $action, Menu $record): void {
                     if ($record->isPastLocked()) {
                         Notification::make()
-                            ->title('Thực đơn quá khứ đã chốt — không thể xóa')
+                            ->title(__('menu.errors.past_locked_delete'))
                             ->danger()
                             ->send();
 

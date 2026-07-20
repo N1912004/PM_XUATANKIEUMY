@@ -17,12 +17,12 @@ class CreateRecipe extends CreateRecord
 
     public function getTitle(): string|Htmlable
     {
-        return 'Thêm món ăn vào ngân hàng thực đơn';
+        return __('recipe.pages.create.title');
     }
 
     public function getSubheading(): string|Htmlable|null
     {
-        return 'Khai báo món ăn, mức giá suất ăn và cost nguyên liệu trên 1 phần';
+        return __('recipe.pages.create.subtitle');
     }
 
     /**
@@ -32,10 +32,10 @@ class CreateRecipe extends CreateRecord
     {
         return [
             $this->getCancelFormAction()
-                ->label('Hủy')
+                ->label(__('recipe.actions.cancel'))
                 ->icon('heroicon-m-x-mark'),
             Action::make('saveDraft')
-                ->label('Lưu nháp')
+                ->label(__('recipe.actions.save_draft'))
                 ->icon('heroicon-m-archive-box')
                 ->color('gray')
                 ->action(function (): void {
@@ -43,7 +43,7 @@ class CreateRecipe extends CreateRecord
                     $this->create();
                 }),
             $this->getCreateFormAction()
-                ->label('Tạo món ăn')
+                ->label(__('recipe.actions.create'))
                 ->icon('heroicon-m-plus')
                 ->formId('form'),
         ];

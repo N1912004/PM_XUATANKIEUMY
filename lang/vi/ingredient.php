@@ -1,7 +1,9 @@
 <?php
 
 return [
+    'cost_source_notice' => 'Đơn giá nguyên liệu được lấy từ module Nguyên liệu / Nhà cung cấp và dùng để tự động tính cost nguyên liệu trên 1 phần.',
     'navigation' => [
+        'group' => 'NGUYÊN LIỆU & KHO',
         'ingredient' => 'Nguyên liệu',
         'ingredient_plural' => 'Danh sách nguyên liệu',
         'unit' => 'Đơn vị tính',

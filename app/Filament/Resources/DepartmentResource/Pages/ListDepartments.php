@@ -12,7 +12,7 @@ class ListDepartments extends ListRecords
 
     public function getTitle(): string
     {
-        return __('Phòng ban');
+        return __('catalog.department.label');
     }
 
     protected function getHeaderActions(): array

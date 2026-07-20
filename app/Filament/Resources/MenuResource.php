@@ -23,22 +23,22 @@ class MenuResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return __('Lập thực đơn');
+        return __('menu.navigation.label');
     }
 
     public static function getModelLabel(): string
     {
-        return __('Thực đơn');
+        return __('menu.model.singular');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('Lập thực đơn');
+        return __('menu.model.plural');
     }
 
     public static function getNavigationGroup(): ?string
     {
-        return __('VẬN HÀNH BẾP');
+        return __('menu.navigation.group');
     }
 
     public static function form(Form $form): Form
@@ -47,38 +47,38 @@ class MenuResource extends Resource
             ->schema([
                 static::kitchenSelect(),
                 Forms\Components\DatePicker::make('date')
-                    ->label('Ngày áp dụng')
+                    ->label(__('menu.fields.date'))
                     ->required(),
                 Forms\Components\Select::make('shift_id')
-                    ->label('Ca làm việc')
+                    ->label(__('menu.fields.shift'))
                     ->relationship('shift', 'name')
                     ->searchable()
                     ->preload()
                     ->required(),
                 Forms\Components\Select::make('recipe_id')
-                    ->label('Món ăn')
+                    ->label(__('menu.fields.recipe'))
                     ->relationship('recipe', 'name', fn ($query) => $query->where('status', 'active'))
                     ->searchable()
                     ->preload()
                     ->required(),
                 Forms\Components\TextInput::make('estimated_portions')
-                    ->label('Số suất ăn dự kiến')
+                    ->label(__('menu.fields.estimated_portions'))
                     ->required()
                     ->numeric()
                     ->default(0),
                 Forms\Components\Select::make('status')
-                    ->label('Trạng thái')
+                    ->label(__('menu.fields.status'))
                     ->required()
                     ->options([
-                        'draft' => 'Nháp (Draft)',
-                        'sent' => 'Đã gửi khách hàng (Sent)',
-                        'confirmed' => 'Khách đã xác nhận (Confirmed)',
-                        'locked' => 'Đã chốt (Locked)',
+                        'draft' => __('menu.status.draft_detailed'),
+                        'sent' => __('menu.status.sent_detailed'),
+                        'confirmed' => __('menu.status.confirmed_detailed'),
+                        'locked' => __('menu.status.locked_detailed'),
                     ])
                     ->default('draft'),
                 Forms\Components\TextInput::make('edit_reason')
-                    ->label('Lý do sửa (bắt buộc khi sửa thực đơn ĐÃ CHỐT)')
-                    ->placeholder('VD: Khách đổi món đột xuất')
+                    ->label(__('menu.fields.audit_reason'))
+                    ->placeholder(__('menu.placeholders.audit_reason'))
                     ->maxLength(255)
                     ->dehydrated(false)
                     ->visible(fn (string $operation, ?Menu $record): bool => $operation === 'edit'
@@ -93,18 +93,18 @@ class MenuResource extends Resource
             ->columns([
                 static::kitchenColumn(),
                 Tables\Columns\TextColumn::make('date')
-                    ->label('Ngày áp dụng')
+                    ->label(__('menu.fields.date'))
                     ->date('d/m/Y')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('shift.name')
-                    ->label('Ca làm việc')
+                    ->label(__('menu.fields.shift'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('recipe.name')
-                    ->label('Tên món ăn')
+                    ->label(__('menu.fields.recipe_name'))
                     ->sortable()
                     ->weight('bold'),
                 Tables\Columns\TextColumn::make('recipe.type')
-                    ->label('Nhóm món')
+                    ->label(__('menu.fields.recipe_type'))
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         'Món mặn', 'Món 1' => 'danger',
@@ -115,12 +115,12 @@ class MenuResource extends Resource
                     })
                     ->sortable(),
                 Tables\Columns\TextColumn::make('estimated_portions')
-                    ->label('Số suất ăn dự kiến')
+                    ->label(__('menu.fields.estimated_portions'))
                     ->numeric()
                     ->sortable()
                     ->weight('bold'),
                 Tables\Columns\TextColumn::make('status')
-                    ->label('Trạng thái')
+                    ->label(__('menu.fields.status'))
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         'draft' => 'warning',
@@ -129,7 +129,7 @@ class MenuResource extends Resource
                         'locked' => 'success',
                         default => 'gray',
                     })
-                    ->formatStateUsing(fn (string $state): string => Menu::STATUS_LABELS[$state] ?? $state),
+                    ->formatStateUsing(fn (string $state): string => __("menu.status.{$state}")),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -137,14 +137,14 @@ class MenuResource extends Resource
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('kitchen_id')
-                    ->label('Bếp ăn')
+                    ->label(__('menu.fields.kitchen'))
                     ->relationship('kitchen', 'name'),
                 Tables\Filters\SelectFilter::make('shift_id')
-                    ->label('Ca làm việc')
+                    ->label(__('menu.fields.shift'))
                     ->relationship('shift', 'name'),
                 Tables\Filters\SelectFilter::make('status')
-                    ->label('Trạng thái')
-                    ->options(Menu::STATUS_LABELS),
+                    ->label(__('menu.fields.status'))
+                    ->options(collect(array_keys(Menu::STATUS_LABELS))->mapWithKeys(fn (string $status): array => [$status => __("menu.status.{$status}")])->all()),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

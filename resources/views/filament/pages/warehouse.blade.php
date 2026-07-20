@@ -540,9 +540,9 @@
     {{-- Nếu là quản trị viên/toàn quyền, cho phép chọn bếp linh hoạt --}}
     @if(auth()->user()?->hasRole(['super_admin', 'Quản trị viên']))
         <div class="col-span-full mb-1.5 flex items-center gap-2.5 rounded-lg border border-gray-200 bg-white px-4 py-3 dark:border-gray-700 dark:bg-gray-800">
-            <span class="text-sm font-semibold text-gray-600 dark:text-gray-300">Đang chọn Bếp ăn:</span>
+            <span class="text-sm font-semibold text-gray-600 dark:text-gray-300">{{ __('warehouse.filters.selected_kitchen') }}</span>
             <select wire:model.live="selectedKitchenId" class="rounded-md border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:[color-scheme:dark]">
-                <option value="all">Tất cả các bếp</option>
+                <option value="all">{{ __('warehouse.filters.all_kitchens') }}</option>
                 @foreach(\App\Models\Kitchen::orderBy('name')->get() as $kit)
                     <option value="{{ $kit->id }}">{{ $kit->name }}</option>
                 @endforeach
@@ -773,7 +773,7 @@
                         </select>
 
                         @if($stocksData->hasPages())
-                            <nav role="navigation" aria-label="Pagination Navigation" style="display:flex; align-items:center; gap:4px;">
+                            <nav role="navigation" aria-label="{{ __('warehouse.pagination.navigation') }}" style="display:flex; align-items:center; gap:4px;">
                                 {{-- Trang trước --}}
                                 @if ($stocksData->onFirstPage())
                                     <span aria-disabled="true" style="opacity:.4; padding:4px;">

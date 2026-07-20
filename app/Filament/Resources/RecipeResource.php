@@ -32,45 +32,45 @@ class RecipeResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return __('Ngân Hàng Thực đơn');
+        return __('recipe.navigation.label');
     }
 
     public static function getModelLabel(): string
     {
-        return __('Món ăn');
+        return __('recipe.model.singular');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('Ngân Hàng Thực đơn');
+        return __('recipe.model.plural');
     }
 
     public static function getNavigationGroup(): ?string
     {
-        return __('VẬN HÀNH BẾP');
+        return __('recipe.navigation.group');
     }
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\Section::make('Thông tin món ăn')
+                Forms\Components\Section::make(__('recipe.sections.information'))
                     ->columns(3)
                     ->extraAttributes(['class' => 'recipe-form-section'])
                     ->schema([
                         Forms\Components\TextInput::make('name')
-                            ->label('Tên món ăn')
+                            ->label(__('recipe.fields.name'))
                             ->required()
-                            ->placeholder('Nhập tên món ăn'),
+                            ->placeholder(__('recipe.placeholders.name')),
                         Forms\Components\TextInput::make('code')
-                            ->label('Mã món')
+                            ->label(__('recipe.fields.code'))
                             ->required()
                             ->default(fn (): string => self::nextRecipeCode())
                             ->disabled()
                             ->dehydrated()
                             ->unique(ignoreRecord: true),
                         Forms\Components\Select::make('type')
-                            ->label('Nhóm món')
+                            ->label(__('recipe.fields.type'))
                             ->required()
                             ->options(fn () => RecipeType::pluck('name', 'name')->all())
                             ->default('Món mặn')
@@ -78,16 +78,16 @@ class RecipeResource extends Resource
                             ->preload()
                             ->native(false),
                         Forms\Components\Select::make('price_level')
-                            ->label('Mức giá suất ăn')
+                            ->label(__('recipe.fields.price_level'))
                             ->required()
                             ->options(self::mealPriceOptions())
                             ->default(20000)
                             ->searchable()
                             ->preload()
                             ->native(false)
-                            ->helperText('Đơn giá suất ăn có thể khác nhau theo đơn vị / hợp đồng.'),
+                            ->helperText(__('recipe.helpers.price_level')),
                         Forms\Components\Select::make('actual_price')
-                            ->label('Đơn giá suất ăn')
+                            ->label(__('recipe.fields.actual_price'))
                             ->required()
                             ->options(self::mealPriceOptions())
                             ->default(20000)
@@ -96,14 +96,14 @@ class RecipeResource extends Resource
                             ->live() // đổi giá bán → tính lại cảnh báo lãi/lỗ ngay
                             ->native(false),
                         Forms\Components\TextInput::make('cost_override')
-                            ->label('Cost điều chỉnh (override)')
+                            ->label(__('recipe.fields.cost_override'))
                             ->numeric()
                             ->minValue(0)
                             ->nullable()
                             ->live(onBlur: true)
-                            ->helperText('Chỉ dùng trường hợp đặc biệt — bỏ trống để dùng cost TỰ TÍNH từ định mức nguyên liệu.'),
+                            ->helperText(__('recipe.helpers.cost_override')),
                         Forms\Components\TextInput::make('cost_override_reason')
-                            ->label('Lý do điều chỉnh cost')
+                            ->label(__('recipe.fields.cost_override_reason'))
                             ->dehydrated(false)
                             ->maxLength(255)
                             // Bắt buộc lý do khi giá override được đặt/thay đổi so với giá trị đang lưu
@@ -113,33 +113,33 @@ class RecipeResource extends Resource
 
                                 return ($new !== null && $new !== '') && (float) $new !== (float) ($old ?? -1);
                             })
-                            ->helperText('Bắt buộc khi đặt/thay đổi cost điều chỉnh — được lưu vào nhật ký giá.'),
+                            ->helperText(__('recipe.helpers.cost_override_reason')),
                         Forms\Components\Select::make('price_option')
-                            ->label('Tùy chọn đơn giá')
+                            ->label(__('recipe.fields.price_option'))
                             ->required()
                             ->options([
-                                'Không' => 'Không',
-                                'Có' => 'Có',
+                                'Không' => __('recipe.options.no'),
+                                'Có' => __('recipe.options.yes'),
                             ])
                             ->default('Không')
                             ->native(false),
                         Forms\Components\Select::make('status')
-                            ->label('Trạng thái')
+                            ->label(__('recipe.fields.status'))
                             ->required()
                             ->options([
-                                'active' => 'Đang hoạt động',
-                                'pending' => 'Chờ rà soát',
-                                'inactive' => 'Ngừng hoạt động',
+                                'active' => __('recipe.status.active'),
+                                'pending' => __('recipe.status.pending'),
+                                'inactive' => __('recipe.status.inactive'),
                             ])
                             ->default('active')
                             ->native(false),
                         Forms\Components\TextInput::make('description')
-                            ->label('Mô tả')
-                            ->placeholder('Mô tả ngắn về món ăn')
+                            ->label(__('recipe.fields.description'))
+                            ->placeholder(__('recipe.placeholders.description'))
                             ->columnSpan(2),
                     ]),
 
-                Forms\Components\Section::make('Bảng nguyên liệu & cost trên 1 phần')
+                Forms\Components\Section::make(__('recipe.sections.ingredients_cost'))
                     ->extraAttributes(['class' => 'recipe-cost-section'])
                     ->schema([
                         Forms\Components\Repeater::make('recipeIngredients')
@@ -148,7 +148,7 @@ class RecipeResource extends Resource
                             ->defaultItems(1)
                             ->schema([
                                 Forms\Components\Select::make('ingredient_id')
-                                    ->label('Nguyên liệu')
+                                    ->label(__('recipe.fields.ingredient'))
                                     ->relationship('ingredient', 'name')
                                     ->required()
                                     ->searchable()
@@ -157,10 +157,10 @@ class RecipeResource extends Resource
                                     ->disableOptionsWhenSelectedInSiblingRepeaterItems()
                                     ->afterStateHydrated(fn (Set $set, ?int $state): mixed => $set('ingredient_price', self::ingredientPrice($state)))
                                     ->afterStateUpdated(fn (Set $set, ?int $state): mixed => $set('ingredient_price', self::ingredientPrice($state)))
-                                    ->placeholder('Tên nguyên liệu')
+                                    ->placeholder(__('recipe.placeholders.ingredient'))
                                     ->columnSpan(3),
                                 Forms\Components\TextInput::make('quantity_gram')
-                                    ->label('Định lượng (g)')
+                                    ->label(__('recipe.fields.quantity_gram'))
                                     ->numeric()
                                     ->placeholder('gram')
                                     ->suffix('g')
@@ -180,7 +180,7 @@ class RecipeResource extends Resource
                                     })
                                     ->columnSpan(2),
                                 Forms\Components\TextInput::make('quantity_per_portion')
-                                    ->label('Định lượng (kg)')
+                                    ->label(__('recipe.fields.quantity_kg'))
                                     ->numeric()
                                     ->required()
                                     ->default(0.1)
@@ -202,37 +202,37 @@ class RecipeResource extends Resource
                                     })
                                     ->columnSpan(2),
                                 Forms\Components\TextInput::make('ingredient_price')
-                                    ->label('Đơn giá NL')
+                                    ->label(__('recipe.fields.ingredient_price'))
                                     ->disabled()
                                     ->dehydrated(false)
                                     ->prefixIcon('heroicon-m-lock-closed')
                                     ->formatStateUsing(fn (mixed $state): string => self::formatCurrency((float) $state))
                                     ->columnSpan(2),
                                 Forms\Components\Placeholder::make('line_total')
-                                    ->label('Thành tiền')
+                                    ->label(__('recipe.fields.line_total'))
                                     ->content(fn (Get $get): string => self::formatCurrency(
                                         (float) ($get('quantity_per_portion') ?? 0) * self::ingredientPrice($get('ingredient_id'))
                                     ))
                                     ->extraAttributes(['class' => 'recipe-line-total'])
                                     ->columnSpan(1),
                                 Forms\Components\TextInput::make('note')
-                                    ->label('Ghi chú')
-                                    ->placeholder('Ghi chú')
+                                    ->label(__('recipe.fields.note'))
+                                    ->placeholder(__('recipe.placeholders.note'))
                                     ->columnSpan(2),
                             ])
                             ->columns(12)
                             ->itemNumbers()
-                            ->addActionLabel('Thêm nguyên liệu')
+                            ->addActionLabel(__('recipe.actions.add_ingredient'))
                             ->addActionAlignment(Alignment::End)
                             ->deleteAction(fn (Action $action): Action => $action->icon('heroicon-m-trash')->label(''))
                             ->reorderable(false)
                             ->collapsible(false)
                             ->itemLabel(fn (array $state): ?string => filled($state['ingredient_id'] ?? null)
                                 ? Ingredient::query()->find($state['ingredient_id'])?->name
-                                : 'Nguyên liệu'),
+                                : __('recipe.fields.ingredient')),
                         Forms\Components\Placeholder::make('total_cost')
                             ->hiddenLabel()
-                            ->content(fn (Get $get): string => 'Tổng cost đơn giá trên 1 phần:  '.self::formatCurrency(self::recipeIngredientsTotal($get('recipeIngredients') ?? [])))
+                            ->content(fn (Get $get): string => __('recipe.messages.total_cost', ['cost' => self::formatCurrency(self::recipeIngredientsTotal($get('recipeIngredients') ?? []))]))
                             ->extraAttributes(['class' => 'recipe-total-cost'])
                             ->columnSpanFull(),
                         // Kiểm soát lãi/lỗ (BA R6): so cost thực tế với đơn giá bán cho khách
@@ -243,24 +243,24 @@ class RecipeResource extends Resource
                                 $price = (float) ($get('actual_price') ?? 0);
 
                                 if ($price <= 0 || $cost <= 0) {
-                                    return new HtmlString('<span style="color:#64748b">Chọn đơn giá bán suất ăn để kiểm tra lãi/lỗ.</span>');
+                                    return new HtmlString('<span style="color:#64748b">'.e(__('recipe.messages.select_sale_price')).'</span>');
                                 }
 
                                 $margin = $price - $cost;
                                 $rate = round($margin / $price * 100, 1);
 
                                 if ($margin < 0) {
-                                    return new HtmlString('<span style="color:#dc2626;font-weight:700">⚠ LỖ '.self::formatCurrency(abs($margin)).'/suất — cost đang cao hơn giá bán ('.self::formatCurrency($price).').</span>');
+                                    return new HtmlString('<span style="color:#dc2626;font-weight:700">'.e(__('recipe.messages.loss', ['margin' => self::formatCurrency(abs($margin)), 'price' => self::formatCurrency($price)])).'</span>');
                                 }
 
                                 $color = $rate < 10 ? '#d97706' : '#059669';
 
-                                return new HtmlString('<span style="color:'.$color.';font-weight:700">Lãi gộp '.self::formatCurrency($margin).'/suất ('.$rate.'% giá bán).'.($rate < 10 ? ' Biên lãi mỏng — cân nhắc lại định mức.' : '').'</span>');
+                                return new HtmlString('<span style="color:'.$color.';font-weight:700">'.e(__('recipe.messages.gross_margin', ['margin' => self::formatCurrency($margin), 'rate' => $rate])).($rate < 10 ? ' '.e(__('recipe.messages.thin_margin')) : '').'</span>');
                             })
                             ->columnSpanFull(),
                         Forms\Components\Placeholder::make('cost_note')
                             ->hiddenLabel()
-                            ->content('Đơn giá nguyên liệu được lấy tự động từ module Nguyên liệu & NCC.')
+                            ->content(__('recipe.messages.ingredient_price_source'))
                             ->extraAttributes(['class' => 'recipe-cost-note'])
                             ->columnSpanFull(),
                     ])
@@ -273,16 +273,16 @@ class RecipeResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('code')
-                    ->label('MÃ MÓN')
+                    ->label(__('recipe.table.code'))
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('name')
-                    ->label('TÊN MÓN ĂN')
+                    ->label(__('recipe.table.name'))
                     ->searchable()
                     ->sortable()
                     ->weight('bold'),
                 Tables\Columns\TextColumn::make('type')
-                    ->label('NHÓM MÓN')
+                    ->label(__('recipe.table.type'))
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         'Món mặn', 'Món 1', 'Món 2', 'Món 3' => 'warning',
@@ -292,29 +292,29 @@ class RecipeResource extends Resource
                         default => 'gray',
                     }),
                 Tables\Columns\TextColumn::make('price_level')
-                    ->label('MỨC GIÁ SUẤT ĂN')
+                    ->label(__('recipe.table.price_level'))
                     ->formatStateUsing(fn ($state) => number_format($state, 0, ',', '.').' d')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('actual_price')
-                    ->label('ĐƠN GIÁ SUẤT ĂN')
+                    ->label(__('recipe.table.actual_price'))
                     ->formatStateUsing(fn ($state) => number_format($state, 0, ',', '.').' d')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('ingredients_count')
-                    ->label('SỐ NGUYÊN LIỆU')
+                    ->label(__('recipe.table.ingredients_count'))
                     ->counts('ingredients')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('total_weight')
-                    ->label('TỔNG ĐỊNH LƯỢNG / PHẦN')
+                    ->label(__('recipe.table.total_weight'))
                     ->state(fn ($record) => str_replace('.', ',', round($record->ingredients->sum('pivot.quantity_per_portion'), 2)).' kg'),
                 Tables\Columns\TextColumn::make('total_cost')
-                    ->label('TỔNG COST NGUYÊN LIỆU / PHẦN')
+                    ->label(__('recipe.table.total_cost'))
                     ->formatStateUsing(fn ($state) => number_format($state, 0, ',', '.').' d')
                     ->weight('bold')
                     ->color(fn ($record) => $record->cost_override !== null ? 'warning' : 'primary')
-                    ->description(fn ($record) => $record->cost_override !== null ? 'Cost điều chỉnh (override)' : null)
+                    ->description(fn ($record) => $record->cost_override !== null ? __('recipe.fields.cost_override') : null)
                     ->state(fn ($record) => $record->effectiveCostPerPortion()),
                 Tables\Columns\TextColumn::make('status')
-                    ->label('TRẠNG THÁI')
+                    ->label(__('recipe.table.status'))
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         'active' => 'success',
@@ -323,49 +323,49 @@ class RecipeResource extends Resource
                         default => 'gray',
                     })
                     ->formatStateUsing(fn (string $state): string => match ($state) {
-                        'active' => 'Đang áp dụng',
-                        'pending' => 'Chờ rà soát',
-                        'inactive' => 'Ngưng áp dụng',
+                        'active' => __('recipe.status.active_applied'),
+                        'pending' => __('recipe.status.pending'),
+                        'inactive' => __('recipe.status.inactive_applied'),
                         default => $state,
                     }),
                 Tables\Columns\TextColumn::make('updated_at')
-                    ->label('CẬP NHẬT')
+                    ->label(__('recipe.table.updated_at'))
                     ->dateTime('d/m/Y H:i')
                     ->sortable(),
             ])
-            ->searchPlaceholder('Tìm kiếm theo tên món ăn...')
+            ->searchPlaceholder(__('recipe.placeholders.search'))
             ->filters([
                 Tables\Filters\SelectFilter::make('price_level')
-                    ->label('Mức giá / Đơn giá suất ăn')
+                    ->label(__('recipe.filters.price'))
                     ->options(self::mealPriceOptions()),
                 Tables\Filters\SelectFilter::make('recipe_type_id')
-                    ->label('Nhóm món')
+                    ->label(__('recipe.fields.type'))
                     ->relationship('recipeType', 'name'),
                 Tables\Filters\SelectFilter::make('status')
-                    ->label('Trạng thái')
+                    ->label(__('recipe.fields.status'))
                     ->options([
-                        'active' => 'Đang áp dụng',
-                        'pending' => 'Chờ rà soát',
-                        'inactive' => 'Ngưng áp dụng',
+                        'active' => __('recipe.status.active_applied'),
+                        'pending' => __('recipe.status.pending'),
+                        'inactive' => __('recipe.status.inactive_applied'),
                     ]),
             ])
             ->filtersLayout(FiltersLayout::AboveContent)
             ->filtersFormColumns(3)
             ->actions([
                 Tables\Actions\ViewAction::make()
-                    ->label('Xem')
+                    ->label(__('recipe.actions.view'))
                     ->hiddenLabel()
                     ->button(),
                 Tables\Actions\EditAction::make()
-                    ->label('Chỉnh sửa')
+                    ->label(__('recipe.actions.edit'))
                     ->hiddenLabel()
                     ->button(),
                 Tables\Actions\DeleteAction::make()
-                    ->label('Xóa')
+                    ->label(__('recipe.actions.delete'))
                     ->hiddenLabel()
                     ->button(),
             ])
-            ->actionsColumnLabel('HOẠT ĐỘNG')
+            ->actionsColumnLabel(__('recipe.table.actions'))
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),

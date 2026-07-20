@@ -21,50 +21,50 @@ class AreaResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return __('Khu vực');
+        return __('catalog.area.label');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('Khu vực');
+        return __('catalog.area.label');
     }
 
     public static function getNavigationGroup(): ?string
     {
-        return __('KHU VỰC & NHÀ ĂN');
+        return __('catalog.groups.area_kitchen');
     }
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\Section::make('Thông tin khu vực')
+                Forms\Components\Section::make(__('catalog.area_section'))
                     ->schema([
                         Forms\Components\Grid::make(2)
                             ->schema([
                                 Forms\Components\TextInput::make('name')
-                                    ->label('Tên khu vực')
+                                    ->label(__('catalog.area.fields.name'))
                                     ->required()
-                                    ->placeholder('VD: Đông Nai / Hồ Chí Minh')
+                                    ->placeholder(__('catalog.area.placeholders.name'))
                                     ->maxLength(255),
                                 Forms\Components\TextInput::make('code')
-                                    ->label('Mã khu vực')
+                                    ->label(__('catalog.area.fields.code'))
                                     ->required()
-                                    ->placeholder('VD: KV-DN')
+                                    ->placeholder(__('catalog.area.placeholders.code'))
                                     ->maxLength(255),
                                 Forms\Components\Select::make('manager_id')
-                                    ->label('Quản lý phụ trách')
+                                    ->label(__('catalog.area.fields.manager'))
                                     ->relationship('manager', 'name')
                                     ->searchable()
                                     ->preload(),
                                 Forms\Components\Toggle::make('status')
-                                    ->label('Hoạt động')
+                                    ->label(__('catalog.common.active'))
                                     ->default(true)
                                     ->required(),
                             ]),
                         Forms\Components\Textarea::make('notes')
-                            ->label('Ghi chú')
-                            ->placeholder('Phạm vi vận hành, ca sản xuất, khách hàng chính...')
+                            ->label(__('catalog.common.notes'))
+                            ->placeholder(__('catalog.area.placeholders.notes'))
                             ->rows(3)
                             ->columnSpanFull(),
                     ]),
@@ -76,39 +76,39 @@ class AreaResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('index')
-                    ->label('STT')
+                    ->label(__('catalog.common.index'))
                     ->state(static function (HasTable $livewire, \stdClass $rowLoop): string {
                         return (string) ($rowLoop->iteration);
                     }),
                 Tables\Columns\TextColumn::make('code')
-                    ->label('MÃ')
+                    ->label(__('catalog.area.table.code'))
                     ->searchable()
                     ->sortable()
                     ->weight('bold'),
                 Tables\Columns\TextColumn::make('name')
-                    ->label('KHU VỰC')
+                    ->label(__('catalog.area.table.name'))
                     ->searchable()
                     ->sortable()
                     ->weight('bold'),
                 Tables\Columns\TextColumn::make('manager.name')
-                    ->label('QUẢN LÝ PHỤ TRÁCH')
+                    ->label(__('catalog.area.table.manager'))
                     ->sortable()
                     ->weight('semibold'),
                 Tables\Columns\TextColumn::make('kitchens_count')
-                    ->label('SỐ NHÀ ĂN / BẾP')
+                    ->label(__('catalog.area.table.kitchens_count'))
                     ->counts('kitchens')
                     ->badge()
                     ->color('primary')
                     ->alignCenter()
                     ->sortable(),
                 Tables\Columns\IconColumn::make('status')
-                    ->label('TRẠNG THÁI')
+                    ->label(__('catalog.common.status'))
                     ->boolean()
                     ->sortable(),
             ])
             ->filters([
                 Tables\Filters\TernaryFilter::make('status')
-                    ->label('Trạng thái hoạt động'),
+                    ->label(__('catalog.common.active_status')),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),

@@ -13,7 +13,7 @@ class ListUsers extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make()->label('Thêm tài khoản'),
+            Actions\CreateAction::make()->label(__('user.actions.create')),
         ];
     }
 }

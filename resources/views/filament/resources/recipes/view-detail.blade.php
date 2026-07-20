@@ -29,10 +29,10 @@
     // Lịch sử cập nhật giá nguyên liệu
     $priceHistory = [];
     foreach ($record->ingredients as $ingredient) {
-        $supplierName = $ingredient->supplier?->name ?? 'Nhà cung cấp';
+        $supplierName = $ingredient->supplier?->name ?? __('recipe.detail.supplier');
         $priceHistory[] = [
             'time' => $ingredient->updated_at,
-            'message' => "Đồng bộ giá từ " . $supplierName,
+            'message' => __('recipe.detail.price_synced_from', ['supplier' => $supplierName]),
         ];
     }
     usort($priceHistory, function ($a, $b) {
@@ -170,9 +170,9 @@
                     default => 'ms-inactive'
                 };
                 $statusText = match($record->status) {
-                    'active' => 'Đang hoạt động',
-                    'pending' => 'Chờ rà soát',
-                    'inactive' => 'Ngừng hoạt động',
+                    'active' => __('recipe.status.active'),
+                    'pending' => __('recipe.status.pending'),
+                    'inactive' => __('recipe.status.inactive'),
                     default => $record->status
                 };
               @endphp
@@ -181,32 +181,32 @@
             
             <div class="md-meta-grid">
               <div class="md-meta-item">
-                <span class="md-meta-k">Mã món:</span>
+                <span class="md-meta-k">{{ __('recipe.detail.code') }}</span>
                 <span class="md-meta-v">{{ $record->code }}</span>
               </div>
               <div class="md-meta-item">
-                <span class="md-meta-k">Đơn giá suất ăn:</span>
-                <span class="md-meta-v">{{ $record->price_option === 'Có' ? 'Tùy theo đơn vị' : number_format($record->actual_price, 0, ',', '.') . ' đ' }}</span>
+                <span class="md-meta-k">{{ __('recipe.detail.actual_price') }}</span>
+                <span class="md-meta-v">{{ $record->price_option === 'Có' ? __('recipe.detail.by_unit') : __('recipe.detail.currency', ['value' => number_format($record->actual_price, 0, ',', '.')]) }}</span>
               </div>
               <div class="md-meta-item">
-                <span class="md-meta-k">Nhóm món:</span>
+                <span class="md-meta-k">{{ __('recipe.detail.type') }}</span>
                 <span class="md-meta-v">{{ $record->type }}</span>
               </div>
               <div class="md-meta-item">
-                <span class="md-meta-k">Người tạo:</span>
+                <span class="md-meta-k">{{ __('recipe.detail.created_by') }}</span>
                 <span class="md-meta-v" style="display:flex;align-items:center;gap:6px">
                   <div style="width:20px;height:20px;border-radius:50%;overflow:hidden;flex-shrink:0">
                     <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=40&h=40&fit=crop&crop=face" style="width:100%;height:100%;object-fit:cover">
                   </div>
-                  {{ auth()->user()?->name ?? 'Nguyễn Văn A' }}
+                  {{ auth()->user()?->name ?? __('recipe.detail.unknown_user') }}
                 </span>
               </div>
               <div class="md-meta-item">
-                <span class="md-meta-k">Mức giá suất ăn:</span>
-                <span class="md-meta-v">{{ number_format($record->price_level, 0, ',', '.') }} đ</span>
+                <span class="md-meta-k">{{ __('recipe.detail.price_level') }}</span>
+                <span class="md-meta-v">{{ __('recipe.detail.currency', ['value' => number_format($record->price_level, 0, ',', '.')]) }}</span>
               </div>
               <div class="md-meta-item">
-                <span class="md-meta-k">Ngày cập nhật:</span>
+                <span class="md-meta-k">{{ __('recipe.detail.updated_at') }}</span>
                 <span class="md-meta-v">{{ $record->updated_at->format('d/m/Y H:i') }}</span>
               </div>
             </div>
@@ -217,43 +217,38 @@
         <div class="md-stat-row">
           <div class="md-stat">
             <div class="md-stat-ico">🍴</div>
-            <div class="md-stat-lbl">Số nguyên liệu</div>
+            <div class="md-stat-lbl">{{ __('recipe.detail.ingredient_count') }}</div>
             <div class="md-stat-val">{{ $ingredientsCount }}</div>
-            <div class="md-stat-unit">loại</div>
+            <div class="md-stat-unit">{{ __('recipe.detail.types_unit') }}</div>
           </div>
           <div class="md-stat">
             <div class="md-stat-ico">⚖️</div>
-            <div class="md-stat-lbl">Tổng định lượng / phần</div>
+            <div class="md-stat-lbl">{{ __('recipe.detail.total_weight') }}</div>
             <div class="md-stat-val">{{ (float) $totalWeight }}</div>
             <div class="md-stat-unit">kg</div>
           </div>
           <div class="md-stat" style="background:var(--bl-s)">
             <div class="md-stat-ico">💰</div>
-            <div class="md-stat-lbl">Tổng cost NL / phần</div>
-            <div class="md-stat-val" style="color:var(--bl)">{{ number_format($totalCost, 0, ',', '.') }} đ</div>
-            <div class="md-stat-unit">đồng</div>
+            <div class="md-stat-lbl">{{ __('recipe.detail.total_cost') }}</div>
+            <div class="md-stat-val" style="color:var(--bl)">{{ __('recipe.detail.currency', ['value' => number_format($totalCost, 0, ',', '.')]) }}</div>
+            <div class="md-stat-unit">{{ __('recipe.detail.currency_unit') }}</div>
           </div>
         </div>
       </div>
 
       <!-- Ingredient detail -->
       <div class="md-card">
-        <div class="md-sec-ttl" style="font-size:14px;font-weight:700;color:var(--tx);margin-bottom:6px">Chi tiết nguyên liệu</div>
+        <div class="md-sec-ttl" style="font-size:14px;font-weight:700;color:var(--tx);margin-bottom:6px">{{ __('recipe.detail.ingredients_title') }}</div>
         <div class="md-note" style="margin-bottom:14px">
           <i class="fa-solid fa-circle-info"></i>
-          Đơn giá nguyên liệu được tự động cập nhật từ module Nhà cung cấp / Nguyên liệu
+          {{ __('recipe.detail.ingredient_price_notice') }}
         </div>
         <div class="md-table-wrapper">
           <table class="md-ing-table">
             <thead>
               <tr>
                 <th>STT</th>
-                <th>Nguyên liệu</th>
-                <th>Định lượng (KG) / 1 phần</th>
-                <th>Đơn giá nguyên liệu</th>
-                <th>Thành tiền</th>
-                <th>Nhà cung cấp</th>
-                <th>Ghi chú</th>
+                <th>{{ __('recipe.fields.ingredient') }}</th><th>{{ __('recipe.detail.quantity_per_portion') }}</th><th>{{ __('recipe.fields.ingredient_price') }}</th><th>{{ __('recipe.fields.line_total') }}</th><th>{{ __('recipe.detail.supplier') }}</th><th>{{ __('recipe.fields.note') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -267,8 +262,8 @@
                   <td style="font-weight:600;color:var(--mu)">{{ $index + 1 }}</td>
                   <td style="font-weight:600">{{ $ingredient->name }}</td>
                   <td>{{ (float) $qty }}</td>
-                  <td>{{ number_format($price, 0, ',', '.') }} đ</td>
-                  <td style="font-weight:700;color:var(--or)">{{ number_format($itemTotal, 0, ',', '.') }} đ</td>
+                  <td>{{ __('recipe.detail.currency', ['value' => number_format($price, 0, ',', '.')]) }}</td>
+                  <td style="font-weight:700;color:var(--or)">{{ __('recipe.detail.currency', ['value' => number_format($itemTotal, 0, ',', '.')]) }}</td>
                   <td style="font-size:12px;color:var(--mu)">{{ $ingredient->supplier?->name ?? '—' }}</td>
                   <td style="color:var(--fa)">{{ $ingredient->pivot->note ?? '–' }}</td>
                 </tr>
@@ -278,13 +273,13 @@
         </div>
         
         <div class="md-total-bar">
-          <span class="md-total-lbl">Tổng cost đơn giá trên 1 phần {{ $record->name }}:</span>
-          <span class="md-total-val">{{ number_format($totalCost, 0, ',', '.') }} đ</span>
+          <span class="md-total-lbl">{{ __('recipe.detail.total_cost_for_dish', ['name' => $record->name]) }}</span>
+          <span class="md-total-val">{{ __('recipe.detail.currency', ['value' => number_format($totalCost, 0, ',', '.')]) }}</span>
         </div>
         
         <div class="md-note">
           <i class="fa-solid fa-circle-info"></i>
-          Giá nguyên liệu được đồng bộ tự động từ module Nhà cung cấp / Nguyên liệu. Vui lòng kiểm tra lại khi có thay đổi giá.
+          {{ __('recipe.detail.price_sync_notice') }}
         </div>
       </div>
     </div>
@@ -293,7 +288,7 @@
     <div>
       <!-- Tóm tắt cost -->
       <div class="md-cost-rp">
-        <div class="md-cost-rp-ttl">Tóm tắt cost</div>
+        <div class="md-cost-rp-ttl">{{ __('recipe.detail.cost_summary') }}</div>
         <div style="display:flex;justify-content:center;margin-bottom:12px">
           @php
             $r = 48;
@@ -313,8 +308,8 @@
                         stroke-dasharray="{{ $dashArray }}" stroke-dashoffset="{{ $dashOffset }}" stroke-linecap="butt"
                         transform="rotate(-90 65 65)" />
             @endforeach
-            <text x="65" y="61" text-anchor="middle" font-size="12" font-weight="800" fill="#267DC1" font-family="Inter,sans-serif">{{ number_format($totalCost, 0, ',', '.') }}đ</text>
-            <text x="65" y="75" text-anchor="middle" font-size="8.5" fill="#64748B" font-family="Inter,sans-serif">Tổng cost / phần</text>
+            <text x="65" y="61" text-anchor="middle" font-size="12" font-weight="800" fill="#267DC1" font-family="Inter,sans-serif">{{ __('recipe.detail.currency', ['value' => number_format($totalCost, 0, ',', '.')]) }}</text>
+            <text x="65" y="75" text-anchor="middle" font-size="8.5" fill="#64748B" font-family="Inter,sans-serif">{{ __('recipe.detail.chart_total') }}</text>
           </svg>
         </div>
         
@@ -325,7 +320,7 @@
                 <span class="dl-dot" style="background:{{ $item['color'] }}"></span>
                 {{ $item['name'] }}
               </div>
-              <span class="dl-pct" style="font-size:11px">{{ number_format($item['cost'], 0, ',', '.') }} đ &nbsp;{{ $item['percentage'] }}%</span>
+              <span class="dl-pct" style="font-size:11px">{{ __('recipe.detail.currency', ['value' => number_format($item['cost'], 0, ',', '.')]) }} &nbsp;{{ $item['percentage'] }}%</span>
             </div>
           @endforeach
         </div>
@@ -335,24 +330,24 @@
       <div class="md-cost-rp">
         <div class="md-cost-rp-ttl" style="display:flex;align-items:center;gap:7px">
           <i class="fa-solid fa-magnifying-glass" style="font-size:13px;color:var(--bl)"></i>
-          Thông tin tìm kiếm
+          {{ __('recipe.detail.search_information') }}
         </div>
-        <div style="font-size:12px;color:var(--mu);line-height:1.6;margin-bottom:8px">Bạn có thể tìm kiếm và lọc món ăn trong module Thực đơn theo các tiêu chí:</div>
+        <div style="font-size:12px;color:var(--mu);line-height:1.6;margin-bottom:8px">{{ __('recipe.detail.search_hint') }}</div>
         <ul class="lf-rule" style="list-style:none;padding:0;display:flex;flex-direction:column;gap:4px">
           <li style="font-size:12px;color:var(--su);display:flex;gap:5px;align-items:flex-start">
             <span style="color:var(--bl)">•</span>
-            Tên món ăn
+            {{ __('recipe.fields.name') }}
           </li>
           <li style="font-size:12px;color:var(--su);display:flex;gap:5px;align-items:flex-start">
             <span style="color:var(--bl)">•</span>
-            Đơn giá
+            {{ __('recipe.fields.actual_price') }}
           </li>
         </ul>
       </div>
 
       <!-- Lịch sử cập nhật giá nguyên liệu -->
       <div class="md-cost-rp" style="margin-bottom:0">
-        <div class="md-cost-rp-ttl">Lịch sử cập nhật giá nguyên liệu</div>
+        <div class="md-cost-rp-ttl">{{ __('recipe.detail.price_history') }}</div>
         @if (count($priceHistory) > 0)
           @foreach ($priceHistory as $index => $history)
             @php
@@ -374,7 +369,7 @@
             </div>
           @endforeach
         @else
-          <div style="font-size:12px;color:var(--fa);text-align:center;padding:10px 0">Chưa ghi nhận lịch sử biến động giá nguyên liệu.</div>
+          <div style="font-size:12px;color:var(--fa);text-align:center;padding:10px 0">{{ __('recipe.detail.no_price_history') }}</div>
         @endif
       </div>
     </div>

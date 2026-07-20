@@ -12,7 +12,7 @@ class ListKitchenTypes extends ListRecords
 
     public function getTitle(): string
     {
-        return __('Loại bếp / nhà ăn');
+        return __('catalog.kitchen_type.label');
     }
 
     protected function getHeaderActions(): array

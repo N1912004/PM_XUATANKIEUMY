@@ -2,7 +2,7 @@
     <svg class="w-5 h-5 flex-shrink-0 text-sky-500" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 111.08 1.04l-.425.85a.75.75 0 11-1.254-.834l.56-1.12zM12 7.5a.75.75 0 110-1.5.75.75 0 0 1 0 1.5zM21 12a9 9 0 11-18 0 9 9 0 0 1 18 0z" />
     </svg>
-    <span>Đơn giá nguyên liệu được lấy từ module Nguyên liệu / Nhà cung cấp và dùng để tự động tính cost nguyên liệu trên 1 phần.</span>
+    <span>{{ __('ingredient.cost_source_notice') }}</span>
 </div>
 
 <style>

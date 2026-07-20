@@ -84,6 +84,8 @@ return [
         'in_transit' => 'In transit',
     ],
     'filters' => [
+        'selected_kitchen' => 'Selected kitchen:',
+        'all_kitchens' => 'All kitchens',
         'from_date' => 'From date',
         'to_date' => 'To date',
 
@@ -112,6 +114,7 @@ return [
         'no_ledger_transactions' => 'No transaction history found.',
     ],
     'pagination' => [
+        'navigation' => 'Warehouse pagination navigation',
         'showing' => 'Showing :from-:to of :total stock items',
         'per_page' => ':count / page',
     ],
@@ -187,6 +190,7 @@ return [
         'default_out_reason' => 'Production by goods list',
     ],
     'notifications' => [
+        'select_specific_kitchen' => 'Please select a specific kitchen before performing this operation.',
         'negative_stock_title' => 'Stock quantity cannot be negative',
         'negative_stock_body' => 'Physical stock cannot go below zero — recheck the counted quantity.',
         'negative_after_check' => 'Closing the stocktake would push :name below zero — recheck the counted quantity.',
@@ -232,5 +236,14 @@ return [
     'log' => [
         'showing' => 'Showing :shown / :total transactions',
         'load_more' => 'Load 50 more',
+    ],
+    'resource' => [
+        'navigation_group' => 'INGREDIENTS & INVENTORY',
+        'fields' => ['status' => 'Status'],
+        'status' => ['completed' => 'Completed', 'cancelled' => 'Cancelled'],
+        'table' => ['index' => '#', 'voucher_code' => 'VOUCHER CODE', 'source_kitchen' => 'SOURCE KITCHEN', 'destination_kitchen' => 'DESTINATION KITCHEN', 'status' => 'STATUS', 'created_at' => 'CREATED'],
+        'transaction' => ['quantity_change_signed' => 'Quantity change (+/-)', 'quantity_change' => 'Quantity change', 'after_quantity' => 'Stock after transaction'],
+        'transfer' => ['navigation' => 'Stock Transfers', 'model' => 'Stock transfer', 'source_kitchen' => 'Source kitchen', 'destination_kitchen' => 'Destination kitchen', 'same_area' => 'The destination kitchen must be in the same area as the source kitchen.', 'items' => 'Transfer items', 'insufficient' => 'Insufficient available stock for transfer (:available remaining).', 'received' => 'Goods received and destination stock updated', 'cancel' => 'Cancel transfer', 'cancelled' => 'Transfer cancelled and stock returned to the source kitchen'],
+        'stock' => ['navigation' => 'Inventory', 'model' => 'Stock', 'ingredient_exists' => 'This ingredient already exists in the selected kitchen inventory.', 'unit_placeholder' => 'E.g. kg, box, item', 'reference_price' => 'Reference price', 'external_inbound_heading' => 'External inbound (direct purchase without a PO)', 'kitchen' => 'Kitchen', 'inbound_quantity' => 'Inbound quantity', 'attachment' => 'Invoice or supporting document', 'attachment_required' => 'A supporting document is required before saving.', 'external_inbound_success' => 'External inbound recorded successfully'],
     ],
 ];

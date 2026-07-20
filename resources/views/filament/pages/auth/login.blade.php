@@ -328,7 +328,7 @@
 
                 {{-- Vòng tròn 8 múi ảnh món ăn + tâm ISO --}}
                 <div class="lg-wheel">
-                    <svg viewBox="0 0 220 220" role="img" aria-label="Bánh xe hình ảnh món ăn — chứng nhận ISO 22000:2018">
+                    <svg viewBox="0 0 220 220" role="img" aria-label="{{ __('login.accessibility.food_wheel') }}">
                         <defs>
                             @foreach($wheel as $i => [$photo, $fallback])
                                 @php $p1 = $pts[$i]; $p2 = $pts[($i + 1) % 8]; @endphp
@@ -433,7 +433,7 @@
                                autocomplete="current-password" required
                                x-bind:type="show ? 'text' : 'password'">
                         <button type="button" class="lg-eye" x-on:click="show = !show"
-                                x-bind:aria-label="show ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'">
+                                x-bind:aria-label="show ? @js(__('login.accessibility.hide_password')) : @js(__('login.accessibility.show_password'))">
                             <i class="fa-solid" x-bind:class="show ? 'fa-eye-slash' : 'fa-eye'" aria-hidden="true"></i>
                         </button>
                     </div>

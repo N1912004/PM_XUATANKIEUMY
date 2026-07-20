@@ -21,22 +21,22 @@ class PositionResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('NHÂN SỰ');
+        return __('catalog.groups.hr');
     }
 
     public static function getNavigationLabel(): string
     {
-        return __('Chức vụ');
+        return __('catalog.position.label');
     }
 
     public static function getModelLabel(): string
     {
-        return __('Chức vụ');
+        return __('catalog.position.label');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('Chức vụ');
+        return __('catalog.position.label');
     }
 
     public static function form(Form $form): Form
@@ -44,20 +44,20 @@ class PositionResource extends Resource
         return $form
             ->schema([
                 Forms\Components\TextInput::make('name')
-                    ->label('Tên chức vụ')
-                    ->placeholder('Nhập tên chức vụ (VD: Tổ trưởng bếp, Chuyên viên...)')
+                    ->label(__('catalog.position.fields.name'))
+                    ->placeholder(__('catalog.position.placeholders.name'))
                     ->required()
                     ->unique(ignoreRecord: true)
                     ->maxLength(255)
                     ->columnSpanFull(),
                 Forms\Components\TextInput::make('sort')
-                    ->label('Thứ tự hiển thị')
+                    ->label(__('catalog.common.sort_order'))
                     ->numeric()
                     ->default(0),
                 Forms\Components\Toggle::make('active')
-                    ->label('Đang sử dụng')
+                    ->label(__('catalog.common.in_use'))
                     ->default(true)
-                    ->helperText('Tắt thì không còn xuất hiện ở các form chọn chức vụ, dữ liệu cũ giữ nguyên.'),
+                    ->helperText(__('catalog.position.helpers.active')),
             ]);
     }
 
@@ -66,7 +66,7 @@ class PositionResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('index')
-                    ->label('STT')
+                    ->label(__('catalog.common.index'))
                     ->state(static function (Tables\Contracts\HasTable $livewire, \stdClass $rowLoop): string {
                         $currentPage = method_exists($livewire, 'getTablePage') ? $livewire->getTablePage() : 1;
                         $recordsPerPage = method_exists($livewire, 'getTableRecordsPerPage') ? $livewire->getTableRecordsPerPage() : 10;
@@ -80,26 +80,26 @@ class PositionResource extends Resource
                     ])
                     ->width('56px'),
                 Tables\Columns\TextColumn::make('name')
-                    ->label('TÊN CHỨC VỤ')
+                    ->label(__('catalog.position.table.name'))
                     ->searchable()
                     ->sortable()
                     ->weight('bold'),
                 Tables\Columns\TextColumn::make('sort')
-                    ->label('THỨ TỰ')
+                    ->label(__('catalog.common.sort_order_upper'))
                     ->sortable()
                     ->alignCenter(),
                 Tables\Columns\IconColumn::make('active')
-                    ->label('ĐANG DÙNG')
+                    ->label(__('catalog.common.in_use_upper'))
                     ->boolean(),
                 Tables\Columns\TextColumn::make('employees_count')
-                    ->label('SỐ NHÂN VIÊN')
+                    ->label(__('catalog.position.table.count'))
                     ->counts('employees')
                     ->alignCenter()
                     ->sortable()
                     ->color('primary')
                     ->weight('bold'),
                 Tables\Columns\TextColumn::make('created_at')
-                    ->label('NGÀY TẠO')
+                    ->label(__('catalog.common.created_at'))
                     ->dateTime('d/m/Y H:i')
                     ->extraAttributes([
                         'style' => 'font-variant-numeric: tabular-nums;',
@@ -110,7 +110,7 @@ class PositionResource extends Resource
             ->defaultSort('sort')
             ->filters([
                 Tables\Filters\TernaryFilter::make('active')
-                    ->label('Đang sử dụng'),
+                    ->label(__('catalog.common.in_use')),
             ])
             ->actions([
                 Tables\Actions\EditAction::make()
@@ -120,7 +120,7 @@ class PositionResource extends Resource
                     ->before(function (Tables\Actions\DeleteAction $action, $record): void {
                         if ($record->employees()->exists()) {
                             Notification::make()
-                                ->title('Không thể xóa chức vụ này vì đang có '.$record->employees()->count().' nhân viên trực thuộc.')
+                                ->title(__('catalog.position.errors.in_use', ['count' => $record->employees()->count()]))
                                 ->danger()
                                 ->send();
                             $action->cancel();
@@ -134,7 +134,7 @@ class PositionResource extends Resource
                             $inUse = $records->filter(fn ($r) => $r->employees()->exists());
                             if ($inUse->isNotEmpty()) {
                                 Notification::make()
-                                    ->title('Không thể xóa hàng loạt. Các chức vụ sau đang có nhân viên: '.$inUse->pluck('name')->implode(', '))
+                                    ->title(__('catalog.position.errors.bulk_in_use', ['names' => $inUse->pluck('name')->implode(', ')]))
                                     ->danger()
                                     ->send();
                                 $action->cancel();

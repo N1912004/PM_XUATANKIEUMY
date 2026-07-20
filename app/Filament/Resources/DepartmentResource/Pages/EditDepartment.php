@@ -19,7 +19,7 @@ class EditDepartment extends EditRecord
                     $record = $this->getRecord();
                     if ($record->employees()->exists()) {
                         Notification::make()
-                            ->title('Không thể xóa phòng ban này vì đang có '.$record->employees()->count().' nhân viên trực thuộc.')
+                            ->title(__('catalog.department.errors.in_use', ['count' => $record->employees()->count()]))
                             ->danger()
                             ->send();
                         $action->cancel();

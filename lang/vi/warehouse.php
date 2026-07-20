@@ -84,6 +84,8 @@ return [
         'in_transit' => 'Đang chuyển',
     ],
     'filters' => [
+        'selected_kitchen' => 'Đang chọn Bếp ăn:',
+        'all_kitchens' => 'Tất cả các bếp',
         'from_date' => 'Từ ngày',
         'to_date' => 'Đến ngày',
 
@@ -112,6 +114,7 @@ return [
         'no_ledger_transactions' => 'Không tìm thấy lịch sử giao dịch nào.',
     ],
     'pagination' => [
+        'navigation' => 'Điều hướng phân trang kho',
         'showing' => 'Hiển thị :from-:to trên :total mặt hàng tồn kho',
         'per_page' => ':count / trang',
     ],
@@ -187,6 +190,7 @@ return [
         'default_out_reason' => 'Sản xuất theo list hàng',
     ],
     'notifications' => [
+        'select_specific_kitchen' => 'Vui lòng chọn một bếp cụ thể trước khi thực hiện nghiệp vụ này.',
         'negative_stock_title' => 'Số lượng tồn không được âm',
         'negative_stock_body' => 'Kho thực tế không thể âm — kiểm tra lại số đếm thực tế.',
         'negative_after_check' => 'Chốt kiểm kê sẽ làm tồn kho của :name xuống âm — kiểm tra lại số đếm.',
@@ -232,5 +236,14 @@ return [
     'log' => [
         'showing' => 'Đang hiển thị :shown / :total giao dịch',
         'load_more' => 'Xem thêm 50 dòng',
+    ],
+    'resource' => [
+        'navigation_group' => 'NGUYÊN LIỆU & KHO',
+        'fields' => ['status' => 'Trạng thái'],
+        'status' => ['completed' => 'Hoàn thành', 'cancelled' => 'Hủy'],
+        'table' => ['index' => 'STT', 'voucher_code' => 'MÃ PHIẾU', 'source_kitchen' => 'BẾP XUẤT', 'destination_kitchen' => 'BẾP NHẬN', 'status' => 'TRẠNG THÁI', 'created_at' => 'NGÀY TẠO'],
+        'transaction' => ['quantity_change_signed' => 'Số lượng thay đổi (+/-)', 'quantity_change' => 'Số lượng thay đổi', 'after_quantity' => 'Tồn kho sau giao dịch'],
+        'transfer' => ['navigation' => 'Điều chuyển kho', 'model' => 'Phiếu điều chuyển kho', 'source_kitchen' => 'Bếp xuất (nguồn)', 'destination_kitchen' => 'Bếp nhận (đích)', 'same_area' => 'Bếp nhận phải thuộc cùng khu vực với bếp xuất.', 'items' => 'Mặt hàng điều chuyển', 'insufficient' => 'Tồn khả dụng không đủ để điều chuyển (còn :available).', 'received' => 'Đã nhận hàng & cập nhật tồn kho bếp nhận', 'cancel' => 'Hủy phiếu', 'cancelled' => 'Đã hủy phiếu & hoàn tồn về bếp xuất'],
+        'stock' => ['navigation' => 'Kho', 'model' => 'Kho hàng', 'ingredient_exists' => 'Nguyên liệu này đã tồn tại trong kho của bếp đã chọn.', 'unit_placeholder' => 'VD: Kg, Hộp, Quả, ...', 'reference_price' => 'Đơn giá tham chiếu (đ)', 'external_inbound_heading' => 'Nhập kho ngoài (mua trực tiếp không qua PO)', 'kitchen' => 'Bếp ăn', 'inbound_quantity' => 'Số lượng nhập', 'attachment' => 'Ảnh/File hóa đơn chứng từ', 'attachment_required' => 'Bắt buộc đính kèm chứng từ trước khi lưu.', 'external_inbound_success' => 'Đã nhập kho ngoài thành công'],
     ],
 ];

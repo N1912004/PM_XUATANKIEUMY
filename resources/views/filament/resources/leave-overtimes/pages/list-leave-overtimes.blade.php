@@ -26,17 +26,17 @@
     <!-- Header Section -->
     <div class="emp-head" style="margin-bottom: 14px;">
         <div>
-            <h1 class="emp-title">Nghỉ phép &amp; Tăng ca</h1>
-            <p class="emp-subtitle">Quản lý yêu cầu nghỉ phép, làm thêm giờ và trạng thái phê duyệt của nhân viên</p>
+            <h1 class="emp-title">{{ __('leave_overtime.navigation') }}</h1>
+            <p class="emp-subtitle">{{ __('leave_overtime.ui.subtitle') }}</p>
         </div>
         <div class="emp-actions">
             <button wire:click="exportLeaveOvertimes" class="emp-btn">
                 <i class="fa-solid fa-download" style="font-size: 13px;"></i>
-                Xuất dữ liệu
+                {{ __('leave_overtime.actions.export') }}
             </button>
             <a href="{{ \App\Filament\Resources\LeaveOvertimeResource::getUrl('create') }}" class="emp-btn emp-btn-primary">
                 <i class="fa-solid fa-plus"></i>
-                Tạo yêu cầu
+                {{ __('leave_overtime.actions.create') }}
             </a>
         </div>
     </div>
@@ -44,10 +44,10 @@
     <!-- Tabs chuyển đổi -->
     <div class="lv-tabs">
         <button wire:click="switchTab('all')" class="lv-tab {{ $activeTab === 'all' ? 'active' : '' }}">
-            Tất cả yêu cầu
+            {{ __('leave_overtime.tabs.all') }}
         </button>
         <button wire:click="switchTab('history')" class="lv-tab {{ $activeTab === 'history' ? 'active' : '' }}">
-            Lịch sử phê duyệt
+            {{ __('leave_overtime.tabs.history') }}
         </button>
     </div>
 
@@ -56,7 +56,7 @@
         <!-- Filter Toolbar -->
         <div class="lv-bar">
             <div class="lv-srch">
-                <input wire:model.live.debounce.250ms="search" type="text" placeholder="Tìm kiếm nhân viên...">
+                <input wire:model.live.debounce.250ms="search" type="text" placeholder="{{ __('leave_overtime.ui.search_placeholder') }}">
                 <i class="fa-solid fa-magnifying-glass"></i>
             </div>
             
@@ -66,14 +66,14 @@
             </div>
 
             <select wire:model.live="departmentFilter" class="lv-sel">
-                <option value="">Phòng ban</option>
+                <option value="">{{ __('leave_overtime.ui.department') }}</option>
                 @foreach($depts as $deptId => $deptName)
                     <option value="{{ $deptId }}">{{ $deptName }}</option>
                 @endforeach
             </select>
 
             <select wire:model.live="typeFilter" class="lv-sel">
-                <option value="">Loại yêu cầu</option>
+                <option value="">{{ __('leave_overtime.fields.type') }}</option>
                 @foreach($types as $typeId => $typeName)
                     <option value="{{ $typeId }}">{{ $typeName }}</option>
                 @endforeach
@@ -81,31 +81,31 @@
 
             @if($activeTab === 'all')
                 <select wire:model.live="statusFilter" class="lv-sel">
-                    <option value="">Trạng thái</option>
-                    <option value="pending">Chờ duyệt</option>
-                    <option value="approved">Đã duyệt</option>
-                    <option value="rejected">Từ chối</option>
-                    <option value="cancelled">Đã hủy</option>
+                    <option value="">{{ __('leave_overtime.ui.status') }}</option>
+                    <option value="pending">{{ __('leave_overtime.status.pending') }}</option>
+                    <option value="approved">{{ __('leave_overtime.status.approved') }}</option>
+                    <option value="rejected">{{ __('leave_overtime.status.rejected') }}</option>
+                    <option value="cancelled">{{ __('leave_overtime.status.cancelled') }}</option>
                 </select>
             @else
                 <select wire:model.live="statusFilter" class="lv-sel">
-                    <option value="">Trạng thái</option>
-                    <option value="approved">Đã duyệt</option>
-                    <option value="rejected">Từ chối</option>
-                    <option value="cancelled">Đã hủy</option>
+                    <option value="">{{ __('leave_overtime.ui.status') }}</option>
+                    <option value="approved">{{ __('leave_overtime.status.approved') }}</option>
+                    <option value="rejected">{{ __('leave_overtime.status.rejected') }}</option>
+                    <option value="cancelled">{{ __('leave_overtime.status.cancelled') }}</option>
                 </select>
             @endif
 
             <div class="lv-sp"></div>
 
             <button class="lv-fbtn" style="height:34px">
-                <i class="fa-solid fa-sliders"></i> Bộ lọc
+                <i class="fa-solid fa-sliders"></i> {{ __('leave_overtime.ui.filters') }}
                 @if($activeFiltersCount > 0)
                     <span class="lv-fdot">{{ $activeFiltersCount }}</span>
                 @endif
             </button>
 
-            <button wire:click="resetFilters" class="lv-rbtn" title="Cài lại bộ lọc">
+            <button wire:click="resetFilters" class="lv-rbtn" title="{{ __('leave_overtime.ui.reset_filters') }}">
                 <i class="fa-solid fa-rotate-right"></i>
             </button>
         </div>
@@ -115,17 +115,17 @@
             <table style="width:100%; border-collapse:collapse; text-align:left; font-size:13px">
                 <thead>
                     <tr style="border-bottom:1.5px solid var(--po-bd2); color:var(--po-mu); font-weight:700; text-transform:uppercase; font-size:11px; background:var(--po-bd2)">
-                        <th style="padding:14px 12px; width:40px"><input type="checkbox"></th>
-                        <th style="padding:14px 12px; width:100px">Mã NV</th>
-                        <th style="padding:14px 12px">Họ và tên</th>
-                        <th style="padding:14px 12px">Phòng ban</th>
-                        <th style="padding:14px 12px">Loại yêu cầu</th>
-                        <th style="padding:14px 12px">Thời gian / Ngày áp dụng</th>
-                        <th style="padding:14px 12px; width:110px">Số ngày / Số giờ</th>
-                        <th style="padding:14px 12px">Lý do</th>
-                        <th style="padding:14px 12px">Người duyệt</th>
-                        <th style="padding:14px 12px; width:130px">Trạng thái</th>
-                        <th style="padding:14px 12px; width:120px; text-align:center">Hành động</th>
+                        <th style="padding:14px 12px; width:40px"><input type="checkbox" aria-label="{{ __('leave_overtime.ui.select_all') }}"></th>
+                        <th style="padding:14px 12px; width:100px">{{ __('leave_overtime.ui.employee_code') }}</th>
+                        <th style="padding:14px 12px">{{ __('leave_overtime.ui.full_name') }}</th>
+                        <th style="padding:14px 12px">{{ __('leave_overtime.ui.department') }}</th>
+                        <th style="padding:14px 12px">{{ __('leave_overtime.fields.type') }}</th>
+                        <th style="padding:14px 12px">{{ __('leave_overtime.ui.applied_date') }}</th>
+                        <th style="padding:14px 12px; width:110px">{{ __('leave_overtime.fields.duration') }}</th>
+                        <th style="padding:14px 12px">{{ __('leave_overtime.ui.reason') }}</th>
+                        <th style="padding:14px 12px">{{ __('leave_overtime.fields.approver') }}</th>
+                        <th style="padding:14px 12px; width:130px">{{ __('leave_overtime.ui.status') }}</th>
+                        <th style="padding:14px 12px; width:120px; text-align:center">{{ __('leave_overtime.ui.actions') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -165,14 +165,14 @@
                             elseif (str_contains($typeName, 'Tăng ca')) $typeClass = 'req-ot';
                         @endphp
                         <tr style="border-bottom:1px solid var(--po-bd2); color:var(--po-tx)" class="emp-row">
-                            <td style="padding:12px 12px;"><input type="checkbox"></td>
+                            <td style="padding:12px 12px;"><input type="checkbox" aria-label="{{ __('leave_overtime.ui.select_request', ['code' => $row->employee?->code]) }}"></td>
                             <td style="padding:12px 12px; font-weight:700; color:var(--po-mu)">{{ $row->employee?->code }}</td>
                             <td style="padding:12px 12px;">
                                 <div style="display:flex; align-items:center; gap:10px">
                                     @if($row->employee && $row->employee->avatar_url && filter_var($row->employee->avatar_url, FILTER_VALIDATE_URL))
-                                        <img src="{{ $row->employee->avatar_url }}" style="width:34px; height:34px; border-radius:50%; object-fit:cover;">
+                                            <img src="{{ $row->employee->avatar_url }}" alt="{{ $row->employee->name }}" style="width:34px; height:34px; border-radius:50%; object-fit:cover;">
                                     @elseif($row->employee && $row->employee->avatar_url)
-                                        <img src="{{ asset('storage/' . $row->employee->avatar_url) }}" style="width:34px; height:34px; border-radius:50%; object-fit:cover;">
+                                            <img src="{{ asset('storage/' . $row->employee->avatar_url) }}" alt="{{ $row->employee->name }}" style="width:34px; height:34px; border-radius:50%; object-fit:cover;">
                                     @else
                                         <div style="width:34px; height:34px; border-radius:50%; background:{{ $rowColor }}1A; color:{{ $rowColor }}; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:12px">
                                             {{ $rowInitials }}
@@ -198,7 +198,7 @@
                                 <div style="font-weight:600; color:var(--po-tx)">{{ $dateStr }}</div>
                                 @if($row->start_date)
                                     <div style="font-size:10.5px; color:var(--po-mu); margin-top:2px">
-                                        (Thứ {{ ['Chủ Nhật', 'Hai', 'Ba', 'Tư', 'Năm', 'Sáu', 'Bảy'][$row->start_date->dayOfWeek] }})
+                                        ({{ __('leave_overtime.ui.weekday_prefix') }} {{ __('leave_overtime.weekdays.' . $row->start_date->dayOfWeek) }})
                                     </div>
                                 @endif
                             </td>
@@ -208,9 +208,9 @@
                                 @if($row->approver)
                                     <div style="display:flex; align-items:center; gap:8px">
                                         @if($row->approver->avatar_url && filter_var($row->approver->avatar_url, FILTER_VALIDATE_URL))
-                                            <img src="{{ $row->approver->avatar_url }}" style="width:26px; height:26px; border-radius:50%; object-fit:cover;">
+                                            <img src="{{ $row->approver->avatar_url }}" alt="{{ $row->approver->name }}" style="width:26px; height:26px; border-radius:50%; object-fit:cover;">
                                         @elseif($row->approver->avatar_url)
-                                            <img src="{{ asset('storage/' . $row->approver->avatar_url) }}" style="width:26px; height:26px; border-radius:50%; object-fit:cover;">
+                                            <img src="{{ asset('storage/' . $row->approver->avatar_url) }}" alt="{{ $row->approver->name }}" style="width:26px; height:26px; border-radius:50%; object-fit:cover;">
                                         @else
                                             <div style="width:26px; height:26px; border-radius:50%; background:{{ $appColor }}1A; color:{{ $appColor }}; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:10px">
                                                 {{ $appInitials }}
@@ -222,18 +222,18 @@
                                         </div>
                                     </div>
                                 @else
-                                    <span style="color:var(--po-fa)">Chưa có</span>
+                                    <span style="color:var(--po-fa)">{{ __('leave_overtime.ui.none') }}</span>
                                 @endif
                             </td>
                             <td style="padding:12px 12px;">
                                 @if($row->status === 'pending')
-                                    <span class="st-pill st-late">Chờ duyệt</span>
+                                    <span class="st-pill st-late">{{ __('leave_overtime.status.pending') }}</span>
                                 @elseif($row->status === 'approved')
-                                    <span class="st-pill st-ok">Đã duyệt</span>
+                                    <span class="st-pill st-ok">{{ __('leave_overtime.status.approved') }}</span>
                                 @elseif($row->status === 'rejected')
-                                    <span class="st-pill st-absent">Từ chối</span>
+                                    <span class="st-pill st-absent">{{ __('leave_overtime.status.rejected') }}</span>
                                 @elseif($row->status === 'cancelled')
-                                    <span class="st-pill" style="background:var(--po-bd2); color:var(--po-su); border-color:var(--po-bd)">Đã hủy</span>
+                                    <span class="st-pill" style="background:var(--po-bd2); color:var(--po-su); border-color:var(--po-bd)">{{ __('leave_overtime.status.cancelled') }}</span>
                                 @else
                                     <span class="st-pill" style="background:var(--po-bd2); color:var(--po-su);">{{ $row->status }}</span>
                                 @endif
@@ -241,17 +241,17 @@
                             <td style="padding:12px 12px; text-align:center">
                                 <div style="display:inline-flex; gap:5px">
                                     <!-- Xem chi tiết (Edit) -->
-                                    <a href="{{ \App\Filament\Resources\LeaveOvertimeResource::getUrl('edit', ['record' => $row]) }}" class="abt" title="Xem chi tiết">
+                                    <a href="{{ \App\Filament\Resources\LeaveOvertimeResource::getUrl('edit', ['record' => $row]) }}" class="abt" title="{{ __('leave_overtime.actions.view') }}">
                                         <i class="fa-solid fa-eye"></i>
                                     </a>
 
                                     <!-- Chỉnh sửa -->
-                                    <a href="{{ \App\Filament\Resources\LeaveOvertimeResource::getUrl('edit', ['record' => $row]) }}" class="abt" title="Chỉnh sửa">
+                                    <a href="{{ \App\Filament\Resources\LeaveOvertimeResource::getUrl('edit', ['record' => $row]) }}" class="abt" title="{{ __('leave_overtime.actions.edit') }}">
                                         <i class="fa-solid fa-pencil"></i>
                                     </a>
 
                                     <!-- Xóa yêu cầu -->
-                                    <button wire:click="deleteLeaveOvertime({{ $row->id }})" wire:confirm="Bạn có chắc chắn muốn xóa yêu cầu này?" class="abt" title="Xóa yêu cầu">
+                                    <button wire:click="deleteLeaveOvertime({{ $row->id }})" wire:confirm="{{ __('leave_overtime.ui.confirm_delete') }}" class="abt" title="{{ __('leave_overtime.ui.delete') }}">
                                         <i class="fa-solid fa-trash"></i>
                                     </button>
                                 </div>
@@ -263,8 +263,8 @@
                                 <div style="font-size:24px; color:var(--po-mu); margin-bottom:8px">
                                     <i class="fa-solid fa-magnifying-glass" style="opacity:.3"></i>
                                 </div>
-                                <div style="font-weight:700; color:var(--po-tx)">Không tìm thấy yêu cầu nghỉ phép hay tăng ca nào</div>
-                                <div style="font-size:12px; color:var(--po-mu)">Hãy thử điều chỉnh bộ lọc hoặc từ khóa tìm kiếm khác.</div>
+                                <div style="font-weight:700; color:var(--po-tx)">{{ __('leave_overtime.ui.empty') }}</div>
+                                <div style="font-size:12px; color:var(--po-mu)">{{ __('leave_overtime.ui.empty_hint') }}</div>
                             </td>
                         </tr>
                     @endforelse
@@ -285,17 +285,17 @@
             @endphp
             <div class="po-footer" style="border-top:1px solid var(--po-bd2); padding:14px 18px; display:flex; justify-content:space-between; align-items:center; font-size:12.5px; color:var(--po-mu)">
                 <div>
-                    Hiển thị <strong>{{ $itemsList->firstItem() }}</strong> đến <strong>{{ $itemsList->lastItem() }}</strong> trong tổng số <strong>{{ number_format($itemsList->total(), 0, ',', '.') }}</strong> yêu cầu
+                    {!! __('leave_overtime.ui.pagination', ['from' => '<strong>'.$itemsList->firstItem().'</strong>', 'to' => '<strong>'.$itemsList->lastItem().'</strong>', 'total' => '<strong>'.number_format($itemsList->total(), 0, ',', '.').'</strong>']) !!}
                 </div>
                 <div class="po-pagination" style="display:flex; align-items:center; gap:12px">
                     <select wire:model.live="perPage" class="po-select" style="min-width:7rem;height:2.1rem;padding:0 .5rem;border-radius:.5rem; border:1px solid var(--po-bd); outline:none; background:var(--po-wh); color:var(--po-tx)">
-                        <option value="10">10 dòng/trang</option>
-                        <option value="20">20 dòng/trang</option>
-                        <option value="50">50 dòng/trang</option>
+                        <option value="10">{{ __('leave_overtime.ui.rows_per_page', ['count' => 10]) }}</option>
+                        <option value="20">{{ __('leave_overtime.ui.rows_per_page', ['count' => 20]) }}</option>
+                        <option value="50">{{ __('leave_overtime.ui.rows_per_page', ['count' => 50]) }}</option>
                     </select>
 
                     @if($itemsList->hasPages())
-                    <nav role="navigation" aria-label="Pagination Navigation" style="display:flex; align-items:center; gap:4px">
+                    <nav role="navigation" aria-label="{{ __('leave_overtime.ui.pagination_navigation') }}" style="display:flex; align-items:center; gap:4px">
                         {{-- Previous --}}
                         @if ($itemsList->onFirstPage())
                             <span aria-disabled="true" style="width:30px; height:30px; border-radius:6px; border:1px solid var(--po-bd); display:flex; align-items:center; justify-content:center; color:var(--po-fa); cursor:not-allowed">

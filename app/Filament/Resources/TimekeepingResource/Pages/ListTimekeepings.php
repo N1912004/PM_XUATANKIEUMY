@@ -149,7 +149,7 @@ class ListTimekeepings extends Page
             : null;
 
         if (! $employee) {
-            session()->flash('error', 'Không tìm thấy thông tin nhân sự liên kết với tài khoản.');
+            session()->flash('error', __('timekeeping.messages.linked_employee_missing'));
 
             return;
         }
@@ -174,7 +174,7 @@ class ListTimekeepings extends Page
 
             $timekeeping->save();
             $this->dateFilter = $today;
-            session()->flash('message', 'Check-in thành công lúc '.$timekeeping->check_in.'!');
+            session()->flash('message', __('timekeeping.messages.checked_in', ['time' => $timekeeping->check_in]));
         }
     }
 
@@ -185,7 +185,7 @@ class ListTimekeepings extends Page
             : null;
 
         if (! $employee) {
-            session()->flash('error', 'Không tìm thấy thông tin nhân sự.');
+            session()->flash('error', __('timekeeping.messages.employee_missing'));
 
             return;
         }
@@ -213,7 +213,7 @@ class ListTimekeepings extends Page
 
             $timekeeping->save();
             $this->dateFilter = now()->toDateString();
-            session()->flash('message', 'Check-out thành công lúc '.$timekeeping->check_out.'!');
+            session()->flash('message', __('timekeeping.messages.checked_out', ['time' => $timekeeping->check_out]));
         }
     }
 
@@ -328,7 +328,7 @@ class ListTimekeepings extends Page
         if ($tk) {
             abort_unless(TimekeepingResource::canDelete($tk), 403);
             $tk->delete();
-            session()->flash('message', 'Xóa bản ghi chấm công thành công.');
+            session()->flash('message', __('timekeeping.messages.deleted'));
         }
     }
 

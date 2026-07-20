@@ -14,26 +14,26 @@
         <!-- Header Section -->
         <div class="po-head" style="margin-bottom: 20px;">
             <div>
-                <h1 class="po-title">Đơn {{ $record->code }}</h1>
+                <h1 class="po-title">{{ __('purchase_order.detail.order_title', ['code' => $record->code]) }}</h1>
                 <p class="po-subtitle">
-                    Gộp nguyên liệu theo nhà cung cấp · Ngày đặt {{ $record->estimated_delivery_date ? $record->estimated_delivery_date->format('d/m/Y') : '--' }}
+                    {{ __('purchase_order.detail.subtitle', ['date' => $record->estimated_delivery_date ? $record->estimated_delivery_date->format('d/m/Y') : '--']) }}
                 </p>
             </div>
             <div style="display:flex; gap:8px; flex-wrap:wrap">
                 <!-- Nút Quay lại -->
                 <a href="{{ \App\Filament\Resources\PurchaseOrderResource::getUrl('index') }}" class="po-btn" style="background:var(--po-wh); border:1px solid var(--po-bd); color:var(--po-tx)">
-                    <i class="fa-solid fa-arrow-left"></i> Quay lại
+                    <i class="fa-solid fa-arrow-left"></i> {{ __('purchase_order.actions.back') }}
                 </a>
 
                 <!-- Nút Xuất Excel (tất cả NCC) -->
                 <button wire:click="exportAllNcc" class="po-btn" style="background:var(--po-wh); border:1px solid var(--po-bd); color:var(--po-tx)">
-                    <i class="fa-solid fa-file-excel" style="color:var(--po-gn)"></i> Xuất Excel (tất cả NCC)
+                    <i class="fa-solid fa-file-excel" style="color:var(--po-gn)"></i> {{ __('purchase_order.actions.export_all_suppliers') }}
                 </button>
 
                 <!-- Nút Kiểm hàng (chuyển hướng sang kho tab nhập PO) -->
                 @if(in_array($record->status, ['sent', 'checking']) && is_null($record->stocked_at))
                     <a href="{{ url('/admin/stocks?tab=in&inMode=po&po_id=' . $record->id) }}" class="po-btn po-btn-primary">
-                        <i class="fa-solid fa-clipboard-check"></i> Kiểm hàng
+                        <i class="fa-solid fa-clipboard-check"></i> {{ __('purchase_order.actions.check_goods') }}
                     </a>
                 @endif
             </div>
@@ -64,7 +64,7 @@
                     </span>
 
                     <span style="font-size:12px; font-weight:500; {{ $isActive ? 'color:rgba(255,255,255,0.85);' : 'color:var(--po-mu);' }}">
-                        {{ number_format($poTotal / 1000, 0, '', '') }}k đ
+                        {{ __('purchase_order.currency.thousand', ['value' => number_format($poTotal / 1000, 0, '', '')]) }}
                     </span>
                 </a>
             @endforeach
@@ -78,12 +78,12 @@
                     <span style="width:10px; height:10px; border-radius:50%; background:{{ $colors[array_search($record->id, $relatedPOs->pluck('id')->toArray()) % count($colors)] }}; display:inline-block"></span>
                     <span style="font-size:16px; font-weight:800; color:var(--po-tx)">{{ $record->supplier?->name }}</span>
                     <span style="font-size:12px; color:var(--po-mu); font-weight:500">
-                        {{ $record->supplier?->type === 'uot' ? 'Thịt/Ướt' : ($record->supplier?->type === 'kho' ? 'Hàng Khô' : 'Nhà cung cấp') }}
+                        {{ $record->supplier?->type === 'uot' ? __('purchase_order.ingredient_types.meat_wet') : ($record->supplier?->type === 'kho' ? __('purchase_order.ingredient_types.dry') : __('purchase_order.fields.supplier')) }}
                     </span>
                 </div>
                 <!-- Nút xuất Excel NCC này -->
                 <button wire:click="exportCurrentNcc" class="po-btn" style="background:var(--po-wh); border:1px solid var(--po-bd); color:var(--po-tx); padding:6px 12px; font-size:12px">
-                    <i class="fa-solid fa-file-excel" style="color:var(--po-gn)"></i> Xuất Excel NCC này
+                    <i class="fa-solid fa-file-excel" style="color:var(--po-gn)"></i> {{ __('purchase_order.actions.export_current_supplier') }}
                 </button>
             </div>
 
@@ -93,11 +93,11 @@
                     <thead>
                         <tr style="border-bottom:1.5px solid var(--po-bd2); color:var(--po-mu); font-weight:700; text-transform:uppercase; font-size:11px">
                             <th style="padding:10px 8px; width:40px">#</th>
-                            <th style="padding:10px 8px">Tên nguyên liệu</th>
-                            <th style="padding:10px 8px; width:120px">Loại</th>
-                            <th style="padding:10px 8px; width:120px; text-align:center">Số lượng</th>
-                            <th style="padding:10px 8px; width:120px; text-align:right">Đơn giá</th>
-                            <th style="padding:10px 8px; width:140px; text-align:right">Thành tiền</th>
+                            <th style="padding:10px 8px">{{ __('purchase_order.table.ingredient_name') }}</th>
+                            <th style="padding:10px 8px; width:120px">{{ __('purchase_order.table.type') }}</th>
+                            <th style="padding:10px 8px; width:120px; text-align:center">{{ __('purchase_order.table.quantity') }}</th>
+                            <th style="padding:10px 8px; width:120px; text-align:right">{{ __('purchase_order.table.unit_price') }}</th>
+                            <th style="padding:10px 8px; width:140px; text-align:right">{{ __('purchase_order.table.line_total') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -117,15 +117,15 @@
                                 <td style="padding:12px 8px">
                                     @if($isThit)
                                         <span class="ot-thit" style="font-size:11px; display:inline-flex; align-items:center; gap:4px">
-                                            <i class="fa-solid fa-drumstick-bite" style="font-size: 10px;"></i> Thịt
+                                            <i class="fa-solid fa-drumstick-bite" style="font-size: 10px;"></i> {{ __('purchase_order.ingredient_types.meat') }}
                                         </span>
                                     @elseif($isRau)
                                         <span class="ot-uot" style="font-size:11px; display:inline-flex; align-items:center; gap:4px">
-                                            <i class="fa-solid fa-leaf" style="font-size: 10px;"></i> Rau/Ướt
+                                            <i class="fa-solid fa-leaf" style="font-size: 10px;"></i> {{ __('purchase_order.ingredient_types.vegetable_wet') }}
                                         </span>
                                     @else
                                         <span class="ot-kho" style="font-size:11px; display:inline-flex; align-items:center; gap:4px">
-                                            <i class="fa-solid fa-box" style="font-size: 10px;"></i> Hàng Khô
+                                            <i class="fa-solid fa-box" style="font-size: 10px;"></i> {{ __('purchase_order.ingredient_types.dry') }}
                                         </span>
                                     @endif
                                 </td>
@@ -133,20 +133,20 @@
                                     {{ (float)$item->quantity_ordered }} {{ $item->ingredient?->unit }}
                                 </td>
                                 <td style="padding:12px 8px; text-align:right; color:var(--po-mu)">
-                                    {{ number_format($item->unit_price, 0, ',', '.') }} đ/{{ $item->ingredient?->unit }}
+                                    {{ __('purchase_order.currency.amount', ['value' => number_format($item->unit_price, 0, ',', '.')]) }}/{{ $item->ingredient?->unit }}
                                 </td>
                                 <td style="padding:12px 8px; text-align:right; font-weight:700; color:var(--po-rd)">
-                                    {{ number_format($total, 0, ',', '.') }} đ
+                                    {{ __('purchase_order.currency.amount', ['value' => number_format($total, 0, ',', '.')]) }}
                                 </td>
                             </tr>
                         @endforeach
                         <!-- Tổng cộng dòng NCC -->
                         <tr style="background:var(--po-bl-s); color:var(--po-bl); font-weight:700; border-top:1.5px solid var(--po-bl-m)">
                             <td colspan="4" style="padding:14px 12px; text-align:right; font-size:14px">
-                                Tổng đơn {{ $record->supplier?->name }}:
+                                {{ __('purchase_order.detail.supplier_total', ['supplier' => $record->supplier?->name]) }}
                             </td>
                             <td colspan="2" style="padding:14px 12px; text-align:right; font-size:16px; color:var(--po-bl)">
-                                {{ number_format($currentPOTotal, 0, ',', '.') }} đ
+                                {{ __('purchase_order.currency.amount', ['value' => number_format($currentPOTotal, 0, ',', '.')]) }}
                             </td>
                         </tr>
                     </tbody>

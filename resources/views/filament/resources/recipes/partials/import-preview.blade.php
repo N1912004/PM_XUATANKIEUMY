@@ -7,9 +7,9 @@
         RecipesImport::SKIPPED => 'text-danger-700 bg-danger-50 dark:text-danger-400 dark:bg-danger-400/10',
     ];
     $labels = [
-        RecipesImport::CREATED => 'Thêm mới',
-        RecipesImport::UPDATED => 'Cập nhật',
-        RecipesImport::SKIPPED => 'Bỏ qua',
+        RecipesImport::CREATED => __('recipe.import_preview.created'),
+        RecipesImport::UPDATED => __('recipe.import_preview.updated'),
+        RecipesImport::SKIPPED => __('recipe.import_preview.skipped'),
     ];
 
     // File có thể rất lớn — modal không render nổi toàn bộ. Badge tổng LUÔN đúng 100%;
@@ -25,18 +25,18 @@
 <div class="space-y-3">
     <div class="flex flex-wrap gap-2 text-sm">
         <span class="rounded-md px-2 py-1 {{ $badge[RecipesImport::CREATED] }}">
-            Thêm mới: {{ number_format($createdRows->count()) }} món
+            {{ __('recipe.import_preview.created_count', ['count' => number_format($createdRows->count())]) }}
         </span>
         <span class="rounded-md px-2 py-1 {{ $badge[RecipesImport::UPDATED] }}">
-            Cập nhật: {{ number_format($updatedRows->count()) }} món
+            {{ __('recipe.import_preview.updated_count', ['count' => number_format($updatedRows->count())]) }}
         </span>
         <span class="rounded-md px-2 py-1 {{ $badge[RecipesImport::SKIPPED] }}">
-            Bỏ qua: {{ number_format($skippedRows->count()) }} món
+            {{ __('recipe.import_preview.skipped_count', ['count' => number_format($skippedRows->count())]) }}
         </span>
     </div>
 
     @if ($import->results === [])
-        <p class="text-sm text-gray-500 dark:text-gray-400">File không có món ăn nào để nhập.</p>
+        <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('recipe.import_preview.empty') }}</p>
     @else
         {{-- Dòng BỎ QUA hiện thẳng (kèm lý do) — đây là thứ cần soát trước khi bấm xác nhận --}}
         @if ($skippedRows->isNotEmpty())
@@ -44,8 +44,8 @@
                 <table class="w-full text-start text-sm">
                     <thead class="bg-danger-50 dark:bg-danger-400/10 sticky top-0">
                         <tr>
-                            <th class="px-3 py-2 text-start font-medium w-16">Dòng</th>
-                            <th class="px-3 py-2 text-start font-medium">Món bị bỏ qua — lý do</th>
+                            <th class="px-3 py-2 text-start font-medium w-16">{{ __('recipe.import_preview.row') }}</th>
+                            <th class="px-3 py-2 text-start font-medium">{{ __('recipe.import_preview.skipped_reason') }}</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200 dark:divide-white/10">
@@ -65,7 +65,7 @@
             </div>
             @if ($skippedRows->count() > $cap)
                 <p class="text-xs text-gray-500 dark:text-gray-400">
-                    … và {{ number_format($skippedRows->count() - $cap) }} dòng bỏ qua khác (tổng số ở badge phía trên là chính xác).
+                    {{ __('recipe.import_preview.more_skipped', ['count' => number_format($skippedRows->count() - $cap)]) }}
                 </p>
             @endif
         @endif
@@ -75,8 +75,8 @@
             @if ($rows->isNotEmpty())
                 <details class="rounded-lg ring-1 ring-gray-950/5 dark:ring-white/10">
                     <summary class="cursor-pointer select-none px-3 py-2 text-sm font-medium">
-                        {{ $labels[$status] }}: {{ number_format($rows->count()) }} món
-                        <span class="text-xs font-normal text-gray-500 dark:text-gray-400">(bấm để xem {{ $rows->count() > $cap ? $cap.' dòng đầu' : 'danh sách' }})</span>
+                        {{ __($status === RecipesImport::CREATED ? 'recipe.import_preview.created_count' : 'recipe.import_preview.updated_count', ['count' => number_format($rows->count())]) }}
+                        <span class="text-xs font-normal text-gray-500 dark:text-gray-400">{{ __('recipe.import_preview.click_to_view', ['content' => $rows->count() > $cap ? __('recipe.import_preview.first_rows', ['count' => $cap]) : __('recipe.import_preview.list')]) }}</span>
                     </summary>
                     <div class="max-h-80 overflow-y-auto border-t border-gray-200 dark:border-white/10">
                         <table class="w-full text-start text-sm">
@@ -91,7 +91,7 @@
                         </table>
                         @if ($rows->count() > $cap)
                             <p class="px-3 py-2 text-xs text-gray-500 dark:text-gray-400">
-                                … và {{ number_format($rows->count() - $cap) }} món khác (tổng số ở badge phía trên là chính xác).
+                                {{ __('recipe.import_preview.more_items', ['count' => number_format($rows->count() - $cap)]) }}
                             </p>
                         @endif
                     </div>

@@ -26,22 +26,22 @@ class StockTransferResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return __('Điều chuyển kho');
+        return __('warehouse.resource.transfer.navigation');
     }
 
     public static function getModelLabel(): string
     {
-        return __('Phiếu điều chuyển kho');
+        return __('warehouse.resource.transfer.model');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('Điều chuyển kho');
+        return __('warehouse.resource.transfer.navigation');
     }
 
     public static function getNavigationGroup(): ?string
     {
-        return __('NGUYÊN LIỆU & KHO');
+        return __('warehouse.resource.navigation_group');
     }
 
     public static function form(Form $form): Form
@@ -49,14 +49,14 @@ class StockTransferResource extends Resource
         return $form
             ->schema([
                 Forms\Components\Select::make('source_kitchen_id')
-                    ->label('Bếp xuất (nguồn)')
+                    ->label(__('warehouse.resource.transfer.source_kitchen'))
                     ->relationship('sourceKitchen', 'name')
                     ->searchable()
                     ->preload()
                     ->required()
                     ->default(fn () => Filament::auth()->user()?->currentKitchenId()),
                 Forms\Components\Select::make('dest_kitchen_id')
-                    ->label('Bếp nhận (đích)')
+                    ->label(__('warehouse.resource.transfer.destination_kitchen'))
                     // Chỉ liệt kê bếp CÙNG KHU VỰC với bếp nguồn (quy định điều chuyển nội khu vực)
                     ->relationship(
                         'destKitchen',
@@ -75,23 +75,23 @@ class StockTransferResource extends Resource
                         $sourceAreaId = Kitchen::whereKey($get('source_kitchen_id'))->value('area_id');
                         $destAreaId = Kitchen::whereKey($value)->value('area_id');
                         if ($sourceAreaId && $destAreaId !== $sourceAreaId) {
-                            $fail('Bếp nhận phải thuộc cùng khu vực với bếp xuất.');
+                            $fail(__('warehouse.resource.transfer.same_area'));
                         }
                     }),
                 Forms\Components\Textarea::make('note')
-                    ->label('Ghi chú')
+                    ->label(__('warehouse.table.note'))
                     ->columnSpanFull(),
                 Forms\Components\Repeater::make('items')
-                    ->label('Mặt hàng điều chuyển')
+                    ->label(__('warehouse.resource.transfer.items'))
                     ->relationship('items')
                     ->schema([
                         Forms\Components\Select::make('ingredient_id')
-                            ->label('Nguyên liệu')
+                            ->label(__('warehouse.table.ingredient'))
                             ->options(fn () => Ingredient::pluck('name', 'id'))
                             ->searchable()
                             ->required(),
                         Forms\Components\TextInput::make('quantity')
-                            ->label('Số lượng chuyển')
+                            ->label(__('warehouse.table.transfer_qty'))
                             ->numeric()
                             ->required()
                             ->minValue(0.001)
@@ -112,13 +112,13 @@ class StockTransferResource extends Resource
                                     $available = $stock ? ((float) $stock->quantity - (float) $stock->frozen_quantity) : 0.0;
 
                                     if ($available < (float) $value) {
-                                        $fail("Tồn khả dụng không đủ để điều chuyển (còn {$available}).");
+                                        $fail(__('warehouse.resource.transfer.insufficient', ['available' => $available]));
                                     }
                                 },
                             ]),
                     ])
                     ->columns(2)
-                    ->addActionLabel('Thêm mặt hàng')
+                    ->addActionLabel(__('warehouse.actions.add_item'))
                     ->columnSpanFull(),
             ]);
     }
@@ -128,7 +128,7 @@ class StockTransferResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('index')
-                    ->label('STT')
+                    ->label(__('warehouse.resource.table.index'))
                     ->state(static function (Tables\Contracts\HasTable $livewire, \stdClass $rowLoop): string {
                         $currentPage = method_exists($livewire, 'getTablePage') ? $livewire->getTablePage() : 1;
                         $recordsPerPage = method_exists($livewire, 'getTableRecordsPerPage') ? $livewire->getTableRecordsPerPage() : 10;
@@ -142,17 +142,17 @@ class StockTransferResource extends Resource
                     ])
                     ->width('56px'),
                 Tables\Columns\TextColumn::make('code')
-                    ->label('MÃ PHIẾU')
+                    ->label(__('warehouse.resource.table.voucher_code'))
                     ->searchable()
                     ->weight('bold'),
                 Tables\Columns\TextColumn::make('sourceKitchen.name')
-                    ->label('BẾP XUẤT')
+                    ->label(__('warehouse.resource.table.source_kitchen'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('destKitchen.name')
-                    ->label('BẾP NHẬN')
+                    ->label(__('warehouse.resource.table.destination_kitchen'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('status')
-                    ->label('TRẠNG THÁI')
+                    ->label(__('warehouse.resource.table.status'))
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         StockTransfer::STATUS_IN_TRANSIT => 'warning',
@@ -161,13 +161,13 @@ class StockTransferResource extends Resource
                         default => 'gray',
                     })
                     ->formatStateUsing(fn (string $state): string => match ($state) {
-                        StockTransfer::STATUS_IN_TRANSIT => 'Đang chuyển',
-                        StockTransfer::STATUS_DONE => 'Hoàn thành',
-                        StockTransfer::STATUS_CANCELLED => 'Hủy',
+                        StockTransfer::STATUS_IN_TRANSIT => __('warehouse.status.in_transit'),
+                        StockTransfer::STATUS_DONE => __('warehouse.resource.status.completed'),
+                        StockTransfer::STATUS_CANCELLED => __('warehouse.resource.status.cancelled'),
                         default => $state,
                     }),
                 Tables\Columns\TextColumn::make('created_at')
-                    ->label('NGÀY TẠO')
+                    ->label(__('warehouse.resource.table.created_at'))
                     ->dateTime('H:i d/m/Y')
                     ->extraAttributes([
                         'style' => 'font-variant-numeric: tabular-nums;',
@@ -176,16 +176,16 @@ class StockTransferResource extends Resource
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('status')
-                    ->label('Trạng thái')
+                    ->label(__('warehouse.resource.fields.status'))
                     ->options([
-                        StockTransfer::STATUS_IN_TRANSIT => 'Đang chuyển',
-                        StockTransfer::STATUS_DONE => 'Hoàn thành',
-                        StockTransfer::STATUS_CANCELLED => 'Hủy',
+                        StockTransfer::STATUS_IN_TRANSIT => __('warehouse.status.in_transit'),
+                        StockTransfer::STATUS_DONE => __('warehouse.resource.status.completed'),
+                        StockTransfer::STATUS_CANCELLED => __('warehouse.resource.status.cancelled'),
                     ]),
             ])
             ->actions([
                 Tables\Actions\Action::make('confirmReceived')
-                    ->label('Xác nhận nhận hàng')
+                    ->label(__('warehouse.actions.confirm_receive'))
                     ->icon('heroicon-o-check-circle')
                     ->color('primary')
                     ->requiresConfirmation()
@@ -209,10 +209,10 @@ class StockTransferResource extends Resource
                             403
                         );
                         $record->confirmReceived(Filament::auth()->id());
-                        Notification::make()->title('Đã nhận hàng & cập nhật tồn kho bếp nhận')->success()->send();
+                        Notification::make()->title(__('warehouse.resource.transfer.received'))->success()->send();
                     }),
                 Tables\Actions\Action::make('cancelTransfer')
-                    ->label('Hủy phiếu')
+                    ->label(__('warehouse.resource.transfer.cancel'))
                     ->icon('heroicon-o-x-circle')
                     ->color('danger')
                     ->requiresConfirmation()
@@ -236,7 +236,7 @@ class StockTransferResource extends Resource
                             403
                         );
                         $record->cancel();
-                        Notification::make()->title('Đã hủy phiếu & hoàn tồn về bếp xuất')->warning()->send();
+                        Notification::make()->title(__('warehouse.resource.transfer.cancelled'))->warning()->send();
                     }),
             ]);
     }

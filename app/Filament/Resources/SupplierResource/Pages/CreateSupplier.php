@@ -74,7 +74,7 @@ class CreateSupplier extends Page
         $this->syncIngredients($supplier);
 
         Notification::make()
-            ->title('Đã lưu nhà cung cấp')
+            ->title(__('supplier.notifications.saved'))
             ->success()
             ->send();
 
@@ -175,7 +175,7 @@ class CreateSupplier extends Page
                     $domain = strtolower(substr(strrchr($value, '@'), 1));
                     $typoDomains = ['1gmail.com', 'gamil.com', 'gmail.con', 'yaho.com', 'hotamil.com', 'outlok.com'];
                     if (in_array($domain, $typoDomains)) {
-                        $fail('Địa chỉ email chứa tên miền không hợp lệ hoặc sai chính tả.');
+                        $fail(__('supplier.validation.email_typo'));
                     }
                 },
             ],
@@ -191,9 +191,9 @@ class CreateSupplier extends Page
     protected function messages(): array
     {
         return [
-            'code.regex' => 'Mã nhà cung cấp chỉ được chứa chữ cái không dấu, chữ số, dấu gạch ngang (-) và gạch dưới (_).',
-            'phone.regex' => 'Số điện thoại không đúng định dạng Việt Nam (phải gồm 10-11 số, bắt đầu bằng 0, 84 hoặc +84).',
-            'email.regex' => 'Địa chỉ email không đúng định dạng (tên miền sau ký tự @ phải bắt đầu bằng chữ cái).',
+            'code.regex' => __('supplier.validation.code_format'),
+            'phone.regex' => __('supplier.validation.phone_format'),
+            'email.regex' => __('supplier.validation.email_format'),
         ];
     }
 
@@ -203,11 +203,11 @@ class CreateSupplier extends Page
     protected function validationAttributes(): array
     {
         return [
-            'name' => 'tên nhà cung cấp',
-            'code' => 'mã nhà cung cấp',
-            'phone' => 'số điện thoại',
-            'email' => 'địa chỉ email',
-            'type' => 'loại thực phẩm',
+            'name' => __('supplier.attributes.name'),
+            'code' => __('supplier.attributes.code'),
+            'phone' => __('supplier.attributes.phone'),
+            'email' => __('supplier.attributes.email'),
+            'type' => __('supplier.attributes.type'),
         ];
     }
 

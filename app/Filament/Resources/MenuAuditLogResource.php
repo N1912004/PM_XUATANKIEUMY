@@ -26,22 +26,22 @@ class MenuAuditLogResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return __('Lịch sử sửa thực đơn');
+        return __('menu.audit.label');
     }
 
     public static function getModelLabel(): string
     {
-        return __('Lịch sử sửa thực đơn');
+        return __('menu.audit.label');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('Lịch sử sửa thực đơn');
+        return __('menu.audit.label');
     }
 
     public static function getNavigationGroup(): ?string
     {
-        return __('VẬN HÀNH BẾP');
+        return __('menu.navigation.group');
     }
 
     /** Quyền xem gắn theo quyền xem thực đơn — không cần permission Shield riêng */
@@ -70,36 +70,36 @@ class MenuAuditLogResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('edited_at')
-                    ->label('Thời điểm')
+                    ->label(__('menu.audit.fields.occurred_at'))
                     ->dateTime('d/m/Y H:i')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('menu_id')
-                    ->label('Thực đơn')
-                    ->formatStateUsing(fn ($state) => $state ? "#{$state}" : 'Đã xóa')
+                    ->label(__('menu.audit.fields.menu'))
+                    ->formatStateUsing(fn ($state) => $state ? "#{$state}" : __('menu.audit.deleted_menu'))
                     ->badge()
                     ->color(fn ($state) => $state ? 'gray' : 'danger'),
                 Tables\Columns\TextColumn::make('user.name')
-                    ->label('Người sửa')
+                    ->label(__('menu.audit.fields.user'))
                     ->placeholder('—')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('action')
-                    ->label('Hành động')
+                    ->label(__('menu.audit.fields.action'))
                     ->badge()
-                    ->formatStateUsing(fn (string $state): string => $state === 'deleted' ? 'Xóa' : 'Sửa')
+                    ->formatStateUsing(fn (string $state): string => $state === 'deleted' ? __('menu.audit.actions.deleted') : __('menu.audit.actions.updated'))
                     ->color(fn (string $state): string => $state === 'deleted' ? 'danger' : 'warning'),
                 Tables\Columns\TextColumn::make('field')
-                    ->label('Trường')
+                    ->label(__('menu.audit.fields.field'))
                     ->placeholder('—'),
                 Tables\Columns\TextColumn::make('old_value')
-                    ->label('Giá trị cũ')
+                    ->label(__('menu.audit.fields.old_value'))
                     ->limit(30)
                     ->placeholder('—'),
                 Tables\Columns\TextColumn::make('new_value')
-                    ->label('Giá trị mới')
+                    ->label(__('menu.audit.fields.new_value'))
                     ->limit(30)
                     ->placeholder('—'),
                 Tables\Columns\TextColumn::make('reason')
-                    ->label('Lý do sửa')
+                    ->label(__('menu.audit.fields.reason'))
                     ->limit(40)
                     ->placeholder('—')
                     ->searchable(),
@@ -107,18 +107,18 @@ class MenuAuditLogResource extends Resource
             ->defaultSort('edited_at', 'desc')
             ->filters([
                 Tables\Filters\SelectFilter::make('user_id')
-                    ->label('Người sửa')
+                    ->label(__('menu.audit.fields.user'))
                     ->relationship('user', 'name')
                     ->searchable()
                     ->preload(),
                 Tables\Filters\SelectFilter::make('action')
-                    ->label('Hành động')
-                    ->options(['updated' => 'Sửa', 'deleted' => 'Xóa']),
+                    ->label(__('menu.audit.fields.action'))
+                    ->options(['updated' => __('menu.audit.actions.updated'), 'deleted' => __('menu.audit.actions.deleted')]),
                 Tables\Filters\Filter::make('edited_between')
-                    ->label('Khoảng thời gian')
+                    ->label(__('menu.audit.fields.date_range'))
                     ->form([
-                        Forms\Components\DatePicker::make('from')->label('Từ ngày'),
-                        Forms\Components\DatePicker::make('to')->label('Đến ngày'),
+                        Forms\Components\DatePicker::make('from')->label(__('menu.audit.fields.from_date')),
+                        Forms\Components\DatePicker::make('to')->label(__('menu.audit.fields.to_date')),
                     ])
                     ->query(fn (Builder $query, array $data): Builder => $query
                         ->when($data['from'] ?? null, fn ($q, $from) => $q->where('edited_at', '>=', $from))

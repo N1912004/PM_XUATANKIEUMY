@@ -27,22 +27,22 @@ class StockResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return __('Kho');
+        return __('warehouse.resource.stock.navigation');
     }
 
     public static function getModelLabel(): string
     {
-        return __('Kho hàng');
+        return __('warehouse.resource.stock.model');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('Kho');
+        return __('warehouse.resource.stock.navigation');
     }
 
     public static function getNavigationGroup(): ?string
     {
-        return __('NGUYÊN LIỆU & KHO');
+        return __('warehouse.resource.navigation_group');
     }
 
     public static function form(Form $form): Form
@@ -51,7 +51,7 @@ class StockResource extends Resource
             ->schema([
                 static::kitchenSelect(),
                 Forms\Components\Select::make('ingredient_id')
-                    ->label('Nguyên liệu')
+                    ->label(__('warehouse.table.ingredient'))
                     ->relationship('ingredient', 'name')
                     ->searchable()
                     ->preload()
@@ -63,19 +63,19 @@ class StockResource extends Resource
                         modifyRuleUsing: fn (Unique $rule, Forms\Get $get) => $rule->where('kitchen_id', $get('kitchen_id')),
                     )
                     ->validationMessages([
-                        'unique' => 'Nguyên liệu này đã tồn tại trong kho của bếp đã chọn.',
+                        'unique' => __('warehouse.resource.stock.ingredient_exists'),
                     ])
                     ->createOptionForm([
                         Forms\Components\TextInput::make('code')
-                            ->label('Mã nguyên liệu')
+                            ->label(__('warehouse.table.ingredient_code_short'))
                             ->required()
                             ->default(fn () => 'NL'.str_pad(mt_rand(1, 99999), 5, '0', STR_PAD_LEFT))
                             ->unique('ingredients', 'code'),
                         Forms\Components\TextInput::make('name')
-                            ->label('Tên nguyên liệu')
+                            ->label(__('warehouse.table.ingredient'))
                             ->required(),
                         Forms\Components\Select::make('type')
-                            ->label('Phân loại')
+                            ->label(__('warehouse.table.type'))
                             ->options([
                                 'Động vật' => 'Động vật',
                                 'Thực vật' => 'Thực vật',
@@ -84,30 +84,30 @@ class StockResource extends Resource
                             ])
                             ->required(),
                         Forms\Components\TextInput::make('unit')
-                            ->label('Đơn vị tính')
+                            ->label(__('warehouse.table.unit'))
                             ->required()
-                            ->placeholder('VD: Kg, Hộp, Quả, ...'),
+                            ->placeholder(__('warehouse.resource.stock.unit_placeholder')),
                         Forms\Components\Select::make('supplier_id')
-                            ->label('Nhà cung cấp')
+                            ->label(__('warehouse.table.supplier'))
                             ->relationship('supplier', 'name')
                             ->nullable(),
                         Forms\Components\TextInput::make('reference_price')
-                            ->label('Đơn giá tham chiếu (đ)')
+                            ->label(__('warehouse.resource.stock.reference_price'))
                             ->numeric()
                             ->default(0),
                     ]),
                 Forms\Components\TextInput::make('quantity')
-                    ->label('Số lượng tồn')
+                    ->label(__('warehouse.table.current_stock'))
                     ->required()
                     ->numeric()
                     ->default(0.000),
                 Forms\Components\TextInput::make('min_quantity')
-                    ->label('Định mức tối thiểu (min)')
+                    ->label(__('warehouse.table.minimum'))
                     ->required()
                     ->numeric()
                     ->default(0.000),
                 Forms\Components\TextInput::make('unit_price')
-                    ->label('Đơn giá (đ)')
+                    ->label(__('warehouse.table.unit_price'))
                     ->required()
                     ->numeric()
                     ->default(0.00),
@@ -125,18 +125,18 @@ class StockResource extends Resource
                     }),
                 static::kitchenColumn(),
                 Tables\Columns\TextColumn::make('ingredient.code')
-                    ->label('MÃ NL')
+                    ->label(__('warehouse.table.ingredient_code_short'))
                     ->sortable()
                     ->searchable()
                     ->weight('bold'),
                 Tables\Columns\TextColumn::make('ingredient.name')
-                    ->label('NGUYÊN LIỆU')
+                    ->label(__('warehouse.table.ingredient'))
                     ->sortable()
                     ->searchable()
-                    ->description(fn ($record) => 'Click để xem Thẻ kho')
+                    ->description(fn ($record) => __('warehouse.tooltips.open_ledger'))
                     ->weight('bold'),
                 Tables\Columns\TextColumn::make('ingredient.type')
-                    ->label('LOẠI')
+                    ->label(__('warehouse.table.type'))
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         'Động vật' => 'danger',
@@ -146,88 +146,84 @@ class StockResource extends Resource
                         default => 'gray',
                     }),
                 Tables\Columns\TextColumn::make('ingredient.supplier.name')
-                    ->label('NCC')
+                    ->label(__('warehouse.table.supplier'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('quantity')
-                    ->label('TỒN HIỆN TẠI')
+                    ->label(__('warehouse.table.current_stock'))
                     ->state(fn ($record) => $record->quantity.' '.$record->ingredient->unit)
                     ->sortable(),
                 Tables\Columns\TextColumn::make('min_quantity')
-                    ->label('TỐI THIỂU')
+                    ->label(__('warehouse.table.minimum'))
                     ->state(fn ($record) => $record->min_quantity.' '.$record->ingredient->unit)
                     ->sortable(),
                 Tables\Columns\TextColumn::make('unit_price')
-                    ->label('ĐƠN GIÁ')
+                    ->label(__('warehouse.table.unit_price'))
                     ->money('VND')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('total_value')
-                    ->label('GIÁ TRỊ')
+                    ->label(__('warehouse.table.value'))
                     ->money('VND')
                     ->state(fn ($record) => $record->quantity * $record->unit_price)
                     ->weight('bold')
                     ->color('primary'),
                 Tables\Columns\TextColumn::make('updated_at')
-                    ->label('CẬP NHẬT LẦN CUỐI')
+                    ->label(__('warehouse.table.last_updated'))
                     ->dateTime('H:i d/m/Y')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('stock_status')
-                    ->label('TRẠNG THÁI')
+                    ->label(__('warehouse.table.status'))
                     ->badge()
                     ->state(fn ($record): string => match (true) {
-                        $record->quantity == 0 => 'Hết hàng',
-                        $record->quantity <= $record->min_quantity => 'Sắp hết',
-                        default => 'Đủ hàng',
+                        $record->quantity == 0 => __('warehouse.status.out_of_stock'),
+                        $record->quantity <= $record->min_quantity => __('warehouse.status.low_stock'),
+                        default => __('warehouse.status.enough_stock'),
                     })
-                    ->color(fn ($state): string => match ($state) {
-                        'Hết hàng' => 'danger',
-                        'Sắp hết' => 'warning',
-                        default => 'success',
-                    }),
+                    ->color(fn ($record): string => $record->quantity == 0 ? 'danger' : ($record->quantity <= $record->min_quantity ? 'warning' : 'success')),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('kitchen_id')
-                    ->label('Bếp ăn')
+                    ->label(__('warehouse.filters.selected_kitchen'))
                     ->relationship('kitchen', 'name'),
                 Tables\Filters\SelectFilter::make('ingredient_id')
-                    ->label('Nguyên liệu')
+                    ->label(__('warehouse.table.ingredient'))
                     ->relationship('ingredient', 'name'),
             ])
             ->headerActions([
                 Tables\Actions\Action::make('externalInbound')
-                    ->label('Nhập kho ngoài')
+                    ->label(__('warehouse.transaction_type_labels.external_inbound'))
                     ->icon('heroicon-o-inbox-arrow-down')
                     ->color('gray')
-                    ->modalHeading('Nhập kho ngoài (mua trực tiếp không qua PO)')
+                    ->modalHeading(__('warehouse.resource.stock.external_inbound_heading'))
                     ->form([
                         Forms\Components\Select::make('kitchen_id')
-                            ->label('Bếp ăn')
+                            ->label(__('warehouse.resource.stock.kitchen'))
                             ->relationship('kitchen', 'name')
                             ->searchable()
                             ->preload()
                             ->default(fn () => Filament::auth()->user()?->currentKitchenId()),
                         Forms\Components\Select::make('ingredient_id')
-                            ->label('Nguyên liệu')
+                            ->label(__('warehouse.table.ingredient'))
                             ->relationship('ingredient', 'name')
                             ->searchable()
                             ->preload()
                             ->required(),
                         Forms\Components\TextInput::make('quantity')
-                            ->label('Số lượng nhập')
+                            ->label(__('warehouse.resource.stock.inbound_quantity'))
                             ->numeric()
                             ->required()
                             ->minValue(0.001),
                         Forms\Components\TextInput::make('unit_price')
-                            ->label('Đơn giá (đ)')
+                            ->label(__('warehouse.table.unit_price'))
                             ->numeric()
                             ->default(0),
                         Forms\Components\FileUpload::make('attachment')
-                            ->label('Ảnh/File hóa đơn chứng từ')
+                            ->label(__('warehouse.resource.stock.attachment'))
                             ->disk('public')
                             ->directory('stock-vouchers')
                             ->required()
-                            ->helperText('Bắt buộc đính kèm chứng từ trước khi lưu.'),
+                            ->helperText(__('warehouse.resource.stock.attachment_required')),
                         Forms\Components\Textarea::make('note')
-                            ->label('Ghi chú'),
+                            ->label(__('warehouse.table.note')),
                     ])
                     ->action(function (array $data): void {
                         Stock::recordExternalInbound(
@@ -240,7 +236,7 @@ class StockResource extends Resource
                         );
 
                         Notification::make()
-                            ->title('Đã nhập kho ngoài thành công')
+                            ->title(__('warehouse.resource.stock.external_inbound_success'))
                             ->success()
                             ->send();
                     }),

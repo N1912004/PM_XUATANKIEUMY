@@ -41,17 +41,17 @@ class LapThucDonTuan extends Page implements HasForms
 
     public static function getNavigationLabel(): string
     {
-        return __('Lập thực đơn tuần');
+        return __('menu.weekly.title');
     }
 
     public function getTitle(): string
     {
-        return __('Lập thực đơn tuần');
+        return __('menu.weekly.title');
     }
 
     public static function getNavigationGroup(): ?string
     {
-        return __('VẬN HÀNH BẾP');
+        return __('menu.navigation.group');
     }
 
     protected static string $view = 'filament.pages.lap-thuc-don-tuan';
@@ -88,36 +88,36 @@ class LapThucDonTuan extends Page implements HasForms
                     ->columns(2)
                     ->schema([
                         Select::make('kitchen_id')
-                            ->label('Bếp ăn')
+                            ->label(__('menu.fields.kitchen'))
                             ->options(fn () => Kitchen::pluck('name', 'id'))
                             ->searchable(),
                         DatePicker::make('week_start')
-                            ->label('Ngày bắt đầu tuần (Thứ 2)')
+                            ->label(__('menu.weekly.fields.week_start'))
                             ->required()
-                            ->helperText('Các món sẽ được xếp theo thứ tính từ ngày này.'),
+                            ->helperText(__('menu.weekly.helpers.week_start')),
                     ]),
                 TextInput::make('edit_reason')
-                    ->label('Lý do sửa (bắt buộc khi sửa thực đơn ĐÃ CHỐT)')
-                    ->placeholder('VD: Khách đổi món đột xuất ngày 15/07')
+                    ->label(__('menu.fields.audit_reason'))
+                    ->placeholder(__('menu.weekly.placeholders.audit_reason'))
                     ->maxLength(255),
                 Repeater::make('entries')
-                    ->label('Các món trong tuần')
+                    ->label(__('menu.weekly.fields.items'))
                     ->schema([
                         Select::make('day')
-                            ->label('Thứ')
+                            ->label(__('menu.weekly.fields.day'))
                             ->options(self::WEEKDAYS)
                             ->required(),
                         Select::make('shift_id')
-                            ->label('Ca')
+                            ->label(__('menu.fields.shift'))
                             ->options(fn () => Shift::pluck('name', 'id'))
                             ->required(),
                         Select::make('recipe_id')
-                            ->label('Món ăn')
+                            ->label(__('menu.fields.recipe'))
                             ->options(fn () => Recipe::where('status', 'active')->pluck('name', 'id'))
                             ->searchable()
                             ->required(),
                         TextInput::make('estimated_portions')
-                            ->label('Số suất')
+                            ->label(__('menu.fields.estimated_portions'))
                             ->numeric()
                             ->default(0)
                             ->required(),
@@ -141,7 +141,7 @@ class LapThucDonTuan extends Page implements HasForms
         $entries = $state['entries'] ?? [];
 
         if (empty($entries)) {
-            Notification::make()->title('Chưa có món nào để lưu!')->warning()->send();
+            Notification::make()->title(__('menu.weekly.notifications.no_items'))->warning()->send();
 
             return;
         }
@@ -155,7 +155,7 @@ class LapThucDonTuan extends Page implements HasForms
         if ($user && ! $user->hasRole(['super_admin', 'Quản trị viên'])) {
             $ownKitchenId = $user->currentKitchenId();
             if ($ownKitchenId && (int) $kitchenId !== (int) $ownKitchenId) {
-                Notification::make()->title('Bạn chỉ có thể lập thực đơn cho bếp của mình!')->danger()->send();
+                Notification::make()->title(__('menu.errors.own_kitchen_only'))->danger()->send();
 
                 return;
             }
@@ -186,7 +186,7 @@ class LapThucDonTuan extends Page implements HasForms
 
         if ($touchesLocked && $editReason === '') {
             Notification::make()
-                ->title('Cần lý do sửa thực đơn đã chốt')
+                ->title(__('menu.errors.audit_reason_required'))
                 ->body('Bạn đang sửa thực đơn ĐÃ CHỐT — vui lòng nhập "Lý do sửa" trước khi lưu.')
                 ->danger()
                 ->send();
@@ -232,14 +232,14 @@ class LapThucDonTuan extends Page implements HasForms
 
         if ($skippedDowngrade > 0) {
             Notification::make()
-                ->title("{$skippedDowngrade} món được giữ nguyên trạng thái (không hạ cấp về '".(Menu::STATUS_LABELS[$status] ?? $status)."')")
+                ->title(__('menu.weekly.notifications.downgrade_skipped', ['count' => $skippedDowngrade, 'status' => Menu::STATUS_LABELS[$status] ?? $status]))
                 ->warning()
                 ->send();
         }
 
         if ($skippedPast > 0) {
             Notification::make()
-                ->title("{$skippedPast} món thuộc thực đơn quá khứ đã chốt — bị khóa cứng, không sửa được")
+                ->title(__('menu.weekly.notifications.past_skipped', ['count' => $skippedPast]))
                 ->warning()
                 ->send();
         }
@@ -247,13 +247,13 @@ class LapThucDonTuan extends Page implements HasForms
         $label = $status === 'draft' ? 'Đã lưu nháp' : (Menu::STATUS_LABELS[$status] ?? $status);
 
         Notification::make()
-            ->title($label.' thực đơn tuần ('.count($entries).' món)')
+            ->title(__('menu.weekly.notifications.saved', ['status' => $label, 'count' => count($entries)]))
             ->success()
             ->send();
 
         if (! empty($duplicates)) {
             Notification::make()
-                ->title('Cảnh báo lặp món trong 3 tuần gần nhất')
+                ->title(__('menu.weekly.notifications.duplicate_warning'))
                 ->body('Các món đã từng xuất hiện: '.implode(', ', $duplicates))
                 ->warning()
                 ->persistent()

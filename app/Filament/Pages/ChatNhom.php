@@ -91,7 +91,7 @@ class ChatNhom extends Page
         $this->messages[] = [
             'id' => $payload['id'] ?? null,
             'user_id' => $payload['user_id'] ?? null,
-            'user_name' => $payload['user_name'] ?? 'Ẩn danh',
+            'user_name' => $payload['user_name'] ?? __('chat.anonymous'),
             'body' => $payload['body'] ?? '',
             'created_at' => $payload['created_at'] ?? now()->format('H:i d/m'),
         ];
@@ -105,7 +105,7 @@ class ChatNhom extends Page
         return [
             'id' => $message->id,
             'user_id' => $message->user_id,
-            'user_name' => $message->user?->name ?? 'Ẩn danh',
+            'user_name' => $message->user?->name ?? __('chat.anonymous'),
             'body' => $message->body,
             'created_at' => $message->created_at?->format('H:i d/m'),
         ];

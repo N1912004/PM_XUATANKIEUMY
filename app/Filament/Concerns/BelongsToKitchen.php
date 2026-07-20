@@ -43,7 +43,7 @@ trait BelongsToKitchen
     public static function kitchenSelect(): Select
     {
         return Select::make('kitchen_id')
-            ->label('Bếp ăn')
+            ->label(__('common.kitchen'))
             ->relationship('kitchen', 'name')
             ->searchable()
             ->preload()
@@ -53,8 +53,8 @@ trait BelongsToKitchen
     public static function kitchenColumn(): TextColumn
     {
         return TextColumn::make('kitchen.name')
-            ->label('BẾP')
-            ->placeholder('— Chung —')
+            ->label(__('common.kitchen_column'))
+            ->placeholder(__('common.shared'))
             ->sortable()
             ->toggleable();
     }

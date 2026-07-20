@@ -489,13 +489,13 @@
 
     <div class="report-header-container">
         <div>
-            <h1 class="report-title">Báo cáo – Xuất ăn</h1>
-            <p class="report-subtitle">Tổng hợp món ăn & nguyên liệu theo khoảng ngày và ca phục vụ</p>
+            <h1 class="report-title">{{ __('report.heading') }}</h1>
+            <p class="report-subtitle">{{ __('report.subtitle') }}</p>
         </div>
         <div>
             <button type="button" class="excel-btn" wire:click="exportExcel">
                 <i class="fa-solid fa-file-excel" style="color:#059669; font-size:15px"></i>
-                <span>Xuất Excel</span>
+                <span>{{ __('report.actions.export') }}</span>
             </button>
         </div>
     </div>
@@ -503,23 +503,23 @@
     <!-- Filter bar -->
     <div class="filter-bar">
         <div class="filter-item">
-            <span class="font-bold">Từ ngày:</span>
+            <span class="font-bold">{{ __('report.filters.from_date') }}:</span>
             <input type="date" class="date-input" wire:model.live="fromDate">
         </div>
         <div class="filter-item">
-            <span class="font-bold">Đến ngày:</span>
+            <span class="font-bold">{{ __('report.filters.to_date') }}:</span>
             <input type="date" class="date-input" wire:model.live="toDate">
         </div>
-        <button type="button" class="week-btn" wire:click="setThisWeek">Theo tuần thực đơn</button>
+        <button type="button" class="week-btn" wire:click="setThisWeek">{{ __('report.actions.this_week') }}</button>
 
         <div class="filter-item">
-            <span class="font-bold">Bếp:</span>
+            <span class="font-bold">{{ __('report.filters.kitchen') }}:</span>
             <div style="min-width:190px">
                 @include('filament.components.search-select', [
                     'name' => 'kitchenId',
                     'live' => true,
-                    'placeholder' => 'Tất cả bếp',
-                    'emptyLabel' => 'Tất cả bếp',
+                    'placeholder' => __('report.filters.all_kitchens'),
+                    'emptyLabel' => __('report.filters.all_kitchens'),
                     'options' => collect($this->getKitchenOptions())->map(fn ($name, $id) => ['value' => $id, 'label' => $name])->values()->all(),
                 ])
             </div>
@@ -547,7 +547,7 @@
 
         <div class="search-container">
             <i class="fa-solid fa-magnifying-glass search-icon"></i>
-            <input type="text" wire:model.live.debounce.300ms="search" placeholder="Tìm món / nguyên liệu...">
+            <input type="text" wire:model.live.debounce.300ms="search" placeholder="{{ __('report.filters.search') }}">
         </div>
     </div>
 
@@ -555,38 +555,38 @@
     @php $stats = $this->getStats(); @endphp
     <div class="stats-grid">
         <div class="stat-card">
-            <div class="stat-icon" style="background: #eff6ff; color: #1e40af;"><i class="fa-regular fa-calendar"></i></div>
+            <div class="stat-icon" style="background: #E9F2F8; color: #267DC1;"><i class="fa-regular fa-calendar"></i></div>
             <div>
                 <div class="stat-val">{{ $stats['days'] }}</div>
-                <div class="stat-lbl">Ngày có thực đơn</div>
+                <div class="stat-lbl">{{ __('report.stats.menu_days') }}</div>
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon" style="background: #fff7ed; color: #ea580c;"><i class="fa-solid fa-utensils"></i></div>
+            <div class="stat-icon" style="background: #E9F2F8; color: #267DC1;"><i class="fa-solid fa-utensils"></i></div>
             <div>
                 <div class="stat-val">{{ $stats['dishes'] }}</div>
-                <div class="stat-lbl">Lượt món</div>
+                <div class="stat-lbl">{{ __('report.stats.dishes') }}</div>
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon" style="background: #f5f3ff; color: #7c3aed;"><i class="fa-solid fa-seedling"></i></div>
+            <div class="stat-icon" style="background: #E9F2F8; color: #267DC1;"><i class="fa-solid fa-seedling"></i></div>
             <div>
                 <div class="stat-val">{{ $stats['ingredients'] }}</div>
-                <div class="stat-lbl">Dòng nguyên liệu</div>
+                <div class="stat-lbl">{{ __('report.stats.ingredient_rows') }}</div>
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon" style="background: #ecfdf5; color: #059669;"><i class="fa-solid fa-users"></i></div>
+            <div class="stat-icon" style="background: #E9F2F8; color: #267DC1;"><i class="fa-solid fa-users"></i></div>
             <div>
                 <div class="stat-val">{{ number_format($stats['suat'], 0, ',', '.') }}</div>
-                <div class="stat-lbl">Tổng suất</div>
+                <div class="stat-lbl">{{ __('report.stats.portions') }}</div>
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon" style="background: #fef2f2; color: #dc2626;"><i class="fa-solid fa-sack-dollar"></i></div>
+            <div class="stat-icon" style="background: #E9F2F8; color: #267DC1;"><i class="fa-solid fa-sack-dollar"></i></div>
             <div>
-                <div class="stat-val">{{ number_format($stats['cost'], 0, ',', '.') }}đ</div>
-                <div class="stat-lbl">Tổng chi phí giá vốn</div>
+                <div class="stat-val">{{ number_format($stats['cost'], 0, ',', '.') }}{{ __('report.currency') }}</div>
+                <div class="stat-lbl">{{ __('report.stats.cost') }}</div>
             </div>
         </div>
     </div>
@@ -598,8 +598,8 @@
             <div class="day-header" @click="open = !open" style="cursor:pointer; user-select:none">
                 <div class="day-title">
                     <i class="fa-solid fa-weight-hanging"></i>
-                    <span>TỔNG NGUYÊN LIỆU TIÊU THỤ CẢ KỲ</span>
-                    <span class="day-badge">{{ count($ingredientTotals) }} nguyên liệu</span>
+                    <span>{{ __('report.ingredients.title') }}</span>
+                    <span class="day-badge">{{ __('report.counts.ingredients', ['count' => count($ingredientTotals)]) }}</span>
                 </div>
                 <div style="display:flex; align-items:center; gap:8px">
                     <i class="fa-solid fa-chevron-down" x-show="!open" style="font-size:12px; color:#1e40af"></i>
@@ -611,10 +611,10 @@
                     <thead>
                         <tr>
                             <th style="width:44px">TT</th>
-                            <th>MÃ</th>
-                            <th>TÊN NGUYÊN LIỆU</th>
-                            <th style="text-align:right">TỔNG TIÊU THỤ</th>
-                            <th style="text-align:right">GIÁ TRỊ</th>
+                            <th>{{ __('report.table.code') }}</th>
+                            <th>{{ __('report.table.ingredient') }}</th>
+                            <th style="text-align:right">{{ __('report.table.total_consumption') }}</th>
+                            <th style="text-align:right">{{ __('report.table.value') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -630,7 +630,7 @@
                                         {{ number_format($ing['quantity'], 2, ',', '.') }} kg
                                     @endif
                                 </td>
-                                <td style="text-align:right; font-weight:700; color:#dc2626">{{ number_format($ing['cost'], 0, ',', '.') }}đ</td>
+                                <td style="text-align:right; font-weight:700; color:#dc2626">{{ number_format($ing['cost'], 0, ',', '.') }}{{ __('report.currency') }}</td>
                             </tr>
                         @endforeach
                     </tbody>
@@ -644,8 +644,8 @@
     @if(empty($groupedData))
         <div class="empty-state">
             <i class="fa-solid fa-chart-column" style="font-size:32px; opacity:.3; margin-bottom:8px"></i>
-            <h3>Không có dữ liệu trong khoảng đã chọn</h3>
-            <p>Hãy chọn lại khoảng ngày, ca, hoặc thử tìm kiếm cụm từ khác.</p>
+            <h3>{{ __('report.empty.title') }}</h3>
+            <p>{{ __('report.empty.description') }}</p>
         </div>
     @else
         @foreach($groupedData as $dayIndex => $day)
@@ -678,7 +678,7 @@
                             <span class="shift-badge" style="background: {{ $color['bg'] }}; color: {{ $color['text'] }}; border-color: {{ $color['border'] }};">
                                 {{ strtoupper($shift['name']) }}
                             </span>
-                            <span class="shift-count-badge">{{ count($shift['dishes']) }} món</span>
+                            <span class="shift-count-badge">{{ __('report.counts.dishes', ['count' => count($shift['dishes'])]) }}</span>
                         </div>
 
                         @foreach($shift['dishes'] as $dish)
@@ -691,8 +691,8 @@
                                     </div>
                                     <div style="display:flex; align-items:center; gap:8px">
                                         <div class="dish-portions-block">
-                                            <span class="dish-portions-badge">{{ $dish['suat'] }} suất</span>
-                                            <span class="dish-portions-phan">{{ $dish['phan'] }} phần</span>
+                                            <span class="dish-portions-badge">{{ __('report.counts.portions', ['count' => $dish['suat']]) }}</span>
+                                            <span class="dish-portions-phan">{{ __('report.counts.servings', ['count' => $dish['phan']]) }}</span>
                                         </div>
                                         <i class="fa-solid fa-chevron-down" x-show="!open" style="font-size:11px; color:var(--po-mu)"></i>
                                         <i class="fa-solid fa-chevron-up" x-show="open" style="font-size:11px; color:var(--po-mu)"></i>
@@ -704,12 +704,12 @@
                                         <thead>
                                             <tr>
                                                 <th style="width: 36px; text-align: center;">#</th>
-                                                <th>Mã NL</th>
-                                                <th>Tên nguyên liệu</th>
-                                                <th style="text-align: center;">ĐL (g/suất)</th>
-                                                <th style="text-align: center;">Số suất</th>
-                                                <th style="text-align: center;">Số phần</th>
-                                                <th style="text-align: right;">Tổng KG</th>
+                                                <th>{{ __('report.table.ingredient_code') }}</th>
+                                                <th>{{ __('report.table.ingredient_name') }}</th>
+                                                <th style="text-align: center;">{{ __('report.table.quantity_per_portion') }}</th>
+                                                <th style="text-align: center;">{{ __('report.table.portions') }}</th>
+                                                <th style="text-align: center;">{{ __('report.table.servings') }}</th>
+                                                <th style="text-align: right;">{{ __('report.table.total_kg') }}</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -733,7 +733,7 @@
                                             @empty
                                                 <tr>
                                                     <td colspan="7" style="text-align: center; color: #94a3b8; padding: 12px; font-style: italic;">
-                                                        Món tự nhập – chưa khai báo nguyên liệu trong ngân hàng
+                                                        {{ __('report.empty.manual_dish_ingredients') }}
                                                     </td>
                                                 </tr>
                                             @endforelse

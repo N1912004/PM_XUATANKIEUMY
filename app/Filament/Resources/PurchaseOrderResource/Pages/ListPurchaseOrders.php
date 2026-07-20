@@ -95,7 +95,7 @@ class ListPurchaseOrders extends Page
         $order->delete();
 
         Notification::make()
-            ->title('Đã xóa đơn đặt hàng')
+            ->title(__('purchase_order.notifications.deleted'))
             ->success()
             ->send();
 
@@ -110,10 +110,10 @@ class ListPurchaseOrders extends Page
             return (floor($m) == $m ? number_format($m, 0) : number_format($m, 1, '.', '')).' tr';
         }
         if ($value >= 1000) {
-            return number_format($value / 1000, 0, '.', '.').' nghìn đ';
+            return __('purchase_order.currency.thousand', ['value' => number_format($value / 1000, 0, '.', '.')]);
         }
 
-        return number_format($value).' đ';
+        return __('purchase_order.currency.amount', ['value' => number_format($value)]);
     }
 
     public function monthOptions(): array
@@ -139,7 +139,7 @@ class ListPurchaseOrders extends Page
 
         foreach ($months as $m) {
             $carbon = Carbon::parse($m.'-01');
-            $options[$m] = 'Tháng '.$carbon->format('m/Y');
+            $options[$m] = __('purchase_order.filters.month', ['month' => $carbon->format('m/Y')]);
         }
 
         return $options;

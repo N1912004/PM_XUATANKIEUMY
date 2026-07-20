@@ -33,12 +33,12 @@ class ListAreas extends Page
         if ($area) {
             // Kiểm tra ràng buộc: còn nhà ăn/bếp trực thuộc thì không cho xóa
             if ($area->kitchens()->exists()) {
-                session()->flash('error', 'Không thể xóa khu vực này vì vẫn còn nhà ăn/bếp trực thuộc.');
+                session()->flash('error', __('catalog.area.errors.in_use'));
 
                 return;
             }
             $area->delete();
-            session()->flash('message', 'Xóa khu vực thành công.');
+            session()->flash('message', __('catalog.area.notifications.deleted'));
         }
     }
 

@@ -13,8 +13,8 @@
 
     <div class="sup-head">
         <div>
-            <h1 class="sup-title">Nhà cung cấp</h1>
-            <p class="sup-subtitle">Quản lý thông tin NCC, loại thực phẩm cung cấp và bảng giá theo từng nguyên liệu</p>
+            <h1 class="sup-title">{{ __('supplier.list.title') }}</h1>
+            <p class="sup-subtitle">{{ __('supplier.list.subtitle') }}</p>
         </div>
         <div class="sup-actions">
             <button
@@ -32,7 +32,7 @@
                     <path clip-rule="evenodd" d="M12 19C15.866 19 19 15.866 19 12C19 8.13401 15.866 5 12 5C8.13401 5 5 8.13401 5 12C5 15.866 8.13401 19 12 19ZM12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" fill-rule="evenodd" fill="currentColor" opacity="0.2"/>
                     <path d="M2 12C2 6.47715 6.47715 2 12 2V5C8.13401 5 5 8.13401 5 12H2Z" fill="currentColor"/>
                 </svg>
-                <span class="fi-btn-label">Xuất Excel</span>
+                <span class="fi-btn-label">{{ __('supplier.actions.export_excel') }}</span>
             </button>
             <a
                 href="{{ \App\Filament\Resources\SupplierResource::getUrl('create') }}"
@@ -42,7 +42,7 @@
                 <svg class="fi-btn-icon h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
                 </svg>
-                <span class="fi-btn-label">Thêm NCC</span>
+                <span class="fi-btn-label">{{ __('supplier.actions.create') }}</span>
             </a>
         </div>
     </div>
@@ -59,12 +59,12 @@
                 </svg>
             </div>
             <div class="sup-kpi-value">{{ $statsData['suppliers'] }}</div>
-            <div class="sup-kpi-label">Tổng NCC</div>
+            <div class="sup-kpi-label">{{ __('supplier.kpi.total') }}</div>
             <div class="sup-kpi-note">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px">
                     <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
                 </svg>
-                Đang quản lý
+                {{ __('supplier.kpi.managed') }}
             </div>
         </div>
 
@@ -76,12 +76,12 @@
                 </svg>
             </div>
             <div class="sup-kpi-value">{{ $statsData['types'] }}</div>
-            <div class="sup-kpi-label">Loại thực phẩm</div>
+            <div class="sup-kpi-label">{{ __('supplier.kpi.food_types') }}</div>
             <div class="sup-kpi-note">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px">
                     <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
                 </svg>
-                Theo nhóm cung cấp
+                {{ __('supplier.kpi.by_supply_group') }}
             </div>
         </div>
 
@@ -92,12 +92,12 @@
                 </svg>
             </div>
             <div class="sup-kpi-value">{{ $statsData['ingredients'] }}</div>
-            <div class="sup-kpi-label">Nguyên liệu liên kết</div>
+            <div class="sup-kpi-label">{{ __('supplier.kpi.linked_ingredients') }}</div>
             <div class="sup-kpi-note">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px">
                     <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
                 </svg>
-                NCC ↔ nguyên liệu
+                {{ __('supplier.kpi.supplier_ingredient') }}
             </div>
         </div>
 
@@ -109,12 +109,12 @@
                 </svg>
             </div>
             <div class="sup-kpi-value">{{ $statsData['quotes'] }}</div>
-            <div class="sup-kpi-label">Báo giá đã nhập</div>
+            <div class="sup-kpi-label">{{ __('supplier.kpi.quoted_prices') }}</div>
             <div class="sup-kpi-note">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px">
                     <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
                 </svg>
-                Theo từng nguyên liệu
+                {{ __('supplier.kpi.by_ingredient') }}
             </div>
         </div>
     </div>
@@ -126,11 +126,11 @@
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
                 </svg>
-                <input wire:model.live.debounce.300ms="search" type="text" placeholder="Tìm tên NCC, SĐT hoặc email...">
+                <input wire:model.live.debounce.300ms="search" type="text" placeholder="{{ __('supplier.placeholders.search') }}">
             </div>
 
             <div class="sup-filter" style="min-width:14rem">
-                <label id="sup-type-label">Loại TP cung cấp</label>
+                <label id="sup-type-label">{{ __('supplier.filters.food_types') }}</label>
                 {{-- Combobox thuần Alpine: Choices.js không có trong dự án và Filament
                      không expose nó ra global, nên tự dựng để vừa tìm vừa chọn. --}}
                 <div
@@ -145,9 +145,9 @@
                             return q === '' ? this.options : this.options.filter(o => o.toLowerCase().includes(q));
                         },
                         get label() {
-                            if (! this.selected.length) return 'Tất cả';
+                            if (! this.selected.length) return @js(__('supplier.filters.all'));
                             if (this.selected.length <= 2) return this.selected.join(', ');
-                            return this.selected.length + ' loại đã chọn';
+                            return @js(__('supplier.filters.selected_types', ['count' => '__COUNT__'])).replace('__COUNT__', this.selected.length);
                         },
                         isChecked(option) {
                             return this.selected.includes(option);
@@ -188,14 +188,14 @@
                             x-model="search"
                             type="text"
                             class="sup-combo-search"
-                            placeholder="Tìm loại thực phẩm..."
+                            placeholder="{{ __('supplier.placeholders.search_type') }}"
                             @keydown.enter.prevent="filtered.length && toggleOption(filtered[0])"
                         >
 
                         <ul class="sup-combo-list" role="listbox" aria-multiselectable="true">
                             <li>
                                 <button type="button" class="sup-combo-option sup-combo-clear" @click="selected = []">
-                                    Bỏ chọn tất cả
+                                    {{ __('supplier.actions.clear_all') }}
                                 </button>
                             </li>
                             <template x-for="option in filtered" :key="option">
@@ -215,18 +215,18 @@
                                     </button>
                                 </li>
                             </template>
-                            <li x-show="filtered.length === 0" class="sup-combo-empty">Không tìm thấy loại phù hợp</li>
+                            <li x-show="filtered.length === 0" class="sup-combo-empty">{{ __('supplier.empty.no_matching_type') }}</li>
                         </ul>
                     </div>
                 </div>
             </div>
 
             <div class="sup-filter">
-                <label>Trạng thái</label>
+                <label>{{ __('supplier.fields.status') }}</label>
                 <select wire:model.live="statusFilter" class="sup-select">
-                    <option value="">Tất cả</option>
-                    <option value="active">Đang hoạt động</option>
-                    <option value="inactive">Tạm khóa</option>
+                    <option value="">{{ __('supplier.filters.all') }}</option>
+                    <option value="active">{{ __('supplier.status.active') }}</option>
+                    <option value="inactive">{{ __('supplier.status.locked') }}</option>
                 </select>
             </div>
 
@@ -242,7 +242,7 @@
                     <svg class="fi-btn-icon h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12"/>
                     </svg>
-                    <span class="fi-btn-label">Xóa lọc</span>
+                    <span class="fi-btn-label">{{ __('supplier.actions.clear_filters') }}</span>
                 </button>
             @endif
         </div>
@@ -252,14 +252,14 @@
                 <thead>
                     <tr>
                         <th style="width:56px;text-align:center">STT</th>
-                        <th style="width:110px">Mã NCC</th>
-                        <th>Tên NCC</th>
-                        <th style="width:130px">Số điện thoại</th>
+                        <th style="width:110px">{{ __('supplier.table.code') }}</th>
+                        <th>{{ __('supplier.table.name_short') }}</th>
+                        <th style="width:130px">{{ __('supplier.table.phone') }}</th>
                         <th>Email</th>
-                        <th style="width:180px">Loại thực phẩm cung cấp</th>
-                        <th style="width:130px;text-align:center">SL nguyên liệu</th>
-                        <th style="width:140px">Trạng thái</th>
-                        <th style="text-align:center;width:120px">Thao tác</th>
+                        <th style="width:180px">{{ __('supplier.table.food_types') }}</th>
+                        <th style="width:130px;text-align:center">{{ __('supplier.table.ingredient_count') }}</th>
+                        <th style="width:140px">{{ __('supplier.table.status') }}</th>
+                        <th style="text-align:center;width:120px">{{ __('supplier.table.actions') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -274,9 +274,9 @@
                             <td class="sup-link-num">{{ $supplier->ingredients_count }}</td>
                             <td>
                                 @if($supplier->status)
-                                    <span class="spill s-ok">Đang hoạt động</span>
+                                    <span class="spill s-ok">{{ __('supplier.status.active') }}</span>
                                 @else
-                                    <span class="spill s-qt">Tạm khóa</span>
+                                    <span class="spill s-qt">{{ __('supplier.status.locked') }}</span>
                                 @endif
                             </td>
                             <td style="text-align:center">
@@ -287,13 +287,13 @@
                                             <circle cx="12" cy="12" r="3"/>
                                         </svg>
                                     </a>
-                                    <a href="{{ \App\Filament\Resources\SupplierResource::getUrl('edit', ['record' => $supplier->id]) }}" class="sup-row-action" title="Chỉnh sửa" style="color: var(--sup-mu)">
+                                    <a href="{{ \App\Filament\Resources\SupplierResource::getUrl('edit', ['record' => $supplier->id]) }}" class="sup-row-action" title="{{ __('supplier.actions.edit') }}" style="color: var(--sup-mu)">
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
                                             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                                         </svg>
                                     </a>
-                                    <button wire:click="deleteSupplier({{ $supplier->id }})" wire:confirm="Bạn có chắc chắn muốn xóa nhà cung cấp này không?" class="sup-row-action sup-row-danger" title="Xóa">
+                                    <button wire:click="deleteSupplier({{ $supplier->id }})" wire:confirm="{{ __('supplier.confirm.delete') }}" class="sup-row-action sup-row-danger" title="{{ __('supplier.actions.delete') }}">
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                             <polyline points="3 6 5 6 21 6"/>
                                             <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
@@ -305,7 +305,7 @@
                     @empty
                         <tr>
                             <td colspan="9" style="text-align:center;padding:30px;color:var(--sup-mu)">
-                                Không tìm thấy nhà cung cấp nào.
+                                {{ __('supplier.empty.no_suppliers') }}
                             </td>
                         </tr>
                     @endforelse
@@ -316,7 +316,7 @@
         @if($suppliersList->hasPages())
             <div class="sup-footer">
                 <div>
-                    Hiển thị {{ $suppliersList->firstItem() }}-{{ $suppliersList->lastItem() }} trên {{ $suppliersList->total() }} nhà cung cấp
+                    {{ __('supplier.pagination.summary', ['from' => $suppliersList->firstItem(), 'to' => $suppliersList->lastItem(), 'total' => $suppliersList->total()]) }}
                 </div>
                 <div class="sup-pagination">
                     <select wire:model.live="perPage" class="sup-select" style="min-width:7rem;height:2rem;padding:0 .5rem;border-radius:.5rem">

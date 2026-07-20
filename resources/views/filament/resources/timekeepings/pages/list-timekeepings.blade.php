@@ -31,8 +31,8 @@
         }
 
         $cardDate = \Carbon\Carbon::parse($this->dateFilter ?: now()->toDateString());
-        $dayNames = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
-        $statusLabel = $attendanceRecord?->status ?: 'Chưa ghi nhận';
+        $dayNames = array_values(__('timekeeping.weekdays'));
+        $statusLabel = $attendanceRecord?->status ?: __('timekeeping.status.unrecorded');
         $statusClass = match ($statusLabel) {
             'Đúng giờ' => 'ok',
             'Đi trễ' => 'late',
@@ -60,13 +60,13 @@
     <!-- Page Head -->
     <div class="emp-head" style="margin-bottom: 16px;">
         <div>
-            <h1 class="emp-title">Chấm công</h1>
-            <p class="emp-subtitle">Theo dõi check-in, check-out, ca làm việc và tình trạng đi làm của nhân viên</p>
+            <h1 class="emp-title">{{ __('timekeeping.navigation') }}</h1>
+            <p class="emp-subtitle">{{ __('timekeeping.ui.subtitle') }}</p>
         </div>
         <div>
             <button wire:click="exportTimekeepings" class="emp-btn">
                 <i class="fa-solid fa-download" style="font-size: 13px;"></i>
-                Xuất dữ liệu
+                {{ __('timekeeping.actions.export') }}
             </button>
         </div>
     </div>
@@ -88,7 +88,7 @@
                     <div>
                         <div class="ci-name">{{ $employee->name }}</div>
                         <div class="ci-id">{{ $employee->code }}</div>
-                        <div class="ci-role">Nhân viên · {{ $employee->department?->name ?? '—' }}</div>
+                        <div class="ci-role">{{ __('timekeeping.ui.employee') }} · {{ $employee->department?->name ?? '—' }}</div>
                     </div>
                 </div>
 
@@ -96,25 +96,25 @@
                     <div class="ci-meta-item">
                         <i class="ci-meta-ico fa-regular fa-calendar"></i>
                         <div>
-                            <div class="ci-meta-lbl">Ngày làm việc</div>
+                            <div class="ci-meta-lbl">{{ __('timekeeping.fields.date') }}</div>
                             <div class="ci-meta-val">{{ $cardDate->format('d/m/Y') }} ({{ $dayNames[$cardDate->dayOfWeek] }})</div>
                         </div>
                     </div>
                     <div class="ci-meta-item">
                         <i class="ci-meta-ico fa-regular fa-clock"></i>
                         <div>
-                            <div class="ci-meta-lbl">Ca làm việc</div>
+                            <div class="ci-meta-lbl">{{ __('timekeeping.fields.shift') }}</div>
                             <div class="ci-meta-val">
                                 @if($attendanceRecord?->shift)
                                     {{ $attendanceRecord->shift->name }} · {{ $attendanceRecord->shift->time_range }}
                                 @else
-                                    Chưa phân ca
+                                    {{ __('timekeeping.attendance.not_assigned') }}
                                 @endif
                             </div>
                         </div>
                     </div>
                     <div class="ci-meta-status">
-                        <div class="ci-meta-lbl">Trạng thái</div>
+                        <div class="ci-meta-lbl">{{ __('timekeeping.fields.status') }}</div>
                         <span class="ci-status-badge {{ $statusClass }}">{{ $statusLabel }}</span>
                     </div>
                 </div>
@@ -122,13 +122,13 @@
 
             <div class="ci-bottom">
                 <div class="ci-time-box">
-                    <div class="ci-time-lbl">Check-in</div>
+                    <div class="ci-time-lbl">{{ __('timekeeping.table.check_in') }}</div>
                     <div class="ci-time-val in">{{ $attendanceRecord?->check_in ? date('H:i', strtotime($attendanceRecord->check_in)) : '--' }}</div>
                     <div class="ci-time-date">{{ $attendanceRecord?->check_in ? $cardDate->format('d/m/Y') : '--' }}</div>
                 </div>
                 <div class="ci-divider"></div>
                 <div class="ci-time-box">
-                    <div class="ci-time-lbl">Check-out</div>
+                    <div class="ci-time-lbl">{{ __('timekeeping.table.check_out') }}</div>
                     <div class="ci-time-val out">{{ $attendanceRecord?->check_out ? date('H:i', strtotime($attendanceRecord->check_out)) : '--' }}</div>
                     <div class="ci-time-date">{{ $attendanceRecord?->check_out ? $cardDate->format('d/m/Y') : '--' }}</div>
                 </div>
@@ -139,24 +139,24 @@
                         <button class="ci-btn done-in" type="button" disabled>
                             <i class="ci-btn-ico fa-solid fa-circle-check"></i>
                             <span>
-                                <strong>Check-in</strong>
-                                <small>Đã thực hiện lúc {{ date('H:i', strtotime($attendanceRecord->check_in)) }}</small>
+                                <strong>{{ __('timekeeping.table.check_in') }}</strong>
+                                <small>{{ __('timekeeping.ui.recorded_at', ['time' => date('H:i', strtotime($attendanceRecord->check_in))]) }}</small>
                             </span>
                         </button>
                     @elseif($canUseAttendanceActions)
                         <button class="ci-btn active-in" type="button" wire:click="checkIn">
                             <i class="ci-btn-ico fa-regular fa-clock"></i>
                             <span>
-                                <strong>Check-in</strong>
-                                <small>Bấm để ghi nhận vào ca</small>
+                                <strong>{{ __('timekeeping.table.check_in') }}</strong>
+                                <small>{{ __('timekeeping.attendance.check_in_hint') }}</small>
                             </span>
                         </button>
                     @else
                         <button class="ci-btn disabled" type="button" disabled>
                             <i class="ci-btn-ico fa-regular fa-clock"></i>
                             <span>
-                                <strong>Check-in</strong>
-                                <small>Chưa có dữ liệu</small>
+                                <strong>{{ __('timekeeping.table.check_in') }}</strong>
+                                <small>{{ __('timekeeping.attendance.no_data') }}</small>
                             </span>
                         </button>
                     @endif
@@ -165,24 +165,24 @@
                         <button class="ci-btn done-out" type="button" disabled>
                             <i class="ci-btn-ico fa-solid fa-circle-check"></i>
                             <span>
-                                <strong>Check-out</strong>
-                                <small>Đã thực hiện lúc {{ date('H:i', strtotime($attendanceRecord->check_out)) }}</small>
+                                <strong>{{ __('timekeeping.table.check_out') }}</strong>
+                                <small>{{ __('timekeeping.ui.recorded_at', ['time' => date('H:i', strtotime($attendanceRecord->check_out))]) }}</small>
                             </span>
                         </button>
                     @elseif($attendanceRecord?->check_in && $canUseAttendanceActions)
                         <button class="ci-btn active-out" type="button" wire:click="checkOut">
                             <i class="ci-btn-ico fa-regular fa-clock"></i>
                             <span>
-                                <strong>Check-out</strong>
-                                <small>Bấm để ghi nhận ra ca</small>
+                                <strong>{{ __('timekeeping.table.check_out') }}</strong>
+                                <small>{{ __('timekeeping.attendance.check_out_hint') }}</small>
                             </span>
                         </button>
                     @else
                         <button class="ci-btn disabled" type="button" disabled>
                             <i class="ci-btn-ico fa-regular fa-clock"></i>
                             <span>
-                                <strong>Check-out</strong>
-                                <small>{{ $attendanceRecord?->check_in ? 'Chưa có dữ liệu' : 'Cần check-in trước' }}</small>
+                                <strong>{{ __('timekeeping.table.check_out') }}</strong>
+                                <small>{{ $attendanceRecord?->check_in ? __('timekeeping.attendance.no_data') : __('timekeeping.attendance.check_in_first') }}</small>
                             </span>
                         </button>
                     @endif
@@ -192,7 +192,7 @@
             @if($attendanceRecord)
                 <div class="ci-confirm">
                     <i class="fa-solid fa-circle-check"></i>
-                    Thời gian đã được lưu vào bảng chấm công.
+                    {{ __('timekeeping.attendance.saved') }}
                 </div>
             @endif
         </div>
@@ -203,19 +203,19 @@
         <!-- Filter Toolbar -->
         <div class="att-toolbar">
             <div class="att-srch">
-                <input wire:model.live.debounce.250ms="search" type="text" placeholder="Tìm kiếm nhân viên...">
+                <input wire:model.live.debounce.250ms="search" type="text" placeholder="{{ __('timekeeping.placeholders.search') }}">
                 <i class="fa-solid fa-magnifying-glass"></i>
             </div>
             
             <div style="display:flex; flex-direction:column; gap:2px">
-                <span style="font-size:10px; font-weight:600; color:var(--fa); padding:0 2px">Ngày làm việc</span>
+                <span style="font-size:10px; font-weight:600; color:var(--fa); padding:0 2px">{{ __('timekeeping.fields.date') }}</span>
                 <input wire:model.live="dateFilter" class="att-date" type="date" style="height:34px; padding:0 10px; border-radius:8px">
             </div>
 
             <div style="display:flex; flex-direction:column; gap:2px">
-                <span style="font-size:10px; font-weight:600; color:var(--fa); padding:0 2px">Ca làm việc</span>
+                <span style="font-size:10px; font-weight:600; color:var(--fa); padding:0 2px">{{ __('timekeeping.fields.shift') }}</span>
                 <select wire:model.live="shiftFilter" class="att-sel">
-                    <option value="">Tất cả</option>
+                    <option value="">{{ __('timekeeping.ui.all') }}</option>
                     @foreach($shifts as $shift)
                         <option value="{{ $shift->id }}">{{ $shift->name }} ({{ $shift->time_range }})</option>
                     @endforeach
@@ -223,9 +223,9 @@
             </div>
 
             <div style="display:flex; flex-direction:column; gap:2px">
-                <span style="font-size:10px; font-weight:600; color:var(--fa); padding:0 2px">Phòng ban</span>
+                <span style="font-size:10px; font-weight:600; color:var(--fa); padding:0 2px">{{ __('timekeeping.filters.department') }}</span>
                 <select wire:model.live="departmentFilter" class="att-sel">
-                    <option value="">Tất cả</option>
+                    <option value="">{{ __('timekeeping.ui.all') }}</option>
                     @foreach($depts as $deptId => $deptName)
                         <option value="{{ $deptId }}">{{ $deptName }}</option>
                     @endforeach
@@ -233,9 +233,9 @@
             </div>
 
             <div style="display:flex; flex-direction:column; gap:2px">
-                <span style="font-size:10px; font-weight:600; color:var(--fa); padding:0 2px">Khu vực</span>
+                <span style="font-size:10px; font-weight:600; color:var(--fa); padding:0 2px">{{ __('timekeeping.filters.area') }}</span>
                 <select wire:model.live="areaFilter" class="att-sel">
-                    <option value="">Tất cả</option>
+                    <option value="">{{ __('timekeeping.ui.all') }}</option>
                     @foreach($areas as $area)
                         <option value="{{ $area->id }}">{{ $area->name }}</option>
                     @endforeach
@@ -243,27 +243,27 @@
             </div>
 
             <div style="display:flex; flex-direction:column; gap:2px">
-                <span style="font-size:10px; font-weight:600; color:var(--fa); padding:0 2px">Trạng thái</span>
+                <span style="font-size:10px; font-weight:600; color:var(--fa); padding:0 2px">{{ __('timekeeping.fields.status') }}</span>
                 <select wire:model.live="statusFilter" class="att-sel">
-                    <option value="">Tất cả</option>
-                    <option value="Đúng giờ">Đúng giờ</option>
-                    <option value="Đi trễ">Đi trễ</option>
-                    <option value="Tăng ca">Tăng ca</option>
-                    <option value="Nghỉ phép">Nghỉ phép</option>
-                    <option value="Vắng mặt">Vắng mặt</option>
+                    <option value="">{{ __('timekeeping.ui.all') }}</option>
+                    <option value="Đúng giờ">{{ __('timekeeping.status.on_time') }}</option>
+                    <option value="Đi trễ">{{ __('timekeeping.status.late') }}</option>
+                    <option value="Tăng ca">{{ __('timekeeping.status.overtime') }}</option>
+                    <option value="Nghỉ phép">{{ __('timekeeping.status.leave') }}</option>
+                    <option value="Vắng mặt">{{ __('timekeeping.status.absent') }}</option>
                 </select>
             </div>
 
             <div class="att-sp"></div>
 
             <div class="att-fbtn" style="height:34px">
-                <i class="fa-solid fa-sliders"></i> Bộ lọc
+                <i class="fa-solid fa-sliders"></i> {{ __('timekeeping.ui.filters') }}
                 @if($activeFiltersCount > 0)
                     <span class="att-fdot">{{ $activeFiltersCount }}</span>
                 @endif
             </div>
 
-            <button wire:click="resetFilters" class="att-rbtn" title="Cài lại bộ lọc">
+            <button wire:click="resetFilters" class="att-rbtn" title="{{ __('timekeeping.ui.reset_filters') }}">
                 <i class="fa-solid fa-rotate-right"></i>
             </button>
         </div>
@@ -274,16 +274,16 @@
                 <thead>
                     <tr style="border-bottom:1.5px solid var(--po-bd2); color:var(--po-mu); font-weight:700; text-transform:uppercase; font-size:11px; background:var(--po-bd2)">
                         <th style="padding:14px 12px; width:40px"><input type="checkbox"></th>
-                        <th style="padding:14px 12px; width:100px">Mã NV</th>
-                        <th style="padding:14px 12px">Họ và tên</th>
-                        <th style="padding:14px 12px">Phòng ban</th>
-                        <th style="padding:14px 12px">Ca làm việc</th>
-                        <th style="padding:14px 12px; width:100px">Check-in</th>
-                        <th style="padding:14px 12px; width:100px">Check-out</th>
-                        <th style="padding:14px 12px; width:100px">Tổng giờ</th>
-                        <th style="padding:14px 12px; width:100px">Tăng ca</th>
-                        <th style="padding:14px 12px; width:140px">Trạng thái</th>
-                        <th style="padding:14px 12px; width:120px; text-align:center">Hành động</th>
+                        <th style="padding:14px 12px; width:100px">{{ __('timekeeping.table.employee_code') }}</th>
+                        <th style="padding:14px 12px">{{ __('timekeeping.table.name') }}</th>
+                        <th style="padding:14px 12px">{{ __('timekeeping.table.department') }}</th>
+                        <th style="padding:14px 12px">{{ __('timekeeping.table.shift') }}</th>
+                        <th style="padding:14px 12px; width:100px">{{ __('timekeeping.table.check_in') }}</th>
+                        <th style="padding:14px 12px; width:100px">{{ __('timekeeping.table.check_out') }}</th>
+                        <th style="padding:14px 12px; width:100px">{{ __('timekeeping.table.total') }}</th>
+                        <th style="padding:14px 12px; width:100px">{{ __('timekeeping.table.overtime') }}</th>
+                        <th style="padding:14px 12px; width:140px">{{ __('timekeeping.table.status') }}</th>
+                        <th style="padding:14px 12px; width:120px; text-align:center">{{ __('timekeeping.ui.actions') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -365,15 +365,15 @@
                             </td>
                             <td style="padding:12px 12px;">
                                 @if($row->status === 'Đúng giờ')
-                                    <span class="st-pill st-ok">Đúng giờ</span>
+                                    <span class="st-pill st-ok">{{ __('timekeeping.status.on_time') }}</span>
                                 @elseif($row->status === 'Đi trễ')
-                                    <span class="st-pill st-late">Đi trễ</span>
+                                    <span class="st-pill st-late">{{ __('timekeeping.status.late') }}</span>
                                 @elseif($row->status === 'Tăng ca')
-                                    <span class="st-pill st-ot">Tăng ca</span>
+                                    <span class="st-pill st-ot">{{ __('timekeeping.status.overtime') }}</span>
                                 @elseif($row->status === 'Nghỉ phép')
-                                    <span class="st-pill st-leave">Nghỉ phép</span>
+                                    <span class="st-pill st-leave">{{ __('timekeeping.status.leave') }}</span>
                                 @elseif($row->status === 'Vắng mặt')
-                                    <span class="st-pill st-absent">Vắng mặt</span>
+                                    <span class="st-pill st-absent">{{ __('timekeeping.status.absent') }}</span>
                                 @else
                                     <span class="st-pill" style="background:var(--po-bd2); color:var(--po-su);">{{ $row->status }}</span>
                                 @endif
@@ -381,17 +381,17 @@
                             <td style="padding:12px 12px; text-align:center">
                                 <div style="display:inline-flex; gap:5px">
                                     <!-- Xem chi tiết (Edit) -->
-                                    <a href="{{ \App\Filament\Resources\TimekeepingResource::getUrl('edit', ['record' => $row]) }}" class="abt" title="Xem chi tiết">
+                                    <a href="{{ \App\Filament\Resources\TimekeepingResource::getUrl('edit', ['record' => $row]) }}" class="abt" title="{{ __('timekeeping.actions.view') }}">
                                         <i class="fa-solid fa-eye"></i>
                                     </a>
 
                                     <!-- Chỉnh sửa -->
-                                    <a href="{{ \App\Filament\Resources\TimekeepingResource::getUrl('edit', ['record' => $row]) }}" class="abt" title="Chỉnh sửa">
+                                    <a href="{{ \App\Filament\Resources\TimekeepingResource::getUrl('edit', ['record' => $row]) }}" class="abt" title="{{ __('timekeeping.actions.edit') }}">
                                         <i class="fa-solid fa-pencil"></i>
                                     </a>
 
                                     <!-- Xóa chấm công -->
-                                    <button wire:click="deleteTimekeeping({{ $row->id }})" wire:confirm="Bạn có chắc chắn muốn xóa bản ghi chấm công này?" class="abt" title="Xóa chấm công">
+                                    <button wire:click="deleteTimekeeping({{ $row->id }})" wire:confirm="{{ __('timekeeping.ui.confirm_delete') }}" class="abt" title="{{ __('timekeeping.ui.delete') }}">
                                         <i class="fa-solid fa-trash"></i>
                                     </button>
                                 </div>
@@ -403,8 +403,8 @@
                                 <div style="font-size:24px; color:var(--po-mu); margin-bottom:8px">
                                     <i class="fa-solid fa-magnifying-glass" style="opacity:.3"></i>
                                 </div>
-                                <div style="font-weight:700; color:var(--po-tx)">Không tìm thấy dữ liệu chấm công nào</div>
-                                <div style="font-size:12px; color:var(--po-mu)">Hãy thử điều chỉnh bộ lọc hoặc chọn ngày làm việc khác.</div>
+                                <div style="font-weight:700; color:var(--po-tx)">{{ __('timekeeping.ui.empty') }}</div>
+                                <div style="font-size:12px; color:var(--po-mu)">{{ __('timekeeping.ui.empty_hint') }}</div>
                             </td>
                         </tr>
                     @endforelse
@@ -425,16 +425,16 @@
             @endphp
             <div class="po-footer" style="border-top:1px solid var(--po-bd2); padding:14px 18px; display:flex; justify-content:space-between; align-items:center; font-size:12.5px; color:var(--po-mu)">
                 <div>
-                    Hiển thị <strong>{{ $timekeepingsList->firstItem() }}</strong> đến <strong>{{ $timekeepingsList->lastItem() }}</strong> trong tổng số <strong>{{ number_format($timekeepingsList->total(), 0, ',', '.') }}</strong> bản ghi
+                    {{ __('timekeeping.ui.pagination', ['from' => $timekeepingsList->firstItem(), 'to' => $timekeepingsList->lastItem(), 'total' => number_format($timekeepingsList->total(), 0, ',', '.')]) }}
                 </div>
                 <div class="po-pagination" style="display:flex; align-items:center; gap:12px">
                     <select wire:model.live="perPage" class="po-select" style="min-width:7rem;height:2.1rem;padding:0 .5rem;border-radius:.5rem; border:1px solid var(--po-bd); outline:none; background:var(--po-wh); color:var(--po-tx)">
-                        <option value="10">10 dòng/trang</option>
-                        <option value="20">20 dòng/trang</option>
-                        <option value="50">50 dòng/trang</option>
+                        <option value="10">{{ __('timekeeping.ui.rows_per_page', ['count' => 10]) }}</option>
+                        <option value="20">{{ __('timekeeping.ui.rows_per_page', ['count' => 20]) }}</option>
+                        <option value="50">{{ __('timekeeping.ui.rows_per_page', ['count' => 50]) }}</option>
                     </select>
 
-                    <nav role="navigation" aria-label="Pagination Navigation" style="display:flex; align-items:center; gap:4px">
+                    <nav role="navigation" aria-label="{{ __('common.pagination.navigation') }}" style="display:flex; align-items:center; gap:4px">
                         {{-- Previous --}}
                         @if ($timekeepingsList->onFirstPage())
                             <span aria-disabled="true" style="width:30px; height:30px; border-radius:6px; border:1px solid var(--po-bd); display:flex; align-items:center; justify-content:center; color:var(--po-fa); cursor:not-allowed">

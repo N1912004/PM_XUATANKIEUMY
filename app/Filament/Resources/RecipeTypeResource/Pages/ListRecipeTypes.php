@@ -12,7 +12,7 @@ class ListRecipeTypes extends ListRecords
 
     public function getTitle(): string
     {
-        return __('Nhóm món');
+        return __('recipe.recipe_type.label');
     }
 
     protected function getHeaderActions(): array

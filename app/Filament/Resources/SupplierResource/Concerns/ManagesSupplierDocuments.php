@@ -53,7 +53,7 @@ trait ManagesSupplierDocuments
             if ($upload) {
                 $this->validate(
                     ["documentUploads.{$index}" => 'file|mimes:jpg,jpeg,png,webp,pdf|max:5120'],
-                    ["documentUploads.{$index}.mimes" => 'Hồ sơ chỉ nhận ảnh hoặc PDF.', "documentUploads.{$index}.max" => 'Hồ sơ tối đa 5MB.'],
+                    ["documentUploads.{$index}.mimes" => __('supplier.validation.document_mimes'), "documentUploads.{$index}.max" => __('supplier.validation.document_max')],
                 );
                 $doc['file_path'] = $upload->store('supplier-documents', 'public');
             }

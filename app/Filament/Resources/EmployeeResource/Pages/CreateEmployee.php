@@ -139,22 +139,22 @@ class CreateEmployee extends Page
             'uploadedDocFiles.*' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png,webp|max:5120',
             'documents.*.expired_at' => 'nullable|date',
         ], [
-            'code.required' => 'Mã nhân viên là bắt buộc.',
-            'code.unique' => 'Mã nhân viên đã tồn tại.',
-            'name.required' => 'Họ và tên là bắt buộc.',
-            'email.required' => 'Email là bắt buộc.',
-            'email.email' => 'Email không đúng định dạng.',
-            'phone.required' => 'Số điện thoại là bắt buộc.',
-            'department_id.required' => 'Phòng ban là bắt buộc.',
-            'position_id.required' => 'Chức vụ là bắt buộc.',
-            'area_id.required' => 'Khu vực là bắt buộc.',
-            'start_date.required' => 'Ngày vào làm là bắt buộc.',
-            'avatarFile.image' => 'Ảnh đại diện phải là tệp hình ảnh (JPG, PNG, WebP).',
-            'avatarFile.mimes' => 'Ảnh đại diện phải là tệp hình ảnh (JPG, PNG, WebP).',
-            'avatarFile.max' => 'Ảnh đại diện tối đa 2MB.',
-            'uploadedDocFiles.*.mimes' => 'Tệp đính kèm phải là PDF, Word hoặc hình ảnh.',
-            'uploadedDocFiles.*.max' => 'Tệp đính kèm tối đa 5MB.',
-            'documents.*.expired_at.date' => 'Ngày hết hạn hồ sơ không đúng định dạng.',
+            'code.required' => __('employee.validation.code_required'),
+            'code.unique' => __('employee.validation.code_unique'),
+            'name.required' => __('employee.validation.name_required'),
+            'email.required' => __('employee.validation.email_required'),
+            'email.email' => __('employee.validation.email_email'),
+            'phone.required' => __('employee.validation.phone_required'),
+            'department_id.required' => __('employee.validation.department_required'),
+            'position_id.required' => __('employee.validation.position_required'),
+            'area_id.required' => __('employee.validation.area_required'),
+            'start_date.required' => __('employee.validation.start_date_required'),
+            'avatarFile.image' => __('employee.validation.avatar_image'),
+            'avatarFile.mimes' => __('employee.validation.avatar_image'),
+            'avatarFile.max' => __('employee.validation.avatar_max'),
+            'uploadedDocFiles.*.mimes' => __('employee.validation.document_mimes'),
+            'uploadedDocFiles.*.max' => __('employee.validation.document_max'),
+            'documents.*.expired_at.date' => __('employee.validation.document_expiry_date'),
         ]);
 
         $avatarPath = null;
@@ -169,7 +169,7 @@ class CreateEmployee extends Page
                 $filePath = $this->uploadedDocFiles[$index]->store('employee_docs', 'public');
             }
             $processedDocs[] = [
-                'name' => $doc['name'] ?: 'Tài liệu không tên',
+                'name' => $doc['name'] ?: __('employee.messages.unnamed_document'),
                 'file_path' => $filePath,
                 'expired_at' => $doc['expired_at'],
             ];
@@ -208,7 +208,7 @@ class CreateEmployee extends Page
             'documents' => $processedDocs,
         ]);
 
-        session()->flash('message', 'Thêm mới nhân viên thành công!');
+        session()->flash('message', __('employee.messages.created'));
 
         if ($this->createAnother) {
             return redirect($this->getResource()::getUrl('create'));

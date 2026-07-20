@@ -22,69 +22,69 @@ class LeaveOvertimeResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return __('Nghỉ phép & Tăng ca');
+        return __('leave_overtime.navigation');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('Nghỉ phép & Tăng ca');
+        return __('leave_overtime.navigation');
     }
 
     public static function getNavigationGroup(): ?string
     {
-        return __('NHÂN SỰ');
+        return __('leave_overtime.group');
     }
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\Section::make('Thông tin yêu cầu')
+                Forms\Components\Section::make(__('leave_overtime.sections.request'))
                     ->columns(3)
                     ->schema([
                         Forms\Components\Select::make('employee_id')
-                            ->label('Nhân viên yêu cầu')
+                            ->label(__('leave_overtime.fields.employee'))
                             ->relationship('employee', 'name')
                             ->searchable()
                             ->preload()
                             ->required(),
                         Forms\Components\Select::make('leave_type_id')
-                            ->label('Loại yêu cầu')
+                            ->label(__('leave_overtime.fields.type'))
                             ->relationship('leaveType', 'name', fn ($query) => $query->where('active', true)->orderBy('sort')->orderBy('name'))
                             ->searchable()
                             ->preload()
                             ->required(),
                         Forms\Components\TextInput::make('duration_text')
-                            ->label('Số ngày / Số giờ')
-                            ->placeholder('VD: 1 ngày hoặc 4 giờ')
+                            ->label(__('leave_overtime.fields.duration'))
+                            ->placeholder(__('leave_overtime.ui.duration_placeholder'))
                             ->required()
                             ->maxLength(255),
                         Forms\Components\DatePicker::make('start_date')
-                            ->label('Từ ngày / Ngày áp dụng')
+                            ->label(__('leave_overtime.fields.start_date'))
                             ->required(),
                         Forms\Components\DatePicker::make('end_date')
-                            ->label('Đến ngày')
+                            ->label(__('leave_overtime.fields.end_date'))
                             ->nullable(),
                     ]),
-                Forms\Components\Section::make('Chi tiết & Duyệt')
+                Forms\Components\Section::make(__('leave_overtime.sections.approval'))
                     ->columns(2)
                     ->schema([
                         Forms\Components\Textarea::make('reason')
-                            ->label('Lý do chi tiết')
+                            ->label(__('leave_overtime.fields.reason'))
                             ->columnSpanFull()
                             ->rows(3),
                         Forms\Components\Select::make('approver_id')
-                            ->label('Người duyệt')
+                            ->label(__('leave_overtime.fields.approver'))
                             ->relationship('approver', 'name')
                             ->searchable()
                             ->preload(),
                         Forms\Components\Select::make('status')
-                            ->label('Trạng thái phê duyệt')
+                            ->label(__('leave_overtime.fields.status'))
                             ->options([
-                                'pending' => 'Chờ duyệt',
-                                'approved' => 'Đã duyệt',
-                                'rejected' => 'Từ chối',
-                                'cancelled' => 'Đã hủy',
+                                'pending' => __('leave_overtime.status.pending'),
+                                'approved' => __('leave_overtime.status.approved'),
+                                'rejected' => __('leave_overtime.status.rejected'),
+                                'cancelled' => __('leave_overtime.status.cancelled'),
                             ])
                             ->default('pending')
                             ->required(),
@@ -97,28 +97,28 @@ class LeaveOvertimeResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('index')
-                    ->label('STT')
+                    ->label(__('common.index'))
                     ->state(static function (HasTable $livewire, \stdClass $rowLoop): string {
                         return (string) ($rowLoop->iteration);
                     }),
                 Tables\Columns\TextColumn::make('employee.code')
-                    ->label('MÃ NV')
+                    ->label(__('leave_overtime.ui.employee_code'))
                     ->searchable()
                     ->sortable()
                     ->weight('bold'),
                 Tables\Columns\TextColumn::make('employee.name')
-                    ->label('HỌ VÀ TÊN')
+                    ->label(__('leave_overtime.ui.full_name'))
                     ->searchable()
                     ->sortable()
                     ->weight('bold')
                     ->description(fn ($record) => $record->employee?->email),
                 Tables\Columns\TextColumn::make('employee.department.name')
-                    ->label('PHÒNG BAN')
+                    ->label(__('leave_overtime.ui.department'))
                     ->badge()
                     ->color('gray')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('leaveType.name')
-                    ->label('LOẠI YÊU CẦU')
+                    ->label(__('leave_overtime.fields.type'))
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         'Nghỉ phép năm' => 'success',
@@ -129,28 +129,28 @@ class LeaveOvertimeResource extends Resource
                     })
                     ->sortable(),
                 Tables\Columns\TextColumn::make('time_range')
-                    ->label('THỜI GIAN / NGÀY ÁP DỤNG')
+                    ->label(__('leave_overtime.ui.applied_date'))
                     ->state(fn ($record) => $record->start_date?->format('d/m/Y').($record->end_date ? ' đến '.$record->end_date->format('d/m/Y') : ''))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('duration_text')
-                    ->label('SỐ NGÀY / SỐ GIỜ')
+                    ->label(__('leave_overtime.fields.duration'))
                     ->weight('bold')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('reason')
-                    ->label('LÝ DO')
+                    ->label(__('leave_overtime.fields.reason'))
                     ->limit(40)
                     ->searchable(),
                 Tables\Columns\TextColumn::make('approver.name')
-                    ->label('NGƯỜI DUYỆT')
+                    ->label(__('leave_overtime.fields.approver'))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('status')
-                    ->label('TRẠNG THÁI')
+                    ->label(__('leave_overtime.ui.status'))
                     ->badge()
                     ->formatStateUsing(fn (string $state): string => match ($state) {
-                        'pending' => 'Chờ duyệt',
-                        'approved' => 'Đã duyệt',
-                        'rejected' => 'Từ chối',
-                        'cancelled' => 'Đã hủy',
+                        'pending' => __('leave_overtime.status.pending'),
+                        'approved' => __('leave_overtime.status.approved'),
+                        'rejected' => __('leave_overtime.status.rejected'),
+                        'cancelled' => __('leave_overtime.status.cancelled'),
                         default => $state,
                     })
                     ->color(fn (string $state): string => match ($state) {
@@ -164,21 +164,21 @@ class LeaveOvertimeResource extends Resource
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('employee_id')
-                    ->label('Nhân viên')
+                    ->label(__('leave_overtime.fields.employee'))
                     ->relationship('employee', 'name')
                     // Tìm kiếm ajax thay vì render toàn bộ nhân viên vào HTML
                     ->searchable()
                     ->optionsLimit(50),
                 Tables\Filters\SelectFilter::make('leave_type_id')
-                    ->label('Loại yêu cầu')
+                    ->label(__('leave_overtime.fields.type'))
                     ->relationship('leaveType', 'name', fn ($query) => $query->where('active', true)->orderBy('sort')->orderBy('name')),
                 Tables\Filters\SelectFilter::make('status')
-                    ->label('Trạng thái')
+                    ->label(__('leave_overtime.fields.status'))
                     ->options([
-                        'pending' => 'Chờ duyệt',
-                        'approved' => 'Đã duyệt',
-                        'rejected' => 'Từ chối',
-                        'cancelled' => 'Đã hủy',
+                        'pending' => __('leave_overtime.status.pending'),
+                        'approved' => __('leave_overtime.status.approved'),
+                        'rejected' => __('leave_overtime.status.rejected'),
+                        'cancelled' => __('leave_overtime.status.cancelled'),
                     ]),
             ])
             ->actions([

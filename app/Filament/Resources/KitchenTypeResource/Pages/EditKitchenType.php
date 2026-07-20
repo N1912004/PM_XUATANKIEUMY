@@ -19,7 +19,7 @@ class EditKitchenType extends EditRecord
                     $record = $this->getRecord();
                     if ($record->kitchens()->exists()) {
                         Notification::make()
-                            ->title('Không thể xóa loại này vì đang có '.$record->kitchens()->count().' nhà ăn/bếp sử dụng.')
+                            ->title(__('catalog.kitchen_type.errors.in_use', ['count' => $record->kitchens()->count()]))
                             ->danger()
                             ->send();
                         $action->cancel();

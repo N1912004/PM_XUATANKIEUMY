@@ -21,22 +21,22 @@ class KitchenTypeResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('KHU VỰC & NHÀ ĂN');
+        return __('catalog.groups.area_kitchen');
     }
 
     public static function getNavigationLabel(): string
     {
-        return __('Loại bếp / nhà ăn');
+        return __('catalog.kitchen_type.label');
     }
 
     public static function getModelLabel(): string
     {
-        return __('Loại bếp / nhà ăn');
+        return __('catalog.kitchen_type.label');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('Loại bếp / nhà ăn');
+        return __('catalog.kitchen_type.label');
     }
 
     public static function form(Form $form): Form
@@ -44,20 +44,20 @@ class KitchenTypeResource extends Resource
         return $form
             ->schema([
                 Forms\Components\TextInput::make('name')
-                    ->label('Tên loại')
-                    ->placeholder('Nhập tên loại bếp / nhà ăn (VD: Bếp sản xuất, Nhà ăn phục vụ...)')
+                    ->label(__('catalog.kitchen_type.fields.name'))
+                    ->placeholder(__('catalog.kitchen_type.placeholders.name'))
                     ->required()
                     ->unique(ignoreRecord: true)
                     ->maxLength(255)
                     ->columnSpanFull(),
                 Forms\Components\TextInput::make('sort')
-                    ->label('Thứ tự hiển thị')
+                    ->label(__('catalog.common.sort_order'))
                     ->numeric()
                     ->default(0),
                 Forms\Components\Toggle::make('active')
-                    ->label('Đang sử dụng')
+                    ->label(__('catalog.common.in_use'))
                     ->default(true)
-                    ->helperText('Tắt thì không còn xuất hiện ở các form chọn loại, dữ liệu cũ giữ nguyên.'),
+                    ->helperText(__('catalog.kitchen_type.helpers.active')),
             ]);
     }
 
@@ -66,7 +66,7 @@ class KitchenTypeResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('index')
-                    ->label('STT')
+                    ->label(__('catalog.common.index'))
                     ->state(static function (Tables\Contracts\HasTable $livewire, \stdClass $rowLoop): string {
                         $currentPage = method_exists($livewire, 'getTablePage') ? $livewire->getTablePage() : 1;
                         $recordsPerPage = method_exists($livewire, 'getTableRecordsPerPage') ? $livewire->getTableRecordsPerPage() : 10;
@@ -80,26 +80,26 @@ class KitchenTypeResource extends Resource
                     ])
                     ->width('56px'),
                 Tables\Columns\TextColumn::make('name')
-                    ->label('TÊN LOẠI')
+                    ->label(__('catalog.kitchen_type.table.name'))
                     ->searchable()
                     ->sortable()
                     ->weight('bold'),
                 Tables\Columns\TextColumn::make('sort')
-                    ->label('THỨ TỰ')
+                    ->label(__('catalog.common.sort_order_upper'))
                     ->sortable()
                     ->alignCenter(),
                 Tables\Columns\IconColumn::make('active')
-                    ->label('ĐANG DÙNG')
+                    ->label(__('catalog.common.in_use_upper'))
                     ->boolean(),
                 Tables\Columns\TextColumn::make('kitchens_count')
-                    ->label('SỐ NHÀ ĂN / BẾP')
+                    ->label(__('catalog.kitchen_type.table.count'))
                     ->counts('kitchens')
                     ->alignCenter()
                     ->sortable()
                     ->color('primary')
                     ->weight('bold'),
                 Tables\Columns\TextColumn::make('created_at')
-                    ->label('NGÀY TẠO')
+                    ->label(__('catalog.common.created_at'))
                     ->dateTime('d/m/Y H:i')
                     ->extraAttributes([
                         'style' => 'font-variant-numeric: tabular-nums;',
@@ -110,7 +110,7 @@ class KitchenTypeResource extends Resource
             ->defaultSort('sort')
             ->filters([
                 Tables\Filters\TernaryFilter::make('active')
-                    ->label('Đang sử dụng'),
+                    ->label(__('catalog.common.in_use')),
             ])
             ->actions([
                 Tables\Actions\EditAction::make()
@@ -120,7 +120,7 @@ class KitchenTypeResource extends Resource
                     ->before(function (Tables\Actions\DeleteAction $action, $record): void {
                         if ($record->kitchens()->exists()) {
                             Notification::make()
-                                ->title('Không thể xóa loại này vì đang có '.$record->kitchens()->count().' nhà ăn/bếp sử dụng.')
+                                ->title(__('catalog.kitchen_type.errors.in_use', ['count' => $record->kitchens()->count()]))
                                 ->danger()
                                 ->send();
                             $action->cancel();
@@ -134,7 +134,7 @@ class KitchenTypeResource extends Resource
                             $inUse = $records->filter(fn ($r) => $r->kitchens()->exists());
                             if ($inUse->isNotEmpty()) {
                                 Notification::make()
-                                    ->title('Không thể xóa hàng loạt. Các loại sau đang được sử dụng: '.$inUse->pluck('name')->implode(', '))
+                                    ->title(__('catalog.kitchen_type.errors.bulk_in_use', ['names' => $inUse->pluck('name')->implode(', ')]))
                                     ->danger()
                                     ->send();
                                 $action->cancel();
