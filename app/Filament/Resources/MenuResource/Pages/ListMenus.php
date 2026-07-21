@@ -9,6 +9,7 @@ use App\Models\Menu;
 use App\Models\Recipe;
 use App\Models\Shift;
 use App\Models\WeekMenu;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -831,7 +832,7 @@ class ListMenus extends Page
         }
 
         if (! $hasAnyRecipe) {
-            \Filament\Notifications\Notification::make()
+            Notification::make()
                 ->title('Chưa chọn món ăn!')
                 ->body(__('menu.notifications.no_items'))
                 ->warning()
@@ -939,7 +940,7 @@ class ListMenus extends Page
             }
         });
 
-        \Filament\Notifications\Notification::make()
+        Notification::make()
             ->title($this->weekStatus === 'locked' ? 'Đã chốt thực đơn đợt thành công!' : 'Đã lưu thực đơn đợt thành công!')
             ->success()
             ->send();
@@ -1057,7 +1058,8 @@ class ListMenus extends Page
     public function updatedDayDate($date): void
     {
         if ($this->dayKitchenId && $date) {
-            $this->loadDayMenu($this->dayKitchenId, $date, $this->isEditingDay);
+            // Pass null to auto-detect editing mode based on existing data.
+            $this->loadDayMenu($this->dayKitchenId, $date);
         }
     }
 
@@ -1127,7 +1129,7 @@ class ListMenus extends Page
         }
 
         if (! $hasAnyRecipe) {
-            \Filament\Notifications\Notification::make()
+            Notification::make()
                 ->title('Chưa chọn món ăn!')
                 ->body(__('menu.notifications.no_items'))
                 ->warning()
@@ -1225,7 +1227,7 @@ class ListMenus extends Page
             }
         });
 
-        \Filament\Notifications\Notification::make()
+        Notification::make()
             ->title($this->dayStatus === 'locked' ? 'Đã chốt thực đơn ngày thành công!' : 'Đã lưu thực đơn ngày thành công!')
             ->success()
             ->send();
@@ -1309,5 +1311,4 @@ class ListMenus extends Page
     {
         return Recipe::orderBy('name')->get();
     }
-
 }

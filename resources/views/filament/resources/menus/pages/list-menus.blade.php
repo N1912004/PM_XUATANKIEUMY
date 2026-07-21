@@ -302,10 +302,10 @@
                 <label>Đến ngày *</label>
                 <input wire:model.live="weekDateTo" type="date" class="ctrl" required>
             </div>
-            @if($weekHasExistingMenus)
+            @if($weekHasEditableLockedMenus)
                 <div class="field" style="min-width:280px; flex:1">
-                    <label>{{ __('menu.fields.audit_reason') }}{{ $weekHasEditableLockedMenus ? ' *' : '' }}</label>
-                    <input wire:model="weekEditReason" type="text" class="ctrl" placeholder="{{ __('menu.placeholders.audit_reason') }}" {{ $weekHasEditableLockedMenus ? 'required' : '' }}>
+                    <label>{{ __('menu.fields.audit_reason') }} *</label>
+                    <input wire:model="weekEditReason" type="text" class="ctrl" placeholder="{{ __('menu.placeholders.audit_reason') }}" required>
                     @error('weekEditReason') <span style="color:var(--po-rd);font-size:12px">{{ $message }}</span> @enderror
                 </div>
             @endif
@@ -434,10 +434,10 @@
                 <label>{{ __('menu.day_form.date') }} *</label>
                 <input wire:model.live="dayDate" type="date" class="ctrl" required>
             </div>
-            @if($dayHasExistingMenus)
+            @if($dayHasEditableLockedMenus)
                 <div class="field" style="min-width:280px; flex:1">
-                    <label>{{ __('menu.fields.audit_reason') }}{{ $dayHasEditableLockedMenus ? ' *' : '' }}</label>
-                    <input wire:model="dayEditReason" type="text" class="ctrl" placeholder="{{ __('menu.placeholders.audit_reason') }}" {{ $dayHasEditableLockedMenus ? 'required' : '' }}>
+                    <label>{{ __('menu.fields.audit_reason') }} *</label>
+                    <input wire:model="dayEditReason" type="text" class="ctrl" placeholder="{{ __('menu.placeholders.audit_reason') }}" required>
                     @error('dayEditReason') <span style="color:var(--po-rd);font-size:12px">{{ $message }}</span> @enderror
                 </div>
             @endif
