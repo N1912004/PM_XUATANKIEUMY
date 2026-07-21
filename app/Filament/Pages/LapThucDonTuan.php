@@ -119,7 +119,8 @@ class LapThucDonTuan extends Page implements HasForms
                         TextInput::make('estimated_portions')
                             ->label(__('menu.fields.estimated_portions'))
                             ->numeric()
-                            ->default(0)
+                            ->minValue(1)
+                            ->default(1)
                             ->required(),
                     ])
                     ->columns(4)
@@ -136,6 +137,12 @@ class LapThucDonTuan extends Page implements HasForms
     {
         // Ghi/chốt thực đơn là đầu pipeline (List hàng → PO → Kho) — phải có quyền theo policy Menu
         abort_unless(MenuResource::canCreate(), 403);
+
+        if (! array_key_exists($status, Menu::STATUS_ORDER)) {
+            Notification::make()->title(__('menu.errors.invalid_status'))->danger()->send();
+
+            return;
+        }
 
         $state = $this->form->getState();
         $entries = $state['entries'] ?? [];
@@ -269,11 +276,6 @@ class LapThucDonTuan extends Page implements HasForms
     public function sendToClient(): void
     {
         $this->save('sent');
-    }
-
-    public function confirmByClient(): void
-    {
-        $this->save('confirmed');
     }
 
     public function lockWeek(): void

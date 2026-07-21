@@ -65,14 +65,14 @@ class MenuResource extends Resource
                     ->label(__('menu.fields.estimated_portions'))
                     ->required()
                     ->numeric()
-                    ->default(0),
+                    ->minValue(1)
+                    ->default(1),
                 Forms\Components\Select::make('status')
                     ->label(__('menu.fields.status'))
                     ->required()
                     ->options([
                         'draft' => __('menu.status.draft_detailed'),
                         'sent' => __('menu.status.sent_detailed'),
-                        'confirmed' => __('menu.status.confirmed_detailed'),
                         'locked' => __('menu.status.locked_detailed'),
                     ])
                     ->default('draft'),
@@ -81,9 +81,10 @@ class MenuResource extends Resource
                     ->placeholder(__('menu.placeholders.audit_reason'))
                     ->maxLength(255)
                     ->dehydrated(false)
+                    ->required(fn (?Menu $record): bool => $record?->status === 'locked')
                     ->visible(fn (string $operation, ?Menu $record): bool => $operation === 'edit'
                         && $record !== null
-                        && in_array($record->status, Menu::FINALIZED_STATUSES, true)),
+                        && $record->status === 'locked'),
             ]);
     }
 
@@ -125,7 +126,6 @@ class MenuResource extends Resource
                     ->color(fn (string $state): string => match ($state) {
                         'draft' => 'warning',
                         'sent' => 'info',
-                        'confirmed' => 'primary',
                         'locked' => 'success',
                         default => 'gray',
                     })
