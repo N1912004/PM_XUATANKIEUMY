@@ -36,7 +36,7 @@ class IngredientTypeResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('ingredient.navigation.group');
+        return __('NGUYÊN LIỆU & KHO');
     }
 
     public static function form(Form $form): Form

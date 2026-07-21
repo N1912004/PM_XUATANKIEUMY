@@ -238,7 +238,7 @@ return [
         'load_more' => 'Load 50 more',
     ],
     'resource' => [
-        'navigation_group' => 'INGREDIENTS & INVENTORY',
+        'navigation_group' => 'INGREDIENTS & WAREHOUSE',
         'fields' => ['status' => 'Status'],
         'status' => ['completed' => 'Completed', 'cancelled' => 'Cancelled'],
         'table' => ['index' => '#', 'voucher_code' => 'VOUCHER CODE', 'source_kitchen' => 'SOURCE KITCHEN', 'destination_kitchen' => 'DESTINATION KITCHEN', 'status' => 'STATUS', 'created_at' => 'CREATED'],

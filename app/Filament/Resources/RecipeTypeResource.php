@@ -21,7 +21,7 @@ class RecipeTypeResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('recipe.recipe_type.navigation_group');
+        return __('NGUYÊN LIỆU & KHO');
     }
 
     public static function getNavigationLabel(): string

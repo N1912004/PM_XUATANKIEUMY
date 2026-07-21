@@ -41,7 +41,7 @@ class StockTransferResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('warehouse.resource.navigation_group');
+        return __('NGUYÊN LIỆU & KHO');
     }
 
     public static function form(Form $form): Form
