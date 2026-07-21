@@ -63,6 +63,8 @@ class ListMenus extends Page
     // (mỗi phần tử ['recipe_id' => , 'portions' => ]) — cho phép nhiều món/ô qua nút (+).
     public array $weekCells = [];
 
+    public array $selectedShifts = []; // Danh sách shift_id được tích chọn hiển thị trên ma trận tuần
+
     public string $weekEditReason = ''; // Lý do sửa — bắt buộc khi ghi đè thực đơn ĐÃ CHỐT
 
     public bool $weekHasExistingMenus = false;
@@ -651,6 +653,9 @@ class ListMenus extends Page
 
         $this->weekCells = [];
         $shifts = Shift::all();
+        if (empty($this->selectedShifts)) {
+            $this->selectedShifts = $shifts->pluck('id')->map(fn ($id) => (string) $id)->all();
+        }
 
         $weekMenu = WeekMenu::where('kitchen_id', $kitchenId)
             ->where('date_from', $this->weekDateFrom)

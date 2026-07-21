@@ -315,7 +315,7 @@
         </div>
 
         <!-- Meta Info Bar & Status Badge -->
-        <div class="tcard" style="padding:12px 16px; margin-bottom:14px; display:flex; align-items:center; gap:16px; flex-wrap:wrap; font-size:13px; color:var(--po-su)">
+        <div class="tcard" style="padding:12px 16px; margin-bottom:14px; display:flex; align-items:center; gap:12px; flex-wrap:wrap; font-size:12.5px; color:var(--po-su)">
             <div style="display:flex; align-items:center; gap:8px">
                 <i class="fa-solid fa-building" style="color:var(--po-bl)"></i>
                 <strong>{{ $kitchens->firstWhere('id', (int) $weekKitchenId)?->name ?? __('menu.fields.kitchen') }}</strong>
@@ -325,6 +325,28 @@
                 <i class="fa-regular fa-calendar-days" style="color:var(--po-bl)"></i>
                 <span>Tuần {{ date('W/Y', strtotime($weekDateFrom)) }} &nbsp;·&nbsp; {{ date('d/m/Y', strtotime($weekDateFrom)) }} – {{ date('d/m/Y', strtotime($weekDateTo)) }}</span>
             </div>
+            <div style="width:1px; height:20px; background:var(--po-bd); flex-shrink:0"></div>
+
+            <!-- Shift Filter Checkboxes -->
+            <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap">
+                <i class="fa-solid fa-sun" style="color:var(--po-or); font-size:12px"></i>
+                <span style="font-weight:600; color:var(--po-mu); margin-right:2px">Ca:</span>
+                @foreach($shifts as $index => $shift)
+                    <label style="display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border-radius:6px; background:var(--po-bd2); border:1px solid var(--po-bd); cursor:pointer; font-weight:600; font-size:11.5px">
+                        <input type="checkbox" value="{{ $shift->id }}" wire:model.live="selectedShifts">
+                        CA {{ $loop->iteration }} ({{ $shift->name }})
+                    </label>
+                @endforeach
+
+                <!-- Quick Action Buttons: Thêm ca / Thêm món -->
+                <a href="/admin/shifts" target="_blank" style="height:26px; padding:0 8px; border:1px dashed var(--po-bd); border-radius:6px; background:transparent; font-size:11px; font-weight:600; color:var(--po-mu); text-decoration:none; display:inline-flex; align-items:center; gap:4px" title="Quản lý / Thêm ca mới">
+                    <i class="fa-solid fa-plus"></i> Thêm ca
+                </a>
+                <a href="/admin/recipes/create" target="_blank" style="height:26px; padding:0 8px; border:1px dashed var(--po-gn); border-radius:6px; background:var(--po-gn-s); font-size:11px; font-weight:600; color:var(--po-gn-t); text-decoration:none; display:inline-flex; align-items:center; gap:4px" title="Tạo món mới trong ngân hàng thực đơn">
+                    <i class="fa-solid fa-plus"></i> Thêm món
+                </a>
+            </div>
+
             <div style="margin-left:auto">
                 @if($weekStatus === 'locked')
                     <span class="ms-locked">{{ __('menu.status.locked') }}</span>
@@ -368,11 +390,22 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($shifts as $shift)
+                    @php
+                        $shiftPalettes = [
+                            0 => ['bg' => '#EFF6FF', 'border' => '#BFDBFE', 'text' => '#1E40AF'],
+                            1 => ['bg' => '#F0FDF4', 'border' => '#A7F3D0', 'text' => '#065F46'],
+                            2 => ['bg' => '#FEF3C7', 'border' => '#FDE68A', 'text' => '#78350F'],
+                            3 => ['bg' => '#F5F3FF', 'border' => '#DDD6FE', 'text' => '#4C1D95'],
+                        ];
+                    @endphp
+                    @foreach($shifts as $index => $shift)
+                        @continue(!empty($selectedShifts) && !in_array((string)$shift->id, array_map('strval', $selectedShifts), true))
+                        @php $pal = $shiftPalettes[$index % 4]; @endphp
                         <tr style="border-bottom:1px solid var(--po-bd)">
-                            <td style="padding:14px; font-weight:800; background:var(--po-bd2); color:var(--po-tx); position:sticky; left:0; z-index:1">
-                                {{ $shift->name }}
-                                <div style="font-size:10px; font-weight:500; color:var(--po-mu); margin-top:2px">
+                            <td style="padding:12px; font-weight:800; background:{{ $pal['bg'] }}; border-left:5px solid {{ $pal['text'] }}; color:{{ $pal['text'] }}; position:sticky; left:0; z-index:1">
+                                <div style="font-size:12.5px; font-weight:800">CA {{ $loop->iteration }}</div>
+                                <div style="font-size:11px; font-weight:700; opacity:.9">{{ $shift->name }}</div>
+                                <div style="font-size:9.5px; font-weight:500; opacity:.8; margin-top:3px">
                                     {{ $shift->time_range }}
                                 </div>
                             </td>
