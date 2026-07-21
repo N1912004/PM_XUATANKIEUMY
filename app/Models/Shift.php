@@ -16,6 +16,7 @@ class Shift extends Model
         'time_from',
         'time_to',
         'time_range',
+        'sort_order',
     ];
 
     protected static function booted(): void
@@ -41,6 +42,27 @@ class Shift extends Model
                 throw ValidationException::withMessages([
                     'time_to' => __('catalog.shift.validation.max_duration'),
                 ]);
+            }
+
+            if ($shift->sort_order !== null && (int) $shift->sort_order < 1) {
+                throw ValidationException::withMessages([
+                    'sort_order' => 'Thứ tự ưu tiên phải từ 1 trở lên.',
+                ]);
+            }
+
+            if ($shift->sort_order === null) {
+                $maxOrder = static::max('sort_order') ?? 0;
+                $shift->sort_order = $maxOrder + 1;
+            } else {
+                $exists = static::where('sort_order', $shift->sort_order)
+                    ->where('id', '!=', $shift->id ?? 0)
+                    ->exists();
+
+                if ($exists) {
+                    throw ValidationException::withMessages([
+                        'sort_order' => 'Thứ tự ưu tiên này đã trùng với một ca khác, vui lòng nhập số khác.',
+                    ]);
+                }
             }
 
             $shift->time_from = $timeFrom;

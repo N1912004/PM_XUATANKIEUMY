@@ -4,6 +4,7 @@ namespace App\Filament\Resources\MenuResource\Pages;
 
 use App\Exports\MenuExport;
 use App\Filament\Resources\MenuResource;
+use App\Filament\Resources\ShiftResource;
 use App\Models\Kitchen;
 use App\Models\Menu;
 use App\Models\Recipe;
@@ -62,6 +63,8 @@ class ListMenus extends Page
     // Ma trận grid tuần: mỗi ô [day_index][shift_id] là DANH SÁCH món
     // (mỗi phần tử ['recipe_id' => , 'portions' => ]) — cho phép nhiều món/ô qua nút (+).
     public array $weekCells = [];
+
+    public array $selectedShifts = []; // Danh sách shift_id được tích chọn hiển thị trên ma trận tuần
 
     public string $weekEditReason = ''; // Lý do sửa — bắt buộc khi ghi đè thực đơn ĐÃ CHỐT
 
@@ -651,6 +654,9 @@ class ListMenus extends Page
 
         $this->weekCells = [];
         $shifts = Shift::all();
+        if (empty($this->selectedShifts)) {
+            $this->selectedShifts = $shifts->pluck('id')->map(fn ($id) => (string) $id)->all();
+        }
 
         $weekMenu = WeekMenu::where('kitchen_id', $kitchenId)
             ->where('date_from', $this->weekDateFrom)
@@ -1020,32 +1026,56 @@ class ListMenus extends Page
             ->first()?->status ?? 'draft';
 
         $menusByShift = $dayMenus->groupBy('shift_id');
+        $defaultLabels = __('menu.default_dish_labels');
+        if (! is_array($defaultLabels)) {
+            $defaultLabels = ['Món 1', 'Món 2', 'Rau xào / luộc', 'Canh', 'Cơm', 'Tráng miệng', 'Món chay 1', 'Món chay 2', 'Canh chay'];
+        }
 
         foreach ($shifts as $shift) {
             $menus = $menusByShift->get($shift->id, collect());
+            $shiftPortions = $menus->first()?->estimated_portions ?? 200;
 
             $recipes = [];
-            foreach ($menus as $m) {
+            foreach ($menus as $idx => $m) {
                 $recipes[] = [
                     'menu_id' => $m->id,
+                    'label' => $defaultLabels[$idx] ?? __('menu.labels.dish_index', ['index' => $idx + 1]),
                     'recipe_id' => $m->recipe_id,
                     'portions' => $m->estimated_portions,
                 ];
             }
 
             if (empty($recipes)) {
-                $recipes[] = [
-                    'menu_id' => null,
-                    'recipe_id' => '',
-                    'portions' => 1,
-                ];
+                foreach (array_slice($defaultLabels, 0, 6) as $lbl) {
+                    $recipes[] = [
+                        'menu_id' => null,
+                        'label' => $lbl,
+                        'recipe_id' => '',
+                        'portions' => $shiftPortions,
+                    ];
+                }
             }
 
             $this->dayItems[$shift->id] = [
                 'shift_name' => $shift->name,
+                'shift_portions' => $shiftPortions,
                 'recipes' => $recipes,
             ];
         }
+
+        $this->sortDayItems();
+    }
+
+    public function sortDayItems(): void
+    {
+        $shiftOrders = $this->getShifts()->pluck('sort_order', 'id')->all();
+
+        uksort($this->dayItems, function ($a, $b) use ($shiftOrders) {
+            $orderA = (int) ($shiftOrders[$a] ?? 999999);
+            $orderB = (int) ($shiftOrders[$b] ?? 999999);
+
+            return $orderA <=> $orderB;
+        });
     }
 
     public function updatedDayKitchenId($kitchenId): void
@@ -1063,13 +1093,102 @@ class ListMenus extends Page
         }
     }
 
+    public function updatedDayItems($value, $key): void
+    {
+        $parts = explode('.', $key);
+        if (count($parts) === 2 && $parts[1] === 'shift_portions') {
+            $shiftId = $parts[0];
+            $portions = (int) $value;
+            if (isset($this->dayItems[$shiftId]['recipes'])) {
+                foreach ($this->dayItems[$shiftId]['recipes'] as $idx => $r) {
+                    $this->dayItems[$shiftId]['recipes'][$idx]['portions'] = $portions;
+                }
+            }
+        }
+    }
+
     public function addRecipeToShift($shiftId)
     {
+        $nextIdx = count($this->dayItems[$shiftId]['recipes'] ?? []) + 1;
+        $shiftPortions = (int) ($this->dayItems[$shiftId]['shift_portions'] ?? 200);
         $this->dayItems[$shiftId]['recipes'][] = [
             'menu_id' => null,
+            'label' => __('menu.labels.dish_index', ['index' => $nextIdx]),
             'recipe_id' => '',
-            'portions' => 1,
+            'portions' => $shiftPortions,
         ];
+    }
+
+    public function addShiftToDay(): void
+    {
+        $allShifts = $this->getShifts();
+        $existingShiftIds = array_keys($this->dayItems);
+        $unusedShift = $allShifts->first(fn ($s) => ! in_array($s->id, $existingShiftIds));
+
+        $defaultLabels = __('menu.default_dish_labels');
+        if (! is_array($defaultLabels)) {
+            $defaultLabels = ['Món 1', 'Món 2', 'Rau xào / luộc', 'Canh', 'Cơm', 'Tráng miệng'];
+        }
+        $recipes = [];
+        foreach (array_slice($defaultLabels, 0, 6) as $lbl) {
+            $recipes[] = [
+                'menu_id' => null,
+                'label' => $lbl,
+                'recipe_id' => '',
+                'portions' => 150,
+            ];
+        }
+
+        if (! $unusedShift) {
+            Notification::make()
+                ->title(__('menu.notifications.all_shifts_added_title'))
+                ->body(__('menu.notifications.all_shifts_added_body'))
+                ->info()
+                ->send();
+
+            $this->redirect(ShiftResource::getUrl('create', array_filter([
+                'from' => 'day_menu',
+                'date' => $this->dayDate,
+                'kitchen' => $this->dayKitchenId,
+            ])));
+
+            return;
+        }
+
+        $this->dayItems[$unusedShift->id] = [
+            'shift_name' => $unusedShift->name,
+            'shift_portions' => 150,
+            'recipes' => $recipes,
+        ];
+
+        $this->sortDayItems();
+    }
+
+    public function removeShiftFromDay($shiftId): void
+    {
+        if (count($this->dayItems) <= 1) {
+            Notification::make()
+                ->title(__('menu.notifications.at_least_one_shift'))
+                ->warning()
+                ->send();
+
+            return;
+        }
+
+        // Nếu ca có bản ghi menu đã lưu thì xóa các bản ghi menu
+        if (isset($this->dayItems[$shiftId]['recipes'])) {
+            foreach ($this->dayItems[$shiftId]['recipes'] as $item) {
+                if (! empty($item['menu_id'])) {
+                    $menu = Menu::find($item['menu_id']);
+                    if ($menu && MenuResource::canDelete($menu)) {
+                        $menu->auditReason = trim($this->dayEditReason) ?: null;
+                        $menu->delete();
+                    }
+                }
+            }
+        }
+
+        unset($this->dayItems[$shiftId]);
     }
 
     public function removeRecipeFromShift($shiftId, $index)
@@ -1304,7 +1423,11 @@ class ListMenus extends Page
 
     public function getShifts()
     {
-        return Shift::all();
+        return Shift::query()
+            ->orderBy('sort_order')
+            ->orderBy('time_from')
+            ->orderBy('id')
+            ->get();
     }
 
     public function getRecipes()
