@@ -578,9 +578,6 @@
                                 <span class="dv-ca-badge {{ $bCls }}">{{ $shiftData['shift_name'] }}</span>
                             </div>
                             <div style="display:flex; align-items:center; gap:8px">
-                                <span style="font-size:12px; color:var(--po-mu)">{{ __('menu.labels.shift_portions') }}:</span>
-                                <input type="number" wire:model.live="dayItems.{{ $shiftId }}.shift_portions" class="ctrl" style="width:75px; height:32px; text-align:center; font-weight:700" @disabled($dayHasPastLockedMenus)>
-                                <span style="font-size:12px; color:var(--po-mu)">{{ __('menu.labels.portions') }}</span>
                                 @unless($dayHasPastLockedMenus)
                                     <button type="button" wire:click="removeShiftFromDay({{ $shiftId }})" title="{{ __('menu.actions.remove_shift') }}" style="margin-left:6px; height:30px; padding:0 10px; border:1px solid var(--po-bd); border-radius:7px; background:var(--po-wh); color:var(--po-rd); font-size:11.5px; font-weight:600; cursor:pointer">
                                         <i class="fa-solid fa-xmark"></i> {{ __('menu.actions.remove_shift') }}
