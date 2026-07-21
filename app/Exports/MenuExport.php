@@ -3,8 +3,10 @@
 namespace App\Exports;
 
 use App\Models\Menu;
+use App\Models\Setting;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithEvents;
@@ -147,24 +149,32 @@ class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
     {
         $lastRow = $sheet->getHighestRow();
 
-        // 1. Set column widths
-        $sheet->getColumnDimension('A')->setWidth(22);
+        // 1. Set column widths (Column A widened to 30 for spacious logo presentation)
+        $sheet->getColumnDimension('A')->setWidth(30);
         $sheet->getColumnDimension('B')->setWidth(50);
 
         // 2. Merge cells for Header (A1:A3 & B1:B3)
         $sheet->mergeCells('A1:A3');
         $sheet->mergeCells('B1:B3');
 
-        // Embed Logo Image from project if available
-        $logoPath = public_path('images/bluefire-logo.png');
-        if (file_exists($logoPath)) {
+        // Resolve System Settings Logo from http://127.0.0.1:8001/admin/system-settings?tab=-thuong-hieu-tab
+        $systemLogoRel = Setting::get('site_logo');
+        $resolvedLogoPath = null;
+
+        if ($systemLogoRel && Storage::disk('public')->exists($systemLogoRel)) {
+            $resolvedLogoPath = Storage::disk('public')->path($systemLogoRel);
+        } elseif (file_exists(public_path('images/bluefire-logo.png'))) {
+            $resolvedLogoPath = public_path('images/bluefire-logo.png');
+        }
+
+        if ($resolvedLogoPath && file_exists($resolvedLogoPath)) {
             $drawing = new Drawing;
-            $drawing->setName('BlueFire Logo');
-            $drawing->setDescription('BlueFire Logo');
-            $drawing->setPath($logoPath);
+            $drawing->setName('System Brand Logo');
+            $drawing->setDescription('System Brand Logo');
+            $drawing->setPath($resolvedLogoPath);
             $drawing->setCoordinates('A1');
-            $drawing->setHeight(52);
-            $drawing->setOffsetX(12);
+            $drawing->setHeight(54);
+            $drawing->setOffsetX(15);
             $drawing->setOffsetY(6);
             $drawing->setWorksheet($sheet);
         } else {
