@@ -140,12 +140,6 @@
                 >
             @endif
 
-            <!-- Ô tìm kiếm từ khóa -->
-            <div style="position: relative; display: inline-flex; align-items: center;" wire:key="search-filter-box">
-                <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 10px; color: var(--po-mu); font-size: 12px; pointer-events: none;"></i>
-                <input wire:model.live.debounce.300ms="searchFilter" type="text" class="ctrl" style="padding-left: 30px; height: 34px; border-radius: 8px; font-size: 12.5px; min-width: 200px;" placeholder="{{ __('menu.placeholders.search_keyword') }}">
-            </div>
-
             <div class="tsp"></div>
 
             <button wire:click="resetFilters" class="att-rbtn" title="{{ __('menu.actions.reset_filters') }}">
