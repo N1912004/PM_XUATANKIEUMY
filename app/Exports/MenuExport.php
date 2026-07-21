@@ -24,9 +24,9 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
  * Xuất thực đơn ra .xlsx:
  * - Thực đơn ngày: theo mẫu CJ Catering / BlueFire 100% (Ảnh 2)
  * - Thực đơn tuần: theo mẫu ma trận tuần chuẩn 100% (Ảnh 2), tự động lọc bỏ ca không có món,
+ *   tất cả ô tiêu đề & phân loại món (B2=SHIFT/CA, C2=DISH/MÓN, C3=DISH 1/MÓN 1...) đều tự động đa ngôn ngữ VI / EN.
  *   màu sắc RGB y chang file gốc (B2/A2/B3 fill #BFBFBF, C2:J2 fill #D8D8D8, C3 fill #FBE4D5, font đỏ Times New Roman),
  *   viền xanh cyan #00B0F0 và tự động nhúng logo dự án từ System Settings.
- * Tự động đa ngôn ngữ VI / EN theo ngôn ngữ hệ thống đang chọn.
  */
 class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
 {
@@ -309,10 +309,10 @@ class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
 
         $richText = new RichText;
         $run1 = $richText->createTextRun($titleLine1);
-        $run1->getFont()->setName('Times New Roman')->setSize(16)->setBold(true)->setColor(new Color('FFFF0000'));
+        $run1->getFont()->setName('Times New Roman')->setSize(15)->setBold(true)->setColor(new Color('FFFF0000'));
 
         $run2 = $richText->createTextRun($titleLine2);
-        $run2->getFont()->setName('Times New Roman')->setSize(13)->setBold(true)->setItalic(true)->setColor(new Color('FFFF0000'));
+        $run2->getFont()->setName('Times New Roman')->setSize(12)->setBold(true)->setItalic(true)->setColor(new Color('FFFF0000'));
 
         $sheet->setCellValue('A1', $richText);
         $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)->setVertical(Alignment::VERTICAL_CENTER);
@@ -339,12 +339,12 @@ class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
             $drawing->setWorksheet($sheet);
         }
 
-        // 2. Row 2 Header: B2=CA (BFBFBF fill, Red font), C2..J2 (D8D8D8 fill, Red font)
+        // 2. Row 2 Header: B2=SHIFT/CA (BFBFBF fill, Red font), C2=DISH/MÓN (D8D8D8 fill, Red font), D2..J2 (D8D8D8 fill, Red font)
         $sheet->getRowDimension(2)->setRowHeight(32);
         $headers = [
             'A' => '',
-            'B' => 'CA',
-            'C' => 'MÓN',
+            'B' => $isEn ? 'SHIFT' : 'CA',
+            'C' => $isEn ? 'DISH' : 'MÓN',
             'D' => $isEn ? 'MON' : 'THỨ 2',
             'E' => $isEn ? 'TUE' : 'THỨ 3',
             'F' => $isEn ? 'WED' : 'THỨ 4',
@@ -374,22 +374,34 @@ class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
             'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
         ]);
 
-        // 3. Dynamic Shift filtering
+        // 3. Dynamic Shift filtering & Category localization
         $allShifts = Shift::orderBy('sort_order')->orderBy('id')->get()->values();
         $activeShiftIds = $this->menus->pluck('shift_id')->unique()->filter()->toArray();
 
+        $categoriesVi = [
+            0 => ['MÓN 1', 'MÓN 2', 'RAU XÀO/LUỘC', 'CANH', 'CƠM', 'MÓN CHAY 1', 'MÓN CHAY 2', 'CANH CHAY', 'MÓN CHAY 3', 'CƠM CHAY', 'COMBO', 'TRÁNG MIỆNG'],
+            1 => ['MÓN MẶN 1', 'MÓN MẶN 2', 'MÓN RAU XÀO/LUỘC', 'MÓN CANH', 'MÓN CHAY 1', 'MÓN CHAY 2', 'RAU XÀO CHAY', 'TRÁNG MIỆNG'],
+            2 => ['MÓN MẶN 1', 'MÓN MẶN 2', 'MÓN RAU XÀO/LUỘC', 'MÓN CANH', 'CƠM', 'MÓN CHAY 1', 'MÓN CHAY 2', 'MÓN RAU XÀO/LUỘC', 'MÓN CHAY 3', 'CƠM', 'COMBO', 'TRÁNG MIỆNG'],
+        ];
+
+        $categoriesEn = [
+            0 => ['DISH 1', 'DISH 2', 'STIR-FRIED / BOILED VEG', 'SOUP', 'RICE', 'VEGETARIAN 1', 'VEGETARIAN 2', 'VEGETARIAN SOUP', 'VEGETARIAN 3', 'VEGETARIAN RICE', 'COMBO', 'DESSERT'],
+            1 => ['MAIN DISH 1', 'MAIN DISH 2', 'STIR-FRIED / BOILED VEG', 'SOUP', 'VEGETARIAN 1', 'VEGETARIAN 2', 'VEGETARIAN STIR-FRY', 'DESSERT'],
+            2 => ['MAIN DISH 1', 'MAIN DISH 2', 'STIR-FRIED / BOILED VEG', 'SOUP', 'RICE', 'VEGETARIAN 1', 'VEGETARIAN 2', 'STIR-FRIED VEG', 'VEGETARIAN 3', 'RICE', 'COMBO', 'DESSERT'],
+        ];
+
         $shiftTemplates = [
             0 => [
-                'name' => 'CA 1',
-                'categories' => ['MÓN 1', 'MÓN 2', 'RAU XÀO/LUỘC', 'CANH', 'CƠM', 'MÓN CHAY 1', 'MÓN CHAY 2', 'CANH CHAY', 'MÓN CHAY 3', 'CƠM CHAY', 'COMBO', 'TRÁNG MIỆNG'],
+                'name' => $isEn ? 'SHIFT 1' : 'CA 1',
+                'categories' => $isEn ? $categoriesEn[0] : $categoriesVi[0],
             ],
             1 => [
-                'name' => 'CA 2',
-                'categories' => ['MÓN MẶN 1', 'MÓN MẶN 2', 'MÓN RAU XÀO/LUỘC', 'MÓN CANH', 'MÓN CHAY 1', 'MÓN CHAY 2', 'RAU XÀO CHAY', 'TRÁNG MIỆNG'],
+                'name' => $isEn ? 'SHIFT 2' : 'CA 2',
+                'categories' => $isEn ? $categoriesEn[1] : $categoriesVi[1],
             ],
             2 => [
-                'name' => 'CA 3',
-                'categories' => ['MÓN MẶN 1', 'MÓN MẶN 2', 'MÓN RAU XÀO/LUỘC', 'MÓN CANH', 'CƠM', 'MÓN CHAY 1', 'MÓN CHAY 2', 'MÓN RAU XÀO/LUỘC', 'MÓN CHAY 3', 'CƠM', 'COMBO', 'TRÁNG MIỆNG'],
+                'name' => $isEn ? 'SHIFT 3' : 'CA 3',
+                'categories' => $isEn ? $categoriesEn[2] : $categoriesVi[2],
             ],
         ];
 
