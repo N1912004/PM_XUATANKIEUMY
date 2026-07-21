@@ -190,35 +190,6 @@
         flex-wrap: wrap;
     }
 
-    .mp-srch {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        background: var(--po-bg);
-        border: 1px solid var(--po-bd);
-        border-radius: 8px;
-        padding: 0 10px;
-        height: 34px;
-        flex: 1;
-        min-width: 200px;
-    }
-
-    .mp-srch i {
-        color: var(--po-fa);
-        font-size: 12px;
-    }
-
-    .mp-srch input {
-        border: none;
-        background: transparent;
-        outline: none;
-        font-size: 12.5px;
-        color: var(--po-tx);
-        width: 100%;
-        box-shadow: none !important;
-        padding: 0;
-    }
-
     .mp-sel {
         height: 34px;
         padding: 0 24px 0 10px;
@@ -234,6 +205,19 @@
         background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath d='M2 3.5l3 3 3-3' stroke='%2394A3B8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
         background-repeat: no-repeat;
         background-position: right 8px center;
+    }
+
+    .mp-date-filter {
+        height: 34px;
+        padding: 0 10px;
+        background: var(--po-wh);
+        border: 1px solid var(--po-bd);
+        border-radius: 8px;
+        font-size: 12.5px;
+        color: var(--po-su);
+        outline: none;
+        min-width: 160px;
+        box-shadow: none !important;
     }
 
     .tsp {
@@ -257,89 +241,6 @@
     .att-rbtn:hover {
         background: var(--po-bg);
         border-color: var(--po-bd);
-    }
-
-    /* Locked Warning Panel */
-    .mp-locked-panel {
-        background: var(--po-or-s);
-        border: 1px solid var(--po-or);
-        border-radius: var(--po-r);
-        padding: 14px 16px;
-    }
-
-    .mp-locked-panel-hd {
-        display: flex;
-        justify-content: space-between;
-        align-items: start;
-        margin-bottom: 12px;
-        flex-wrap: wrap;
-        gap: 8px;
-    }
-
-    .mp-locked-panel-title {
-        font-size: 14px;
-        font-weight: 800;
-        color: var(--po-or);
-        display: flex;
-        align-items: center;
-        gap: 6px;
-    }
-
-    .mp-locked-panel-sub {
-        font-size: 11.5px;
-        color: var(--po-or);
-        margin-top: 3px;
-    }
-
-    .mp-locked-tools {
-        display: flex;
-        align-items: flex-end;
-        gap: 10px;
-        flex-wrap: wrap;
-    }
-
-    .dv-field {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-    }
-
-    .dv-field label {
-        font-size: 11px;
-        font-weight: 700;
-        color: var(--po-or);
-    }
-
-    .dv-sel {
-        height: 34px;
-        border-radius: 7px;
-        border: 1px solid var(--po-or);
-        background: var(--po-wh);
-        padding: 0 10px;
-        font-size: 12.5px;
-        color: var(--po-or);
-        outline: none;
-    }
-
-    .btn {
-        height: 34px;
-        padding: 0 14px;
-        border-radius: 8px;
-        font-size: 12px;
-        font-weight: 700;
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
-        cursor: pointer;
-        background: var(--po-wh);
-        border: 1px solid var(--po-bd);
-        color: var(--po-su);
-    }
-
-    .btn-p {
-        background: var(--po-bl) !important;
-        border-color: var(--po-bl) !important;
-        color: #fff !important;
     }
 
     /* List items */

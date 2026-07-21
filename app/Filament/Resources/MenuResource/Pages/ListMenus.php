@@ -9,6 +9,7 @@ use App\Models\Menu;
 use App\Models\Recipe;
 use App\Models\Shift;
 use Filament\Resources\Pages\Page;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Carbon;
@@ -31,13 +32,19 @@ class ListMenus extends Page
     public $activeView = 'list';
 
     // LIST FILTERS
-    public $search = '';
+    public $kitchenFilter = '';
 
     public $typeFilter = ''; // 'week' hoặc 'day' hoặc ''
 
     public $statusFilter = ''; // 'draft', 'sent', 'locked'
 
+    public $weekFilter = '';
+
+    public $dayFilter = '';
+
     public $monthFilter = '';
+
+    public $searchFilter = '';
 
     public int $perPage = 10;
 
@@ -79,21 +86,23 @@ class ListMenus extends Page
 
     protected $queryString = [
         'activeView' => ['except' => 'list'],
-        'search' => ['except' => ''],
+        'kitchenFilter' => ['except' => ''],
         'typeFilter' => ['except' => ''],
         'statusFilter' => ['except' => ''],
+        'weekFilter' => ['except' => ''],
+        'dayFilter' => ['except' => ''],
         'monthFilter' => ['except' => ''],
+        'searchFilter' => ['except' => ''],
     ];
 
     public function mount(): void
     {
-        if ($this->monthFilter === '') {
-            $this->monthFilter = now()->format('Y-m');
-        }
+        $this->normalizeListFilters();
 
-        $this->weekKitchenId = Kitchen::first()?->id;
+        $firstKitchenId = $this->getKitchens()->first()?->id;
+        $this->weekKitchenId = $firstKitchenId;
         $this->weekStartDate = now()->startOfWeek()->toDateString();
-        $this->dayKitchenId = Kitchen::first()?->id;
+        $this->dayKitchenId = $firstKitchenId;
         $this->dayDate = now()->toDateString();
     }
 
@@ -108,24 +117,58 @@ class ListMenus extends Page
 
     public function resetFilters()
     {
-        $this->search = '';
+        $this->kitchenFilter = $this->canChooseKitchen()
+            ? ''
+            : (string) (auth()->user()?->currentKitchenId() ?? '');
         $this->typeFilter = '';
         $this->statusFilter = '';
-        $this->monthFilter = now()->format('Y-m');
+        $this->weekFilter = '';
+        $this->dayFilter = '';
+        $this->monthFilter = '';
+        $this->searchFilter = '';
         $this->resetPage();
     }
 
-    public function updatedSearch(): void
+    public function updatedKitchenFilter(): void
     {
+        if ($this->kitchenFilter !== '' && ! $this->getKitchens()->contains('id', (int) $this->kitchenFilter)) {
+            $this->kitchenFilter = '';
+        }
+
         $this->resetPage();
     }
 
     public function updatedTypeFilter(): void
     {
+        if (! in_array($this->typeFilter, ['', 'week', 'day'], true)) {
+            $this->typeFilter = '';
+        }
+
+        if ($this->typeFilter !== 'week') {
+            $this->weekFilter = '';
+        }
+        if ($this->typeFilter !== 'day') {
+            $this->dayFilter = '';
+        }
+
         $this->resetPage();
     }
 
     public function updatedStatusFilter(): void
+    {
+        if (! in_array($this->statusFilter, ['', ...array_keys(Menu::STATUS_ORDER)], true)) {
+            $this->statusFilter = '';
+        }
+
+        $this->resetPage();
+    }
+
+    public function updatedWeekFilter(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedDayFilter(): void
     {
         $this->resetPage();
     }
@@ -135,32 +178,89 @@ class ListMenus extends Page
         $this->resetPage();
     }
 
+    public function updatedSearchFilter(): void
+    {
+        $this->resetPage();
+    }
+
+    public function getKitchenOptions(): array
+    {
+        return $this->getKitchens()->map(fn (Kitchen $kitchen): array => [
+            'value' => (string) $kitchen->id,
+            'label' => $kitchen->name,
+            'sub' => $kitchen->area?->name ?? '',
+        ])->all();
+    }
+
     public function updatedPerPage(): void
     {
         $this->resetPage();
     }
 
-    /**
-     * Danh sách tháng cho bộ lọc: sinh từ dữ liệu Menu thực tế + tháng hiện tại (không hardcode).
-     *
-     * @return array<string, string> ['Y-m' => 'Tháng m/Y']
-     */
-    public function getMonthOptions(): array
+    protected function normalizeListFilters(): void
     {
-        // substr(date,1,7) = 'YYYY-MM' — portable trên cả MySQL lẫn SQLite (thay DATE_FORMAT)
-        $months = Menu::query()
-            ->selectRaw('DISTINCT substr(date, 1, 7) AS ym')
-            ->orderByDesc('ym')
-            ->pluck('ym')
-            ->push(now()->format('Y-m'))
-            ->unique()
-            ->sortDesc();
+        if (! in_array($this->typeFilter, ['', 'week', 'day'], true)) {
+            $this->typeFilter = '';
+        }
+        if (! in_array($this->statusFilter, ['', ...array_keys(Menu::STATUS_ORDER)], true)) {
+            $this->statusFilter = '';
+        }
+        if ($this->weekFilter !== '' && $this->selectedWeekRange() === null) {
+            $this->weekFilter = '';
+        }
+        if ($this->dayFilter !== '' && ! $this->isValidDate($this->dayFilter)) {
+            $this->dayFilter = '';
+        }
+        if ($this->monthFilter !== '' && ! preg_match('/^\d{4}-\d{2}$/', $this->monthFilter)) {
+            $this->monthFilter = '';
+        }
 
-        return $months->mapWithKeys(function (string $ym): array {
-            [$y, $m] = explode('-', $ym);
+        if (! $this->canChooseKitchen()) {
+            $this->kitchenFilter = (string) (auth()->user()?->currentKitchenId() ?? '');
 
-            return [$ym => __('menu.month_label', ['month' => $m, 'year' => $y])];
-        })->all();
+            return;
+        }
+
+        if ($this->kitchenFilter !== '' && ! $this->getKitchens()->contains('id', (int) $this->kitchenFilter)) {
+            $this->kitchenFilter = '';
+        }
+    }
+
+    /**
+     * @return array{0: string, 1: string}|null [Thứ Hai, Thứ Hai tuần kế tiếp)
+     */
+    protected function selectedWeekRange(): ?array
+    {
+        if (! preg_match('/^(\d{4})-W(\d{2})$/', (string) $this->weekFilter, $matches)) {
+            return null;
+        }
+
+        $year = (int) $matches[1];
+        $week = (int) $matches[2];
+        if ($week < 1 || $week > 53) {
+            return null;
+        }
+
+        $start = Carbon::now()->setISODate($year, $week)->startOfDay();
+        if ($start->isoWeekYear !== $year || $start->isoWeek !== $week) {
+            return null;
+        }
+
+        return [$start->toDateString(), $start->copy()->addWeek()->toDateString()];
+    }
+
+    protected function isValidDate(string $date): bool
+    {
+        if (! preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $date, $matches)) {
+            return false;
+        }
+
+        return checkdate((int) $matches[2], (int) $matches[3], (int) $matches[1]);
+    }
+
+    public function canChooseKitchen(): bool
+    {
+        return auth()->user()?->hasRole(['super_admin', 'Quản trị viên']) ?? false;
     }
 
     /**
@@ -175,7 +275,10 @@ class ListMenus extends Page
             $this->assertKitchenAccess($kitchenId);
         }
 
-        $query = Menu::with(['kitchen', 'shift', 'recipe'])->orderBy('date')->orderBy('shift_id');
+        $query = $this->scopedMenuQuery()
+            ->with(['kitchen', 'shift', 'recipe'])
+            ->orderBy('date')
+            ->orderBy('shift_id');
 
         if ($kitchenId && $from) {
             $query->where('kitchen_id', $kitchenId)
@@ -183,13 +286,15 @@ class ListMenus extends Page
                 ->where('date', '<', Carbon::parse($to ?: $from)->addDay()->toDateString());
             $subtitle = 'Từ '.Carbon::parse($from)->format('d/m/Y').' đến '.Carbon::parse($to ?: $from)->format('d/m/Y');
         } else {
-            $period = $this->monthFilter ?: now()->format('Y-m');
-            $query->where('date', 'like', $period.'%');
-            $subtitle = 'Tháng '.Carbon::parse($period.'-01')->format('m/Y');
+            $query = $this->filteredMenuQuery()
+                ->with(['kitchen', 'shift', 'recipe'])
+                ->orderBy('date')
+                ->orderBy('shift_id');
+            $subtitle = __('menu.export.filtered_list');
         }
 
         // Xuất .xlsx thật qua Laravel Excel (trước đây là CSV) — file này còn dùng để gửi khách duyệt.
-        $fileName = 'thuc-don-'.($from ?: $this->monthFilter ?: now()->format('Y-m')).'.xlsx';
+        $fileName = 'thuc-don-'.($from ?: now()->format('Y-m-d')).'.xlsx';
 
         return Excel::download(new MenuExport($query->get(), $subtitle), $fileName);
     }
@@ -240,7 +345,7 @@ class ListMenus extends Page
         $from = $monthPrefix.'-01';
         $to = Carbon::parse($from)->addMonth()->toDateString();
 
-        $counts = Menu::query()
+        $counts = $this->scopedMenuQuery()
             ->where('date', '>=', $from)
             ->where('date', '<', $to)
             ->selectRaw('COUNT(*) AS total')
@@ -249,7 +354,7 @@ class ListMenus extends Page
             ->selectRaw("SUM(CASE WHEN status = 'locked' THEN 1 ELSE 0 END) AS locked")
             ->first();
 
-        $activeWeeks = Menu::query()
+        $activeWeeks = $this->scopedMenuQuery()
             ->where('date', '>=', $from)
             ->where('date', '<', $to)
             ->get(['kitchen_id', 'date'])
@@ -266,16 +371,63 @@ class ListMenus extends Page
     }
 
     /**
-     * Query menu đã áp bộ lọc tháng / trạng thái / tìm kiếm bếp — dùng chung cho 2 bước bên dưới.
+     * Query fail-closed theo bếp đăng nhập. Chỉ quản trị được phép chọn bếp khác.
      */
-    protected function filteredMenuQuery()
+    protected function scopedMenuQuery(): Builder
     {
-        return Menu::query()
-            ->when($this->monthFilter, fn ($q) => $q
-                ->where('date', '>=', $this->monthFilter.'-01')
-                ->where('date', '<', Carbon::parse($this->monthFilter.'-01')->addMonth()->toDateString()))
-            ->when($this->statusFilter, fn ($q) => $q->where('status', $this->statusFilter))
-            ->when($this->search, fn ($q) => $q->whereHas('kitchen', fn ($k) => $k->where('name', 'like', '%'.$this->search.'%')));
+        $query = Menu::query();
+        $user = auth()->user();
+
+        if (! $user) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        if ($this->canChooseKitchen()) {
+            return $query->when(
+                $this->kitchenFilter !== '',
+                fn (Builder $builder) => $builder->where('kitchen_id', (int) $this->kitchenFilter)
+            );
+        }
+
+        $kitchenId = $user->currentKitchenId();
+
+        return $kitchenId
+            ? $query->where('kitchen_id', $kitchenId)
+            : $query->whereRaw('1 = 0');
+    }
+
+    /**
+     * Query dùng chung cho key card và chi tiết card, bảo đảm filter/badge không lệch nhau.
+     */
+    protected function filteredMenuQuery(): Builder
+    {
+        $query = $this->scopedMenuQuery()
+            ->when($this->statusFilter !== '', fn (Builder $builder) => $builder->where('status', $this->statusFilter));
+
+        if ($this->typeFilter === 'week' && ($range = $this->selectedWeekRange()) !== null) {
+            $query->where('date', '>=', $range[0])->where('date', '<', $range[1]);
+        }
+
+        if ($this->typeFilter === 'day' && $this->isValidDate($this->dayFilter)) {
+            $query->where('date', '>=', $this->dayFilter)
+                ->where('date', '<', Carbon::parse($this->dayFilter)->addDay()->toDateString());
+        }
+
+        if ($this->typeFilter === '' && $this->monthFilter !== '' && preg_match('/^\d{4}-\d{2}$/', $this->monthFilter)) {
+            $start = $this->monthFilter.'-01';
+            $end = Carbon::parse($start)->addMonth()->toDateString();
+            $query->where('date', '>=', $start)->where('date', '<', $end);
+        }
+
+        if ($this->searchFilter !== '') {
+            $term = '%'.$this->searchFilter.'%';
+            $query->where(function (Builder $b) use ($term) {
+                $b->whereHas('kitchen', fn ($k) => $k->where('name', 'like', $term)->orWhereHas('area', fn ($a) => $a->where('name', 'like', $term)))
+                    ->orWhereHas('recipe', fn ($r) => $r->where('name', 'like', $term));
+            });
+        }
+
+        return $query;
     }
 
     public function menus()
@@ -323,12 +475,17 @@ class ListMenus extends Page
             $end = $isWeek ? $start->copy()->addDays(6) : $start->copy();
 
             // Đại diện = menu có date lớn nhất trong [start, end] của bếp này (đã sort date desc).
-            $menu = ($representativeMenus[$key->kitchen_id] ?? collect())
-                ->first(fn (Menu $m) => $m->date->betweenIncluded($start, $end));
+            $groupMenus = ($representativeMenus[$key->kitchen_id] ?? collect())
+                ->filter(fn (Menu $m) => $m->date->betweenIncluded($start, $end));
+            $menu = $groupMenus->first();
 
             if (! $menu) {
                 return null;
             }
+
+            $cardStatus = $groupMenus
+                ->sortByDesc(fn (Menu $item): int => Menu::STATUS_ORDER[$item->status] ?? -1)
+                ->first()?->status ?? $menu->status;
 
             if ($isWeek) {
                 return [
@@ -342,7 +499,7 @@ class ListMenus extends Page
                     'end_date' => $end->toDateString(),
                     'meta_company' => $menu->kitchen?->area?->name ?? 'Công ty Summit',
                     'meta_info' => 'Tổng 7 ngày · '.($menu->kitchen?->id ? '18 ca' : 'Ca ăn'),
-                    'status' => $menu->status,
+                    'status' => $cardStatus,
                     'date_raw' => $menu->date,
                 ];
             }
@@ -358,7 +515,7 @@ class ListMenus extends Page
                 'end_date' => $menu->date->toDateString(),
                 'meta_company' => $menu->kitchen?->area?->name ?? 'Công ty Summit',
                 'meta_info' => $menu->estimated_portions.' suất '.$menu->shift?->name,
-                'status' => $menu->status,
+                'status' => $cardStatus,
                 'date_raw' => $menu->date,
             ];
         })->filter()->values();
@@ -385,9 +542,11 @@ class ListMenus extends Page
         $rangeStart = $dates->min()->toDateString();
         $rangeEnd = $dates->max()->copy()->addDays(6)->toDateString();
 
-        return Menu::with(['kitchen.area', 'shift'])
+        return $this->filteredMenuQuery()
+            ->with(['kitchen.area', 'shift'])
             ->whereIn('kitchen_id', $pageKeys->pluck('kitchen_id')->unique()->all())
-            ->whereBetween('date', [$rangeStart, $rangeEnd])
+            ->where('date', '>=', $rangeStart)
+            ->where('date', '<', Carbon::parse($rangeEnd)->addDay()->toDateString())
             ->orderByDesc('date')
             ->get()
             ->groupBy('kitchen_id')
@@ -486,7 +645,7 @@ class ListMenus extends Page
         }
 
         $ownKitchenId = $user->currentKitchenId();
-        abort_if($ownKitchenId && (int) $kitchenId !== (int) $ownKitchenId, 403, __('menu.errors.own_kitchen_only'));
+        abort_unless($ownKitchenId && (int) $kitchenId === (int) $ownKitchenId, 403, __('menu.errors.own_kitchen_only'));
     }
 
     /**
@@ -920,7 +1079,18 @@ class ListMenus extends Page
     // ==========================================
     public function getKitchens()
     {
-        return Kitchen::orderBy('name')->get();
+        $query = Kitchen::query()->orderBy('name');
+        $user = auth()->user();
+
+        if (! $user || $this->canChooseKitchen()) {
+            return $query->get();
+        }
+
+        $kitchenId = $user->currentKitchenId();
+
+        return $kitchenId
+            ? $query->whereKey($kitchenId)->get()
+            : collect();
     }
 
     public function getShifts()
@@ -933,12 +1103,4 @@ class ListMenus extends Page
         return Recipe::orderBy('name')->get();
     }
 
-    public function getLockedMenus()
-    {
-        return Menu::with('kitchen')
-            ->where('status', 'locked')
-            ->select('kitchen_id', 'date')
-            ->distinct()
-            ->get();
-    }
 }

@@ -112,7 +112,7 @@
         type="button"
         x-ref="trigger"
         @click="toggle()"
-        class="flex w-full items-center justify-between gap-2 rounded-md border border-gray-300 bg-white px-2 py-1.5 text-left text-xs font-semibold text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
+        class="flex w-full items-center justify-between gap-2 rounded-md border border-gray-300 bg-white px-2 py-1.5 text-left text-xs font-normal text-gray-900 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
         style="height:34px"
     >
         <span x-text="currentLabel || @js($placeholder)" :class="currentLabel ? '' : 'text-gray-400'" class="truncate"></span>
@@ -137,7 +137,7 @@
                 x-model="search"
                 type="text"
                 placeholder="{{ $searchPlaceholder }}"
-                class="w-full rounded-md border border-gray-200 px-2 py-1 text-xs dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
+                class="w-full rounded-md border border-gray-200 px-2 py-1 text-xs font-normal dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"
             >
         </div>
 
@@ -145,7 +145,7 @@
             @if($nullable)
                 <div
                     @click="pick('')"
-                    class="cursor-pointer rounded px-2 py-1.5 text-xs font-semibold italic text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"
+                    class="cursor-pointer rounded px-2 py-1.5 text-xs font-normal text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800"
                 >
                     {{ $emptyLabel }}
                 </div>
@@ -154,7 +154,7 @@
             <template x-for="option in filtered" :key="option.value">
                 <div
                     @click="pick(option.value)"
-                    class="cursor-pointer rounded px-2 py-1.5 text-xs font-semibold hover:bg-gray-100 dark:hover:bg-gray-800"
+                    class="cursor-pointer rounded px-2 py-1.5 text-xs font-normal hover:bg-gray-100 dark:hover:bg-gray-800"
                     :class="String(selected ?? '') === option.value ? 'bg-primary-50 text-primary-700 dark:bg-gray-800' : 'text-gray-800 dark:text-gray-100'"
                 >
                     <span x-text="option.label"></span>
@@ -162,7 +162,7 @@
                 </div>
             </template>
 
-            <div x-show="filtered.length === 0" class="px-2 py-3 text-center text-xs font-semibold text-gray-400">
+            <div x-show="filtered.length === 0" class="px-2 py-3 text-center text-xs font-normal text-gray-400">
                 {{ __('common.select.no_results') }}
             </div>
         </div>

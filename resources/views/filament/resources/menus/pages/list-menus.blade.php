@@ -72,69 +72,85 @@
 
         <!-- Filter Bar -->
         <div class="mp-bar" style="margin-bottom: 14px;">
-            <div class="mp-srch">
-                <i class="fa-solid fa-magnifying-glass"></i>
-                <input wire:model.live.debounce.250ms="search" type="text" placeholder="{{ __('menu.placeholders.search') }}">
-            </div>
-            <select wire:model.live="typeFilter" class="mp-sel">
+            <!-- 1. Ô select bếp ăn (Dạng VỪA TÌM VỪA CHỌN theo chuẩn dự án) -->
+            @if($this->canChooseKitchen())
+                <div style="min-width: 220px;" wire:key="kitchen-filter-search-select">
+                    @include('filament.components.search-select', [
+                        'name' => 'kitchenFilter',
+                        'live' => true,
+                        'nullable' => true,
+                        'placeholder' => __('menu.filters.all_kitchens'),
+                        'emptyLabel' => __('menu.filters.all_kitchens'),
+                        'searchPlaceholder' => __('menu.placeholders.search_kitchen'),
+                        'options' => $this->getKitchenOptions(),
+                    ])
+                </div>
+            @else
+                @php
+                    $assignedKitchen = $kitchens->firstWhere('id', (int) $kitchenFilter) ?? $kitchens->first();
+                @endphp
+                <div style="min-width: 180px; height: 34px; border: 1px solid var(--po-bd); border-radius: 8px; padding: 0 10px; display: flex; align-items: center; font-size: 12.5px; font-weight: 700; color: var(--po-su); background: var(--po-bd2);" wire:key="assigned-kitchen-badge">
+                    <i class="fa-solid fa-utensils" style="margin-right: 6px; color: var(--po-bl);"></i>
+                    {{ $assignedKitchen?->name ?? __('menu.fields.kitchen') }}
+                </div>
+            @endif
+
+            <!-- 2. Select loại thực đơn tuần hoặc ngày hoặc tất cả -->
+            <select wire:key="type-filter-select" wire:model.live="typeFilter" class="mp-sel">
                 <option value="">{{ __('menu.filters.all_types') }}</option>
                 <option value="week">{{ __('menu.types.week') }}</option>
                 <option value="day">{{ __('menu.types.day') }}</option>
             </select>
-            <select wire:model.live="statusFilter" class="mp-sel">
+
+            <!-- 3. Trạng thái (đúng các trạng thái chốt: Nháp, Đã gửi khách hàng, Đã chốt) -->
+            <select wire:key="status-filter-select" wire:model.live="statusFilter" class="mp-sel">
                 <option value="">{{ __('menu.filters.all_statuses') }}</option>
                 <option value="draft">{{ __('menu.status.draft') }}</option>
                 <option value="sent">{{ __('menu.status.sent') }}</option>
                 <option value="locked">{{ __('menu.status.locked') }}</option>
             </select>
-            <select wire:model.live="monthFilter" class="mp-sel">
-                @foreach($this->getMonthOptions() as $ym => $label)
-                    <option value="{{ $ym }}">{{ $label }}</option>
-                @endforeach
-            </select>
+
+            <!-- 4. Ô filter thời gian động (Tuần / Ngày / Tháng) - Có wire:key giữ giá trị ngày đã chọn -->
+            @if($typeFilter === 'week')
+                <input
+                    wire:key="filter-week-input"
+                    wire:model.live="weekFilter"
+                    type="week"
+                    class="mp-date-filter"
+                    aria-label="{{ __('menu.filters.week') }}"
+                    title="{{ __('menu.filters.week') }}"
+                >
+            @elseif($typeFilter === 'day')
+                <input
+                    wire:key="filter-day-input"
+                    wire:model.live="dayFilter"
+                    type="date"
+                    class="mp-date-filter"
+                    aria-label="{{ __('menu.filters.day') }}"
+                    title="{{ __('menu.filters.day') }}"
+                >
+            @else
+                <input
+                    wire:key="filter-month-input"
+                    wire:model.live="monthFilter"
+                    type="month"
+                    class="mp-date-filter"
+                    aria-label="{{ __('menu.filters.month') }}"
+                    title="{{ __('menu.filters.month') }}"
+                >
+            @endif
+
+            <!-- Ô tìm kiếm từ khóa -->
+            <div style="position: relative; display: inline-flex; align-items: center;" wire:key="search-filter-box">
+                <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 10px; color: var(--po-mu); font-size: 12px; pointer-events: none;"></i>
+                <input wire:model.live.debounce.300ms="searchFilter" type="text" class="ctrl" style="padding-left: 30px; height: 34px; border-radius: 8px; font-size: 12.5px; min-width: 200px;" placeholder="{{ __('menu.placeholders.search_keyword') }}">
+            </div>
+
             <div class="tsp"></div>
+
             <button wire:click="resetFilters" class="att-rbtn" title="{{ __('menu.actions.reset_filters') }}">
                 <i class="fa-solid fa-rotate-right"></i>
             </button>
-        </div>
-
-        <!-- Locked Edit Warning Panel -->
-        <div class="mp-locked-panel" style="margin-bottom: 16px;">
-            <div class="mp-locked-panel-hd">
-                <div>
-                    <div class="mp-locked-panel-title">
-                        <i class="fa-solid fa-lock-open"></i>
-                        {{ __('menu.locked_edit.title') }}
-                    </div>
-                    <div class="mp-locked-panel-sub">
-                        {{ __('menu.locked_edit.description') }}
-                    </div>
-                </div>
-                <span class="ms-locked">{{ __('menu.status.locked') }}</span>
-            </div>
-            <div class="mp-locked-tools">
-                <div class="dv-field" style="min-width:260px">
-                    <label>{{ __('menu.filters.locked_menus') }}</label>
-                    <select class="dv-sel" id="mpLockedMenuSelect">
-                        @php
-                            $lockedMenus = $this->getLockedMenus();
-                        @endphp
-                        @forelse($lockedMenus as $lm)
-                            <option value="{{ $lm->kitchen_id }}_{{ $lm->date->toDateString() }}">
-                                {{ __('menu.labels.date_kitchen', ['date' => $lm->date->format('d/m/Y'), 'kitchen' => $lm->kitchen?->name]) }}
-                            </option>
-                        @empty
-                            <option value="">{{ __('menu.empty.no_locked_menus') }}</option>
-                        @endforelse
-                    </select>
-                </div>
-                <button type="button" onclick="const val = document.getElementById('mpLockedMenuSelect').value.split('_'); if(val.length === 2) { @this.loadDayMenu(val[0], val[1]); }" class="btn btn-p">
-                    <i class="fa-solid fa-pen-to-square"></i> {{ __('menu.actions.open_edit') }}
-                </button>
-                <button type="button" onclick="const val = document.getElementById('mpLockedMenuSelect').value.split('_'); if(val.length === 2) { @this.loadWeekMenu(val[0], val[1]); }" class="btn">
-                    <i class="fa-regular fa-calendar-week"></i> {{ __('menu.actions.view_week') }}
-                </button>
-            </div>
         </div>
 
         <!-- List cards -->
