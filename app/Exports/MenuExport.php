@@ -15,15 +15,18 @@ use Maatwebsite\Excel\Concerns\WithTitle;
 use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\RichText\RichText;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Color;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 
 /**
  * Xuất thực đơn ra .xlsx:
  * - Thực đơn ngày: theo mẫu CJ Catering / BlueFire 100% (Ảnh 2)
- * - Thực đơn tuần: theo mẫu ma trận tuần chuẩn 100% từ file LISTHANGMAU_THUCDON (1).xlsx (Sheet TD)
+ * - Thực đơn tuần: theo mẫu ma trận tuần chuẩn 100% từ file LISTHANGMAU_THUCDON (1).xlsx (Sheet TD),
+ *   ca làm việc động lấy theo Shift DB (CA 1, CA 2, CA 3...), tiêu đề A1 trình bày chuẩn đẹp bằng RichText.
  * Tự động đa ngôn ngữ VI / EN theo ngôn ngữ hệ thống đang chọn.
  */
 class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
@@ -343,28 +346,54 @@ class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
             }
         }
 
-        // 2. Set D1 Title & Date Range
+        // 2. Set A1 Title & Date Range via RichText (Merged A1:I1)
         $isEn = app()->getLocale() === 'en';
         $dates = $this->menus->pluck('date')
             ->filter()
             ->map(fn ($d) => $d instanceof Carbon ? $d : Carbon::parse($d));
 
-        $start = $dates->min() ? $dates->min()->copy()->startOfWeek() : now()->startOfWeek();
+        if ($dates->isEmpty() && preg_match('/(\d{2}\/\d{2}\/\d{4})/', $this->subtitle, $m)) {
+            $start = Carbon::createFromFormat('d/m/Y', $m[1])->startOfWeek();
+        } else {
+            $start = $dates->min() ? $dates->min()->copy()->startOfWeek() : now()->startOfWeek();
+        }
         $end = $start->copy()->addDays(6);
 
         $titleLine1 = $isEn
-            ? 'SUMMIT CANTEEN WEEKLY MENU '.$start->format('d.m.Y')
-            : 'THỰC ĐƠN CANTEEN SUMMIT TUẦN '.$start->format('d.m.Y');
+            ? 'SUMMIT CANTEEN WEEKLY MENU '.$start->format('d.m.Y')."\n"
+            : 'THỰC ĐƠN CANTEEN SUMMIT TUẦN '.$start->format('d.m.Y')."\n";
         $titleLine2 = $isEn
             ? '(From '.$start->format('d/m/Y').' to '.$end->format('d/m/Y').')'
             : '(Từ ngày '.$start->format('d/m/Y').' đến ngày '.$end->format('d/m/Y').')';
 
-        $source->setCellValue('D1', $titleLine1."\n".$titleLine2);
+        $richText = new RichText;
+        $run1 = $richText->createTextRun($titleLine1);
+        $run1->getFont()->setName('Times New Roman')->setSize(16)->setBold(true)->setColor(new Color('FFFF0000'));
 
-        // 3. Map menus to D3:J34 matrix
-        $shifts = Shift::orderBy('sort_order')->orderBy('id')->get();
+        $run2 = $richText->createTextRun($titleLine2);
+        $run2->getFont()->setName('Times New Roman')->setSize(13)->setItalic(true)->setColor(new Color('FFFF0000'));
+
+        $source->setCellValue('A1', $richText);
+
+        // 3. Set clean Column A side label (Merged A2:A34)
+        $source->setCellValue('A2', $isEn ? 'WEEKLY MENU' : 'THỰC ĐƠN TUẦN');
+
+        // 4. Dynamic Shifts in Column B from DB Shifts
+        $shifts = Shift::orderBy('sort_order')->orderBy('id')->get()->values();
+        $shiftCells = [0 => 'B3', 1 => 'B15', 2 => 'B23'];
+        foreach ($shiftCells as $idx => $cell) {
+            if (isset($shifts[$idx])) {
+                $sName = mb_strtoupper($shifts[$idx]->name);
+                if (! str_starts_with($sName, 'THỰC ĐƠN') && ! str_starts_with($sName, 'MENU')) {
+                    $sName = ($isEn ? 'MENU ' : 'THỰC ĐƠN ').$sName;
+                }
+                $source->setCellValue($cell, $sName);
+            }
+        }
+
+        // 5. Map menus to D3:J34 matrix
         $shiftMap = [];
-        foreach ($shifts->values() as $idx => $s) {
+        foreach ($shifts as $idx => $s) {
             $shiftMap[$s->id] = $idx;
         }
         $shiftRowStart = [0 => 3, 1 => 15, 2 => 23];
@@ -391,7 +420,7 @@ class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
             }
         }
 
-        // 4. Clone merged cells, dimensions, styles, values, and drawings onto target $sheet
+        // 6. Clone merged cells, dimensions, styles, values, and drawings onto target $sheet
         foreach ($source->getMergeCells() as $mergeRange) {
             $sheet->mergeCells($mergeRange);
         }
@@ -423,6 +452,10 @@ class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
             $newDrawing = clone $drawing;
             $newDrawing->setWorksheet($sheet);
         }
+
+        // 7. Apply wrapText and center vertical alignment for D3:J34
+        $sheet->getStyle('D3:J34')->getAlignment()->setWrapText(true);
+        $sheet->getStyle('D3:J34')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
     }
 
     protected function formatStandardMultiDaySheet($sheet): void
