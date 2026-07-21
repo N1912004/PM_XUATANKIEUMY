@@ -26,7 +26,7 @@ return [
     'default_dish_labels' => ['Main dish 1', 'Main dish 2', 'Stir-fried / Boiled veg', 'Soup', 'Rice', 'Dessert', 'Vegetarian dish 1', 'Vegetarian dish 2', 'Vegetarian soup'],
     'export' => ['filtered_list' => 'Filtered menu list'],
     'pagination' => ['summary' => 'Showing :from-:to of :total menus', 'per_page' => ':count / page'],
-    'week_form' => ['title' => 'Create weekly menu', 'subtitle' => 'Set dishes and portion capacity for each day of the week', 'shift_day' => 'SHIFT / DAY', 'duplicate_warning' => ':count dishes appeared in the last 3 weeks'],
-    'day_form' => ['title' => 'Daily menu', 'subtitle' => 'Enter menu details and portions for each service shift', 'date' => 'Menu date'],
+    'week_form' => ['title' => 'Create new weekly menu', 'edit_title' => 'Edit weekly menu', 'subtitle' => 'Set dishes and portion capacity for each day of the week', 'shift_day' => 'SHIFT / DAY', 'duplicate_warning' => ':count dishes appeared in the last 3 weeks'],
+    'day_form' => ['title' => 'Create new daily menu', 'edit_title' => 'Edit daily menu', 'subtitle' => 'Specify menu details and portion counts for each service shift', 'date' => 'Menu date'],
     'days' => ['sunday' => 'Sunday', 'weekday' => 'Day :day'],
 ];

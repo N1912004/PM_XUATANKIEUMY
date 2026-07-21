@@ -76,6 +76,10 @@ class ListMenus extends Page
 
     public bool $isEditingWeek = false;
 
+    public string $mode = ''; // 'create' hoặc 'edit'
+
+    public $weekMenuId = null; // ID của WeekMenu khi chỉnh sửa
+
     // FORM DAY STATES
     public $dayKitchenId;
 
@@ -97,6 +101,8 @@ class ListMenus extends Page
 
     protected $queryString = [
         'activeView' => ['except' => 'list'],
+        'mode' => ['except' => ''],
+        'weekMenuId' => ['except' => null],
         'kitchenFilter' => ['except' => ''],
         'typeFilter' => ['except' => ''],
         'statusFilter' => ['except' => ''],
@@ -117,10 +123,23 @@ class ListMenus extends Page
         $this->dayKitchenId = $firstKitchenId;
         $this->dayDate = now()->toDateString();
 
-        if ($this->activeView === 'week' && $firstKitchenId) {
-            $this->loadWeekMenu($firstKitchenId, $this->weekDateFrom, $this->weekDateTo, false);
+        $reqMode = request()->query('mode');
+        $reqWeekMenuId = request()->query('weekMenuId');
+
+        if ($reqWeekMenuId && ($wm = WeekMenu::find($reqWeekMenuId))) {
+            $this->activeView = 'week';
+            $this->weekMenuId = $wm->id;
+            $this->mode = 'edit';
+            $this->weekKitchenId = $wm->kitchen_id;
+            $this->weekDateFrom = $wm->date_from;
+            $this->weekDateTo = $wm->date_to;
+            $this->loadWeekMenu($wm->kitchen_id, $wm->date_from, $wm->date_to, true);
+        } elseif ($this->activeView === 'week' && $firstKitchenId) {
+            $isEditing = $reqMode === 'edit';
+            $this->loadWeekMenu($firstKitchenId, $this->weekDateFrom, $this->weekDateTo, $isEditing);
         } elseif ($this->activeView === 'day' && $firstKitchenId) {
-            $this->loadDayMenu($firstKitchenId, $this->dayDate, false);
+            $isEditing = $reqMode === 'edit';
+            $this->loadDayMenu($firstKitchenId, $this->dayDate, $isEditing);
         }
     }
 
@@ -128,9 +147,13 @@ class ListMenus extends Page
     {
         $this->activeView = $view;
         if ($view === 'list') {
+            $this->mode = '';
+            $this->weekMenuId = null;
             $this->resetWeekForm();
             $this->resetDayForm();
         } elseif ($view === 'week') {
+            $this->mode = 'create';
+            $this->weekMenuId = null;
             $this->loadWeekMenu(
                 $this->weekKitchenId ?? $this->getKitchens()->first()?->id,
                 $this->weekDateFrom ?? now()->startOfWeek()->toDateString(),
@@ -138,6 +161,8 @@ class ListMenus extends Page
                 false
             );
         } elseif ($view === 'day') {
+            $this->mode = 'create';
+            $this->weekMenuId = null;
             $this->loadDayMenu($this->dayKitchenId ?? $this->getKitchens()->first()?->id, $this->dayDate ?? now()->toDateString(), false);
         }
     }
@@ -637,6 +662,11 @@ class ListMenus extends Page
     // ==========================================
     public function loadWeekMenu($kitchenId, $dateFrom, $dateTo = null, ?bool $isEditing = null)
     {
+        if (is_bool($dateTo)) {
+            $isEditing = $dateTo;
+            $dateTo = null;
+        }
+
         $kitchenId = (int) $kitchenId;
         $this->assertKitchenAccess($kitchenId);
         $this->weekKitchenId = $kitchenId;
@@ -680,7 +710,9 @@ class ListMenus extends Page
         if ($isEditing === null) {
             $isEditing = $hasData;
         }
-        $this->isEditingWeek = $isEditing;
+        $this->isEditingWeek = (bool) $isEditing;
+        $this->mode = $this->isEditingWeek ? 'edit' : 'create';
+        $this->weekMenuId = $this->isEditingWeek ? $weekMenu?->id : null;
 
         $this->weekHasExistingMenus = $hasData;
         $this->weekHasEditableLockedMenus = $isEditing && $weekMenu?->status === 'locked' && ! $weekMenu->isPastLocked();
@@ -1014,7 +1046,8 @@ class ListMenus extends Page
         if ($isEditing === null) {
             $isEditing = $dayMenus->isNotEmpty();
         }
-        $this->isEditingDay = $isEditing;
+        $this->isEditingDay = (bool) $isEditing;
+        $this->mode = $this->isEditingDay ? 'edit' : 'create';
 
         $this->dayHasExistingMenus = $dayMenus->isNotEmpty();
         $this->dayHasEditableLockedMenus = $isEditing && $dayMenus->contains(

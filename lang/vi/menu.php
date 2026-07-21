@@ -26,7 +26,7 @@ return [
     'default_dish_labels' => ['Món 1', 'Món 2', 'Rau xào / luộc', 'Canh', 'Cơm', 'Tráng miệng', 'Món chay 1', 'Món chay 2', 'Canh chay'],
     'export' => ['filtered_list' => 'Danh sách thực đơn theo bộ lọc'],
     'pagination' => ['summary' => 'Hiển thị :from-:to trên :total thực đơn', 'per_page' => ':count / trang'],
-    'week_form' => ['title' => 'Lập thực đơn tuần mới', 'subtitle' => 'Thiết lập món ăn và công suất suất ăn cho từng thứ trong tuần', 'shift_day' => 'CA / THỨ', 'duplicate_warning' => 'Món đã xuất hiện trong 3 tuần gần nhất (:count món)'],
-    'day_form' => ['title' => 'Thực đơn ngày', 'subtitle' => 'Khai báo chi tiết thực đơn và số lượng suất ăn cụ thể theo từng ca ăn trong ngày', 'date' => 'Ngày lập thực đơn'],
+    'week_form' => ['title' => 'Lập thực đơn tuần mới', 'edit_title' => 'Chỉnh sửa thực đơn tuần', 'subtitle' => 'Thiết lập món ăn và công suất suất ăn cho từng thứ trong tuần', 'shift_day' => 'CA / THỨ', 'duplicate_warning' => 'Món đã xuất hiện trong 3 tuần gần nhất (:count món)'],
+    'day_form' => ['title' => 'Lập thực đơn ngày mới', 'edit_title' => 'Chỉnh sửa thực đơn ngày', 'subtitle' => 'Khai báo chi tiết thực đơn và số lượng suất ăn cụ thể theo từng ca ăn trong ngày', 'date' => 'Ngày lập thực đơn'],
     'days' => ['sunday' => 'Chủ nhật', 'weekday' => 'Thứ :day'],
 ];

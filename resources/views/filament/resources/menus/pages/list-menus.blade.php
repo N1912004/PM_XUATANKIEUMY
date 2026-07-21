@@ -27,7 +27,7 @@
                 <p class="emp-subtitle">{{ __('menu.list.subtitle') }}</p>
             </div>
             <div class="emp-actions">
-                <button wire:click="loadWeekMenu({{ $kitchens->first()?->id ?? 1 }}, '{{ now()->startOfWeek()->toDateString() }}', false)" class="emp-btn">
+                <button wire:click="loadWeekMenu({{ $kitchens->first()?->id ?? 1 }}, '{{ now()->startOfWeek()->toDateString() }}', null, false)" class="emp-btn">
                     <i class="fa-solid fa-calendar-days"></i>
                     {{ __('menu.actions.create_week') }}
                 </button>
@@ -266,15 +266,17 @@
         <!-- Header -->
         <div class="emp-head" style="margin-bottom: 16px;">
             <div>
-                <h1 class="emp-title">{{ __('menu.week_form.title') }}</h1>
+                <h1 class="emp-title">{{ $isEditingWeek ? __('menu.week_form.edit_title') : __('menu.week_form.title') }}</h1>
                 <p class="emp-subtitle">{{ __('menu.week_form.subtitle') }}</p>
             </div>
             <div class="emp-actions">
                 @php $weekRank = \App\Models\Menu::STATUS_ORDER[$weekStatus] ?? 0; @endphp
                 <button wire:click="switchView('list')" class="emp-btn"><i class="fa-solid fa-arrow-left"></i> {{ __('menu.actions.back') }}</button>
-                <button wire:click="exportMenus({{ $weekKitchenId }}, '{{ $weekDateFrom }}', '{{ $weekDateTo }}')" class="emp-btn">
-                    <i class="fa-solid fa-file-excel" style="color:var(--po-gn)"></i> {{ __('menu.actions.export_excel') }}
-                </button>
+                @if($isEditingWeek)
+                    <button wire:click="exportMenus({{ $weekKitchenId }}, '{{ $weekDateFrom }}', '{{ $weekDateTo }}')" class="emp-btn">
+                        <i class="fa-solid fa-file-excel" style="color:var(--po-gn)"></i> {{ __('menu.actions.export_excel') }}
+                    </button>
+                @endif
                 @unless($weekHasPastLockedMenus)
                     @if($weekRank <= \App\Models\Menu::STATUS_ORDER['draft'])
                         <button wire:click="saveWeekMenu('draft')" class="emp-btn"><i class="fa-regular fa-floppy-disk"></i> {{ __('menu.actions.save_draft') }}</button>
@@ -483,15 +485,17 @@
         <!-- Header -->
         <div class="emp-head" style="margin-bottom: 16px;">
             <div>
-                <h1 class="emp-title">{{ __('menu.day_form.title') }}</h1>
+                <h1 class="emp-title">{{ $isEditingDay ? __('menu.day_form.edit_title') : __('menu.day_form.title') }}</h1>
                 <p class="emp-subtitle">{{ __('menu.day_form.subtitle') }}</p>
             </div>
             <div class="emp-actions">
                 @php $dayRank = \App\Models\Menu::STATUS_ORDER[$dayStatus] ?? 0; @endphp
                 <button wire:click="switchView('list')" class="emp-btn"><i class="fa-solid fa-arrow-left"></i> {{ __('menu.actions.back') }}</button>
-                <button wire:click="exportMenus({{ $dayKitchenId }}, '{{ $dayDate }}', '{{ $dayDate }}')" class="emp-btn">
-                    <i class="fa-solid fa-file-excel" style="color:var(--po-gn)"></i> {{ __('menu.actions.export_excel') }}
-                </button>
+                @if($isEditingDay)
+                    <button wire:click="exportMenus({{ $dayKitchenId }}, '{{ $dayDate }}', '{{ $dayDate }}')" class="emp-btn">
+                        <i class="fa-solid fa-file-excel" style="color:var(--po-gn)"></i> {{ __('menu.actions.export_excel') }}
+                    </button>
+                @endif
                 @unless($dayHasPastLockedMenus)
                     @if($dayRank <= \App\Models\Menu::STATUS_ORDER['draft'])
                         <button wire:click="saveDayMenu('draft')" class="emp-btn"><i class="fa-regular fa-floppy-disk"></i> {{ __('menu.actions.save_draft') }}</button>
