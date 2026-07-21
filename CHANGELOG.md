@@ -12,7 +12,7 @@ All notable changes to this project will be documented in this file.
 - Ẩn trường nhập lý do sửa khi tạo mới (`mode=create`), chỉ hiển thị khi chỉnh sửa (`mode=edit`) thực đơn đã chốt.
 - Tối ưu hóa sắp xếp ca theo thứ tự `sort_order` & `id` từ danh mục ca làm việc DB.
 - Nâng cấp thanh phân trang danh sách thực đơn, bổ sung tùy chọn `5, 10, 20, 50` bản ghi trên mỗi trang và cho phép điều hướng mượt mà.
-- Nâng cấp file xuất Excel thực đơn ngày (`MenuExport.php`) khớp 100% mẫu CJ Catering / BlueFire: header thương hiệu BlueFire & CJ Catering, banner vàng chữ đỏ `MENU MẶN`, gom toàn bộ món ăn trong ngày không phân biệt ca (dạng `MÓN 1`, `MÓN 2`...), viền xanh cyan `#00B0F0`.
+- Nâng cấp file xuất Excel thực đơn ngày (`MenuExport.php`) khớp 100% mẫu CJ Catering / BlueFire (Ảnh 2): Nhúng trực tiếp ảnh logo thương hiệu BlueFire vào ô A1:A3 qua PhpSpreadsheet Drawing, xuất ĐÚNG số món ăn thực tế có trong ngày (không in dư 7 dòng trống), banner vàng chữ đỏ `MENU MẶN 46`, gom toàn bộ món ăn không phân biệt ca (dạng `MÓN 1`, `MÓN 2`...) và viền xanh cyan `#00B0F0`.
 
 ## [2026-07-20]
 

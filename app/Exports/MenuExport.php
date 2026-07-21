@@ -14,9 +14,10 @@ use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 
 /**
- * Xuất thực đơn ra .xlsx (thực đơn ngày theo mẫu CJ Catering / BlueFire, thực đơn tuần theo bảng tổng hợp).
+ * Xuất thực đơn ra .xlsx (thực đơn ngày theo mẫu CJ Catering / BlueFire 100%, thực đơn tuần theo bảng tổng hợp).
  */
 class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
 {
@@ -70,34 +71,31 @@ class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
     {
         $rows = [];
 
-        // Row 1: Header logo & Company Name
-        $rows[] = ["BlueFire\nTASTE & BEAUTY", 'CÔNG TY TNHH DỊCH VỤ CJ CATERING VIỆT NAM'];
+        // Row 1: Header logo cell (left, empty text for Drawing overlay) & Company Name (right)
+        $rows[] = ['', 'CÔNG TY TNHH DỊCH VỤ CJ CATERING VIỆT NAM'];
         // Row 2 & 3: Empty rows merged with Row 1
         $rows[] = ['', ''];
         $rows[] = ['', ''];
 
-        // Row 4: Title Banner
-        $titleText = 'MENU MẶN';
-        if ($this->singleDayDateStr !== '') {
-            $titleText .= ' - '.$this->singleDayDateStr;
-        }
-        $rows[] = [$titleText, ''];
+        // Row 4: Title Banner (MENU MẶN 46)
+        $rows[] = ['MENU MẶN 46', ''];
 
         // Row 5: Table Header
         $rows[] = ['CƠ CẤU', 'TÊN MÓN ĂN'];
 
-        // Row 6+: Dishes (k phân biệt ca — gom toàn bộ món trong ngày)
+        // Row 6+: Dishes (k phân biệt ca — gom toàn bộ món trong ngày. Xuất ĐÚNG số món thực tế, không in thừa)
         $dishNames = $this->menus->pluck('recipe.name')
             ->filter()
             ->unique()
             ->values()
             ->all();
 
-        $minRows = max(7, count($dishNames));
+        if ($dishNames === []) {
+            $dishNames = [''];
+        }
 
-        for ($i = 0; $i < $minRows; $i++) {
+        foreach ($dishNames as $i => $dishName) {
             $label = 'MÓN '.($i + 1);
-            $dishName = $dishNames[$i] ?? '';
             $rows[] = [$label, $dishName];
         }
 
@@ -157,20 +155,34 @@ class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
         $sheet->mergeCells('A1:A3');
         $sheet->mergeCells('B1:B3');
 
-        // Style A1:A3 (BlueFire Brand text)
-        $sheet->getStyle('A1')->applyFromArray([
-            'font' => [
-                'bold' => true,
-                'size' => 13,
-                'color' => ['rgb' => '002060'],
-                'name' => 'Calibri',
-            ],
-            'alignment' => [
-                'horizontal' => Alignment::HORIZONTAL_CENTER,
-                'vertical' => Alignment::VERTICAL_CENTER,
-                'wrapText' => true,
-            ],
-        ]);
+        // Embed Logo Image from project if available
+        $logoPath = public_path('images/bluefire-logo.png');
+        if (file_exists($logoPath)) {
+            $drawing = new Drawing;
+            $drawing->setName('BlueFire Logo');
+            $drawing->setDescription('BlueFire Logo');
+            $drawing->setPath($logoPath);
+            $drawing->setCoordinates('A1');
+            $drawing->setHeight(52);
+            $drawing->setOffsetX(12);
+            $drawing->setOffsetY(6);
+            $drawing->setWorksheet($sheet);
+        } else {
+            $sheet->setCellValue('A1', "BlueFire\nTASTE & BEAUTY");
+            $sheet->getStyle('A1')->applyFromArray([
+                'font' => [
+                    'bold' => true,
+                    'size' => 13,
+                    'color' => ['rgb' => '002060'],
+                    'name' => 'Calibri',
+                ],
+                'alignment' => [
+                    'horizontal' => Alignment::HORIZONTAL_CENTER,
+                    'vertical' => Alignment::VERTICAL_CENTER,
+                    'wrapText' => true,
+                ],
+            ]);
+        }
 
         // Style B1:B3 (CJ Catering Company Name)
         $sheet->getStyle('B1')->applyFromArray([
@@ -187,7 +199,7 @@ class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
             ],
         ]);
 
-        // 3. Row 4: Merge A4:B4 (Banner title "MENU MẶN")
+        // 3. Row 4: Merge A4:B4 (Banner title "MENU MẶN 46")
         $sheet->mergeCells('A4:B4');
         $sheet->getRowDimension(4)->setRowHeight(30);
         $sheet->getStyle('A4')->applyFromArray([
