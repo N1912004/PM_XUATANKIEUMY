@@ -47,9 +47,10 @@ class EditMenu extends EditRecord
         if ($blocked !== null) {
             Notification::make()
                 ->title(match ($blocked) {
-                    'past' => 'Thực đơn quá khứ đã chốt — bị khóa cứng, không thể sửa',
-                    'downgrade' => 'Không được hạ cấp trạng thái thực đơn (chỉ đi tiến Nháp → Gửi → Xác nhận → Chốt)',
-                    default => 'Sửa thực đơn ĐÃ CHỐT bắt buộc nhập "Lý do sửa"',
+                    'past' => __('menu.errors.past_locked_edit'),
+                    'downgrade' => __('menu.errors.status_downgrade'),
+                    'need_reason' => __('menu.errors.audit_reason_required'),
+                    default => __('menu.errors.invalid_status'),
                 })
                 ->danger()
                 ->send();

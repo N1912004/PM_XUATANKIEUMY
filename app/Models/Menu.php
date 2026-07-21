@@ -6,7 +6,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 
 class Menu extends Model
 {
@@ -24,15 +26,15 @@ class Menu extends Model
      *
      * @var array<int, string>
      */
-    public const FINALIZED_STATUSES = ['sent', 'confirmed', 'locked'];
+    public const FINALIZED_STATUSES = ['sent', 'locked'];
 
     /**
      * Thứ bậc vòng đời trạng thái (BA 07/07/2026): không được hạ cấp trạng thái
-     * khi lưu lại — chỉ đi tiến Nháp → Gửi xác nhận → Khách đã xác nhận → Đã chốt.
+     * khi lưu lại — chỉ đi tiến Nháp → Đã gửi khách hàng → Đã chốt.
      *
      * @var array<string, int>
      */
-    public const STATUS_ORDER = ['draft' => 0, 'sent' => 1, 'confirmed' => 2, 'locked' => 3];
+    public const STATUS_ORDER = ['draft' => 0, 'sent' => 1, 'locked' => 2];
 
     /**
      * Nhãn hiển thị tiếng Việt của từng trạng thái.
@@ -42,7 +44,6 @@ class Menu extends Model
     public const STATUS_LABELS = [
         'draft' => 'Nháp',
         'sent' => 'Đã gửi khách hàng',
-        'confirmed' => 'Khách đã xác nhận',
         'locked' => 'Đã chốt',
     ];
 
@@ -67,15 +68,26 @@ class Menu extends Model
      */
     public function editBlockReason(string $newStatus, ?string $reason): ?string
     {
-        if ($this->isPastLocked()) {
+        if (! array_key_exists($newStatus, self::STATUS_ORDER)) {
+            return 'invalid_status';
+        }
+
+        $currentStatus = $this->exists
+            ? (string) $this->getRawOriginal('status')
+            : (string) $this->status;
+        $currentDate = $this->exists
+            ? $this->getRawOriginal('date')
+            : $this->date;
+
+        if ($currentStatus === 'locked' && $currentDate !== null && Carbon::parse($currentDate)->isBefore(today())) {
             return 'past';
         }
 
-        if ((self::STATUS_ORDER[$newStatus] ?? 0) < (self::STATUS_ORDER[$this->status] ?? 0)) {
+        if (self::STATUS_ORDER[$newStatus] < (self::STATUS_ORDER[$currentStatus] ?? PHP_INT_MAX)) {
             return 'downgrade';
         }
 
-        if ($this->status === 'locked' && trim((string) $reason) === '') {
+        if ($currentStatus === 'locked' && trim((string) $reason) === '') {
             return 'need_reason';
         }
 
@@ -117,6 +129,25 @@ class Menu extends Model
 
     protected static function booted(): void
     {
+        static::saving(function (Menu $menu): void {
+            $blocked = $menu->exists
+                ? $menu->editBlockReason((string) $menu->status, $menu->auditReason)
+                : (array_key_exists((string) $menu->status, self::STATUS_ORDER) ? null : 'invalid_status');
+
+            if ($blocked === null) {
+                return;
+            }
+
+            throw ValidationException::withMessages([
+                $blocked === 'need_reason' ? 'edit_reason' : 'status' => match ($blocked) {
+                    'past' => __('menu.errors.past_locked_edit'),
+                    'downgrade' => __('menu.errors.status_downgrade'),
+                    'need_reason' => __('menu.errors.audit_reason_required'),
+                    default => __('menu.errors.invalid_status'),
+                },
+            ]);
+        });
+
         // Ghi vết mọi thay đổi trên thực đơn ĐÃ CHỐT / ĐÃ GỬI (ai sửa, sửa gì, lúc nào)
         static::updated(function (Menu $menu): void {
             $originalStatus = $menu->getOriginal('status');

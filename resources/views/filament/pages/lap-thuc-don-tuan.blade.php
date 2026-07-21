@@ -9,9 +9,6 @@
             <x-filament::button wire:click="sendToClient" color="info" icon="heroicon-m-paper-airplane">
                 {{ __('menu.actions.send_customer') }}
             </x-filament::button>
-            <x-filament::button wire:click="confirmByClient" color="warning" icon="heroicon-m-check-badge">
-                {{ __('menu.actions.customer_confirmed') }}
-            </x-filament::button>
             <x-filament::button wire:click="lockWeek" color="success" icon="heroicon-m-lock-closed">
                 {{ __('menu.actions.lock') }}
             </x-filament::button>
