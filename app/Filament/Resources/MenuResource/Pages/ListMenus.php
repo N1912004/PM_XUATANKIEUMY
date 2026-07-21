@@ -353,8 +353,14 @@ class ListMenus extends Page
             $isSingleDay = false;
         }
 
-        // Xuất .xlsx thật qua Laravel Excel (trước đây là CSV) — file này còn dùng để gửi khách duyệt.
-        $prefix = app()->getLocale() === 'en' ? 'menu' : 'thuc-don';
+        // Xuất .xlsx thật qua Laravel Excel — phân định rõ thực đơn ngày / thực đơn tuần và đa ngôn ngữ VI/EN.
+        $isEn = app()->getLocale() === 'en';
+        if ($isSingleDay) {
+            $prefix = $isEn ? 'daily-menu' : 'thuc-don-ngay';
+        } else {
+            $prefix = $isEn ? 'weekly-menu' : 'thuc-don-tuan';
+        }
+
         $fileName = $prefix.'-'.($from ?: now()->format('Y-m-d')).'.xlsx';
 
         return Excel::download(new MenuExport($query->get(), $subtitle, $isSingleDay), $fileName);
