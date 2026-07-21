@@ -27,11 +27,11 @@
                 <p class="emp-subtitle">{{ __('menu.list.subtitle') }}</p>
             </div>
             <div class="emp-actions">
-                <button wire:click="loadWeekMenu({{ $kitchens->first()?->id ?? 1 }}, '{{ now()->startOfWeek()->toDateString() }}')" class="emp-btn">
+                <button wire:click="loadWeekMenu({{ $kitchens->first()?->id ?? 1 }}, '{{ now()->startOfWeek()->toDateString() }}', false)" class="emp-btn">
                     <i class="fa-solid fa-calendar-days"></i>
                     {{ __('menu.actions.create_week') }}
                 </button>
-                <button wire:click="loadDayMenu({{ $kitchens->first()?->id ?? 1 }}, '{{ now()->toDateString() }}')" class="emp-btn emp-btn-primary">
+                <button wire:click="loadDayMenu({{ $kitchens->first()?->id ?? 1 }}, '{{ now()->toDateString() }}', false)" class="emp-btn emp-btn-primary">
                     <i class="fa-solid fa-plus"></i>
                     {{ __('menu.actions.create_day') }}
                 </button>
@@ -156,7 +156,7 @@
         <!-- List cards -->
         <div class="mp-card-list">
             @forelse($menusList as $row)
-                <div wire:click="{{ $row['type'] === 'week' ? "loadWeekMenu({$row['kitchen_id']}, '{$row['start_date']}')" : "loadDayMenu({$row['kitchen_id']}, '{$row['start_date']}')" }}" class="mp-item">
+                <div wire:click="{{ $row['type'] === 'week' ? "loadWeekMenu({$row['kitchen_id']}, '{$row['start_date']}', true)" : "loadDayMenu({$row['kitchen_id']}, '{$row['start_date']}', true)" }}" class="mp-item">
                     <div class="mp-item-ico" style="{{ $row['type'] === 'week' ? 'background:var(--po-bl-s);color:var(--po-bl)' : 'background:var(--po-pu-s);color:var(--po-pu)' }}">
                         @if($row['type'] === 'week')
                             <i class="fa-solid fa-calendar-days"></i>
@@ -183,8 +183,8 @@
                         @endif
 
                         <div class="mp-item-actions" style="margin-top: 8px">
-                            <!-- Xem chi tiết -->
-                            <button wire:click="{{ $row['type'] === 'week' ? "loadWeekMenu({$row['kitchen_id']}, '{$row['start_date']}')" : "loadDayMenu({$row['kitchen_id']}, '{$row['start_date']}')" }}" class="abt" title="{{ __('menu.actions.edit') }}">
+                            <!-- Xem chi tiết / Chỉnh sửa -->
+                            <button wire:click="{{ $row['type'] === 'week' ? "loadWeekMenu({$row['kitchen_id']}, '{$row['start_date']}', true)" : "loadDayMenu({$row['kitchen_id']}, '{$row['start_date']}', true)" }}" class="abt" title="{{ __('menu.actions.edit') }}">
                                 <i class="fa-solid fa-pencil"></i>
                             </button>
                             <!-- Xuất Excel -->
@@ -294,20 +294,20 @@
         <div class="tcard" style="padding:16px; margin-bottom:14px; background:var(--po-bd2); display:flex; gap:12px; flex-wrap:wrap">
             <div class="field" style="min-width:240px">
                 <label>{{ __('menu.fields.kitchen') }} *</label>
-                <select wire:model.live="weekKitchenId" class="ctrl" required @disabled($weekHasExistingMenus)>
+                <select wire:model.live="weekKitchenId" class="ctrl" required @disabled(! $this->canChooseKitchen())>
                     @foreach($kitchens as $kit)
-                        <option value="{{ $kit->id }}">{{ $kit->name }}</option>
+                        <option value="{{ $kit->id }}" @selected((int) $weekKitchenId === (int) $kit->id)>{{ $kit->name }}</option>
                     @endforeach
                 </select>
             </div>
             <div class="field" style="min-width:200px">
                 <label>{{ __('menu.weekly.fields.week_start') }} *</label>
-                <input wire:model.live="weekStartDate" type="date" class="ctrl" required @disabled($weekHasExistingMenus)>
+                <input wire:model.live="weekStartDate" type="date" class="ctrl" required>
             </div>
-            @if($weekHasExistingMenus)
+            @if($weekHasEditableLockedMenus)
                 <div class="field" style="min-width:280px; flex:1">
-                    <label>{{ __('menu.fields.audit_reason') }} @if($weekHasEditableLockedMenus) * @endif</label>
-                    <input wire:model="weekEditReason" type="text" class="ctrl" placeholder="{{ __('menu.placeholders.audit_reason') }}" @required($weekHasEditableLockedMenus)>
+                    <label>{{ __('menu.fields.audit_reason') }} *</label>
+                    <input wire:model="weekEditReason" type="text" class="ctrl" placeholder="{{ __('menu.placeholders.audit_reason') }}" required>
                     @error('weekEditReason') <span style="color:var(--po-rd);font-size:12px">{{ $message }}</span> @enderror
                 </div>
             @endif
@@ -428,20 +428,20 @@
         <div class="tcard" style="padding:16px; margin-bottom:14px; background:var(--po-bd2); display:flex; gap:12px; flex-wrap:wrap">
             <div class="field" style="min-width:240px">
                 <label>{{ __('menu.fields.kitchen') }} *</label>
-                <select wire:model.live="dayKitchenId" class="ctrl" required @disabled($dayHasExistingMenus)>
+                <select wire:model.live="dayKitchenId" class="ctrl" required @disabled(! $this->canChooseKitchen())>
                     @foreach($kitchens as $kit)
-                        <option value="{{ $kit->id }}">{{ $kit->name }}</option>
+                        <option value="{{ $kit->id }}" @selected((int) $dayKitchenId === (int) $kit->id)>{{ $kit->name }}</option>
                     @endforeach
                 </select>
             </div>
             <div class="field" style="min-width:200px">
                 <label>{{ __('menu.day_form.date') }} *</label>
-                <input wire:model.live="dayDate" type="date" class="ctrl" required @disabled($dayHasExistingMenus)>
+                <input wire:model.live="dayDate" type="date" class="ctrl" required>
             </div>
-            @if($dayHasExistingMenus)
+            @if($dayHasEditableLockedMenus)
                 <div class="field" style="min-width:280px; flex:1">
-                    <label>{{ __('menu.fields.audit_reason') }} @if($dayHasEditableLockedMenus) * @endif</label>
-                    <input wire:model="dayEditReason" type="text" class="ctrl" placeholder="{{ __('menu.placeholders.audit_reason') }}" @required($dayHasEditableLockedMenus)>
+                    <label>{{ __('menu.fields.audit_reason') }} *</label>
+                    <input wire:model="dayEditReason" type="text" class="ctrl" placeholder="{{ __('menu.placeholders.audit_reason') }}" required>
                     @error('dayEditReason') <span style="color:var(--po-rd);font-size:12px">{{ $message }}</span> @enderror
                 </div>
             @endif

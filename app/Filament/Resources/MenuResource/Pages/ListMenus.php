@@ -67,6 +67,8 @@ class ListMenus extends Page
 
     public bool $weekHasPastLockedMenus = false;
 
+    public bool $isEditingWeek = false;
+
     // FORM DAY STATES
     public $dayKitchenId;
 
@@ -81,6 +83,8 @@ class ListMenus extends Page
     public bool $dayHasEditableLockedMenus = false;
 
     public bool $dayHasPastLockedMenus = false;
+
+    public bool $isEditingDay = false;
 
     public $dayItems = []; // Array of shifts, each containing recipes selected
 
@@ -104,6 +108,12 @@ class ListMenus extends Page
         $this->weekStartDate = now()->startOfWeek()->toDateString();
         $this->dayKitchenId = $firstKitchenId;
         $this->dayDate = now()->toDateString();
+
+        if ($this->activeView === 'week' && $firstKitchenId) {
+            $this->loadWeekMenu($firstKitchenId, $this->weekStartDate, false);
+        } elseif ($this->activeView === 'day' && $firstKitchenId) {
+            $this->loadDayMenu($firstKitchenId, $this->dayDate, false);
+        }
     }
 
     public function switchView($view)
@@ -112,6 +122,10 @@ class ListMenus extends Page
         if ($view === 'list') {
             $this->resetWeekForm();
             $this->resetDayForm();
+        } elseif ($view === 'week') {
+            $this->loadWeekMenu($this->weekKitchenId ?? $this->getKitchens()->first()?->id, $this->weekStartDate ?? now()->startOfWeek()->toDateString(), false);
+        } elseif ($view === 'day') {
+            $this->loadDayMenu($this->dayKitchenId ?? $this->getKitchens()->first()?->id, $this->dayDate ?? now()->toDateString(), false);
         }
     }
 
@@ -260,7 +274,12 @@ class ListMenus extends Page
 
     public function canChooseKitchen(): bool
     {
-        return auth()->user()?->hasRole(['super_admin', 'Quản trị viên']) ?? false;
+        $user = auth()->user();
+        if (! $user) {
+            return false;
+        }
+
+        return $user->hasRole(['super_admin', 'Quản trị viên', 'Quản lý bếp']) || $this->getKitchens()->count() > 1;
     }
 
     /**
@@ -556,18 +575,20 @@ class ListMenus extends Page
     // ==========================================
     // WEEK MENU LOGIC
     // ==========================================
-    public function loadWeekMenu($kitchenId, $startDate)
+    public function loadWeekMenu($kitchenId, $startDate, bool $isEditing = false)
     {
+        $kitchenId = (int) $kitchenId;
         $this->assertKitchenAccess($kitchenId);
         $this->weekKitchenId = $kitchenId;
-        $this->weekStartDate = $startDate;
+        $start = Carbon::parse($startDate)->startOfWeek();
+        $this->weekStartDate = $start->toDateString();
         $this->activeView = 'week';
         $this->weekEditReason = '';
+        $this->isEditingWeek = $isEditing;
 
         // Khởi tạo ma trận rỗng cho cả tuần (T2 -> CN) và các ca ăn
         $this->weekCells = [];
         $shifts = Shift::all();
-        $start = Carbon::parse($startDate);
 
         // Nạp menu CẢ TUẦN (T2→CN) bằng 1 query rồi gom NHIỀU món theo (ngày, ca)
         $weekMenus = Menu::where('kitchen_id', $kitchenId)
@@ -577,10 +598,10 @@ class ListMenus extends Page
             ->get();
 
         $this->weekHasExistingMenus = $weekMenus->isNotEmpty();
-        $this->weekHasEditableLockedMenus = $weekMenus->contains(
+        $this->weekHasEditableLockedMenus = $isEditing && $weekMenus->contains(
             fn (Menu $menu): bool => $menu->status === 'locked' && ! $menu->isPastLocked()
         );
-        $this->weekHasPastLockedMenus = $weekMenus->contains(fn (Menu $menu): bool => $menu->isPastLocked());
+        $this->weekHasPastLockedMenus = $isEditing && $weekMenus->contains(fn (Menu $menu): bool => $menu->isPastLocked());
         $this->weekStatus = $weekMenus
             ->sortByDesc(fn (Menu $menu): int => Menu::STATUS_ORDER[$menu->status] ?? -1)
             ->first()?->status ?? 'draft';
@@ -606,14 +627,14 @@ class ListMenus extends Page
     public function updatedWeekKitchenId($kitchenId): void
     {
         if ($kitchenId && $this->weekStartDate) {
-            $this->loadWeekMenu($kitchenId, $this->weekStartDate);
+            $this->loadWeekMenu($kitchenId, $this->weekStartDate, $this->isEditingWeek);
         }
     }
 
     public function updatedWeekStartDate($startDate): void
     {
         if ($this->weekKitchenId && $startDate) {
-            $this->loadWeekMenu($this->weekKitchenId, $startDate);
+            $this->loadWeekMenu($this->weekKitchenId, $startDate, $this->isEditingWeek);
         }
     }
 
@@ -706,6 +727,28 @@ class ListMenus extends Page
             'weekStatus.in' => __('menu.errors.invalid_status'),
         ]);
 
+        $hasAnyRecipe = false;
+        foreach ($this->weekCells as $byShift) {
+            foreach ($byShift as $cell) {
+                foreach ($cell as $item) {
+                    if ((int) ($item['recipe_id'] ?? 0) > 0) {
+                        $hasAnyRecipe = true;
+                        break 3;
+                    }
+                }
+            }
+        }
+
+        if (! $hasAnyRecipe) {
+            \Filament\Notifications\Notification::make()
+                ->title('Chưa chọn món ăn!')
+                ->body(__('menu.notifications.no_items'))
+                ->warning()
+                ->send();
+
+            return;
+        }
+
         $shifts = Shift::all();
         $start = Carbon::parse($this->weekStartDate);
         $skippedLocked = 0;
@@ -792,6 +835,11 @@ class ListMenus extends Page
             }
         });
 
+        \Filament\Notifications\Notification::make()
+            ->title($this->weekStatus === 'locked' ? 'Đã chốt thực đơn tuần thành công!' : 'Đã lưu thực đơn tuần thành công!')
+            ->success()
+            ->send();
+
         session()->flash('message', $skippedLocked > 0
             ? __('menu.notifications.week_saved_with_skipped', ['count' => $skippedLocked])
             : __('menu.notifications.week_saved'));
@@ -803,7 +851,21 @@ class ListMenus extends Page
      */
     protected function weekGuardSkips(Menu $menu): bool
     {
-        return $menu->editBlockReason($this->weekStatus, $this->weekEditReason) !== null;
+        return $this->isMenuBlocked($menu, $this->weekStatus, $this->weekEditReason, $this->isEditingWeek);
+    }
+
+    protected function isMenuBlocked(Menu $menu, string $targetStatus, string $reason, bool $isEditing): bool
+    {
+        $blocked = $menu->editBlockReason($targetStatus, $reason);
+        if ($blocked === null) {
+            return false;
+        }
+
+        if (! $isEditing && $blocked === 'need_reason') {
+            return false;
+        }
+
+        return true;
     }
 
     public function resetWeekForm()
@@ -814,18 +876,21 @@ class ListMenus extends Page
         $this->weekHasExistingMenus = false;
         $this->weekHasEditableLockedMenus = false;
         $this->weekHasPastLockedMenus = false;
+        $this->isEditingWeek = false;
     }
 
     // ==========================================
     // DAY MENU LOGIC
     // ==========================================
-    public function loadDayMenu($kitchenId, $date)
+    public function loadDayMenu($kitchenId, $date, bool $isEditing = false)
     {
+        $kitchenId = (int) $kitchenId;
         $this->assertKitchenAccess($kitchenId);
         $this->dayKitchenId = $kitchenId;
         $this->dayDate = $date;
         $this->activeView = 'day';
         $this->dayEditReason = '';
+        $this->isEditingDay = $isEditing;
 
         $this->dayItems = [];
         $shifts = Shift::all();
@@ -837,10 +902,10 @@ class ListMenus extends Page
             ->get();
 
         $this->dayHasExistingMenus = $dayMenus->isNotEmpty();
-        $this->dayHasEditableLockedMenus = $dayMenus->contains(
+        $this->dayHasEditableLockedMenus = $isEditing && $dayMenus->contains(
             fn (Menu $menu): bool => $menu->status === 'locked' && ! $menu->isPastLocked()
         );
-        $this->dayHasPastLockedMenus = $dayMenus->contains(fn (Menu $menu): bool => $menu->isPastLocked());
+        $this->dayHasPastLockedMenus = $isEditing && $dayMenus->contains(fn (Menu $menu): bool => $menu->isPastLocked());
         $this->dayStatus = $dayMenus
             ->sortByDesc(fn (Menu $menu): int => Menu::STATUS_ORDER[$menu->status] ?? -1)
             ->first()?->status ?? 'draft';
@@ -878,14 +943,14 @@ class ListMenus extends Page
     public function updatedDayKitchenId($kitchenId): void
     {
         if ($kitchenId && $this->dayDate) {
-            $this->loadDayMenu($kitchenId, $this->dayDate);
+            $this->loadDayMenu($kitchenId, $this->dayDate, $this->isEditingDay);
         }
     }
 
     public function updatedDayDate($date): void
     {
         if ($this->dayKitchenId && $date) {
-            $this->loadDayMenu($this->dayKitchenId, $date);
+            $this->loadDayMenu($this->dayKitchenId, $date, $this->isEditingDay);
         }
     }
 
@@ -945,6 +1010,26 @@ class ListMenus extends Page
             'dayStatus.in' => __('menu.errors.invalid_status'),
         ]);
 
+        $hasAnyRecipe = false;
+        foreach ($this->dayItems as $data) {
+            foreach ($data['recipes'] as $item) {
+                if ((int) ($item['recipe_id'] ?? 0) > 0) {
+                    $hasAnyRecipe = true;
+                    break 2;
+                }
+            }
+        }
+
+        if (! $hasAnyRecipe) {
+            \Filament\Notifications\Notification::make()
+                ->title('Chưa chọn món ăn!')
+                ->body(__('menu.notifications.no_items'))
+                ->warning()
+                ->send();
+
+            return;
+        }
+
         $existingDayMenus = Menu::query()
             ->where('kitchen_id', $this->dayKitchenId)
             ->where('date', '>=', $this->dayDate)
@@ -979,7 +1064,7 @@ class ListMenus extends Page
 
                         if ($menu) {
                             // Guard vòng đời dùng chung (khóa quá khứ / không hạ cấp / lý do khi sửa đã chốt)
-                            if ($menu->editBlockReason($this->dayStatus, $this->dayEditReason) !== null) {
+                            if ($this->isMenuBlocked($menu, $this->dayStatus, $this->dayEditReason, $this->isEditingDay)) {
                                 $skippedLocked++;
 
                                 continue;
@@ -1003,7 +1088,7 @@ class ListMenus extends Page
                             ->first();
 
                         if ($duplicate) {
-                            if ($duplicate->editBlockReason($this->dayStatus, $this->dayEditReason) !== null) {
+                            if ($this->isMenuBlocked($duplicate, $this->dayStatus, $this->dayEditReason, $this->isEditingDay)) {
                                 $skippedLocked++;
 
                                 continue;
@@ -1030,6 +1115,11 @@ class ListMenus extends Page
             }
         });
 
+        \Filament\Notifications\Notification::make()
+            ->title($this->dayStatus === 'locked' ? 'Đã chốt thực đơn ngày thành công!' : 'Đã lưu thực đơn ngày thành công!')
+            ->success()
+            ->send();
+
         session()->flash('message', $skippedLocked > 0
             ? __('menu.notifications.day_saved_with_skipped', ['count' => $skippedLocked])
             : __('menu.notifications.day_saved'));
@@ -1043,11 +1133,17 @@ class ListMenus extends Page
      */
     protected function authorizeAndGuardExistingMenus(Collection $menus, string $targetStatus, string $reason, string $errorKey): bool
     {
+        $isEditing = ($errorKey === 'weekEditReason') ? $this->isEditingWeek : $this->isEditingDay;
+
         foreach ($menus as $menu) {
             abort_unless(MenuResource::canEdit($menu), 403);
 
             $blocked = $menu->editBlockReason($targetStatus, $reason);
             if ($blocked === null) {
+                continue;
+            }
+
+            if (! $isEditing && $blocked === 'need_reason') {
                 continue;
             }
 
@@ -1072,6 +1168,7 @@ class ListMenus extends Page
         $this->dayHasExistingMenus = false;
         $this->dayHasEditableLockedMenus = false;
         $this->dayHasPastLockedMenus = false;
+        $this->isEditingDay = false;
     }
 
     // ==========================================
