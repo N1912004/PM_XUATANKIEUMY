@@ -1,14 +1,14 @@
 @php
     $logoPath = \App\Models\Setting::get('site_logo');
     $displayName = $siteName ?? 'Bluefire Catering';
-    $parts = explode(' ', $displayName, 2);
+    $hasLogo = $logoPath && \Illuminate\Support\Facades\Storage::disk('public')->exists($logoPath);
 @endphp
 
 <div class="flex items-center gap-3 pt-1 pb-3">
-    @if($logoPath)
+    @if($hasLogo)
         <!-- Custom Logo Image -->
         <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($logoPath) }}" 
-             alt="{{ $displayName }}" 
+             alt="" 
              style="height: 2.2rem; max-width: 80px; object-fit: contain;" 
              class="fi-logo rounded-lg">
     @else

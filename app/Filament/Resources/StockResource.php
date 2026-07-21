@@ -42,7 +42,7 @@ class StockResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('warehouse.resource.navigation_group');
+        return __('catalog.groups.ingredients_inventory');
     }
 
     public static function form(Form $form): Form

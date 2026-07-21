@@ -32,7 +32,7 @@ class BaoCao extends Page
 
     public static function getNavigationGroup(): ?string
     {
-        return __('report.navigation.group');
+        return __('catalog.groups.kitchen_operations');
     }
 
     public ?string $fromDate = null;

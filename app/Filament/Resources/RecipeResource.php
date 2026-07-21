@@ -49,7 +49,7 @@ class RecipeResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('recipe.navigation.group');
+        return __('catalog.groups.kitchen_operations');
     }
 
     public static function form(Form $form): Form

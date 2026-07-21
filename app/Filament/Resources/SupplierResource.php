@@ -35,7 +35,7 @@ class SupplierResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('supplier.navigation.group');
+        return __('catalog.groups.supply_inventory');
     }
 
     public static function form(Form $form): Form

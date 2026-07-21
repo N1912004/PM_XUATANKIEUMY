@@ -40,7 +40,7 @@ class PurchaseOrderResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('purchase_order.navigation.group');
+        return __('catalog.groups.supply_inventory');
     }
 
     public static function form(Form $form): Form

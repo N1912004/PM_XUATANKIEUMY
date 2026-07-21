@@ -19,11 +19,13 @@ class Dashboard extends Page
 
     protected static ?string $navigationIcon = 'heroicon-o-squares-2x2';
 
+    protected static ?int $navigationSort = -10;
+
     protected static string $view = 'filament.pages.dashboard';
 
     public static function getNavigationGroup(): ?string
     {
-        return __('TỔNG QUAN');
+        return null;
     }
 
     public static function getNavigationLabel(): string

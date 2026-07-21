@@ -52,7 +52,7 @@ class ListHang extends Page
 
     public static function getNavigationGroup(): ?string
     {
-        return __('list_hang.navigation.group');
+        return __('catalog.groups.supply_inventory');
     }
 
     public static function getNavigationLabel(): string
