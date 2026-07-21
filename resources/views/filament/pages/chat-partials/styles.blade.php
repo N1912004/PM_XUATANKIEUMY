@@ -1,7 +1,7 @@
 <style>
     :root {
-        --bl: #267DC1;
-        --bl-d: #1F669E;
+        --bl: {{ \App\Models\Setting::get('primary_color', '#267DC1') }};
+        --bl-d: {{ \App\Models\Setting::get('primary_color', '#267DC1') }};
         --bl-s: #E9F2F8;
         --bl-m: #A8CBE6;
         --gn: #059669;
@@ -219,7 +219,7 @@
         flex-shrink: 0;
     }
 
-    .g-av-b { background: #E9F2F8; color: #267DC1; }
+    .g-av-b { background: #E9F2F8; color: var(--bl); }
     .g-av-o { background: #FFF7ED; color: #EA580C; }
     .g-av-g { background: #ECFDF5; color: #059669; }
     .g-av-p { background: #F5F3FF; color: #7C3AED; }
@@ -501,7 +501,7 @@
 
     .f-pdf { background: #FEF2F2; color: #DC2626; }
     .f-xls { background: #ECFDF5; color: #059669; }
-    .f-doc { background: #E9F2F8; color: #267DC1; }
+    .f-doc { background: #E9F2F8; color: var(--bl); }
 
     .fi-nm {
         font-size: 12px;

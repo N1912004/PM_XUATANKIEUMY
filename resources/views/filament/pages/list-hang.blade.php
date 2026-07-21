@@ -1,8 +1,8 @@
 @push('styles')
 <style>
     :root {
-        --bl: #267DC1;
-        --bl-d: #1F669E;
+        --bl: {{ \App\Models\Setting::get('primary_color', '#267DC1') }};
+        --bl-d: {{ \App\Models\Setting::get('primary_color', '#267DC1') }};
         --bl-s: #E9F2F8;
         --bl-m: #A8CBE6;
         --gn: #059669;
@@ -772,7 +772,7 @@
                     <div><div class="lhn-chip-val">{{ $stats['shifts'] }}</div><div class="lhn-chip-lbl">{{ __('list_hang.stats.shifts') }}</div></div>
                 </div>
                 <div class="lhn-chip">
-                    <div class="lhn-chip-ico" style="background:#E9F2F8; color:#267DC1;"><i class="fa-solid fa-users"></i></div>
+                    <div class="lhn-chip-ico" style="background:#E9F2F8; color:var(--bl);"><i class="fa-solid fa-users"></i></div>
                     <div><div class="lhn-chip-val">{{ number_format($stats['portions']) }}</div><div class="lhn-chip-lbl">{{ __('list_hang.stats.portions') }}</div></div>
                 </div>
                 <div class="lhn-chip">
@@ -1057,7 +1057,7 @@
                                         @endphp
                                         <tr style="background:#F8FAFC" class="dark:bg-gray-800/40">
                                             <td colspan="9" style="text-align:right; font-weight:700; color:#64748b;">{{ __('list_hang.po.group_total', ['group' => $cat['label']]) }}:</td>
-                                            <td colspan="3" style="font-weight:800; color:#267DC1; font-size:13px;">{{ number_format($groupTotal, 0, ',', '.') }} {{ __('list_hang.currency') }}</td>
+                                            <td colspan="3" style="font-weight:800; color:var(--bl); font-size:13px;">{{ number_format($groupTotal, 0, ',', '.') }} {{ __('list_hang.currency') }}</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -1119,7 +1119,7 @@
                         @endphp
                         @if($ncc)
                             <div class="oh-ncc-chip">
-                                <div class="oh-ncc-chip-dot" style="background:#267DC1;"></div>
+                                <div class="oh-ncc-chip-dot" style="background:var(--bl);"></div>
                                 <div>
                                     <div class="oh-ncc-chip-name">{{ $ncc->code ?: 'NCC' }}</div>
                                     <div class="oh-ncc-chip-cnt" style="font-size:9.5px;">{{ __('list_hang.counts.items', ['count' => $items->count()]) }}</div>

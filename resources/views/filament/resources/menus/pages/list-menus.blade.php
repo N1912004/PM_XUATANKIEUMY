@@ -379,8 +379,8 @@
         <div class="tcard" style="overflow-x:auto">
             <table class="grid-table" style="width:100%; border-collapse:collapse; min-width:900px">
                 <thead>
-                    <tr style="background:#267DC1; color:#fff">
-                        <th colspan="2" style="padding:12px 14px; text-align:center; min-width:160px; position:sticky; left:0; z-index:2; background:#267DC1; color:#fff">{{ __('menu.week_form.shift_day') }}</th>
+                    <tr style="background:var(--po-bl, {{ \App\Models\Setting::get('primary_color', '#267DC1') }}); color:#fff">
+                        <th colspan="2" style="padding:12px 14px; text-align:center; min-width:160px; position:sticky; left:0; z-index:2; background:var(--po-bl, {{ \App\Models\Setting::get('primary_color', '#267DC1') }}); color:#fff">{{ __('menu.week_form.shift_day') }}</th>
                         @php $weekDays = $this->weekDays; @endphp
                         @foreach($weekDays as $d => $wDay)
                             <th style="padding:12px 14px; text-align:center; min-width:145px">

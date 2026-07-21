@@ -2,8 +2,8 @@
     
 <style>
     :root {
-        --po-bl: #267DC1;
-        --po-bl-d: #1F669E;
+        --po-bl: {{ \App\Models\Setting::get('primary_color', '#267DC1') }};
+        --po-bl-d: {{ \App\Models\Setting::get('primary_color', '#267DC1') }};
         --po-bl-s: #E9F2F8;
         --po-bl-m: #A8CBE6;
         --po-gn: #059669;
@@ -555,35 +555,35 @@
     @php $stats = $this->getStats(); @endphp
     <div class="stats-grid">
         <div class="stat-card">
-            <div class="stat-icon" style="background: #E9F2F8; color: #267DC1;"><i class="fa-regular fa-calendar"></i></div>
+            <div class="stat-icon" style="background: #E9F2F8; color: var(--po-bl);"><i class="fa-regular fa-calendar"></i></div>
             <div>
                 <div class="stat-val">{{ $stats['days'] }}</div>
                 <div class="stat-lbl">{{ __('report.stats.menu_days') }}</div>
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon" style="background: #E9F2F8; color: #267DC1;"><i class="fa-solid fa-utensils"></i></div>
+            <div class="stat-icon" style="background: #E9F2F8; color: var(--po-bl);"><i class="fa-solid fa-utensils"></i></div>
             <div>
                 <div class="stat-val">{{ $stats['dishes'] }}</div>
                 <div class="stat-lbl">{{ __('report.stats.dishes') }}</div>
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon" style="background: #E9F2F8; color: #267DC1;"><i class="fa-solid fa-seedling"></i></div>
+            <div class="stat-icon" style="background: #E9F2F8; color: var(--po-bl);"><i class="fa-solid fa-seedling"></i></div>
             <div>
                 <div class="stat-val">{{ $stats['ingredients'] }}</div>
                 <div class="stat-lbl">{{ __('report.stats.ingredient_rows') }}</div>
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon" style="background: #E9F2F8; color: #267DC1;"><i class="fa-solid fa-users"></i></div>
+            <div class="stat-icon" style="background: #E9F2F8; color: var(--po-bl);"><i class="fa-solid fa-users"></i></div>
             <div>
                 <div class="stat-val">{{ number_format($stats['suat'], 0, ',', '.') }}</div>
                 <div class="stat-lbl">{{ __('report.stats.portions') }}</div>
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon" style="background: #E9F2F8; color: #267DC1;"><i class="fa-solid fa-sack-dollar"></i></div>
+            <div class="stat-icon" style="background: #E9F2F8; color: var(--po-bl);"><i class="fa-solid fa-sack-dollar"></i></div>
             <div>
                 <div class="stat-val">{{ number_format($stats['cost'], 0, ',', '.') }}{{ __('report.currency') }}</div>
                 <div class="stat-lbl">{{ __('report.stats.cost') }}</div>

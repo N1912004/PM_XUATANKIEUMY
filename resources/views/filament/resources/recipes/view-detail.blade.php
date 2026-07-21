@@ -11,7 +11,7 @@
 
 <style>
 .md-detail-container {
-  --bl:#267DC1;--bl-d:#1F669E;--bl-s:#E9F2F8;--bl-m:#A8CBE6;
+  --bl:{{ \App\Models\Setting::get('primary_color', '#267DC1') }};--bl-d:{{ \App\Models\Setting::get('primary_color', '#267DC1') }};--bl-s:#E9F2F8;--bl-m:#A8CBE6;
   --gn:#059669;--gn-s:#ECFDF5;--gn-t:#065F46;
   --or:#EA580C;--or-s:#FFF7ED;--or-t:#9A3412;
   --rd:#DC2626;--rd-s:#FEF2F2;--rd-t:#991B1B;
