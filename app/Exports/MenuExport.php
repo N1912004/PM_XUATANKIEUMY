@@ -24,7 +24,8 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
  * Xuất thực đơn ra .xlsx:
  * - Thực đơn ngày: theo mẫu CJ Catering / BlueFire 100% (Ảnh 2)
  * - Thực đơn tuần: theo mẫu ma trận tuần chuẩn 100% (Ảnh 2), tự động lọc bỏ ca không có món,
- *   ca làm việc động lấy từ DB, màu sắc background pastel, viền cyan và font chữ chuẩn đẹp 100%.
+ *   màu sắc RGB y chang file gốc (B2/A2/B3 fill #BFBFBF, C2:J2 fill #D8D8D8, C3 fill #FBE4D5, font đỏ Times New Roman),
+ *   viền xanh cyan #00B0F0 và tự động nhúng logo dự án từ System Settings.
  * Tự động đa ngôn ngữ VI / EN theo ngôn ngữ hệ thống đang chọn.
  */
 class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
@@ -295,7 +296,7 @@ class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
         }
         $end = $start->copy()->addDays(6);
 
-        // 1. Header Banner Row 1 (Merged A1:I1 or A1:J1)
+        // 1. Header Banner Row 1 (Merged A1:I1)
         $sheet->mergeCells('A1:I1');
         $sheet->getRowDimension(1)->setRowHeight(55);
 
@@ -308,28 +309,37 @@ class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
 
         $richText = new RichText;
         $run1 = $richText->createTextRun($titleLine1);
-        $run1->getFont()->setName('Times New Roman')->setSize(15)->setBold(true)->setColor(new Color('FFFF0000'));
+        $run1->getFont()->setName('Times New Roman')->setSize(16)->setBold(true)->setColor(new Color('FFFF0000'));
 
         $run2 = $richText->createTextRun($titleLine2);
-        $run2->getFont()->setName('Times New Roman')->setSize(12)->setBold(true)->setItalic(true)->setColor(new Color('FFFF0000'));
+        $run2->getFont()->setName('Times New Roman')->setSize(13)->setBold(true)->setItalic(true)->setColor(new Color('FFFF0000'));
 
         $sheet->setCellValue('A1', $richText);
         $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)->setVertical(Alignment::VERTICAL_CENTER);
 
-        // Add BlueFire logo on A1
-        $logoPath = public_path('images/bluefire-logo.png');
-        if (file_exists($logoPath)) {
+        // Resolve System Settings Logo from http://127.0.0.1:8001/admin/system-settings?tab=-thuong-hieu-tab
+        $systemLogoRel = Setting::get('site_logo');
+        $resolvedLogoPath = null;
+
+        if ($systemLogoRel && Storage::disk('public')->exists($systemLogoRel)) {
+            $resolvedLogoPath = Storage::disk('public')->path($systemLogoRel);
+        } elseif (file_exists(public_path('images/bluefire-logo.png'))) {
+            $resolvedLogoPath = public_path('images/bluefire-logo.png');
+        }
+
+        if ($resolvedLogoPath && file_exists($resolvedLogoPath)) {
             $drawing = new Drawing;
-            $drawing->setName('Logo');
-            $drawing->setPath($logoPath);
+            $drawing->setName('System Brand Logo');
+            $drawing->setDescription('System Brand Logo');
+            $drawing->setPath($resolvedLogoPath);
             $drawing->setCoordinates('A1');
-            $drawing->setHeight(45);
-            $drawing->setOffsetX(8);
-            $drawing->setOffsetY(5);
+            $drawing->setHeight(50);
+            $drawing->setOffsetX(10);
+            $drawing->setOffsetY(4);
             $drawing->setWorksheet($sheet);
         }
 
-        // 2. Row 2 Header: CA | MÓN | THỨ 2 .. Chủ nhật
+        // 2. Row 2 Header: B2=CA (BFBFBF fill, Red font), C2..J2 (D8D8D8 fill, Red font)
         $sheet->getRowDimension(2)->setRowHeight(32);
         $headers = [
             'A' => '',
@@ -350,14 +360,21 @@ class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
             }
         }
 
-        // Style Row 2 B2:J2
-        $sheet->getStyle('B2:J2')->applyFromArray([
-            'font' => ['bold' => true, 'size' => 11, 'color' => ['rgb' => 'C00000'], 'name' => 'Calibri'],
-            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'D9E1F2']],
+        // Style B2
+        $sheet->getStyle('B2')->applyFromArray([
+            'font' => ['bold' => true, 'size' => 12, 'color' => ['rgb' => 'FF0000'], 'name' => 'Times New Roman'],
+            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'BFBFBF']],
             'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
         ]);
 
-        // 3. Dynamic Shifts filtering
+        // Style C2:J2
+        $sheet->getStyle('C2:J2')->applyFromArray([
+            'font' => ['bold' => true, 'size' => 12, 'color' => ['rgb' => 'FF0000'], 'name' => 'Times New Roman'],
+            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'D8D8D8']],
+            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
+        ]);
+
+        // 3. Dynamic Shift filtering
         $allShifts = Shift::orderBy('sort_order')->orderBy('id')->get()->values();
         $activeShiftIds = $this->menus->pluck('shift_id')->unique()->filter()->toArray();
 
@@ -401,14 +418,14 @@ class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
             $sheet->mergeCells("B{$startRow}:B{$endRow}");
             $sheet->setCellValue("B{$startRow}", $sName);
 
-            // Style Shift B
+            // Style Shift B (BFBFBF fill, Red font)
             $sheet->getStyle("B{$startRow}:B{$endRow}")->applyFromArray([
-                'font' => ['bold' => true, 'size' => 11, 'color' => ['rgb' => 'C00000'], 'name' => 'Calibri'],
-                'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'D9E1F2']],
+                'font' => ['bold' => true, 'size' => 14, 'color' => ['rgb' => 'FF0000'], 'name' => 'Times New Roman'],
+                'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'BFBFBF']],
                 'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER, 'wrapText' => true],
             ]);
 
-            // Populate categories in Column C
+            // Populate categories in Column C (FBE4D5 fill, 0070C0 font)
             foreach ($tpl['categories'] as $catIdx => $catName) {
                 $r = $startRow + $catIdx;
                 $sheet->getRowDimension($r)->setRowHeight(30);
@@ -417,8 +434,8 @@ class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
 
             // Style Category C
             $sheet->getStyle("C{$startRow}:C{$endRow}")->applyFromArray([
-                'font' => ['bold' => true, 'size' => 11, 'color' => ['rgb' => '002060'], 'name' => 'Calibri'],
-                'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'EDEDED']],
+                'font' => ['bold' => true, 'size' => 11, 'color' => ['rgb' => '0070C0'], 'name' => 'Times New Roman'],
+                'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'FBE4D5']],
                 'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
             ]);
 
@@ -428,12 +445,12 @@ class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
 
         $lastRow = $currentRow - 1;
 
-        // 4. Merge Side Header Column A (A2:A{lastRow})
+        // 4. Merge Side Header Column A (A2:A{lastRow}) (BFBFBF fill, Red font)
         $sheet->mergeCells("A2:A{$lastRow}");
         $sheet->setCellValue('A2', $isEn ? "W\nE\nE\nK\nL\nY\n\nM\nE\nN\nU" : "T\nH\nỰ\nC\n\nĐ\nƠ\nN\n\nT\nU\nẦ\nN");
         $sheet->getStyle("A2:A{$lastRow}")->applyFromArray([
-            'font' => ['bold' => true, 'size' => 12, 'color' => ['rgb' => 'C00000'], 'name' => 'Calibri'],
-            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'FCE4D6']],
+            'font' => ['bold' => true, 'size' => 14, 'color' => ['rgb' => 'FF0000'], 'name' => 'Times New Roman'],
+            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'BFBFBF']],
             'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER, 'wrapText' => true],
         ]);
 
@@ -454,14 +471,21 @@ class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
             foreach ($items as $itemIdx => $m) {
                 $targetRow = $baseRow + $itemIdx;
                 if ($targetRow <= $lastRow && $m->recipe?->name) {
-                    $sheet->setCellValue($colStr.$targetRow, $m->recipe->name);
+                    $sourceCell = $sheet->getCell($colStr.$targetRow);
+                    // Append if dish already present on slot, or set
+                    $existing = $sourceCell->getValue();
+                    if ($existing) {
+                        $sourceCell->setValue($existing."\n".$m->recipe->name);
+                    } else {
+                        $sourceCell->setValue($m->recipe->name);
+                    }
                 }
             }
         }
 
         // 6. Style Dish Data Cells D3:J{lastRow}
         $sheet->getStyle("D3:J{$lastRow}")->applyFromArray([
-            'font' => ['bold' => true, 'size' => 11, 'color' => ['rgb' => '0070C0'], 'name' => 'Calibri'],
+            'font' => ['bold' => true, 'size' => 12, 'color' => ['rgb' => '0070C0'], 'name' => 'Times New Roman'],
             'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER, 'wrapText' => true],
         ]);
 
