@@ -12,7 +12,7 @@ class ChatNhom extends Page
 {
     protected static ?string $navigationIcon = 'heroicon-o-chat-bubble-left-right';
 
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 99;
 
     public static function getNavigationLabel(): string
     {
@@ -26,7 +26,7 @@ class ChatNhom extends Page
 
     public static function getNavigationGroup(): ?string
     {
-        return __('CHAT NHÓM');
+        return null;
     }
 
     protected static string $view = 'filament.pages.chat-nhom';

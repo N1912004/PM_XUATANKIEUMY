@@ -239,20 +239,173 @@ class AdminPanelProvider extends PanelProvider
                         }
                         
                         /*
-                         * Icon sidebar: XÁM trung tính cho mọi menu chưa active — màu chỉ dành để
-                         * mã hóa TRẠNG THÁI, không dùng cho phân nhóm điều hướng. Identity toàn hệ
-                         * thống là xanh dương (primary) + cam ở logo. Menu active vẫn nền primary +
-                         * icon trắng (rule ở trên); hover đổi icon sang primary cho phản hồi nhẹ.
+                         * Icon sidebar: Khung màu thương hiệu BlueFire cho từng phân hệ nghiệp vụ.
+                         * Mặc định MỌI icon đều có khung màu nhạt mềm mại `#EBF3FF` + icon xanh `#1267E8`.
+                         * Ghi đè màu riêng theo từng phân hệ bên dưới (đảm bảo không menu nào bị sót).
                          */
-                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) .fi-sidebar-item-icon {
-                            color: #64748b !important; /* Slate-500 */
+                        .fi-sidebar-item-icon {
+                            width: 1.65rem !important;
+                            height: 1.65rem !important;
+                            padding: 0.22rem !important;
+                            border-radius: 0.375rem !important;
+                            flex-shrink: 0 !important;
+                            transition: all 0.15s ease !important;
+                            background-color: #EBF3FF !important;
+                            color: #1267E8 !important;
                         }
-                        .dark .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) .fi-sidebar-item-icon {
-                            color: #94a3b8 !important; /* Slate-400 */
+
+                        /* Menu Active: Icon chuyển màu trắng trên nền mờ */
+                        .fi-sidebar-item.fi-active .fi-sidebar-item-icon,
+                        .fi-sidebar-item-active .fi-sidebar-item-icon,
+                        .fi-active .fi-sidebar-item-icon {
+                            background-color: rgba(255, 255, 255, 0.22) !important;
+                            color: #ffffff !important;
                         }
+
+                        /* 1. TỔNG QUAN / Dashboard (Bảng điều khiển) */
+                        .fi-sidebar-group:first-child .fi-sidebar-item:first-child .fi-sidebar-item-icon,
+                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href$="/admin"] .fi-sidebar-item-icon,
+                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href$="/admin/"] .fi-sidebar-item-icon {
+                            background-color: #EBF3FF !important; color: #1267E8 !important;
+                        }
+
+                        /* 2. VẬN HÀNH BẾP & CUNG ỨNG & KHO & NGUYÊN LIỆU */
+                        /* Ngân hàng thực đơn / Nhóm món / Nhật ký sửa thực đơn */
+                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/admin/recipes"] .fi-sidebar-item-icon,
+                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/admin/recipe-types"] .fi-sidebar-item-icon,
+                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/admin/menu-audit-logs"] .fi-sidebar-item-icon {
+                            background-color: #FFFBEB !important; color: #D97706 !important;
+                        }
+
+                        /* Kho & Tồn kho / Nhật ký kho / Điều chuyển kho */
+                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/admin/stocks"] .fi-sidebar-item-icon,
+                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/admin/stock-transactions"] .fi-sidebar-item-icon,
+                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/admin/stock-transfers"] .fi-sidebar-item-icon {
+                            background-color: #ECFDF5 !important; color: #059669 !important;
+                        }
+
+                        /* List hàng */
+                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/admin/list-hang"] .fi-sidebar-item-icon {
+                            background-color: #ECFDF5 !important; color: #059669 !important;
+                        }
+
+                        /* List nguyên liệu / Đơn vị tính / Loại thực phẩm */
+                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/admin/ingredients"] .fi-sidebar-item-icon,
+                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/admin/units"] .fi-sidebar-item-icon,
+                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/admin/ingredient-types"] .fi-sidebar-item-icon {
+                            background-color: #EBF3FF !important; color: #1267E8 !important;
+                        }
+
+                        /* Nhà cung cấp */
+                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/admin/suppliers"] .fi-sidebar-item-icon {
+                            background-color: #FFF7ED !important; color: #EA580C !important;
+                        }
+
+                        /* Đặt hàng (PO) */
+                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/admin/purchase-orders"] .fi-sidebar-item-icon {
+                            background-color: #ECFDF5 !important; color: #059669 !important;
+                        }
+
+                        /* Lập thực đơn */
+                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/admin/menus"] .fi-sidebar-item-icon,
+                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/admin/lap-thuc-don-tuan"] .fi-sidebar-item-icon {
+                            background-color: #EBF3FF !important; color: #1267E8 !important;
+                        }
+
+                        /* Kiểm thực 3 bước */
+                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/admin/food-safety-audits"] .fi-sidebar-item-icon {
+                            background-color: #F0F9FF !important; color: #0284C7 !important;
+                        }
+
+                        /* Báo cáo */
+                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/admin/bao-cao"] .fi-sidebar-item-icon {
+                            background-color: #ECFDF5 !important; color: #059669 !important;
+                        }
+
+                        /* 3. NHÂN SỰ */
+                        /* Nhân viên / Quản lý tài khoản */
+                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/admin/employees"] .fi-sidebar-item-icon,
+                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/admin/users"] .fi-sidebar-item-icon {
+                            background-color: #EBF3FF !important; color: #1267E8 !important;
+                        }
+
+                        /* Chấm công / Ca làm việc */
+                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/admin/timekeepings"] .fi-sidebar-item-icon,
+                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/admin/shifts"] .fi-sidebar-item-icon {
+                            background-color: #F0F9FF !important; color: #0284C7 !important;
+                        }
+
+                        /* Nghỉ phép & Tăng ca / Loại nghỉ phép */
+                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/admin/leave-overtimes"] .fi-sidebar-item-icon,
+                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/admin/leave-types"] .fi-sidebar-item-icon {
+                            background-color: #FFF1F2 !important; color: #E11D48 !important;
+                        }
+
+                        /* Phòng ban / Chức danh */
+                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/admin/departments"] .fi-sidebar-item-icon,
+                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/admin/positions"] .fi-sidebar-item-icon {
+                            background-color: #F5F3FF !important; color: #7C3AED !important;
+                        }
+
+                        /* 4. CHAT NHÓM */
+                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/admin/chat-nhom"] .fi-sidebar-item-icon {
+                            background-color: #EBF3FF !important; color: #1267E8 !important;
+                        }
+
+                        /* 5. KHU VỰC & NHÀ ĂN */
+                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/admin/areas"] .fi-sidebar-item-icon,
+                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/admin/kitchens"] .fi-sidebar-item-icon,
+                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/admin/kitchen-types"] .fi-sidebar-item-icon {
+                            background-color: #F0F9FF !important; color: #0284C7 !important;
+                        }
+
+                        /* 6. HỆ THỐNG / System Settings */
+                        .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/admin/system-settings"] .fi-sidebar-item-icon {
+                            background-color: #F1F5F9 !important; color: #64748B !important;
+                        }
+
+                        /* Hover nhẹ cho icon chưa active */
                         .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) > .fi-sidebar-item-button:hover .fi-sidebar-item-icon,
                         .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) > a:hover .fi-sidebar-item-icon {
-                            color: rgb(var(--primary-600)) !important;
+                            transform: scale(1.06) !important;
+                        }
+
+                        /* Dark mode support cho icon chưa active */
+                        .dark .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/admin/recipes"] .fi-sidebar-item-icon,
+                        .dark .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/admin/recipe-types"] .fi-sidebar-item-icon {
+                            background-color: rgba(217, 119, 6, 0.18) !important; color: #FBBF24 !important;
+                        }
+                        .dark .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/admin/stocks"] .fi-sidebar-item-icon,
+                        .dark .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/admin/list-hang"] .fi-sidebar-item-icon,
+                        .dark .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/admin/purchase-orders"] .fi-sidebar-item-icon,
+                        .dark .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/admin/bao-cao"] .fi-sidebar-item-icon {
+                            background-color: rgba(5, 150, 105, 0.18) !important; color: #34D399 !important;
+                        }
+                        .dark .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href$="/admin"] .fi-sidebar-item-icon,
+                        .dark .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/admin/ingredients"] .fi-sidebar-item-icon,
+                        .dark .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/admin/menus"] .fi-sidebar-item-icon,
+                        .dark .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/admin/employees"] .fi-sidebar-item-icon,
+                        .dark .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/admin/chat-nhom"] .fi-sidebar-item-icon,
+                        .dark .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/admin/users"] .fi-sidebar-item-icon {
+                            background-color: rgba(18, 103, 232, 0.18) !important; color: #60A5FA !important;
+                        }
+                        .dark .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/admin/suppliers"] .fi-sidebar-item-icon {
+                            background-color: rgba(234, 88, 12, 0.18) !important; color: #FB923C !important;
+                        }
+                        .dark .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/admin/food-safety-audits"] .fi-sidebar-item-icon,
+                        .dark .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/admin/timekeepings"] .fi-sidebar-item-icon,
+                        .dark .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/admin/shifts"] .fi-sidebar-item-icon,
+                        .dark .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/admin/areas"] .fi-sidebar-item-icon,
+                        .dark .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/admin/kitchens"] .fi-sidebar-item-icon {
+                            background-color: rgba(2, 132, 199, 0.18) !important; color: #38BDF8 !important;
+                        }
+                        .dark .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/admin/leave-overtimes"] .fi-sidebar-item-icon,
+                        .dark .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/admin/leave-types"] .fi-sidebar-item-icon {
+                            background-color: rgba(225, 29, 72, 0.18) !important; color: #FB7185 !important;
+                        }
+                        .dark .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/admin/departments"] .fi-sidebar-item-icon,
+                        .dark .fi-sidebar-item:not(.fi-sidebar-item-active):not(:has(.fi-active)) a[href*="/admin/positions"] .fi-sidebar-item-icon {
+                            background-color: rgba(124, 58, 237, 0.18) !important; color: #A78BFA !important;
                         }
 
                         /* Recipe create/edit form: match BA mockup spacing and cost table emphasis */
@@ -371,8 +524,6 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->navigationGroups([
                 NavigationGroup::make()
-                    ->label(fn () => __('TỔNG QUAN')),
-                NavigationGroup::make()
                     ->label(fn () => __('NGUYÊN LIỆU & KHO')),
                 NavigationGroup::make()
                     ->label(fn () => __('CUNG ỨNG & KHO')),
@@ -382,8 +533,6 @@ class AdminPanelProvider extends PanelProvider
                     ->label(fn () => __('VẬN HÀNH BẾP')),
                 NavigationGroup::make()
                     ->label(fn () => __('NHÂN SỰ')),
-                NavigationGroup::make()
-                    ->label(fn () => __('CHAT NHÓM')),
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
