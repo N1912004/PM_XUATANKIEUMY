@@ -220,8 +220,9 @@
     .lg-inputwrap { position: relative; }
     .lg-inputwrap > .fa-solid {
         position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
-        color: #9AA7BC; font-size: 15px; pointer-events: none;
+        color: #9AA7BC; font-size: 15px; pointer-events: none; transition: color .15s ease;
     }
+    .lg-inputwrap:focus-within > .fa-solid { color: var(--lg-bl); }
     .lg-input {
         width: 100%; height: 52px; border: 1.5px solid var(--lg-line); border-radius: 12px;
         padding: 0 46px 0 44px; font-size: 14.5px; color: var(--lg-ink); background: #fff;
@@ -232,7 +233,7 @@
     .lg-eye {
         position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
         width: 38px; height: 38px; border: none; background: transparent; cursor: pointer;
-        color: #9AA7BC; font-size: 15px; border-radius: 9px;
+        color: #9AA7BC; font-size: 15px; border-radius: 9px; transition: color .15s, background .15s;
     }
     .lg-eye:hover { color: var(--lg-bl); background: rgba({{ $primaryColorRgb }},.06); }
     .lg-err { display: block; margin-top: 7px; font-size: 12.5px; color: var(--lg-rd); font-weight: 600; }
@@ -251,14 +252,22 @@
         width: 100%; height: 54px; border: none; border-radius: 12px; cursor: pointer;
         background: var(--lg-bl) !important; color: #fff !important; font-size: 15.5px; font-weight: 800 !important;
         letter-spacing: .1em; text-transform: uppercase;
-        box-shadow: 0 8px 20px rgba({{ $primaryColorRgb }}, .18) !important; transition: background .15s, transform .1s;
+        box-shadow: 0 8px 20px rgba({{ $primaryColorRgb }}, .2) !important; transition: background .15s, box-shadow .15s, transform .1s;
         font-family: inherit;
     }
     .lg-page button.lg-submit[type="submit"]:hover,
-    .lg-page .lg-submit:hover { background: var(--lg-bl-d) !important; box-shadow: 0 8px 20px rgba({{ $primaryColorRgb }}, .18) !important; }
+    .lg-page .lg-submit:hover { background: var(--lg-bl-d) !important; box-shadow: 0 10px 26px rgba({{ $primaryColorRgb }}, .32) !important; }
     .lg-page .lg-submit:active { transform: translateY(1px); }
     .lg-page .lg-submit:focus-visible { outline: 3px solid rgba({{ $primaryColorRgb }},.4); outline-offset: 2px; }
     .lg-page .lg-submit[disabled] { opacity: .75; cursor: wait; }
+
+    /* Huy hiệu bảo mật SSL & ISO 22000 bên dưới nút đăng nhập */
+    .lg-trust-badge {
+        display: flex; align-items: center; justify-content: center; gap: 6.5px;
+        margin-top: 18px; font-size: 11.5px; color: #7B8BA0; font-weight: 500;
+        user-select: none;
+    }
+    .lg-trust-badge i { color: var(--lg-bl); font-size: 12px; }
 
     /* ── Responsive ── */
     @media (max-width: 1180px) {
@@ -440,6 +449,11 @@
                     <span wire:loading.remove>{{ __('login.card.submit') }}</span>
                     <span wire:loading>{{ __('login.card.submitting') }}</span>
                 </button>
+
+                <div class="lg-trust-badge">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <span>Hệ thống bảo mật SSL 256-bit &bull; Chuẩn ISO 22000:2018</span>
+                </div>
 
             </form>
         </div>
