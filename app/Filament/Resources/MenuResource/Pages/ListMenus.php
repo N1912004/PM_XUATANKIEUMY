@@ -343,19 +343,21 @@ class ListMenus extends Page
                 ->where('date', '>=', $from)
                 ->where('date', '<', Carbon::parse($to ?: $from)->addDay()->toDateString());
             $subtitle = 'Từ '.Carbon::parse($from)->format('d/m/Y').' đến '.Carbon::parse($to ?: $from)->format('d/m/Y');
+            $isSingleDay = ($to ?: $from) === $from;
         } else {
             $query = $this->filteredMenuQuery()
                 ->with(['kitchen', 'shift', 'recipe'])
                 ->orderBy('date')
                 ->orderBy('shift_id');
             $subtitle = __('menu.export.filtered_list');
+            $isSingleDay = false;
         }
 
         // Xuất .xlsx thật qua Laravel Excel (trước đây là CSV) — file này còn dùng để gửi khách duyệt.
         $prefix = app()->getLocale() === 'en' ? 'menu' : 'thuc-don';
         $fileName = $prefix.'-'.($from ?: now()->format('Y-m-d')).'.xlsx';
 
-        return Excel::download(new MenuExport($query->get(), $subtitle), $fileName);
+        return Excel::download(new MenuExport($query->get(), $subtitle, $isSingleDay), $fileName);
     }
 
     /** Xuất tuần đang soạn trên form (T2 → CN, khớp đủ 7 ngày của grid). */
