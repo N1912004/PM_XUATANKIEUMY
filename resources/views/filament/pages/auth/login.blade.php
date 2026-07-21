@@ -151,7 +151,7 @@
     .lg-left { display: flex; flex-direction: column; height: 100%; padding: 4px 0 0; box-sizing: border-box; }
     .lg-lockup { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
     .lg-lockup .nm { font-size: 30px; font-weight: 800; color: var(--lg-bl); letter-spacing: -.02em; line-height: 1; }
-    .lg-lockup .tg { font-size: 11px; font-weight: 700; color: var(--lg-rd); letter-spacing: .34em; }
+    .lg-lockup .tg { font-size: 11px; font-weight: 700; color: var(--lg-bl); letter-spacing: .34em; }
 
     .lg-hero { margin-top: 24px; }
     .lg-hero h1 {
@@ -182,7 +182,7 @@
         box-shadow: 0 0 0 5px rgba(255,255,255,.92);
     }
     .lg-wheel-core .nm { font-size: 15px; font-weight: 800; color: var(--lg-bl); line-height: 1.05; margin-top: 1px; }
-    .lg-wheel-core .tg { font-size: 6px; font-weight: 700; color: var(--lg-rd); letter-spacing: .25em; }
+    .lg-wheel-core .tg { font-size: 6px; font-weight: 700; color: var(--lg-bl); letter-spacing: .25em; }
     .lg-wheel-core .iso { font-size: 9.5px; font-weight: 800; color: var(--lg-bl); margin-top: 2px; }
 
     /* 4 giá trị cốt lõi — icon OUTLINE như mẫu, không nền hộp */
@@ -209,7 +209,7 @@
     }
     .lg-card-logo { display: flex; flex-direction: column; align-items: center; gap: 5px; margin-bottom: 18px; }
     .lg-card-logo .nm { font-size: 25px; font-weight: 800; color: var(--lg-bl); line-height: 1.05; }
-    .lg-card-logo .tg { font-size: 9.5px; font-weight: 700; color: var(--lg-rd); letter-spacing: .32em; }
+    .lg-card-logo .tg { font-size: 9.5px; font-weight: 700; color: var(--lg-bl); letter-spacing: .32em; }
 
     .lg-title { text-align: center; font-size: 24px; font-weight: 800; margin: 4px 0 0; letter-spacing: -.01em; }
     .lg-title-rule { width: 60px; height: 2px; background: var(--lg-bl); border-radius: 1px; margin: 12px auto 14px; }
