@@ -4,6 +4,7 @@ namespace App\Exports;
 
 use App\Models\Menu;
 use App\Models\Setting;
+use App\Models\Shift;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
@@ -13,14 +14,17 @@ use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithTitle;
 use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 
 /**
- * Xuất thực đơn ra .xlsx (thực đơn ngày theo mẫu CJ Catering / BlueFire 100%, thực đơn tuần theo bảng tổng hợp),
- * tự động đa ngôn ngữ VI / EN theo ngôn ngữ hệ thống đang chọn.
+ * Xuất thực đơn ra .xlsx:
+ * - Thực đơn ngày: theo mẫu CJ Catering / BlueFire 100% (Ảnh 2)
+ * - Thực đơn tuần: theo mẫu ma trận tuần chuẩn 100% từ file LISTHANGMAU_THUCDON (1).xlsx (Sheet TD)
+ * Tự động đa ngôn ngữ VI / EN theo ngôn ngữ hệ thống đang chọn.
  */
 class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
 {
@@ -60,7 +64,7 @@ class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
             return $isEn ? 'Day Menu' : 'Thực đơn ngày';
         }
 
-        return $isEn ? 'Week Menu' : 'Thực đơn tuần';
+        return 'TD';
     }
 
     /**
@@ -120,6 +124,20 @@ class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
     }
 
     protected function multiDayArray(): array
+    {
+        if (file_exists(base_path('LISTHANGMAU_THUCDON (1).xlsx'))) {
+            $rows = [];
+            for ($r = 1; $r <= 35; $r++) {
+                $rows[] = array_pad([], 10, '');
+            }
+
+            return $rows;
+        }
+
+        return $this->standardMultiDayArray();
+    }
+
+    protected function standardMultiDayArray(): array
     {
         $isEn = app()->getLocale() === 'en';
         $rows = [];
@@ -306,6 +324,108 @@ class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
     }
 
     protected function formatMultiDaySheet($sheet): void
+    {
+        $templatePath = base_path('LISTHANGMAU_THUCDON (1).xlsx');
+        if (! file_exists($templatePath)) {
+            $this->formatStandardMultiDaySheet($sheet);
+
+            return;
+        }
+
+        $tplSpreadsheet = IOFactory::load($templatePath);
+        $source = $tplSpreadsheet->getSheetByName('TD') ?? $tplSpreadsheet->getSheet(0);
+
+        // 1. Clear sample dishes in D3:J34
+        for ($r = 3; $r <= 34; $r++) {
+            for ($c = 4; $c <= 10; $c++) {
+                $colStr = Coordinate::stringFromColumnIndex($c);
+                $source->setCellValue($colStr.$r, '');
+            }
+        }
+
+        // 2. Set D1 Title & Date Range
+        $isEn = app()->getLocale() === 'en';
+        $dates = $this->menus->pluck('date')
+            ->filter()
+            ->map(fn ($d) => $d instanceof Carbon ? $d : Carbon::parse($d));
+
+        $start = $dates->min() ? $dates->min()->copy()->startOfWeek() : now()->startOfWeek();
+        $end = $start->copy()->addDays(6);
+
+        $titleLine1 = $isEn
+            ? 'SUMMIT CANTEEN WEEKLY MENU '.$start->format('d.m.Y')
+            : 'THỰC ĐƠN CANTEEN SUMMIT TUẦN '.$start->format('d.m.Y');
+        $titleLine2 = $isEn
+            ? '(From '.$start->format('d/m/Y').' to '.$end->format('d/m/Y').')'
+            : '(Từ ngày '.$start->format('d/m/Y').' đến ngày '.$end->format('d/m/Y').')';
+
+        $source->setCellValue('D1', $titleLine1."\n".$titleLine2);
+
+        // 3. Map menus to D3:J34 matrix
+        $shifts = Shift::orderBy('sort_order')->orderBy('id')->get();
+        $shiftMap = [];
+        foreach ($shifts->values() as $idx => $s) {
+            $shiftMap[$s->id] = $idx;
+        }
+        $shiftRowStart = [0 => 3, 1 => 15, 2 => 23];
+
+        $byDayShift = $this->menus->groupBy(fn ($m) => ($m->date instanceof Carbon ? $m->date->toDateString() : Carbon::parse($m->date)->toDateString()).'|'.$m->shift_id);
+
+        foreach ($byDayShift as $key => $items) {
+            [$dateStr, $shiftId] = explode('|', $key);
+            $cDate = Carbon::parse($dateStr);
+            $dayIdx = (int) $start->diffInDays($cDate);
+            $colStr = ['D', 'E', 'F', 'G', 'H', 'I', 'J'][$dayIdx] ?? null;
+            if (! $colStr) {
+                continue;
+            }
+
+            $sIdx = $shiftMap[$shiftId] ?? 0;
+            $baseRow = $shiftRowStart[$sIdx] ?? 3;
+
+            foreach ($items as $itemIdx => $m) {
+                $targetRow = $baseRow + $itemIdx;
+                if ($targetRow <= 34 && $m->recipe?->name) {
+                    $source->setCellValue($colStr.$targetRow, $m->recipe->name);
+                }
+            }
+        }
+
+        // 4. Clone merged cells, dimensions, styles, values, and drawings onto target $sheet
+        foreach ($source->getMergeCells() as $mergeRange) {
+            $sheet->mergeCells($mergeRange);
+        }
+
+        foreach ($source->getColumnDimensions() as $col => $dimension) {
+            $sheet->getColumnDimension($col)->setWidth($dimension->getWidth());
+        }
+
+        foreach ($source->getRowDimensions() as $row => $dimension) {
+            $sheet->getRowDimension($row)->setRowHeight($dimension->getRowHeight());
+        }
+
+        $maxRow = min(35, $source->getHighestRow());
+        $maxColIndex = Coordinate::columnIndexFromString('J');
+
+        for ($r = 1; $r <= $maxRow; $r++) {
+            for ($c = 1; $c <= $maxColIndex; $c++) {
+                $colStr = Coordinate::stringFromColumnIndex($c);
+                $cellAddr = $colStr.$r;
+                $sourceCell = $source->getCell($cellAddr);
+                $targetCell = $sheet->getCell($cellAddr);
+
+                $targetCell->setValue($sourceCell->getValue());
+                $sheet->duplicateStyle($source->getStyle($cellAddr), $cellAddr);
+            }
+        }
+
+        foreach ($source->getDrawingCollection() as $drawing) {
+            $newDrawing = clone $drawing;
+            $newDrawing->setWorksheet($sheet);
+        }
+    }
+
+    protected function formatStandardMultiDaySheet($sheet): void
     {
         $lastCol = Coordinate::stringFromColumnIndex(8);
         $lastRow = $sheet->getHighestRow();

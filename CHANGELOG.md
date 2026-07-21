@@ -13,6 +13,7 @@ All notable changes to this project will be documented in this file.
 - Tối ưu hóa sắp xếp ca theo thứ tự `sort_order` & `id` từ danh mục ca làm việc DB.
 - Nâng cấp thanh phân trang danh sách thực đơn, bổ sung tùy chọn `5, 10, 20, 50` bản ghi trên mỗi trang và cho phép điều hướng mượt mà.
 - Nâng cấp file xuất Excel thực đơn ngày (`MenuExport.php`) khớp 100% mẫu CJ Catering / BlueFire: Tự động đa ngôn ngữ (VI/EN) cho tên file (`menu-YYYY-MM-DD.xlsx`), tên sheet, tên công ty, tiêu đề banner (`SAVORY MENU 46`), tiêu đề cột (`STRUCTURE` | `DISH NAME`) và tiền tố món (`DISH 1`), tự động lấy ảnh logo hệ thống từ Cài đặt (`Setting::get('site_logo')` tại `/admin/system-settings?tab=-thuong-hieu-tab`), mở rộng độ rộng Cột A (width = 30) giúp logo hiển thị thoáng đẹp, nhúng trực tiếp qua PhpSpreadsheet Drawing vào ô A1:A3, xuất ĐÚNG số món ăn thực tế có trong ngày (không in dư dòng trống), gom toàn bộ món ăn không phân biệt ca và viền xanh cyan `#00B0F0`.
+- Nâng cấp file xuất Excel thực đơn tuần (`MenuExport.php` ➔ Sheet `TD`) khớp 100% mẫu ma trận thực đơn tuần từ file `LISTHANGMAU_THUCDON (1).xlsx`: Nhúng nguyên bản toàn bộ thiết kế, logo BlueFire, màu sắc, font chữ, đường viền, nhãn nhóm món, phân ca (`THỰC ĐƠN CA TRƯA`, `THỰC ĐƠN CA CHIỀU`, `THỰC ĐƠN CA ĐÊM`), ánh xạ chính xác món ăn theo từng thứ (Thứ 2 ➔ Chủ Nhật) và hỗ trợ đa ngôn ngữ VI/EN.
 
 ## [2026-07-20]
 
