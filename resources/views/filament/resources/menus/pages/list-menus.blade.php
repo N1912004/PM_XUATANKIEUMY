@@ -264,7 +264,7 @@
              VIEW 2: BIỂU MẪU THỰC ĐƠN TUẦN
              ========================================================================= -->
         <!-- Header -->
-        <div class="emp-head" style="margin-bottom: 20px;">
+        <div class="emp-head" style="margin-bottom: 16px;">
             <div>
                 <h1 class="emp-title">{{ __('menu.week_form.title') }}</h1>
                 <p class="emp-subtitle">{{ __('menu.week_form.subtitle') }}</p>
@@ -272,6 +272,9 @@
             <div class="emp-actions">
                 @php $weekRank = \App\Models\Menu::STATUS_ORDER[$weekStatus] ?? 0; @endphp
                 <button wire:click="switchView('list')" class="emp-btn"><i class="fa-solid fa-arrow-left"></i> {{ __('menu.actions.back') }}</button>
+                <button wire:click="exportMenus({{ $weekKitchenId }}, '{{ $weekDateFrom }}', '{{ $weekDateTo }}')" class="emp-btn">
+                    <i class="fa-solid fa-file-excel" style="color:var(--po-gn)"></i> {{ __('menu.actions.export_excel') }}
+                </button>
                 @unless($weekHasPastLockedMenus)
                     @if($weekRank <= \App\Models\Menu::STATUS_ORDER['draft'])
                         <button wire:click="saveWeekMenu('draft')" class="emp-btn"><i class="fa-regular fa-floppy-disk"></i> {{ __('menu.actions.save_draft') }}</button>
@@ -311,6 +314,28 @@
             @endif
         </div>
 
+        <!-- Meta Info Bar & Status Badge -->
+        <div class="tcard" style="padding:12px 16px; margin-bottom:14px; display:flex; align-items:center; gap:16px; flex-wrap:wrap; font-size:13px; color:var(--po-su)">
+            <div style="display:flex; align-items:center; gap:8px">
+                <i class="fa-solid fa-building" style="color:var(--po-bl)"></i>
+                <strong>{{ $kitchens->firstWhere('id', (int) $weekKitchenId)?->name ?? __('menu.fields.kitchen') }}</strong>
+            </div>
+            <div style="width:1px; height:20px; background:var(--po-bd); flex-shrink:0"></div>
+            <div style="display:flex; align-items:center; gap:8px">
+                <i class="fa-regular fa-calendar-days" style="color:var(--po-bl)"></i>
+                <span>Tuần {{ date('W/Y', strtotime($weekDateFrom)) }} &nbsp;·&nbsp; {{ date('d/m/Y', strtotime($weekDateFrom)) }} – {{ date('d/m/Y', strtotime($weekDateTo)) }}</span>
+            </div>
+            <div style="margin-left:auto">
+                @if($weekStatus === 'locked')
+                    <span class="ms-locked">{{ __('menu.status.locked') }}</span>
+                @elseif($weekStatus === 'sent')
+                    <span class="ms-sent">{{ __('menu.status.sent') }}</span>
+                @else
+                    <span class="ms-draft">{{ __('menu.status.draft') }}</span>
+                @endif
+            </div>
+        </div>
+
         {{-- Cảnh báo lặp món so với 3 tuần gần nhất (BA R33) --}}
         @php $dupWarnings = $this->getWeekDuplicateWarnings(); @endphp
         @if(!empty($dupWarnings))
@@ -330,7 +355,7 @@
             <table class="grid-table" style="width:100%; border-collapse:collapse; min-width:900px">
                 <thead>
                     <tr style="background:#267DC1; color:#fff">
-                        <th style="padding:12px 14px; text-align:left; width:120px">{{ __('menu.week_form.shift_day') }}</th>
+                        <th style="padding:12px 14px; text-align:left; width:130px; position:sticky; left:0; z-index:2; background:#267DC1">{{ __('menu.week_form.shift_day') }}</th>
                         @php $weekDays = $this->weekDays; @endphp
                         @foreach($weekDays as $d => $wDay)
                             <th style="padding:12px 14px; text-align:center">
@@ -345,7 +370,7 @@
                 <tbody>
                     @foreach($shifts as $shift)
                         <tr style="border-bottom:1px solid var(--po-bd)">
-                            <td style="padding:14px; font-weight:800; background:var(--po-bd2); color:var(--po-tx)">
+                            <td style="padding:14px; font-weight:800; background:var(--po-bd2); color:var(--po-tx); position:sticky; left:0; z-index:1">
                                 {{ $shift->name }}
                                 <div style="font-size:10px; font-weight:500; color:var(--po-mu); margin-top:2px">
                                     {{ $shift->time_range }}
@@ -393,6 +418,29 @@
                     @endforeach
                 </tbody>
             </table>
+        </div>
+
+        <!-- Shift Legend & Grid Instruction Bar -->
+        <div style="display:flex; gap:16px; margin-top:12px; flex-wrap:wrap; align-items:center; font-size:12.5px; color:var(--po-mu)">
+            <span style="display:flex; align-items:center; gap:6px">
+                <span style="display:inline-block; width:12px; height:12px; border-radius:3px; background:#EFF6FF; border:1px solid #BFDBFE"></span>
+                CA 1 – Ca Trưa
+            </span>
+            <span style="display:flex; align-items:center; gap:6px">
+                <span style="display:inline-block; width:12px; height:12px; border-radius:3px; background:#F0FDF4; border:1px solid #A7F3D0"></span>
+                CA 2 – Ca Chiều
+            </span>
+            <span style="display:flex; align-items:center; gap:6px">
+                <span style="display:inline-block; width:12px; height:12px; border-radius:3px; background:#FEF3C7; border:1px solid #FDE68A"></span>
+                CA 3 – Ca Đêm
+            </span>
+            <span style="display:flex; align-items:center; gap:6px">
+                <span style="display:inline-block; width:12px; height:12px; border-radius:3px; background:#F5F3FF; border:1px solid #DDD6FE"></span>
+                CA 4
+            </span>
+            <span style="margin-left:auto; color:var(--po-fa); font-size:11.5px">
+                <i class="fa-solid fa-circle-info"></i> {{ __('menu.placeholders.select_dish') }} cho từng ca & ngày làm việc
+            </span>
         </div>
 
     @elseif($activeView === 'day')
