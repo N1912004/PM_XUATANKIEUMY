@@ -550,21 +550,22 @@
                     $badgeClasses = ['dv-ca-b1', 'dv-ca-b2', 'dv-ca-b3', 'dv-ca-b4'];
                 @endphp
                 @foreach($dayItems as $shiftId => $shiftData)
-                    @php $bCls = $badgeClasses[($loop->iteration - 1) % 4]; @endphp
+                    @php
+                        $bCls = $badgeClasses[($loop->iteration - 1) % 4];
+                    @endphp
                     <div class="tcard" style="padding:18px 20px">
                         <!-- Shift Header -->
                         <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; padding-bottom:10px; border-bottom:1px solid var(--po-bd2)">
                             <div style="font-size:14px; font-weight:700; color:var(--po-tx); display:flex; align-items:center; gap:8px">
-                                <span class="dv-ca-badge {{ $bCls }}">CA {{ $loop->iteration }}</span>
-                                <span style="font-weight:700">{{ $shiftData['shift_name'] }}</span>
+                                <span class="dv-ca-badge {{ $bCls }}">{{ $shiftData['shift_name'] }}</span>
                             </div>
                             <div style="display:flex; align-items:center; gap:8px">
-                                <span style="font-size:12px; color:var(--po-mu)">{{ __('menu.day_form.portions') ?? 'Số suất' }}:</span>
+                                <span style="font-size:12px; color:var(--po-mu)">{{ __('menu.labels.shift_portions') }}:</span>
                                 <input type="number" wire:model.live="dayItems.{{ $shiftId }}.shift_portions" class="ctrl" style="width:75px; height:32px; text-align:center; font-weight:700" @disabled($dayHasPastLockedMenus)>
-                                <span style="font-size:12px; color:var(--po-mu)">suất</span>
+                                <span style="font-size:12px; color:var(--po-mu)">{{ __('menu.labels.portions') }}</span>
                                 @unless($dayHasPastLockedMenus)
-                                    <button type="button" wire:click="removeShiftFromDay({{ $shiftId }})" title="Xóa ca" style="margin-left:6px; height:30px; padding:0 10px; border:1px solid var(--po-bd); border-radius:7px; background:var(--po-wh); color:var(--po-rd); font-size:11.5px; font-weight:600; cursor:pointer">
-                                        <i class="fa-solid fa-xmark"></i> Xóa ca
+                                    <button type="button" wire:click="removeShiftFromDay({{ $shiftId }})" title="{{ __('menu.actions.remove_shift') }}" style="margin-left:6px; height:30px; padding:0 10px; border:1px solid var(--po-bd); border-radius:7px; background:var(--po-wh); color:var(--po-rd); font-size:11.5px; font-weight:600; cursor:pointer">
+                                        <i class="fa-solid fa-xmark"></i> {{ __('menu.actions.remove_shift') }}
                                     </button>
                                 @endunless
                             </div>
@@ -574,7 +575,7 @@
                         <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:12px">
                             @foreach($shiftData['recipes'] as $index => $item)
                                 <div class="dv-field">
-                                    <input wire:model="dayItems.{{ $shiftId }}.recipes.{{ $index }}.label" class="ctrl" style="font-size:11.5px; font-weight:600; color:var(--po-mu); border:none; background:transparent; outline:none; height:auto; padding:0 2px; width:100%" placeholder="Tên loại món (món 1, canh...)" @disabled($dayHasPastLockedMenus)>
+                                    <input wire:model="dayItems.{{ $shiftId }}.recipes.{{ $index }}.label" class="ctrl" style="font-size:11.5px; font-weight:600; color:var(--po-mu); border:none; background:transparent; outline:none; height:auto; padding:0 2px; width:100%" placeholder="{{ __('menu.placeholders.dish_label') }}" @disabled($dayHasPastLockedMenus)>
                                     <div style="display:flex; gap:6px; align-items:center">
                                         <select wire:model="dayItems.{{ $shiftId }}.recipes.{{ $index }}.recipe_id" class="ctrl" style="flex:1; height:38px; border:1.5px solid var(--po-bd); border-radius:8px" @disabled($dayHasPastLockedMenus)>
                                             <option value="">{{ __('menu.placeholders.select_dish') }}</option>
@@ -584,7 +585,7 @@
                                         </select>
                                         <div style="display:flex; align-items:center; gap:3px; flex-shrink:0">
                                             <input wire:model="dayItems.{{ $shiftId }}.recipes.{{ $index }}.portions" type="number" min="1" class="ctrl" style="width:54px; height:38px; border:1.5px solid var(--po-bd); border-radius:8px; text-align:center; font-size:13px; font-weight:700; color:var(--po-gn-t)" @disabled($dayHasPastLockedMenus)>
-                                            <span style="font-size:10.5px; color:var(--po-mu)">phần</span>
+                                            <span style="font-size:10.5px; color:var(--po-mu)">{{ __('menu.labels.portions') }}</span>
                                         </div>
                                         @unless($dayHasPastLockedMenus)
                                             <button type="button" wire:click="removeRecipeFromShift({{ $shiftId }}, {{ $index }})" title="{{ __('menu.actions.remove_dish') }}" style="width:34px; height:38px; border:1px solid var(--po-bd); border-radius:8px; background:var(--po-wh); color:var(--po-rd); cursor:pointer; flex-shrink:0">
@@ -605,11 +606,18 @@
                     </div>
                 @endforeach
 
-                <!-- Add Shift Full Width Button -->
+                <!-- Action Buttons Row -->
                 @unless($dayHasPastLockedMenus)
-                    <button type="button" wire:click="addShiftToDay" style="width:100%; height:42px; border:1.5px dashed var(--po-bl); border-radius:10px; background:var(--po-bl-s); color:var(--po-bl); font-size:13.5px; font-weight:700; cursor:pointer; margin-top:4px">
-                        <i class="fa-solid fa-plus"></i> {{ __('menu.actions.create_shift') ?? 'Thêm ca' }}
-                    </button>
+                    <div style="display:flex; gap:10px; margin-top:4px">
+                        <button type="button" wire:click="addShiftToDay" style="flex:1; height:42px; border:1.5px dashed var(--po-bl); border-radius:10px; background:var(--po-bl-s); color:var(--po-bl); font-size:13.5px; font-weight:700; cursor:pointer">
+                            <i class="fa-solid fa-plus"></i> {{ __('menu.actions.add_shift') }}
+                        </button>
+                        @if(count($dayItems) > 1)
+                            <button type="button" wire:click="sortDayItems" title="{{ __('menu.actions.sort_shifts') }}" style="height:42px; padding:0 18px; border:1.5px solid var(--po-bd); border-radius:10px; background:var(--po-wh); color:var(--po-bl); font-size:13px; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:6px">
+                                <i class="fa-solid fa-arrow-down-short-wide"></i> {{ __('menu.actions.sort_shifts') }}
+                            </button>
+                        @endif
+                    </div>
                 @endunless
             </div>
         </div>

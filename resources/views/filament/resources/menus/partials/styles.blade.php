@@ -445,6 +445,18 @@
         background: var(--po-wh);
     }
 
+    .dv-ca-badge {
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 11.5px;
+        font-weight: 700;
+        display: inline-block;
+    }
+    .dv-ca-b1 { background: #EFF6FF; color: #1e40af; }
+    .dv-ca-b2 { background: #F0FDF4; color: #065F46; }
+    .dv-ca-b3 { background: #FEF3C7; color: #78350F; }
+    .dv-ca-b4 { background: #F5F3FF; color: #4C1D95; }
+
     .tcard {
         background: var(--po-wh);
         border: 1px solid var(--po-bd);

@@ -4,6 +4,7 @@ namespace App\Filament\Resources\MenuResource\Pages;
 
 use App\Exports\MenuExport;
 use App\Filament\Resources\MenuResource;
+use App\Filament\Resources\ShiftResource;
 use App\Models\Kitchen;
 use App\Models\Menu;
 use App\Models\Recipe;
@@ -1025,7 +1026,10 @@ class ListMenus extends Page
             ->first()?->status ?? 'draft';
 
         $menusByShift = $dayMenus->groupBy('shift_id');
-        $defaultLabels = ['Món 1', 'Món 2', 'Rau xào / luộc', 'Canh', 'Cơm', 'Tráng miệng', 'Món chay 1', 'Món chay 2', 'Canh chay'];
+        $defaultLabels = __('menu.default_dish_labels');
+        if (! is_array($defaultLabels)) {
+            $defaultLabels = ['Món 1', 'Món 2', 'Rau xào / luộc', 'Canh', 'Cơm', 'Tráng miệng', 'Món chay 1', 'Món chay 2', 'Canh chay'];
+        }
 
         foreach ($shifts as $shift) {
             $menus = $menusByShift->get($shift->id, collect());
@@ -1035,7 +1039,7 @@ class ListMenus extends Page
             foreach ($menus as $idx => $m) {
                 $recipes[] = [
                     'menu_id' => $m->id,
-                    'label' => $defaultLabels[$idx] ?? ('Món '.($idx + 1)),
+                    'label' => $defaultLabels[$idx] ?? __('menu.labels.dish_index', ['index' => $idx + 1]),
                     'recipe_id' => $m->recipe_id,
                     'portions' => $m->estimated_portions,
                 ];
@@ -1058,6 +1062,20 @@ class ListMenus extends Page
                 'recipes' => $recipes,
             ];
         }
+
+        $this->sortDayItems();
+    }
+
+    public function sortDayItems(): void
+    {
+        $shiftOrders = $this->getShifts()->pluck('sort_order', 'id')->all();
+
+        uksort($this->dayItems, function ($a, $b) use ($shiftOrders) {
+            $orderA = (int) ($shiftOrders[$a] ?? 999999);
+            $orderB = (int) ($shiftOrders[$b] ?? 999999);
+
+            return $orderA <=> $orderB;
+        });
     }
 
     public function updatedDayKitchenId($kitchenId): void
@@ -1095,7 +1113,7 @@ class ListMenus extends Page
         $shiftPortions = (int) ($this->dayItems[$shiftId]['shift_portions'] ?? 200);
         $this->dayItems[$shiftId]['recipes'][] = [
             'menu_id' => null,
-            'label' => 'Món '.$nextIdx,
+            'label' => __('menu.labels.dish_index', ['index' => $nextIdx]),
             'recipe_id' => '',
             'portions' => $shiftPortions,
         ];
@@ -1103,10 +1121,16 @@ class ListMenus extends Page
 
     public function addShiftToDay(): void
     {
-        $nextId = (int) (collect(array_keys($this->dayItems))->max() ?? 0) + 1;
-        $defaultLabels = ['Món 1', 'Món 2', 'Rau xào / luộc', 'Canh', 'Cơm', 'Tráng miệng'];
+        $allShifts = $this->getShifts();
+        $existingShiftIds = array_keys($this->dayItems);
+        $unusedShift = $allShifts->first(fn ($s) => ! in_array($s->id, $existingShiftIds));
+
+        $defaultLabels = __('menu.default_dish_labels');
+        if (! is_array($defaultLabels)) {
+            $defaultLabels = ['Món 1', 'Món 2', 'Rau xào / luộc', 'Canh', 'Cơm', 'Tráng miệng'];
+        }
         $recipes = [];
-        foreach ($defaultLabels as $lbl) {
+        foreach (array_slice($defaultLabels, 0, 6) as $lbl) {
             $recipes[] = [
                 'menu_id' => null,
                 'label' => $lbl,
@@ -1115,18 +1139,36 @@ class ListMenus extends Page
             ];
         }
 
-        $this->dayItems[$nextId] = [
-            'shift_name' => 'Ca '.$nextId,
+        if (! $unusedShift) {
+            Notification::make()
+                ->title(__('menu.notifications.all_shifts_added_title'))
+                ->body(__('menu.notifications.all_shifts_added_body'))
+                ->info()
+                ->send();
+
+            $this->redirect(ShiftResource::getUrl('create', array_filter([
+                'from' => 'day_menu',
+                'date' => $this->dayDate,
+                'kitchen' => $this->dayKitchenId,
+            ])));
+
+            return;
+        }
+
+        $this->dayItems[$unusedShift->id] = [
+            'shift_name' => $unusedShift->name,
             'shift_portions' => 150,
             'recipes' => $recipes,
         ];
+
+        $this->sortDayItems();
     }
 
     public function removeShiftFromDay($shiftId): void
     {
         if (count($this->dayItems) <= 1) {
             Notification::make()
-                ->title('Cần giữ lại tối thiểu 1 ca ăn!')
+                ->title(__('menu.notifications.at_least_one_shift'))
                 ->warning()
                 ->send();
 
@@ -1381,7 +1423,11 @@ class ListMenus extends Page
 
     public function getShifts()
     {
-        return Shift::all();
+        return Shift::query()
+            ->orderBy('sort_order')
+            ->orderBy('time_from')
+            ->orderBy('id')
+            ->get();
     }
 
     public function getRecipes()

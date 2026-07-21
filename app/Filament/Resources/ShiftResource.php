@@ -47,6 +47,16 @@ class ShiftResource extends Resource
                     ->placeholder(__('catalog.shift.placeholders.name'))
                     ->required()
                     ->maxLength(255),
+                Forms\Components\TextInput::make('sort_order')
+                    ->label(__('catalog.shift.fields.sort_order'))
+                    ->numeric()
+                    ->minValue(1)
+                    ->default(fn (): int => ((int) Shift::max('sort_order')) + 1)
+                    ->unique(Shift::class, 'sort_order', ignoreRecord: true)
+                    ->validationMessages([
+                        'unique' => 'Thứ tự ưu tiên này đã trùng với một ca khác, vui lòng nhập số khác.',
+                    ])
+                    ->required(),
                 Forms\Components\Grid::make(2)
                     ->schema([
                         Forms\Components\TimePicker::make('time_from')
@@ -74,6 +84,7 @@ class ShiftResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('sort_order', 'asc')
             ->columns([
                 Tables\Columns\TextColumn::make('index')
                     ->label(__('catalog.common.index'))
@@ -89,6 +100,11 @@ class ShiftResource extends Resource
                         'style' => 'font-variant-numeric: tabular-nums; font-weight: 600; color: #64748b;',
                     ])
                     ->width('56px'),
+                Tables\Columns\TextColumn::make('sort_order')
+                    ->label(__('catalog.shift.table.sort_order'))
+                    ->sortable()
+                    ->alignCenter()
+                    ->width('120px'),
                 Tables\Columns\TextColumn::make('name')
                     ->label(__('catalog.shift.fields.name'))
                     ->searchable()
