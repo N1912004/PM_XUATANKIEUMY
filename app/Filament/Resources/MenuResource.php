@@ -38,7 +38,7 @@ class MenuResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('menu.navigation.group');
+        return __('catalog.groups.kitchen_operations');
     }
 
     public static function form(Form $form): Form

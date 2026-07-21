@@ -32,7 +32,7 @@ class EmployeeResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('employee.group');
+        return __('catalog.groups.hr');
     }
 
     public static function form(Form $form): Form

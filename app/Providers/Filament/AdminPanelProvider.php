@@ -496,15 +496,15 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->navigationGroups([
                 NavigationGroup::make()
-                    ->label(fn () => __('NGUYÊN LIỆU & KHO')),
+                    ->label(fn () => __('catalog.groups.ingredients_inventory')),
                 NavigationGroup::make()
-                    ->label(fn () => __('CUNG ỨNG & KHO')),
+                    ->label(fn () => __('catalog.groups.supply_inventory')),
                 NavigationGroup::make()
-                    ->label(fn () => __('KHU VỰC & NHÀ ĂN')),
+                    ->label(fn () => __('catalog.groups.area_kitchen')),
                 NavigationGroup::make()
-                    ->label(fn () => __('VẬN HÀNH BẾP')),
+                    ->label(fn () => __('catalog.groups.kitchen_operations')),
                 NavigationGroup::make()
-                    ->label(fn () => __('NHÂN SỰ')),
+                    ->label(fn () => __('catalog.groups.hr')),
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([

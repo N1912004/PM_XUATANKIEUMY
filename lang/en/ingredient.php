@@ -3,7 +3,7 @@
 return [
     'cost_source_notice' => 'Ingredient prices come from the Ingredients / Suppliers module and are used to calculate the ingredient cost per portion automatically.',
     'navigation' => [
-        'group' => 'INGREDIENTS & WAREHOUSE',
+        'group' => 'catalog.groups.ingredients_inventory',
         'ingredient' => 'Ingredient',
         'ingredient_plural' => 'Ingredient List',
         'unit' => 'Unit of Measure',

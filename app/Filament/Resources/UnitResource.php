@@ -36,7 +36,7 @@ class UnitResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('NGUYÊN LIỆU & KHO');
+        return __('catalog.groups.ingredients_inventory');
     }
 
     public static function form(Form $form): Form

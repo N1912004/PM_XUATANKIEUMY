@@ -35,7 +35,7 @@ class ShiftResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('catalog.groups.kitchen_operations');
+        return __('catalog.groups.hr');
     }
 
     public static function form(Form $form): Form

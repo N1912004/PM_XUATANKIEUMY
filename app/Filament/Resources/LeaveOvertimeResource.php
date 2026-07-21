@@ -32,7 +32,7 @@ class LeaveOvertimeResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('leave_overtime.group');
+        return __('catalog.groups.hr');
     }
 
     public static function form(Form $form): Form
