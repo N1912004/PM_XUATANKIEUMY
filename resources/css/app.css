@@ -54,3 +54,23 @@
 [x-cloak] {
     display: none !important;
 }
+
+/* Sidebar Header Logo centering */
+.fi-sidebar-header > div[x-show*="sidebar.isOpen"] {
+    flex: 1 1 0% !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+}
+
+.fi-sidebar-header > div[x-show*="sidebar.isOpen"] a {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    width: 100% !important;
+}
+
+.fi-sidebar-header > div[x-show*="sidebar.isOpen"] .fi-logo {
+    justify-content: center !important;
+    width: 100% !important;
+}
