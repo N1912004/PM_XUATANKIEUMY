@@ -261,14 +261,6 @@
     .lg-page .lg-submit:focus-visible { outline: 3px solid rgba({{ $primaryColorRgb }},.4); outline-offset: 2px; }
     .lg-page .lg-submit[disabled] { opacity: .75; cursor: wait; }
 
-    /* Huy hiệu bảo mật SSL & ISO 22000 bên dưới nút đăng nhập */
-    .lg-trust-badge {
-        display: flex; align-items: center; justify-content: center; gap: 6.5px;
-        margin-top: 18px; font-size: 11.5px; color: #7B8BA0; font-weight: 500;
-        user-select: none;
-    }
-    .lg-trust-badge i { color: var(--lg-bl); font-size: 12px; }
-
     /* ── Responsive ── */
     @media (max-width: 1180px) {
         .lg-shell { grid-template-columns: 1fr 460px; gap: 32px; padding: 24px 28px; }
@@ -449,11 +441,6 @@
                     <span wire:loading.remove>{{ __('login.card.submit') }}</span>
                     <span wire:loading>{{ __('login.card.submitting') }}</span>
                 </button>
-
-                <div class="lg-trust-badge">
-                    <i class="fa-solid fa-shield-halved"></i>
-                    <span>Hệ thống bảo mật SSL 256-bit &bull; Chuẩn ISO 22000:2018</span>
-                </div>
 
             </form>
         </div>
