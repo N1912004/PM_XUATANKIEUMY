@@ -3,33 +3,70 @@
 namespace App\Exports;
 
 use App\Models\Menu;
+use App\Models\Setting;
+use App\Models\Shift;
+use Carbon\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithTitle;
 use Maatwebsite\Excel\Events\AfterSheet;
-use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use PhpOffice\PhpSpreadsheet\RichText\RichText;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Color;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 
 /**
- * Xuất thực đơn ra .xlsx (thay bản CSV cũ) — dùng cho cả nút xuất trên card tuần/ngày
- * và nút "Gửi xác nhận" (file gửi khách duyệt).
+ * Xuất thực đơn ra .xlsx:
+ * - Thực đơn ngày: theo mẫu CJ Catering / BlueFire 100% (Ảnh 2)
+ * - Thực đơn tuần: theo mẫu ma trận tuần chuẩn 100% (Ảnh 2), tự động lọc bỏ ca không có món,
+ *   tất cả ô tiêu đề & phân loại món (B2=SHIFT/CA, C2=DISH/MÓN, C3=DISH 1/MÓN 1...) đều tự động đa ngôn ngữ VI / EN.
+ *   màu sắc RGB y chang file gốc (B2/A2/B3 fill #BFBFBF, C2:J2 fill #D8D8D8, C3 fill #FBE4D5, font đỏ Times New Roman),
+ *   viền xanh cyan #00B0F0 và tự động nhúng logo dự án từ System Settings.
  */
 class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
 {
-    protected const COLS = 8;
+    protected bool $isSingleDay = false;
 
-    protected const TITLE = 'THỰC ĐƠN';
+    protected string $singleDayDateStr = '';
 
     /** @param Collection<int, Menu> $menus */
-    public function __construct(protected Collection $menus, protected string $subtitle = '') {}
+    public function __construct(
+        protected Collection $menus,
+        protected string $subtitle = '',
+        ?bool $isSingleDay = null
+    ) {
+        if ($isSingleDay !== null) {
+            $this->isSingleDay = $isSingleDay;
+        } else {
+            $uniqueDates = $this->menus->pluck('date')
+                ->filter()
+                ->map(fn ($d) => $d instanceof Carbon ? $d->toDateString() : Carbon::parse($d)->toDateString())
+                ->unique();
+            $this->isSingleDay = $uniqueDates->count() <= 1;
+        }
+
+        if ($this->isSingleDay) {
+            $firstDate = $this->menus->pluck('date')->filter()->first();
+            if ($firstDate) {
+                $cDate = $firstDate instanceof Carbon ? $firstDate : Carbon::parse($firstDate);
+                $this->singleDayDateStr = $cDate->format('d/m/Y');
+            }
+        }
+    }
 
     public function title(): string
     {
-        return 'Thực đơn';
+        $isEn = app()->getLocale() === 'en';
+        if ($this->isSingleDay) {
+            return $isEn ? 'Day Menu' : 'Thực đơn ngày';
+        }
+
+        return 'TD';
     }
 
     /**
@@ -37,24 +74,62 @@ class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
      */
     public function array(): array
     {
+        if ($this->isSingleDay) {
+            return $this->singleDayArray();
+        }
+
+        return $this->multiDayArray();
+    }
+
+    protected function singleDayArray(): array
+    {
+        $isEn = app()->getLocale() === 'en';
         $rows = [];
-        $rows[] = array_pad([self::TITLE], self::COLS, '');
-        $rows[] = array_pad([$this->subtitle], self::COLS, '');
-        $rows[] = ['STT', 'Bếp ăn', 'Ngày', 'Thứ', 'Ca', 'Món ăn', 'Số suất', 'Trạng thái'];
 
-        $dayNames = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
+        // Row 1: Header logo cell (left) & Company Name (right)
+        $companyName = $isEn
+            ? 'CJ CATERING VIETNAM SERVICE CO., LTD'
+            : 'CÔNG TY TNHH DỊCH VỤ CJ CATERING VIỆT NAM';
+        $rows[] = ['', $companyName];
+        // Row 2 & 3: Empty rows merged with Row 1
+        $rows[] = ['', ''];
+        $rows[] = ['', ''];
 
-        foreach ($this->menus as $i => $menu) {
-            $rows[] = [
-                $i + 1,
-                $menu->kitchen?->name ?? '',
-                $menu->date->format('d/m/Y'),
-                $dayNames[$menu->date->dayOfWeek],
-                $menu->shift?->name ?? '',
-                $menu->recipe?->name ?? '',
-                (int) $menu->estimated_portions,
-                Menu::STATUS_LABELS[$menu->status] ?? $menu->status,
-            ];
+        // Row 4: Title Banner
+        $titleText = $isEn ? 'SAVORY MENU 46' : 'MENU MẶN 46';
+        $rows[] = [$titleText, ''];
+
+        // Row 5: Table Header
+        $colAHeader = $isEn ? 'STRUCTURE' : 'CƠ CẤU';
+        $colBHeader = $isEn ? 'DISH NAME' : 'TÊN MÓN ĂN';
+        $rows[] = [$colAHeader, $colBHeader];
+
+        // Row 6+: Dishes (k phân biệt ca — gom toàn bộ món trong ngày. Xuất ĐÚNG số món thực tế)
+        $dishNames = $this->menus->pluck('recipe.name')
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+
+        if ($dishNames === []) {
+            $dishNames = [''];
+        }
+
+        $dishPrefix = $isEn ? 'DISH ' : 'MÓN ';
+
+        foreach ($dishNames as $i => $dishName) {
+            $label = $dishPrefix.($i + 1);
+            $rows[] = [$label, $dishName];
+        }
+
+        return $rows;
+    }
+
+    protected function multiDayArray(): array
+    {
+        $rows = [];
+        for ($r = 1; $r <= 35; $r++) {
+            $rows[] = array_pad([], 10, '');
         }
 
         return $rows;
@@ -65,27 +140,378 @@ class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
         return [
             AfterSheet::class => function (AfterSheet $event): void {
                 $sheet = $event->sheet->getDelegate();
-                $lastCol = Coordinate::stringFromColumnIndex(self::COLS);
-                $lastRow = $sheet->getHighestRow();
 
-                $sheet->mergeCells("A1:{$lastCol}1");
-                $sheet->mergeCells("A2:{$lastCol}2");
-                $sheet->getRowDimension(1)->setRowHeight(32);
-                $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(16);
-                $sheet->getStyle('A1:A2')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-
-                $sheet->getStyle("A3:{$lastCol}3")->applyFromArray([
-                    'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF'], 'size' => 11],
-                    'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '0F4C81']],
-                    'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
-                ]);
-
-                $sheet->getStyle("G4:G{$lastRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-
-                $sheet->getStyle("A3:{$lastCol}{$lastRow}")->applyFromArray([
-                    'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => 'D3D3D3']]],
-                ]);
+                if ($this->isSingleDay) {
+                    $this->formatSingleDaySheet($sheet);
+                } else {
+                    $this->formatMultiDaySheet($sheet);
+                }
             },
         ];
+    }
+
+    protected function formatSingleDaySheet($sheet): void
+    {
+        $lastRow = $sheet->getHighestRow();
+
+        // 1. Set column widths (Column A widened to 30 for spacious logo presentation)
+        $sheet->getColumnDimension('A')->setWidth(30);
+        $sheet->getColumnDimension('B')->setWidth(50);
+
+        // 2. Merge cells for Header (A1:A3 & B1:B3)
+        $sheet->mergeCells('A1:A3');
+        $sheet->mergeCells('B1:B3');
+
+        // Resolve System Settings Logo from http://127.0.0.1:8001/admin/system-settings?tab=-thuong-hieu-tab
+        $systemLogoRel = Setting::get('site_logo');
+        $resolvedLogoPath = null;
+
+        if ($systemLogoRel && Storage::disk('public')->exists($systemLogoRel)) {
+            $resolvedLogoPath = Storage::disk('public')->path($systemLogoRel);
+        } elseif (file_exists(public_path('images/bluefire-logo.png'))) {
+            $resolvedLogoPath = public_path('images/bluefire-logo.png');
+        }
+
+        if ($resolvedLogoPath && file_exists($resolvedLogoPath)) {
+            $drawing = new Drawing;
+            $drawing->setName('System Brand Logo');
+            $drawing->setDescription('System Brand Logo');
+            $drawing->setPath($resolvedLogoPath);
+            $drawing->setCoordinates('A1');
+            $drawing->setHeight(54);
+            $drawing->setOffsetX(15);
+            $drawing->setOffsetY(6);
+            $drawing->setWorksheet($sheet);
+        } else {
+            $sheet->setCellValue('A1', "BlueFire\nTASTE & BEAUTY");
+            $sheet->getStyle('A1')->applyFromArray([
+                'font' => [
+                    'bold' => true,
+                    'size' => 13,
+                    'color' => ['rgb' => '002060'],
+                    'name' => 'Calibri',
+                ],
+                'alignment' => [
+                    'horizontal' => Alignment::HORIZONTAL_CENTER,
+                    'vertical' => Alignment::VERTICAL_CENTER,
+                    'wrapText' => true,
+                ],
+            ]);
+        }
+
+        // Style B1:B3 (CJ Catering Company Name)
+        $sheet->getStyle('B1')->applyFromArray([
+            'font' => [
+                'bold' => true,
+                'size' => 15,
+                'color' => ['rgb' => 'FF0000'],
+                'name' => 'Calibri',
+            ],
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'vertical' => Alignment::VERTICAL_CENTER,
+                'wrapText' => true,
+            ],
+        ]);
+
+        // 3. Row 4: Merge A4:B4 (Banner title "MENU MẶN 46")
+        $sheet->mergeCells('A4:B4');
+        $sheet->getRowDimension(4)->setRowHeight(30);
+        $sheet->getStyle('A4')->applyFromArray([
+            'font' => [
+                'bold' => true,
+                'size' => 14,
+                'color' => ['rgb' => 'FF0000'],
+                'name' => 'Calibri',
+            ],
+            'fill' => [
+                'fillType' => Fill::FILL_SOLID,
+                'startColor' => ['rgb' => 'FFC000'],
+            ],
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'vertical' => Alignment::VERTICAL_CENTER,
+            ],
+        ]);
+
+        // 4. Row 5: Table Header (CƠ CẤU | TÊN MÓN ĂN)
+        $sheet->getRowDimension(5)->setRowHeight(28);
+        $sheet->getStyle('A5:B5')->applyFromArray([
+            'font' => [
+                'bold' => true,
+                'size' => 12,
+                'color' => ['rgb' => '002060'],
+                'name' => 'Calibri',
+            ],
+            'fill' => [
+                'fillType' => Fill::FILL_SOLID,
+                'startColor' => ['rgb' => 'D9E1F2'],
+            ],
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'vertical' => Alignment::VERTICAL_CENTER,
+            ],
+        ]);
+
+        // 5. Data Rows (A6:B{lastRow})
+        for ($r = 6; $r <= $lastRow; $r++) {
+            $sheet->getRowDimension($r)->setRowHeight(26);
+        }
+        $sheet->getStyle("A6:B{$lastRow}")->applyFromArray([
+            'font' => [
+                'bold' => true,
+                'size' => 12,
+                'color' => ['rgb' => '0070C0'],
+                'name' => 'Calibri',
+            ],
+            'alignment' => [
+                'horizontal' => Alignment::HORIZONTAL_CENTER,
+                'vertical' => Alignment::VERTICAL_CENTER,
+            ],
+        ]);
+
+        // 6. Cyan Borders (#00B0F0) on the entire table (A1:B{lastRow})
+        $cyanBorder = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => Border::BORDER_MEDIUM,
+                    'color' => ['rgb' => '00B0F0'],
+                ],
+            ],
+        ];
+        $sheet->getStyle("A1:B{$lastRow}")->applyFromArray($cyanBorder);
+    }
+
+    protected function formatMultiDaySheet($sheet): void
+    {
+        $isEn = app()->getLocale() === 'en';
+        $dates = $this->menus->pluck('date')
+            ->filter()
+            ->map(fn ($d) => $d instanceof Carbon ? $d : Carbon::parse($d));
+
+        if ($dates->isEmpty() && preg_match('/(\d{2}\/\d{2}\/\d{4})/', $this->subtitle, $m)) {
+            $start = Carbon::createFromFormat('d/m/Y', $m[1])->startOfWeek();
+        } else {
+            $start = $dates->min() ? $dates->min()->copy()->startOfWeek() : now()->startOfWeek();
+        }
+        $end = $start->copy()->addDays(6);
+
+        // 1. Header Banner Row 1 (Merged A1:I1)
+        $sheet->mergeCells('A1:I1');
+        $sheet->getRowDimension(1)->setRowHeight(55);
+
+        $titleLine1 = $isEn
+            ? 'SUMMIT CANTEEN WEEKLY MENU '.$start->format('d.m.Y')."\n"
+            : 'THỰC ĐƠN CANTEEN SUMMIT TUẦN '.$start->format('d.m.Y')."\n";
+        $titleLine2 = $isEn
+            ? '(From '.$start->format('d/m/Y').' to '.$end->format('d/m/Y').')'
+            : '(Từ ngày '.$start->format('d/m/Y').' đến ngày '.$end->format('d/m/Y').')';
+
+        $richText = new RichText;
+        $run1 = $richText->createTextRun($titleLine1);
+        $run1->getFont()->setName('Times New Roman')->setSize(15)->setBold(true)->setColor(new Color('FFFF0000'));
+
+        $run2 = $richText->createTextRun($titleLine2);
+        $run2->getFont()->setName('Times New Roman')->setSize(12)->setBold(true)->setItalic(true)->setColor(new Color('FFFF0000'));
+
+        $sheet->setCellValue('A1', $richText);
+        $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)->setVertical(Alignment::VERTICAL_CENTER);
+
+        // Resolve System Settings Logo from http://127.0.0.1:8001/admin/system-settings?tab=-thuong-hieu-tab
+        $systemLogoRel = Setting::get('site_logo');
+        $resolvedLogoPath = null;
+
+        if ($systemLogoRel && Storage::disk('public')->exists($systemLogoRel)) {
+            $resolvedLogoPath = Storage::disk('public')->path($systemLogoRel);
+        } elseif (file_exists(public_path('images/bluefire-logo.png'))) {
+            $resolvedLogoPath = public_path('images/bluefire-logo.png');
+        }
+
+        if ($resolvedLogoPath && file_exists($resolvedLogoPath)) {
+            $drawing = new Drawing;
+            $drawing->setName('System Brand Logo');
+            $drawing->setDescription('System Brand Logo');
+            $drawing->setPath($resolvedLogoPath);
+            $drawing->setCoordinates('A1');
+            $drawing->setHeight(50);
+            $drawing->setOffsetX(10);
+            $drawing->setOffsetY(4);
+            $drawing->setWorksheet($sheet);
+        }
+
+        // 2. Row 2 Header: B2=SHIFT/CA (BFBFBF fill, Red font), C2=DISH/MÓN (D8D8D8 fill, Red font), D2..J2 (D8D8D8 fill, Red font)
+        $sheet->getRowDimension(2)->setRowHeight(32);
+        $headers = [
+            'A' => '',
+            'B' => $isEn ? 'SHIFT' : 'CA',
+            'C' => $isEn ? 'DISH' : 'MÓN',
+            'D' => $isEn ? 'MON' : 'THỨ 2',
+            'E' => $isEn ? 'TUE' : 'THỨ 3',
+            'F' => $isEn ? 'WED' : 'THỨ 4',
+            'G' => $isEn ? 'THU' : 'THỨ 5',
+            'H' => $isEn ? 'FRI' : 'THỨ 6',
+            'I' => $isEn ? 'SAT' : 'Thứ 7',
+            'J' => $isEn ? 'SUN' : 'Chủ nhật',
+        ];
+
+        foreach ($headers as $col => $hText) {
+            if ($col !== 'A') {
+                $sheet->setCellValue($col.'2', $hText);
+            }
+        }
+
+        // Style B2
+        $sheet->getStyle('B2')->applyFromArray([
+            'font' => ['bold' => true, 'size' => 12, 'color' => ['rgb' => 'FF0000'], 'name' => 'Times New Roman'],
+            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'BFBFBF']],
+            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
+        ]);
+
+        // Style C2:J2
+        $sheet->getStyle('C2:J2')->applyFromArray([
+            'font' => ['bold' => true, 'size' => 12, 'color' => ['rgb' => 'FF0000'], 'name' => 'Times New Roman'],
+            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'D8D8D8']],
+            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
+        ]);
+
+        // 3. Dynamic Shift filtering & Category localization
+        $allShifts = Shift::orderBy('sort_order')->orderBy('id')->get()->values();
+        $activeShiftIds = $this->menus->pluck('shift_id')->unique()->filter()->toArray();
+
+        $categoriesVi = [
+            0 => ['MÓN 1', 'MÓN 2', 'RAU XÀO/LUỘC', 'CANH', 'CƠM', 'MÓN CHAY 1', 'MÓN CHAY 2', 'CANH CHAY', 'MÓN CHAY 3', 'CƠM CHAY', 'COMBO', 'TRÁNG MIỆNG'],
+            1 => ['MÓN MẶN 1', 'MÓN MẶN 2', 'MÓN RAU XÀO/LUỘC', 'MÓN CANH', 'MÓN CHAY 1', 'MÓN CHAY 2', 'RAU XÀO CHAY', 'TRÁNG MIỆNG'],
+            2 => ['MÓN MẶN 1', 'MÓN MẶN 2', 'MÓN RAU XÀO/LUỘC', 'MÓN CANH', 'CƠM', 'MÓN CHAY 1', 'MÓN CHAY 2', 'MÓN RAU XÀO/LUỘC', 'MÓN CHAY 3', 'CƠM', 'COMBO', 'TRÁNG MIỆNG'],
+        ];
+
+        $categoriesEn = [
+            0 => ['DISH 1', 'DISH 2', 'STIR-FRIED / BOILED VEG', 'SOUP', 'RICE', 'VEGETARIAN 1', 'VEGETARIAN 2', 'VEGETARIAN SOUP', 'VEGETARIAN 3', 'VEGETARIAN RICE', 'COMBO', 'DESSERT'],
+            1 => ['MAIN DISH 1', 'MAIN DISH 2', 'STIR-FRIED / BOILED VEG', 'SOUP', 'VEGETARIAN 1', 'VEGETARIAN 2', 'VEGETARIAN STIR-FRY', 'DESSERT'],
+            2 => ['MAIN DISH 1', 'MAIN DISH 2', 'STIR-FRIED / BOILED VEG', 'SOUP', 'RICE', 'VEGETARIAN 1', 'VEGETARIAN 2', 'STIR-FRIED VEG', 'VEGETARIAN 3', 'RICE', 'COMBO', 'DESSERT'],
+        ];
+
+        $shiftTemplates = [
+            0 => [
+                'name' => $isEn ? 'SHIFT 1' : 'CA 1',
+                'categories' => $isEn ? $categoriesEn[0] : $categoriesVi[0],
+            ],
+            1 => [
+                'name' => $isEn ? 'SHIFT 2' : 'CA 2',
+                'categories' => $isEn ? $categoriesEn[1] : $categoriesVi[1],
+            ],
+            2 => [
+                'name' => $isEn ? 'SHIFT 3' : 'CA 3',
+                'categories' => $isEn ? $categoriesEn[2] : $categoriesVi[2],
+            ],
+        ];
+
+        $currentRow = 3;
+        $shiftRowMap = [];
+
+        foreach ($shiftTemplates as $sIdx => $tpl) {
+            $sObj = $allShifts[$sIdx] ?? null;
+            $hasItems = $sObj && in_array($sObj->id, $activeShiftIds);
+
+            // Hide shifts that have NO menu items (unless activeShiftIds is empty, then render shift 0)
+            if (! $hasItems && $activeShiftIds !== []) {
+                continue;
+            }
+
+            $catCount = count($tpl['categories']);
+            $startRow = $currentRow;
+            $endRow = $startRow + $catCount - 1;
+
+            $sName = $sObj ? mb_strtoupper($sObj->name) : $tpl['name'];
+            if (! str_starts_with($sName, 'THỰC ĐƠN') && ! str_starts_with($sName, 'MENU')) {
+                $sName = ($isEn ? 'MENU ' : 'THỰC ĐƠN ').$sName;
+            }
+
+            // Merge B{startRow}:B{endRow}
+            $sheet->mergeCells("B{$startRow}:B{$endRow}");
+            $sheet->setCellValue("B{$startRow}", $sName);
+
+            // Style Shift B (BFBFBF fill, Red font)
+            $sheet->getStyle("B{$startRow}:B{$endRow}")->applyFromArray([
+                'font' => ['bold' => true, 'size' => 14, 'color' => ['rgb' => 'FF0000'], 'name' => 'Times New Roman'],
+                'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'BFBFBF']],
+                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER, 'wrapText' => true],
+            ]);
+
+            // Populate categories in Column C (FBE4D5 fill, 0070C0 font)
+            foreach ($tpl['categories'] as $catIdx => $catName) {
+                $r = $startRow + $catIdx;
+                $sheet->getRowDimension($r)->setRowHeight(30);
+                $sheet->setCellValue("C{$r}", $catName);
+            }
+
+            // Style Category C
+            $sheet->getStyle("C{$startRow}:C{$endRow}")->applyFromArray([
+                'font' => ['bold' => true, 'size' => 11, 'color' => ['rgb' => '0070C0'], 'name' => 'Times New Roman'],
+                'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'FBE4D5']],
+                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
+            ]);
+
+            $shiftRowMap[$sObj?->id ?? $sIdx] = ['startRow' => $startRow, 'endRow' => $endRow];
+            $currentRow = $endRow + 1;
+        }
+
+        $lastRow = $currentRow - 1;
+
+        // 4. Merge Side Header Column A (A2:A{lastRow}) (BFBFBF fill, Red font)
+        $sheet->mergeCells("A2:A{$lastRow}");
+        $sheet->setCellValue('A2', $isEn ? "W\nE\nE\nK\nL\nY\n\nM\nE\nN\nU" : "T\nH\nỰ\nC\n\nĐ\nƠ\nN\n\nT\nU\nẦ\nN");
+        $sheet->getStyle("A2:A{$lastRow}")->applyFromArray([
+            'font' => ['bold' => true, 'size' => 14, 'color' => ['rgb' => 'FF0000'], 'name' => 'Times New Roman'],
+            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'BFBFBF']],
+            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER, 'wrapText' => true],
+        ]);
+
+        // 5. Populate dish names into D..J
+        $byDayShift = $this->menus->groupBy(fn ($m) => ($m->date instanceof Carbon ? $m->date->toDateString() : Carbon::parse($m->date)->toDateString()).'|'.$m->shift_id);
+
+        foreach ($byDayShift as $key => $items) {
+            [$dateStr, $shiftId] = explode('|', $key);
+            $cDate = Carbon::parse($dateStr);
+            $dayIdx = (int) $start->diffInDays($cDate);
+            $colStr = ['D', 'E', 'F', 'G', 'H', 'I', 'J'][$dayIdx] ?? null;
+            if (! $colStr) {
+                continue;
+            }
+
+            $baseRow = $shiftRowMap[$shiftId]['startRow'] ?? 3;
+
+            foreach ($items as $itemIdx => $m) {
+                $targetRow = $baseRow + $itemIdx;
+                if ($targetRow <= $lastRow && $m->recipe?->name) {
+                    $sourceCell = $sheet->getCell($colStr.$targetRow);
+                    // Append if dish already present on slot, or set
+                    $existing = $sourceCell->getValue();
+                    if ($existing) {
+                        $sourceCell->setValue($existing."\n".$m->recipe->name);
+                    } else {
+                        $sourceCell->setValue($m->recipe->name);
+                    }
+                }
+            }
+        }
+
+        // 6. Style Dish Data Cells D3:J{lastRow}
+        $sheet->getStyle("D3:J{$lastRow}")->applyFromArray([
+            'font' => ['bold' => true, 'size' => 12, 'color' => ['rgb' => '0070C0'], 'name' => 'Times New Roman'],
+            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER, 'wrapText' => true],
+        ]);
+
+        // 7. Column Widths
+        $sheet->getColumnDimension('A')->setWidth(6);
+        $sheet->getColumnDimension('B')->setWidth(14);
+        $sheet->getColumnDimension('C')->setWidth(18);
+        foreach (['D', 'E', 'F', 'G', 'H', 'I', 'J'] as $col) {
+            $sheet->getColumnDimension($col)->setWidth(24);
+        }
+
+        // 8. Cyan Borders (#00B0F0) on the entire matrix (A1:J{lastRow})
+        $sheet->getStyle("A1:J{$lastRow}")->applyFromArray([
+            'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_MEDIUM, 'color' => ['rgb' => '00B0F0']]],
+        ]);
     }
 }

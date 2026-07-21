@@ -96,18 +96,22 @@ class SystemSettings extends Page implements HasForms
                                             ->disk('public')
                                             ->directory('settings')
                                             ->visibility('public')
+                                            ->openable()
+                                            ->downloadable()
                                             ->imagePreviewHeight('80')
                                             ->acceptedFileTypes(['image/png', 'image/svg+xml', 'image/jpeg', 'image/webp'])
-                                            ->maxSize(1024)
+                                            ->maxSize(2048)
                                             ->helperText(__('settings.branding.logo_helper')),
                                         Forms\Components\FileUpload::make('site_favicon')
                                             ->label(__('settings.branding.favicon'))
                                             ->disk('public')
                                             ->directory('settings')
                                             ->visibility('public')
+                                            ->openable()
+                                            ->downloadable()
                                             ->imagePreviewHeight('48')
                                             ->acceptedFileTypes(['image/svg+xml', 'image/png', 'image/x-icon', 'image/vnd.microsoft.icon'])
-                                            ->maxSize(512)
+                                            ->maxSize(1024)
                                             ->helperText(__('settings.branding.favicon_helper')),
                                     ]),
 

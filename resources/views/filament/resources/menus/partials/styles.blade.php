@@ -2,8 +2,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <style>
     :root {
-        --po-bl: #267DC1;
-        --po-bl-d: #1F669E;
+        --po-bl: {{ \App\Models\Setting::get('primary_color', '#267DC1') }};
+        --po-bl-d: {{ \App\Models\Setting::get('primary_color', '#267DC1') }};
         --po-bl-s: #E9F2F8;
         --po-bl-m: #A8CBE6;
         --po-gn: #059669;
@@ -321,30 +321,42 @@
         background: var(--po-bd2);
         color: var(--po-su);
         border: 1px solid var(--po-bd);
-        font-size: 11px;
+        font-size: 13px;
         font-weight: 700;
-        padding: 2px 8px;
-        border-radius: 12px;
+        padding: 5px 14px;
+        border-radius: 20px;
+        box-shadow: 0 1px 2px rgba(0,0,0,.04);
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
     }
 
     .ms-sent {
         background: var(--po-bl-s);
         color: var(--po-bl);
         border: 1px solid var(--po-bl-m);
-        font-size: 11px;
+        font-size: 13px;
         font-weight: 700;
-        padding: 2px 8px;
-        border-radius: 12px;
+        padding: 5px 14px;
+        border-radius: 20px;
+        box-shadow: 0 1px 2px rgba(0,0,0,.04);
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
     }
 
     .ms-locked {
         background: var(--po-or-s);
         color: var(--po-or);
         border: 1px solid var(--po-or);
-        font-size: 11px;
+        font-size: 13px;
         font-weight: 700;
-        padding: 2px 8px;
-        border-radius: 12px;
+        padding: 5px 14px;
+        border-radius: 20px;
+        box-shadow: 0 1px 2px rgba(0,0,0,.04);
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
     }
 
     /* abt action button */

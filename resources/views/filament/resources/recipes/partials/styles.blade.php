@@ -1,8 +1,8 @@
 @push('styles')
 <style>
     :root {
-        --bl: #267DC1;
-        --bl-d: #1F669E;
+        --bl: {{ \App\Models\Setting::get('primary_color', '#267DC1') }};
+        --bl-d: {{ \App\Models\Setting::get('primary_color', '#267DC1') }};
         --bl-s: #E9F2F8;
         --bl-m: #A8CBE6;
         --gn: #059669;

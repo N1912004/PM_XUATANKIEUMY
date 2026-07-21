@@ -27,7 +27,7 @@
                 <p class="emp-subtitle">{{ __('menu.list.subtitle') }}</p>
             </div>
             <div class="emp-actions">
-                <button wire:click="loadWeekMenu({{ $kitchens->first()?->id ?? 1 }}, '{{ now()->startOfWeek()->toDateString() }}', false)" class="emp-btn">
+                <button wire:click="loadWeekMenu({{ $kitchens->first()?->id ?? 1 }}, '{{ now()->startOfWeek()->toDateString() }}', null, false)" class="emp-btn">
                     <i class="fa-solid fa-calendar-days"></i>
                     {{ __('menu.actions.create_week') }}
                 </button>
@@ -197,13 +197,14 @@
             @endforelse
         </div>
 
-        @if($menusList->hasPages() || $menusList->total() > 10)
+        @if($menusList->total() > 0)
             <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-top:14px; font-size:12px; color:var(--po-mu)">
                 <div>
                     {{ __('menu.pagination.summary', ['from' => $menusList->firstItem() ?? 0, 'to' => $menusList->lastItem() ?? 0, 'total' => $menusList->total()]) }}
                 </div>
                 <div style="display:flex; align-items:center; gap:8px;">
                     <select wire:model.live="perPage" style="height:30px; border:1px solid var(--po-bd); border-radius:6px; padding:0 8px; font-size:12px; background:transparent;">
+                        <option value="5">{{ __('menu.pagination.per_page', ['count' => 5]) }}</option>
                         <option value="10">{{ __('menu.pagination.per_page', ['count' => 10]) }}</option>
                         <option value="20">{{ __('menu.pagination.per_page', ['count' => 20]) }}</option>
                         <option value="50">{{ __('menu.pagination.per_page', ['count' => 50]) }}</option>
@@ -266,18 +267,25 @@
         <!-- Header -->
         <div class="emp-head" style="margin-bottom: 16px;">
             <div>
-                <h1 class="emp-title">{{ __('menu.week_form.title') }}</h1>
+                <h1 class="emp-title">{{ $isEditingWeek ? __('menu.week_form.edit_title') : __('menu.week_form.title') }}</h1>
                 <p class="emp-subtitle">{{ __('menu.week_form.subtitle') }}</p>
             </div>
             <div class="emp-actions">
                 @php $weekRank = \App\Models\Menu::STATUS_ORDER[$weekStatus] ?? 0; @endphp
                 <button wire:click="switchView('list')" class="emp-btn"><i class="fa-solid fa-arrow-left"></i> {{ __('menu.actions.back') }}</button>
-                <button wire:click="exportMenus({{ $weekKitchenId }}, '{{ $weekDateFrom }}', '{{ $weekDateTo }}')" class="emp-btn">
-                    <i class="fa-solid fa-file-excel" style="color:var(--po-gn)"></i> {{ __('menu.actions.export_excel') }}
+                <button type="button" wire:click="sortWeekItems" title="{{ __('menu.actions.sort_shifts') }}" class="emp-btn">
+                    <i class="fa-solid fa-arrow-down-short-wide"></i> {{ __('menu.actions.sort_shifts') }}
                 </button>
+                @if($isEditingWeek)
+                    <button wire:click="exportMenus({{ $weekKitchenId }}, '{{ $weekDateFrom }}', '{{ $weekDateTo }}')" class="emp-btn">
+                        <i class="fa-solid fa-file-excel" style="color:var(--po-gn)"></i> {{ __('menu.actions.export_excel') }}
+                    </button>
+                @endif
                 @unless($weekHasPastLockedMenus)
                     @if($weekRank <= \App\Models\Menu::STATUS_ORDER['draft'])
-                        <button wire:click="saveWeekMenu('draft')" class="emp-btn"><i class="fa-regular fa-floppy-disk"></i> {{ __('menu.actions.save_draft') }}</button>
+                        <button wire:click="saveWeekMenu('draft')" class="emp-btn">
+                            <i class="fa-regular fa-floppy-disk"></i> {{ $isEditingWeek ? __('menu.actions.save_changes') : __('menu.actions.save_draft') }}
+                        </button>
                     @endif
                     @if($weekRank <= \App\Models\Menu::STATUS_ORDER['sent'])
                         <button wire:click="saveWeekMenu('sent')" class="emp-btn"><i class="fa-regular fa-paper-plane"></i> {{ __('menu.actions.send_customer') }}</button>
@@ -289,23 +297,24 @@
 
         <!-- Form settings -->
         <div class="tcard" style="padding:16px; margin-bottom:14px; background:var(--po-bd2); display:flex; gap:12px; flex-wrap:wrap">
-            <div class="field" style="min-width:240px">
+            <div class="field" style="min-width:260px">
                 <label>{{ __('menu.fields.kitchen') }} *</label>
-                <select wire:model.live="weekKitchenId" class="ctrl" required @disabled(! $this->canChooseKitchen())>
-                    @foreach($kitchens as $kit)
-                        <option value="{{ $kit->id }}" @selected((int) $weekKitchenId === (int) $kit->id)>{{ $kit->name }}</option>
-                    @endforeach
-                </select>
+                @include('filament.components.search-select', [
+                    'name' => 'weekKitchenId',
+                    'live' => true,
+                    'options' => $this->getKitchenOptions(),
+                    'nullable' => false,
+                ])
             </div>
             <div class="field" style="min-width:180px">
-                <label>Từ ngày *</label>
+                <label>{{ __('menu.labels.date_from') }} *</label>
                 <input wire:model.live="weekDateFrom" type="date" class="ctrl" required>
             </div>
             <div class="field" style="min-width:180px">
-                <label>Đến ngày *</label>
+                <label>{{ __('menu.labels.date_to') }} *</label>
                 <input wire:model.live="weekDateTo" type="date" class="ctrl" required>
             </div>
-            @if($weekHasEditableLockedMenus)
+            @if($isEditingWeek && $weekHasEditableLockedMenus)
                 <div class="field" style="min-width:280px; flex:1">
                     <label>{{ __('menu.fields.audit_reason') }} *</label>
                     <input wire:model="weekEditReason" type="text" class="ctrl" placeholder="{{ __('menu.placeholders.audit_reason') }}" required>
@@ -323,39 +332,33 @@
             <div style="width:1px; height:20px; background:var(--po-bd); flex-shrink:0"></div>
             <div style="display:flex; align-items:center; gap:8px">
                 <i class="fa-regular fa-calendar-days" style="color:var(--po-bl)"></i>
-                <span>Tuần {{ date('W/Y', strtotime($weekDateFrom)) }} &nbsp;·&nbsp; {{ date('d/m/Y', strtotime($weekDateFrom)) }} – {{ date('d/m/Y', strtotime($weekDateTo)) }}</span>
+                <span>{{ __('menu.labels.week_prefix') }} {{ date('W/Y', strtotime($weekDateFrom)) }} &nbsp;·&nbsp; {{ date('d/m/Y', strtotime($weekDateFrom)) }} – {{ date('d/m/Y', strtotime($weekDateTo)) }}</span>
             </div>
             <div style="width:1px; height:20px; background:var(--po-bd); flex-shrink:0"></div>
 
             <!-- Shift Filter Checkboxes -->
             <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap">
                 <i class="fa-solid fa-sun" style="color:var(--po-or); font-size:12px"></i>
-                <span style="font-weight:600; color:var(--po-mu); margin-right:2px">Ca:</span>
+                <span style="font-weight:600; color:var(--po-mu); margin-right:2px">{{ __('menu.labels.shift') }}:</span>
                 @foreach($shifts as $index => $shift)
                     <label style="display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border-radius:6px; background:var(--po-bd2); border:1px solid var(--po-bd); cursor:pointer; font-weight:600; font-size:11.5px">
                         <input type="checkbox" value="{{ $shift->id }}" wire:model.live="selectedShifts">
-                        CA {{ $loop->iteration }} ({{ $shift->name }})
+                        {{ $shift->name }}
                     </label>
                 @endforeach
-
-                <!-- Quick Action Buttons: Thêm ca / Thêm món -->
-                <a href="/admin/shifts" target="_blank" style="height:26px; padding:0 8px; border:1px dashed var(--po-bd); border-radius:6px; background:transparent; font-size:11px; font-weight:600; color:var(--po-mu); text-decoration:none; display:inline-flex; align-items:center; gap:4px" title="Quản lý / Thêm ca mới">
-                    <i class="fa-solid fa-plus"></i> Thêm ca
-                </a>
-                <a href="/admin/recipes/create" target="_blank" style="height:26px; padding:0 8px; border:1px dashed var(--po-gn); border-radius:6px; background:var(--po-gn-s); font-size:11px; font-weight:600; color:var(--po-gn-t); text-decoration:none; display:inline-flex; align-items:center; gap:4px" title="Tạo món mới trong ngân hàng thực đơn">
-                    <i class="fa-solid fa-plus"></i> Thêm món
-                </a>
             </div>
 
-            <div style="margin-left:auto">
-                @if($weekStatus === 'locked')
-                    <span class="ms-locked">{{ __('menu.status.locked') }}</span>
-                @elseif($weekStatus === 'sent')
-                    <span class="ms-sent">{{ __('menu.status.sent') }}</span>
-                @else
-                    <span class="ms-draft">{{ __('menu.status.draft') }}</span>
-                @endif
-            </div>
+            @if($isEditingWeek)
+                <div style="margin-left:auto">
+                    @if($weekStatus === 'locked')
+                        <span class="ms-locked"><i class="fa-solid fa-lock"></i> {{ __('menu.status.locked') }}</span>
+                    @elseif($weekStatus === 'sent')
+                        <span class="ms-sent"><i class="fa-regular fa-paper-plane"></i> {{ __('menu.status.sent') }}</span>
+                    @else
+                        <span class="ms-draft"><i class="fa-regular fa-file-lines"></i> {{ __('menu.status.draft') }}</span>
+                    @endif
+                </div>
+            @endif
         </div>
 
         {{-- Cảnh báo lặp món so với 3 tuần gần nhất (BA R33) --}}
@@ -376,11 +379,11 @@
         <div class="tcard" style="overflow-x:auto">
             <table class="grid-table" style="width:100%; border-collapse:collapse; min-width:900px">
                 <thead>
-                    <tr style="background:#267DC1; color:#fff">
-                        <th style="padding:12px 14px; text-align:left; width:130px; position:sticky; left:0; z-index:2; background:#267DC1">{{ __('menu.week_form.shift_day') }}</th>
+                    <tr style="background:var(--po-bl, {{ \App\Models\Setting::get('primary_color', '#267DC1') }}); color:#fff">
+                        <th colspan="2" style="padding:12px 14px; text-align:center; min-width:160px; position:sticky; left:0; z-index:2; background:var(--po-bl, {{ \App\Models\Setting::get('primary_color', '#267DC1') }}); color:#fff">{{ __('menu.week_form.shift_day') }}</th>
                         @php $weekDays = $this->weekDays; @endphp
                         @foreach($weekDays as $d => $wDay)
-                            <th style="padding:12px 14px; text-align:center">
+                            <th style="padding:12px 14px; text-align:center; min-width:145px">
                                 {{ $wDay['day_name'] }}
                                 <div style="font-size:10.5px; font-weight:500; opacity:.85; margin-top:2px">
                                     {{ date('d/m/Y', strtotime($wDay['date'])) }}
@@ -397,57 +400,69 @@
                             2 => ['bg' => '#FEF3C7', 'border' => '#FDE68A', 'text' => '#78350F'],
                             3 => ['bg' => '#F5F3FF', 'border' => '#DDD6FE', 'text' => '#4C1D95'],
                         ];
+                        $categories = $this->dishCategories;
+                        $catCount = count($categories);
                     @endphp
                     @foreach($shifts as $index => $shift)
                         @continue(!empty($selectedShifts) && !in_array((string)$shift->id, array_map('strval', $selectedShifts), true))
                         @php $pal = $shiftPalettes[$index % 4]; @endphp
-                        <tr style="border-bottom:1px solid var(--po-bd)">
-                            <td style="padding:12px; font-weight:800; background:{{ $pal['bg'] }}; border-left:5px solid {{ $pal['text'] }}; color:{{ $pal['text'] }}; position:sticky; left:0; z-index:1">
-                                <div style="font-size:12.5px; font-weight:800">CA {{ $loop->iteration }}</div>
-                                <div style="font-size:11px; font-weight:700; opacity:.9">{{ $shift->name }}</div>
-                                <div style="font-size:9.5px; font-weight:500; opacity:.8; margin-top:3px">
-                                    {{ $shift->time_range }}
-                                </div>
-                            </td>
-                            @foreach($weekDays as $d => $wDay)
-                                <td style="padding:8px; text-align:center; background:var(--po-wh); vertical-align:top">
-                                    <div style="display:flex; flex-direction:column; gap:8px">
-                                        {{-- Mỗi ô = danh sách món (nhiều món/ca), thêm bằng nút (+) từng ô --}}
-                                        @foreach(($weekCells[$d][$shift->id] ?? [['recipe_id'=>'','portions'=>200]]) as $ci => $cellItem)
-                                            <div style="display:flex; flex-direction:column; gap:4px; padding:6px; border:1px dashed var(--po-bd); border-radius:8px; background:var(--po-bd2)">
-                                                <div style="display:flex; align-items:center; gap:4px">
-                                                    <select wire:model="weekCells.{{ $d }}.{{ $shift->id }}.{{ $ci }}.recipe_id" class="ctrl" style="font-size:12px; height:30px; flex:1" @disabled($weekHasPastLockedMenus)>
-                                                        <option value="">{{ __('menu.placeholders.select_dish') }}</option>
-                                                        @foreach($recipes as $rec)
-                                                            <option value="{{ $rec->id }}">{{ $rec->name }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                    @unless($weekHasPastLockedMenus)
-                                                        <button type="button" wire:click="removeWeekDish({{ $d }}, {{ $shift->id }}, {{ $ci }})"
-                                                            title="{{ __('menu.actions.remove_dish') }}"
-                                                            style="width:26px; height:30px; flex-shrink:0; border:none; border-radius:6px; background:var(--po-rd-s); color:var(--po-rd); cursor:pointer; font-size:12px">
-                                                            <i class="fa-solid fa-xmark"></i>
-                                                        </button>
-                                                    @endunless
-                                                </div>
-                                                <div style="display:flex; align-items:center; gap:4px">
-                                                    <input wire:model="weekCells.{{ $d }}.{{ $shift->id }}.{{ $ci }}.portions" type="number" class="ctrl" style="font-size:11.5px; height:26px; text-align:center; padding:0 4px" placeholder="{{ __('menu.placeholders.portions') }}" @disabled($weekHasPastLockedMenus)>
-                                                    <span style="font-size:10px; color:var(--po-fa)">{{ __('menu.labels.portions') }}</span>
-                                                </div>
-                                            </div>
-                                        @endforeach
 
-                                        {{-- Nút (+) thêm món cho đúng ô ngày/ca này --}}
-                                        @unless($weekHasPastLockedMenus)
-                                            <button type="button" wire:click="addWeekDish({{ $d }}, {{ $shift->id }})"
-                                                style="border:1px dashed var(--po-bd); border-radius:6px; background:transparent; color:var(--po-bl); font-size:11px; padding:4px 0; cursor:pointer; font-weight:600">
-                                                <i class="fa-solid fa-plus"></i> {{ __('menu.actions.add_dish') }}
+                        @foreach($categories as $ci => $catLabel)
+                            <tr style="border-bottom:1px solid var(--po-bd)">
+                                @if($ci === 0)
+                                    <td rowspan="{{ $catCount + 1 }}" style="background:{{ $pal['bg'] }}; border:1px solid {{ $pal['border'] }}; text-align:center; padding:8px 4px; font-weight:800; font-size:11px; color:{{ $pal['text'] }}; writing-mode:vertical-lr; transform:rotate(180deg); letter-spacing:.05em; white-space:nowrap; min-width:34px; vertical-align:middle; position:sticky; left:0; z-index:2">
+                                        <div style="position:sticky; top:120px; text-align:center; display:inline-block">
+                                            {{ $shift->name }}
+                                        </div>
+                                    </td>
+                                @endif
+
+                                <td style="padding:4px 8px; font-size:11px; font-weight:700; color:var(--po-tx2); background:var(--po-wh); white-space:nowrap; border-right:1px solid var(--po-bd); position:sticky; left:34px; z-index:1; min-width:140px">
+                                    <div style="display:flex; align-items:center; gap:4px">
+                                        <input wire:model.live="customDishCategories.{{ $ci }}" type="text" class="ctrl" style="font-size:11px; font-weight:700; text-transform:uppercase; height:26px; padding:0 6px; border:1px solid transparent; background:transparent; width:100%" onfocus="this.style.borderColor='var(--po-bd)'; this.style.background='var(--po-wh)'" onblur="this.style.borderColor='transparent'; this.style.background='transparent'" @disabled($weekHasPastLockedMenus)>
+                                        @unless($weekHasPastLockedMenus || count($categories) <= 1)
+                                            <button type="button" wire:click="removeCategoryRow({{ $ci }})" title="Xóa dòng món này" style="width:20px; height:20px; border:none; background:transparent; color:var(--po-fa); cursor:pointer; font-size:11px; flex-shrink:0" onmouseover="this.style.color='var(--po-rd)'" onmouseout="this.style.color='var(--po-fa)'">
+                                                <i class="fa-solid fa-xmark"></i>
                                             </button>
                                         @endunless
                                     </div>
                                 </td>
+
+                                @foreach($weekDays as $d => $wDay)
+                                    <td style="padding:6px 8px; text-align:center; background:var(--po-wh); vertical-align:middle">
+                                        <div style="display:flex; flex-direction:column; gap:4px; min-width:130px">
+                                            <select wire:model="weekCells.{{ $d }}.{{ $shift->id }}.{{ $ci }}.recipe_id" class="ctrl" style="font-size:11.5px; height:28px; padding:0 4px" @disabled($weekHasPastLockedMenus)>
+                                                <option value="">{{ __('menu.placeholders.select_dish') }}</option>
+                                                @foreach($recipes as $rec)
+                                                    <option value="{{ $rec->id }}">{{ $rec->name }}</option>
+                                                @endforeach
+                                            </select>
+                                            <div style="display:flex; align-items:center; justify-content:center; gap:4px">
+                                                <input wire:model="weekCells.{{ $d }}.{{ $shift->id }}.{{ $ci }}.portions" type="number" class="ctrl" style="font-size:11px; height:24px; text-align:center; padding:0 4px; width:70px" placeholder="{{ __('menu.placeholders.portions') }}" @disabled($weekHasPastLockedMenus)>
+                                                <span style="font-size:10px; color:var(--po-fa)">{{ __('menu.labels.portions') }}</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                @endforeach
+                            </tr>
+                        @endforeach
+
+                        <!-- Bottom Add Category Row inside Shift -->
+                        <tr style="border-bottom:1px solid var(--po-bd)">
+                            <td style="padding:6px 8px; background:var(--po-wh); border-right:1px solid var(--po-bd); position:sticky; left:34px; z-index:1">
+                                @unless($weekHasPastLockedMenus)
+                                    <button type="button" wire:click="addCategoryRow" style="height:26px; width:100%; border:1.5px dashed var(--po-gn); border-radius:6px; background:var(--po-gn-s); font-size:11.5px; font-weight:700; color:var(--po-gn-t); cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:4px">
+                                        <i class="fa-solid fa-plus"></i> {{ __('menu.actions.add_dish_row') }}
+                                    </button>
+                                @endunless
+                            </td>
+                            @foreach($weekDays as $d => $wDay)
+                                <td style="background:var(--po-wh)"></td>
                             @endforeach
                         </tr>
+
+                        <!-- Separator row between shifts -->
+                        <tr style="height:6px; background:var(--po-bd2)"><td colspan="{{ 2 + count($weekDays) }}" style="padding:0"></td></tr>
                     @endforeach
                 </tbody>
             </table>
@@ -455,24 +470,15 @@
 
         <!-- Shift Legend & Grid Instruction Bar -->
         <div style="display:flex; gap:16px; margin-top:12px; flex-wrap:wrap; align-items:center; font-size:12.5px; color:var(--po-mu)">
-            <span style="display:flex; align-items:center; gap:6px">
-                <span style="display:inline-block; width:12px; height:12px; border-radius:3px; background:#EFF6FF; border:1px solid #BFDBFE"></span>
-                CA 1 – Ca Trưa
-            </span>
-            <span style="display:flex; align-items:center; gap:6px">
-                <span style="display:inline-block; width:12px; height:12px; border-radius:3px; background:#F0FDF4; border:1px solid #A7F3D0"></span>
-                CA 2 – Ca Chiều
-            </span>
-            <span style="display:flex; align-items:center; gap:6px">
-                <span style="display:inline-block; width:12px; height:12px; border-radius:3px; background:#FEF3C7; border:1px solid #FDE68A"></span>
-                CA 3 – Ca Đêm
-            </span>
-            <span style="display:flex; align-items:center; gap:6px">
-                <span style="display:inline-block; width:12px; height:12px; border-radius:3px; background:#F5F3FF; border:1px solid #DDD6FE"></span>
-                CA 4
-            </span>
+            @foreach($shifts as $index => $shift)
+                @php $pal = $shiftPalettes[$index % 4]; @endphp
+                <span style="display:flex; align-items:center; gap:6px">
+                    <span style="display:inline-block; width:12px; height:12px; border-radius:3px; background:{{ $pal['bg'] }}; border:1px solid {{ $pal['border'] }}"></span>
+                    {{ $shift->name }}
+                </span>
+            @endforeach
             <span style="margin-left:auto; color:var(--po-fa); font-size:11.5px">
-                <i class="fa-solid fa-circle-info"></i> {{ __('menu.placeholders.select_dish') }} cho từng ca & ngày làm việc
+                <i class="fa-solid fa-circle-info"></i> {{ __('menu.placeholders.select_dish_hint') }}
             </span>
         </div>
 
@@ -483,42 +489,52 @@
         <!-- Header -->
         <div class="emp-head" style="margin-bottom: 16px;">
             <div>
-                <h1 class="emp-title">{{ __('menu.day_form.title') }}</h1>
+                <h1 class="emp-title">{{ $isEditingDay ? __('menu.day_form.edit_title') : __('menu.day_form.title') }}</h1>
                 <p class="emp-subtitle">{{ __('menu.day_form.subtitle') }}</p>
             </div>
             <div class="emp-actions">
                 @php $dayRank = \App\Models\Menu::STATUS_ORDER[$dayStatus] ?? 0; @endphp
                 <button wire:click="switchView('list')" class="emp-btn"><i class="fa-solid fa-arrow-left"></i> {{ __('menu.actions.back') }}</button>
-                <button wire:click="exportMenus({{ $dayKitchenId }}, '{{ $dayDate }}', '{{ $dayDate }}')" class="emp-btn">
-                    <i class="fa-solid fa-file-excel" style="color:var(--po-gn)"></i> {{ __('menu.actions.export_excel') }}
+                <button type="button" wire:click="sortDayItems(true)" title="{{ __('menu.actions.sort_shifts') }}" class="emp-btn">
+                    <i class="fa-solid fa-arrow-down-short-wide"></i> {{ __('menu.actions.sort_shifts') }}
                 </button>
+                @if($isEditingDay)
+                    <button wire:click="exportMenus({{ $dayKitchenId }}, '{{ $dayDate }}', '{{ $dayDate }}')" class="emp-btn">
+                        <i class="fa-solid fa-file-excel" style="color:var(--po-gn)"></i> {{ __('menu.actions.export_excel') }}
+                    </button>
+                @endif
                 @unless($dayHasPastLockedMenus)
                     @if($dayRank <= \App\Models\Menu::STATUS_ORDER['draft'])
-                        <button wire:click="saveDayMenu('draft')" class="emp-btn"><i class="fa-regular fa-floppy-disk"></i> {{ __('menu.actions.save_draft') }}</button>
+                        <button wire:click="saveDayMenu('draft')" class="emp-btn">
+                            <i class="fa-regular fa-floppy-disk"></i> {{ $isEditingDay ? __('menu.actions.save_changes') : __('menu.actions.save_draft') }}
+                        </button>
                     @endif
                     @if($dayRank <= \App\Models\Menu::STATUS_ORDER['sent'])
                         <button wire:click="saveDayMenu('sent')" class="emp-btn"><i class="fa-regular fa-paper-plane"></i> {{ __('menu.actions.send_customer') }}</button>
                     @endif
-                    <button wire:click="saveDayMenu('locked')" class="emp-btn emp-btn-primary"><i class="fa-solid fa-lock"></i> {{ __('menu.actions.lock') }}</button>
+                    <button wire:click="saveDayMenu('locked')" class="emp-btn emp-btn-primary">
+                        <i class="fa-solid {{ $isEditingDay ? 'fa-lock' : 'fa-floppy-disk' }}"></i> {{ $isEditingDay ? __('menu.actions.lock') : __('menu.actions.save') }}
+                    </button>
                 @endunless
             </div>
         </div>
 
         <!-- Settings form -->
         <div class="tcard" style="padding:16px; margin-bottom:14px; background:var(--po-bd2); display:flex; align-items:center; gap:12px; flex-wrap:wrap">
-            <div class="field" style="min-width:240px">
+            <div class="field" style="min-width:260px">
                 <label>{{ __('menu.fields.kitchen') }} *</label>
-                <select wire:model.live="dayKitchenId" class="ctrl" required @disabled(! $this->canChooseKitchen())>
-                    @foreach($kitchens as $kit)
-                        <option value="{{ $kit->id }}" @selected((int) $dayKitchenId === (int) $kit->id)>{{ $kit->name }}</option>
-                    @endforeach
-                </select>
+                @include('filament.components.search-select', [
+                    'name' => 'dayKitchenId',
+                    'live' => true,
+                    'options' => $this->getKitchenOptions(),
+                    'nullable' => false,
+                ])
             </div>
             <div class="field" style="min-width:200px">
                 <label>{{ __('menu.day_form.date') }} *</label>
                 <input wire:model.live="dayDate" type="date" class="ctrl" required>
             </div>
-            @if($dayHasEditableLockedMenus)
+            @if($isEditingDay && $dayHasEditableLockedMenus)
                 <div class="field" style="min-width:280px; flex:1">
                     <label>{{ __('menu.fields.audit_reason') }} *</label>
                     <input wire:model="dayEditReason" type="text" class="ctrl" placeholder="{{ __('menu.placeholders.audit_reason') }}" required>
@@ -526,15 +542,17 @@
                 </div>
             @endif
 
-            <div style="margin-left:auto">
-                @if($dayStatus === 'locked')
-                    <span class="ms-locked">{{ __('menu.status.locked') }}</span>
-                @elseif($dayStatus === 'sent')
-                    <span class="ms-sent">{{ __('menu.status.sent') }}</span>
-                @else
-                    <span class="ms-draft">{{ __('menu.status.draft') }}</span>
-                @endif
-            </div>
+            @if($isEditingDay)
+                <div style="margin-left:auto">
+                    @if($dayStatus === 'locked')
+                        <span class="ms-locked"><i class="fa-solid fa-lock"></i> {{ __('menu.status.locked') }}</span>
+                    @elseif($dayStatus === 'sent')
+                        <span class="ms-sent"><i class="fa-regular fa-paper-plane"></i> {{ __('menu.status.sent') }}</span>
+                    @else
+                        <span class="ms-draft"><i class="fa-regular fa-file-lines"></i> {{ __('menu.status.draft') }}</span>
+                    @endif
+                </div>
+            @endif
         </div>
 
         @if($dayHasPastLockedMenus)
@@ -612,11 +630,6 @@
                         <button type="button" wire:click="addShiftToDay" style="flex:1; height:42px; border:1.5px dashed var(--po-bl); border-radius:10px; background:var(--po-bl-s); color:var(--po-bl); font-size:13.5px; font-weight:700; cursor:pointer">
                             <i class="fa-solid fa-plus"></i> {{ __('menu.actions.add_shift') }}
                         </button>
-                        @if(count($dayItems) > 1)
-                            <button type="button" wire:click="sortDayItems" title="{{ __('menu.actions.sort_shifts') }}" style="height:42px; padding:0 18px; border:1.5px solid var(--po-bd); border-radius:10px; background:var(--po-wh); color:var(--po-bl); font-size:13px; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:6px">
-                                <i class="fa-solid fa-arrow-down-short-wide"></i> {{ __('menu.actions.sort_shifts') }}
-                            </button>
-                        @endif
                     </div>
                 @endunless
             </div>

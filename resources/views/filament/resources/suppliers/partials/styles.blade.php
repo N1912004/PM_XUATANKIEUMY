@@ -3,8 +3,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <style>
             :root {
-                --sup-bl: #267DC1;
-                --sup-bl-d: #1F669E;
+                --sup-bl: {{ \App\Models\Setting::get('primary_color', '#267DC1') }};
+                --sup-bl-d: {{ \App\Models\Setting::get('primary_color', '#267DC1') }};
                 --sup-bl-s: #E9F2F8;
                 --sup-bl-m: #A8CBE6;
                 --sup-gn: #059669;
