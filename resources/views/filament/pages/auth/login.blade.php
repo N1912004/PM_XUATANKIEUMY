@@ -14,8 +14,9 @@
     // Toạ độ 8 múi 45°/múi (tâm 110,110 bán kính 110, bắt đầu từ đỉnh 12h)
     $pts = [[110,0],[187.78,32.22],[220,110],[187.78,187.78],[110,220],[32.22,187.78],[0,110],[32.22,32.22]];
 
-    // ĐỌC MÀU CHỦ ĐẠO TỪ SETTINGS (Mặc định brand BlueFire #267DC1 nếu chưa có cấu hình)
-    $primaryColor = \App\Models\Setting::get('primary_color', '#267DC1');
+    // MÀU THƯƠNG HIỆU BLUEFIRE CỐ ĐỊNH CHUẨN DÀNH RIÊNG CHO TRANG ĐĂNG NHẬP
+    // Độc lập hoàn toàn với cấu hình màu chủ đề hệ thống trong Admin Panel
+    $primaryColor = '#1267E8'; // Standard Corporate Royal Blue
 
     // Helper chuyển HEX sang RGB
     $hexToRgb = function ($hex) {
@@ -32,7 +33,7 @@
         return [$r, $g, $b];
     };
 
-    // Helper làm tối màu (darken) cho hover
+    // Helper làm tối màu (darken) cho hiệu ứng hover
     $darkenColor = function ($hex, $percent = 12) {
         $hex = str_replace('#', '', $hex);
         if (strlen($hex) == 3) {
@@ -49,40 +50,23 @@
         return sprintf("#%02x%02x%02x", $r, $g, $b);
     };
 
-    // Helper làm sáng màu (lighten) cho dải băng
-    $lightenColor = function ($hex, $percent = 10) {
-        $hex = str_replace('#', '', $hex);
-        if (strlen($hex) == 3) {
-            $hex = substr($hex, 0, 1) . substr($hex, 0, 1) . substr($hex, 1, 1) . substr($hex, 1, 1) . substr($hex, 2, 1) . substr($hex, 2, 1);
-        }
-        $r = hexdec(substr($hex, 0, 2));
-        $g = hexdec(substr($hex, 2, 2));
-        $b = hexdec(substr($hex, 4, 2));
-
-        $r = max(0, min(255, (int)($r + ((255 - $r) * $percent / 100))));
-        $g = max(0, min(255, (int)($g + ((255 - $g) * $percent / 100))));
-        $b = max(0, min(255, (int)($b + ((255 - $b) * $percent / 100))));
-
-        return sprintf("#%02x%02x%02x", $r, $g, $b);
-    };
-
     $rgb = $hexToRgb($primaryColor);
     $primaryColorRgb = implode(',', $rgb);
-    $primaryColorHover = $darkenColor($primaryColor, 12);
-    $primaryColorBand = $lightenColor($primaryColor, 10);
+    $primaryColorHover = '#0C50BB'; // Darker Royal Blue hover
+    $primaryColorBand = '#1267E8';  // Đồng bộ hoàn toàn cùng 1 tông xanh #1267E8
 @endphp
 <div class="lg-page">
 <style>
     :root {
-        --lg-bl: {{ $primaryColor }};
-        --lg-bl-d: {{ $primaryColorHover }};
-        --lg-bl-band: {{ $primaryColorBand }};
-        --lg-rd: #E11D48;
-        --lg-ink: #16233B;
-        --lg-mu: #5B6B84;
-        --lg-mu-strong: #46566E; /* xám đậm hơn ~13% cho subtitle — cùng hệ màu, chỉ tăng contrast */
-        --lg-line: #DCE4F0;
-        --lg-bg: #EDF1F7;
+        --lg-bl: #1267E8;
+        --lg-bl-d: #0C50BB;
+        --lg-bl-band: #1267E8;
+        --lg-rd: #DC2626;
+        --lg-ink: #0F172A;
+        --lg-mu: #64748B;
+        --lg-mu-strong: #475569;
+        --lg-line: #E2E8F0;
+        --lg-bg: #F4F7FB;
         --lg-card: #FFFFFF;
     }
 
