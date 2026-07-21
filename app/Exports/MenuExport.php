@@ -13,8 +13,6 @@ use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithTitle;
 use Maatwebsite\Excel\Events\AfterSheet;
-use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
-use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\RichText\RichText;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
@@ -25,8 +23,8 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 /**
  * Xuất thực đơn ra .xlsx:
  * - Thực đơn ngày: theo mẫu CJ Catering / BlueFire 100% (Ảnh 2)
- * - Thực đơn tuần: theo mẫu ma trận tuần chuẩn 100% từ file LISTHANGMAU_THUCDON (1).xlsx (Sheet TD),
- *   ca làm việc động lấy theo Shift DB (CA 1, CA 2, CA 3...), tiêu đề A1 trình bày chuẩn đẹp bằng RichText.
+ * - Thực đơn tuần: theo mẫu ma trận tuần chuẩn 100% (Ảnh 2), tự động lọc bỏ ca không có món,
+ *   ca làm việc động lấy từ DB, màu sắc background pastel, viền cyan và font chữ chuẩn đẹp 100%.
  * Tự động đa ngôn ngữ VI / EN theo ngôn ngữ hệ thống đang chọn.
  */
 class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
@@ -128,52 +126,9 @@ class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
 
     protected function multiDayArray(): array
     {
-        if (file_exists(base_path('LISTHANGMAU_THUCDON (1).xlsx'))) {
-            $rows = [];
-            for ($r = 1; $r <= 35; $r++) {
-                $rows[] = array_pad([], 10, '');
-            }
-
-            return $rows;
-        }
-
-        return $this->standardMultiDayArray();
-    }
-
-    protected function standardMultiDayArray(): array
-    {
-        $isEn = app()->getLocale() === 'en';
         $rows = [];
-
-        $bannerTitle = $isEn ? 'WEEKLY MENU' : 'THỰC ĐƠN TUẦN';
-        $rows[] = array_pad([$bannerTitle], 8, '');
-        $rows[] = array_pad([$this->subtitle], 8, '');
-
-        if ($isEn) {
-            $rows[] = ['#', 'Kitchen', 'Date', 'Day', 'Shift', 'Dish Name', 'Portions', 'Status'];
-            $dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-        } else {
-            $rows[] = ['STT', 'Bếp ăn', 'Ngày', 'Thứ', 'Ca', 'Món ăn', 'Số suất', 'Trạng thái'];
-            $dayNames = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
-        }
-
-        foreach ($this->menus as $i => $menu) {
-            $cDate = $menu->date instanceof Carbon ? $menu->date : Carbon::parse($menu->date);
-            $statusLabel = __('menu.status.'.$menu->status);
-            if ($statusLabel === 'menu.status.'.$menu->status) {
-                $statusLabel = Menu::STATUS_LABELS[$menu->status] ?? $menu->status;
-            }
-
-            $rows[] = [
-                $i + 1,
-                $menu->kitchen?->name ?? '',
-                $cDate->format('d/m/Y'),
-                $dayNames[$cDate->dayOfWeek],
-                $menu->shift?->name ?? '',
-                $menu->recipe?->name ?? '',
-                (int) $menu->estimated_portions,
-                $statusLabel,
-            ];
+        for ($r = 1; $r <= 35; $r++) {
+            $rows[] = array_pad([], 10, '');
         }
 
         return $rows;
@@ -328,25 +283,6 @@ class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
 
     protected function formatMultiDaySheet($sheet): void
     {
-        $templatePath = base_path('LISTHANGMAU_THUCDON (1).xlsx');
-        if (! file_exists($templatePath)) {
-            $this->formatStandardMultiDaySheet($sheet);
-
-            return;
-        }
-
-        $tplSpreadsheet = IOFactory::load($templatePath);
-        $source = $tplSpreadsheet->getSheetByName('TD') ?? $tplSpreadsheet->getSheet(0);
-
-        // 1. Clear sample dishes in D3:J34
-        for ($r = 3; $r <= 34; $r++) {
-            for ($c = 4; $c <= 10; $c++) {
-                $colStr = Coordinate::stringFromColumnIndex($c);
-                $source->setCellValue($colStr.$r, '');
-            }
-        }
-
-        // 2. Set A1 Title & Date Range via RichText (Merged A1:I1)
         $isEn = app()->getLocale() === 'en';
         $dates = $this->menus->pluck('date')
             ->filter()
@@ -359,6 +295,10 @@ class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
         }
         $end = $start->copy()->addDays(6);
 
+        // 1. Header Banner Row 1 (Merged A1:I1 or A1:J1)
+        $sheet->mergeCells('A1:I1');
+        $sheet->getRowDimension(1)->setRowHeight(55);
+
         $titleLine1 = $isEn
             ? 'SUMMIT CANTEEN WEEKLY MENU '.$start->format('d.m.Y')."\n"
             : 'THỰC ĐƠN CANTEEN SUMMIT TUẦN '.$start->format('d.m.Y')."\n";
@@ -368,36 +308,136 @@ class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
 
         $richText = new RichText;
         $run1 = $richText->createTextRun($titleLine1);
-        $run1->getFont()->setName('Times New Roman')->setSize(16)->setBold(true)->setColor(new Color('FFFF0000'));
+        $run1->getFont()->setName('Times New Roman')->setSize(15)->setBold(true)->setColor(new Color('FFFF0000'));
 
         $run2 = $richText->createTextRun($titleLine2);
-        $run2->getFont()->setName('Times New Roman')->setSize(13)->setItalic(true)->setColor(new Color('FFFF0000'));
+        $run2->getFont()->setName('Times New Roman')->setSize(12)->setBold(true)->setItalic(true)->setColor(new Color('FFFF0000'));
 
-        $source->setCellValue('A1', $richText);
+        $sheet->setCellValue('A1', $richText);
+        $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)->setVertical(Alignment::VERTICAL_CENTER);
 
-        // 3. Set clean Column A side label (Merged A2:A34)
-        $source->setCellValue('A2', $isEn ? 'WEEKLY MENU' : 'THỰC ĐƠN TUẦN');
+        // Add BlueFire logo on A1
+        $logoPath = public_path('images/bluefire-logo.png');
+        if (file_exists($logoPath)) {
+            $drawing = new Drawing;
+            $drawing->setName('Logo');
+            $drawing->setPath($logoPath);
+            $drawing->setCoordinates('A1');
+            $drawing->setHeight(45);
+            $drawing->setOffsetX(8);
+            $drawing->setOffsetY(5);
+            $drawing->setWorksheet($sheet);
+        }
 
-        // 4. Dynamic Shifts in Column B from DB Shifts
-        $shifts = Shift::orderBy('sort_order')->orderBy('id')->get()->values();
-        $shiftCells = [0 => 'B3', 1 => 'B15', 2 => 'B23'];
-        foreach ($shiftCells as $idx => $cell) {
-            if (isset($shifts[$idx])) {
-                $sName = mb_strtoupper($shifts[$idx]->name);
-                if (! str_starts_with($sName, 'THỰC ĐƠN') && ! str_starts_with($sName, 'MENU')) {
-                    $sName = ($isEn ? 'MENU ' : 'THỰC ĐƠN ').$sName;
-                }
-                $source->setCellValue($cell, $sName);
+        // 2. Row 2 Header: CA | MÓN | THỨ 2 .. Chủ nhật
+        $sheet->getRowDimension(2)->setRowHeight(32);
+        $headers = [
+            'A' => '',
+            'B' => 'CA',
+            'C' => 'MÓN',
+            'D' => $isEn ? 'MON' : 'THỨ 2',
+            'E' => $isEn ? 'TUE' : 'THỨ 3',
+            'F' => $isEn ? 'WED' : 'THỨ 4',
+            'G' => $isEn ? 'THU' : 'THỨ 5',
+            'H' => $isEn ? 'FRI' : 'THỨ 6',
+            'I' => $isEn ? 'SAT' : 'Thứ 7',
+            'J' => $isEn ? 'SUN' : 'Chủ nhật',
+        ];
+
+        foreach ($headers as $col => $hText) {
+            if ($col !== 'A') {
+                $sheet->setCellValue($col.'2', $hText);
             }
         }
 
-        // 5. Map menus to D3:J34 matrix
-        $shiftMap = [];
-        foreach ($shifts as $idx => $s) {
-            $shiftMap[$s->id] = $idx;
-        }
-        $shiftRowStart = [0 => 3, 1 => 15, 2 => 23];
+        // Style Row 2 B2:J2
+        $sheet->getStyle('B2:J2')->applyFromArray([
+            'font' => ['bold' => true, 'size' => 11, 'color' => ['rgb' => 'C00000'], 'name' => 'Calibri'],
+            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'D9E1F2']],
+            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
+        ]);
 
+        // 3. Dynamic Shifts filtering
+        $allShifts = Shift::orderBy('sort_order')->orderBy('id')->get()->values();
+        $activeShiftIds = $this->menus->pluck('shift_id')->unique()->filter()->toArray();
+
+        $shiftTemplates = [
+            0 => [
+                'name' => 'CA 1',
+                'categories' => ['MÓN 1', 'MÓN 2', 'RAU XÀO/LUỘC', 'CANH', 'CƠM', 'MÓN CHAY 1', 'MÓN CHAY 2', 'CANH CHAY', 'MÓN CHAY 3', 'CƠM CHAY', 'COMBO', 'TRÁNG MIỆNG'],
+            ],
+            1 => [
+                'name' => 'CA 2',
+                'categories' => ['MÓN MẶN 1', 'MÓN MẶN 2', 'MÓN RAU XÀO/LUỘC', 'MÓN CANH', 'MÓN CHAY 1', 'MÓN CHAY 2', 'RAU XÀO CHAY', 'TRÁNG MIỆNG'],
+            ],
+            2 => [
+                'name' => 'CA 3',
+                'categories' => ['MÓN MẶN 1', 'MÓN MẶN 2', 'MÓN RAU XÀO/LUỘC', 'MÓN CANH', 'CƠM', 'MÓN CHAY 1', 'MÓN CHAY 2', 'MÓN RAU XÀO/LUỘC', 'MÓN CHAY 3', 'CƠM', 'COMBO', 'TRÁNG MIỆNG'],
+            ],
+        ];
+
+        $currentRow = 3;
+        $shiftRowMap = [];
+
+        foreach ($shiftTemplates as $sIdx => $tpl) {
+            $sObj = $allShifts[$sIdx] ?? null;
+            $hasItems = $sObj && in_array($sObj->id, $activeShiftIds);
+
+            // Hide shifts that have NO menu items (unless activeShiftIds is empty, then render shift 0)
+            if (! $hasItems && $activeShiftIds !== []) {
+                continue;
+            }
+
+            $catCount = count($tpl['categories']);
+            $startRow = $currentRow;
+            $endRow = $startRow + $catCount - 1;
+
+            $sName = $sObj ? mb_strtoupper($sObj->name) : $tpl['name'];
+            if (! str_starts_with($sName, 'THỰC ĐƠN') && ! str_starts_with($sName, 'MENU')) {
+                $sName = ($isEn ? 'MENU ' : 'THỰC ĐƠN ').$sName;
+            }
+
+            // Merge B{startRow}:B{endRow}
+            $sheet->mergeCells("B{$startRow}:B{$endRow}");
+            $sheet->setCellValue("B{$startRow}", $sName);
+
+            // Style Shift B
+            $sheet->getStyle("B{$startRow}:B{$endRow}")->applyFromArray([
+                'font' => ['bold' => true, 'size' => 11, 'color' => ['rgb' => 'C00000'], 'name' => 'Calibri'],
+                'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'D9E1F2']],
+                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER, 'wrapText' => true],
+            ]);
+
+            // Populate categories in Column C
+            foreach ($tpl['categories'] as $catIdx => $catName) {
+                $r = $startRow + $catIdx;
+                $sheet->getRowDimension($r)->setRowHeight(30);
+                $sheet->setCellValue("C{$r}", $catName);
+            }
+
+            // Style Category C
+            $sheet->getStyle("C{$startRow}:C{$endRow}")->applyFromArray([
+                'font' => ['bold' => true, 'size' => 11, 'color' => ['rgb' => '002060'], 'name' => 'Calibri'],
+                'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'EDEDED']],
+                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
+            ]);
+
+            $shiftRowMap[$sObj?->id ?? $sIdx] = ['startRow' => $startRow, 'endRow' => $endRow];
+            $currentRow = $endRow + 1;
+        }
+
+        $lastRow = $currentRow - 1;
+
+        // 4. Merge Side Header Column A (A2:A{lastRow})
+        $sheet->mergeCells("A2:A{$lastRow}");
+        $sheet->setCellValue('A2', $isEn ? "W\nE\nE\nK\nL\nY\n\nM\nE\nN\nU" : "T\nH\nỰ\nC\n\nĐ\nƠ\nN\n\nT\nU\nẦ\nN");
+        $sheet->getStyle("A2:A{$lastRow}")->applyFromArray([
+            'font' => ['bold' => true, 'size' => 12, 'color' => ['rgb' => 'C00000'], 'name' => 'Calibri'],
+            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'FCE4D6']],
+            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER, 'wrapText' => true],
+        ]);
+
+        // 5. Populate dish names into D..J
         $byDayShift = $this->menus->groupBy(fn ($m) => ($m->date instanceof Carbon ? $m->date->toDateString() : Carbon::parse($m->date)->toDateString()).'|'.$m->shift_id);
 
         foreach ($byDayShift as $key => $items) {
@@ -409,76 +449,33 @@ class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
                 continue;
             }
 
-            $sIdx = $shiftMap[$shiftId] ?? 0;
-            $baseRow = $shiftRowStart[$sIdx] ?? 3;
+            $baseRow = $shiftRowMap[$shiftId]['startRow'] ?? 3;
 
             foreach ($items as $itemIdx => $m) {
                 $targetRow = $baseRow + $itemIdx;
-                if ($targetRow <= 34 && $m->recipe?->name) {
-                    $source->setCellValue($colStr.$targetRow, $m->recipe->name);
+                if ($targetRow <= $lastRow && $m->recipe?->name) {
+                    $sheet->setCellValue($colStr.$targetRow, $m->recipe->name);
                 }
             }
         }
 
-        // 6. Clone merged cells, dimensions, styles, values, and drawings onto target $sheet
-        foreach ($source->getMergeCells() as $mergeRange) {
-            $sheet->mergeCells($mergeRange);
-        }
-
-        foreach ($source->getColumnDimensions() as $col => $dimension) {
-            $sheet->getColumnDimension($col)->setWidth($dimension->getWidth());
-        }
-
-        foreach ($source->getRowDimensions() as $row => $dimension) {
-            $sheet->getRowDimension($row)->setRowHeight($dimension->getRowHeight());
-        }
-
-        $maxRow = min(35, $source->getHighestRow());
-        $maxColIndex = Coordinate::columnIndexFromString('J');
-
-        for ($r = 1; $r <= $maxRow; $r++) {
-            for ($c = 1; $c <= $maxColIndex; $c++) {
-                $colStr = Coordinate::stringFromColumnIndex($c);
-                $cellAddr = $colStr.$r;
-                $sourceCell = $source->getCell($cellAddr);
-                $targetCell = $sheet->getCell($cellAddr);
-
-                $targetCell->setValue($sourceCell->getValue());
-                $sheet->duplicateStyle($source->getStyle($cellAddr), $cellAddr);
-            }
-        }
-
-        foreach ($source->getDrawingCollection() as $drawing) {
-            $newDrawing = clone $drawing;
-            $newDrawing->setWorksheet($sheet);
-        }
-
-        // 7. Apply wrapText and center vertical alignment for D3:J34
-        $sheet->getStyle('D3:J34')->getAlignment()->setWrapText(true);
-        $sheet->getStyle('D3:J34')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
-    }
-
-    protected function formatStandardMultiDaySheet($sheet): void
-    {
-        $lastCol = Coordinate::stringFromColumnIndex(8);
-        $lastRow = $sheet->getHighestRow();
-
-        $sheet->mergeCells("A1:{$lastCol}1");
-        $sheet->mergeCells("A2:{$lastCol}2");
-        $sheet->getRowDimension(1)->setRowHeight(32);
-        $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(16);
-        $sheet->getStyle('A1:A2')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-
-        $sheet->getStyle("A3:{$lastCol}3")->applyFromArray([
-            'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF'], 'size' => 11],
-            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '0F4C81']],
-            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
+        // 6. Style Dish Data Cells D3:J{lastRow}
+        $sheet->getStyle("D3:J{$lastRow}")->applyFromArray([
+            'font' => ['bold' => true, 'size' => 11, 'color' => ['rgb' => '0070C0'], 'name' => 'Calibri'],
+            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER, 'wrapText' => true],
         ]);
 
-        $sheet->getStyle("G4:G{$lastRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        // 7. Column Widths
+        $sheet->getColumnDimension('A')->setWidth(6);
+        $sheet->getColumnDimension('B')->setWidth(14);
+        $sheet->getColumnDimension('C')->setWidth(18);
+        foreach (['D', 'E', 'F', 'G', 'H', 'I', 'J'] as $col) {
+            $sheet->getColumnDimension($col)->setWidth(24);
+        }
 
-        $sheet->getStyle("A3:{$lastCol}{$lastRow}")->applyFromArray([
-            'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => 'D3D3D3']]],
+        // 8. Cyan Borders (#00B0F0) on the entire matrix (A1:J{lastRow})
+        $sheet->getStyle("A1:J{$lastRow}")->applyFromArray([
+            'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_MEDIUM, 'color' => ['rgb' => '00B0F0']]],
         ]);
     }
 }
