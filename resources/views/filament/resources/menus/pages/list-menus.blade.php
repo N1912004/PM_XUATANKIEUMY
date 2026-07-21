@@ -294,14 +294,18 @@
                     @endforeach
                 </select>
             </div>
-            <div class="field" style="min-width:200px">
-                <label>{{ __('menu.weekly.fields.week_start') }} *</label>
-                <input wire:model.live="weekStartDate" type="date" class="ctrl" required>
+            <div class="field" style="min-width:180px">
+                <label>Từ ngày *</label>
+                <input wire:model.live="weekDateFrom" type="date" class="ctrl" required>
             </div>
-            @if($weekHasEditableLockedMenus)
+            <div class="field" style="min-width:180px">
+                <label>Đến ngày *</label>
+                <input wire:model.live="weekDateTo" type="date" class="ctrl" required>
+            </div>
+            @if($weekHasExistingMenus)
                 <div class="field" style="min-width:280px; flex:1">
-                    <label>{{ __('menu.fields.audit_reason') }} *</label>
-                    <input wire:model="weekEditReason" type="text" class="ctrl" placeholder="{{ __('menu.placeholders.audit_reason') }}" required>
+                    <label>{{ __('menu.fields.audit_reason') }}{{ $weekHasEditableLockedMenus ? ' *' : '' }}</label>
+                    <input wire:model="weekEditReason" type="text" class="ctrl" placeholder="{{ __('menu.placeholders.audit_reason') }}" {{ $weekHasEditableLockedMenus ? 'required' : '' }}>
                     @error('weekEditReason') <span style="color:var(--po-rd);font-size:12px">{{ $message }}</span> @enderror
                 </div>
             @endif
@@ -327,17 +331,15 @@
                 <thead>
                     <tr style="background:#267DC1; color:#fff">
                         <th style="padding:12px 14px; text-align:left; width:120px">{{ __('menu.week_form.shift_day') }}</th>
-                        @for($d = 0; $d < 7; $d++)
-                            @php
-                                $dayDate = \Illuminate\Support\Carbon::parse($this->weekStartDate)->addDays($d);
-                            @endphp
+                        @php $weekDays = $this->weekDays; @endphp
+                        @foreach($weekDays as $d => $wDay)
                             <th style="padding:12px 14px; text-align:center">
-                                {{ $d === 6 ? __('menu.days.sunday') : __('menu.days.weekday', ['day' => $d + 2]) }}
+                                {{ $wDay['day_name'] }}
                                 <div style="font-size:10.5px; font-weight:500; opacity:.85; margin-top:2px">
-                                    {{ $dayDate->format('d/m/Y') }}
+                                    {{ date('d/m/Y', strtotime($wDay['date'])) }}
                                 </div>
                             </th>
-                        @endfor
+                        @endforeach
                     </tr>
                 </thead>
                 <tbody>
@@ -349,7 +351,7 @@
                                     {{ $shift->time_range }}
                                 </div>
                             </td>
-                            @for($d = 0; $d < 7; $d++)
+                            @foreach($weekDays as $d => $wDay)
                                 <td style="padding:8px; text-align:center; background:var(--po-wh); vertical-align:top">
                                     <div style="display:flex; flex-direction:column; gap:8px">
                                         {{-- Mỗi ô = danh sách món (nhiều món/ca), thêm bằng nút (+) từng ô --}}
@@ -380,13 +382,13 @@
                                         {{-- Nút (+) thêm món cho đúng ô ngày/ca này --}}
                                         @unless($weekHasPastLockedMenus)
                                             <button type="button" wire:click="addWeekDish({{ $d }}, {{ $shift->id }})"
-                                                style="height:28px; border:1px dashed var(--po-bl-m); border-radius:8px; background:var(--po-bl-s); color:var(--po-bl); cursor:pointer; font-size:11.5px; font-weight:700; display:flex; align-items:center; justify-content:center; gap:4px">
+                                                style="border:1px dashed var(--po-bd); border-radius:6px; background:transparent; color:var(--po-bl); font-size:11px; padding:4px 0; cursor:pointer; font-weight:600">
                                                 <i class="fa-solid fa-plus"></i> {{ __('menu.actions.add_dish') }}
                                             </button>
                                         @endunless
                                     </div>
                                 </td>
-                            @endfor
+                            @endforeach
                         </tr>
                     @endforeach
                 </tbody>
@@ -432,10 +434,10 @@
                 <label>{{ __('menu.day_form.date') }} *</label>
                 <input wire:model.live="dayDate" type="date" class="ctrl" required>
             </div>
-            @if($dayHasEditableLockedMenus)
+            @if($dayHasExistingMenus)
                 <div class="field" style="min-width:280px; flex:1">
-                    <label>{{ __('menu.fields.audit_reason') }} *</label>
-                    <input wire:model="dayEditReason" type="text" class="ctrl" placeholder="{{ __('menu.placeholders.audit_reason') }}" required>
+                    <label>{{ __('menu.fields.audit_reason') }}{{ $dayHasEditableLockedMenus ? ' *' : '' }}</label>
+                    <input wire:model="dayEditReason" type="text" class="ctrl" placeholder="{{ __('menu.placeholders.audit_reason') }}" {{ $dayHasEditableLockedMenus ? 'required' : '' }}>
                     @error('dayEditReason') <span style="color:var(--po-rd);font-size:12px">{{ $message }}</span> @enderror
                 </div>
             @endif
