@@ -28,7 +28,7 @@
             </div>
             <div class="emp-actions">
                 <button wire:click="loadWeekMenu({{ $kitchens->first()?->id ?? 1 }}, '{{ now()->startOfWeek()->toDateString() }}')" class="emp-btn">
-                    <i class="fa-regular fa-calendar-week"></i>
+                    <i class="fa-solid fa-calendar-days"></i>
                     {{ __('menu.actions.create_week') }}
                 </button>
                 <button wire:click="loadDayMenu({{ $kitchens->first()?->id ?? 1 }}, '{{ now()->toDateString() }}')" class="emp-btn emp-btn-primary">
@@ -41,21 +41,21 @@
         <!-- KPIs Stats -->
         <div class="mp-krow" style="margin-bottom: 16px;">
             <div class="mp-kcard">
-                <div class="mp-kico" style="background:var(--po-bl-s); color:var(--po-bl)"><i class="fa-regular fa-calendar-week"></i></div>
+                <div class="mp-kico" style="background:var(--po-bl-s); color:var(--po-bl)"><i class="fa-solid fa-calendar-days"></i></div>
                 <div>
                     <div class="mp-klbl">{{ __('menu.kpi.running_weekly') }}</div>
                     <div class="mp-kval">{{ $stats['total_active_weeks'] }}</div>
                 </div>
             </div>
             <div class="mp-kcard">
-                <div class="mp-kico" style="background:var(--po-bl-s); color:var(--po-bl)"><i class="fa-solid fa-circle-check"></i></div>
+                <div class="mp-kico" style="background:var(--po-bl-s); color:var(--po-bl)"><i class="fa-solid fa-paper-plane"></i></div>
                 <div>
                     <div class="mp-klbl">{{ __('menu.kpi.sent_this_month') }}</div>
                     <div class="mp-kval">{{ $stats['sent_month'] }}</div>
                 </div>
             </div>
             <div class="mp-kcard">
-                <div class="mp-kico" style="background:var(--po-bl-s); color:var(--po-bl)"><i class="fa-solid fa-clock-rotate-left"></i></div>
+                <div class="mp-kico" style="background:var(--po-bl-s); color:var(--po-bl)"><i class="fa-solid fa-file-pen"></i></div>
                 <div>
                     <div class="mp-klbl">{{ __('menu.kpi.still_draft') }}</div>
                     <div class="mp-kval">{{ $stats['pending'] }}</div>
@@ -159,9 +159,9 @@
                 <div wire:click="{{ $row['type'] === 'week' ? "loadWeekMenu({$row['kitchen_id']}, '{$row['start_date']}')" : "loadDayMenu({$row['kitchen_id']}, '{$row['start_date']}')" }}" class="mp-item">
                     <div class="mp-item-ico" style="{{ $row['type'] === 'week' ? 'background:var(--po-bl-s);color:var(--po-bl)' : 'background:var(--po-pu-s);color:var(--po-pu)' }}">
                         @if($row['type'] === 'week')
-                            <i class="fa-regular fa-calendar-week"></i>
+                            <i class="fa-solid fa-calendar-days"></i>
                         @else
-                            <i class="fa-regular fa-calendar-day"></i>
+                            <i class="fa-solid fa-calendar-day"></i>
                         @endif
                     </div>
                     <div class="mp-item-info">
@@ -170,7 +170,7 @@
                         <div class="mp-item-meta">
                             <span class="mp-item-tag"><i class="fa-solid fa-building"></i>{{ $row['meta_company'] }}</span>
                             <span class="mp-item-tag"><i class="fa-solid fa-utensils"></i>{{ $row['meta_info'] }}</span>
-                            <span class="mp-item-tag"><i class="fa-regular fa-clock"></i>{{ __('menu.labels.applies_on', ['date' => date('d/m/Y', strtotime($row['start_date']))]) }}</span>
+                            <span class="mp-item-tag"><i class="fa-solid fa-clock"></i>{{ __('menu.labels.applies_on', ['date' => date('d/m/Y', strtotime($row['start_date']))]) }}</span>
                         </div>
                     </div>
                     <div class="mp-item-right" wire:click.stop>
