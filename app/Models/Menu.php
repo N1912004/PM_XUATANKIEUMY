@@ -19,7 +19,17 @@ class Menu extends Model
      *
      * @var array<int, string>
      */
-    protected const AUDITED_FIELDS = ['kitchen_id', 'date', 'shift_id', 'recipe_id', 'estimated_portions', 'status'];
+    protected const AUDITED_FIELDS = ['kitchen_id', 'week_menu_id', 'date', 'shift_id', 'recipe_id', 'estimated_portions', 'status'];
+
+    protected $fillable = [
+        'kitchen_id',
+        'week_menu_id',
+        'date',
+        'shift_id',
+        'recipe_id',
+        'estimated_portions',
+        'status',
+    ];
 
     /**
      * Các trạng thái "đã hoàn tất" mà mọi thay đổi sau đó đều bắt buộc ghi vết.
@@ -94,14 +104,6 @@ class Menu extends Model
         return null;
     }
 
-    protected $fillable = [
-        'kitchen_id',
-        'date',
-        'shift_id',
-        'recipe_id',
-        'estimated_portions',
-        'status',
-    ];
 
     protected $casts = [
         'date' => 'date',
@@ -120,6 +122,11 @@ class Menu extends Model
     public function kitchen(): BelongsTo
     {
         return $this->belongsTo(Kitchen::class);
+    }
+
+    public function weekMenu(): BelongsTo
+    {
+        return $this->belongsTo(WeekMenu::class, 'week_menu_id');
     }
 
     public function auditLogs(): HasMany
