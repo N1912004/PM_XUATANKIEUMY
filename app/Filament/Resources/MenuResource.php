@@ -83,8 +83,7 @@ class MenuResource extends Resource
                     ->dehydrated(false)
                     ->required(fn (?Menu $record): bool => $record?->status === 'locked')
                     ->visible(fn (string $operation, ?Menu $record): bool => $operation === 'edit'
-                        && $record !== null
-                        && $record->status === 'locked'),
+                        && $record !== null),
             ]);
     }
 

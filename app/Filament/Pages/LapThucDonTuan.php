@@ -96,10 +96,6 @@ class LapThucDonTuan extends Page implements HasForms
                             ->required()
                             ->helperText(__('menu.weekly.helpers.week_start')),
                     ]),
-                TextInput::make('edit_reason')
-                    ->label(__('menu.fields.audit_reason'))
-                    ->placeholder(__('menu.weekly.placeholders.audit_reason'))
-                    ->maxLength(255),
                 Repeater::make('entries')
                     ->label(__('menu.weekly.fields.items'))
                     ->schema([

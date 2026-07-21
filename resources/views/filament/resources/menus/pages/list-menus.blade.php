@@ -281,7 +281,7 @@
         <div class="tcard" style="padding:16px; margin-bottom:14px; background:var(--po-bd2); display:flex; gap:12px; flex-wrap:wrap">
             <div class="field" style="min-width:240px">
                 <label>{{ __('menu.fields.kitchen') }} *</label>
-                <select wire:model="weekKitchenId" class="ctrl" required @disabled($weekHasExistingMenus)>
+                <select wire:model.live="weekKitchenId" class="ctrl" required @disabled($weekHasExistingMenus)>
                     @foreach($kitchens as $kit)
                         <option value="{{ $kit->id }}">{{ $kit->name }}</option>
                     @endforeach
@@ -289,12 +289,12 @@
             </div>
             <div class="field" style="min-width:200px">
                 <label>{{ __('menu.weekly.fields.week_start') }} *</label>
-                <input wire:model="weekStartDate" type="date" class="ctrl" required @disabled($weekHasExistingMenus)>
+                <input wire:model.live="weekStartDate" type="date" class="ctrl" required @disabled($weekHasExistingMenus)>
             </div>
-            @if($weekHasEditableLockedMenus)
+            @if($weekHasExistingMenus)
                 <div class="field" style="min-width:280px; flex:1">
-                    <label>{{ __('menu.fields.audit_reason') }} *</label>
-                    <input wire:model="weekEditReason" type="text" class="ctrl" placeholder="{{ __('menu.placeholders.audit_reason') }}" required>
+                    <label>{{ __('menu.fields.audit_reason') }} @if($weekHasEditableLockedMenus) * @endif</label>
+                    <input wire:model="weekEditReason" type="text" class="ctrl" placeholder="{{ __('menu.placeholders.audit_reason') }}" @required($weekHasEditableLockedMenus)>
                     @error('weekEditReason') <span style="color:var(--po-rd);font-size:12px">{{ $message }}</span> @enderror
                 </div>
             @endif
@@ -418,7 +418,7 @@
         <div class="tcard" style="padding:16px; margin-bottom:14px; background:var(--po-bd2); display:flex; gap:12px; flex-wrap:wrap">
             <div class="field" style="min-width:240px">
                 <label>{{ __('menu.fields.kitchen') }} *</label>
-                <select wire:model="dayKitchenId" class="ctrl" required @disabled($dayHasExistingMenus)>
+                <select wire:model.live="dayKitchenId" class="ctrl" required @disabled($dayHasExistingMenus)>
                     @foreach($kitchens as $kit)
                         <option value="{{ $kit->id }}">{{ $kit->name }}</option>
                     @endforeach
@@ -426,12 +426,12 @@
             </div>
             <div class="field" style="min-width:200px">
                 <label>{{ __('menu.day_form.date') }} *</label>
-                <input wire:model="dayDate" type="date" class="ctrl" required @disabled($dayHasExistingMenus)>
+                <input wire:model.live="dayDate" type="date" class="ctrl" required @disabled($dayHasExistingMenus)>
             </div>
-            @if($dayHasEditableLockedMenus)
+            @if($dayHasExistingMenus)
                 <div class="field" style="min-width:280px; flex:1">
-                    <label>{{ __('menu.fields.audit_reason') }} *</label>
-                    <input wire:model="dayEditReason" type="text" class="ctrl" placeholder="{{ __('menu.placeholders.audit_reason') }}" required>
+                    <label>{{ __('menu.fields.audit_reason') }} @if($dayHasEditableLockedMenus) * @endif</label>
+                    <input wire:model="dayEditReason" type="text" class="ctrl" placeholder="{{ __('menu.placeholders.audit_reason') }}" @required($dayHasEditableLockedMenus)>
                     @error('dayEditReason') <span style="color:var(--po-rd);font-size:12px">{{ $message }}</span> @enderror
                 </div>
             @endif

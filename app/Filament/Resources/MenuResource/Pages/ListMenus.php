@@ -399,6 +399,7 @@ class ListMenus extends Page
     // ==========================================
     public function loadWeekMenu($kitchenId, $startDate)
     {
+        $this->assertKitchenAccess($kitchenId);
         $this->weekKitchenId = $kitchenId;
         $this->weekStartDate = $startDate;
         $this->activeView = 'week';
@@ -440,6 +441,20 @@ class ListMenus extends Page
                 // Ô rỗng vẫn giữ 1 dòng trống để user nhập nhanh (không bắt bấm + trước)
                 $this->weekCells[$d][$shift->id] = $items ?: [['recipe_id' => '', 'portions' => 200]];
             }
+        }
+    }
+
+    public function updatedWeekKitchenId($kitchenId): void
+    {
+        if ($kitchenId && $this->weekStartDate) {
+            $this->loadWeekMenu($kitchenId, $this->weekStartDate);
+        }
+    }
+
+    public function updatedWeekStartDate($startDate): void
+    {
+        if ($this->weekKitchenId && $startDate) {
+            $this->loadWeekMenu($this->weekKitchenId, $startDate);
         }
     }
 
@@ -647,6 +662,7 @@ class ListMenus extends Page
     // ==========================================
     public function loadDayMenu($kitchenId, $date)
     {
+        $this->assertKitchenAccess($kitchenId);
         $this->dayKitchenId = $kitchenId;
         $this->dayDate = $date;
         $this->activeView = 'day';
@@ -697,6 +713,20 @@ class ListMenus extends Page
                 'shift_name' => $shift->name,
                 'recipes' => $recipes,
             ];
+        }
+    }
+
+    public function updatedDayKitchenId($kitchenId): void
+    {
+        if ($kitchenId && $this->dayDate) {
+            $this->loadDayMenu($kitchenId, $this->dayDate);
+        }
+    }
+
+    public function updatedDayDate($date): void
+    {
+        if ($this->dayKitchenId && $date) {
+            $this->loadDayMenu($this->dayKitchenId, $date);
         }
     }
 
