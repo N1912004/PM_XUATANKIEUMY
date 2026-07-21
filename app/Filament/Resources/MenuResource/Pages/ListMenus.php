@@ -352,7 +352,8 @@ class ListMenus extends Page
         }
 
         // Xuất .xlsx thật qua Laravel Excel (trước đây là CSV) — file này còn dùng để gửi khách duyệt.
-        $fileName = 'thuc-don-'.($from ?: now()->format('Y-m-d')).'.xlsx';
+        $prefix = app()->getLocale() === 'en' ? 'menu' : 'thuc-don';
+        $fileName = $prefix.'-'.($from ?: now()->format('Y-m-d')).'.xlsx';
 
         return Excel::download(new MenuExport($query->get(), $subtitle), $fileName);
     }

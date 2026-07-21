@@ -19,7 +19,8 @@ use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 
 /**
- * Xuất thực đơn ra .xlsx (thực đơn ngày theo mẫu CJ Catering / BlueFire 100%, thực đơn tuần theo bảng tổng hợp).
+ * Xuất thực đơn ra .xlsx (thực đơn ngày theo mẫu CJ Catering / BlueFire 100%, thực đơn tuần theo bảng tổng hợp),
+ * tự động đa ngôn ngữ VI / EN theo ngôn ngữ hệ thống đang chọn.
  */
 class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
 {
@@ -54,7 +55,12 @@ class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
 
     public function title(): string
     {
-        return $this->isSingleDay ? 'Thực đơn ngày' : 'Thực đơn tuần';
+        $isEn = app()->getLocale() === 'en';
+        if ($this->isSingleDay) {
+            return $isEn ? 'Day Menu' : 'Thực đơn ngày';
+        }
+
+        return $isEn ? 'Week Menu' : 'Thực đơn tuần';
     }
 
     /**
@@ -71,21 +77,28 @@ class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
 
     protected function singleDayArray(): array
     {
+        $isEn = app()->getLocale() === 'en';
         $rows = [];
 
-        // Row 1: Header logo cell (left, empty text for Drawing overlay) & Company Name (right)
-        $rows[] = ['', 'CÔNG TY TNHH DỊCH VỤ CJ CATERING VIỆT NAM'];
+        // Row 1: Header logo cell (left) & Company Name (right)
+        $companyName = $isEn
+            ? 'CJ CATERING VIETNAM SERVICE CO., LTD'
+            : 'CÔNG TY TNHH DỊCH VỤ CJ CATERING VIỆT NAM';
+        $rows[] = ['', $companyName];
         // Row 2 & 3: Empty rows merged with Row 1
         $rows[] = ['', ''];
         $rows[] = ['', ''];
 
-        // Row 4: Title Banner (MENU MẶN 46)
-        $rows[] = ['MENU MẶN 46', ''];
+        // Row 4: Title Banner
+        $titleText = $isEn ? 'SAVORY MENU 46' : 'MENU MẶN 46';
+        $rows[] = [$titleText, ''];
 
         // Row 5: Table Header
-        $rows[] = ['CƠ CẤU', 'TÊN MÓN ĂN'];
+        $colAHeader = $isEn ? 'STRUCTURE' : 'CƠ CẤU';
+        $colBHeader = $isEn ? 'DISH NAME' : 'TÊN MÓN ĂN';
+        $rows[] = [$colAHeader, $colBHeader];
 
-        // Row 6+: Dishes (k phân biệt ca — gom toàn bộ món trong ngày. Xuất ĐÚNG số món thực tế, không in thừa)
+        // Row 6+: Dishes (k phân biệt ca — gom toàn bộ món trong ngày. Xuất ĐÚNG số món thực tế)
         $dishNames = $this->menus->pluck('recipe.name')
             ->filter()
             ->unique()
@@ -96,8 +109,10 @@ class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
             $dishNames = [''];
         }
 
+        $dishPrefix = $isEn ? 'DISH ' : 'MÓN ';
+
         foreach ($dishNames as $i => $dishName) {
-            $label = 'MÓN '.($i + 1);
+            $label = $dishPrefix.($i + 1);
             $rows[] = [$label, $dishName];
         }
 
@@ -106,15 +121,28 @@ class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
 
     protected function multiDayArray(): array
     {
+        $isEn = app()->getLocale() === 'en';
         $rows = [];
-        $rows[] = array_pad(['THỰC ĐƠN TUẦN'], 8, '');
-        $rows[] = array_pad([$this->subtitle], 8, '');
-        $rows[] = ['STT', 'Bếp ăn', 'Ngày', 'Thứ', 'Ca', 'Món ăn', 'Số suất', 'Trạng thái'];
 
-        $dayNames = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
+        $bannerTitle = $isEn ? 'WEEKLY MENU' : 'THỰC ĐƠN TUẦN';
+        $rows[] = array_pad([$bannerTitle], 8, '');
+        $rows[] = array_pad([$this->subtitle], 8, '');
+
+        if ($isEn) {
+            $rows[] = ['#', 'Kitchen', 'Date', 'Day', 'Shift', 'Dish Name', 'Portions', 'Status'];
+            $dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        } else {
+            $rows[] = ['STT', 'Bếp ăn', 'Ngày', 'Thứ', 'Ca', 'Món ăn', 'Số suất', 'Trạng thái'];
+            $dayNames = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
+        }
 
         foreach ($this->menus as $i => $menu) {
             $cDate = $menu->date instanceof Carbon ? $menu->date : Carbon::parse($menu->date);
+            $statusLabel = __('menu.status.'.$menu->status);
+            if ($statusLabel === 'menu.status.'.$menu->status) {
+                $statusLabel = Menu::STATUS_LABELS[$menu->status] ?? $menu->status;
+            }
+
             $rows[] = [
                 $i + 1,
                 $menu->kitchen?->name ?? '',
@@ -123,7 +151,7 @@ class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
                 $menu->shift?->name ?? '',
                 $menu->recipe?->name ?? '',
                 (int) $menu->estimated_portions,
-                Menu::STATUS_LABELS[$menu->status] ?? $menu->status,
+                $statusLabel,
             ];
         }
 
