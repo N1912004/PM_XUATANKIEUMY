@@ -1025,29 +1025,36 @@ class ListMenus extends Page
             ->first()?->status ?? 'draft';
 
         $menusByShift = $dayMenus->groupBy('shift_id');
+        $defaultLabels = ['Món 1', 'Món 2', 'Rau xào / luộc', 'Canh', 'Cơm', 'Tráng miệng', 'Món chay 1', 'Món chay 2', 'Canh chay'];
 
         foreach ($shifts as $shift) {
             $menus = $menusByShift->get($shift->id, collect());
+            $shiftPortions = $menus->first()?->estimated_portions ?? 200;
 
             $recipes = [];
-            foreach ($menus as $m) {
+            foreach ($menus as $idx => $m) {
                 $recipes[] = [
                     'menu_id' => $m->id,
+                    'label' => $defaultLabels[$idx] ?? ('Món '.($idx + 1)),
                     'recipe_id' => $m->recipe_id,
                     'portions' => $m->estimated_portions,
                 ];
             }
 
             if (empty($recipes)) {
-                $recipes[] = [
-                    'menu_id' => null,
-                    'recipe_id' => '',
-                    'portions' => 1,
-                ];
+                foreach (array_slice($defaultLabels, 0, 6) as $lbl) {
+                    $recipes[] = [
+                        'menu_id' => null,
+                        'label' => $lbl,
+                        'recipe_id' => '',
+                        'portions' => $shiftPortions,
+                    ];
+                }
             }
 
             $this->dayItems[$shift->id] = [
                 'shift_name' => $shift->name,
+                'shift_portions' => $shiftPortions,
                 'recipes' => $recipes,
             ];
         }
@@ -1068,13 +1075,78 @@ class ListMenus extends Page
         }
     }
 
+    public function updatedDayItems($value, $key): void
+    {
+        $parts = explode('.', $key);
+        if (count($parts) === 2 && $parts[1] === 'shift_portions') {
+            $shiftId = $parts[0];
+            $portions = (int) $value;
+            if (isset($this->dayItems[$shiftId]['recipes'])) {
+                foreach ($this->dayItems[$shiftId]['recipes'] as $idx => $r) {
+                    $this->dayItems[$shiftId]['recipes'][$idx]['portions'] = $portions;
+                }
+            }
+        }
+    }
+
     public function addRecipeToShift($shiftId)
     {
+        $nextIdx = count($this->dayItems[$shiftId]['recipes'] ?? []) + 1;
+        $shiftPortions = (int) ($this->dayItems[$shiftId]['shift_portions'] ?? 200);
         $this->dayItems[$shiftId]['recipes'][] = [
             'menu_id' => null,
+            'label' => 'Món '.$nextIdx,
             'recipe_id' => '',
-            'portions' => 1,
+            'portions' => $shiftPortions,
         ];
+    }
+
+    public function addShiftToDay(): void
+    {
+        $nextId = (int) (collect(array_keys($this->dayItems))->max() ?? 0) + 1;
+        $defaultLabels = ['Món 1', 'Món 2', 'Rau xào / luộc', 'Canh', 'Cơm', 'Tráng miệng'];
+        $recipes = [];
+        foreach ($defaultLabels as $lbl) {
+            $recipes[] = [
+                'menu_id' => null,
+                'label' => $lbl,
+                'recipe_id' => '',
+                'portions' => 150,
+            ];
+        }
+
+        $this->dayItems[$nextId] = [
+            'shift_name' => 'Ca '.$nextId,
+            'shift_portions' => 150,
+            'recipes' => $recipes,
+        ];
+    }
+
+    public function removeShiftFromDay($shiftId): void
+    {
+        if (count($this->dayItems) <= 1) {
+            Notification::make()
+                ->title('Cần giữ lại tối thiểu 1 ca ăn!')
+                ->warning()
+                ->send();
+
+            return;
+        }
+
+        // Nếu ca có bản ghi menu đã lưu thì xóa các bản ghi menu
+        if (isset($this->dayItems[$shiftId]['recipes'])) {
+            foreach ($this->dayItems[$shiftId]['recipes'] as $item) {
+                if (! empty($item['menu_id'])) {
+                    $menu = Menu::find($item['menu_id']);
+                    if ($menu && MenuResource::canDelete($menu)) {
+                        $menu->auditReason = trim($this->dayEditReason) ?: null;
+                        $menu->delete();
+                    }
+                }
+            }
+        }
+
+        unset($this->dayItems[$shiftId]);
     }
 
     public function removeRecipeFromShift($shiftId, $index)
