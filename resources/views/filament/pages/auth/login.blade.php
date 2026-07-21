@@ -14,8 +14,9 @@
     // Toạ độ 8 múi 45°/múi (tâm 110,110 bán kính 110, bắt đầu từ đỉnh 12h)
     $pts = [[110,0],[187.78,32.22],[220,110],[187.78,187.78],[110,220],[32.22,187.78],[0,110],[32.22,32.22]];
 
-    // ĐỌC MÀU CHỦ ĐẠO TỪ SETTINGS (Mặc định brand BlueFire #267DC1 nếu chưa có cấu hình)
-    $primaryColor = \App\Models\Setting::get('primary_color', '#267DC1');
+    // MÀU THƯƠNG HIỆU BLUEFIRE CỐ ĐỊNH CHUẨN DÀNH RIÊNG CHO TRANG ĐĂNG NHẬP
+    // Độc lập hoàn toàn với cấu hình màu chủ đề hệ thống trong Admin Panel
+    $primaryColor = '#1267E8'; // Standard Corporate Royal Blue
 
     // Helper chuyển HEX sang RGB
     $hexToRgb = function ($hex) {
@@ -32,7 +33,7 @@
         return [$r, $g, $b];
     };
 
-    // Helper làm tối màu (darken) cho hover
+    // Helper làm tối màu (darken) cho hiệu ứng hover
     $darkenColor = function ($hex, $percent = 12) {
         $hex = str_replace('#', '', $hex);
         if (strlen($hex) == 3) {
@@ -49,40 +50,23 @@
         return sprintf("#%02x%02x%02x", $r, $g, $b);
     };
 
-    // Helper làm sáng màu (lighten) cho dải băng
-    $lightenColor = function ($hex, $percent = 10) {
-        $hex = str_replace('#', '', $hex);
-        if (strlen($hex) == 3) {
-            $hex = substr($hex, 0, 1) . substr($hex, 0, 1) . substr($hex, 1, 1) . substr($hex, 1, 1) . substr($hex, 2, 1) . substr($hex, 2, 1);
-        }
-        $r = hexdec(substr($hex, 0, 2));
-        $g = hexdec(substr($hex, 2, 2));
-        $b = hexdec(substr($hex, 4, 2));
-
-        $r = max(0, min(255, (int)($r + ((255 - $r) * $percent / 100))));
-        $g = max(0, min(255, (int)($g + ((255 - $g) * $percent / 100))));
-        $b = max(0, min(255, (int)($b + ((255 - $b) * $percent / 100))));
-
-        return sprintf("#%02x%02x%02x", $r, $g, $b);
-    };
-
     $rgb = $hexToRgb($primaryColor);
     $primaryColorRgb = implode(',', $rgb);
-    $primaryColorHover = $darkenColor($primaryColor, 12);
-    $primaryColorBand = $lightenColor($primaryColor, 10);
+    $primaryColorHover = '#0C50BB'; // Darker Royal Blue hover
+    $primaryColorBand = '#1267E8';  // Đồng bộ hoàn toàn cùng 1 tông xanh #1267E8
 @endphp
 <div class="lg-page">
 <style>
     :root {
-        --lg-bl: {{ $primaryColor }};
-        --lg-bl-d: {{ $primaryColorHover }};
-        --lg-bl-band: {{ $primaryColorBand }};
-        --lg-rd: #E11D48;
-        --lg-ink: #16233B;
-        --lg-mu: #5B6B84;
-        --lg-mu-strong: #46566E; /* xám đậm hơn ~13% cho subtitle — cùng hệ màu, chỉ tăng contrast */
-        --lg-line: #DCE4F0;
-        --lg-bg: #EDF1F7;
+        --lg-bl: #1267E8;
+        --lg-bl-d: #0C50BB;
+        --lg-bl-band: #1267E8;
+        --lg-rd: #DC2626;
+        --lg-ink: #0F172A;
+        --lg-mu: #64748B;
+        --lg-mu-strong: #475569;
+        --lg-line: #E2E8F0;
+        --lg-bg: #F4F7FB;
         --lg-card: #FFFFFF;
     }
 
@@ -167,7 +151,7 @@
     .lg-left { display: flex; flex-direction: column; height: 100%; padding: 4px 0 0; box-sizing: border-box; }
     .lg-lockup { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
     .lg-lockup .nm { font-size: 30px; font-weight: 800; color: var(--lg-bl); letter-spacing: -.02em; line-height: 1; }
-    .lg-lockup .tg { font-size: 11px; font-weight: 700; color: var(--lg-rd); letter-spacing: .34em; }
+    .lg-lockup .tg { font-size: 11px; font-weight: 700; color: var(--lg-bl); letter-spacing: .34em; }
 
     .lg-hero { margin-top: 24px; }
     .lg-hero h1 {
@@ -192,14 +176,14 @@
     }
     .lg-wheel svg { display: block; width: 100%; height: auto; }
     .lg-wheel-core {
-        position: absolute; inset: 50%; width: 46%; height: 46%; transform: translate(-50%, -50%);
+        position: absolute; inset: 50%; width: 44%; height: 44%; transform: translate(-50%, -50%);
         background: #fff; border-radius: 50%; display: flex; flex-direction: column;
-        align-items: center; justify-content: center; gap: 1.5px; text-align: center;
-        box-shadow: 0 0 0 5px rgba(255,255,255,.92);
+        align-items: center; justify-content: center; gap: 1px; text-align: center;
+        box-shadow: 0 0 0 5px rgba(255,255,255,.92); padding: 4px;
     }
-    .lg-wheel-core .nm { font-size: 15px; font-weight: 800; color: var(--lg-bl); line-height: 1.05; margin-top: 1px; }
-    .lg-wheel-core .tg { font-size: 6px; font-weight: 700; color: var(--lg-rd); letter-spacing: .25em; }
-    .lg-wheel-core .iso { font-size: 9.5px; font-weight: 800; color: var(--lg-bl); margin-top: 2px; }
+    .lg-wheel-core .nm { font-size: 13px; font-weight: 800; color: var(--lg-bl); line-height: 1; margin-top: 1px; }
+    .lg-wheel-core .tg { font-size: 5.5px; font-weight: 700; color: var(--lg-bl); letter-spacing: .22em; }
+    .lg-wheel-core .iso { font-size: 8px; font-weight: 800; color: var(--lg-bl); margin-top: 1px; letter-spacing: .02em; }
 
     /* 4 giá trị cốt lõi — icon OUTLINE như mẫu, không nền hộp */
     .lg-values { margin-top: auto; padding-top: 20px; display: flex; align-items: stretch; }
@@ -225,7 +209,7 @@
     }
     .lg-card-logo { display: flex; flex-direction: column; align-items: center; gap: 5px; margin-bottom: 18px; }
     .lg-card-logo .nm { font-size: 25px; font-weight: 800; color: var(--lg-bl); line-height: 1.05; }
-    .lg-card-logo .tg { font-size: 9.5px; font-weight: 700; color: var(--lg-rd); letter-spacing: .32em; }
+    .lg-card-logo .tg { font-size: 9.5px; font-weight: 700; color: var(--lg-bl); letter-spacing: .32em; }
 
     .lg-title { text-align: center; font-size: 24px; font-weight: 800; margin: 4px 0 0; letter-spacing: -.01em; }
     .lg-title-rule { width: 60px; height: 2px; background: var(--lg-bl); border-radius: 1px; margin: 12px auto 14px; }
@@ -236,8 +220,9 @@
     .lg-inputwrap { position: relative; }
     .lg-inputwrap > .fa-solid {
         position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
-        color: #9AA7BC; font-size: 15px; pointer-events: none;
+        color: #9AA7BC; font-size: 15px; pointer-events: none; transition: color .15s ease;
     }
+    .lg-inputwrap:focus-within > .fa-solid { color: var(--lg-bl); }
     .lg-input {
         width: 100%; height: 52px; border: 1.5px solid var(--lg-line); border-radius: 12px;
         padding: 0 46px 0 44px; font-size: 14.5px; color: var(--lg-ink); background: #fff;
@@ -248,7 +233,7 @@
     .lg-eye {
         position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
         width: 38px; height: 38px; border: none; background: transparent; cursor: pointer;
-        color: #9AA7BC; font-size: 15px; border-radius: 9px;
+        color: #9AA7BC; font-size: 15px; border-radius: 9px; transition: color .15s, background .15s;
     }
     .lg-eye:hover { color: var(--lg-bl); background: rgba({{ $primaryColorRgb }},.06); }
     .lg-err { display: block; margin-top: 7px; font-size: 12.5px; color: var(--lg-rd); font-weight: 600; }
@@ -267,11 +252,11 @@
         width: 100%; height: 54px; border: none; border-radius: 12px; cursor: pointer;
         background: var(--lg-bl) !important; color: #fff !important; font-size: 15.5px; font-weight: 800 !important;
         letter-spacing: .1em; text-transform: uppercase;
-        box-shadow: 0 8px 20px rgba({{ $primaryColorRgb }}, .18) !important; transition: background .15s, transform .1s;
+        box-shadow: 0 8px 20px rgba({{ $primaryColorRgb }}, .2) !important; transition: background .15s, box-shadow .15s, transform .1s;
         font-family: inherit;
     }
     .lg-page button.lg-submit[type="submit"]:hover,
-    .lg-page .lg-submit:hover { background: var(--lg-bl-d) !important; box-shadow: 0 8px 20px rgba({{ $primaryColorRgb }}, .18) !important; }
+    .lg-page .lg-submit:hover { background: var(--lg-bl-d) !important; box-shadow: 0 10px 26px rgba({{ $primaryColorRgb }}, .32) !important; }
     .lg-page .lg-submit:active { transform: translateY(1px); }
     .lg-page .lg-submit:focus-visible { outline: 3px solid rgba({{ $primaryColorRgb }},.4); outline-offset: 2px; }
     .lg-page .lg-submit[disabled] { opacity: .75; cursor: wait; }
@@ -350,7 +335,7 @@
                         <circle cx="110" cy="110" r="108.5" fill="none" stroke="#fff" stroke-width="3"/>
                     </svg>
                     <div class="lg-wheel-core">
-                        @include('filament.pages.auth.partials.bluefire-logo', ['height' => 26])
+                        @include('filament.pages.auth.partials.bluefire-logo', ['height' => 20])
                         <div class="nm">BlueFire</div>
                         <div class="tg">TASTE BEAUTY</div>
                         <div class="iso">ISO 22000:2018</div>
