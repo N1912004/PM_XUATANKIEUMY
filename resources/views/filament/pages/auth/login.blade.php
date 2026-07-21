@@ -176,14 +176,14 @@
     }
     .lg-wheel svg { display: block; width: 100%; height: auto; }
     .lg-wheel-core {
-        position: absolute; inset: 50%; width: 46%; height: 46%; transform: translate(-50%, -50%);
+        position: absolute; inset: 50%; width: 44%; height: 44%; transform: translate(-50%, -50%);
         background: #fff; border-radius: 50%; display: flex; flex-direction: column;
-        align-items: center; justify-content: center; gap: 1.5px; text-align: center;
-        box-shadow: 0 0 0 5px rgba(255,255,255,.92);
+        align-items: center; justify-content: center; gap: 1px; text-align: center;
+        box-shadow: 0 0 0 5px rgba(255,255,255,.92); padding: 4px;
     }
-    .lg-wheel-core .nm { font-size: 15px; font-weight: 800; color: var(--lg-bl); line-height: 1.05; margin-top: 1px; }
-    .lg-wheel-core .tg { font-size: 6px; font-weight: 700; color: var(--lg-bl); letter-spacing: .25em; }
-    .lg-wheel-core .iso { font-size: 9.5px; font-weight: 800; color: var(--lg-bl); margin-top: 2px; }
+    .lg-wheel-core .nm { font-size: 13px; font-weight: 800; color: var(--lg-bl); line-height: 1; margin-top: 1px; }
+    .lg-wheel-core .tg { font-size: 5.5px; font-weight: 700; color: var(--lg-bl); letter-spacing: .22em; }
+    .lg-wheel-core .iso { font-size: 8px; font-weight: 800; color: var(--lg-bl); margin-top: 1px; letter-spacing: .02em; }
 
     /* 4 giá trị cốt lõi — icon OUTLINE như mẫu, không nền hộp */
     .lg-values { margin-top: auto; padding-top: 20px; display: flex; align-items: stretch; }
@@ -334,7 +334,7 @@
                         <circle cx="110" cy="110" r="108.5" fill="none" stroke="#fff" stroke-width="3"/>
                     </svg>
                     <div class="lg-wheel-core">
-                        @include('filament.pages.auth.partials.bluefire-logo', ['height' => 26])
+                        @include('filament.pages.auth.partials.bluefire-logo', ['height' => 20])
                         <div class="nm">BlueFire</div>
                         <div class="tg">TASTE BEAUTY</div>
                         <div class="iso">ISO 22000:2018</div>
