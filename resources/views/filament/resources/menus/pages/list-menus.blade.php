@@ -624,15 +624,11 @@
         </div>
 
         <!-- ════════════════════════ POPUP CHỌN MÓN ════════════════════════ -->
+        <div x-show="isOpen" x-cloak style="position:fixed; inset:0; background:rgba(15,23,42,.48); backdrop-filter:blur(4px); z-index:9999" @click="closeModal()"></div>
+
         <div x-show="isOpen" x-cloak 
-             style="position:fixed; inset:0; z-index:10000; display:flex; align-items:center; justify-content:center; padding:16px; box-sizing:border-box"
+             style="position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); z-index:10000; width:640px; max-width:92vw; height:min(620px, 84vh); max-height:84vh; background:var(--po-wh, #fff); border-radius:16px; box-shadow:0 20px 60px rgba(15,23,42,.28); overflow:hidden; display:flex; flex-direction:column"
              @keydown.escape.window="closeModal()">
-
-            <!-- Backdrop -->
-            <div style="position:fixed; inset:0; background:rgba(15,23,42,.48); backdrop-filter:blur(4px); z-index:1" @click="closeModal()"></div>
-
-            <!-- Modal Dialog Card -->
-            <div style="position:relative; z-index:2; width:640px; max-width:100%; height:min(660px, calc(100vh - 32px)); max-height:calc(100vh - 32px); background:var(--po-wh, #fff); border-radius:16px; box-shadow:0 20px 60px rgba(15,23,42,.25); overflow:hidden; display:flex; flex-direction:column">
 
             <!-- Popup Header -->
             <div style="display:flex; align-items:center; justify-content:space-between; padding:16px 20px; border-bottom:1px solid var(--po-bd, #e2e8f0); flex-shrink:0">
@@ -731,7 +727,6 @@
             </div>
         </div>
     </div>
-</div>
 
     @elseif($activeView === 'day')
         <!-- =========================================================================
