@@ -954,14 +954,7 @@
                     </div>
                 @endforeach
 
-                <!-- Action Buttons Row -->
-                @unless($dayHasPastLockedMenus)
-                    <div style="display:flex; gap:10px; margin-top:4px">
-                        <button type="button" wire:click="addShiftToDay" style="flex:1; height:42px; border:1.5px dashed var(--po-bl); border-radius:10px; background:var(--po-bl-s); color:var(--po-bl); font-size:13.5px; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:6px">
-                            <i class="fa-solid fa-plus"></i> {{ __('menu.actions.add_shift') }}
-                        </button>
-                    </div>
-                @endunless
+
             </div>
         </div>
 
