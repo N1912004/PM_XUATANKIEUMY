@@ -185,7 +185,7 @@ class CreatePurchaseOrder extends Page
             $selectedSupplierId = $this->itemSuppliers[$ingId] ?? ($this->groupSuppliers[$gKey] ?? $firstSupplierId);
 
             $existingOrders = isset($existingPOItems[$ingId])
-                ? $existingPOItems[$ingId]->pluck('code')->unique()->values()->all()
+                ? array_values(array_unique(array_filter($existingPOItems[$ingId]->pluck('code')->toArray())))
                 : [];
 
             if (! isset($this->itemSelected[$ingId])) {
