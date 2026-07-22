@@ -41,6 +41,20 @@ class EditPurchaseOrder extends EditRecord
             ->get();
     }
 
+    public function formatFriendly(float $value): string
+    {
+        if ($value >= 1000000) {
+            $m = $value / 1000000;
+
+            return (floor($m) == $m ? number_format($m, 0) : number_format($m, 1, '.', '')).' tr';
+        }
+        if ($value >= 1000) {
+            return __('purchase_order.currency.thousand', ['value' => number_format($value / 1000, 0, '.', '.')]);
+        }
+
+        return __('purchase_order.currency.amount', ['value' => number_format($value)]);
+    }
+
     /**
      * Xuất đơn đặt hàng theo BIỂU MẪU NCC (MẪU ĐƠN ĐẶT HÀNG.xlsx): file .xlsx thật,
      * section theo nhóm nguyên liệu, dòng tổng cộng + khối chữ ký.
