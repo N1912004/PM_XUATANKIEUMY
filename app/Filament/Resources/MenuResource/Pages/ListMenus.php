@@ -941,7 +941,7 @@ class ListMenus extends Page
 
         if (! $hasAnyRecipe) {
             Notification::make()
-                ->title('Chưa chọn món ăn!')
+                ->title(__('menu.notifications.no_items_title'))
                 ->body(__('menu.notifications.no_items'))
                 ->warning()
                 ->send();
@@ -1399,7 +1399,7 @@ class ListMenus extends Page
 
         if (! $hasAnyRecipe) {
             Notification::make()
-                ->title('Chưa chọn món ăn!')
+                ->title(__('menu.notifications.no_items_title'))
                 ->body(__('menu.notifications.no_items'))
                 ->warning()
                 ->send();
