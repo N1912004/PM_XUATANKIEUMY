@@ -193,9 +193,11 @@ class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
             $drawing->setDescription('System Brand Logo');
             $drawing->setPath($resolvedLogoPath);
             $drawing->setCoordinates('A1');
-            $drawing->setHeight(60);
+            $drawing->setResizeProportional(true);
+            $drawing->setWidth(160);
+            $drawing->setHeight(48);
             $drawing->setOffsetX(10);
-            $drawing->setOffsetY(6);
+            $drawing->setOffsetY(10);
             $drawing->setWorksheet($sheet);
         } else {
             $sheet->setCellValue('A1', "BlueFire\nTASTE & BEAUTY");
@@ -359,9 +361,11 @@ class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
             $drawing->setDescription('System Brand Logo');
             $drawing->setPath($resolvedLogoPath);
             $drawing->setCoordinates('A1');
-            $drawing->setHeight(50);
+            $drawing->setResizeProportional(true);
+            $drawing->setWidth(160);
+            $drawing->setHeight(48);
             $drawing->setOffsetX(10);
-            $drawing->setOffsetY(4);
+            $drawing->setOffsetY(6);
             $drawing->setWorksheet($sheet);
         }
 
