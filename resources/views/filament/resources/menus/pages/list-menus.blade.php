@@ -150,7 +150,7 @@
         <!-- List cards -->
         <div class="mp-card-list">
             @forelse($menusList as $row)
-                <div wire:click="{{ $row['type'] === 'week' ? "editWeekMenu({$row['id']})" : "loadDayMenu({$row['kitchen_id']}, '{$row['start_date']}', true)" }}" class="mp-item">
+                <div wire:click="{{ $row['type'] === 'week' ? "editWeekMenu({$row['id']})" : "editDayMenu({$row['id']})" }}" class="mp-item">
                     <div class="mp-item-ico" style="{{ $row['type'] === 'week' ? 'background:var(--po-bl-s);color:var(--po-bl)' : 'background:var(--po-pu-s);color:var(--po-pu)' }}">
                         @if($row['type'] === 'week')
                             <i class="fa-solid fa-calendar-days"></i>
@@ -178,11 +178,11 @@
 
                         <div class="mp-item-actions" style="margin-top: 8px">
                             <!-- Xem chi tiết / Chỉnh sửa -->
-                            <button wire:click="{{ $row['type'] === 'week' ? "editWeekMenu({$row['id']})" : "loadDayMenu({$row['kitchen_id']}, '{$row['start_date']}', true)" }}" class="abt" title="{{ __('menu.actions.edit') }}">
+                            <button wire:click="{{ $row['type'] === 'week' ? "editWeekMenu({$row['id']})" : "editDayMenu({$row['id']})" }}" class="abt" title="{{ __('menu.actions.edit') }}">
                                 <i class="fa-solid fa-pencil"></i>
                             </button>
                             <!-- Xuất Excel -->
-                            <button class="abt" title="{{ __('menu.actions.export_excel') }}" wire:click="exportMenus({{ $row['kitchen_id'] }}, '{{ $row['start_date'] }}', '{{ $row['end_date'] }}')">
+                            <button class="abt" title="{{ __('menu.actions.export_excel') }}" wire:click="{{ $row['type'] === 'day' ? "exportDayMenu({$row['id']})" : "exportWeekMenu({$row['id']})" }}">
                                 <i class="fa-solid fa-file-excel" style="color:var(--po-gn)"></i>
                             </button>
                         </div>
@@ -275,7 +275,6 @@
             selectedRecipeCost: '',
             customName: '',
             portions: 1,
-            phan: 1,
             recipes: @js($this->recipesData),
             displayLimit: 50,
 
@@ -285,7 +284,7 @@
                 this.groups = Array.from(set);
             },
 
-            openModal(day, shiftId, categoryIdx, shiftName, dayDow, dayDateStr, categoryLabel, currentRecipeId, currentPortions, currentPhan, currentCustomName) {
+            openModal(day, shiftId, categoryIdx, shiftName, dayDow, dayDateStr, categoryLabel, currentRecipeId, currentPortions, currentCustomName) {
                 this.targetDay = day;
                 this.targetShiftId = shiftId;
                 this.targetCategoryIdx = categoryIdx;
@@ -296,7 +295,6 @@
                 this.activeGroup = 'all';
                 this.displayLimit = 50;
                 this.portions = currentPortions || 1;
-                this.phan = currentPhan || 1;
                 this.customName = currentCustomName || '';
 
                 let found = null;
@@ -377,7 +375,6 @@
                 if (this.targetDay !== null && this.targetShiftId !== null && this.targetCategoryIdx !== null) {
                     $wire.set('weekCells.' + this.targetDay + '.' + this.targetShiftId + '.' + this.targetCategoryIdx + '.recipe_id', this.selectedRecipeId);
                     $wire.set('weekCells.' + this.targetDay + '.' + this.targetShiftId + '.' + this.targetCategoryIdx + '.portions', this.portions);
-                    $wire.set('weekCells.' + this.targetDay + '.' + this.targetShiftId + '.' + this.targetCategoryIdx + '.phan', this.phan);
                 }
                 this.closeModal();
             }
@@ -395,7 +392,7 @@
                 @php $weekRank = \App\Models\Menu::STATUS_ORDER[$weekStatus] ?? 0; @endphp
                 <button wire:click="switchView('list')" class="emp-btn"><i class="fa-solid fa-arrow-left"></i> {{ __('menu.actions.back') }}</button>
                 @if($isEditingWeek)
-                    <button wire:click="exportMenus({{ $weekKitchenId }}, '{{ $weekDateFrom }}', '{{ $weekDateTo }}')" class="emp-btn">
+                    <button wire:click="exportWeekForm" class="emp-btn">
                         <i class="fa-solid fa-file-excel" style="color:var(--po-gn)"></i> {{ __('menu.actions.export_excel') }}
                     </button>
                 @endif
@@ -408,7 +405,10 @@
                     @if(! $isEditingWeek || $weekRank <= \App\Models\Menu::STATUS_ORDER['sent'])
                         <button wire:click="saveWeekMenu('sent')" class="emp-btn"><i class="fa-regular fa-paper-plane"></i> {{ __('menu.actions.send_customer') }}</button>
                     @endif
-                    <button wire:click="saveWeekMenu('locked')" class="emp-btn emp-btn-primary"><i class="fa-solid fa-lock"></i> {{ __('menu.actions.lock') }}</button>
+                    <button wire:click="saveWeekMenu('locked')" wire:loading.attr="disabled" wire:target="saveWeekMenu" class="emp-btn emp-btn-primary">
+                        <i class="fa-solid {{ $weekRank >= \App\Models\Menu::STATUS_ORDER['locked'] ? 'fa-floppy-disk' : 'fa-lock' }}"></i>
+                        {{ $weekRank >= \App\Models\Menu::STATUS_ORDER['locked'] ? __('menu.actions.save_changes') : __('menu.actions.lock') }}
+                    </button>
                 @endunless
             </div>
         </div>
@@ -554,12 +554,11 @@
                                             $cellVal = $this->weekCells[$d][$shift->id][$ci] ?? ['recipe_id' => '', 'portions' => 1, 'phan' => 1];
                                             $selectedRec = $recipes->firstWhere('id', $cellVal['recipe_id'] ?? null);
                                             $portionsVal = (int) ($cellVal['portions'] ?? 1);
-                                            $phanVal = (int) ($cellVal['phan'] ?? 1);
                                             $cellTitle = $selectedRec?->name ?? '';
                                         @endphp
                                         <div style="min-width:130px">
                                             <button type="button" 
-                                                    @click="openModal({{ $d }}, {{ $shift->id }}, {{ $ci }}, '{{ e($shift->name) }}', '{{ e($wDay['day_name']) }}', '{{ date('d-m', strtotime($wDay['date'])) }}', '{{ e($customDishCategories[$ci] ?? $catLabel) }}', '{{ $cellVal['recipe_id'] ?? '' }}', {{ $portionsVal }}, {{ $phanVal }}, '{{ e($cellTitle) }}')"
+                                                    @click="openModal({{ $d }}, {{ $shift->id }}, {{ $ci }}, @js($shift->name), @js($wDay['day_name']), '{{ date('d-m', strtotime($wDay['date'])) }}', @js($customDishCategories[$ci] ?? $catLabel), '{{ $cellVal['recipe_id'] ?? '' }}', {{ $portionsVal }}, @js($cellTitle))"
                                                     @disabled($weekHasPastLockedMenus)
                                                     style="border:1px solid {{ $selectedRec ? 'var(--po-bl-m, #bfdbfe)' : 'var(--po-bd, #e2e8f0)' }}; border-radius:8px; padding:6px 8px; background:{{ $selectedRec ? '#FAFCFF' : '#fff' }}; text-align:left; cursor:pointer; width:100%; transition:all .15s; outline:none; display:flex; flex-direction:column; gap:2px">
                                                 @if($selectedRec)
@@ -567,15 +566,14 @@
                                                         {{ $selectedRec->name }}
                                                     </div>
                                                     <div style="font-size:11px; font-weight:700; color:var(--po-bl, #2563eb); display:flex; align-items:center; gap:4px">
-                                                        <span>{{ $portionsVal }} {{ __('menu.labels.portions') }}</span>
-                                                        <span style="font-weight:500; color:var(--po-mu)">· {{ $phanVal }} {{ __('menu.popup.phan_suffix') }}</span>
+                                                        <span>{{ $portionsVal }} {{ __('menu.popup.phan_suffix') }}</span>
                                                     </div>
                                                 @else
                                                     <div style="font-size:11.5px; font-weight:500; color:var(--po-mu)">
                                                         <em>{{ __('menu.placeholders.select_dish') }}</em>
                                                     </div>
                                                     <div style="font-size:11px; font-weight:600; color:var(--po-bl); opacity:.8">
-                                                        {{ $portionsVal }} {{ __('menu.labels.portions') }} · {{ $phanVal }} {{ __('menu.popup.phan_suffix') }}
+                                                        {{ $portionsVal }} {{ __('menu.popup.phan_suffix') }}
                                                     </div>
                                                 @endif
                                             </button>
@@ -704,15 +702,9 @@
                 <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:nowrap">
                     <div style="display:flex; align-items:center; gap:10px; flex-wrap:nowrap">
                         <div style="display:flex; align-items:center; gap:4px; font-size:12px; color:var(--po-tx2)">
-                            <i class="fa-solid fa-users" style="color:var(--po-bl, #2563eb); font-size:12px"></i>
-                            <span style="font-weight:600">{{ __('menu.popup.portions_label') }}</span>
-                            <input x-model.number="portions" type="number" min="1" style="width:58px; height:32px; border:1.5px solid var(--po-bd, #e2e8f0); border-radius:8px; padding:0 6px; font-size:13px; font-weight:700; color:var(--po-bl, #2563eb); text-align:center; outline:none">
-                            <span style="font-size:11.5px; color:var(--po-mu)">{{ __('menu.labels.portions') }}</span>
-                        </div>
-                        <div style="display:flex; align-items:center; gap:4px; font-size:12px; color:var(--po-tx2)">
                             <i class="fa-solid fa-layer-group" style="color:var(--po-gn, #059669); font-size:12px"></i>
                             <span style="font-weight:600">{{ __('menu.popup.phan_label') }}</span>
-                            <input x-model.number="phan" type="number" min="1" step="1" style="width:52px; height:32px; border:1.5px solid var(--po-bd, #e2e8f0); border-radius:8px; padding:0 6px; font-size:13px; font-weight:700; color:var(--po-gn, #059669); text-align:center; outline:none">
+                            <input x-model.number="portions" type="number" min="1" style="width:58px; height:32px; border:1.5px solid var(--po-bd, #e2e8f0); border-radius:8px; padding:0 6px; font-size:13px; font-weight:700; color:var(--po-bl, #2563eb); text-align:center; outline:none">
                             <span style="font-size:11.5px; color:var(--po-mu)">{{ __('menu.popup.phan_suffix') }}</span>
                         </div>
                     </div>
@@ -728,6 +720,81 @@
     </div>
 
     @elseif($activeView === 'day')
+        <div x-data="{
+            isOpen: false,
+            search: '',
+            activeGroup: 'all',
+            displayLimit: 50,
+            targetShiftId: null,
+            targetRecipeIndex: null,
+            subtitle: '',
+            selectedRecipeId: null,
+            selectedRecipeName: '',
+            selectedRecipeCost: '',
+            portions: 1,
+            recipes: @js($this->recipesData),
+            groups: [],
+
+            init() {
+                this.groups = [...new Set(this.recipes.map(recipe => recipe.group).filter(Boolean))];
+            },
+
+            openDayModal(shiftId, recipeIndex, shiftName, label, currentRecipeId, currentPortions) {
+                this.targetShiftId = shiftId;
+                this.targetRecipeIndex = recipeIndex;
+                this.subtitle = `${shiftName} / ${label}`;
+                this.search = '';
+                this.activeGroup = 'all';
+                this.displayLimit = 50;
+                this.portions = currentPortions || 1;
+                const selected = this.recipes.find(recipe => String(recipe.id) === String(currentRecipeId));
+                this.selectedRecipeId = selected?.id ?? null;
+                this.selectedRecipeName = selected?.name ?? '';
+                this.selectedRecipeCost = selected?.cost_formatted ?? '';
+                this.isOpen = true;
+                this.$nextTick(() => this.$refs.daySearchInput?.focus());
+            },
+
+            closeDayModal() {
+                this.isOpen = false;
+            },
+
+            selectDayRecipe(recipe) {
+                if (String(this.selectedRecipeId) === String(recipe.id)) {
+                    this.clearDaySelection();
+                    return;
+                }
+                this.selectedRecipeId = recipe.id;
+                this.selectedRecipeName = recipe.name;
+                this.selectedRecipeCost = recipe.cost_formatted;
+            },
+
+            clearDaySelection() {
+                this.selectedRecipeId = null;
+                this.selectedRecipeName = '';
+                this.selectedRecipeCost = '';
+            },
+
+            filteredDayRecipes() {
+                const query = this.search.toLowerCase().trim();
+                return this.recipes.filter(recipe =>
+                    (this.activeGroup === 'all' || recipe.group === this.activeGroup)
+                    && (!query || recipe.name.toLowerCase().includes(query))
+                );
+            },
+
+            visibleDayRecipes() {
+                return this.filteredDayRecipes().slice(0, this.displayLimit);
+            },
+
+            confirmDaySelection() {
+                if (this.targetShiftId !== null && this.targetRecipeIndex !== null) {
+                    $wire.set(`dayItems.${this.targetShiftId}.recipes.${this.targetRecipeIndex}.recipe_id`, this.selectedRecipeId);
+                    $wire.set(`dayItems.${this.targetShiftId}.recipes.${this.targetRecipeIndex}.portions`, this.portions);
+                }
+                this.closeDayModal();
+            }
+        }">
         <!-- =========================================================================
              VIEW 3: BIỂU MẪU THỰC ĐƠN NGÀY (DAY VIEW)
              ========================================================================= -->
@@ -741,7 +808,7 @@
                 @php $dayRank = \App\Models\Menu::STATUS_ORDER[$dayStatus] ?? 0; @endphp
                 <button wire:click="switchView('list')" class="emp-btn"><i class="fa-solid fa-arrow-left"></i> {{ __('menu.actions.back') }}</button>
                 @if($isEditingDay)
-                    <button wire:click="exportMenus({{ $dayKitchenId }}, '{{ $dayDate }}', '{{ $dayDate }}')" class="emp-btn">
+                    <button wire:click="exportDayMenu({{ $dayMenuId }})" class="emp-btn">
                         <i class="fa-solid fa-file-excel" style="color:var(--po-gn)"></i> {{ __('menu.actions.export_excel') }}
                     </button>
                 @endif
@@ -836,16 +903,21 @@
                                 <div class="dv-field">
                                     <input wire:model="dayItems.{{ $shiftId }}.recipes.{{ $index }}.label" class="ctrl" style="font-size:11.5px; font-weight:700; color:var(--po-mu); border:none; background:transparent; outline:none; height:auto; padding:0 2px; margin-bottom:4px; width:100%" placeholder="{{ __('menu.placeholders.dish_label') }}" @disabled($dayHasPastLockedMenus)>
                                     <div style="display:flex; gap:8px; align-items:center">
-                                        <select wire:model="dayItems.{{ $shiftId }}.recipes.{{ $index }}.recipe_id" class="ctrl" style="flex:1; height:38px; border:1.5px solid var(--po-bd); border-radius:8px; font-size:13px; color:var(--po-tx)" @disabled($dayHasPastLockedMenus)>
-                                            <option value="">{{ __('menu.placeholders.select_dish') }}</option>
-                                            @foreach($recipes as $rec)
-                                                <option value="{{ $rec->id }}">{{ $rec->name }}</option>
-                                            @endforeach
-                                        </select>
-                                        <div style="display:flex; align-items:center; gap:4px; flex-shrink:0">
-                                            <input wire:model="dayItems.{{ $shiftId }}.recipes.{{ $index }}.phan" type="number" min="1" class="ctrl" style="width:48px; height:38px; border:1.5px solid var(--po-bd); border-radius:8px; text-align:center; font-size:13px; font-weight:700; color:var(--po-gn, #059669); outline:none" @disabled($dayHasPastLockedMenus)>
-                                            <span style="font-size:11px; font-weight:500; color:var(--po-mu)">{{ __('menu.popup.phan_suffix') }}</span>
-                                        </div>
+                                        @php $dayRecipe = $recipes->firstWhere('id', $item['recipe_id'] ?? null); @endphp
+                                        <button
+                                            type="button"
+                                            @click="openDayModal({{ $shiftId }}, {{ $index }}, @js($shiftName), @js($item['label'] ?? __('menu.labels.dish_index', ['index' => $index + 1])), '{{ $item['recipe_id'] ?? '' }}', {{ (int) ($item['portions'] ?? 1) }})"
+                                            @disabled($dayHasPastLockedMenus)
+                                            class="ctrl"
+                                            style="flex:1; min-height:38px; border:1.5px solid var(--po-bd); border-radius:8px; padding:7px 10px; background:var(--po-wh); text-align:left; cursor:pointer; display:flex; align-items:center; justify-content:space-between; gap:8px"
+                                        >
+                                            <span style="font-size:13px; font-weight:{{ $dayRecipe ? '700' : '500' }}; color:{{ $dayRecipe ? 'var(--po-tx)' : 'var(--po-fa)' }}">
+                                                {{ $dayRecipe?->name ?? __('menu.placeholders.select_dish') }}
+                                            </span>
+                                            <span style="font-size:11.5px; color:var(--po-gn); white-space:nowrap">
+                                                {{ (int) ($item['portions'] ?? 1) }} {{ __('menu.popup.phan_suffix') }}
+                                            </span>
+                                        </button>
                                         @unless($dayHasPastLockedMenus)
                                             <button type="button" wire:click="removeRecipeFromShift({{ $shiftId }}, {{ $index }})" title="{{ __('menu.actions.remove_dish') }}" style="width:34px; height:38px; border:1px solid var(--po-bd); border-radius:8px; background:var(--po-wh); color:var(--po-rd); cursor:pointer; flex-shrink:0; display:grid; place-items:center">
                                                 <i class="fa-solid fa-trash-can" style="font-size:12px"></i>
@@ -874,6 +946,71 @@
                     </div>
                 @endunless
             </div>
+        </div>
+
+        <div x-show="isOpen" x-cloak style="position:fixed; inset:0; background:rgba(15,23,42,.48); backdrop-filter:blur(4px); z-index:9999" @click="closeDayModal()"></div>
+        <div x-show="isOpen" x-cloak style="position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); z-index:10000; width:640px; max-width:94vw; max-height:calc(100vh - 32px); background:var(--po-wh); border-radius:16px; box-shadow:0 20px 60px rgba(15,23,42,.3); overflow:hidden; display:flex; flex-direction:column" @keydown.escape.window="closeDayModal()">
+            <div style="display:flex; align-items:center; justify-content:space-between; padding:14px 20px; border-bottom:1px solid var(--po-bd)">
+                <div>
+                    <div style="font-size:15px; font-weight:800; color:var(--po-tx)">{{ __('menu.popup.title') }}</div>
+                    <div style="font-size:12px; color:var(--po-mu); margin-top:2px" x-text="subtitle"></div>
+                </div>
+                <button type="button" @click="closeDayModal()" style="width:32px; height:32px; border:none; background:var(--po-bd2); border-radius:8px; cursor:pointer; color:var(--po-mu)">✕</button>
+            </div>
+
+            <div style="padding:12px 20px 0">
+                <div style="display:flex; align-items:center; gap:8px; background:var(--po-bg); border:1.5px solid var(--po-bd); border-radius:9px; padding:0 12px; height:38px; margin-bottom:10px">
+                    <i class="fa-solid fa-magnifying-glass" style="color:var(--po-fa)"></i>
+                    <input x-ref="daySearchInput" x-model="search" @input="displayLimit = 50" type="text" placeholder="{{ __('menu.popup.search_placeholder') }}" style="border:none; background:transparent; outline:none; width:100%; color:var(--po-tx)">
+                </div>
+                <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px">
+                    <button type="button" class="popup-grp-btn" :class="{ 'active': activeGroup === 'all' }" @click="activeGroup = 'all'; displayLimit = 50">{{ __('menu.popup.all') }}</button>
+                    <template x-for="group in groups" :key="group">
+                        <button type="button" class="popup-grp-btn" :class="{ 'active': activeGroup === group }" @click="activeGroup = group; displayLimit = 50" x-text="group"></button>
+                    </template>
+                </div>
+            </div>
+
+            <div style="min-height:120px; max-height:300px; overflow-y:auto; padding:0 20px 12px" @scroll="if ($el.scrollTop + $el.clientHeight >= $el.scrollHeight - 60) displayLimit += 50">
+                <template x-for="recipe in visibleDayRecipes()" :key="recipe.id">
+                    <div class="popup-dish" :class="{ 'selected': selectedRecipeId == recipe.id }" @click="selectDayRecipe(recipe)">
+                        <div class="popup-dish-chk" x-text="selectedRecipeId == recipe.id ? '✓' : ''"></div>
+                        <div class="popup-dish-ico"><i class="fa-solid fa-bowl-food"></i></div>
+                        <div style="flex:1; min-width:0">
+                            <div class="popup-dish-nm" x-text="recipe.name"></div>
+                            <div class="popup-dish-meta" x-text="@js(__('menu.popup.group_prefix')) + recipe.group"></div>
+                        </div>
+                        <div class="popup-dish-cost">
+                            <span x-text="recipe.cost_formatted" style="font-size:12px; font-weight:700; color:var(--po-gn)"></span>
+                            <span style="display:block; font-size:10px; color:var(--po-fa)">{{ __('menu.popup.cost_per_portion') }}</span>
+                        </div>
+                    </div>
+                </template>
+                <div x-show="filteredDayRecipes().length === 0" style="text-align:center; padding:28px; color:var(--po-fa)">{{ __('menu.popup.no_results') }}</div>
+            </div>
+
+            <div style="padding:12px 20px 14px; border-top:1px solid var(--po-bd); background:var(--po-bg)">
+                <div x-show="selectedRecipeId" style="display:flex; align-items:center; justify-content:space-between; background:var(--po-bl-s); border:1.5px solid var(--po-bl-m); border-radius:9px; padding:8px 12px; margin-bottom:10px">
+                    <div>
+                        <div style="font-size:13px; font-weight:700; color:var(--po-tx)" x-text="selectedRecipeName"></div>
+                        <div style="font-size:11px; color:var(--po-mu)" x-text="'Cost: ' + selectedRecipeCost + ' / ' + @js(__('menu.popup.phan_suffix'))"></div>
+                    </div>
+                    <button type="button" @click="clearDaySelection()" style="border:none; background:none; color:var(--po-rd); font-weight:600; cursor:pointer">{{ __('menu.popup.unselect') }}</button>
+                </div>
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap">
+                    <div style="display:flex; align-items:center; gap:6px; color:var(--po-tx2)">
+                        <i class="fa-solid fa-layer-group" style="color:var(--po-gn)"></i>
+                        <span style="font-weight:600">{{ __('menu.popup.phan_label') }}</span>
+                        <input x-model.number="portions" type="number" min="1" style="width:64px; height:34px; border:1.5px solid var(--po-bd); border-radius:8px; text-align:center; font-weight:700; color:var(--po-gn)">
+                        <span>{{ __('menu.popup.phan_suffix') }}</span>
+                    </div>
+                    <div style="display:flex; gap:8px">
+                        <button type="button" @click="closeDayModal()" class="emp-btn">{{ __('menu.popup.cancel') }}</button>
+                        <button type="button" @click="confirmDaySelection()" class="emp-btn emp-btn-primary"><i class="fa-solid fa-check"></i> {{ __('menu.popup.confirm') }}</button>
+                    </div>
+                </div>
+            </div>
+        </div>
         </div>
     @endif
 </div>
