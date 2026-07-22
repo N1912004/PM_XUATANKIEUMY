@@ -183,6 +183,8 @@ class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
 
         if ($systemLogoRel && Storage::disk('public')->exists($systemLogoRel)) {
             $resolvedLogoPath = Storage::disk('public')->path($systemLogoRel);
+        } elseif (file_exists(public_path('images/bluefire-logo.png'))) {
+            $resolvedLogoPath = public_path('images/bluefire-logo.png');
         } elseif (file_exists(storage_path('app/public/bluefire-logo.png'))) {
             $resolvedLogoPath = storage_path('app/public/bluefire-logo.png');
         }
@@ -351,6 +353,8 @@ class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
 
         if ($systemLogoRel && Storage::disk('public')->exists($systemLogoRel)) {
             $resolvedLogoPath = Storage::disk('public')->path($systemLogoRel);
+        } elseif (file_exists(public_path('images/bluefire-logo.png'))) {
+            $resolvedLogoPath = public_path('images/bluefire-logo.png');
         } elseif (file_exists(storage_path('app/public/bluefire-logo.png'))) {
             $resolvedLogoPath = storage_path('app/public/bluefire-logo.png');
         }
