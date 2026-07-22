@@ -11,6 +11,7 @@ use App\Models\Supplier;
 use Carbon\Carbon;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\DB;
 
 class CreatePurchaseOrder extends Page
@@ -22,6 +23,11 @@ class CreatePurchaseOrder extends Page
     public function getHeading(): string
     {
         return '';
+    }
+
+    public function getHeader(): ?View
+    {
+        return null;
     }
 
     public string $orderDate = '';
@@ -71,6 +77,13 @@ class CreatePurchaseOrder extends Page
             foreach ($groups[$groupKey]['items'] as $item) {
                 $this->itemSuppliers[$item['ingredient_id']] = $value;
             }
+        }
+    }
+
+    public function updatedItemQuantities($value, $key): void
+    {
+        if (is_numeric($value) && (float) $value < 0) {
+            $this->itemQuantities[$key] = 0;
         }
     }
 
@@ -190,7 +203,7 @@ class CreatePurchaseOrder extends Page
             }
 
             $ingId = $item['ingredient_id'];
-            $manualQty = $this->itemQuantities[$ingId] ?? round($item['total_kg'], 2);
+            $manualQty = max(0, (float) ($this->itemQuantities[$ingId] ?? round($item['total_kg'], 2)));
 
             $rawTypeName = str_replace(['🥩 ', '🥬 ', '📦 '], '', $item['group_label']);
             $matchedSupplier = $allSuppliers->first(function ($s) use ($rawTypeName) {
@@ -208,10 +221,9 @@ class CreatePurchaseOrder extends Page
                 : [];
 
             if (! isset($this->itemSelected[$ingId])) {
-                $isSelected = empty($existingOrders);
-            } else {
-                $isSelected = (bool) $this->itemSelected[$ingId];
+                $this->itemSelected[$ingId] = empty($existingOrders);
             }
+            $isSelected = (bool) $this->itemSelected[$ingId];
 
             $item['already_ordered_pos'] = $existingOrders;
             $item['selected'] = $isSelected;

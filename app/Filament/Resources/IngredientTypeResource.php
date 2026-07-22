@@ -50,8 +50,8 @@ class IngredientTypeResource extends Resource
                     ->unique(ignoreRecord: true)
                     ->maxLength(255),
                 Forms\Components\TextInput::make('icon')
-                    ->label('Biểu tượng (Icon / Emoji)')
-                    ->placeholder('VD: 🥩, 🥬, 📦, 🧂, 🌾')
+                    ->label(__('ingredient.type.icon'))
+                    ->placeholder(__('ingredient.type.icon_placeholder'))
                     ->maxLength(50),
             ]);
     }
@@ -75,7 +75,7 @@ class IngredientTypeResource extends Resource
                     ])
                     ->width('56px'),
                 Tables\Columns\TextColumn::make('icon')
-                    ->label('Biểu tượng')
+                    ->label(__('ingredient.type.table_icon'))
                     ->alignCenter()
                     ->width('100px'),
                 Tables\Columns\TextColumn::make('name')

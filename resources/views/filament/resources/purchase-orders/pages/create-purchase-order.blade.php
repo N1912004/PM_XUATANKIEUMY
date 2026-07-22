@@ -26,7 +26,7 @@
         $supplierCount = count($uniqueSupplierIds);
     @endphp
 
-    <div class="po-page w-full space-y-6" style="padding: 0 !important; background: transparent !important; padding-bottom: 90px !important;">
+    <div class="po-page w-full space-y-6" style="padding: 0 !important; background: transparent !important; padding-bottom: 20px !important;">
         <!-- Header Bar -->
         <div class="po-head" style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 16px;">
             <div>
@@ -96,9 +96,9 @@
             @php
                 $groupTotal = collect($group['items'])->sum('line_total');
             @endphp
-            <div class="oh-group-card" style="background:var(--po-wh); border:1px solid var(--po-bd); border-radius:var(--po-r); margin-bottom:20px; overflow:hidden; box-shadow:var(--po-sh)">
+            <div class="oh-group-card" style="background:var(--po-wh); border:1px solid var(--po-bd); border-radius:var(--po-r); margin-bottom:20px; box-shadow:var(--po-sh)">
                 <!-- Group Header -->
-                <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 18px; background:#FAFBFC; border-bottom:1px solid var(--po-bd2)">
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 18px; background:#FAFBFC; border-bottom:1px solid var(--po-bd2); border-top-left-radius:var(--po-r); border-top-right-radius:var(--po-r)">
                     <div style="display:flex; align-items:center; gap:10px">
                         <span class="{{ $group['class'] }}" style="font-size:13px; font-weight:800; padding:3px 10px; border-radius:20px">
                             {{ $group['label'] }}
@@ -108,45 +108,66 @@
                         </span>
                     </div>
 
-                    <!-- Quick Supplier Assignment for Group (Vừa tìm vừa chọn) -->
+                    <!-- Quick Supplier Assignment for Group (Vừa tìm vừa chọn với x-teleport) -->
                     <div style="display:flex; align-items:center; gap:8px">
                         <span style="font-size:12px; font-weight:700; color:var(--po-mu)">{{ __('purchase_order.create.quick_assign_supplier') }}</span>
                         <div x-data="{
                             open: false,
                             search: '',
+                            top: 0,
+                            left: 0,
                             suppliers: {{ json_encode($suppliers->map(fn($s) => ['id' => $s->id, 'name' => $s->name])->values()->toArray()) }},
                             get filtered() {
                                 if (!this.search) return this.suppliers;
                                 return this.suppliers.filter(s => s.name.toLowerCase().includes(this.search.toLowerCase()));
+                            },
+                            updatePos() {
+                                let rect = $refs.trigger.getBoundingClientRect();
+                                let spaceBelow = window.innerHeight - rect.bottom;
+                                if (spaceBelow < 230 && rect.top > 230) {
+                                    this.top = rect.top - 210;
+                                } else {
+                                    this.top = rect.bottom + 4;
+                                }
+                                this.left = rect.right - 230;
+                            },
+                            toggleOpen() {
+                                if (!this.open) {
+                                    this.updatePos();
+                                }
+                                this.open = !this.open;
                             },
                             selectSupplier(id, name) {
                                 $wire.updatedGroupSuppliers(id, '{{ $group['key'] }}');
                                 this.search = name;
                                 this.open = false;
                             }
-                        }" @click.outside="open = false" style="position:relative; min-width:180px">
-                            <div @click="open = !open" style="display:flex; align-items:center; justify-content:space-between; background:#fff; border:1px solid var(--po-bd); border-radius:6px; padding:4px 10px; cursor:pointer; font-size:12px; font-weight:600; color:var(--po-tx); box-shadow:0 1px 2px rgba(0,0,0,0.05)">
+                        }">
+                            <div x-ref="trigger" @click="toggleOpen()" style="display:flex; align-items:center; justify-content:space-between; background:#fff; border:1px solid var(--po-bd); border-radius:6px; padding:4px 10px; cursor:pointer; font-size:12px; font-weight:600; color:var(--po-tx); box-shadow:0 1px 2px rgba(0,0,0,0.05); min-width:180px">
                                 <span x-text="search || '{{ __('purchase_order.create.select_supplier') }}'" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:140px"></span>
                                 <i class="fa-solid fa-chevron-down" style="font-size:10px; color:var(--po-mu)"></i>
                             </div>
 
-                            <div x-show="open" x-cloak style="position:absolute; right:0; top:calc(100% + 4px); width:230px; background:#fff; border:1px solid var(--po-bd); border-radius:8px; box-shadow:0 10px 25px rgba(0,0,0,0.15); z-index:100; padding:6px">
-                                <input type="text" x-model="search" placeholder="{{ __('purchase_order.create.search_supplier') }}" style="width:100%; padding:6px 9px; font-size:12px; border:1px solid var(--po-bd2); border-radius:4px; outline:none; margin-bottom:4px" @click.stop>
-                                
-                                <div style="max-height:180px; overflow-y:auto">
-                                    <template x-for="sup in filtered" :key="sup.id">
-                                        <div @click="selectSupplier(sup.id, sup.name)" 
-                                             style="padding:6px 8px; font-size:12px; font-weight:600; color:var(--po-tx); cursor:pointer; border-radius:4px; transition:0.1s"
-                                             onmouseover="this.style.background='#F1F5F9'" 
-                                             onmouseout="this.style.background='transparent'"
-                                             x-text="sup.name">
+                            <template x-teleport="body">
+                                <div x-show="open" x-cloak @click.outside="open = false" 
+                                     :style="`position:fixed; top:${top}px; left:${left}px; width:230px; background:#fff; border:1px solid var(--po-bd); border-radius:8px; box-shadow:0 10px 30px rgba(0,0,0,0.25); z-index:99999; padding:6px`">
+                                    <input type="text" x-model="search" placeholder="{{ __('purchase_order.create.search_supplier') }}" style="width:100%; padding:6px 9px; font-size:12px; border:1px solid var(--po-bd2); border-radius:4px; outline:none; margin-bottom:4px" @click.stop>
+                                    
+                                    <div style="max-height:180px; overflow-y:auto">
+                                        <template x-for="sup in filtered" :key="sup.id">
+                                            <div @click="selectSupplier(sup.id, sup.name)" 
+                                                 style="padding:6px 8px; font-size:12px; font-weight:600; color:var(--po-tx); cursor:pointer; border-radius:4px; transition:0.1s"
+                                                 onmouseover="this.style.background='#F1F5F9'" 
+                                                 onmouseout="this.style.background='transparent'"
+                                                 x-text="sup.name">
+                                            </div>
+                                        </template>
+                                        <div x-show="filtered.length === 0" style="padding:8px; font-size:11.5px; color:var(--po-mu); text-align:center">
+                                            {{ __('purchase_order.create.no_supplier_found') }}
                                         </div>
-                                    </template>
-                                    <div x-show="filtered.length === 0" style="padding:8px; font-size:11.5px; color:var(--po-mu); text-align:center">
-                                        {{ __('purchase_order.create.no_supplier_found') }}
                                     </div>
                                 </div>
-                            </div>
+                            </template>
                         </div>
                     </div>
                 </div>
@@ -197,8 +218,11 @@
                                         {{ number_format($item['total_kg'], 2) }} {{ $item['unit'] }}
                                     </td>
                                     <td style="text-align:center">
-                                        <input type="number" step="0.01" min="0" wire:model.live="itemQuantities.{{ $item['ingredient_id'] }}" 
-                                               style="width:75px; height:28px; border:1px solid var(--po-bd); border-radius:6px; text-align:center; font-weight:700; color:var(--po-bl)">
+                                         <input type="number" step="0.01" min="0" 
+                                                onkeydown="if(event.key==='-') event.preventDefault();"
+                                                oninput="if(this.value < 0) this.value = 0;"
+                                                wire:model.live="itemQuantities.{{ $item['ingredient_id'] }}" 
+                                                style="width:75px; height:28px; border:1px solid var(--po-bd); border-radius:6px; text-align:center; font-weight:700; color:var(--po-bl)">
                                     </td>
                                     <td style="text-align:right; color:var(--po-mu)">
                                         {{ number_format($item['reference_price'], 0, ',', '.') }} đ/{{ $item['unit'] }}
@@ -207,9 +231,12 @@
                                         {{ number_format($item['line_total'], 0, ',', '.') }} đ
                                     </td>
                                     <td>
+                                        <!-- Per-row Searchable Select với x-teleport body chống tràn tuyệt đối -->
                                         <div x-data="{
                                             open: false,
                                             search: '',
+                                            top: 0,
+                                            left: 0,
                                             suppliers: {{ json_encode($suppliers->map(fn($s) => ['id' => $s->id, 'name' => $s->name])->values()->toArray()) }},
                                             get selectedName() {
                                                 let currentId = $wire.itemSuppliers[{{ $item['ingredient_id'] }}] || {{ $item['supplier_id'] }};
@@ -220,34 +247,53 @@
                                                 if (!this.search) return this.suppliers;
                                                 return this.suppliers.filter(s => s.name.toLowerCase().includes(this.search.toLowerCase()));
                                             },
+                                            updatePos() {
+                                                let rect = $refs.rowTrigger.getBoundingClientRect();
+                                                let spaceBelow = window.innerHeight - rect.bottom;
+                                                if (spaceBelow < 220 && rect.top > 220) {
+                                                    this.top = rect.top - 200;
+                                                } else {
+                                                    this.top = rect.bottom + 4;
+                                                }
+                                                this.left = rect.right - 220;
+                                            },
+                                            toggleOpen() {
+                                                if (!this.open) {
+                                                    this.updatePos();
+                                                }
+                                                this.open = !this.open;
+                                            },
                                             selectSupplier(id) {
                                                 $wire.set('itemSuppliers.{{ $item['ingredient_id'] }}', id);
                                                 this.open = false;
                                                 this.search = '';
                                             }
-                                        }" @click.outside="open = false" style="position:relative; width:100%; min-width:160px">
-                                            <div @click="open = !open" style="display:flex; align-items:center; justify-content:space-between; background:#fff; border:1px solid var(--po-bd); border-radius:6px; padding:4px 8px; cursor:pointer; font-size:12px; font-weight:600; color:var(--po-tx)">
+                                        }">
+                                            <div x-ref="rowTrigger" @click="toggleOpen()" style="display:flex; align-items:center; justify-content:space-between; background:#fff; border:1px solid var(--po-bd); border-radius:6px; padding:4px 8px; cursor:pointer; font-size:12px; font-weight:600; color:var(--po-tx); width:100%; min-width:160px">
                                                 <span x-text="selectedName" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:130px"></span>
                                                 <i class="fa-solid fa-chevron-down" style="font-size:10px; color:var(--po-mu)"></i>
                                             </div>
 
-                                            <div x-show="open" x-cloak style="position:absolute; right:0; top:calc(100% + 4px); width:220px; background:#fff; border:1px solid var(--po-bd); border-radius:8px; box-shadow:0 10px 25px rgba(0,0,0,0.15); z-index:100; padding:6px">
-                                                <input type="text" x-model="search" placeholder="{{ __('purchase_order.create.search_supplier') }}" style="width:100%; padding:5px 8px; font-size:12px; border:1px solid var(--po-bd2); border-radius:4px; outline:none; margin-bottom:4px" @click.stop>
-                                                
-                                                <div style="max-height:160px; overflow-y:auto">
-                                                    <template x-for="sup in filtered" :key="sup.id">
-                                                        <div @click="selectSupplier(sup.id)" 
-                                                             style="padding:6px 8px; font-size:12px; font-weight:600; color:var(--po-tx); cursor:pointer; border-radius:4px; transition:0.1s"
-                                                             onmouseover="this.style.background='#F1F5F9'" 
-                                                             onmouseout="this.style.background='transparent'"
-                                                             x-text="sup.name">
+                                            <template x-teleport="body">
+                                                <div x-show="open" x-cloak @click.outside="open = false" 
+                                                     :style="`position:fixed; top:${top}px; left:${left}px; width:220px; background:#fff; border:1px solid var(--po-bd); border-radius:8px; box-shadow:0 10px 30px rgba(0,0,0,0.25); z-index:99999; padding:6px`">
+                                                    <input type="text" x-model="search" placeholder="{{ __('purchase_order.create.search_supplier') }}" style="width:100%; padding:5px 8px; font-size:12px; border:1px solid var(--po-bd2); border-radius:4px; outline:none; margin-bottom:4px" @click.stop>
+                                                    
+                                                    <div style="max-height:170px; overflow-y:auto">
+                                                        <template x-for="sup in filtered" :key="sup.id">
+                                                            <div @click="selectSupplier(sup.id)" 
+                                                                 style="padding:6px 8px; font-size:12px; font-weight:600; color:var(--po-tx); cursor:pointer; border-radius:4px; transition:0.1s"
+                                                                 onmouseover="this.style.background='#F1F5F9'" 
+                                                                 onmouseout="this.style.background='transparent'"
+                                                                 x-text="sup.name">
+                                                            </div>
+                                                        </template>
+                                                        <div x-show="filtered.length === 0" style="padding:8px; font-size:11.5px; color:var(--po-mu); text-align:center">
+                                                            {{ __('purchase_order.create.no_supplier_found') }}
                                                         </div>
-                                                    </template>
-                                                    <div x-show="filtered.length === 0" style="padding:8px; font-size:11.5px; color:var(--po-mu); text-align:center">
-                                                        {{ __('purchase_order.create.no_supplier_found') }}
                                                     </div>
                                                 </div>
-                                            </div>
+                                            </template>
                                         </div>
                                     </td>
                                 </tr>
@@ -273,9 +319,9 @@
             </div>
         @endforelse
 
-        <!-- Fixed Bottom Grand Total Blue Banner (lhn-grand) -->
-        <div class="lhn-grand" style="position:fixed; bottom:16px; left:calc(var(--sidebar-width, 260px) + 24px); right:24px; border-radius:12px; background:linear-gradient(135deg, #1474FF, #0059DD); color:#fff; padding:14px 24px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 8px 24px rgba(20, 116, 255, 0.35); z-index:40">
-            <div>
+        <!-- Fixed Bottom Grand Total Blue Banner (Sticky inside content container) -->
+        <div class="lhn-grand" style="position:sticky; bottom:16px; width:100%; border-radius:12px; background:linear-gradient(135deg, #1474FF, #0059DD); color:#fff; padding:14px 24px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; box-shadow:0 8px 24px rgba(20, 116, 255, 0.35); z-index:40; margin-top:24px">
+            <div style="min-width:240px; flex:1">
                 <div style="font-size:15px; font-weight:800">
                     {{ __('purchase_order.create.grand_total_header', [
                         'date' => \Carbon\Carbon::parse($orderDate)->format('d/m/Y'),
@@ -291,12 +337,12 @@
                     ]) }}
                 </div>
             </div>
-            <div style="display:flex; align-items:center; gap:20px">
+            <div style="display:flex; align-items:center; gap:20px; flex-shrink:0">
                 <div style="text-align:right">
                     <div style="font-size:11px; opacity:0.85; text-transform:uppercase; font-weight:700">{{ __('purchase_order.create.grand_total_label') }}</div>
-                    <div style="font-size:22px; font-weight:900; letter-spacing:-0.5px">{{ number_format($grandTotal, 0, ',', '.') }} đ</div>
+                    <div style="font-size:22px; font-weight:900; letter-spacing:-0.5px; white-space:nowrap">{{ number_format($grandTotal, 0, ',', '.') }} đ</div>
                 </div>
-                <button wire:click="createAndSendOrders" class="po-btn" style="background:#fff; color:#0059DD; font-weight:800; padding:10px 20px; font-size:14px; border:none; box-shadow:0 4px 12px rgba(0,0,0,0.15)">
+                <button wire:click="createAndSendOrders" class="po-btn" style="background:#fff; color:#0059DD; font-weight:800; padding:10px 20px; font-size:14px; border:none; box-shadow:0 4px 12px rgba(0,0,0,0.15); white-space:nowrap; display:inline-flex; align-items:center; gap:8px; flex-shrink:0">
                     <i class="fa-solid fa-paper-plane"></i> {{ __('purchase_order.actions.create_and_send') }}
                 </button>
             </div>

@@ -6,6 +6,7 @@ use App\Filament\Resources\PurchaseOrderResource;
 use App\Models\PurchaseOrder;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\DB;
 
 class CheckPurchaseOrder extends Page
@@ -17,6 +18,11 @@ class CheckPurchaseOrder extends Page
     public function getHeading(): string
     {
         return '';
+    }
+
+    public function getHeader(): ?View
+    {
+        return null;
     }
 
     public PurchaseOrder $record;

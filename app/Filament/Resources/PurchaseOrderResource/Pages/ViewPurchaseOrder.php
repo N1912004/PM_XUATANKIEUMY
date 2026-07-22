@@ -7,6 +7,7 @@ use App\Exports\PurchaseOrderTemplateExport;
 use App\Filament\Resources\PurchaseOrderResource;
 use App\Models\PurchaseOrder;
 use Filament\Resources\Pages\ViewRecord;
+use Illuminate\Contracts\View\View;
 use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
@@ -24,6 +25,11 @@ class ViewPurchaseOrder extends ViewRecord
     public function getHeading(): string
     {
         return '';
+    }
+
+    public function getHeader(): ?View
+    {
+        return null;
     }
 
     protected function getHeaderActions(): array
