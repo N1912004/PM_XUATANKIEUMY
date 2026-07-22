@@ -166,7 +166,13 @@ class CreatePurchaseOrder extends Page
         }
 
         $allSuppliers = $this->suppliers;
-        $firstSupplierId = $allSuppliers->first()?->id;
+
+        $defaultSuppliersByGroup = [
+            'thit' => $allSuppliers->first(fn ($s) => str_contains(mb_strtolower($s->type ?? ''), 'động vật') || str_contains(mb_strtolower($s->type ?? ''), 'thịt') || str_contains(mb_strtolower($s->name), 'feddy'))?->id,
+            'uot' => $allSuppliers->first(fn ($s) => str_contains(mb_strtolower($s->type ?? ''), 'rau') || str_contains(mb_strtolower($s->type ?? ''), 'thực vật') || str_contains(mb_strtolower($s->name), 'linh thịnh'))?->id,
+            'kho' => $allSuppliers->first(fn ($s) => str_contains(mb_strtolower($s->type ?? ''), 'khô') || str_contains(mb_strtolower($s->name), 'vũ đức thọ'))?->id,
+            'khac' => $allSuppliers->first(fn ($s) => str_contains(mb_strtolower($s->type ?? ''), 'lương thực') || str_contains(mb_strtolower($s->name), 'an phát'))?->id,
+        ];
 
         $groups = [];
         foreach ($aggregated as $item) {
@@ -182,7 +188,8 @@ class CreatePurchaseOrder extends Page
 
             $ingId = $item['ingredient_id'];
             $manualQty = $this->itemQuantities[$ingId] ?? round($item['total_kg'], 2);
-            $selectedSupplierId = $this->itemSuppliers[$ingId] ?? ($this->groupSuppliers[$gKey] ?? $firstSupplierId);
+            $groupDefaultSupplierId = $defaultSuppliersByGroup[$gKey] ?? $allSuppliers->first()?->id;
+            $selectedSupplierId = $this->itemSuppliers[$ingId] ?? ($this->groupSuppliers[$gKey] ?? $groupDefaultSupplierId);
 
             $existingOrders = isset($existingPOItems[$ingId])
                 ? array_values(array_unique(array_filter($existingPOItems[$ingId]->pluck('code')->toArray())))
