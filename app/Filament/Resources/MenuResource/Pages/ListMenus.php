@@ -1221,17 +1221,7 @@ class ListMenus extends Page
             ->send();
 
         session()->flash('message', __('menu.notifications.week_saved'));
-        if (! $wasEditing) {
-            $this->switchView('list');
-        } else {
-            $this->loadWeekMenu(
-                $weekMenu->kitchen_id,
-                $weekMenu->date_from,
-                $weekMenu->date_to,
-                true,
-                $weekMenu->id
-            );
-        }
+        $this->switchView('list');
     }
 
     /**
@@ -1714,11 +1704,7 @@ class ListMenus extends Page
         session()->flash('message', $skippedLocked > 0
             ? __('menu.notifications.day_saved_with_skipped', ['count' => $skippedLocked])
             : __('menu.notifications.day_saved'));
-        if (! $wasEditing) {
-            $this->switchView('list');
-        } else {
-            $this->loadDayMenu($dayMenu->kitchen_id, $dayMenu->date->toDateString(), true, $dayMenu->id);
-        }
+        $this->switchView('list');
     }
 
     /**
