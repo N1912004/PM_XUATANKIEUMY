@@ -150,7 +150,7 @@
         <!-- List cards -->
         <div class="mp-card-list">
             @forelse($menusList as $row)
-                <div wire:click="{{ $row['type'] === 'week' ? "loadWeekMenu({$row['kitchen_id']}, '{$row['start_date']}', true)" : "loadDayMenu({$row['kitchen_id']}, '{$row['start_date']}', true)" }}" class="mp-item">
+                <div wire:click="{{ $row['type'] === 'week' ? "editWeekMenu({$row['id']})" : "loadDayMenu({$row['kitchen_id']}, '{$row['start_date']}', true)" }}" class="mp-item">
                     <div class="mp-item-ico" style="{{ $row['type'] === 'week' ? 'background:var(--po-bl-s);color:var(--po-bl)' : 'background:var(--po-pu-s);color:var(--po-pu)' }}">
                         @if($row['type'] === 'week')
                             <i class="fa-solid fa-calendar-days"></i>
@@ -178,7 +178,7 @@
 
                         <div class="mp-item-actions" style="margin-top: 8px">
                             <!-- Xem chi tiết / Chỉnh sửa -->
-                            <button wire:click="{{ $row['type'] === 'week' ? "loadWeekMenu({$row['kitchen_id']}, '{$row['start_date']}', true)" : "loadDayMenu({$row['kitchen_id']}, '{$row['start_date']}', true)" }}" class="abt" title="{{ __('menu.actions.edit') }}">
+                            <button wire:click="{{ $row['type'] === 'week' ? "editWeekMenu({$row['id']})" : "loadDayMenu({$row['kitchen_id']}, '{$row['start_date']}', true)" }}" class="abt" title="{{ __('menu.actions.edit') }}">
                                 <i class="fa-solid fa-pencil"></i>
                             </button>
                             <!-- Xuất Excel -->
@@ -378,9 +378,6 @@
                     $wire.set('weekCells.' + this.targetDay + '.' + this.targetShiftId + '.' + this.targetCategoryIdx + '.recipe_id', this.selectedRecipeId);
                     $wire.set('weekCells.' + this.targetDay + '.' + this.targetShiftId + '.' + this.targetCategoryIdx + '.portions', this.portions);
                     $wire.set('weekCells.' + this.targetDay + '.' + this.targetShiftId + '.' + this.targetCategoryIdx + '.phan', this.phan);
-                    if (this.customName) {
-                        $wire.set('customDishCategories.' + this.targetCategoryIdx, this.customName);
-                    }
                 }
                 this.closeModal();
             }
@@ -403,12 +400,12 @@
                     </button>
                 @endif
                 @unless($weekHasPastLockedMenus)
-                    @if($weekRank <= \App\Models\Menu::STATUS_ORDER['draft'])
+                    @if(! $isEditingWeek || $weekRank <= \App\Models\Menu::STATUS_ORDER['draft'])
                         <button wire:click="saveWeekMenu('draft')" class="emp-btn">
                             <i class="fa-regular fa-floppy-disk"></i> {{ $isEditingWeek ? __('menu.actions.save_changes') : __('menu.actions.save_draft') }}
                         </button>
                     @endif
-                    @if($weekRank <= \App\Models\Menu::STATUS_ORDER['sent'])
+                    @if(! $isEditingWeek || $weekRank <= \App\Models\Menu::STATUS_ORDER['sent'])
                         <button wire:click="saveWeekMenu('sent')" class="emp-btn"><i class="fa-regular fa-paper-plane"></i> {{ __('menu.actions.send_customer') }}</button>
                     @endif
                     <button wire:click="saveWeekMenu('locked')" class="emp-btn emp-btn-primary"><i class="fa-solid fa-lock"></i> {{ __('menu.actions.lock') }}</button>
@@ -453,7 +450,7 @@
             <div style="width:1px; height:20px; background:var(--po-bd); flex-shrink:0"></div>
             <div style="display:flex; align-items:center; gap:8px">
                 <i class="fa-regular fa-calendar-days" style="color:var(--po-bl)"></i>
-                <span>{{ __('menu.labels.week_prefix') }} {{ date('W/Y', strtotime($weekDateFrom)) }} &nbsp;·&nbsp; {{ date('d/m/Y', strtotime($weekDateFrom)) }} – {{ date('d/m/Y', strtotime($weekDateTo)) }}</span>
+                <span>{{ date('d/m/Y', strtotime($weekDateFrom)) }} – {{ date('d/m/Y', strtotime($weekDateTo)) }}</span>
             </div>
             <div style="width:1px; height:20px; background:var(--po-bd); flex-shrink:0"></div>
 
@@ -558,16 +555,16 @@
                                             $selectedRec = $recipes->firstWhere('id', $cellVal['recipe_id'] ?? null);
                                             $portionsVal = (int) ($cellVal['portions'] ?? 1);
                                             $phanVal = (int) ($cellVal['phan'] ?? 1);
-                                            $catCustomName = $this->customDishCategories[$ci] ?? ($selectedRec?->name ?? '');
+                                            $cellTitle = $selectedRec?->name ?? '';
                                         @endphp
                                         <div style="min-width:130px">
                                             <button type="button" 
-                                                    @click="openModal({{ $d }}, {{ $shift->id }}, {{ $ci }}, '{{ e($shift->name) }}', '{{ e($wDay['day_name']) }}', '{{ date('d-m', strtotime($wDay['date'])) }}', '{{ e($catLabel) }}', '{{ $cellVal['recipe_id'] ?? '' }}', {{ $portionsVal }}, {{ $phanVal }}, '{{ e($catCustomName) }}')"
+                                                    @click="openModal({{ $d }}, {{ $shift->id }}, {{ $ci }}, '{{ e($shift->name) }}', '{{ e($wDay['day_name']) }}', '{{ date('d-m', strtotime($wDay['date'])) }}', '{{ e($customDishCategories[$ci] ?? $catLabel) }}', '{{ $cellVal['recipe_id'] ?? '' }}', {{ $portionsVal }}, {{ $phanVal }}, '{{ e($cellTitle) }}')"
                                                     @disabled($weekHasPastLockedMenus)
-                                                    style="border:1px solid {{ ($selectedRec || $catCustomName) ? 'var(--po-bl-m, #bfdbfe)' : 'var(--po-bd, #e2e8f0)' }}; border-radius:8px; padding:6px 8px; background:{{ ($selectedRec || $catCustomName) ? '#FAFCFF' : '#fff' }}; text-align:left; cursor:pointer; width:100%; transition:all .15s; outline:none; display:flex; flex-direction:column; gap:2px">
-                                                @if($selectedRec || $catCustomName)
+                                                    style="border:1px solid {{ $selectedRec ? 'var(--po-bl-m, #bfdbfe)' : 'var(--po-bd, #e2e8f0)' }}; border-radius:8px; padding:6px 8px; background:{{ $selectedRec ? '#FAFCFF' : '#fff' }}; text-align:left; cursor:pointer; width:100%; transition:all .15s; outline:none; display:flex; flex-direction:column; gap:2px">
+                                                @if($selectedRec)
                                                     <div style="font-size:12px; font-weight:700; color:var(--po-tx, #0f172a); line-clamp:2; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; line-height:1.3">
-                                                        {{ $catCustomName ?: $selectedRec->name }}
+                                                        {{ $selectedRec->name }}
                                                     </div>
                                                     <div style="font-size:11px; font-weight:700; color:var(--po-bl, #2563eb); display:flex; align-items:center; gap:4px">
                                                         <span>{{ $portionsVal }} {{ __('menu.labels.portions') }}</span>
@@ -627,11 +624,11 @@
         <div x-show="isOpen" x-cloak style="position:fixed; inset:0; background:rgba(15,23,42,.48); backdrop-filter:blur(4px); z-index:9999" @click="closeModal()"></div>
 
         <div x-show="isOpen" x-cloak 
-             style="position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); z-index:10000; width:640px; max-width:92vw; height:min(620px, 84vh); max-height:84vh; background:var(--po-wh, #fff); border-radius:16px; box-shadow:0 20px 60px rgba(15,23,42,.28); overflow:hidden; display:flex; flex-direction:column"
+             style="position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); z-index:10000; width:640px; max-width:94vw; max-height:calc(100vh - 32px); height:fit-content; background:var(--po-wh, #fff); border-radius:16px; box-shadow:0 20px 60px rgba(15,23,42,.3); overflow:hidden; display:flex; flex-direction:column"
              @keydown.escape.window="closeModal()">
 
             <!-- Popup Header -->
-            <div style="display:flex; align-items:center; justify-content:space-between; padding:16px 20px; border-bottom:1px solid var(--po-bd, #e2e8f0); flex-shrink:0">
+            <div style="display:flex; align-items:center; justify-content:space-between; padding:14px 20px; border-bottom:1px solid var(--po-bd, #e2e8f0); flex-shrink:0">
                 <div>
                     <div style="font-size:15px; font-weight:800; color:var(--po-tx, #1e293b)">{{ __('menu.popup.title') }}</div>
                     <div style="font-size:12px; color:var(--po-mu, #64748b); margin-top:2px" x-text="subtitle"></div>
@@ -641,7 +638,7 @@
 
             <!-- Search + Group Filters -->
             <div style="padding:12px 20px 0; flex-shrink:0">
-                <div style="display:flex; align-items:center; gap:8px; background:var(--po-bg, #f8fafc); border:1.5px solid var(--po-bd, #e2e8f0); border-radius:9px; padding:0 12px; height:40px; margin-bottom:10px; transition:.13s">
+                <div style="display:flex; align-items:center; gap:8px; background:var(--po-bg, #f8fafc); border:1.5px solid var(--po-bd, #e2e8f0); border-radius:9px; padding:0 12px; height:38px; margin-bottom:10px; transition:.13s">
                     <i class="fa-solid fa-magnifying-glass" style="color:var(--po-fa, #94a3b8); font-size:13px; flex-shrink:0"></i>
                     <input x-ref="searchInput" x-model="search" @input="displayLimit = 50" type="text" placeholder="{{ __('menu.popup.search_placeholder') }}" style="border:none; background:transparent; outline:none; font-size:13.5px; color:var(--po-tx, #1e293b); width:100%">
                 </div>
@@ -654,7 +651,7 @@
             </div>
 
             <!-- Dish List -->
-            <div style="flex:1; min-height:0; overflow-y:auto; padding:0 20px 12px; scrollbar-width:thin" @scroll="if ($el.scrollTop + $el.clientHeight >= $el.scrollHeight - 60) loadMore()">
+            <div style="flex:1 1 auto; min-height:100px; max-height:260px; overflow-y:auto; padding:0 20px 12px; scrollbar-width:thin; scrollbar-color:var(--po-bd, #cbd5e1) transparent" @scroll="if ($el.scrollTop + $el.clientHeight >= $el.scrollHeight - 60) loadMore()">
                 <template x-for="d in visibleRecipes()" :key="d.id">
                     <div class="popup-dish" :class="{ 'selected': selectedRecipeId == d.id }" @click="selectRecipe(d)">
                         <div class="popup-dish-chk" x-text="selectedRecipeId == d.id ? '✓' : ''"></div>
@@ -683,10 +680,10 @@
                 </div>
             </div>
 
-            <!-- Footer: Selected Dish Info + Portion Settings -->
-            <div style="padding:14px 20px; border-top:1px solid var(--po-bd, #e2e8f0); background:#FAFBFC; flex-shrink:0">
-                <div x-show="selectedRecipeId" style="margin-bottom:10px">
-                    <div style="display:flex; align-items:center; justify-content:space-between; background:var(--po-bl-s, #eff6ff); border:1.5px solid var(--po-bl-m, #bfdbfe); border-radius:9px; padding:10px 14px">
+            <!-- Footer: Selected Dish Info + Portion Settings + Action Buttons -->
+            <div style="padding:12px 20px 14px; border-top:1px solid var(--po-bd, #e2e8f0); background:#FAFBFC; flex-shrink:0">
+                <div x-show="selectedRecipeId" style="margin-bottom:8px">
+                    <div style="display:flex; align-items:center; justify-content:space-between; background:var(--po-bl-s, #eff6ff); border:1.5px solid var(--po-bl-m, #bfdbfe); border-radius:9px; padding:8px 12px">
                         <div style="display:flex; align-items:center; gap:8px">
                             <i class="fa-solid fa-bowl-food" style="color:var(--po-bl, #2563eb); font-size:14px"></i>
                             <div>
@@ -698,28 +695,30 @@
                     </div>
                 </div>
 
-                <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px">
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px">
                     <i class="fa-solid fa-pen" style="color:var(--po-bl, #2563eb); font-size:13px"></i>
-                    <span style="font-size:13px; color:var(--po-tx2, #475569); white-space:nowrap">{{ __('menu.popup.dish_name_label') }}</span>
-                    <input x-model="customName" type="text" placeholder="{{ __('menu.popup.dish_name_placeholder') }}" style="flex:1; height:36px; border:1.5px solid var(--po-bd, #e2e8f0); border-radius:8px; padding:0 12px; font-size:13.5px; font-weight:600; color:var(--po-tx, #1e293b); outline:none">
+                    <span style="font-size:12.5px; font-weight:600; color:var(--po-tx2, #475569); white-space:nowrap">{{ __('menu.popup.dish_name_label') }}</span>
+                    <input x-model="customName" type="text" placeholder="{{ __('menu.popup.dish_name_placeholder') }}" style="flex:1; height:34px; border:1.5px solid var(--po-bd, #e2e8f0); border-radius:8px; padding:0 10px; font-size:13px; font-weight:600; color:var(--po-tx, #1e293b); outline:none">
                 </div>
 
-                <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap">
-                    <div style="display:flex; align-items:center; gap:8px; font-size:13px; color:var(--po-tx2)">
-                        <i class="fa-solid fa-users" style="color:var(--po-bl, #2563eb)"></i>
-                        <span>{{ __('menu.popup.portions_label') }}</span>
-                        <input x-model.number="portions" type="number" min="1" style="width:70px; height:34px; border:1.5px solid var(--po-bd, #e2e8f0); border-radius:8px; padding:0 10px; font-size:14px; font-weight:700; color:var(--po-bl, #2563eb); text-align:center; outline:none">
-                        <span>{{ __('menu.labels.portions') }}</span>
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:nowrap">
+                    <div style="display:flex; align-items:center; gap:10px; flex-wrap:nowrap">
+                        <div style="display:flex; align-items:center; gap:4px; font-size:12px; color:var(--po-tx2)">
+                            <i class="fa-solid fa-users" style="color:var(--po-bl, #2563eb); font-size:12px"></i>
+                            <span style="font-weight:600">{{ __('menu.popup.portions_label') }}</span>
+                            <input x-model.number="portions" type="number" min="1" style="width:58px; height:32px; border:1.5px solid var(--po-bd, #e2e8f0); border-radius:8px; padding:0 6px; font-size:13px; font-weight:700; color:var(--po-bl, #2563eb); text-align:center; outline:none">
+                            <span style="font-size:11.5px; color:var(--po-mu)">{{ __('menu.labels.portions') }}</span>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:4px; font-size:12px; color:var(--po-tx2)">
+                            <i class="fa-solid fa-layer-group" style="color:var(--po-gn, #059669); font-size:12px"></i>
+                            <span style="font-weight:600">{{ __('menu.popup.phan_label') }}</span>
+                            <input x-model.number="phan" type="number" min="1" step="1" style="width:52px; height:32px; border:1.5px solid var(--po-bd, #e2e8f0); border-radius:8px; padding:0 6px; font-size:13px; font-weight:700; color:var(--po-gn, #059669); text-align:center; outline:none">
+                            <span style="font-size:11.5px; color:var(--po-mu)">{{ __('menu.popup.phan_suffix') }}</span>
+                        </div>
                     </div>
-                    <div style="display:flex; align-items:center; gap:8px; font-size:13px; color:var(--po-tx2)">
-                        <i class="fa-solid fa-layer-group" style="color:var(--po-gn, #059669)"></i>
-                        <span>{{ __('menu.popup.phan_label') }}</span>
-                        <input x-model.number="phan" type="number" min="1" step="1" style="width:62px; height:34px; border:1.5px solid var(--po-bd, #e2e8f0); border-radius:8px; padding:0 10px; font-size:14px; font-weight:700; color:var(--po-gn, #059669); text-align:center; outline:none">
-                        <span>{{ __('menu.popup.phan_suffix') }}</span>
-                    </div>
-                    <div style="margin-left:auto; display:flex; gap:8px">
-                        <button type="button" @click="closeModal()" style="height:38px; padding:0 16px; border:1px solid var(--po-bd, #e2e8f0); border-radius:9px; background:#fff; font-size:13px; font-weight:600; cursor:pointer; color:var(--po-tx2)">{{ __('menu.popup.cancel') }}</button>
-                        <button type="button" @click="confirmSelection()" style="height:38px; padding:0 18px; border:none; border-radius:9px; background:linear-gradient(135deg, var(--po-bl, #2563eb), #0059DD); color:#fff; font-size:13px; font-weight:700; cursor:pointer; box-shadow:0 4px 12px rgba(18,103,232,.3); display:flex; align-items:center; gap:7px">
+                    <div style="display:flex; align-items:center; gap:8px; flex-shrink:0">
+                        <button type="button" @click="closeModal()" style="height:34px; padding:0 14px; border:1px solid var(--po-bd, #e2e8f0); border-radius:8px; background:#fff; font-size:12.5px; font-weight:600; cursor:pointer; color:var(--po-tx2)">{{ __('menu.popup.cancel') }}</button>
+                        <button type="button" @click="confirmSelection()" style="height:34px; padding:0 16px; border:none; border-radius:8px; background:linear-gradient(135deg, var(--po-bl, #2563eb), #0059DD); color:#fff; font-size:12.5px; font-weight:700; cursor:pointer; box-shadow:0 4px 12px rgba(18,103,232,.3); display:flex; align-items:center; gap:6px; white-space:nowrap">
                             <i class="fa-solid fa-check"></i>{{ __('menu.popup.confirm') }}
                         </button>
                     </div>
@@ -813,16 +812,18 @@
                 @foreach($dayItems as $shiftId => $shiftData)
                     @php
                         $bCls = $badgeClasses[($loop->iteration - 1) % 4];
+                        $shiftName = $shiftData['shift_name'] ?? $shifts->firstWhere('id', (int) $shiftId)?->name ?? __('menu.fields.shift');
+                        $shiftRecipes = $shiftData['recipes'] ?? [];
                     @endphp
                     <div class="tcard" style="padding:18px 20px">
                         <!-- Shift Header -->
-                        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; padding-bottom:10px; border-bottom:1px solid var(--po-bd2)">
+                        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; padding-bottom:10px; border-bottom:1px solid var(--po-bd2); flex-wrap:wrap; gap:10px">
                             <div style="font-size:14px; font-weight:700; color:var(--po-tx); display:flex; align-items:center; gap:8px">
-                                <span class="dv-ca-badge {{ $bCls }}">{{ $shiftData['shift_name'] }}</span>
+                                <span class="dv-ca-badge {{ $bCls }}">{{ $shiftName }}</span>
                             </div>
-                            <div style="display:flex; align-items:center; gap:8px">
+                            <div style="display:flex; align-items:center; gap:12px">
                                 @unless($dayHasPastLockedMenus)
-                                    <button type="button" wire:click="removeShiftFromDay({{ $shiftId }})" title="{{ __('menu.actions.remove_shift') }}" style="margin-left:6px; height:30px; padding:0 10px; border:1px solid var(--po-bd); border-radius:7px; background:var(--po-wh); color:var(--po-rd); font-size:11.5px; font-weight:600; cursor:pointer">
+                                    <button type="button" wire:click="removeShiftFromDay({{ $shiftId }})" title="{{ __('menu.actions.remove_shift') }}" style="height:32px; padding:0 12px; border:1px solid var(--po-bd); border-radius:7px; background:var(--po-wh); color:var(--po-rd); font-size:12px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:4px">
                                         <i class="fa-solid fa-xmark"></i> {{ __('menu.actions.remove_shift') }}
                                     </button>
                                 @endunless
@@ -830,24 +831,24 @@
                         </div>
 
                         <!-- Dishes 2-Column Grid -->
-                        <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:12px">
-                            @foreach($shiftData['recipes'] as $index => $item)
+                        <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:14px 20px">
+                            @foreach($shiftRecipes as $index => $item)
                                 <div class="dv-field">
-                                    <input wire:model="dayItems.{{ $shiftId }}.recipes.{{ $index }}.label" class="ctrl" style="font-size:11.5px; font-weight:600; color:var(--po-mu); border:none; background:transparent; outline:none; height:auto; padding:0 2px; width:100%" placeholder="{{ __('menu.placeholders.dish_label') }}" @disabled($dayHasPastLockedMenus)>
-                                    <div style="display:flex; gap:6px; align-items:center">
-                                        <select wire:model="dayItems.{{ $shiftId }}.recipes.{{ $index }}.recipe_id" class="ctrl" style="flex:1; height:38px; border:1.5px solid var(--po-bd); border-radius:8px" @disabled($dayHasPastLockedMenus)>
+                                    <input wire:model="dayItems.{{ $shiftId }}.recipes.{{ $index }}.label" class="ctrl" style="font-size:11.5px; font-weight:700; color:var(--po-mu); border:none; background:transparent; outline:none; height:auto; padding:0 2px; margin-bottom:4px; width:100%" placeholder="{{ __('menu.placeholders.dish_label') }}" @disabled($dayHasPastLockedMenus)>
+                                    <div style="display:flex; gap:8px; align-items:center">
+                                        <select wire:model="dayItems.{{ $shiftId }}.recipes.{{ $index }}.recipe_id" class="ctrl" style="flex:1; height:38px; border:1.5px solid var(--po-bd); border-radius:8px; font-size:13px; color:var(--po-tx)" @disabled($dayHasPastLockedMenus)>
                                             <option value="">{{ __('menu.placeholders.select_dish') }}</option>
                                             @foreach($recipes as $rec)
                                                 <option value="{{ $rec->id }}">{{ $rec->name }}</option>
                                             @endforeach
                                         </select>
-                                        <div style="display:flex; align-items:center; gap:3px; flex-shrink:0">
-                                            <input wire:model="dayItems.{{ $shiftId }}.recipes.{{ $index }}.portions" type="number" min="1" class="ctrl" style="width:54px; height:38px; border:1.5px solid var(--po-bd); border-radius:8px; text-align:center; font-size:13px; font-weight:700; color:var(--po-gn-t)" @disabled($dayHasPastLockedMenus)>
-                                            <span style="font-size:10.5px; color:var(--po-mu)">{{ __('menu.labels.portions') }}</span>
+                                        <div style="display:flex; align-items:center; gap:4px; flex-shrink:0">
+                                            <input wire:model="dayItems.{{ $shiftId }}.recipes.{{ $index }}.phan" type="number" min="1" class="ctrl" style="width:48px; height:38px; border:1.5px solid var(--po-bd); border-radius:8px; text-align:center; font-size:13px; font-weight:700; color:var(--po-gn, #059669); outline:none" @disabled($dayHasPastLockedMenus)>
+                                            <span style="font-size:11px; font-weight:500; color:var(--po-mu)">{{ __('menu.popup.phan_suffix') }}</span>
                                         </div>
                                         @unless($dayHasPastLockedMenus)
-                                            <button type="button" wire:click="removeRecipeFromShift({{ $shiftId }}, {{ $index }})" title="{{ __('menu.actions.remove_dish') }}" style="width:34px; height:38px; border:1px solid var(--po-bd); border-radius:8px; background:var(--po-wh); color:var(--po-rd); cursor:pointer; flex-shrink:0">
-                                                <i class="fa-solid fa-trash" style="font-size:11px"></i>
+                                            <button type="button" wire:click="removeRecipeFromShift({{ $shiftId }}, {{ $index }})" title="{{ __('menu.actions.remove_dish') }}" style="width:34px; height:38px; border:1px solid var(--po-bd); border-radius:8px; background:var(--po-wh); color:var(--po-rd); cursor:pointer; flex-shrink:0; display:grid; place-items:center">
+                                                <i class="fa-solid fa-trash-can" style="font-size:12px"></i>
                                             </button>
                                         @endunless
                                     </div>
@@ -857,7 +858,7 @@
 
                         <!-- Add Dish inside Card -->
                         @unless($dayHasPastLockedMenus)
-                            <button type="button" wire:click="addRecipeToShift({{ $shiftId }})" style="margin-top:14px; height:34px; padding:0 14px; border:1.5px dashed var(--po-bl); border-radius:8px; background:var(--po-bl-s); color:var(--po-bl); font-size:12.5px; font-weight:700; cursor:pointer">
+                            <button type="button" wire:click="addRecipeToShift({{ $shiftId }})" style="margin-top:16px; height:34px; padding:0 14px; border:1.5px dashed var(--po-bl); border-radius:8px; background:var(--po-bl-s); color:var(--po-bl); font-size:12.5px; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; gap:6px">
                                 <i class="fa-solid fa-plus"></i> {{ __('menu.actions.add_dish') }}
                             </button>
                         @endunless
@@ -867,7 +868,7 @@
                 <!-- Action Buttons Row -->
                 @unless($dayHasPastLockedMenus)
                     <div style="display:flex; gap:10px; margin-top:4px">
-                        <button type="button" wire:click="addShiftToDay" style="flex:1; height:42px; border:1.5px dashed var(--po-bl); border-radius:10px; background:var(--po-bl-s); color:var(--po-bl); font-size:13.5px; font-weight:700; cursor:pointer">
+                        <button type="button" wire:click="addShiftToDay" style="flex:1; height:42px; border:1.5px dashed var(--po-bl); border-radius:10px; background:var(--po-bl-s); color:var(--po-bl); font-size:13.5px; font-weight:700; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:6px">
                             <i class="fa-solid fa-plus"></i> {{ __('menu.actions.add_shift') }}
                         </button>
                     </div>

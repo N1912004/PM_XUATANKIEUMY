@@ -127,17 +127,22 @@ class ListMenus extends Page
         $reqMode = request()->query('mode');
         $reqWeekMenuId = request()->query('weekMenuId');
 
-        if ($reqWeekMenuId && ($wm = WeekMenu::find($reqWeekMenuId))) {
+        if ($reqMode === 'edit' && $reqWeekMenuId && ($wm = WeekMenu::find($reqWeekMenuId))) {
             $this->activeView = 'week';
             $this->weekMenuId = $wm->id;
             $this->mode = 'edit';
             $this->weekKitchenId = $wm->kitchen_id;
             $this->weekDateFrom = $wm->date_from;
             $this->weekDateTo = $wm->date_to;
-            $this->loadWeekMenu($wm->kitchen_id, $wm->date_from, $wm->date_to, true);
+            $this->loadWeekMenu($wm->kitchen_id, $wm->date_from, $wm->date_to, true, $wm->id);
+        } elseif ($this->activeView === 'week' && $reqMode === 'edit') {
+            // An edit URL must identify one WeekMenu. Never guess from stale day
+            // query parameters or the first kitchen because that can open another menu.
+            $this->activeView = 'list';
+            $this->mode = '';
+            $this->weekMenuId = null;
         } elseif ($this->activeView === 'week' && $firstKitchenId) {
-            $isEditing = $reqMode === 'edit';
-            $this->loadWeekMenu($firstKitchenId, $this->weekDateFrom, $this->weekDateTo, $isEditing);
+            $this->loadWeekMenu($firstKitchenId, $this->weekDateFrom, $this->weekDateTo, false);
         } elseif ($this->activeView === 'day' && $firstKitchenId) {
             $isEditing = $reqMode === 'edit';
             $this->loadDayMenu($firstKitchenId, $this->dayDate, $isEditing);
@@ -318,7 +323,9 @@ class ListMenus extends Page
             return false;
         }
 
-        return $user->hasRole(['super_admin', 'Quản trị viên', 'Quản lý bếp']) || $this->getKitchens()->count() > 1;
+        return $user->isSuperAdmin()
+            || $user->hasRole(['Quản trị viên', 'Quản lý bếp'])
+            || Kitchen::query()->limit(2)->count() > 1;
     }
 
     /**
@@ -713,7 +720,7 @@ class ListMenus extends Page
     // ==========================================
     // WEEK MENU LOGIC
     // ==========================================
-    public function loadWeekMenu($kitchenId, $dateFrom, $dateTo = null, ?bool $isEditing = null)
+    public function loadWeekMenu($kitchenId, $dateFrom, $dateTo = null, ?bool $isEditing = null, ?int $weekMenuId = null)
     {
         if (is_bool($dateTo)) {
             $isEditing = $dateTo;
@@ -741,38 +748,26 @@ class ListMenus extends Page
             $this->selectedShifts = $shifts->pluck('id')->map(fn ($id) => (string) $id)->all();
         }
 
-        $weekMenu = WeekMenu::where('kitchen_id', $kitchenId)
-            ->where('date_from', $this->weekDateFrom)
-            ->where('date_to', $this->weekDateTo)
-            ->first();
-
-        // Also check for loose (orphaned) Menu rows in the date range
-        // that are NOT linked to any WeekMenu — covers legacy data and day menus.
-        $looseMenus = collect();
-        if (! $weekMenu) {
-            $looseMenus = Menu::where('kitchen_id', $kitchenId)
-                ->whereNull('week_menu_id')
-                ->where('date', '>=', $this->weekDateFrom)
-                ->where('date', '<=', $this->weekDateTo)
-                ->get();
+        $weekMenu = null;
+        if ($isEditing && $weekMenuId) {
+            $weekMenu = WeekMenu::query()
+                ->whereKey($weekMenuId)
+                ->where('kitchen_id', $kitchenId)
+                ->firstOrFail();
         }
 
-        $hasData = $weekMenu !== null || $looseMenus->isNotEmpty();
+        $hasData = $weekMenu !== null;
 
-        // Auto-detect editing mode: if caller didn't specify, infer from existing data.
-        if ($isEditing === null) {
-            $isEditing = $hasData;
-        }
-        $this->isEditingWeek = (bool) $isEditing;
+        $this->isEditingWeek = $weekMenu !== null;
         $this->mode = $this->isEditingWeek ? 'edit' : 'create';
-        $this->weekMenuId = $this->isEditingWeek ? $weekMenu?->id : null;
+        $this->weekMenuId = $weekMenu?->id;
 
         $this->weekHasExistingMenus = $hasData;
         $this->weekHasEditableLockedMenus = $weekMenu?->status === 'locked' && ! $weekMenu->isPastLocked();
         $this->weekHasPastLockedMenus = (bool) $weekMenu?->isPastLocked();
         $this->weekStatus = $weekMenu?->status ?? 'draft';
 
-        $weekMenus = $weekMenu ? $weekMenu->menus : $looseMenus;
+        $weekMenus = $weekMenu?->menus ?? collect();
         $menusByDayShift = $weekMenus->groupBy(fn (Menu $m) => $m->date->toDateString().'|'.$m->shift_id);
 
         $daysCount = (int) $start->diffInDays($end) + 1;
@@ -797,10 +792,30 @@ class ListMenus extends Page
         }
     }
 
+    public function editWeekMenu(int $weekMenuId): void
+    {
+        $weekMenu = WeekMenu::findOrFail($weekMenuId);
+        $this->assertKitchenAccess((int) $weekMenu->kitchen_id);
+
+        $this->loadWeekMenu(
+            $weekMenu->kitchen_id,
+            $weekMenu->date_from,
+            $weekMenu->date_to,
+            true,
+            $weekMenu->id
+        );
+    }
+
     public function updatedWeekKitchenId($kitchenId): void
     {
         if ($kitchenId && $this->weekDateFrom) {
-            $this->loadWeekMenu($kitchenId, $this->weekDateFrom, $this->weekDateTo, $this->isEditingWeek);
+            $this->loadWeekMenu(
+                $kitchenId,
+                $this->weekDateFrom,
+                $this->weekDateTo,
+                $this->isEditingWeek,
+                $this->weekMenuId
+            );
         }
     }
 
@@ -810,7 +825,13 @@ class ListMenus extends Page
             if (! $this->weekDateTo || Carbon::parse($this->weekDateTo)->isBefore($dateFrom)) {
                 $this->weekDateTo = Carbon::parse($dateFrom)->addDays(6)->toDateString();
             }
-            $this->loadWeekMenu($this->weekKitchenId, $dateFrom, $this->weekDateTo, $this->isEditingWeek);
+            $this->loadWeekMenu(
+                $this->weekKitchenId,
+                $dateFrom,
+                $this->weekDateTo,
+                $this->isEditingWeek,
+                $this->weekMenuId
+            );
         }
     }
 
@@ -820,7 +841,13 @@ class ListMenus extends Page
             if (Carbon::parse($dateTo)->isBefore($this->weekDateFrom)) {
                 $this->weekDateTo = $this->weekDateFrom;
             }
-            $this->loadWeekMenu($this->weekKitchenId, $this->weekDateFrom, $this->weekDateTo, $this->isEditingWeek);
+            $this->loadWeekMenu(
+                $this->weekKitchenId,
+                $this->weekDateFrom,
+                $this->weekDateTo,
+                $this->isEditingWeek,
+                $this->weekMenuId
+            );
         }
     }
 
@@ -954,18 +981,27 @@ class ListMenus extends Page
         $dateFrom = $start->toDateString();
         $dateTo = $end->toDateString();
 
-        $weekMenu = WeekMenu::where('kitchen_id', $this->weekKitchenId)
-            ->where('date_from', $dateFrom)
-            ->where('date_to', $dateTo)
-            ->first();
+        $weekMenu = $this->isEditingWeek && $this->weekMenuId
+            ? WeekMenu::query()
+                ->whereKey($this->weekMenuId)
+                ->where('kitchen_id', $this->weekKitchenId)
+                ->firstOrFail()
+            : null;
 
         if ($weekMenu && ($blocked = $weekMenu->editBlockReason($this->weekStatus, $this->weekEditReason))) {
-            $this->addError('weekEditReason', match ($blocked) {
+            $message = match ($blocked) {
                 'past' => __('menu.errors.past_locked_edit'),
                 'downgrade' => __('menu.errors.status_downgrade'),
                 'need_reason' => __('menu.errors.audit_reason_required'),
                 default => __('menu.errors.invalid_status'),
-            });
+            };
+
+            $this->addError('weekEditReason', $message);
+
+            Notification::make()
+                ->title($message)
+                ->danger()
+                ->send();
 
             return;
         }
@@ -974,17 +1010,23 @@ class ListMenus extends Page
         $daysCount = (int) $start->diffInDays($end) + 1;
 
         DB::transaction(function () use ($shifts, $start, $dateFrom, $dateTo, $daysCount, &$weekMenu): void {
-            $weekMenu = WeekMenu::updateOrCreate(
-                [
+            if ($weekMenu) {
+                $weekMenu->update([
                     'kitchen_id' => $this->weekKitchenId,
                     'date_from' => $dateFrom,
                     'date_to' => $dateTo,
-                ],
-                [
                     'status' => $this->weekStatus,
                     'audit_reason' => trim($this->weekEditReason) ?: null,
-                ]
-            );
+                ]);
+            } else {
+                $weekMenu = WeekMenu::create([
+                    'kitchen_id' => $this->weekKitchenId,
+                    'date_from' => $dateFrom,
+                    'date_to' => $dateTo,
+                    'status' => $this->weekStatus,
+                    'audit_reason' => trim($this->weekEditReason) ?: null,
+                ]);
+            }
 
             // Sync custom dish categories into recipe_types table
             foreach ($this->customDishCategories as $catLabel) {
@@ -993,14 +1035,6 @@ class ListMenus extends Page
                     RecipeType::firstOrCreate(['name' => $trimmed]);
                 }
             }
-
-            // Adopt orphaned Menu rows that fall within this week range
-            // (covers legacy data created before the WeekMenu system).
-            Menu::where('kitchen_id', $this->weekKitchenId)
-                ->whereNull('week_menu_id')
-                ->where('date', '>=', $dateFrom)
-                ->where('date', '<=', $dateTo)
-                ->update(['week_menu_id' => $weekMenu->id]);
 
             for ($d = 0; $d < $daysCount; $d++) {
                 $currentDate = $start->copy()->addDays($d)->toDateString();
@@ -1057,12 +1091,22 @@ class ListMenus extends Page
         });
 
         Notification::make()
-            ->title($this->weekStatus === 'locked' ? 'Đã chốt thực đơn đợt thành công!' : 'Đã lưu thực đơn đợt thành công!')
+            ->title(match ($this->weekStatus) {
+                'sent' => __('menu.notifications.week_sent'),
+                'locked' => __('menu.notifications.week_locked'),
+                default => __('menu.notifications.week_draft_saved'),
+            })
             ->success()
             ->send();
 
         session()->flash('message', __('menu.notifications.week_saved'));
-        $this->switchView('list');
+        $this->loadWeekMenu(
+            $weekMenu->kitchen_id,
+            $weekMenu->date_from,
+            $weekMenu->date_to,
+            true,
+            $weekMenu->id
+        );
     }
 
     /**
@@ -1150,6 +1194,7 @@ class ListMenus extends Page
                     'label' => $defaultLabels[$idx] ?? __('menu.labels.dish_index', ['index' => $idx + 1]),
                     'recipe_id' => $m->recipe_id,
                     'portions' => $m->estimated_portions,
+                    'phan' => 1,
                 ];
             }
 
@@ -1160,6 +1205,7 @@ class ListMenus extends Page
                         'label' => $lbl,
                         'recipe_id' => '',
                         'portions' => $shiftPortions,
+                        'phan' => 1,
                     ];
                 }
             }
@@ -1254,6 +1300,7 @@ class ListMenus extends Page
             'label' => __('menu.labels.dish_index', ['index' => $nextIdx]),
             'recipe_id' => '',
             'portions' => $shiftPortions,
+            'phan' => 1,
         ];
     }
 
