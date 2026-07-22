@@ -868,8 +868,20 @@
                 </div>
             @endif
 
+            <!-- Shift Filter Checkboxes -->
+            <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-left:auto">
+                <i class="fa-solid fa-sun" style="color:var(--po-or); font-size:12px"></i>
+                <span style="font-weight:600; color:var(--po-mu); margin-right:2px">{{ __('menu.labels.shift') }}:</span>
+                @foreach($shifts as $index => $shift)
+                    <label style="display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border-radius:6px; background:var(--po-wh); border:1px solid var(--po-bd); cursor:pointer; font-weight:600; font-size:11.5px">
+                        <input type="checkbox" value="{{ $shift->id }}" wire:model.live="selectedShifts">
+                        {{ $shift->name }}
+                    </label>
+                @endforeach
+            </div>
+
             @if($isEditingDay)
-                <div style="margin-left:auto">
+                <div>
                     @if($dayStatus === 'locked')
                         <span class="ms-locked"><i class="fa-solid fa-lock"></i> {{ __('menu.status.locked') }}</span>
                     @elseif($dayStatus === 'sent')
@@ -894,6 +906,7 @@
                     $badgeClasses = ['dv-ca-b1', 'dv-ca-b2', 'dv-ca-b3', 'dv-ca-b4'];
                 @endphp
                 @foreach($dayItems as $shiftId => $shiftData)
+                    @continue(!empty($selectedShifts) && !in_array((string)$shiftId, array_map('strval', $selectedShifts), true))
                     @php
                         $bCls = $badgeClasses[($loop->iteration - 1) % 4];
                         $shiftName = $shiftData['shift_name'] ?? $shifts->firstWhere('id', (int) $shiftId)?->name ?? __('menu.fields.shift');
