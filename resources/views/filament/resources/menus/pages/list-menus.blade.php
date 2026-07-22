@@ -701,11 +701,6 @@
                     </div>
                 </div>
 
-                <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px">
-                    <i class="fa-solid fa-pen" style="color:var(--po-bl, #2563eb); font-size:13px"></i>
-                    <span style="font-size:12.5px; font-weight:600; color:var(--po-tx2, #475569); white-space:nowrap">{{ __('menu.popup.dish_name_label') }}</span>
-                    <input x-model="customName" type="text" placeholder="{{ __('menu.popup.dish_name_placeholder') }}" style="flex:1; height:34px; border:1.5px solid var(--po-bd, #e2e8f0); border-radius:8px; padding:0 10px; font-size:13px; font-weight:600; color:var(--po-tx, #1e293b); outline:none">
-                </div>
 
                 <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:nowrap">
                     <div style="display:flex; align-items:center; gap:14px; flex-wrap:nowrap">
