@@ -378,50 +378,46 @@ class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
         $allShifts = Shift::orderBy('sort_order')->orderBy('id')->get()->values();
         $activeShiftIds = $this->menus->pluck('shift_id')->unique()->filter()->toArray();
 
-        $categoriesVi = [
+        $defaultCategoriesVi = [
             0 => ['MÓN 1', 'MÓN 2', 'RAU XÀO/LUỘC', 'CANH', 'CƠM', 'MÓN CHAY 1', 'MÓN CHAY 2', 'CANH CHAY', 'MÓN CHAY 3', 'CƠM CHAY', 'COMBO', 'TRÁNG MIỆNG'],
             1 => ['MÓN MẶN 1', 'MÓN MẶN 2', 'MÓN RAU XÀO/LUỘC', 'MÓN CANH', 'MÓN CHAY 1', 'MÓN CHAY 2', 'RAU XÀO CHAY', 'TRÁNG MIỆNG'],
             2 => ['MÓN MẶN 1', 'MÓN MẶN 2', 'MÓN RAU XÀO/LUỘC', 'MÓN CANH', 'CƠM', 'MÓN CHAY 1', 'MÓN CHAY 2', 'MÓN RAU XÀO/LUỘC', 'MÓN CHAY 3', 'CƠM', 'COMBO', 'TRÁNG MIỆNG'],
         ];
 
-        $categoriesEn = [
+        $defaultCategoriesEn = [
             0 => ['DISH 1', 'DISH 2', 'STIR-FRIED / BOILED VEG', 'SOUP', 'RICE', 'VEGETARIAN 1', 'VEGETARIAN 2', 'VEGETARIAN SOUP', 'VEGETARIAN 3', 'VEGETARIAN RICE', 'COMBO', 'DESSERT'],
             1 => ['MAIN DISH 1', 'MAIN DISH 2', 'STIR-FRIED / BOILED VEG', 'SOUP', 'VEGETARIAN 1', 'VEGETARIAN 2', 'VEGETARIAN STIR-FRY', 'DESSERT'],
             2 => ['MAIN DISH 1', 'MAIN DISH 2', 'STIR-FRIED / BOILED VEG', 'SOUP', 'RICE', 'VEGETARIAN 1', 'VEGETARIAN 2', 'STIR-FRIED VEG', 'VEGETARIAN 3', 'RICE', 'COMBO', 'DESSERT'],
         ];
 
-        $shiftTemplates = [
-            0 => [
-                'name' => $isEn ? 'SHIFT 1' : 'CA 1',
-                'categories' => $isEn ? $categoriesEn[0] : $categoriesVi[0],
-            ],
-            1 => [
-                'name' => $isEn ? 'SHIFT 2' : 'CA 2',
-                'categories' => $isEn ? $categoriesEn[1] : $categoriesVi[1],
-            ],
-            2 => [
-                'name' => $isEn ? 'SHIFT 3' : 'CA 3',
-                'categories' => $isEn ? $categoriesEn[2] : $categoriesVi[2],
-            ],
-        ];
-
         $currentRow = 3;
         $shiftRowMap = [];
 
-        foreach ($shiftTemplates as $sIdx => $tpl) {
-            $sObj = $allShifts[$sIdx] ?? null;
-            $hasItems = $sObj && in_array($sObj->id, $activeShiftIds);
+        foreach ($allShifts as $sIdx => $sObj) {
+            $hasItems = in_array($sObj->id, $activeShiftIds, true);
 
-            // Hide shifts that have NO menu items (unless activeShiftIds is empty, then render shift 0)
+            // Hide shifts that have NO menu items (unless activeShiftIds is empty, then render first shift)
             if (! $hasItems && $activeShiftIds !== []) {
                 continue;
             }
 
-            $catCount = count($tpl['categories']);
+            $shiftMenus = $this->menus->where('shift_id', $sObj->id);
+            $maxDishesCount = $shiftMenus
+                ->groupBy(fn ($m) => $m->date instanceof Carbon ? $m->date->toDateString() : Carbon::parse($m->date)->toDateString())
+                ->map(fn ($g) => $g->count())
+                ->max() ?: 1;
+
+            $defaults = $isEn ? ($defaultCategoriesEn[$sIdx] ?? []) : ($defaultCategoriesVi[$sIdx] ?? []);
+            $categories = [];
+            for ($i = 0; $i < $maxDishesCount; $i++) {
+                $categories[] = $defaults[$i] ?? ($isEn ? 'DISH '.($i + 1) : 'MÓN '.($i + 1));
+            }
+
+            $catCount = count($categories);
             $startRow = $currentRow;
             $endRow = $startRow + $catCount - 1;
 
-            $sName = $sObj ? mb_strtoupper($sObj->name) : $tpl['name'];
+            $sName = mb_strtoupper($sObj->name);
             if (! str_starts_with($sName, 'THỰC ĐƠN') && ! str_starts_with($sName, 'MENU')) {
                 $sName = ($isEn ? 'MENU ' : 'THỰC ĐƠN ').$sName;
             }
@@ -438,7 +434,7 @@ class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
             ]);
 
             // Populate categories in Column C (FBE4D5 fill, 0070C0 font)
-            foreach ($tpl['categories'] as $catIdx => $catName) {
+            foreach ($categories as $catIdx => $catName) {
                 $r = $startRow + $catIdx;
                 $sheet->getRowDimension($r)->setRowHeight(30);
                 $sheet->setCellValue("C{$r}", $catName);
@@ -451,7 +447,7 @@ class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
                 'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
             ]);
 
-            $shiftRowMap[$sObj?->id ?? $sIdx] = ['startRow' => $startRow, 'endRow' => $endRow];
+            $shiftRowMap[$sObj->id] = ['startRow' => $startRow, 'endRow' => $endRow];
             $currentRow = $endRow + 1;
         }
 
