@@ -48,8 +48,11 @@ class IngredientTypeResource extends Resource
                     ->placeholder(__('ingredient.type.name_placeholder'))
                     ->required()
                     ->unique(ignoreRecord: true)
-                    ->maxLength(255)
-                    ->columnSpanFull(),
+                    ->maxLength(255),
+                Forms\Components\TextInput::make('icon')
+                    ->label('Biểu tượng (Icon / Emoji)')
+                    ->placeholder('VD: 🥩, 🥬, 📦, 🧂, 🌾')
+                    ->maxLength(50),
             ]);
     }
 
@@ -71,6 +74,10 @@ class IngredientTypeResource extends Resource
                         'style' => 'font-variant-numeric: tabular-nums; font-weight: 600; color: #64748b;',
                     ])
                     ->width('56px'),
+                Tables\Columns\TextColumn::make('icon')
+                    ->label('Biểu tượng')
+                    ->alignCenter()
+                    ->width('100px'),
                 Tables\Columns\TextColumn::make('name')
                     ->label(__('ingredient.type.table_name'))
                     ->searchable()
