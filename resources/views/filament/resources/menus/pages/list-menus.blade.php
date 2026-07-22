@@ -869,7 +869,7 @@
             @endif
 
             <!-- Shift Filter Checkboxes -->
-            <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-left:auto">
+            <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-top:16px">
                 <i class="fa-solid fa-sun" style="color:var(--po-or); font-size:12px"></i>
                 <span style="font-weight:600; color:var(--po-mu); margin-right:2px">{{ __('menu.labels.shift') }}:</span>
                 @foreach($shifts as $index => $shift)
@@ -881,7 +881,7 @@
             </div>
 
             @if($isEditingDay)
-                <div>
+                <div style="margin-left:auto">
                     @if($dayStatus === 'locked')
                         <span class="ms-locked"><i class="fa-solid fa-lock"></i> {{ __('menu.status.locked') }}</span>
                     @elseif($dayStatus === 'sent')
