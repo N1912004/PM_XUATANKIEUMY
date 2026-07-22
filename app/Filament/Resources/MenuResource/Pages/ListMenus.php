@@ -1076,7 +1076,9 @@ class ListMenus extends Page
         $dateFrom = $start->toDateString();
         $dateTo = $end->toDateString();
 
-        $weekMenu = $this->isEditingWeek && $this->weekMenuId
+        $wasEditing = $this->isEditingWeek && (bool) $this->weekMenuId;
+
+        $weekMenu = $wasEditing
             ? WeekMenu::query()
                 ->whereKey($this->weekMenuId)
                 ->where('kitchen_id', $this->weekKitchenId)
@@ -1219,13 +1221,17 @@ class ListMenus extends Page
             ->send();
 
         session()->flash('message', __('menu.notifications.week_saved'));
-        $this->loadWeekMenu(
-            $weekMenu->kitchen_id,
-            $weekMenu->date_from,
-            $weekMenu->date_to,
-            true,
-            $weekMenu->id
-        );
+        if (! $wasEditing) {
+            $this->switchView('list');
+        } else {
+            $this->loadWeekMenu(
+                $weekMenu->kitchen_id,
+                $weekMenu->date_from,
+                $weekMenu->date_to,
+                true,
+                $weekMenu->id
+            );
+        }
     }
 
     /**
@@ -1582,7 +1588,9 @@ class ListMenus extends Page
             return;
         }
 
-        $dayMenu = $this->isEditingDay && $this->dayMenuId
+        $wasEditing = $this->isEditingDay && (bool) $this->dayMenuId;
+
+        $dayMenu = $wasEditing
             ? DayMenu::query()
                 ->with('menus')
                 ->whereKey($this->dayMenuId)
@@ -1706,7 +1714,11 @@ class ListMenus extends Page
         session()->flash('message', $skippedLocked > 0
             ? __('menu.notifications.day_saved_with_skipped', ['count' => $skippedLocked])
             : __('menu.notifications.day_saved'));
-        $this->loadDayMenu($dayMenu->kitchen_id, $dayMenu->date->toDateString(), true, $dayMenu->id);
+        if (! $wasEditing) {
+            $this->switchView('list');
+        } else {
+            $this->loadDayMenu($dayMenu->kitchen_id, $dayMenu->date->toDateString(), true, $dayMenu->id);
+        }
     }
 
     /**
