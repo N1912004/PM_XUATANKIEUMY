@@ -26,7 +26,7 @@ return [
     'default_dish_labels' => ['Món 1', 'Món 2', 'Rau xào / luộc', 'Canh', 'Cơm', 'Món chay 1', 'Món chay 2', 'Canh chay', 'Tráng miệng'],
     'export' => ['filtered_list' => 'Filtered menu list'],
     'pagination' => ['summary' => 'Showing :from-:to of :total menus', 'per_page' => ':count / page'],
-    'week_form' => ['title' => 'Create new weekly menu', 'edit_title' => 'Edit weekly menu', 'subtitle' => 'Set dishes and portion capacity for each day of the week', 'shift_day' => 'SHIFT / DAY', 'duplicate_warning' => ':count dishes appeared in the last 3 weeks'],
+    'week_form' => ['title' => 'Create new weekly menu', 'edit_title' => 'Edit weekly menu', 'subtitle' => 'Set dishes and portion capacity for each day of the week', 'shift_day' => 'SHIFT / DISH', 'duplicate_warning' => ':count dishes appeared in the last 3 weeks'],
     'day_form' => ['title' => 'Create new daily menu', 'edit_title' => 'Edit daily menu', 'subtitle' => 'Specify menu details and portion counts for each service shift', 'date' => 'Menu date'],
     'days' => ['sunday' => 'Sunday', 'monday' => 'Monday', 'tuesday' => 'Tuesday', 'wednesday' => 'Wednesday', 'thursday' => 'Thursday', 'friday' => 'Friday', 'saturday' => 'Saturday'],
     'popup' => [
