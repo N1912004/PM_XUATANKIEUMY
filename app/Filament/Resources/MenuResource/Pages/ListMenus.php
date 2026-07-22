@@ -686,7 +686,7 @@ class ListMenus extends Page
         foreach ($this->weekCells as $d => $dShifts) {
             foreach ($dShifts as $sId => $items) {
                 if (! isset($this->weekCells[$d][$sId][$newIdx])) {
-                    $this->weekCells[$d][$sId][$newIdx] = ['recipe_id' => '', 'portions' => 200];
+                    $this->weekCells[$d][$sId][$newIdx] = ['recipe_id' => '', 'portions' => 1];
                 }
             }
         }
@@ -789,7 +789,7 @@ class ListMenus extends Page
                 }
 
                 while (count($items) < $catCount) {
-                    $items[] = ['recipe_id' => '', 'portions' => 200];
+                    $items[] = ['recipe_id' => '', 'portions' => 1];
                 }
 
                 $this->weekCells[$d][$shift->id] = $items;
@@ -827,7 +827,7 @@ class ListMenus extends Page
     /** Thêm 1 dòng món trống vào ô (ngày, ca) của grid tuần. */
     public function addWeekDish(int $day, int $shiftId): void
     {
-        $this->weekCells[$day][$shiftId][] = ['recipe_id' => '', 'portions' => 200];
+        $this->weekCells[$day][$shiftId][] = ['recipe_id' => '', 'portions' => 1];
     }
 
     /** Bỏ 1 dòng món khỏi ô; luôn chừa lại tối thiểu 1 dòng trống. */
@@ -837,7 +837,7 @@ class ListMenus extends Page
         $this->weekCells[$day][$shiftId] = array_values($this->weekCells[$day][$shiftId]);
 
         if ($this->weekCells[$day][$shiftId] === []) {
-            $this->weekCells[$day][$shiftId] = [['recipe_id' => '', 'portions' => 200]];
+            $this->weekCells[$day][$shiftId] = [['recipe_id' => '', 'portions' => 1]];
         }
     }
 
@@ -1011,7 +1011,7 @@ class ListMenus extends Page
                     foreach ($cell as $item) {
                         $rid = (int) ($item['recipe_id'] ?? 0);
                         if ($rid > 0) {
-                            $desired[$rid] = (int) ($item['portions'] ?? 200);
+                            $desired[$rid] = (int) ($item['portions'] ?? 1);
                         }
                     }
 
@@ -1141,7 +1141,7 @@ class ListMenus extends Page
 
         foreach ($shifts as $shift) {
             $menus = $menusByShift->get($shift->id, collect());
-            $shiftPortions = $menus->first()?->estimated_portions ?? 200;
+            $shiftPortions = $menus->first()?->estimated_portions ?? 1;
 
             $recipes = [];
             foreach ($menus as $idx => $m) {
@@ -1248,7 +1248,7 @@ class ListMenus extends Page
     public function addRecipeToShift($shiftId)
     {
         $nextIdx = count($this->dayItems[$shiftId]['recipes'] ?? []) + 1;
-        $shiftPortions = (int) ($this->dayItems[$shiftId]['shift_portions'] ?? 200);
+        $shiftPortions = (int) ($this->dayItems[$shiftId]['shift_portions'] ?? 1);
         $this->dayItems[$shiftId]['recipes'][] = [
             'menu_id' => null,
             'label' => __('menu.labels.dish_index', ['index' => $nextIdx]),
@@ -1273,7 +1273,7 @@ class ListMenus extends Page
                 'menu_id' => null,
                 'label' => $lbl,
                 'recipe_id' => '',
-                'portions' => 150,
+                'portions' => 1,
             ];
         }
 
@@ -1295,7 +1295,7 @@ class ListMenus extends Page
 
         $this->dayItems[$unusedShift->id] = [
             'shift_name' => $unusedShift->name,
-            'shift_portions' => 150,
+            'shift_portions' => 1,
             'recipes' => $recipes,
         ];
 

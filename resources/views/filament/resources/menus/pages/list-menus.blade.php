@@ -273,9 +273,6 @@
             <div class="emp-actions">
                 @php $weekRank = \App\Models\Menu::STATUS_ORDER[$weekStatus] ?? 0; @endphp
                 <button wire:click="switchView('list')" class="emp-btn"><i class="fa-solid fa-arrow-left"></i> {{ __('menu.actions.back') }}</button>
-                <button type="button" wire:click="sortWeekItems" title="{{ __('menu.actions.sort_shifts') }}" class="emp-btn">
-                    <i class="fa-solid fa-arrow-down-short-wide"></i> {{ __('menu.actions.sort_shifts') }}
-                </button>
                 @if($isEditingWeek)
                     <button wire:click="exportMenus({{ $weekKitchenId }}, '{{ $weekDateFrom }}', '{{ $weekDateTo }}')" class="emp-btn">
                         <i class="fa-solid fa-file-excel" style="color:var(--po-gn)"></i> {{ __('menu.actions.export_excel') }}
@@ -495,9 +492,6 @@
             <div class="emp-actions">
                 @php $dayRank = \App\Models\Menu::STATUS_ORDER[$dayStatus] ?? 0; @endphp
                 <button wire:click="switchView('list')" class="emp-btn"><i class="fa-solid fa-arrow-left"></i> {{ __('menu.actions.back') }}</button>
-                <button type="button" wire:click="sortDayItems(true)" title="{{ __('menu.actions.sort_shifts') }}" class="emp-btn">
-                    <i class="fa-solid fa-arrow-down-short-wide"></i> {{ __('menu.actions.sort_shifts') }}
-                </button>
                 @if($isEditingDay)
                     <button wire:click="exportMenus({{ $dayKitchenId }}, '{{ $dayDate }}', '{{ $dayDate }}')" class="emp-btn">
                         <i class="fa-solid fa-file-excel" style="color:var(--po-gn)"></i> {{ __('menu.actions.export_excel') }}
