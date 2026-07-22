@@ -209,11 +209,48 @@
                                         {{ number_format($item['line_total'], 0, ',', '.') }} đ
                                     </td>
                                     <td>
-                                        <select class="oh-ncc-sel" wire:model.live="itemSuppliers.{{ $item['ingredient_id'] }}" style="width:100%">
-                                            @foreach($suppliers as $sup)
-                                                <option value="{{ $sup->id }}">{{ $sup->name }}</option>
-                                            @endforeach
-                                        </select>
+                                        <div x-data="{
+                                            open: false,
+                                            search: '',
+                                            suppliers: {{ json_encode($suppliers->map(fn($s) => ['id' => $s->id, 'name' => $s->name])->values()->toArray()) }},
+                                            get selectedName() {
+                                                let currentId = $wire.itemSuppliers[{{ $item['ingredient_id'] }}] || {{ $item['supplier_id'] }};
+                                                let found = this.suppliers.find(s => s.id == currentId);
+                                                return found ? found.name : '-- Chọn NCC --';
+                                            },
+                                            get filtered() {
+                                                if (!this.search) return this.suppliers;
+                                                return this.suppliers.filter(s => s.name.toLowerCase().includes(this.search.toLowerCase()));
+                                            },
+                                            selectSupplier(id) {
+                                                $wire.set('itemSuppliers.{{ $item['ingredient_id'] }}', id);
+                                                this.open = false;
+                                                this.search = '';
+                                            }
+                                        }" @click.outside="open = false" style="position:relative; width:100%; min-width:160px">
+                                            <div @click="open = !open" style="display:flex; align-items:center; justify-content:space-between; background:#fff; border:1px solid var(--po-bd); border-radius:6px; padding:4px 8px; cursor:pointer; font-size:12px; font-weight:600; color:var(--po-tx)">
+                                                <span x-text="selectedName" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:130px"></span>
+                                                <i class="fa-solid fa-chevron-down" style="font-size:10px; color:var(--po-mu)"></i>
+                                            </div>
+
+                                            <div x-show="open" x-cloak style="position:absolute; right:0; top:calc(100% + 4px); width:220px; background:#fff; border:1px solid var(--po-bd); border-radius:8px; box-shadow:0 10px 25px rgba(0,0,0,0.15); z-index:100; padding:6px">
+                                                <input type="text" x-model="search" placeholder="🔍 Tìm NCC..." style="width:100%; padding:5px 8px; font-size:12px; border:1px solid var(--po-bd2); border-radius:4px; outline:none; margin-bottom:4px" @click.stop>
+                                                
+                                                <div style="max-height:160px; overflow-y:auto">
+                                                    <template x-for="sup in filtered" :key="sup.id">
+                                                        <div @click="selectSupplier(sup.id)" 
+                                                             style="padding:6px 8px; font-size:12px; font-weight:600; color:var(--po-tx); cursor:pointer; border-radius:4px; transition:0.1s"
+                                                             onmouseover="this.style.background='#F1F5F9'" 
+                                                             onmouseout="this.style.background='transparent'"
+                                                             x-text="sup.name">
+                                                        </div>
+                                                    </template>
+                                                    <div x-show="filtered.length === 0" style="padding:8px; font-size:11.5px; color:var(--po-mu); text-align:center">
+                                                        Không tìm thấy NCC
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </td>
                                 </tr>
                             @endforeach
