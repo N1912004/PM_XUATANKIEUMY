@@ -615,7 +615,7 @@ class ListMenus extends Page
             : (! $this->canChooseKitchen() ? auth()->user()?->currentKitchenId() : null);
 
         $weekKeys = DB::table('week_menus')
-            ->selectRaw("'week' AS card_type, id AS record_id, kitchen_id, date_from AS group_date, status")
+            ->selectRaw("'week' AS card_type, id AS record_id, kitchen_id, date_from AS group_date, status, updated_at")
             ->when($kitchenIdFilter, fn ($b) => $b->where('kitchen_id', $kitchenIdFilter))
             ->when($this->statusFilter !== '', fn ($b) => $b->where('status', $this->statusFilter))
             ->when($this->typeFilter === 'week' && ($range = $this->selectedWeekRange()) !== null, fn ($b) => $b->where('date_from', '>=', $range[0])->where('date_from', '<=', $range[1]))
@@ -626,7 +626,7 @@ class ListMenus extends Page
             });
 
         $dayKeys = DB::table('day_menus')
-            ->selectRaw("'day' AS card_type, id AS record_id, kitchen_id, date AS group_date, status")
+            ->selectRaw("'day' AS card_type, id AS record_id, kitchen_id, date AS group_date, status, updated_at")
             ->when($kitchenIdFilter, fn ($b) => $b->where('kitchen_id', $kitchenIdFilter))
             ->when($this->statusFilter !== '', fn ($b) => $b->where('status', $this->statusFilter))
             ->when($this->typeFilter === 'day' && $this->isValidDate($this->dayFilter), fn ($b) => $b->where('date', '>=', $this->dayFilter)->where('date', '<', Carbon::parse($this->dayFilter)->addDay()->toDateString()))
@@ -644,9 +644,9 @@ class ListMenus extends Page
 
         $page = Paginator::resolveCurrentPage('page');
         $allKeys = DB::query()->fromSub($keysQuery, 'groups')
-            ->orderByDesc('group_date')
-            ->orderBy('card_type')
-            ->orderBy('kitchen_id');
+            ->orderByDesc('updated_at')
+            ->orderByDesc('record_id')
+            ->orderByDesc('group_date');
 
         $total = (clone $allKeys)->count();
         $pageKeys = $allKeys->forPage($page, $this->perPage)->get();
