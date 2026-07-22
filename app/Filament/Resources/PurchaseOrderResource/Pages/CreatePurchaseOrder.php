@@ -35,8 +35,6 @@ class CreatePurchaseOrder extends Page
 
     public array $itemSelected = [];
 
-    public array $itemSplits = [];
-
     public function mount(): void
     {
         abort_unless(PurchaseOrderResource::canCreate(), 403);
@@ -196,13 +194,10 @@ class CreatePurchaseOrder extends Page
                 $isSelected = (bool) $this->itemSelected[$ingId];
             }
 
-            $split = $this->itemSplits[$ingId] ?? 'Phiếu 1';
-
             $item['already_ordered_pos'] = $existingOrders;
             $item['selected'] = $isSelected;
             $item['quantity_manual'] = (float) $manualQty;
             $item['supplier_id'] = $selectedSupplierId;
-            $item['split'] = $split;
             $item['line_total'] = $isSelected ? ((float) $manualQty * $item['reference_price']) : 0;
             $item['dish_string'] = implode(', ', array_slice($item['dishes'], 0, 3)).(count($item['dishes']) > 3 ? '...' : '');
 
@@ -237,28 +232,23 @@ class CreatePurchaseOrder extends Page
         }
 
         $kitchenId = auth()->user()?->currentKitchenId();
-        $itemsGrouped = collect($allItems)->groupBy(fn ($it) => $it['supplier_id'].'-'.$it['split']);
+        $itemsGrouped = collect($allItems)->groupBy('supplier_id');
 
         $createdCount = 0;
 
         DB::transaction(function () use ($itemsGrouped, $kitchenId, &$createdCount) {
-            foreach ($itemsGrouped as $groupKey => $items) {
-                $parts = explode('-', $groupKey, 2);
-                $supplierId = (int) $parts[0];
-                $splitName = $parts[1] ?? 'Phiếu 1';
-
+            foreach ($itemsGrouped as $supplierId => $items) {
                 $supplier = Supplier::find($supplierId);
                 if (! $supplier) {
                     continue;
                 }
 
                 $supplierCode = strtoupper($supplier->code ?: 'NCC');
-                $splitCode = str_replace('Phiếu ', 'P', $splitName);
-                $poCode = 'PO-LH-'.Carbon::parse($this->orderDate)->format('Ymd').'-'.$supplierCode.'-'.$splitCode;
+                $poCode = 'PO-LH-'.Carbon::parse($this->orderDate)->format('Ymd').'-'.$supplierCode;
 
                 $attempts = 0;
                 while (PurchaseOrder::where('code', $poCode)->exists() && $attempts < 10) {
-                    $poCode = 'PO-LH-'.Carbon::parse($this->orderDate)->format('Ymd').'-'.$supplierCode.'-'.$splitCode.'-'.mt_rand(10, 99);
+                    $poCode = 'PO-LH-'.Carbon::parse($this->orderDate)->format('Ymd').'-'.$supplierCode.'-'.mt_rand(10, 99);
                     $attempts++;
                 }
 
@@ -269,7 +259,7 @@ class CreatePurchaseOrder extends Page
                     'status' => 'sent',
                     'type' => 'day',
                     'estimated_delivery_date' => $this->orderDate,
-                    'note' => 'Đơn đặt hàng tạo từ trang Tạo đơn đặt hàng ngày '.Carbon::parse($this->orderDate)->format('d/m/Y')." ({$splitName})",
+                    'note' => 'Đơn đặt hàng tạo từ trang Tạo đơn đặt hàng ngày '.Carbon::parse($this->orderDate)->format('d/m/Y'),
                 ]);
 
                 foreach ($items as $it) {
@@ -288,7 +278,7 @@ class CreatePurchaseOrder extends Page
 
         Notification::make()
             ->title('Tạo đơn đặt hàng thành công!')
-            ->body("Đã tạo và gửi {$createdCount} đơn đặt hàng theo Nhà cung cấp & Phiếu.")
+            ->body("Đã tạo và gửi {$createdCount} đơn đặt hàng theo Nhà cung cấp.")
             ->success()
             ->send();
 

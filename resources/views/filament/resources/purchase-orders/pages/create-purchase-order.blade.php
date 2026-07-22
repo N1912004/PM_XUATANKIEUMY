@@ -2,121 +2,129 @@
     @include('filament.resources.purchase-orders.partials.styles')
 
     @php
-        $shifts = $this->shifts;
+        $groups = $this->getAggregatedGroupsProperty();
         $suppliers = $this->suppliers;
-        $aggregatedGroups = $this->getAggregatedGroupsProperty();
+        $shifts = $this->shifts;
 
-        $allFlatItems = [];
-        foreach ($aggregatedGroups as $grp) {
-            foreach ($grp['items'] as $it) {
-                $allFlatItems[] = $it;
+        $totalCount = 0;
+        $selectedCount = 0;
+        $grandTotal = 0;
+        $uniqueSupplierIds = [];
+
+        foreach ($groups as $grp) {
+            foreach ($grp['items'] as $item) {
+                $totalCount++;
+                if (!empty($item['selected'])) {
+                    $selectedCount++;
+                    $grandTotal += $item['line_total'];
+                    if (!empty($item['supplier_id'])) {
+                        $uniqueSupplierIds[$item['supplier_id']] = true;
+                    }
+                }
             }
         }
-
-        $totalCount = count($allFlatItems);
-        $selectedItems = array_filter($allFlatItems, fn($it) => !empty($it['selected']));
-        $selectedCount = count($selectedItems);
-        $distinctSuppliersCount = collect($selectedItems)->pluck('supplier_id')->unique()->count();
-        $distinctSplitsCount = collect($selectedItems)->pluck('split')->unique()->count();
-        $grandTotal = collect($selectedItems)->sum('line_total');
+        $supplierCount = count($uniqueSupplierIds);
     @endphp
 
-    <div class="po-page w-full space-y-6" style="padding: 0 !important; background: transparent !important;">
+    <div class="po-page w-full space-y-6" style="padding: 0 !important; background: transparent !important; padding-bottom: 90px !important;">
         <!-- Header Bar -->
-        <div class="po-head" style="margin-bottom:16px">
-            <div>
-                <h1 class="po-title" style="font-size:20px">{{ __('purchase_order.actions.create_order_title') }}</h1>
-                <p class="po-subtitle">{{ __('purchase_order.actions.create_order_subtitle') }}</p>
-            </div>
-            <div style="display:flex; gap:8px; flex-wrap:wrap">
-                <a href="{{ \App\Filament\Resources\PurchaseOrderResource::getUrl('index') }}" class="po-btn">
+        <div class="po-head" style="margin-bottom: 16px;">
+            <div style="display:flex; align-items:center; gap:12px">
+                <a href="{{ \App\Filament\Resources\PurchaseOrderResource::getUrl('index') }}" class="po-btn" style="background:var(--po-wh); border:1px solid var(--po-bd); color:var(--po-tx)">
                     <i class="fa-solid fa-arrow-left"></i> {{ __('purchase_order.actions.back') }}
                 </a>
-                <button wire:click="createAndSendOrders" class="po-btn po-btn-primary">
-                    <i class="fa-solid fa-paper-plane"></i> {{ __('purchase_order.actions.create_and_send') }}
+                <div>
+                    <h1 class="po-title" style="font-size:20px; font-weight:800">Tạo đơn đặt hàng</h1>
+                    <p class="po-subtitle" style="font-size:12.5px; color:var(--po-mu)">Tổng hợp nguyên liệu từ thực đơn đã lập theo khoảng ngày & ca ăn</p>
+                </div>
+            </div>
+            <div>
+                <button wire:click="createAndSendOrders" class="po-btn po-btn-primary" style="padding:8px 18px; font-size:13.5px">
+                    <i class="fa-solid fa-paper-plane"></i> Tạo & gửi đơn
                 </button>
             </div>
         </div>
 
-        <!-- Step Wizard -->
-        <div class="oh-steps">
-            <div class="oh-step oh-step-done">
-                <div class="oh-step-num"><i class="fa-solid fa-check" style="font-size:11px"></i></div>
-                <div>
-                    <div class="oh-step-lbl">{{ __('purchase_order.steps.step1_title') }}</div>
-                    <div style="font-size:11px; color:var(--po-fa)">{{ date('d/m/Y', strtotime($sourceFrom)) }}</div>
-                </div>
+        <!-- 3-step Progress Bar -->
+        <div class="oh-steps" style="display:flex; justify-content:space-between; margin-bottom:20px; background:var(--po-wh); padding:12px 20px; border-radius:var(--po-r); border:1px solid var(--po-bd)">
+            <div class="oh-step active" style="display:flex; align-items:center; gap:8px; font-weight:700; color:var(--po-bl)">
+                <span style="width:24px; height:24px; border-radius:50%; background:var(--po-bl); color:#fff; display:flex; align-items:center; justify-content:center; font-size:12px">1</span>
+                <span>Bước 1: Chọn list hàng</span>
             </div>
-            <div class="oh-step-line done"></div>
-            <div class="oh-step oh-step-active">
-                <div class="oh-step-num">2</div>
-                <div>
-                    <div class="oh-step-lbl">{{ __('purchase_order.steps.step2_title') }}</div>
-                    <div style="font-size:11px; color:var(--po-fa)">{{ __('purchase_order.steps.step2_sub') }}</div>
-                </div>
+            <div class="oh-step" style="display:flex; align-items:center; gap:8px; font-weight:600; color:var(--po-mu)">
+                <span style="width:24px; height:24px; border-radius:50%; background:var(--po-bd2); color:var(--po-mu); display:flex; align-items:center; justify-content:center; font-size:12px">2</span>
+                <span>Bước 2: Phân NCC & xác nhận</span>
             </div>
-            <div class="oh-step-line"></div>
-            <div class="oh-step oh-step-pending">
-                <div class="oh-step-num">3</div>
+            <div class="oh-step" style="display:flex; align-items:center; gap:8px; font-weight:600; color:var(--po-mu)">
+                <span style="width:24px; height:24px; border-radius:50%; background:var(--po-bd2); color:var(--po-mu); display:flex; align-items:center; justify-content:center; font-size:12px">3</span>
+                <span>Bước 3: Tạo đơn</span>
+            </div>
+        </div>
+
+        <!-- Date & Shift Filters Card -->
+        <div style="background:var(--po-wh); border:1px solid var(--po-bd); border-radius:var(--po-r); padding:16px; margin-bottom:20px; box-shadow:var(--po-sh)">
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:16px; align-items:end">
                 <div>
-                    <div class="oh-step-lbl">{{ __('purchase_order.steps.step3_title') }}</div>
-                    <div style="font-size:11px; color:var(--po-fa)">{{ __('purchase_order.steps.step3_sub') }}</div>
+                    <label style="font-size:12px; font-weight:700; color:var(--po-tx); display:block; margin-bottom:4px">Ngày đặt hàng</label>
+                    <input type="date" wire:model.live="orderDate" style="width:100%; padding:6px 10px; border-radius:6px; border:1px solid var(--po-bd); font-size:13px; font-weight:600">
+                </div>
+
+                <div>
+                    <label style="font-size:12px; font-weight:700; color:var(--po-tx); display:block; margin-bottom:4px">Nguồn từ ngày</label>
+                    <input type="date" wire:model.live="sourceFrom" style="width:100%; padding:6px 10px; border-radius:6px; border:1px solid var(--po-bd); font-size:13px; font-weight:600">
+                </div>
+
+                <div>
+                    <label style="font-size:12px; font-weight:700; color:var(--po-tx); display:block; margin-bottom:4px">Nguồn đến ngày</label>
+                    <input type="date" wire:model.live="sourceTo" style="width:100%; padding:6px 10px; border-radius:6px; border:1px solid var(--po-bd); font-size:13px; font-weight:600">
+                </div>
+
+                <div style="grid-column: span 2;">
+                    <label style="font-size:12px; font-weight:700; color:var(--po-tx); display:block; margin-bottom:6px">Ca lấy nguyên liệu</label>
+                    <div style="display:flex; gap:12px; flex-wrap:wrap">
+                        @foreach($shifts as $s)
+                            <label style="display:inline-flex; align-items:center; gap:5px; font-size:12.5px; font-weight:600; cursor:pointer; background:#F8FAFC; padding:5px 10px; border-radius:6px; border:1px solid var(--po-bd2)">
+                                <input type="checkbox" value="{{ $s->id }}" wire:model.live="selectedShifts" style="accent-color:var(--po-bl)">
+                                {{ $s->name }}
+                            </label>
+                        @endforeach
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Source Selector Box -->
-        <div class="tcard" style="padding:14px 18px; margin-bottom:14px; display:flex; align-items:flex-end; gap:14px; flex-wrap:wrap">
-            <div class="field" style="min-width:180px">
-                <label style="font-size:11.5px; font-weight:700; color:var(--po-su)">{{ __('purchase_order.fields.order_date') }}</label>
-                <input type="date" class="ctrl" wire:model.live="orderDate" style="height:38px" required>
-            </div>
-            <div class="field" style="min-width:160px">
-                <label style="font-size:11.5px; font-weight:700; color:var(--po-su)">{{ __('purchase_order.fields.source_from') }}</label>
-                <input type="date" class="ctrl" wire:model.live="sourceFrom" style="height:38px" required>
-            </div>
-            <div class="field" style="min-width:160px">
-                <label style="font-size:11.5px; font-weight:700; color:var(--po-su)">{{ __('purchase_order.fields.source_to') }}</label>
-                <input type="date" class="ctrl" wire:model.live="sourceTo" style="height:38px" required>
-            </div>
-            <div class="field" style="min-width:280px; flex:1">
-                <label style="font-size:11.5px; font-weight:700; color:var(--po-su)">{{ __('purchase_order.fields.selected_shifts') }}</label>
-                <div style="display:flex; gap:6px; flex-wrap:wrap; background:var(--po-bg); border:1px solid var(--po-bd); border-radius:8px; padding:7px 9px; min-height:38px">
-                    @foreach($shifts as $shift)
-                        <label style="font-size:12px; font-weight:700; color:var(--po-tx); display:flex; align-items:center; gap:4px; cursor:pointer">
-                            <input type="checkbox" value="{{ $shift->id }}" wire:model.live="selectedShifts">
-                            {{ $shift->name }}
-                        </label>
-                    @endforeach
-                </div>
-            </div>
-        </div>
-
-        <!-- Groups of Ingredients -->
-        <div style="display:flex; flex-direction:column; gap:14px">
-            @forelse($aggregatedGroups as $gKey => $group)
-                @php
-                    $groupTotal = collect($group['items'])->sum('line_total');
-                @endphp
-                <div class="oh-group-card">
-                    <!-- Group Header -->
-                    <div class="oh-group-head">
-                        <div class="oh-group-title">
-                            <span class="{{ $group['class'] }}">{{ $group['label'] }}</span>
-                            <span style="font-size:12px; color:var(--po-mu)">{{ count($group['items']) }} {{ __('purchase_order.labels.ingredients_count') }}</span>
-                        </div>
-                        <div style="display:flex; align-items:center; gap:10px">
-                            <span style="font-size:12.5px; color:var(--po-mu)">Gán nhanh NCC:</span>
-                            <select class="oh-ncc-sel" wire:model.live="groupSuppliers.{{ $gKey }}">
-                                @foreach($suppliers as $sup)
-                                    <option value="{{ $sup->id }}">{{ $sup->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
+        <!-- Ingredient Groups (Grouped by Ingredient Type: Thịt, Rau/Ướt, Hàng Khô) -->
+        @forelse($groups as $group)
+            @php
+                $groupTotal = collect($group['items'])->sum('line_total');
+            @endphp
+            <div class="oh-group-card" style="background:var(--po-wh); border:1px solid var(--po-bd); border-radius:var(--po-r); margin-bottom:20px; overflow:hidden; box-shadow:var(--po-sh)">
+                <!-- Group Header -->
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 18px; background:#FAFBFC; border-bottom:1px solid var(--po-bd2)">
+                    <div style="display:flex; align-items:center; gap:10px">
+                        <span class="{{ $group['class'] }}" style="font-size:13px; font-weight:800; padding:3px 10px; border-radius:20px">
+                            {{ $group['label'] }}
+                        </span>
+                        <span style="font-size:12px; color:var(--po-mu); font-weight:600">
+                            {{ count($group['items']) }} nguyên liệu
+                        </span>
                     </div>
 
-                    <!-- Items Table -->
-                    <table class="oh-table">
+                    <!-- Quick Supplier Assignment for Group -->
+                    <div style="display:flex; align-items:center; gap:8px">
+                        <span style="font-size:12px; font-weight:700; color:var(--po-mu)">Gán nhanh NCC:</span>
+                        <select wire:change="updatedGroupSuppliers($event.target.value, '{{ $group['key'] }}')" class="oh-ncc-sel" style="min-width:140px; padding:4px 8px; font-size:12px">
+                            <option value="">-- Chọn NCC --</option>
+                            @foreach($suppliers as $sup)
+                                <option value="{{ $sup->id }}">{{ $sup->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Group Table -->
+                <div style="overflow-x:auto">
+                    <table class="oh-table" style="width:100%; border-collapse:collapse; text-align:left; font-size:12.5px">
                         <thead>
                             <tr>
                                 <th style="width:36px; text-align:center">#</th>
@@ -128,7 +136,6 @@
                                 <th style="text-align:center">SL ĐẶT TAY</th>
                                 <th style="text-align:right">ĐƠN GIÁ</th>
                                 <th style="text-align:right">THÀNH TIỀN</th>
-                                <th style="width:110px">PHIẾU</th>
                                 <th style="width:180px">NHÀ CUNG CẤP</th>
                             </tr>
                         </thead>
@@ -171,13 +178,6 @@
                                         {{ number_format($item['line_total'], 0, ',', '.') }} đ
                                     </td>
                                     <td>
-                                        <select class="oh-ncc-sel" wire:model.live="itemSplits.{{ $item['ingredient_id'] }}" style="width:100%; min-width:90px">
-                                            <option value="Phiếu 1">Phiếu 1</option>
-                                            <option value="Phiếu 2">Phiếu 2</option>
-                                            <option value="Phiếu 3">Phiếu 3</option>
-                                        </select>
-                                    </td>
-                                    <td>
                                         <select class="oh-ncc-sel" wire:model.live="itemSuppliers.{{ $item['ingredient_id'] }}" style="width:100%">
                                             @foreach($suppliers as $sup)
                                                 <option value="{{ $sup->id }}">{{ $sup->name }}</option>
@@ -187,38 +187,44 @@
                                 </tr>
                             @endforeach
                             <!-- Group Total Row -->
-                            <tr style="background:#F8FAFC">
-                                <td colspan="8" style="text-align:right; font-weight:700; padding:9px 12px; color:var(--po-su)">
-                                    {{ __('purchase_order.labels.group_total', ['group' => $group['label']]) }}:
+                            <tr style="background:#F8FAFC; font-weight:700; border-top:1px solid var(--po-bd2)">
+                                <td colspan="8" style="text-align:right; padding:10px 14px; font-size:13px; color:var(--po-mu)">
+                                    Tổng nhóm {{ str_replace(['🥩 ', '🥬 ', '📦 '], '', $group['label']) }}:
                                 </td>
-                                <td colspan="3" style="font-weight:800; color:var(--po-bl); font-size:13px; padding:9px 12px">
+                                <td colspan="2" style="text-align:left; padding:10px 14px; font-size:14px; font-weight:800; color:var(--po-bl)">
                                     {{ number_format($groupTotal, 0, ',', '.') }} đ
                                 </td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
-            @empty
-                <div class="po-empty">
-                    <div class="po-empty-icon"><i class="fa-solid fa-seedling" style="font-size:24px"></i></div>
-                    <div class="po-empty-title">{{ __('purchase_order.empty.no_ingredients_title') }}</div>
-                    <div class="po-empty-sub">{{ __('purchase_order.empty.no_ingredients_sub') }}</div>
-                </div>
-            @endforelse
-        </div>
+            </div>
+        @empty
+            <div style="text-align:center; padding:40px; background:var(--po-wh); border-radius:var(--po-r); border:1px solid var(--po-bd)">
+                <i class="fa-solid fa-inbox" style="font-size:36px; color:var(--po-mu); margin-bottom:10px"></i>
+                <p style="font-weight:700; color:var(--po-tx)">Không tìm thấy nguyên liệu nào trong khoảng ngày & ca ăn được chọn</p>
+                <p style="font-size:12.5px; color:var(--po-mu)">Vui lòng kiểm tra xem thực đơn của các ngày này đã ở trạng thái "LOCKED" (Đã chốt) hay chưa.</p>
+            </div>
+        @endforelse
 
-        <!-- Grand Total Blue Banner (lhn-grand) -->
-        <div class="lhn-grand" style="margin-top:14px">
+        <!-- Fixed Bottom Grand Total Blue Banner (lhn-grand) -->
+        <div class="lhn-grand" style="position:fixed; bottom:16px; left:calc(var(--sidebar-width, 260px) + 24px); right:24px; border-radius:12px; background:linear-gradient(135deg, #1474FF, #0059DD); color:#fff; padding:14px 24px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 8px 24px rgba(20, 116, 255, 0.35); z-index:40">
             <div>
-                <div class="lhn-grand-lbl">
-                    TỔNG ĐƠN ĐẶT HÀNG – ĐẶT HÀNG {{ date('d/m/Y', strtotime($orderDate)) }} · LIST {{ date('d/m/Y', strtotime($sourceFrom)) }} – {{ date('d/m/Y', strtotime($sourceTo)) }}
+                <div style="font-size:15px; font-weight:800">
+                    TỔNG ĐƠN ĐẶT HÀNG – ĐẶT HÀNG {{ \Carbon\Carbon::parse($orderDate)->format('d/m/Y') }} · LIST {{ \Carbon\Carbon::parse($sourceFrom)->format('d/m/Y') }} – {{ \Carbon\Carbon::parse($sourceTo)->format('d/m/Y') }}
                 </div>
-                <div style="font-size:12px; opacity:.85; margin-top:3px">
-                    {{ $distinctSuppliersCount }} NCC · {{ $selectedCount }}/{{ $totalCount }} nguyên liệu được đặt · {{ $distinctSplitsCount }} phiếu
+                <div style="font-size:12.5px; opacity:0.9; margin-top:2px">
+                    {{ $supplierCount }} NCC · {{ $selectedCount }}/{{ $totalCount }} nguyên liệu được đặt
                 </div>
             </div>
-            <div class="lhn-grand-val">
-                {{ number_format($grandTotal, 0, ',', '.') }} đ
+            <div style="display:flex; align-items:center; gap:20px">
+                <div style="text-align:right">
+                    <div style="font-size:11px; opacity:0.85; text-transform:uppercase; font-weight:700">TỔNG TIỀN ĐẶT HÀNG</div>
+                    <div style="font-size:22px; font-weight:900; letter-spacing:-0.5px">{{ number_format($grandTotal, 0, ',', '.') }} đ</div>
+                </div>
+                <button wire:click="createAndSendOrders" class="po-btn" style="background:#fff; color:#0059DD; font-weight:800; padding:10px 20px; font-size:14px; border:none; box-shadow:0 4px 12px rgba(0,0,0,0.15)">
+                    <i class="fa-solid fa-paper-plane"></i> Tạo & gửi đơn
+                </button>
             </div>
         </div>
     </div>
