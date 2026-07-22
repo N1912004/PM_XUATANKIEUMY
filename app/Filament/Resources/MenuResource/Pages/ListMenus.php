@@ -351,7 +351,7 @@ class ListMenus extends Page
         abort_unless(MenuResource::canViewAny(), 403);
 
         if ($this->activeView === 'week' && $this->weekMenuId) {
-            return $this->exportWeekMenu((int) $this->weekMenuId);
+            return $this->exportWeekMenu((int) $this->weekMenuId, $this->weekDateFrom, $this->weekDateTo);
         }
 
         if ($this->activeView === 'day' && $this->dayMenuId) {
@@ -370,7 +370,7 @@ class ListMenus extends Page
         if ($kitchenId && $from) {
             $query->where('kitchen_id', $kitchenId)
                 ->where('date', '>=', $from)
-                ->where('date', '<', Carbon::parse($to ?: $from)->addDay()->toDateString());
+                ->where('date', '<=', $to ?: $from);
 
             if (($to ?: $from) === $from) {
                 $query->whereNotNull('day_menu_id');
@@ -393,23 +393,23 @@ class ListMenus extends Page
         $prefix = $isSingleDay ? ($isEn ? 'daily-menu' : 'thuc-don-ngay') : ($isEn ? 'weekly-menu' : 'thuc-don-tuan');
         $fileName = $prefix.'-'.($from ?: now()->format('Y-m-d')).'.xlsx';
 
-        return Excel::download(new MenuExport($query->get(), $subtitle, $isSingleDay), $fileName);
+        return Excel::download(new MenuExport($query->get(), $subtitle, $isSingleDay, $from, $to ?: $from), $fileName);
     }
 
-    /** Xuất tuần đang soạn trên form (T2 → CN, khớp đủ 7 ngày của grid). */
+    /** Xuất tuần đang soạn trên form (theo từ ngày -> đến ngày trên bộ lọc). */
     public function exportWeekForm()
     {
-        if ($this->weekMenuId) {
-            return $this->exportWeekMenu((int) $this->weekMenuId);
-        }
+        $start = Carbon::parse($this->weekDateFrom)->toDateString();
+        $end = Carbon::parse($this->weekDateTo)->toDateString();
 
-        $start = Carbon::parse($this->weekDateFrom);
-        $end = Carbon::parse($this->weekDateTo);
+        if ($this->weekMenuId) {
+            return $this->exportWeekMenu((int) $this->weekMenuId, $start, $end);
+        }
 
         $weekMenu = WeekMenu::query()
             ->where('kitchen_id', $this->weekKitchenId)
-            ->where('date_from', $start->toDateString())
-            ->where('date_to', $end->toDateString())
+            ->where('date_from', '<=', $start)
+            ->where('date_to', '>=', $end)
             ->first();
 
         if (! $weekMenu) {
@@ -418,7 +418,7 @@ class ListMenus extends Page
             return null;
         }
 
-        return $this->exportWeekMenu($weekMenu->id);
+        return $this->exportWeekMenu($weekMenu->id, $start, $end);
     }
 
     /** Xuất ngày đang soạn trên form. */
@@ -433,21 +433,26 @@ class ListMenus extends Page
         return $this->exportDayMenu((int) $this->dayMenuId);
     }
 
-    public function exportWeekMenu(int $weekMenuId): BinaryFileResponse
+    public function exportWeekMenu(int $weekMenuId, ?string $from = null, ?string $to = null): BinaryFileResponse
     {
         abort_unless(MenuResource::canViewAny(), 403);
 
         $weekMenu = WeekMenu::findOrFail($weekMenuId);
         $this->assertKitchenAccess((int) $weekMenu->kitchen_id);
 
+        $fromStr = $from ?: $weekMenu->date_from;
+        $toStr = $to ?: $weekMenu->date_to;
+
         $menus = Menu::query()
             ->with(['kitchen', 'shift', 'recipe'])
             ->where('week_menu_id', $weekMenu->id)
+            ->where('date', '>=', $fromStr)
+            ->where('date', '<=', $toStr)
             ->orderBy('date')
             ->orderBy('shift_id')
             ->get();
 
-        $subtitle = 'Từ '.Carbon::parse($weekMenu->date_from)->format('d/m/Y').' đến '.Carbon::parse($weekMenu->date_to)->format('d/m/Y');
+        $subtitle = 'Từ '.Carbon::parse($fromStr)->format('d/m/Y').' đến '.Carbon::parse($toStr)->format('d/m/Y');
         $prefix = app()->getLocale() === 'en' ? 'weekly-menu' : 'thuc-don-tuan';
 
         return Excel::download(
