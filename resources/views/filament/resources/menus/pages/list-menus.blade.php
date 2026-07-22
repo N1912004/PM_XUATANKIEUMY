@@ -919,11 +919,6 @@
                                 <span class="dv-ca-badge {{ $bCls }}">{{ $shiftName }}</span>
                             </div>
                             <div style="display:flex; align-items:center; gap:12px">
-                                @unless($dayHasPastLockedMenus)
-                                    <button type="button" wire:click="removeShiftFromDay({{ $shiftId }})" title="{{ __('menu.actions.remove_shift') }}" style="height:32px; padding:0 12px; border:1px solid var(--po-bd); border-radius:7px; background:var(--po-wh); color:var(--po-rd); font-size:12px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:4px">
-                                        <i class="fa-solid fa-xmark"></i> {{ __('menu.actions.remove_shift') }}
-                                    </button>
-                                @endunless
                             </div>
                         </div>
 
