@@ -148,7 +148,7 @@
                         </span>
                         <span>
                             <i class="fa-regular fa-clock"></i>
-                            {{ __('purchase_order.labels.created_at', ['date' => $order->created_at->format('d/m/Y H:i')]) }}
+                            {{ __('purchase_order.labels.created_at', ['date' => $order->created_at?->timezone('Asia/Ho_Chi_Minh')?->format('d/m/Y H:i')]) }}
                         </span>
                     </div>
                 </div>
