@@ -165,9 +165,13 @@ class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
     {
         $lastRow = $sheet->getHighestRow();
 
-        // 1. Set column widths (Column A widened to 30 for spacious logo presentation)
-        $sheet->getColumnDimension('A')->setWidth(30);
-        $sheet->getColumnDimension('B')->setWidth(50);
+        // 1. Set column widths & row heights for header logo (A1:A3 widened & tall enough for logo)
+        $sheet->getColumnDimension('A')->setWidth(36);
+        $sheet->getColumnDimension('B')->setWidth(54);
+
+        $sheet->getRowDimension(1)->setRowHeight(24);
+        $sheet->getRowDimension(2)->setRowHeight(24);
+        $sheet->getRowDimension(3)->setRowHeight(24);
 
         // 2. Merge cells for Header (A1:A3 & B1:B3)
         $sheet->mergeCells('A1:A3');
@@ -189,8 +193,8 @@ class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
             $drawing->setDescription('System Brand Logo');
             $drawing->setPath($resolvedLogoPath);
             $drawing->setCoordinates('A1');
-            $drawing->setHeight(54);
-            $drawing->setOffsetX(15);
+            $drawing->setHeight(60);
+            $drawing->setOffsetX(10);
             $drawing->setOffsetY(6);
             $drawing->setWorksheet($sheet);
         } else {
