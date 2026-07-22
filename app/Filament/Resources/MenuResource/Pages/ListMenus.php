@@ -749,45 +749,65 @@ class ListMenus extends Page
      */
     public array $customDishCategories = [];
 
+    public function getShiftDishCategories(int $shiftId): array
+    {
+        if (empty($this->customDishCategories[$shiftId]) || ! is_array($this->customDishCategories[$shiftId])) {
+            $this->customDishCategories[$shiftId] = ['Món 1'];
+        }
+
+        return $this->customDishCategories[$shiftId];
+    }
+
     public function getDishCategoriesProperty(): array
     {
         if (empty($this->customDishCategories)) {
-            $this->customDishCategories = ['Món 1'];
+            return ['Món 1'];
         }
 
-        return $this->customDishCategories;
+        $firstKey = array_key_first($this->customDishCategories);
+        $val = $this->customDishCategories[$firstKey] ?? ['Món 1'];
+
+        return is_array($val) ? $val : $this->customDishCategories;
     }
 
-    public function addCategoryRow(?string $name = null): void
+    public function addCategoryRow($shiftId = null, ?string $name = null): void
     {
-        $categories = $this->dishCategories;
+        $sId = (int) ($shiftId ?: 0);
+        if ($sId <= 0) {
+            $firstShift = Shift::orderBy('sort_order')->orderBy('id')->first();
+            $sId = (int) ($firstShift?->id ?? 1);
+        }
+
+        $categories = $this->getShiftDishCategories($sId);
         $newLabel = trim($name ?: '') ?: ('Món '.(count($categories) + 1));
-        $this->customDishCategories[] = $newLabel;
-        $newIdx = count($this->customDishCategories) - 1;
+        $this->customDishCategories[$sId][] = $newLabel;
+        $newIdx = count($this->customDishCategories[$sId]) - 1;
 
         foreach ($this->weekCells as $d => $dShifts) {
-            foreach ($dShifts as $sId => $items) {
-                if (! isset($this->weekCells[$d][$sId][$newIdx])) {
-                    $this->weekCells[$d][$sId][$newIdx] = ['recipe_id' => '', 'portions' => 1];
-                }
+            if (! isset($this->weekCells[$d][$sId][$newIdx])) {
+                $this->weekCells[$d][$sId][$newIdx] = ['recipe_id' => '', 'portions' => 1];
             }
         }
     }
 
-    public function removeCategoryRow(int $index): void
+    public function removeCategoryRow($shiftId = null, int $index = 0): void
     {
-        $categories = $this->dishCategories;
+        $sId = (int) ($shiftId ?: 0);
+        if ($sId <= 0) {
+            $firstShift = Shift::orderBy('sort_order')->orderBy('id')->first();
+            $sId = (int) ($firstShift?->id ?? 1);
+        }
+
+        $categories = $this->getShiftDishCategories($sId);
         if (count($categories) <= 1) {
             return;
         }
 
-        array_splice($this->customDishCategories, $index, 1);
+        array_splice($this->customDishCategories[$sId], $index, 1);
 
         foreach ($this->weekCells as $d => $dShifts) {
-            foreach ($dShifts as $sId => $items) {
-                if (isset($this->weekCells[$d][$sId][$index])) {
-                    array_splice($this->weekCells[$d][$sId], $index, 1);
-                }
+            if (isset($this->weekCells[$d][$sId][$index])) {
+                array_splice($this->weekCells[$d][$sId], $index, 1);
             }
         }
     }
@@ -1104,10 +1124,19 @@ class ListMenus extends Page
             }
 
             // Sync custom dish categories into recipe_types table
-            foreach ($this->customDishCategories as $catLabel) {
-                $trimmed = trim($catLabel);
-                if ($trimmed !== '') {
-                    RecipeType::firstOrCreate(['name' => $trimmed]);
+            foreach ($this->customDishCategories as $catGroup) {
+                if (is_array($catGroup)) {
+                    foreach ($catGroup as $catLabel) {
+                        $trimmed = trim((string) $catLabel);
+                        if ($trimmed !== '') {
+                            RecipeType::firstOrCreate(['name' => $trimmed]);
+                        }
+                    }
+                } elseif (is_string($catGroup)) {
+                    $trimmed = trim($catGroup);
+                    if ($trimmed !== '') {
+                        RecipeType::firstOrCreate(['name' => $trimmed]);
+                    }
                 }
             }
 

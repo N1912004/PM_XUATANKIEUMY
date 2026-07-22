@@ -525,7 +525,11 @@
                     @endphp
                     @foreach($shifts as $index => $shift)
                         @continue(!empty($selectedShifts) && !in_array((string)$shift->id, array_map('strval', $selectedShifts), true))
-                        @php $pal = $shiftPalettes[$index % 4]; @endphp
+                        @php
+                            $pal = $shiftPalettes[$index % 4];
+                            $categories = $this->getShiftDishCategories($shift->id);
+                            $catCount = count($categories);
+                        @endphp
 
                         @foreach($categories as $ci => $catLabel)
                             <tr style="border-bottom:1px solid var(--po-bd)">
@@ -539,9 +543,9 @@
 
                                 <td style="padding:4px 8px; font-size:11px; font-weight:700; color:var(--po-tx2); background:var(--po-wh); white-space:nowrap; border-right:1px solid var(--po-bd); position:sticky; left:34px; z-index:1; min-width:140px">
                                     <div style="display:flex; align-items:center; gap:4px">
-                                        <input wire:model.live="customDishCategories.{{ $ci }}" type="text" class="ctrl" style="font-size:11px; font-weight:700; text-transform:uppercase; height:26px; padding:0 6px; border:1px solid transparent; background:transparent; width:100%" onfocus="this.style.borderColor='var(--po-bd)'; this.style.background='var(--po-wh)'" onblur="this.style.borderColor='transparent'; this.style.background='transparent'" @disabled($weekHasPastLockedMenus)>
+                                        <input wire:model.live="customDishCategories.{{ $shift->id }}.{{ $ci }}" type="text" class="ctrl" style="font-size:11px; font-weight:700; text-transform:uppercase; height:26px; padding:0 6px; border:1px solid transparent; background:transparent; width:100%" onfocus="this.style.borderColor='var(--po-bd)'; this.style.background='var(--po-wh)'" onblur="this.style.borderColor='transparent'; this.style.background='transparent'" @disabled($weekHasPastLockedMenus)>
                                         @unless($weekHasPastLockedMenus || count($categories) <= 1)
-                                            <button type="button" wire:click="removeCategoryRow({{ $ci }})" title="{{ __('menu.actions.remove_dish') }}" style="width:20px; height:20px; border:none; background:transparent; color:var(--po-fa); cursor:pointer; font-size:11px; flex-shrink:0" onmouseover="this.style.color='var(--po-rd)'" onmouseout="this.style.color='var(--po-fa)'">
+                                            <button type="button" wire:click="removeCategoryRow({{ $shift->id }}, {{ $ci }})" title="{{ __('menu.actions.remove_dish') }}" style="width:20px; height:20px; border:none; background:transparent; color:var(--po-fa); cursor:pointer; font-size:11px; flex-shrink:0" onmouseover="this.style.color='var(--po-rd)'" onmouseout="this.style.color='var(--po-fa)'">
                                                 <i class="fa-solid fa-xmark"></i>
                                             </button>
                                         @endunless
@@ -558,7 +562,7 @@
                                         @endphp
                                         <div style="min-width:130px">
                                             <button type="button" 
-                                                    @click="openModal({{ $d }}, {{ $shift->id }}, {{ $ci }}, @js($shift->name), @js($wDay['day_name']), '{{ date('d-m', strtotime($wDay['date'])) }}', @js($customDishCategories[$ci] ?? $catLabel), '{{ $cellVal['recipe_id'] ?? '' }}', {{ $portionsVal }}, @js($cellTitle))"
+                                                    @click="openModal({{ $d }}, {{ $shift->id }}, {{ $ci }}, @js($shift->name), @js($wDay['day_name']), '{{ date('d-m', strtotime($wDay['date'])) }}', @js($customDishCategories[$shift->id][$ci] ?? $catLabel), '{{ $cellVal['recipe_id'] ?? '' }}', {{ $portionsVal }}, @js($cellTitle))"
                                                     @disabled($weekHasPastLockedMenus)
                                                     style="border:1px solid {{ $selectedRec ? 'var(--po-bl-m, #bfdbfe)' : 'var(--po-bd, #e2e8f0)' }}; border-radius:8px; padding:6px 8px; background:{{ $selectedRec ? '#FAFCFF' : '#fff' }}; text-align:left; cursor:pointer; width:100%; transition:all .15s; outline:none; display:flex; flex-direction:column; gap:2px">
                                                 @if($selectedRec)
@@ -587,7 +591,7 @@
                         <tr style="border-bottom:1px solid var(--po-bd)">
                             <td style="padding:6px 8px; background:var(--po-wh); border-right:1px solid var(--po-bd); position:sticky; left:34px; z-index:1">
                                 @unless($weekHasPastLockedMenus)
-                                    <button type="button" wire:click="addCategoryRow" style="height:26px; width:100%; border:1.5px dashed var(--po-gn); border-radius:6px; background:var(--po-gn-s); font-size:11.5px; font-weight:700; color:var(--po-gn-t); cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:4px">
+                                    <button type="button" wire:click="addCategoryRow({{ $shift->id }})" style="height:26px; width:100%; border:1.5px dashed var(--po-gn); border-radius:6px; background:var(--po-gn-s); font-size:11.5px; font-weight:700; color:var(--po-gn-t); cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:4px">
                                         <i class="fa-solid fa-plus"></i> {{ __('menu.actions.add_dish_row') }}
                                     </button>
                                 @endunless
