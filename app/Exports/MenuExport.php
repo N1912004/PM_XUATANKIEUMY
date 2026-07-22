@@ -118,7 +118,7 @@ class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
             $dishNames = [''];
         }
 
-        $dishPrefix = $isEn ? 'DISH ' : 'MÓN ';
+        $dishPrefix = 'MÓN ';
 
         foreach ($dishNames as $i => $dishName) {
             $label = $dishPrefix.($i + 1);
