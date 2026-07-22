@@ -58,6 +58,8 @@ class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
             if ($firstDate) {
                 $cDate = $firstDate instanceof Carbon ? $firstDate : Carbon::parse($firstDate);
                 $this->singleDayDateStr = $cDate->format('d/m/Y');
+            } elseif (preg_match('/(\d{2}\/\d{2}\/\d{4})/', $this->subtitle, $m)) {
+                $this->singleDayDateStr = $m[1];
             }
         }
     }
@@ -99,7 +101,13 @@ class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
         $rows[] = ['', ''];
 
         // Row 4: Title Banner
-        $titleText = $isEn ? 'SAVORY MENU 46' : 'MENU MẶN 46';
+        if ($this->singleDayDateStr !== '') {
+            $titleText = $isEn
+                ? 'DAILY MENU '.$this->singleDayDateStr
+                : 'THỰC ĐƠN NGÀY '.$this->singleDayDateStr;
+        } else {
+            $titleText = $isEn ? 'DAILY MENU' : 'THỰC ĐƠN NGÀY';
+        }
         $rows[] = [$titleText, ''];
 
         // Row 5: Table Header
