@@ -670,7 +670,7 @@ class ListMenus extends Page
     public function getDishCategoriesProperty(): array
     {
         if (empty($this->customDishCategories)) {
-            $this->customDishCategories = ['Món 1', 'Món 2', 'Rau xào / luộc', 'Canh', 'Cơm', 'Món chay 1', 'Món chay 2', 'Canh chay', 'Tráng miệng'];
+            $this->customDishCategories = ['Món 1'];
         }
 
         return $this->customDishCategories;
@@ -1154,7 +1154,7 @@ class ListMenus extends Page
             }
 
             if (empty($recipes)) {
-                foreach (array_slice($defaultLabels, 0, 6) as $lbl) {
+                foreach (array_slice($defaultLabels, 0, 1) as $lbl) {
                     $recipes[] = [
                         'menu_id' => null,
                         'label' => $lbl,
@@ -1268,7 +1268,7 @@ class ListMenus extends Page
             $defaultLabels = ['Món 1', 'Món 2', 'Rau xào / luộc', 'Canh', 'Cơm', 'Tráng miệng'];
         }
         $recipes = [];
-        foreach (array_slice($defaultLabels, 0, 6) as $lbl) {
+        foreach (array_slice($defaultLabels, 0, 1) as $lbl) {
             $recipes[] = [
                 'menu_id' => null,
                 'label' => $lbl,
