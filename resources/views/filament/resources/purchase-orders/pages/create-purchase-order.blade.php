@@ -110,15 +110,46 @@
                         </span>
                     </div>
 
-                    <!-- Quick Supplier Assignment for Group -->
+                    <!-- Quick Supplier Assignment for Group (Vừa tìm vừa chọn) -->
                     <div style="display:flex; align-items:center; gap:8px">
                         <span style="font-size:12px; font-weight:700; color:var(--po-mu)">Gán nhanh NCC:</span>
-                        <select wire:change="updatedGroupSuppliers($event.target.value, '{{ $group['key'] }}')" class="oh-ncc-sel" style="min-width:140px; padding:4px 8px; font-size:12px">
-                            <option value="">-- Chọn NCC --</option>
-                            @foreach($suppliers as $sup)
-                                <option value="{{ $sup->id }}">{{ $sup->name }}</option>
-                            @endforeach
-                        </select>
+                        <div x-data="{
+                            open: false,
+                            search: '',
+                            suppliers: {{ json_encode($suppliers->map(fn($s) => ['id' => $s->id, 'name' => $s->name])->values()->toArray()) }},
+                            get filtered() {
+                                if (!this.search) return this.suppliers;
+                                return this.suppliers.filter(s => s.name.toLowerCase().includes(this.search.toLowerCase()));
+                            },
+                            selectSupplier(id, name) {
+                                $wire.updatedGroupSuppliers(id, '{{ $group['key'] }}');
+                                this.search = name;
+                                this.open = false;
+                            }
+                        }" @click.outside="open = false" style="position:relative; min-width:180px">
+                            <div @click="open = !open" style="display:flex; align-items:center; justify-content:space-between; background:#fff; border:1px solid var(--po-bd); border-radius:6px; padding:4px 10px; cursor:pointer; font-size:12px; font-weight:600; color:var(--po-tx); box-shadow:0 1px 2px rgba(0,0,0,0.05)">
+                                <span x-text="search || '-- Chọn NCC --'" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:140px"></span>
+                                <i class="fa-solid fa-chevron-down" style="font-size:10px; color:var(--po-mu)"></i>
+                            </div>
+
+                            <div x-show="open" x-cloak style="position:absolute; right:0; top:calc(100% + 4px); width:230px; background:#fff; border:1px solid var(--po-bd); border-radius:8px; box-shadow:0 10px 25px rgba(0,0,0,0.15); z-index:100; padding:6px">
+                                <input type="text" x-model="search" placeholder="🔍 Tìm tên NCC..." style="width:100%; padding:6px 9px; font-size:12px; border:1px solid var(--po-bd2); border-radius:4px; outline:none; margin-bottom:4px" @click.stop>
+                                
+                                <div style="max-height:180px; overflow-y:auto">
+                                    <template x-for="sup in filtered" :key="sup.id">
+                                        <div @click="selectSupplier(sup.id, sup.name)" 
+                                             style="padding:6px 8px; font-size:12px; font-weight:600; color:var(--po-tx); cursor:pointer; border-radius:4px; transition:0.1s"
+                                             onmouseover="this.style.background='#F1F5F9'" 
+                                             onmouseout="this.style.background='transparent'"
+                                             x-text="sup.name">
+                                        </div>
+                                    </template>
+                                    <div x-show="filtered.length === 0" style="padding:8px; font-size:11.5px; color:var(--po-mu); text-align:center">
+                                        Không tìm thấy NCC
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
