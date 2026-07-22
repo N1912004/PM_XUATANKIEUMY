@@ -739,6 +739,7 @@
             selectedRecipeName: '',
             selectedRecipeCost: '',
             portions: 1,
+            servings: 1,
             recipes: @js($this->recipesData),
             groups: [],
 
@@ -753,6 +754,7 @@
                 this.search = '';
                 this.activeGroup = 'all';
                 this.displayLimit = 50;
+                this.servings = currentPortions || 1;
                 this.portions = currentPortions || 1;
                 const selected = this.recipes.find(recipe => String(recipe.id) === String(currentRecipeId));
                 this.selectedRecipeId = selected?.id ?? null;
@@ -797,7 +799,7 @@
             confirmDaySelection() {
                 if (this.targetShiftId !== null && this.targetRecipeIndex !== null) {
                     $wire.set(`dayItems.${this.targetShiftId}.recipes.${this.targetRecipeIndex}.recipe_id`, this.selectedRecipeId);
-                    $wire.set(`dayItems.${this.targetShiftId}.recipes.${this.targetRecipeIndex}.portions`, this.portions);
+                    $wire.set(`dayItems.${this.targetShiftId}.recipes.${this.targetRecipeIndex}.portions`, this.servings);
                 }
                 this.closeDayModal();
             }
@@ -1020,16 +1022,19 @@
                     </div>
                     <button type="button" @click="clearDaySelection()" style="border:none; background:none; color:var(--po-rd); font-weight:600; cursor:pointer">{{ __('menu.popup.unselect') }}</button>
                 </div>
-                <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap">
-                    <div style="display:flex; align-items:center; gap:6px; color:var(--po-tx2)">
-                        <i class="fa-solid fa-layer-group" style="color:var(--po-gn)"></i>
-                        <span style="font-weight:600">{{ __('menu.popup.phan_label') }}</span>
-                        <input x-model.number="portions" type="number" min="1" style="width:64px; height:34px; border:1.5px solid var(--po-bd); border-radius:8px; text-align:center; font-weight:700; color:var(--po-gn)">
-                        <span>{{ __('menu.popup.phan_suffix') }}</span>
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:nowrap">
+                    <div style="display:flex; align-items:center; gap:14px; flex-wrap:nowrap">
+                        <!-- Ô Số suất -->
+                        <div style="display:flex; align-items:center; gap:6px; font-size:12.5px; color:var(--po-tx2)">
+                            <i class="fa-solid fa-users" style="color:var(--po-bl, #2563eb); font-size:13px"></i>
+                            <span style="font-weight:600">Số suất:</span>
+                            <input x-model.number="servings" type="number" min="1" style="width:68px; height:34px; border:1.5px solid var(--po-bd, #e2e8f0); border-radius:8px; padding:0 6px; font-size:13.5px; font-weight:700; color:var(--po-bl, #2563eb); text-align:center; outline:none">
+                            <span style="font-size:12px; color:var(--po-mu)">suất</span>
+                        </div>
                     </div>
-                    <div style="display:flex; gap:8px">
-                        <button type="button" @click="closeDayModal()" class="emp-btn">{{ __('menu.popup.cancel') }}</button>
-                        <button type="button" @click="confirmDaySelection()" class="emp-btn emp-btn-primary"><i class="fa-solid fa-check"></i> {{ __('menu.popup.confirm') }}</button>
+                    <div style="display:flex; align-items:center; gap:8px; flex-shrink:0">
+                        <button type="button" @click="closeDayModal()" style="height:34px; padding:0 14px; border:1px solid var(--po-bd, #e2e8f0); border-radius:8px; background:#fff; font-size:12.5px; font-weight:600; cursor:pointer; color:var(--po-tx2)">{{ __('menu.popup.cancel') }}</button>
+                        <button type="button" @click="confirmDaySelection()" style="height:34px; padding:0 16px; border:none; border-radius:8px; background:linear-gradient(135deg, var(--po-bl, #2563eb), #0059DD); color:#fff; font-size:12.5px; font-weight:700; cursor:pointer; box-shadow:0 4px 12px rgba(18,103,232,.3); display:flex; align-items:center; gap:6px; white-space:nowrap"><i class="fa-solid fa-check"></i> {{ __('menu.popup.confirm') }}</button>
                     </div>
                 </div>
             </div>
