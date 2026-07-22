@@ -28,17 +28,15 @@
 
     <div class="po-page w-full space-y-6" style="padding: 0 !important; background: transparent !important; padding-bottom: 90px !important;">
         <!-- Header Bar -->
-        <div class="po-head" style="margin-bottom: 16px;">
-            <div style="display:flex; align-items:center; gap:12px">
+        <div class="po-head" style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 16px;">
+            <div>
+                <h1 class="po-title" style="font-size:20px; font-weight:800">{{ __('purchase_order.create.title') }}</h1>
+                <p class="po-subtitle" style="font-size:12.5px; color:var(--po-mu)">{{ __('purchase_order.create.subtitle') }}</p>
+            </div>
+            <div style="display:flex; align-items:center; gap:10px">
                 <a href="{{ \App\Filament\Resources\PurchaseOrderResource::getUrl('index') }}" class="po-btn" style="background:var(--po-wh); border:1px solid var(--po-bd); color:var(--po-tx)">
                     <i class="fa-solid fa-arrow-left"></i> {{ __('purchase_order.actions.back') }}
                 </a>
-                <div>
-                    <h1 class="po-title" style="font-size:20px; font-weight:800">{{ __('purchase_order.create.title') }}</h1>
-                    <p class="po-subtitle" style="font-size:12.5px; color:var(--po-mu)">{{ __('purchase_order.create.subtitle') }}</p>
-                </div>
-            </div>
-            <div>
                 <button wire:click="createAndSendOrders" class="po-btn po-btn-primary" style="padding:8px 18px; font-size:13.5px">
                     <i class="fa-solid fa-paper-plane"></i> {{ __('purchase_order.actions.create_and_send') }}
                 </button>
