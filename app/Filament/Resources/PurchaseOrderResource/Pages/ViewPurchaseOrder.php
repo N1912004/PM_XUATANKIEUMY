@@ -6,27 +6,24 @@ use App\Exports\PurchaseOrdersBatchExport;
 use App\Exports\PurchaseOrderTemplateExport;
 use App\Filament\Resources\PurchaseOrderResource;
 use App\Models\PurchaseOrder;
-use Filament\Actions;
-use Filament\Resources\Pages\EditRecord;
+use Filament\Resources\Pages\ViewRecord;
 use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
-class EditPurchaseOrder extends EditRecord
+class ViewPurchaseOrder extends ViewRecord
 {
     protected static string $resource = PurchaseOrderResource::class;
 
-    protected static string $view = 'filament.resources.purchase-orders.pages.edit-purchase-order';
+    protected static string $view = 'filament.resources.purchase-orders.pages.view-purchase-order';
+
+    public function getTitle(): string
+    {
+        return 'Chi tiết đơn';
+    }
 
     protected function getHeaderActions(): array
     {
-        return [
-            Actions\DeleteAction::make(),
-        ];
-    }
-
-    protected function getRedirectUrl(): string
-    {
-        return $this->getResource()::getUrl('index');
+        return [];
     }
 
     /**
@@ -41,9 +38,22 @@ class EditPurchaseOrder extends EditRecord
             ->get();
     }
 
+    public function formatFriendly(float $value): string
+    {
+        if ($value >= 1000000) {
+            $m = $value / 1000000;
+
+            return (floor($m) == $m ? number_format($m, 0) : number_format($m, 1, '.', '')).' tr';
+        }
+        if ($value >= 1000) {
+            return __('purchase_order.currency.thousand', ['value' => number_format($value / 1000, 0, '.', '.')]);
+        }
+
+        return __('purchase_order.currency.amount', ['value' => number_format($value)]);
+    }
+
     /**
-     * Xuất đơn đặt hàng theo BIỂU MẪU NCC (MẪU ĐƠN ĐẶT HÀNG.xlsx): file .xlsx thật,
-     * section theo nhóm nguyên liệu, dòng tổng cộng + khối chữ ký.
+     * Xuất đơn đặt hàng theo BIỂU MẪU NCC
      */
     public function exportCurrentNcc(): BinaryFileResponse
     {
@@ -58,14 +68,12 @@ class EditPurchaseOrder extends EditRecord
     }
 
     /**
-     * Xuất .xlsx gộp TẤT CẢ đơn đặt hàng cùng đợt — mỗi nhà cung cấp một sheet theo biểu mẫu
-     * (trước đây là CSV dồn nhiều đơn vào một khối văn bản, không gửi được cho NCC).
+     * Xuất .xlsx gộp TẤT CẢ đơn đặt hàng cùng đợt
      */
     public function exportAllNcc(): BinaryFileResponse
     {
         abort_unless(PurchaseOrderResource::canView($this->record), 403);
 
-        // Chỉ xuất các PO cùng đợt mà user thực sự có quyền xem (không vượt phạm vi record đã authorize)
         $relatedPOs = PurchaseOrder::with(['supplier', 'kitchen', 'items.ingredient'])
             ->where('kitchen_id', $this->record->kitchen_id)
             ->where('estimated_delivery_date', $this->record->estimated_delivery_date)
@@ -73,7 +81,6 @@ class EditPurchaseOrder extends EditRecord
             ->filter(fn (PurchaseOrder $po): bool => PurchaseOrderResource::canView($po))
             ->values();
 
-        // Null-safe: PO có thể chưa có ngày giao dự kiến
         $fileName = 'PO-DOT-'.($this->record->estimated_delivery_date?->format('Ymd') ?? now()->format('Ymd')).'.xlsx';
 
         return Excel::download(new PurchaseOrdersBatchExport($relatedPOs), $fileName);
