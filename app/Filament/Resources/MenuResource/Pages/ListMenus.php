@@ -615,7 +615,7 @@ class ListMenus extends Page
             : (! $this->canChooseKitchen() ? auth()->user()?->currentKitchenId() : null);
 
         $weekKeys = DB::table('week_menus')
-            ->selectRaw("'week' AS card_type, id AS record_id, kitchen_id, date_from AS group_date, status")
+            ->selectRaw("'week' AS card_type, id AS record_id, kitchen_id, date_from AS group_date, status, updated_at")
             ->when($kitchenIdFilter, fn ($b) => $b->where('kitchen_id', $kitchenIdFilter))
             ->when($this->statusFilter !== '', fn ($b) => $b->where('status', $this->statusFilter))
             ->when($this->typeFilter === 'week' && ($range = $this->selectedWeekRange()) !== null, fn ($b) => $b->where('date_from', '>=', $range[0])->where('date_from', '<=', $range[1]))
@@ -626,7 +626,7 @@ class ListMenus extends Page
             });
 
         $dayKeys = DB::table('day_menus')
-            ->selectRaw("'day' AS card_type, id AS record_id, kitchen_id, date AS group_date, status")
+            ->selectRaw("'day' AS card_type, id AS record_id, kitchen_id, date AS group_date, status, updated_at")
             ->when($kitchenIdFilter, fn ($b) => $b->where('kitchen_id', $kitchenIdFilter))
             ->when($this->statusFilter !== '', fn ($b) => $b->where('status', $this->statusFilter))
             ->when($this->typeFilter === 'day' && $this->isValidDate($this->dayFilter), fn ($b) => $b->where('date', '>=', $this->dayFilter)->where('date', '<', Carbon::parse($this->dayFilter)->addDay()->toDateString()))
@@ -644,9 +644,9 @@ class ListMenus extends Page
 
         $page = Paginator::resolveCurrentPage('page');
         $allKeys = DB::query()->fromSub($keysQuery, 'groups')
-            ->orderByDesc('group_date')
-            ->orderBy('card_type')
-            ->orderBy('kitchen_id');
+            ->orderByDesc('updated_at')
+            ->orderByDesc('record_id')
+            ->orderByDesc('group_date');
 
         $total = (clone $allKeys)->count();
         $pageKeys = $allKeys->forPage($page, $this->perPage)->get();
@@ -1076,7 +1076,9 @@ class ListMenus extends Page
         $dateFrom = $start->toDateString();
         $dateTo = $end->toDateString();
 
-        $weekMenu = $this->isEditingWeek && $this->weekMenuId
+        $wasEditing = $this->isEditingWeek && (bool) $this->weekMenuId;
+
+        $weekMenu = $wasEditing
             ? WeekMenu::query()
                 ->whereKey($this->weekMenuId)
                 ->where('kitchen_id', $this->weekKitchenId)
@@ -1219,13 +1221,7 @@ class ListMenus extends Page
             ->send();
 
         session()->flash('message', __('menu.notifications.week_saved'));
-        $this->loadWeekMenu(
-            $weekMenu->kitchen_id,
-            $weekMenu->date_from,
-            $weekMenu->date_to,
-            true,
-            $weekMenu->id
-        );
+        $this->switchView('list');
     }
 
     /**
@@ -1582,7 +1578,9 @@ class ListMenus extends Page
             return;
         }
 
-        $dayMenu = $this->isEditingDay && $this->dayMenuId
+        $wasEditing = $this->isEditingDay && (bool) $this->dayMenuId;
+
+        $dayMenu = $wasEditing
             ? DayMenu::query()
                 ->with('menus')
                 ->whereKey($this->dayMenuId)
@@ -1706,7 +1704,7 @@ class ListMenus extends Page
         session()->flash('message', $skippedLocked > 0
             ? __('menu.notifications.day_saved_with_skipped', ['count' => $skippedLocked])
             : __('menu.notifications.day_saved'));
-        $this->loadDayMenu($dayMenu->kitchen_id, $dayMenu->date->toDateString(), true, $dayMenu->id);
+        $this->switchView('list');
     }
 
     /**
