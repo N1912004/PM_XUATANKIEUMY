@@ -376,7 +376,7 @@
             confirmSelection() {
                 if (this.targetDay !== null && this.targetShiftId !== null && this.targetCategoryIdx !== null) {
                     $wire.set('weekCells.' + this.targetDay + '.' + this.targetShiftId + '.' + this.targetCategoryIdx + '.recipe_id', this.selectedRecipeId);
-                    $wire.set('weekCells.' + this.targetDay + '.' + this.targetShiftId + '.' + this.targetCategoryIdx + '.portions', this.portions);
+                    $wire.set('weekCells.' + this.targetDay + '.' + this.targetShiftId + '.' + this.targetCategoryIdx + '.portions', this.servings);
                     $wire.set('weekCells.' + this.targetDay + '.' + this.targetShiftId + '.' + this.targetCategoryIdx + '.servings', this.servings);
                 }
                 this.closeModal();
@@ -712,13 +712,6 @@
                             <span style="font-size:12px; color:var(--po-mu)">suất</span>
                         </div>
 
-                        <!-- Ô Số phần -->
-                        <div style="display:flex; align-items:center; gap:6px; font-size:12.5px; color:var(--po-tx2)">
-                            <i class="fa-solid fa-layer-group" style="color:var(--po-gn, #059669); font-size:13px"></i>
-                            <span style="font-weight:600">Số phần:</span>
-                            <input x-model.number="portions" type="number" min="1" style="width:60px; height:34px; border:1.5px solid var(--po-bd, #e2e8f0); border-radius:8px; padding:0 6px; font-size:13.5px; font-weight:700; color:var(--po-gn, #059669); text-align:center; outline:none">
-                            <span style="font-size:12px; color:var(--po-mu)">phần</span>
-                        </div>
                     </div>
                     <div style="display:flex; align-items:center; gap:8px; flex-shrink:0">
                         <button type="button" @click="closeModal()" style="height:34px; padding:0 14px; border:1px solid var(--po-bd, #e2e8f0); border-radius:8px; background:#fff; font-size:12.5px; font-weight:600; cursor:pointer; color:var(--po-tx2)">{{ __('menu.popup.cancel') }}</button>
