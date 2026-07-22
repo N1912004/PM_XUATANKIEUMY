@@ -19,11 +19,12 @@ class Menu extends Model
      *
      * @var array<int, string>
      */
-    protected const AUDITED_FIELDS = ['kitchen_id', 'week_menu_id', 'date', 'shift_id', 'recipe_id', 'estimated_portions', 'status'];
+    protected const AUDITED_FIELDS = ['kitchen_id', 'week_menu_id', 'day_menu_id', 'date', 'shift_id', 'recipe_id', 'estimated_portions', 'status'];
 
     protected $fillable = [
         'kitchen_id',
         'week_menu_id',
+        'day_menu_id',
         'date',
         'shift_id',
         'recipe_id',
@@ -104,7 +105,6 @@ class Menu extends Model
         return null;
     }
 
-
     protected $casts = [
         'date' => 'date',
     ];
@@ -112,6 +112,11 @@ class Menu extends Model
     public function shift(): BelongsTo
     {
         return $this->belongsTo(Shift::class);
+    }
+
+    public function dayMenu(): BelongsTo
+    {
+        return $this->belongsTo(DayMenu::class);
     }
 
     public function recipe(): BelongsTo
