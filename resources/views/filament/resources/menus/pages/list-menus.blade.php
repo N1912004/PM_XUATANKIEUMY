@@ -709,9 +709,9 @@
                         <!-- Ô Số suất -->
                         <div style="display:flex; align-items:center; gap:6px; font-size:12.5px; color:var(--po-tx2)">
                             <i class="fa-solid fa-users" style="color:var(--po-bl, #2563eb); font-size:13px"></i>
-                            <span style="font-weight:600">Số suất:</span>
+                            <span style="font-weight:600">{{ __('menu.popup.portions_label') }}</span>
                             <input x-model.number="servings" type="number" min="1" style="width:68px; height:34px; border:1.5px solid var(--po-bd, #e2e8f0); border-radius:8px; padding:0 6px; font-size:13.5px; font-weight:700; color:var(--po-bl, #2563eb); text-align:center; outline:none">
-                            <span style="font-size:12px; color:var(--po-mu)">suất</span>
+                            <span style="font-size:12px; color:var(--po-mu)">{{ __('menu.popup.portions_suffix') }}</span>
                         </div>
 
                     </div>
@@ -1027,9 +1027,9 @@
                         <!-- Ô Số suất -->
                         <div style="display:flex; align-items:center; gap:6px; font-size:12.5px; color:var(--po-tx2)">
                             <i class="fa-solid fa-users" style="color:var(--po-bl, #2563eb); font-size:13px"></i>
-                            <span style="font-weight:600">Số suất:</span>
+                            <span style="font-weight:600">{{ __('menu.popup.portions_label') }}</span>
                             <input x-model.number="servings" type="number" min="1" style="width:68px; height:34px; border:1.5px solid var(--po-bd, #e2e8f0); border-radius:8px; padding:0 6px; font-size:13.5px; font-weight:700; color:var(--po-bl, #2563eb); text-align:center; outline:none">
-                            <span style="font-size:12px; color:var(--po-mu)">suất</span>
+                            <span style="font-size:12px; color:var(--po-mu)">{{ __('menu.popup.portions_suffix') }}</span>
                         </div>
                     </div>
                     <div style="display:flex; align-items:center; gap:8px; flex-shrink:0">

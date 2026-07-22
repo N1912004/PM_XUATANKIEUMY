@@ -40,6 +40,7 @@ return [
         'dish_name_label' => 'Dish name:',
         'dish_name_placeholder' => 'Select a dish or enter a custom name',
         'portions_label' => 'Portions:',
+        'portions_suffix' => 'portions',
         'phan_label' => 'Parts:',
         'phan_suffix' => 'parts',
         'cancel' => 'Cancel',
