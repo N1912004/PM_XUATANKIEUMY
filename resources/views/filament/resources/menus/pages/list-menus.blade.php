@@ -836,34 +836,50 @@
         </div>
 
         <!-- Settings form -->
-        <div class="tcard" style="padding:16px; margin-bottom:14px; background:var(--po-bd2); display:flex; align-items:center; gap:12px; flex-wrap:wrap">
-            <div class="field" style="min-width:260px">
-                <label>{{ __('menu.fields.kitchen') }} *</label>
-                @include('filament.components.search-select', [
-                    'name' => 'dayKitchenId',
-                    'live' => true,
-                    'options' => $this->getKitchenOptions(),
-                    'nullable' => false,
-                ])
-            </div>
-            <div class="field" style="min-width:200px">
-                <label>{{ __('menu.day_form.date') }} *</label>
-                <input wire:model.live="dayDate" type="date" class="ctrl" required>
-            </div>
-            @if($isEditingDay && $dayHasEditableLockedMenus)
-                <div class="field" style="min-width:280px; flex:1">
-                    <label>{{ __('menu.fields.audit_reason') }} *</label>
-                    <input wire:model="dayEditReason" type="text" class="ctrl" placeholder="{{ __('menu.placeholders.audit_reason') }}" required>
-                    @error('dayEditReason') <span style="color:var(--po-rd);font-size:12px">{{ $message }}</span> @enderror
+        <div class="tcard" style="padding:16px 20px; margin-bottom:14px">
+            <div style="display:flex; align-items:flex-start; gap:16px; flex-wrap:wrap">
+                <div class="field" style="min-width:260px">
+                    <label>{{ __('menu.fields.kitchen') }} *</label>
+                    @include('filament.components.search-select', [
+                        'name' => 'dayKitchenId',
+                        'live' => true,
+                        'options' => $this->getKitchenOptions(),
+                        'nullable' => false,
+                    ])
                 </div>
-            @endif
+                <div class="field" style="min-width:200px">
+                    <label>{{ __('menu.day_form.date') }} *</label>
+                    <input wire:model.live="dayDate" type="date" class="ctrl" required>
+                </div>
+                @if($isEditingDay && $dayHasEditableLockedMenus)
+                    <div class="field" style="min-width:280px; flex:1">
+                        <label>{{ __('menu.fields.audit_reason') }} *</label>
+                        <input wire:model="dayEditReason" type="text" class="ctrl" placeholder="{{ __('menu.placeholders.audit_reason') }}" required>
+                        @error('dayEditReason') <span style="color:var(--po-rd);font-size:12px">{{ $message }}</span> @enderror
+                    </div>
+                @endif
+            </div>
+        </div>
+
+        <!-- Meta Info Bar & Status Badge -->
+        <div class="tcard" style="padding:12px 16px; margin-bottom:14px; display:flex; align-items:center; gap:12px; flex-wrap:wrap; font-size:12.5px; color:var(--po-su)">
+            <div style="display:flex; align-items:center; gap:8px">
+                <i class="fa-solid fa-building" style="color:var(--po-bl)"></i>
+                <strong>{{ $kitchens->firstWhere('id', (int) $dayKitchenId)?->name ?? __('menu.fields.kitchen') }}</strong>
+            </div>
+            <div style="width:1px; height:20px; background:var(--po-bd); flex-shrink:0"></div>
+            <div style="display:flex; align-items:center; gap:8px">
+                <i class="fa-regular fa-calendar-days" style="color:var(--po-bl)"></i>
+                <span>{{ date('d/m/Y', strtotime($dayDate)) }}</span>
+            </div>
+            <div style="width:1px; height:20px; background:var(--po-bd); flex-shrink:0"></div>
 
             <!-- Shift Filter Checkboxes -->
-            <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-top:16px">
+            <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap">
                 <i class="fa-solid fa-sun" style="color:var(--po-or); font-size:12px"></i>
                 <span style="font-weight:600; color:var(--po-mu); margin-right:2px">{{ __('menu.labels.shift') }}:</span>
                 @foreach($shifts as $index => $shift)
-                    <label style="display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border-radius:6px; background:var(--po-wh); border:1px solid var(--po-bd); cursor:pointer; font-weight:600; font-size:11.5px">
+                    <label style="display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border-radius:6px; background:var(--po-bd2); border:1px solid var(--po-bd); cursor:pointer; font-weight:600; font-size:11.5px">
                         <input type="checkbox" value="{{ $shift->id }}" wire:model.live="selectedShifts">
                         {{ $shift->name }}
                     </label>

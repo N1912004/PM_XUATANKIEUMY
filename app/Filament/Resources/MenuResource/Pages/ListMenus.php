@@ -128,6 +128,7 @@ class ListMenus extends Page
         $this->weekDateTo = now()->endOfWeek()->toDateString();
         $this->dayKitchenId = $firstKitchenId;
         $this->dayDate = now()->toDateString();
+        $this->selectedShifts = $this->getShifts()->pluck('id')->map(fn ($id) => (string) $id)->all();
 
         $reqMode = request()->query('mode');
         $reqWeekMenuId = request()->query('weekMenuId');
@@ -173,6 +174,7 @@ class ListMenus extends Page
             $this->mode = 'create';
             $this->weekMenuId = null;
             $this->dayMenuId = null;
+            $this->selectedShifts = $this->getShifts()->pluck('id')->map(fn ($id) => (string) $id)->all();
             $this->loadWeekMenu(
                 $this->weekKitchenId ?? $this->getKitchens()->first()?->id,
                 $this->weekDateFrom ?? now()->startOfWeek()->toDateString(),
@@ -183,6 +185,7 @@ class ListMenus extends Page
             $this->mode = 'create';
             $this->weekMenuId = null;
             $this->dayMenuId = null;
+            $this->selectedShifts = $this->getShifts()->pluck('id')->map(fn ($id) => (string) $id)->all();
             $this->loadDayMenu($this->dayKitchenId ?? $this->getKitchens()->first()?->id, $this->dayDate ?? now()->toDateString(), false);
         }
     }
@@ -1268,6 +1271,9 @@ class ListMenus extends Page
 
         $this->dayItems = [];
         $shifts = $this->getShifts();
+        if (empty($this->selectedShifts)) {
+            $this->selectedShifts = $shifts->pluck('id')->map(fn ($id) => (string) $id)->all();
+        }
 
         $dayMenu = null;
         if ($isEditing && $dayMenuId) {
