@@ -268,6 +268,104 @@
         background: var(--po-bg);
     }
 
+    .emp-bottom-bar {
+        position: sticky;
+        bottom: 0;
+    }
+
+    /* Popup Modal Styles */
+    .popup-grp-btn {
+        height: 28px;
+        padding: 0 12px;
+        border: 1px solid var(--po-bd);
+        border-radius: 20px;
+        background: var(--po-bg);
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--po-mu);
+        cursor: pointer;
+        transition: .13s;
+        font-family: inherit;
+        white-space: nowrap;
+    }
+    .popup-grp-btn:hover {
+        border-color: var(--po-bl-m);
+        color: var(--po-bl);
+        background: var(--po-bl-s);
+    }
+    .popup-grp-btn.active {
+        background: var(--po-bl);
+        color: #fff;
+        border-color: var(--po-bl);
+        box-shadow: 0 2px 8px rgba(18, 103, 232, .22);
+    }
+    .popup-dish {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 9px 12px;
+        border: 1.5px solid var(--po-bd);
+        border-radius: 10px;
+        margin-bottom: 7px;
+        cursor: pointer;
+        transition: .13s;
+        background: var(--po-wh);
+    }
+    .popup-dish:hover {
+        border-color: var(--po-bl-m);
+        background: var(--po-bl-s);
+    }
+    .popup-dish.selected {
+        border-color: var(--po-bl);
+        background: var(--po-bl-s);
+    }
+    .popup-dish-ico {
+        width: 36px;
+        height: 36px;
+        border-radius: 9px;
+        display: grid;
+        place-items: center;
+        font-size: 16px;
+        flex-shrink: 0;
+        background: var(--po-bl-s);
+        color: var(--po-bl);
+    }
+    .popup-dish-nm {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--po-tx);
+    }
+    .popup-dish-meta {
+        font-size: 11.5px;
+        color: var(--po-mu);
+        margin-top: 1px;
+    }
+    .popup-dish-cost {
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--po-gn);
+        margin-left: auto;
+        flex-shrink: 0;
+        text-align: right;
+    }
+    .popup-dish-chk {
+        width: 18px;
+        height: 18px;
+        border-radius: 5px;
+        border: 2px solid var(--po-bd);
+        display: grid;
+        place-items: center;
+        flex-shrink: 0;
+        transition: .13s;
+        background: var(--po-wh);
+    }
+    .popup-dish.selected .popup-dish-chk {
+        background: var(--po-bl);
+        border-color: var(--po-bl);
+        color: #fff;
+        font-size: 11px;
+    }
+
     .mp-item-ico {
         width: 42px;
         height: 42px;

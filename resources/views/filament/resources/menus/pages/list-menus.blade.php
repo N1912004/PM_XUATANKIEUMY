@@ -261,6 +261,101 @@
         @endif
 
     @elseif($activeView === 'week')
+        <div x-data="{
+            isOpen: false,
+            search: '',
+            activeGroup: 'all',
+            targetDay: null,
+            targetShiftId: null,
+            targetCategoryIdx: null,
+            subtitle: '',
+            selectedRecipeId: null,
+            selectedRecipeName: '',
+            selectedRecipeGroup: '',
+            selectedRecipeCost: '',
+            customName: '',
+            portions: 1,
+            phan: 1,
+            recipes: @js($this->recipesData),
+            groups: [],
+
+            init() {
+                const set = new Set();
+                this.recipes.forEach(r => { if (r.group) set.add(r.group); });
+                this.groups = Array.from(set);
+            },
+
+            openModal(day, shiftId, categoryIdx, shiftName, dayDow, dayDateStr, categoryLabel, currentRecipeId, currentPortions) {
+                this.targetDay = day;
+                this.targetShiftId = shiftId;
+                this.targetCategoryIdx = categoryIdx;
+                this.subtitle = `${shiftName} – ${dayDow} ${dayDateStr} / ${categoryLabel}`;
+                this.search = '';
+                this.activeGroup = 'all';
+                this.portions = currentPortions || 1;
+                this.phan = 1;
+                
+                if (currentRecipeId) {
+                    const found = this.recipes.find(r => r.id == currentRecipeId);
+                    if (found) {
+                        this.selectRecipe(found);
+                    } else {
+                        this.clearSelection();
+                    }
+                } else {
+                    this.clearSelection();
+                }
+
+                this.isOpen = true;
+                this.$nextTick(() => {
+                    if (this.$refs.searchInput) this.$refs.searchInput.focus();
+                });
+            },
+
+            closeModal() {
+                this.isOpen = false;
+            },
+
+            selectRecipe(rec) {
+                if (this.selectedRecipeId === rec.id) {
+                    this.clearSelection();
+                    return;
+                }
+                this.selectedRecipeId = rec.id;
+                this.selectedRecipeName = rec.name;
+                this.selectedRecipeGroup = rec.group;
+                this.selectedRecipeCost = rec.cost_formatted;
+                this.customName = rec.name;
+            },
+
+            clearSelection() {
+                this.selectedRecipeId = null;
+                this.selectedRecipeName = '';
+                this.selectedRecipeGroup = '';
+                this.selectedRecipeCost = '';
+                this.customName = '';
+            },
+
+            filteredRecipes() {
+                const q = this.search.toLowerCase().trim();
+                return this.recipes.filter(r => {
+                    const matchGroup = this.activeGroup === 'all' || r.group === this.activeGroup;
+                    const matchSearch = !q || r.name.toLowerCase().includes(q);
+                    return matchGroup && matchSearch;
+                });
+            },
+
+            confirmSelection() {
+                if (this.targetDay !== null && this.targetShiftId !== null && this.targetCategoryIdx !== null) {
+                    $wire.set('weekCells.' + this.targetDay + '.' + this.targetShiftId + '.' + this.targetCategoryIdx + '.recipe_id', this.selectedRecipeId);
+                    $wire.set('weekCells.' + this.targetDay + '.' + this.targetShiftId + '.' + this.targetCategoryIdx + '.portions', this.portions);
+                    if (this.customName) {
+                        $wire.set('customDishCategories.' + this.targetCategoryIdx, this.customName);
+                    }
+                }
+                this.closeModal();
+            }
+        }">
         <!-- =========================================================================
              VIEW 2: BIỂU MẪU THỰC ĐƠN TUẦN
              ========================================================================= -->
@@ -427,15 +522,37 @@
 
                                 @foreach($weekDays as $d => $wDay)
                                     <td style="padding:6px 8px; text-align:center; background:var(--po-wh); vertical-align:middle">
-                                        <div style="display:flex; flex-direction:column; gap:4px; min-width:130px">
-                                            <select wire:model="weekCells.{{ $d }}.{{ $shift->id }}.{{ $ci }}.recipe_id" class="ctrl" style="font-size:11.5px; height:28px; padding:0 4px" @disabled($weekHasPastLockedMenus)>
-                                                <option value="">{{ __('menu.placeholders.select_dish') }}</option>
-                                                @foreach($recipes as $rec)
-                                                    <option value="{{ $rec->id }}">{{ $rec->name }}</option>
-                                                @endforeach
-                                            </select>
+                                        @php
+                                            $cellVal = $this->weekCells[$d][$shift->id][$ci] ?? ['recipe_id' => '', 'portions' => 1];
+                                            $selectedRec = $recipes->firstWhere('id', $cellVal['recipe_id'] ?? null);
+                                        @endphp
+                                        <div style="display:flex; flex-direction:column; gap:4px; min-width:135px">
+                                            <button type="button" 
+                                                    @click="openModal({{ $d }}, {{ $shift->id }}, {{ $ci }}, '{{ e($shift->name) }}', '{{ e($wDay['day_name']) }}', '{{ date('d/m/Y', strtotime($wDay['date'])) }}', '{{ e($catLabel) }}', '{{ $cellVal['recipe_id'] ?? '' }}', {{ (int)($cellVal['portions'] ?? 1) }})"
+                                                    @disabled($weekHasPastLockedMenus)
+                                                    style="border:1.5px solid {{ $selectedRec ? 'var(--po-bl-m, #bfdbfe)' : 'var(--po-bd, #e2e8f0)' }}; border-radius:8px; padding:6px 8px; background:{{ $selectedRec ? 'var(--po-bl-s, #eff6ff)' : '#fff' }}; text-align:left; cursor:pointer; width:100%; transition:all .15s; outline:none">
+                                                @if($selectedRec)
+                                                    <div style="font-size:12px; font-weight:700; color:var(--po-tx); line-clamp:2; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden">
+                                                        {{ $selectedRec->name }}
+                                                    </div>
+                                                    <div style="display:flex; align-items:center; justify-content:space-between; margin-top:4px">
+                                                        <span style="font-size:10px; font-weight:600; color:var(--po-bl); background:#dbeafe; padding:1px 5px; border-radius:4px">
+                                                            {{ $selectedRec->type ?? 'Món khác' }}
+                                                        </span>
+                                                        <span style="font-size:10px; font-weight:700; color:var(--po-gn, #059669)">
+                                                            {{ number_format($selectedRec->effectiveCostPerPortion(), 0, ',', '.') }}đ
+                                                        </span>
+                                                    </div>
+                                                @else
+                                                    <div style="font-size:11.5px; font-weight:600; color:var(--po-mu); display:flex; align-items:center; justify-content:space-between">
+                                                        <span><em>{{ __('menu.placeholders.select_dish') }}</em></span>
+                                                        <i class="fa-solid fa-plus-circle" style="font-size:11px; opacity:.7; color:var(--po-bl)"></i>
+                                                    </div>
+                                                @endif
+                                            </button>
+
                                             <div style="display:flex; align-items:center; justify-content:center; gap:4px">
-                                                <input wire:model="weekCells.{{ $d }}.{{ $shift->id }}.{{ $ci }}.portions" type="number" class="ctrl" style="font-size:11px; height:24px; text-align:center; padding:0 4px; width:70px" placeholder="{{ __('menu.placeholders.portions') }}" @disabled($weekHasPastLockedMenus)>
+                                                <input wire:model="weekCells.{{ $d }}.{{ $shift->id }}.{{ $ci }}.portions" type="number" min="1" class="ctrl" style="font-size:11px; height:24px; text-align:center; padding:0 4px; width:64px; font-weight:700" placeholder="{{ __('menu.placeholders.portions') }}" @disabled($weekHasPastLockedMenus)>
                                                 <span style="font-size:10px; color:var(--po-fa)">{{ __('menu.labels.portions') }}</span>
                                             </div>
                                         </div>
@@ -477,6 +594,104 @@
             <span style="margin-left:auto; color:var(--po-fa); font-size:11.5px">
                 <i class="fa-solid fa-circle-info"></i> {{ __('menu.placeholders.select_dish_hint') }}
             </span>
+        </div>
+
+        <!-- ════════════════════════ POPUP CHỌN MÓN ════════════════════════ -->
+        <div x-show="isOpen" x-cloak style="position:fixed; inset:0; background:rgba(15,23,42,.45); z-index:9999; backdrop-filter:blur(4px)" @click="closeModal()"></div>
+
+        <div x-show="isOpen" x-cloak 
+             style="position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); z-index:10000; width:620px; max-width:96vw; max-height:88vh; background:var(--po-wh, #fff); border-radius:16px; box-shadow:0 20px 60px rgba(15,23,42,.22); overflow:hidden; display:flex; flex-direction:column"
+             @keydown.escape.window="closeModal()">
+
+            <!-- Popup Header -->
+            <div style="display:flex; align-items:center; justify-content:space-between; padding:16px 20px; border-bottom:1px solid var(--po-bd, #e2e8f0); flex-shrink:0">
+                <div>
+                    <div style="font-size:15px; font-weight:800; color:var(--po-tx, #1e293b)">Chọn món ăn</div>
+                    <div style="font-size:12px; color:var(--po-mu, #64748b); margin-top:2px" x-text="subtitle"></div>
+                </div>
+                <button type="button" @click="closeModal()" style="width:32px; height:32px; border:none; background:#F1F5F9; border-radius:8px; cursor:pointer; font-size:16px; color:var(--po-mu); display:grid; place-items:center; transition:.13s" onmouseover="this.style.background='#E2E8F0'" onmouseout="this.style.background='#F1F5F9'">✕</button>
+            </div>
+
+            <!-- Search + Group Filters -->
+            <div style="padding:12px 20px 0; flex-shrink:0">
+                <div style="display:flex; align-items:center; gap:8px; background:var(--po-bg, #f8fafc); border:1.5px solid var(--po-bd, #e2e8f0); border-radius:9px; padding:0 12px; height:40px; margin-bottom:10px; transition:.13s">
+                    <i class="fa-solid fa-magnifying-glass" style="color:var(--po-fa, #94a3b8); font-size:13px; flex-shrink:0"></i>
+                    <input x-ref="searchInput" x-model="search" type="text" placeholder="Tìm kiếm tên món ăn..." style="border:none; background:transparent; outline:none; font-size:13.5px; color:var(--po-tx, #1e293b); width:100%">
+                </div>
+                <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px">
+                    <button type="button" class="popup-grp-btn" :class="{ 'active': activeGroup === 'all' }" @click="activeGroup = 'all'">Tất cả</button>
+                    <template x-for="grp in groups" :key="grp">
+                        <button type="button" class="popup-grp-btn" :class="{ 'active': activeGroup === grp }" @click="activeGroup = grp" x-text="grp"></button>
+                    </template>
+                </div>
+            </div>
+
+            <!-- Dish List -->
+            <div style="flex:1; overflow-y:auto; padding:0 20px 12px; scrollbar-width:thin">
+                <template x-for="d in filteredRecipes()" :key="d.id">
+                    <div class="popup-dish" :class="{ 'selected': selectedRecipeId == d.id }" @click="selectRecipe(d)">
+                        <div class="popup-dish-chk" x-text="selectedRecipeId == d.id ? '✓' : ''"></div>
+                        <div class="popup-dish-ico"><i class="fa-solid fa-bowl-food"></i></div>
+                        <div style="flex:1; min-width:0">
+                            <div class="popup-dish-nm" x-text="d.name"></div>
+                            <div class="popup-dish-meta" x-text="'Nhóm: ' + d.group"></div>
+                        </div>
+                        <div class="popup-dish-cost">
+                            <span x-text="d.cost_formatted" style="font-size:12px; font-weight:700; color:var(--po-gn, #059669)"></span>
+                            <span style="display:block; font-size:10px; font-weight:500; color:var(--po-fa, #94a3b8)">Cost/phần</span>
+                        </div>
+                    </div>
+                </template>
+
+                <div x-show="filteredRecipes().length === 0" style="text-align:center; padding:32px; color:var(--po-fa); font-size:13px">
+                    <i class="fa-solid fa-magnifying-glass" style="font-size:26px; display:block; margin-bottom:8px; opacity:.25"></i>
+                    <span>Không tìm thấy món phù hợp</span>
+                </div>
+            </div>
+
+            <!-- Footer: Selected Dish Info + Portion Settings -->
+            <div style="padding:14px 20px; border-top:1px solid var(--po-bd, #e2e8f0); background:#FAFBFC; flex-shrink:0">
+                <div x-show="selectedRecipeId" style="margin-bottom:10px">
+                    <div style="display:flex; align-items:center; justify-content:space-between; background:var(--po-bl-s, #eff6ff); border:1.5px solid var(--po-bl-m, #bfdbfe); border-radius:9px; padding:10px 14px">
+                        <div style="display:flex; align-items:center; gap:8px">
+                            <i class="fa-solid fa-bowl-food" style="color:var(--po-bl, #2563eb); font-size:14px"></i>
+                            <div>
+                                <div style="font-size:13px; font-weight:700; color:var(--po-tx, #1e293b)" x-text="selectedRecipeName"></div>
+                                <div style="font-size:11px; color:var(--po-mu, #64748b)" x-text="'Cost: ' + selectedRecipeCost + ' / phần'"></div>
+                            </div>
+                        </div>
+                        <button type="button" @click="clearSelection()" style="font-size:11px; color:var(--po-rd, #dc2626); font-weight:600; background:none; border:none; cursor:pointer">✕ Bỏ chọn</button>
+                    </div>
+                </div>
+
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px">
+                    <i class="fa-solid fa-pen" style="color:var(--po-bl, #2563eb); font-size:13px"></i>
+                    <span style="font-size:13px; color:var(--po-tx2, #475569); white-space:nowrap">Tên món:</span>
+                    <input x-model="customName" type="text" placeholder="Chọn món hoặc tự nhập / sửa tên món tùy ý" style="flex:1; height:36px; border:1.5px solid var(--po-bd, #e2e8f0); border-radius:8px; padding:0 12px; font-size:13.5px; font-weight:600; color:var(--po-tx, #1e293b); outline:none">
+                </div>
+
+                <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap">
+                    <div style="display:flex; align-items:center; gap:8px; font-size:13px; color:var(--po-tx2)">
+                        <i class="fa-solid fa-users" style="color:var(--po-bl, #2563eb)"></i>
+                        <span>Số suất:</span>
+                        <input x-model.number="portions" type="number" min="1" style="width:70px; height:34px; border:1.5px solid var(--po-bd, #e2e8f0); border-radius:8px; padding:0 10px; font-size:14px; font-weight:700; color:var(--po-bl, #2563eb); text-align:center; outline:none">
+                        <span>suất</span>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px; font-size:13px; color:var(--po-tx2)">
+                        <i class="fa-solid fa-layer-group" style="color:var(--po-gn, #059669)"></i>
+                        <span>Số phần:</span>
+                        <input x-model.number="phan" type="number" min="1" step="1" style="width:62px; height:34px; border:1.5px solid var(--po-bd, #e2e8f0); border-radius:8px; padding:0 10px; font-size:14px; font-weight:700; color:var(--po-gn, #059669); text-align:center; outline:none">
+                        <span>phần</span>
+                    </div>
+                    <div style="margin-left:auto; display:flex; gap:8px">
+                        <button type="button" @click="closeModal()" style="height:38px; padding:0 16px; border:1px solid var(--po-bd, #e2e8f0); border-radius:9px; background:#fff; font-size:13px; font-weight:600; cursor:pointer; color:var(--po-tx2)">Hủy</button>
+                        <button type="button" @click="confirmSelection()" style="height:38px; padding:0 18px; border:none; border-radius:9px; background:linear-gradient(135deg, var(--po-bl, #2563eb), #0059DD); color:#fff; font-size:13px; font-weight:700; cursor:pointer; box-shadow:0 4px 12px rgba(18,103,232,.3); display:flex; align-items:center; gap:7px">
+                            <i class="fa-solid fa-check"></i>Xác nhận chọn
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
         </div>
 
     @elseif($activeView === 'day')

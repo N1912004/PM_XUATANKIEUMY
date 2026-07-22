@@ -1580,6 +1580,21 @@ class ListMenus extends Page
 
     public function getRecipes()
     {
-        return Recipe::orderBy('name')->get();
+        return Recipe::with(['ingredients', 'recipeType'])->orderBy('name')->get();
+    }
+
+    public function getRecipesDataProperty(): array
+    {
+        return $this->getRecipes()->map(function ($recipe) {
+            $cost = $recipe->effectiveCostPerPortion();
+
+            return [
+                'id' => (string) $recipe->id,
+                'name' => $recipe->name,
+                'group' => $recipe->type ?? 'Món khác',
+                'cost' => $cost,
+                'cost_formatted' => number_format($cost, 0, ',', '.').'đ',
+            ];
+        })->values()->toArray();
     }
 }
