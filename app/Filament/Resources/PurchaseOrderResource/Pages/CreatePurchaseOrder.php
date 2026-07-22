@@ -54,6 +54,13 @@ class CreatePurchaseOrder extends Page
         }
     }
 
+    public function updatedSourceTo(): void
+    {
+        if ($this->sourceTo < $this->sourceFrom) {
+            $this->sourceFrom = $this->sourceTo;
+        }
+    }
+
     public function updatedGroupSuppliers($value, $groupKey): void
     {
         $groups = $this->getAggregatedGroupsProperty();
