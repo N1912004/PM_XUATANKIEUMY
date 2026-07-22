@@ -444,10 +444,10 @@ class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
                 ->map(fn ($g) => $g->count())
                 ->max() ?: 1;
 
-            $defaults = $isEn ? ($defaultCategoriesEn[$sIdx] ?? []) : ($defaultCategoriesVi[$sIdx] ?? []);
+            $defaults = $defaultCategoriesVi[$sIdx] ?? [];
             $categories = [];
             for ($i = 0; $i < $maxDishesCount; $i++) {
-                $categories[] = $defaults[$i] ?? ($isEn ? 'DISH '.($i + 1) : 'MÓN '.($i + 1));
+                $categories[] = $defaults[$i] ?? ('MÓN '.($i + 1));
             }
 
             $catCount = count($categories);
