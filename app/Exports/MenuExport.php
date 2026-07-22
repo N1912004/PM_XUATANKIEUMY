@@ -40,7 +40,8 @@ class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
         protected string $subtitle = '',
         ?bool $isSingleDay = null,
         protected ?string $dateFrom = null,
-        protected ?string $dateTo = null
+        protected ?string $dateTo = null,
+        protected array $customDishCategories = []
     ) {
         if ($isSingleDay !== null) {
             $this->isSingleDay = $isSingleDay;
@@ -444,10 +445,18 @@ class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
                 ->map(fn ($g) => $g->count())
                 ->max() ?: 1;
 
+            $shiftCustomCats = $this->customDishCategories[$sObj->id] ?? null;
+            if (! is_array($shiftCustomCats) && is_array($this->customDishCategories)) {
+                $firstVal = reset($this->customDishCategories);
+                if (is_string($firstVal)) {
+                    $shiftCustomCats = $this->customDishCategories;
+                }
+            }
+
             $defaults = $defaultCategoriesVi[$sIdx] ?? [];
             $categories = [];
             for ($i = 0; $i < $maxDishesCount; $i++) {
-                $categories[] = $defaults[$i] ?? ('MÓN '.($i + 1));
+                $categories[] = $shiftCustomCats[$i] ?? ($defaults[$i] ?? ('MÓN '.($i + 1)));
             }
 
             $catCount = count($categories);

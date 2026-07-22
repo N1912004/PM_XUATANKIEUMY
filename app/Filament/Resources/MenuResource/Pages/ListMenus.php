@@ -393,7 +393,7 @@ class ListMenus extends Page
         $prefix = $isSingleDay ? ($isEn ? 'daily-menu' : 'thuc-don-ngay') : ($isEn ? 'weekly-menu' : 'thuc-don-tuan');
         $fileName = $prefix.'-'.($from ?: now()->format('Y-m-d')).'.xlsx';
 
-        return Excel::download(new MenuExport($query->get(), $subtitle, $isSingleDay, $from, $to ?: $from), $fileName);
+        return Excel::download(new MenuExport($query->get(), $subtitle, $isSingleDay, $from, $to ?: $from, $this->customDishCategories), $fileName);
     }
 
     /** Xuất tuần đang soạn trên form (theo từ ngày -> đến ngày trên bộ lọc). */
@@ -456,8 +456,8 @@ class ListMenus extends Page
         $prefix = app()->getLocale() === 'en' ? 'weekly-menu' : 'thuc-don-tuan';
 
         return Excel::download(
-            new MenuExport($menus, $subtitle, false),
-            $prefix.'-'.$weekMenu->id.'-'.$weekMenu->date_from.'.xlsx'
+            new MenuExport($menus, $subtitle, false, $fromStr, $toStr, $this->customDishCategories),
+            $prefix.'-'.$weekMenu->id.'-'.$fromStr.'.xlsx'
         );
     }
 
