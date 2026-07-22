@@ -18,7 +18,12 @@ class ViewPurchaseOrder extends ViewRecord
 
     public function getTitle(): string
     {
-        return 'Chi tiết đơn';
+        return __('purchase_order.detail.order_title', ['code' => $this->record->code]);
+    }
+
+    public function getHeading(): string
+    {
+        return '';
     }
 
     protected function getHeaderActions(): array

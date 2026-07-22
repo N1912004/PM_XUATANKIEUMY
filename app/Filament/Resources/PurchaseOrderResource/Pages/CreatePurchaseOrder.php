@@ -19,6 +19,11 @@ class CreatePurchaseOrder extends Page
 
     protected static string $view = 'filament.resources.purchase-orders.pages.create-purchase-order';
 
+    public function getHeading(): string
+    {
+        return '';
+    }
+
     public string $orderDate = '';
 
     public string $sourceFrom = '';

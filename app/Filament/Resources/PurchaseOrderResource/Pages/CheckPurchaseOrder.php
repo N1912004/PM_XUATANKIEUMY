@@ -14,6 +14,11 @@ class CheckPurchaseOrder extends Page
 
     protected static string $view = 'filament.resources.purchase-orders.pages.check-purchase-order';
 
+    public function getHeading(): string
+    {
+        return '';
+    }
+
     public PurchaseOrder $record;
 
     public int $activePoId = 0;
