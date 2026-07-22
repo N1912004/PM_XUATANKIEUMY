@@ -21,7 +21,7 @@
                 <a href="{{ \App\Filament\Resources\PurchaseOrderResource::getUrl('index') }}" class="po-btn">
                     <i class="fa-solid fa-arrow-left"></i> {{ __('purchase_order.actions.back') }}
                 </a>
-                <button wire:click="completeCheck" class="po-btn po-btn-primary">
+                <button wire:click="completeCheck" wire:loading.attr="disabled" wire:target="completeCheck" class="po-btn po-btn-primary">
                     <i class="fa-solid fa-circle-check"></i> {{ __('purchase_order.actions.complete_check') }}
                 </button>
             </div>

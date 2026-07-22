@@ -11,6 +11,7 @@ use App\Models\Supplier;
 use Carbon\Carbon;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\DB;
 
 class CreatePurchaseOrder extends Page
@@ -18,6 +19,16 @@ class CreatePurchaseOrder extends Page
     protected static string $resource = PurchaseOrderResource::class;
 
     protected static string $view = 'filament.resources.purchase-orders.pages.create-purchase-order';
+
+    public function getHeading(): string
+    {
+        return '';
+    }
+
+    public function getHeader(): ?View
+    {
+        return null;
+    }
 
     public string $orderDate = '';
 
@@ -66,6 +77,13 @@ class CreatePurchaseOrder extends Page
             foreach ($groups[$groupKey]['items'] as $item) {
                 $this->itemSuppliers[$item['ingredient_id']] = $value;
             }
+        }
+    }
+
+    public function updatedItemQuantities($value, $key): void
+    {
+        if (is_numeric($value) && (float) $value < 0) {
+            $this->itemQuantities[$key] = 0;
         }
     }
 
@@ -118,28 +136,33 @@ class CreatePurchaseOrder extends Page
                 $totalKg = $servings * $qtyPerPortion;
 
                 if (! isset($aggregated[$ingId])) {
-                    $ingType = $ing->typeRelation?->name ?? $ing->type ?? __('purchase_order.types.other');
+                    $typeModel = $ing->typeRelation;
+                    $typeId = $typeModel?->id ?? (int) $ing->ingredient_type_id;
+                    $typeName = $typeModel?->name ?? (is_string($ing->type) ? $ing->type : null) ?? 'Khác';
 
-                    $typeLower = mb_strtolower($ingType);
-                    $nameLower = mb_strtolower($ing->name);
+                    $groupKey = 'type_'.($typeId ?: md5($typeName));
+                    $typeLower = mb_strtolower($typeName);
 
-                    if (str_contains($typeLower, 'thịt') || str_contains($typeLower, 'cá') || str_contains($nameLower, 'thịt') || str_contains($nameLower, 'cá') || str_contains($nameLower, 'gà') || str_contains($nameLower, 'vịt') || str_contains($nameLower, 'trứng')) {
-                        $groupKey = 'thit';
-                        $groupLabel = '🥩 Thịt';
+                    $icon = $typeModel?->icon ? trim($typeModel->icon).' ' : '';
+                    if (! $icon) {
+                        if (str_contains($typeLower, 'động vật') || str_contains($typeLower, 'thịt') || str_contains($typeLower, 'cá') || str_contains($typeLower, 'hải sản')) {
+                            $icon = '🥩 ';
+                        } elseif (str_contains($typeLower, 'thực vật') || str_contains($typeLower, 'rau') || str_contains($typeLower, 'củ') || str_contains($typeLower, 'quả') || str_contains($typeLower, 'trái cây')) {
+                            $icon = '🥬 ';
+                        } else {
+                            $icon = '📦 ';
+                        }
+                    }
+
+                    if (str_contains($typeLower, 'động vật') || str_contains($typeLower, 'thịt') || str_contains($typeLower, 'cá')) {
                         $groupClass = 'ot-thit';
-                    } elseif (str_contains($typeLower, 'rau') || str_contains($typeLower, 'củ') || str_contains($nameLower, 'rau') || str_contains($nameLower, 'củ') || str_contains($nameLower, 'giá') || str_contains($nameLower, 'nấm')) {
-                        $groupKey = 'uot';
-                        $groupLabel = '🥬 Rau / Ướt';
+                    } elseif (str_contains($typeLower, 'thực vật') || str_contains($typeLower, 'rau') || str_contains($typeLower, 'củ')) {
                         $groupClass = 'ot-uot';
-                    } elseif (str_contains($typeLower, 'khô') || str_contains($typeLower, 'gia vị') || str_contains($nameLower, 'khô') || str_contains($nameLower, 'gạo') || str_contains($nameLower, 'dầu')) {
-                        $groupKey = 'kho';
-                        $groupLabel = '📦 Hàng Khô';
-                        $groupClass = 'ot-kho';
                     } else {
-                        $groupKey = 'khac';
-                        $groupLabel = '📦 Món Khác';
                         $groupClass = 'ot-kho';
                     }
+
+                    $groupLabel = $icon.$typeName;
 
                     $aggregated[$ingId] = [
                         'ingredient_id' => $ingId,
@@ -167,13 +190,6 @@ class CreatePurchaseOrder extends Page
 
         $allSuppliers = $this->suppliers;
 
-        $defaultSuppliersByGroup = [
-            'thit' => $allSuppliers->first(fn ($s) => str_contains(mb_strtolower($s->type ?? ''), 'động vật') || str_contains(mb_strtolower($s->type ?? ''), 'thịt') || str_contains(mb_strtolower($s->name), 'feddy'))?->id,
-            'uot' => $allSuppliers->first(fn ($s) => str_contains(mb_strtolower($s->type ?? ''), 'rau') || str_contains(mb_strtolower($s->type ?? ''), 'thực vật') || str_contains(mb_strtolower($s->name), 'linh thịnh'))?->id,
-            'kho' => $allSuppliers->first(fn ($s) => str_contains(mb_strtolower($s->type ?? ''), 'khô') || str_contains(mb_strtolower($s->name), 'vũ đức thọ'))?->id,
-            'khac' => $allSuppliers->first(fn ($s) => str_contains(mb_strtolower($s->type ?? ''), 'lương thực') || str_contains(mb_strtolower($s->name), 'an phát'))?->id,
-        ];
-
         $groups = [];
         foreach ($aggregated as $item) {
             $gKey = $item['group_key'];
@@ -187,8 +203,17 @@ class CreatePurchaseOrder extends Page
             }
 
             $ingId = $item['ingredient_id'];
-            $manualQty = $this->itemQuantities[$ingId] ?? round($item['total_kg'], 2);
-            $groupDefaultSupplierId = $defaultSuppliersByGroup[$gKey] ?? $allSuppliers->first()?->id;
+            $manualQty = max(0, (float) ($this->itemQuantities[$ingId] ?? round($item['total_kg'], 2)));
+
+            $rawTypeName = str_replace(['🥩 ', '🥬 ', '📦 '], '', $item['group_label']);
+            $matchedSupplier = $allSuppliers->first(function ($s) use ($rawTypeName) {
+                $sType = mb_strtolower($s->type ?? '');
+                $tName = mb_strtolower($rawTypeName);
+
+                return str_contains($sType, $tName) || str_contains($tName, $sType);
+            });
+
+            $groupDefaultSupplierId = $matchedSupplier?->id ?: $allSuppliers->first()?->id;
             $selectedSupplierId = $this->itemSuppliers[$ingId] ?? ($this->groupSuppliers[$gKey] ?? $groupDefaultSupplierId);
 
             $existingOrders = isset($existingPOItems[$ingId])
@@ -196,10 +221,9 @@ class CreatePurchaseOrder extends Page
                 : [];
 
             if (! isset($this->itemSelected[$ingId])) {
-                $isSelected = empty($existingOrders);
-            } else {
-                $isSelected = (bool) $this->itemSelected[$ingId];
+                $this->itemSelected[$ingId] = empty($existingOrders);
             }
+            $isSelected = (bool) $this->itemSelected[$ingId];
 
             $item['already_ordered_pos'] = $existingOrders;
             $item['selected'] = $isSelected;

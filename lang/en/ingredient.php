@@ -112,7 +112,10 @@ return [
     'type' => [
         'name' => 'Ingredient type name',
         'name_placeholder' => 'E.g. Animal, Plant, Spices...',
+        'icon' => 'Icon / Emoji',
+        'icon_placeholder' => 'E.g. 🥩, 🥬, 📦, 🧂, 🌾',
         'table_name' => 'INGREDIENT TYPE NAME',
+        'table_icon' => 'ICON',
     ],
     'delete' => [
         'in_use' => 'Cannot delete: currently used by :count ingredient(s)',

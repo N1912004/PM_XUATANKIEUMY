@@ -28,4 +28,14 @@ class PurchaseOrderItem extends Model
     {
         return $this->belongsTo(Ingredient::class);
     }
+
+    public function setQuantityOrderedAttribute($value): void
+    {
+        $this->attributes['quantity_ordered'] = max(0, (float) $value);
+    }
+
+    public function setQuantityReceivedAttribute($value): void
+    {
+        $this->attributes['quantity_received'] = max(0, (float) $value);
+    }
 }

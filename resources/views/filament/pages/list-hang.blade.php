@@ -878,7 +878,7 @@
                         <button type="button" class="wh-action-btn" wire:click="goBackToList">
                             <i class="fa-solid fa-arrow-left"></i>{{ __('list_hang.actions.back') }}
                         </button>
-                        <button type="button" class="wh-action-btn wh-action-btn-primary" wire:click="createOrders">
+                        <button type="button" class="wh-action-btn wh-action-btn-primary" wire:click="createOrders" wire:loading.attr="disabled" wire:target="createOrders">
                             <i class="fa-solid fa-paper-plane"></i>{{ __('list_hang.actions.create_send') }}
                         </button>
                     </div>
