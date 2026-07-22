@@ -38,7 +38,10 @@ class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
     public function __construct(
         protected Collection $menus,
         protected string $subtitle = '',
-        ?bool $isSingleDay = null
+        ?bool $isSingleDay = null,
+        protected ?string $dateFrom = null,
+        protected ?string $dateTo = null,
+        protected array $customDishCategories = []
     ) {
         if ($isSingleDay !== null) {
             $this->isSingleDay = $isSingleDay;
@@ -55,6 +58,8 @@ class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
             if ($firstDate) {
                 $cDate = $firstDate instanceof Carbon ? $firstDate : Carbon::parse($firstDate);
                 $this->singleDayDateStr = $cDate->format('d/m/Y');
+            } elseif (preg_match('/(\d{2}\/\d{2}\/\d{4})/', $this->subtitle, $m)) {
+                $this->singleDayDateStr = $m[1];
             }
         }
     }
@@ -96,7 +101,13 @@ class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
         $rows[] = ['', ''];
 
         // Row 4: Title Banner
-        $titleText = $isEn ? 'SAVORY MENU 46' : 'MENU MẶN 46';
+        if ($this->singleDayDateStr !== '') {
+            $titleText = $isEn
+                ? 'DAILY MENU '.$this->singleDayDateStr
+                : 'THỰC ĐƠN NGÀY '.$this->singleDayDateStr;
+        } else {
+            $titleText = $isEn ? 'DAILY MENU' : 'THỰC ĐƠN NGÀY';
+        }
         $rows[] = [$titleText, ''];
 
         // Row 5: Table Header
@@ -115,7 +126,7 @@ class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
             $dishNames = [''];
         }
 
-        $dishPrefix = $isEn ? 'DISH ' : 'MÓN ';
+        $dishPrefix = 'MÓN ';
 
         foreach ($dishNames as $i => $dishName) {
             $label = $dishPrefix.($i + 1);
@@ -154,9 +165,13 @@ class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
     {
         $lastRow = $sheet->getHighestRow();
 
-        // 1. Set column widths (Column A widened to 30 for spacious logo presentation)
-        $sheet->getColumnDimension('A')->setWidth(30);
-        $sheet->getColumnDimension('B')->setWidth(50);
+        // 1. Set column widths & row heights for header logo (A1:A3 widened & tall enough for logo)
+        $sheet->getColumnDimension('A')->setWidth(36);
+        $sheet->getColumnDimension('B')->setWidth(54);
+
+        $sheet->getRowDimension(1)->setRowHeight(24);
+        $sheet->getRowDimension(2)->setRowHeight(24);
+        $sheet->getRowDimension(3)->setRowHeight(24);
 
         // 2. Merge cells for Header (A1:A3 & B1:B3)
         $sheet->mergeCells('A1:A3');
@@ -170,6 +185,8 @@ class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
             $resolvedLogoPath = Storage::disk('public')->path($systemLogoRel);
         } elseif (file_exists(public_path('images/bluefire-logo.png'))) {
             $resolvedLogoPath = public_path('images/bluefire-logo.png');
+        } elseif (file_exists(storage_path('app/public/bluefire-logo.png'))) {
+            $resolvedLogoPath = storage_path('app/public/bluefire-logo.png');
         }
 
         if ($resolvedLogoPath && file_exists($resolvedLogoPath)) {
@@ -178,9 +195,11 @@ class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
             $drawing->setDescription('System Brand Logo');
             $drawing->setPath($resolvedLogoPath);
             $drawing->setCoordinates('A1');
-            $drawing->setHeight(54);
-            $drawing->setOffsetX(15);
-            $drawing->setOffsetY(6);
+            $drawing->setResizeProportional(true);
+            $drawing->setWidth(125);
+            $drawing->setHeight(42);
+            $drawing->setOffsetX(5);
+            $drawing->setOffsetY(8);
             $drawing->setWorksheet($sheet);
         } else {
             $sheet->setCellValue('A1', "BlueFire\nTASTE & BEAUTY");
@@ -285,19 +304,30 @@ class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
     protected function formatMultiDaySheet($sheet): void
     {
         $isEn = app()->getLocale() === 'en';
-        $dates = $this->menus->pluck('date')
-            ->filter()
-            ->map(fn ($d) => $d instanceof Carbon ? $d : Carbon::parse($d));
 
-        if ($dates->isEmpty() && preg_match('/(\d{2}\/\d{2}\/\d{4})/', $this->subtitle, $m)) {
-            $start = Carbon::createFromFormat('d/m/Y', $m[1])->startOfWeek();
+        if ($this->dateFrom && $this->dateTo) {
+            $start = Carbon::parse($this->dateFrom);
+            $end = Carbon::parse($this->dateTo);
         } else {
-            $start = $dates->min() ? $dates->min()->copy()->startOfWeek() : now()->startOfWeek();
-        }
-        $end = $start->copy()->addDays(6);
+            $dates = $this->menus->pluck('date')
+                ->filter()
+                ->map(fn ($d) => $d instanceof Carbon ? $d : Carbon::parse($d));
 
-        // 1. Header Banner Row 1 (Merged A1:I1)
-        $sheet->mergeCells('A1:I1');
+            if ($dates->isEmpty() && preg_match('/(\d{2}\/\d{2}\/\d{4})\s+đến\s+(\d{2}\/\d{2}\/\d{4})/', $this->subtitle, $m)) {
+                $start = Carbon::createFromFormat('d/m/Y', $m[1]);
+                $end = Carbon::createFromFormat('d/m/Y', $m[2]);
+            } else {
+                $start = $dates->min() ? $dates->min()->copy() : now()->startOfWeek();
+                $end = $dates->max() ? $dates->max()->copy() : $start->copy()->addDays(6);
+            }
+        }
+
+        $daysCount = max(1, (int) $start->diffInDays($end) + 1);
+        $colLetters = ['D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M'];
+        $lastHeaderCol = $colLetters[min($daysCount - 1, count($colLetters) - 1)] ?? 'J';
+
+        // 1. Header Banner Row 1 (Merged A1:{$lastHeaderCol}1)
+        $sheet->mergeCells("A1:{$lastHeaderCol}1");
         $sheet->getRowDimension(1)->setRowHeight(55);
 
         $titleLine1 = $isEn
@@ -325,6 +355,8 @@ class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
             $resolvedLogoPath = Storage::disk('public')->path($systemLogoRel);
         } elseif (file_exists(public_path('images/bluefire-logo.png'))) {
             $resolvedLogoPath = public_path('images/bluefire-logo.png');
+        } elseif (file_exists(storage_path('app/public/bluefire-logo.png'))) {
+            $resolvedLogoPath = storage_path('app/public/bluefire-logo.png');
         }
 
         if ($resolvedLogoPath && file_exists($resolvedLogoPath)) {
@@ -333,26 +365,52 @@ class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
             $drawing->setDescription('System Brand Logo');
             $drawing->setPath($resolvedLogoPath);
             $drawing->setCoordinates('A1');
-            $drawing->setHeight(50);
-            $drawing->setOffsetX(10);
-            $drawing->setOffsetY(4);
+            $drawing->setResizeProportional(true);
+            $drawing->setWidth(125);
+            $drawing->setHeight(42);
+            $drawing->setOffsetX(5);
+            $drawing->setOffsetY(6);
             $drawing->setWorksheet($sheet);
         }
 
-        // 2. Row 2 Header: B2=SHIFT/CA (BFBFBF fill, Red font), C2=DISH/MÓN (D8D8D8 fill, Red font), D2..J2 (D8D8D8 fill, Red font)
+        // 2. Row 2 Header: B2=SHIFT/CA (BFBFBF fill, Red font), C2=DISH/MÓN (D8D8D8 fill, Red font), D2... (D8D8D8 fill, Red font)
         $sheet->getRowDimension(2)->setRowHeight(32);
+
+        $dayNamesVi = [
+            0 => 'Chủ nhật',
+            1 => 'THỨ 2',
+            2 => 'THỨ 3',
+            3 => 'THỨ 4',
+            4 => 'THỨ 5',
+            5 => 'THỨ 6',
+            6 => 'Thứ 7',
+        ];
+
+        $dayNamesEn = [
+            0 => 'SUN',
+            1 => 'MON',
+            2 => 'TUE',
+            3 => 'WED',
+            4 => 'THU',
+            5 => 'FRI',
+            6 => 'SAT',
+        ];
+
         $headers = [
             'A' => '',
             'B' => $isEn ? 'SHIFT' : 'CA',
             'C' => $isEn ? 'DISH' : 'MÓN',
-            'D' => $isEn ? 'MON' : 'THỨ 2',
-            'E' => $isEn ? 'TUE' : 'THỨ 3',
-            'F' => $isEn ? 'WED' : 'THỨ 4',
-            'G' => $isEn ? 'THU' : 'THỨ 5',
-            'H' => $isEn ? 'FRI' : 'THỨ 6',
-            'I' => $isEn ? 'SAT' : 'Thứ 7',
-            'J' => $isEn ? 'SUN' : 'Chủ nhật',
         ];
+
+        for ($d = 0; $d < $daysCount; $d++) {
+            $cDate = $start->copy()->addDays($d);
+            $colLetter = $colLetters[$d] ?? null;
+            if (! $colLetter) {
+                break;
+            }
+            $wDay = $cDate->dayOfWeek;
+            $headers[$colLetter] = $isEn ? ($dayNamesEn[$wDay] ?? '') : ($dayNamesVi[$wDay] ?? '');
+        }
 
         foreach ($headers as $col => $hText) {
             if ($col !== 'A') {
@@ -367,8 +425,8 @@ class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
             'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
         ]);
 
-        // Style C2:J2
-        $sheet->getStyle('C2:J2')->applyFromArray([
+        // Style C2:{$lastHeaderCol}2
+        $sheet->getStyle("C2:{$lastHeaderCol}2")->applyFromArray([
             'font' => ['bold' => true, 'size' => 12, 'color' => ['rgb' => 'FF0000'], 'name' => 'Times New Roman'],
             'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'D8D8D8']],
             'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
@@ -378,50 +436,54 @@ class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
         $allShifts = Shift::orderBy('sort_order')->orderBy('id')->get()->values();
         $activeShiftIds = $this->menus->pluck('shift_id')->unique()->filter()->toArray();
 
-        $categoriesVi = [
+        $defaultCategoriesVi = [
             0 => ['MÓN 1', 'MÓN 2', 'RAU XÀO/LUỘC', 'CANH', 'CƠM', 'MÓN CHAY 1', 'MÓN CHAY 2', 'CANH CHAY', 'MÓN CHAY 3', 'CƠM CHAY', 'COMBO', 'TRÁNG MIỆNG'],
             1 => ['MÓN MẶN 1', 'MÓN MẶN 2', 'MÓN RAU XÀO/LUỘC', 'MÓN CANH', 'MÓN CHAY 1', 'MÓN CHAY 2', 'RAU XÀO CHAY', 'TRÁNG MIỆNG'],
             2 => ['MÓN MẶN 1', 'MÓN MẶN 2', 'MÓN RAU XÀO/LUỘC', 'MÓN CANH', 'CƠM', 'MÓN CHAY 1', 'MÓN CHAY 2', 'MÓN RAU XÀO/LUỘC', 'MÓN CHAY 3', 'CƠM', 'COMBO', 'TRÁNG MIỆNG'],
         ];
 
-        $categoriesEn = [
+        $defaultCategoriesEn = [
             0 => ['DISH 1', 'DISH 2', 'STIR-FRIED / BOILED VEG', 'SOUP', 'RICE', 'VEGETARIAN 1', 'VEGETARIAN 2', 'VEGETARIAN SOUP', 'VEGETARIAN 3', 'VEGETARIAN RICE', 'COMBO', 'DESSERT'],
             1 => ['MAIN DISH 1', 'MAIN DISH 2', 'STIR-FRIED / BOILED VEG', 'SOUP', 'VEGETARIAN 1', 'VEGETARIAN 2', 'VEGETARIAN STIR-FRY', 'DESSERT'],
             2 => ['MAIN DISH 1', 'MAIN DISH 2', 'STIR-FRIED / BOILED VEG', 'SOUP', 'RICE', 'VEGETARIAN 1', 'VEGETARIAN 2', 'STIR-FRIED VEG', 'VEGETARIAN 3', 'RICE', 'COMBO', 'DESSERT'],
         ];
 
-        $shiftTemplates = [
-            0 => [
-                'name' => $isEn ? 'SHIFT 1' : 'CA 1',
-                'categories' => $isEn ? $categoriesEn[0] : $categoriesVi[0],
-            ],
-            1 => [
-                'name' => $isEn ? 'SHIFT 2' : 'CA 2',
-                'categories' => $isEn ? $categoriesEn[1] : $categoriesVi[1],
-            ],
-            2 => [
-                'name' => $isEn ? 'SHIFT 3' : 'CA 3',
-                'categories' => $isEn ? $categoriesEn[2] : $categoriesVi[2],
-            ],
-        ];
-
         $currentRow = 3;
         $shiftRowMap = [];
 
-        foreach ($shiftTemplates as $sIdx => $tpl) {
-            $sObj = $allShifts[$sIdx] ?? null;
-            $hasItems = $sObj && in_array($sObj->id, $activeShiftIds);
+        foreach ($allShifts as $sIdx => $sObj) {
+            $hasItems = in_array($sObj->id, $activeShiftIds, true);
 
-            // Hide shifts that have NO menu items (unless activeShiftIds is empty, then render shift 0)
+            // Hide shifts that have NO menu items (unless activeShiftIds is empty, then render first shift)
             if (! $hasItems && $activeShiftIds !== []) {
                 continue;
             }
 
-            $catCount = count($tpl['categories']);
+            $shiftMenus = $this->menus->where('shift_id', $sObj->id);
+            $maxDishesCount = $shiftMenus
+                ->groupBy(fn ($m) => $m->date instanceof Carbon ? $m->date->toDateString() : Carbon::parse($m->date)->toDateString())
+                ->map(fn ($g) => $g->count())
+                ->max() ?: 1;
+
+            $shiftCustomCats = $this->customDishCategories[$sObj->id] ?? null;
+            if (! is_array($shiftCustomCats) && is_array($this->customDishCategories)) {
+                $firstVal = reset($this->customDishCategories);
+                if (is_string($firstVal)) {
+                    $shiftCustomCats = $this->customDishCategories;
+                }
+            }
+
+            $defaults = $defaultCategoriesVi[$sIdx] ?? [];
+            $categories = [];
+            for ($i = 0; $i < $maxDishesCount; $i++) {
+                $categories[] = $shiftCustomCats[$i] ?? ($defaults[$i] ?? ('MÓN '.($i + 1)));
+            }
+
+            $catCount = count($categories);
             $startRow = $currentRow;
             $endRow = $startRow + $catCount - 1;
 
-            $sName = $sObj ? mb_strtoupper($sObj->name) : $tpl['name'];
+            $sName = mb_strtoupper($sObj->name);
             if (! str_starts_with($sName, 'THỰC ĐƠN') && ! str_starts_with($sName, 'MENU')) {
                 $sName = ($isEn ? 'MENU ' : 'THỰC ĐƠN ').$sName;
             }
@@ -438,7 +500,7 @@ class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
             ]);
 
             // Populate categories in Column C (FBE4D5 fill, 0070C0 font)
-            foreach ($tpl['categories'] as $catIdx => $catName) {
+            foreach ($categories as $catIdx => $catName) {
                 $r = $startRow + $catIdx;
                 $sheet->getRowDimension($r)->setRowHeight(30);
                 $sheet->setCellValue("C{$r}", $catName);
@@ -451,7 +513,7 @@ class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
                 'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
             ]);
 
-            $shiftRowMap[$sObj?->id ?? $sIdx] = ['startRow' => $startRow, 'endRow' => $endRow];
+            $shiftRowMap[$sObj->id] = ['startRow' => $startRow, 'endRow' => $endRow];
             $currentRow = $endRow + 1;
         }
 
@@ -466,14 +528,18 @@ class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
             'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER, 'wrapText' => true],
         ]);
 
-        // 5. Populate dish names into D..J
+        // 5. Populate dish names into D..{$lastHeaderCol}
         $byDayShift = $this->menus->groupBy(fn ($m) => ($m->date instanceof Carbon ? $m->date->toDateString() : Carbon::parse($m->date)->toDateString()).'|'.$m->shift_id);
 
         foreach ($byDayShift as $key => $items) {
             [$dateStr, $shiftId] = explode('|', $key);
             $cDate = Carbon::parse($dateStr);
+            if ($cDate->isBefore($start) || $cDate->isAfter($end)) {
+                continue;
+            }
+
             $dayIdx = (int) $start->diffInDays($cDate);
-            $colStr = ['D', 'E', 'F', 'G', 'H', 'I', 'J'][$dayIdx] ?? null;
+            $colStr = $colLetters[$dayIdx] ?? null;
             if (! $colStr) {
                 continue;
             }
@@ -495,8 +561,8 @@ class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
             }
         }
 
-        // 6. Style Dish Data Cells D3:J{lastRow}
-        $sheet->getStyle("D3:J{$lastRow}")->applyFromArray([
+        // 6. Style Dish Data Cells D3:{$lastHeaderCol}{lastRow}
+        $sheet->getStyle("D3:{$lastHeaderCol}{$lastRow}")->applyFromArray([
             'font' => ['bold' => true, 'size' => 12, 'color' => ['rgb' => '0070C0'], 'name' => 'Times New Roman'],
             'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER, 'wrapText' => true],
         ]);
@@ -505,12 +571,14 @@ class MenuExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
         $sheet->getColumnDimension('A')->setWidth(6);
         $sheet->getColumnDimension('B')->setWidth(14);
         $sheet->getColumnDimension('C')->setWidth(18);
-        foreach (['D', 'E', 'F', 'G', 'H', 'I', 'J'] as $col) {
-            $sheet->getColumnDimension($col)->setWidth(24);
+        for ($d = 0; $d < $daysCount; $d++) {
+            if (isset($colLetters[$d])) {
+                $sheet->getColumnDimension($colLetters[$d])->setWidth(24);
+            }
         }
 
-        // 8. Cyan Borders (#00B0F0) on the entire matrix (A1:J{lastRow})
-        $sheet->getStyle("A1:J{$lastRow}")->applyFromArray([
+        // 8. Cyan Borders (#00B0F0) on the entire matrix (A1:{$lastHeaderCol}{lastRow})
+        $sheet->getStyle("A1:{$lastHeaderCol}{$lastRow}")->applyFromArray([
             'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_MEDIUM, 'color' => ['rgb' => '00B0F0']]],
         ]);
     }

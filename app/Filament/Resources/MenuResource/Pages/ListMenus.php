@@ -5,6 +5,7 @@ namespace App\Filament\Resources\MenuResource\Pages;
 use App\Exports\MenuExport;
 use App\Filament\Resources\MenuResource;
 use App\Filament\Resources\ShiftResource;
+use App\Models\DayMenu;
 use App\Models\Kitchen;
 use App\Models\Menu;
 use App\Models\Recipe;
@@ -20,6 +21,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Livewire\WithPagination;
 use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -98,12 +100,15 @@ class ListMenus extends Page
 
     public bool $isEditingDay = false;
 
+    public $dayMenuId = null;
+
     public $dayItems = []; // Array of shifts, each containing recipes selected
 
     protected $queryString = [
         'activeView' => ['except' => 'list'],
         'mode' => ['except' => ''],
         'weekMenuId' => ['except' => null],
+        'dayMenuId' => ['except' => null],
         'kitchenFilter' => ['except' => ''],
         'typeFilter' => ['except' => ''],
         'statusFilter' => ['except' => ''],
@@ -126,21 +131,32 @@ class ListMenus extends Page
 
         $reqMode = request()->query('mode');
         $reqWeekMenuId = request()->query('weekMenuId');
+        $reqDayMenuId = request()->query('dayMenuId');
 
-        if ($reqWeekMenuId && ($wm = WeekMenu::find($reqWeekMenuId))) {
+        if ($this->activeView === 'day' && $reqMode === 'edit' && $reqDayMenuId && ($dayMenu = DayMenu::find($reqDayMenuId))) {
+            $this->editDayMenu($dayMenu->id);
+        } elseif ($this->activeView === 'day' && $reqMode === 'edit') {
+            $this->activeView = 'list';
+            $this->mode = '';
+            $this->dayMenuId = null;
+        } elseif ($reqMode === 'edit' && $reqWeekMenuId && ($wm = WeekMenu::find($reqWeekMenuId))) {
             $this->activeView = 'week';
             $this->weekMenuId = $wm->id;
             $this->mode = 'edit';
             $this->weekKitchenId = $wm->kitchen_id;
             $this->weekDateFrom = $wm->date_from;
             $this->weekDateTo = $wm->date_to;
-            $this->loadWeekMenu($wm->kitchen_id, $wm->date_from, $wm->date_to, true);
+            $this->loadWeekMenu($wm->kitchen_id, $wm->date_from, $wm->date_to, true, $wm->id);
+        } elseif ($this->activeView === 'week' && $reqMode === 'edit') {
+            // An edit URL must identify one WeekMenu. Never guess from stale day
+            // query parameters or the first kitchen because that can open another menu.
+            $this->activeView = 'list';
+            $this->mode = '';
+            $this->weekMenuId = null;
         } elseif ($this->activeView === 'week' && $firstKitchenId) {
-            $isEditing = $reqMode === 'edit';
-            $this->loadWeekMenu($firstKitchenId, $this->weekDateFrom, $this->weekDateTo, $isEditing);
+            $this->loadWeekMenu($firstKitchenId, $this->weekDateFrom, $this->weekDateTo, false);
         } elseif ($this->activeView === 'day' && $firstKitchenId) {
-            $isEditing = $reqMode === 'edit';
-            $this->loadDayMenu($firstKitchenId, $this->dayDate, $isEditing);
+            $this->loadDayMenu($firstKitchenId, $this->dayDate, false);
         }
     }
 
@@ -150,11 +166,13 @@ class ListMenus extends Page
         if ($view === 'list') {
             $this->mode = '';
             $this->weekMenuId = null;
+            $this->dayMenuId = null;
             $this->resetWeekForm();
             $this->resetDayForm();
         } elseif ($view === 'week') {
             $this->mode = 'create';
             $this->weekMenuId = null;
+            $this->dayMenuId = null;
             $this->loadWeekMenu(
                 $this->weekKitchenId ?? $this->getKitchens()->first()?->id,
                 $this->weekDateFrom ?? now()->startOfWeek()->toDateString(),
@@ -164,6 +182,7 @@ class ListMenus extends Page
         } elseif ($view === 'day') {
             $this->mode = 'create';
             $this->weekMenuId = null;
+            $this->dayMenuId = null;
             $this->loadDayMenu($this->dayKitchenId ?? $this->getKitchens()->first()?->id, $this->dayDate ?? now()->toDateString(), false);
         }
     }
@@ -318,7 +337,9 @@ class ListMenus extends Page
             return false;
         }
 
-        return $user->hasRole(['super_admin', 'Quản trị viên', 'Quản lý bếp']) || $this->getKitchens()->count() > 1;
+        return $user->isSuperAdmin()
+            || $user->hasRole(['Quản trị viên', 'Quản lý bếp'])
+            || Kitchen::query()->limit(2)->count() > 1;
     }
 
     /**
@@ -328,6 +349,14 @@ class ListMenus extends Page
     public function exportMenus(?int $kitchenId = null, ?string $from = null, ?string $to = null): BinaryFileResponse
     {
         abort_unless(MenuResource::canViewAny(), 403);
+
+        if ($this->activeView === 'week' && $this->weekMenuId) {
+            return $this->exportWeekMenu((int) $this->weekMenuId, $this->weekDateFrom, $this->weekDateTo);
+        }
+
+        if ($this->activeView === 'day' && $this->dayMenuId) {
+            return $this->exportDayMenu((int) $this->dayMenuId);
+        }
 
         if ($kitchenId !== null) {
             $this->assertKitchenAccess($kitchenId);
@@ -341,7 +370,14 @@ class ListMenus extends Page
         if ($kitchenId && $from) {
             $query->where('kitchen_id', $kitchenId)
                 ->where('date', '>=', $from)
-                ->where('date', '<', Carbon::parse($to ?: $from)->addDay()->toDateString());
+                ->where('date', '<=', $to ?: $from);
+
+            if (($to ?: $from) === $from) {
+                $query->whereNotNull('day_menu_id');
+            } else {
+                $query->whereNotNull('week_menu_id');
+            }
+
             $subtitle = 'Từ '.Carbon::parse($from)->format('d/m/Y').' đến '.Carbon::parse($to ?: $from)->format('d/m/Y');
             $isSingleDay = ($to ?: $from) === $from;
         } else {
@@ -353,52 +389,98 @@ class ListMenus extends Page
             $isSingleDay = false;
         }
 
-        // Xuất .xlsx thật qua Laravel Excel — phân định rõ thực đơn ngày / thực đơn tuần và đa ngôn ngữ VI/EN.
         $isEn = app()->getLocale() === 'en';
-        if ($isSingleDay) {
-            $prefix = $isEn ? 'daily-menu' : 'thuc-don-ngay';
-        } else {
-            $prefix = $isEn ? 'weekly-menu' : 'thuc-don-tuan';
-        }
-
+        $prefix = $isSingleDay ? ($isEn ? 'daily-menu' : 'thuc-don-ngay') : ($isEn ? 'weekly-menu' : 'thuc-don-tuan');
         $fileName = $prefix.'-'.($from ?: now()->format('Y-m-d')).'.xlsx';
 
-        return Excel::download(new MenuExport($query->get(), $subtitle, $isSingleDay), $fileName);
+        return Excel::download(new MenuExport($query->get(), $subtitle, $isSingleDay, $from, $to ?: $from, $this->customDishCategories), $fileName);
     }
 
-    /** Xuất tuần đang soạn trên form (T2 → CN, khớp đủ 7 ngày của grid). */
+    /** Xuất tuần đang soạn trên form (theo từ ngày -> đến ngày trên bộ lọc). */
     public function exportWeekForm()
     {
-        $start = Carbon::parse($this->weekDateFrom);
-        $end = Carbon::parse($this->weekDateTo);
+        $start = Carbon::parse($this->weekDateFrom)->toDateString();
+        $end = Carbon::parse($this->weekDateTo)->toDateString();
 
-        if (! WeekMenu::query()
+        if ($this->weekMenuId) {
+            return $this->exportWeekMenu((int) $this->weekMenuId, $start, $end);
+        }
+
+        $weekMenu = WeekMenu::query()
             ->where('kitchen_id', $this->weekKitchenId)
-            ->where('date_from', $start->toDateString())
-            ->where('date_to', $end->toDateString())
-            ->exists()) {
+            ->where('date_from', '<=', $start)
+            ->where('date_to', '>=', $end)
+            ->first();
+
+        if (! $weekMenu) {
             $this->addError('weekDateFrom', __('menu.errors.export_requires_saved'));
 
             return null;
         }
 
-        return $this->exportMenus((int) $this->weekKitchenId, $start->toDateString(), $end->toDateString());
+        return $this->exportWeekMenu($weekMenu->id, $start, $end);
     }
 
     /** Xuất ngày đang soạn trên form. */
     public function exportDayForm()
     {
-        if (! Menu::query()
-            ->where('kitchen_id', $this->dayKitchenId)
-            ->where('date', '>=', $this->dayDate)
-            ->where('date', '<', Carbon::parse($this->dayDate)->addDay()->toDateString())
-            ->exists()) {
+        if (! $this->dayMenuId) {
             $this->addError('dayDate', __('menu.errors.export_requires_saved'));
 
             return null;
         }
 
-        return $this->exportMenus((int) $this->dayKitchenId, $this->dayDate, $this->dayDate);
+        return $this->exportDayMenu((int) $this->dayMenuId);
+    }
+
+    public function exportWeekMenu(int $weekMenuId, ?string $from = null, ?string $to = null): BinaryFileResponse
+    {
+        abort_unless(MenuResource::canViewAny(), 403);
+
+        $weekMenu = WeekMenu::findOrFail($weekMenuId);
+        $this->assertKitchenAccess((int) $weekMenu->kitchen_id);
+
+        $fromStr = $from ?: $weekMenu->date_from;
+        $toStr = $to ?: $weekMenu->date_to;
+
+        $menus = Menu::query()
+            ->with(['kitchen', 'shift', 'recipe'])
+            ->where('week_menu_id', $weekMenu->id)
+            ->where('date', '>=', $fromStr)
+            ->where('date', '<=', $toStr)
+            ->orderBy('date')
+            ->orderBy('shift_id')
+            ->get();
+
+        $subtitle = 'Từ '.Carbon::parse($fromStr)->format('d/m/Y').' đến '.Carbon::parse($toStr)->format('d/m/Y');
+        $prefix = app()->getLocale() === 'en' ? 'weekly-menu' : 'thuc-don-tuan';
+
+        return Excel::download(
+            new MenuExport($menus, $subtitle, false, $fromStr, $toStr, $this->customDishCategories),
+            $prefix.'-'.$weekMenu->id.'-'.$fromStr.'.xlsx'
+        );
+    }
+
+    public function exportDayMenu(int $dayMenuId): BinaryFileResponse
+    {
+        abort_unless(MenuResource::canViewAny(), 403);
+
+        $dayMenu = DayMenu::findOrFail($dayMenuId);
+        $this->assertKitchenAccess((int) $dayMenu->kitchen_id);
+
+        $menus = Menu::query()
+            ->with(['kitchen', 'shift', 'recipe'])
+            ->where('day_menu_id', $dayMenu->id)
+            ->orderBy('shift_id')
+            ->get();
+
+        $subtitle = 'Ngày '.$dayMenu->date->format('d/m/Y').' · '.$dayMenu->kitchen?->name;
+        $prefix = app()->getLocale() === 'en' ? 'daily-menu' : 'thuc-don-ngay';
+
+        return Excel::download(
+            new MenuExport($menus, $subtitle, true),
+            $prefix.'-'.$dayMenu->id.'-'.$dayMenu->date->format('Y-m-d').'.xlsx'
+        );
     }
 
     // ==========================================
@@ -543,9 +625,8 @@ class ListMenus extends Page
                 $b->where('date_from', '>=', $start)->where('date_from', '<', $end);
             });
 
-        $dayKeys = DB::table('menus')
-            ->whereNull('week_menu_id')
-            ->selectRaw("'day' AS card_type, MIN(id) AS record_id, kitchen_id, date AS group_date, MIN(status) AS status")
+        $dayKeys = DB::table('day_menus')
+            ->selectRaw("'day' AS card_type, id AS record_id, kitchen_id, date AS group_date, status")
             ->when($kitchenIdFilter, fn ($b) => $b->where('kitchen_id', $kitchenIdFilter))
             ->when($this->statusFilter !== '', fn ($b) => $b->where('status', $this->statusFilter))
             ->when($this->typeFilter === 'day' && $this->isValidDate($this->dayFilter), fn ($b) => $b->where('date', '>=', $this->dayFilter)->where('date', '<', Carbon::parse($this->dayFilter)->addDay()->toDateString()))
@@ -553,8 +634,7 @@ class ListMenus extends Page
                 $start = $this->monthFilter.'-01';
                 $end = Carbon::parse($start)->addMonth()->toDateString();
                 $b->where('date', '>=', $start)->where('date', '<', $end);
-            })
-            ->groupBy('kitchen_id', 'group_date');
+            });
 
         $keysQuery = match ($this->typeFilter) {
             'week' => $weekKeys,
@@ -575,7 +655,7 @@ class ListMenus extends Page
         $dayIds = $pageKeys->where('card_type', 'day')->pluck('record_id')->filter()->all();
 
         $weekMenus = $weekIds !== [] ? WeekMenu::with('kitchen.area')->whereIn('id', $weekIds)->get()->keyBy('id') : collect();
-        $dayMenus = $dayIds !== [] ? Menu::with(['kitchen.area', 'shift'])->whereNull('week_menu_id')->whereIn('id', $dayIds)->get()->keyBy('id') : collect();
+        $dayMenus = $dayIds !== [] ? DayMenu::with(['kitchen.area', 'menus.shift'])->whereIn('id', $dayIds)->get()->keyBy('id') : collect();
 
         $cards = $pageKeys->map(function ($key) use ($weekMenus, $dayMenus) {
             if ($key->card_type === 'week') {
@@ -605,26 +685,28 @@ class ListMenus extends Page
                 ];
             }
 
-            $dm = $dayMenus->get($key->record_id);
-            if (! $dm) {
+            $dayMenu = $dayMenus->get($key->record_id);
+            if (! $dayMenu) {
                 return null;
             }
 
+            $representativeMenu = $dayMenu->menus->first();
+
             return [
-                'id' => $dm->id,
+                'id' => $dayMenu->id,
                 'type' => 'day',
-                'kitchen_id' => $dm->kitchen_id,
-                'kitchen_name' => $dm->kitchen?->name ?? 'Nhà ăn',
-                'title' => 'Thực đơn ngày – '.$dm->date->format('d/m/Y').' (Thứ '.['Chủ Nhật', 'Hai', 'Ba', 'Tư', 'Năm', 'Sáu', 'Bảy'][$dm->date->dayOfWeek].')',
-                'sub' => $dm->kitchen?->name.' · '.$dm->shift?->name.' · '.$dm->estimated_portions.' suất',
-                'start_date' => $dm->date->toDateString(),
-                'end_date' => $dm->date->toDateString(),
-                'date_from' => $dm->date->toDateString(),
-                'date_to' => $dm->date->toDateString(),
-                'meta_company' => $dm->kitchen?->area?->name ?? 'Công ty Summit',
-                'meta_info' => $dm->estimated_portions.' suất '.$dm->shift?->name,
-                'status' => $dm->status,
-                'date_raw' => $dm->date,
+                'kitchen_id' => $dayMenu->kitchen_id,
+                'kitchen_name' => $dayMenu->kitchen?->name ?? 'Nhà ăn',
+                'title' => 'Thực đơn ngày – '.$dayMenu->date->format('d/m/Y').' (Thứ '.['Chủ Nhật', 'Hai', 'Ba', 'Tư', 'Năm', 'Sáu', 'Bảy'][$dayMenu->date->dayOfWeek].')',
+                'sub' => $dayMenu->kitchen?->name.' · '.($representativeMenu?->shift?->name ?? __('menu.fields.shift')).' · '.($representativeMenu?->estimated_portions ?? 0).' phần',
+                'start_date' => $dayMenu->date->toDateString(),
+                'end_date' => $dayMenu->date->toDateString(),
+                'date_from' => $dayMenu->date->toDateString(),
+                'date_to' => $dayMenu->date->toDateString(),
+                'meta_company' => $dayMenu->kitchen?->area?->name ?? 'Công ty Summit',
+                'meta_info' => $dayMenu->menus->count().' món',
+                'status' => $dayMenu->status,
+                'date_raw' => $dayMenu->date,
             ];
         })->filter()->values();
 
@@ -667,45 +749,65 @@ class ListMenus extends Page
      */
     public array $customDishCategories = [];
 
+    public function getShiftDishCategories(int $shiftId): array
+    {
+        if (empty($this->customDishCategories[$shiftId]) || ! is_array($this->customDishCategories[$shiftId])) {
+            $this->customDishCategories[$shiftId] = ['Món 1'];
+        }
+
+        return $this->customDishCategories[$shiftId];
+    }
+
     public function getDishCategoriesProperty(): array
     {
         if (empty($this->customDishCategories)) {
-            $this->customDishCategories = ['Món 1'];
+            return ['Món 1'];
         }
 
-        return $this->customDishCategories;
+        $firstKey = array_key_first($this->customDishCategories);
+        $val = $this->customDishCategories[$firstKey] ?? ['Món 1'];
+
+        return is_array($val) ? $val : $this->customDishCategories;
     }
 
-    public function addCategoryRow(?string $name = null): void
+    public function addCategoryRow($shiftId = null, ?string $name = null): void
     {
-        $categories = $this->dishCategories;
+        $sId = (int) ($shiftId ?: 0);
+        if ($sId <= 0) {
+            $firstShift = Shift::orderBy('sort_order')->orderBy('id')->first();
+            $sId = (int) ($firstShift?->id ?? 1);
+        }
+
+        $categories = $this->getShiftDishCategories($sId);
         $newLabel = trim($name ?: '') ?: ('Món '.(count($categories) + 1));
-        $this->customDishCategories[] = $newLabel;
-        $newIdx = count($this->customDishCategories) - 1;
+        $this->customDishCategories[$sId][] = $newLabel;
+        $newIdx = count($this->customDishCategories[$sId]) - 1;
 
         foreach ($this->weekCells as $d => $dShifts) {
-            foreach ($dShifts as $sId => $items) {
-                if (! isset($this->weekCells[$d][$sId][$newIdx])) {
-                    $this->weekCells[$d][$sId][$newIdx] = ['recipe_id' => '', 'portions' => 1];
-                }
+            if (! isset($this->weekCells[$d][$sId][$newIdx])) {
+                $this->weekCells[$d][$sId][$newIdx] = ['recipe_id' => '', 'portions' => 1];
             }
         }
     }
 
-    public function removeCategoryRow(int $index): void
+    public function removeCategoryRow($shiftId = null, int $index = 0): void
     {
-        $categories = $this->dishCategories;
+        $sId = (int) ($shiftId ?: 0);
+        if ($sId <= 0) {
+            $firstShift = Shift::orderBy('sort_order')->orderBy('id')->first();
+            $sId = (int) ($firstShift?->id ?? 1);
+        }
+
+        $categories = $this->getShiftDishCategories($sId);
         if (count($categories) <= 1) {
             return;
         }
 
-        array_splice($this->customDishCategories, $index, 1);
+        array_splice($this->customDishCategories[$sId], $index, 1);
 
         foreach ($this->weekCells as $d => $dShifts) {
-            foreach ($dShifts as $sId => $items) {
-                if (isset($this->weekCells[$d][$sId][$index])) {
-                    array_splice($this->weekCells[$d][$sId], $index, 1);
-                }
+            if (isset($this->weekCells[$d][$sId][$index])) {
+                array_splice($this->weekCells[$d][$sId], $index, 1);
             }
         }
     }
@@ -713,7 +815,7 @@ class ListMenus extends Page
     // ==========================================
     // WEEK MENU LOGIC
     // ==========================================
-    public function loadWeekMenu($kitchenId, $dateFrom, $dateTo = null, ?bool $isEditing = null)
+    public function loadWeekMenu($kitchenId, $dateFrom, $dateTo = null, ?bool $isEditing = null, ?int $weekMenuId = null)
     {
         if (is_bool($dateTo)) {
             $isEditing = $dateTo;
@@ -741,38 +843,26 @@ class ListMenus extends Page
             $this->selectedShifts = $shifts->pluck('id')->map(fn ($id) => (string) $id)->all();
         }
 
-        $weekMenu = WeekMenu::where('kitchen_id', $kitchenId)
-            ->where('date_from', $this->weekDateFrom)
-            ->where('date_to', $this->weekDateTo)
-            ->first();
-
-        // Also check for loose (orphaned) Menu rows in the date range
-        // that are NOT linked to any WeekMenu — covers legacy data and day menus.
-        $looseMenus = collect();
-        if (! $weekMenu) {
-            $looseMenus = Menu::where('kitchen_id', $kitchenId)
-                ->whereNull('week_menu_id')
-                ->where('date', '>=', $this->weekDateFrom)
-                ->where('date', '<=', $this->weekDateTo)
-                ->get();
+        $weekMenu = null;
+        if ($isEditing && $weekMenuId) {
+            $weekMenu = WeekMenu::query()
+                ->whereKey($weekMenuId)
+                ->where('kitchen_id', $kitchenId)
+                ->firstOrFail();
         }
 
-        $hasData = $weekMenu !== null || $looseMenus->isNotEmpty();
+        $hasData = $weekMenu !== null;
 
-        // Auto-detect editing mode: if caller didn't specify, infer from existing data.
-        if ($isEditing === null) {
-            $isEditing = $hasData;
-        }
-        $this->isEditingWeek = (bool) $isEditing;
+        $this->isEditingWeek = $weekMenu !== null;
         $this->mode = $this->isEditingWeek ? 'edit' : 'create';
-        $this->weekMenuId = $this->isEditingWeek ? $weekMenu?->id : null;
+        $this->weekMenuId = $weekMenu?->id;
 
         $this->weekHasExistingMenus = $hasData;
         $this->weekHasEditableLockedMenus = $weekMenu?->status === 'locked' && ! $weekMenu->isPastLocked();
         $this->weekHasPastLockedMenus = (bool) $weekMenu?->isPastLocked();
         $this->weekStatus = $weekMenu?->status ?? 'draft';
 
-        $weekMenus = $weekMenu ? $weekMenu->menus : $looseMenus;
+        $weekMenus = $weekMenu?->menus ?? collect();
         $menusByDayShift = $weekMenus->groupBy(fn (Menu $m) => $m->date->toDateString().'|'.$m->shift_id);
 
         $daysCount = (int) $start->diffInDays($end) + 1;
@@ -785,11 +875,11 @@ class ListMenus extends Page
 
                 $items = [];
                 foreach ($menus as $menu) {
-                    $items[] = ['recipe_id' => (string) $menu->recipe_id, 'portions' => $menu->estimated_portions];
+                    $items[] = ['recipe_id' => (string) $menu->recipe_id, 'portions' => $menu->estimated_portions, 'phan' => 1];
                 }
 
                 while (count($items) < $catCount) {
-                    $items[] = ['recipe_id' => '', 'portions' => 1];
+                    $items[] = ['recipe_id' => '', 'portions' => 1, 'phan' => 1];
                 }
 
                 $this->weekCells[$d][$shift->id] = $items;
@@ -797,10 +887,30 @@ class ListMenus extends Page
         }
     }
 
+    public function editWeekMenu(int $weekMenuId): void
+    {
+        $weekMenu = WeekMenu::findOrFail($weekMenuId);
+        $this->assertKitchenAccess((int) $weekMenu->kitchen_id);
+
+        $this->loadWeekMenu(
+            $weekMenu->kitchen_id,
+            $weekMenu->date_from,
+            $weekMenu->date_to,
+            true,
+            $weekMenu->id
+        );
+    }
+
     public function updatedWeekKitchenId($kitchenId): void
     {
         if ($kitchenId && $this->weekDateFrom) {
-            $this->loadWeekMenu($kitchenId, $this->weekDateFrom, $this->weekDateTo, $this->isEditingWeek);
+            $this->loadWeekMenu(
+                $kitchenId,
+                $this->weekDateFrom,
+                $this->weekDateTo,
+                $this->isEditingWeek,
+                $this->weekMenuId
+            );
         }
     }
 
@@ -810,7 +920,13 @@ class ListMenus extends Page
             if (! $this->weekDateTo || Carbon::parse($this->weekDateTo)->isBefore($dateFrom)) {
                 $this->weekDateTo = Carbon::parse($dateFrom)->addDays(6)->toDateString();
             }
-            $this->loadWeekMenu($this->weekKitchenId, $dateFrom, $this->weekDateTo, $this->isEditingWeek);
+            $this->loadWeekMenu(
+                $this->weekKitchenId,
+                $dateFrom,
+                $this->weekDateTo,
+                $this->isEditingWeek,
+                $this->weekMenuId
+            );
         }
     }
 
@@ -820,14 +936,20 @@ class ListMenus extends Page
             if (Carbon::parse($dateTo)->isBefore($this->weekDateFrom)) {
                 $this->weekDateTo = $this->weekDateFrom;
             }
-            $this->loadWeekMenu($this->weekKitchenId, $this->weekDateFrom, $this->weekDateTo, $this->isEditingWeek);
+            $this->loadWeekMenu(
+                $this->weekKitchenId,
+                $this->weekDateFrom,
+                $this->weekDateTo,
+                $this->isEditingWeek,
+                $this->weekMenuId
+            );
         }
     }
 
     /** Thêm 1 dòng món trống vào ô (ngày, ca) của grid tuần. */
     public function addWeekDish(int $day, int $shiftId): void
     {
-        $this->weekCells[$day][$shiftId][] = ['recipe_id' => '', 'portions' => 1];
+        $this->weekCells[$day][$shiftId][] = ['recipe_id' => '', 'portions' => 1, 'phan' => 1];
     }
 
     /** Bỏ 1 dòng món khỏi ô; luôn chừa lại tối thiểu 1 dòng trống. */
@@ -837,7 +959,7 @@ class ListMenus extends Page
         $this->weekCells[$day][$shiftId] = array_values($this->weekCells[$day][$shiftId]);
 
         if ($this->weekCells[$day][$shiftId] === []) {
-            $this->weekCells[$day][$shiftId] = [['recipe_id' => '', 'portions' => 1]];
+            $this->weekCells[$day][$shiftId] = [['recipe_id' => '', 'portions' => 1, 'phan' => 1]];
         }
     }
 
@@ -954,18 +1076,27 @@ class ListMenus extends Page
         $dateFrom = $start->toDateString();
         $dateTo = $end->toDateString();
 
-        $weekMenu = WeekMenu::where('kitchen_id', $this->weekKitchenId)
-            ->where('date_from', $dateFrom)
-            ->where('date_to', $dateTo)
-            ->first();
+        $weekMenu = $this->isEditingWeek && $this->weekMenuId
+            ? WeekMenu::query()
+                ->whereKey($this->weekMenuId)
+                ->where('kitchen_id', $this->weekKitchenId)
+                ->firstOrFail()
+            : null;
 
         if ($weekMenu && ($blocked = $weekMenu->editBlockReason($this->weekStatus, $this->weekEditReason))) {
-            $this->addError('weekEditReason', match ($blocked) {
+            $message = match ($blocked) {
                 'past' => __('menu.errors.past_locked_edit'),
                 'downgrade' => __('menu.errors.status_downgrade'),
                 'need_reason' => __('menu.errors.audit_reason_required'),
                 default => __('menu.errors.invalid_status'),
-            });
+            };
+
+            $this->addError('weekEditReason', $message);
+
+            Notification::make()
+                ->title($message)
+                ->danger()
+                ->send();
 
             return;
         }
@@ -974,33 +1105,40 @@ class ListMenus extends Page
         $daysCount = (int) $start->diffInDays($end) + 1;
 
         DB::transaction(function () use ($shifts, $start, $dateFrom, $dateTo, $daysCount, &$weekMenu): void {
-            $weekMenu = WeekMenu::updateOrCreate(
-                [
+            if ($weekMenu) {
+                $weekMenu->update([
                     'kitchen_id' => $this->weekKitchenId,
                     'date_from' => $dateFrom,
                     'date_to' => $dateTo,
-                ],
-                [
                     'status' => $this->weekStatus,
                     'audit_reason' => trim($this->weekEditReason) ?: null,
-                ]
-            );
-
-            // Sync custom dish categories into recipe_types table
-            foreach ($this->customDishCategories as $catLabel) {
-                $trimmed = trim($catLabel);
-                if ($trimmed !== '') {
-                    RecipeType::firstOrCreate(['name' => $trimmed]);
-                }
+                ]);
+            } else {
+                $weekMenu = WeekMenu::create([
+                    'kitchen_id' => $this->weekKitchenId,
+                    'date_from' => $dateFrom,
+                    'date_to' => $dateTo,
+                    'status' => $this->weekStatus,
+                    'audit_reason' => trim($this->weekEditReason) ?: null,
+                ]);
             }
 
-            // Adopt orphaned Menu rows that fall within this week range
-            // (covers legacy data created before the WeekMenu system).
-            Menu::where('kitchen_id', $this->weekKitchenId)
-                ->whereNull('week_menu_id')
-                ->where('date', '>=', $dateFrom)
-                ->where('date', '<=', $dateTo)
-                ->update(['week_menu_id' => $weekMenu->id]);
+            // Sync custom dish categories into recipe_types table
+            foreach ($this->customDishCategories as $catGroup) {
+                if (is_array($catGroup)) {
+                    foreach ($catGroup as $catLabel) {
+                        $trimmed = trim((string) $catLabel);
+                        if ($trimmed !== '') {
+                            RecipeType::firstOrCreate(['name' => $trimmed]);
+                        }
+                    }
+                } elseif (is_string($catGroup)) {
+                    $trimmed = trim($catGroup);
+                    if ($trimmed !== '') {
+                        RecipeType::firstOrCreate(['name' => $trimmed]);
+                    }
+                }
+            }
 
             for ($d = 0; $d < $daysCount; $d++) {
                 $currentDate = $start->copy()->addDays($d)->toDateString();
@@ -1026,11 +1164,20 @@ class ListMenus extends Page
                         $existing = $existingByRecipe->get($recipeId);
 
                         if ($existing) {
-                            $existing->auditReason = trim($this->weekEditReason) ?: null;
-                            $existing->update([
+                            $existing->fill([
                                 'estimated_portions' => $portions,
                                 'status' => $this->weekStatus,
                             ]);
+
+                            // Không gọi save() cho món không đổi. Một tuần đang diễn ra có
+                            // thể chứa món đã chốt ở ngày quá khứ; resave bản ghi đó sẽ bị
+                            // state machine chặn dù người dùng chỉ sửa một ngày tương lai.
+                            if (! $existing->isDirty(['estimated_portions', 'status'])) {
+                                continue;
+                            }
+
+                            $existing->auditReason = trim($this->weekEditReason) ?: null;
+                            $existing->save();
                         } else {
                             abort_unless(MenuResource::canCreate(), 403);
                             Menu::create([
@@ -1048,6 +1195,12 @@ class ListMenus extends Page
                     // 2) Xóa các món đã bị gỡ khỏi ô
                     foreach ($existingByRecipe as $recipeId => $menu) {
                         if (! isset($desired[$recipeId])) {
+                            if ($menu->editBlockReason($this->weekStatus, $this->weekEditReason) === 'past') {
+                                throw ValidationException::withMessages([
+                                    'weekEditReason' => __('menu.errors.past_locked_edit'),
+                                ]);
+                            }
+
                             $menu->auditReason = trim($this->weekEditReason) ?: null;
                             $menu->delete();
                         }
@@ -1057,12 +1210,22 @@ class ListMenus extends Page
         });
 
         Notification::make()
-            ->title($this->weekStatus === 'locked' ? 'Đã chốt thực đơn đợt thành công!' : 'Đã lưu thực đơn đợt thành công!')
+            ->title(match ($this->weekStatus) {
+                'sent' => __('menu.notifications.week_sent'),
+                'locked' => __('menu.notifications.week_locked'),
+                default => __('menu.notifications.week_draft_saved'),
+            })
             ->success()
             ->send();
 
         session()->flash('message', __('menu.notifications.week_saved'));
-        $this->switchView('list');
+        $this->loadWeekMenu(
+            $weekMenu->kitchen_id,
+            $weekMenu->date_from,
+            $weekMenu->date_to,
+            true,
+            $weekMenu->id
+        );
     }
 
     /**
@@ -1098,7 +1261,7 @@ class ListMenus extends Page
     // ==========================================
     // DAY MENU LOGIC
     // ==========================================
-    public function loadDayMenu($kitchenId, $date, ?bool $isEditing = null)
+    public function loadDayMenu($kitchenId, $date, ?bool $isEditing = null, ?int $dayMenuId = null)
     {
         $kitchenId = (int) $kitchenId;
         $this->assertKitchenAccess($kitchenId);
@@ -1110,28 +1273,24 @@ class ListMenus extends Page
         $this->dayItems = [];
         $shifts = $this->getShifts();
 
-        // 1 query cho cả ngày (chỉ lấy thực đơn ngày lẻ — week_menu_id IS NULL)
-        $dayMenus = Menu::where('kitchen_id', $kitchenId)
-            ->whereNull('week_menu_id')
-            ->where('date', '>=', $date)
-            ->where('date', '<', Carbon::parse($date)->addDay()->toDateString())
-            ->get();
-
-        // Auto-detect editing mode: if caller didn't specify, infer from existing data.
-        if ($isEditing === null) {
-            $isEditing = $dayMenus->isNotEmpty();
+        $dayMenu = null;
+        if ($isEditing && $dayMenuId) {
+            $dayMenu = DayMenu::query()
+                ->with('menus')
+                ->whereKey($dayMenuId)
+                ->where('kitchen_id', $kitchenId)
+                ->firstOrFail();
         }
-        $this->isEditingDay = (bool) $isEditing;
-        $this->mode = $this->isEditingDay ? 'edit' : 'create';
+        $dayMenus = $dayMenu?->menus ?? collect();
 
-        $this->dayHasExistingMenus = $dayMenus->isNotEmpty();
-        $this->dayHasEditableLockedMenus = $dayMenus->contains(
-            fn (Menu $menu): bool => $menu->status === 'locked' && ! $menu->isPastLocked()
-        );
-        $this->dayHasPastLockedMenus = $dayMenus->contains(fn (Menu $menu): bool => $menu->isPastLocked());
-        $this->dayStatus = $dayMenus
-            ->sortByDesc(fn (Menu $menu): int => Menu::STATUS_ORDER[$menu->status] ?? -1)
-            ->first()?->status ?? 'draft';
+        $this->isEditingDay = $dayMenu !== null;
+        $this->mode = $this->isEditingDay ? 'edit' : 'create';
+        $this->dayMenuId = $dayMenu?->id;
+
+        $this->dayHasExistingMenus = $dayMenu !== null;
+        $this->dayHasEditableLockedMenus = $dayMenu?->status === 'locked' && ! $dayMenu->isPastLocked();
+        $this->dayHasPastLockedMenus = (bool) $dayMenu?->isPastLocked();
+        $this->dayStatus = $dayMenu?->status ?? 'draft';
 
         $menusByShift = $dayMenus->groupBy('shift_id');
         $defaultLabels = __('menu.default_dish_labels');
@@ -1150,6 +1309,7 @@ class ListMenus extends Page
                     'label' => $defaultLabels[$idx] ?? __('menu.labels.dish_index', ['index' => $idx + 1]),
                     'recipe_id' => $m->recipe_id,
                     'portions' => $m->estimated_portions,
+                    'phan' => 1,
                 ];
             }
 
@@ -1160,6 +1320,7 @@ class ListMenus extends Page
                         'label' => $lbl,
                         'recipe_id' => '',
                         'portions' => $shiftPortions,
+                        'phan' => 1,
                     ];
                 }
             }
@@ -1172,6 +1333,14 @@ class ListMenus extends Page
         }
 
         $this->sortDayItems();
+    }
+
+    public function editDayMenu(int $dayMenuId): void
+    {
+        $dayMenu = DayMenu::findOrFail($dayMenuId);
+        $this->assertKitchenAccess((int) $dayMenu->kitchen_id);
+
+        $this->loadDayMenu($dayMenu->kitchen_id, $dayMenu->date->toDateString(), true, $dayMenu->id);
     }
 
     public function sortDayItems(bool $notify = false): void
@@ -1219,15 +1388,14 @@ class ListMenus extends Page
     public function updatedDayKitchenId($kitchenId): void
     {
         if ($kitchenId && $this->dayDate) {
-            $this->loadDayMenu($kitchenId, $this->dayDate, $this->isEditingDay);
+            $this->loadDayMenu($kitchenId, $this->dayDate, $this->isEditingDay, $this->dayMenuId);
         }
     }
 
     public function updatedDayDate($date): void
     {
         if ($this->dayKitchenId && $date) {
-            // Pass null to auto-detect editing mode based on existing data.
-            $this->loadDayMenu($this->dayKitchenId, $date);
+            $this->loadDayMenu($this->dayKitchenId, $date, $this->isEditingDay, $this->dayMenuId);
         }
     }
 
@@ -1254,6 +1422,7 @@ class ListMenus extends Page
             'label' => __('menu.labels.dish_index', ['index' => $nextIdx]),
             'recipe_id' => '',
             'portions' => $shiftPortions,
+            'phan' => 1,
         ];
     }
 
@@ -1317,7 +1486,10 @@ class ListMenus extends Page
         if (isset($this->dayItems[$shiftId]['recipes'])) {
             foreach ($this->dayItems[$shiftId]['recipes'] as $item) {
                 if (! empty($item['menu_id'])) {
-                    $menu = Menu::find($item['menu_id']);
+                    $menu = Menu::query()
+                        ->whereKey($item['menu_id'])
+                        ->where('day_menu_id', $this->dayMenuId)
+                        ->first();
                     if ($menu && MenuResource::canDelete($menu)) {
                         $menu->auditReason = trim($this->dayEditReason) ?: null;
                         $menu->delete();
@@ -1333,7 +1505,10 @@ class ListMenus extends Page
     {
         $menuId = $this->dayItems[$shiftId]['recipes'][$index]['menu_id'] ?? null;
         if ($menuId) {
-            $menu = Menu::find($menuId);
+            $menu = Menu::query()
+                ->whereKey($menuId)
+                ->where('day_menu_id', $this->dayMenuId)
+                ->first();
             if ($menu) {
                 abort_unless(MenuResource::canDelete($menu), 403);
                 $this->assertKitchenAccess($menu->kitchen_id);
@@ -1407,12 +1582,25 @@ class ListMenus extends Page
             return;
         }
 
-        $existingDayMenus = Menu::query()
-            ->where('kitchen_id', $this->dayKitchenId)
-            ->whereNull('week_menu_id')
-            ->where('date', '>=', $this->dayDate)
-            ->where('date', '<', Carbon::parse($this->dayDate)->addDay()->toDateString())
-            ->get();
+        $dayMenu = $this->isEditingDay && $this->dayMenuId
+            ? DayMenu::query()
+                ->with('menus')
+                ->whereKey($this->dayMenuId)
+                ->where('kitchen_id', $this->dayKitchenId)
+                ->firstOrFail()
+            : null;
+        $existingDayMenus = $dayMenu?->menus ?? collect();
+
+        if ($dayMenu && ($blocked = $dayMenu->editBlockReason($this->dayStatus, $this->dayEditReason))) {
+            $this->addError($blocked === 'need_reason' ? 'dayEditReason' : 'dayStatus', match ($blocked) {
+                'past' => __('menu.errors.past_locked_edit'),
+                'downgrade' => __('menu.errors.status_downgrade'),
+                'need_reason' => __('menu.errors.audit_reason_required'),
+                default => __('menu.errors.invalid_status'),
+            });
+
+            return;
+        }
 
         if (! $this->authorizeAndGuardExistingMenus($existingDayMenus, $this->dayStatus, $this->dayEditReason, 'dayEditReason')) {
             return;
@@ -1420,7 +1608,23 @@ class ListMenus extends Page
 
         $skippedLocked = 0;
 
-        DB::transaction(function () use (&$skippedLocked): void {
+        DB::transaction(function () use (&$skippedLocked, &$dayMenu): void {
+            if ($dayMenu) {
+                $dayMenu->update([
+                    'kitchen_id' => $this->dayKitchenId,
+                    'date' => $this->dayDate,
+                    'status' => $this->dayStatus,
+                    'audit_reason' => trim($this->dayEditReason) ?: null,
+                ]);
+            } else {
+                $dayMenu = DayMenu::create([
+                    'kitchen_id' => $this->dayKitchenId,
+                    'date' => $this->dayDate,
+                    'status' => $this->dayStatus,
+                    'audit_reason' => trim($this->dayEditReason) ?: null,
+                ]);
+            }
+
             foreach ($this->dayItems as $shiftId => $data) {
                 foreach ($data['recipes'] as $item) {
                     $recipeId = $item['recipe_id'];
@@ -1435,9 +1639,7 @@ class ListMenus extends Page
                         // Chỉ nhận menu thuộc đúng bếp/ngày đang thao tác (menu_id là dữ liệu client)
                         $menu = Menu::whereKey($menuId)
                             ->where('kitchen_id', $this->dayKitchenId)
-                            ->whereNull('week_menu_id')
-                            ->where('date', '>=', $this->dayDate)
-                            ->where('date', '<', Carbon::parse($this->dayDate)->addDay()->toDateString())
+                            ->where('day_menu_id', $dayMenu->id)
                             ->where('shift_id', $shiftId)
                             ->first();
 
@@ -1451,6 +1653,7 @@ class ListMenus extends Page
 
                             $menu->auditReason = trim($this->dayEditReason) ?: null;
                             $menu->update([
+                                'date' => $this->dayDate,
                                 'recipe_id' => $recipeId,
                                 'estimated_portions' => $portions,
                                 'status' => $this->dayStatus,
@@ -1460,8 +1663,7 @@ class ListMenus extends Page
                         // Món này có thể đã tồn tại trong ca (thêm trùng trên form, hoặc tạo từ màn khác):
                         // update dòng cũ thay vì INSERT để không vỡ unique
                         $duplicate = Menu::where('kitchen_id', $this->dayKitchenId)
-                            ->where('date', '>=', $this->dayDate)
-                            ->where('date', '<', Carbon::parse($this->dayDate)->addDay()->toDateString())
+                            ->where('day_menu_id', $dayMenu->id)
                             ->where('shift_id', $shiftId)
                             ->where('recipe_id', $recipeId)
                             ->first();
@@ -1483,6 +1685,7 @@ class ListMenus extends Page
                             Menu::create([
                                 'kitchen_id' => $this->dayKitchenId,
                                 'week_menu_id' => null,
+                                'day_menu_id' => $dayMenu->id,
                                 'date' => $this->dayDate,
                                 'shift_id' => $shiftId,
                                 'recipe_id' => $recipeId,
@@ -1503,7 +1706,7 @@ class ListMenus extends Page
         session()->flash('message', $skippedLocked > 0
             ? __('menu.notifications.day_saved_with_skipped', ['count' => $skippedLocked])
             : __('menu.notifications.day_saved'));
-        $this->switchView('list');
+        $this->loadDayMenu($dayMenu->kitchen_id, $dayMenu->date->toDateString(), true, $dayMenu->id);
     }
 
     /**
@@ -1549,6 +1752,7 @@ class ListMenus extends Page
         $this->dayHasEditableLockedMenus = false;
         $this->dayHasPastLockedMenus = false;
         $this->isEditingDay = false;
+        $this->dayMenuId = null;
     }
 
     // ==========================================
@@ -1580,6 +1784,24 @@ class ListMenus extends Page
 
     public function getRecipes()
     {
-        return Recipe::orderBy('name')->get();
+        return Recipe::with(['ingredients', 'recipeType'])
+            ->where('status', 'active')
+            ->orderBy('name')
+            ->get();
+    }
+
+    public function getRecipesDataProperty(): array
+    {
+        return $this->getRecipes()->map(function ($recipe) {
+            $cost = $recipe->effectiveCostPerPortion();
+
+            return [
+                'id' => (string) $recipe->id,
+                'name' => $recipe->name,
+                'group' => $recipe->type ?? __('menu.popup.other_group'),
+                'cost' => $cost,
+                'cost_formatted' => number_format($cost, 0, ',', '.').'đ',
+            ];
+        })->values()->toArray();
     }
 }
