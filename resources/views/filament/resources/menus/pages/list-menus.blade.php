@@ -275,6 +275,7 @@
             selectedRecipeCost: '',
             customName: '',
             portions: 1,
+            servings: 1,
             recipes: @js($this->recipesData),
             displayLimit: 50,
 
@@ -284,7 +285,7 @@
                 this.groups = Array.from(set);
             },
 
-            openModal(day, shiftId, categoryIdx, shiftName, dayDow, dayDateStr, categoryLabel, currentRecipeId, currentPortions, currentCustomName) {
+            openModal(day, shiftId, categoryIdx, shiftName, dayDow, dayDateStr, categoryLabel, currentRecipeId, currentPortions, currentCustomName, currentServings) {
                 this.targetDay = day;
                 this.targetShiftId = shiftId;
                 this.targetCategoryIdx = categoryIdx;
@@ -295,6 +296,7 @@
                 this.activeGroup = 'all';
                 this.displayLimit = 50;
                 this.portions = currentPortions || 1;
+                this.servings = currentServings || 1;
                 this.customName = currentCustomName || '';
 
                 let found = null;
@@ -375,6 +377,7 @@
                 if (this.targetDay !== null && this.targetShiftId !== null && this.targetCategoryIdx !== null) {
                     $wire.set('weekCells.' + this.targetDay + '.' + this.targetShiftId + '.' + this.targetCategoryIdx + '.recipe_id', this.selectedRecipeId);
                     $wire.set('weekCells.' + this.targetDay + '.' + this.targetShiftId + '.' + this.targetCategoryIdx + '.portions', this.portions);
+                    $wire.set('weekCells.' + this.targetDay + '.' + this.targetShiftId + '.' + this.targetCategoryIdx + '.servings', this.servings);
                 }
                 this.closeModal();
             }
@@ -555,14 +558,15 @@
                                 @foreach($weekDays as $d => $wDay)
                                     <td style="padding:4px 6px; text-align:left; background:var(--po-wh); vertical-align:middle; border-right:1px solid var(--po-bd2)">
                                         @php
-                                            $cellVal = $this->weekCells[$d][$shift->id][$ci] ?? ['recipe_id' => '', 'portions' => 1, 'phan' => 1];
+                                            $cellVal = $this->weekCells[$d][$shift->id][$ci] ?? ['recipe_id' => '', 'portions' => 1, 'servings' => 1];
                                             $selectedRec = $recipes->firstWhere('id', $cellVal['recipe_id'] ?? null);
                                             $portionsVal = (int) ($cellVal['portions'] ?? 1);
+                                            $servingsVal = (int) ($cellVal['servings'] ?? $cellVal['estimated_portions'] ?? 1);
                                             $cellTitle = $selectedRec?->name ?? '';
                                         @endphp
                                         <div style="min-width:130px">
                                             <button type="button" 
-                                                    @click="openModal({{ $d }}, {{ $shift->id }}, {{ $ci }}, @js($shift->name), @js($wDay['day_name']), '{{ date('d-m', strtotime($wDay['date'])) }}', @js($customDishCategories[$shift->id][$ci] ?? $catLabel), '{{ $cellVal['recipe_id'] ?? '' }}', {{ $portionsVal }}, @js($cellTitle))"
+                                                    @click="openModal({{ $d }}, {{ $shift->id }}, {{ $ci }}, @js($shift->name), @js($wDay['day_name']), '{{ date('d-m', strtotime($wDay['date'])) }}', @js($customDishCategories[$shift->id][$ci] ?? $catLabel), '{{ $cellVal['recipe_id'] ?? '' }}', {{ $portionsVal }}, @js($cellTitle), {{ $servingsVal }})"
                                                     @disabled($weekHasPastLockedMenus)
                                                     style="border:1px solid {{ $selectedRec ? 'var(--po-bl-m, #bfdbfe)' : 'var(--po-bd, #e2e8f0)' }}; border-radius:8px; padding:6px 8px; background:{{ $selectedRec ? '#FAFCFF' : '#fff' }}; text-align:left; cursor:pointer; width:100%; transition:all .15s; outline:none; display:flex; flex-direction:column; gap:2px">
                                                 @if($selectedRec)
@@ -704,12 +708,21 @@
                 </div>
 
                 <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:nowrap">
-                    <div style="display:flex; align-items:center; gap:10px; flex-wrap:nowrap">
-                        <div style="display:flex; align-items:center; gap:4px; font-size:12px; color:var(--po-tx2)">
-                            <i class="fa-solid fa-layer-group" style="color:var(--po-gn, #059669); font-size:12px"></i>
-                            <span style="font-weight:600">{{ __('menu.popup.phan_label') }}</span>
-                            <input x-model.number="portions" type="number" min="1" style="width:58px; height:32px; border:1.5px solid var(--po-bd, #e2e8f0); border-radius:8px; padding:0 6px; font-size:13px; font-weight:700; color:var(--po-bl, #2563eb); text-align:center; outline:none">
-                            <span style="font-size:11.5px; color:var(--po-mu)">{{ __('menu.popup.phan_suffix') }}</span>
+                    <div style="display:flex; align-items:center; gap:14px; flex-wrap:nowrap">
+                        <!-- Ô Số suất -->
+                        <div style="display:flex; align-items:center; gap:6px; font-size:12.5px; color:var(--po-tx2)">
+                            <i class="fa-solid fa-users" style="color:var(--po-bl, #2563eb); font-size:13px"></i>
+                            <span style="font-weight:600">Số suất:</span>
+                            <input x-model.number="servings" type="number" min="1" style="width:68px; height:34px; border:1.5px solid var(--po-bd, #e2e8f0); border-radius:8px; padding:0 6px; font-size:13.5px; font-weight:700; color:var(--po-bl, #2563eb); text-align:center; outline:none">
+                            <span style="font-size:12px; color:var(--po-mu)">suất</span>
+                        </div>
+
+                        <!-- Ô Số phần -->
+                        <div style="display:flex; align-items:center; gap:6px; font-size:12.5px; color:var(--po-tx2)">
+                            <i class="fa-solid fa-layer-group" style="color:var(--po-gn, #059669); font-size:13px"></i>
+                            <span style="font-weight:600">Số phần:</span>
+                            <input x-model.number="portions" type="number" min="1" style="width:60px; height:34px; border:1.5px solid var(--po-bd, #e2e8f0); border-radius:8px; padding:0 6px; font-size:13.5px; font-weight:700; color:var(--po-gn, #059669); text-align:center; outline:none">
+                            <span style="font-size:12px; color:var(--po-mu)">phần</span>
                         </div>
                     </div>
                     <div style="display:flex; align-items:center; gap:8px; flex-shrink:0">
