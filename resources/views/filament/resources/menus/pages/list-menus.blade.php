@@ -7,6 +7,8 @@
         $kitchens = $this->getKitchens();
         $shifts = $this->getShifts();
         $recipes = $this->getRecipes();
+        // O(1) lookup theo id — tránh scan tuyến tính firstWhere() mỗi ô grid.
+        $recipesById = $recipes->keyBy('id');
     @endphp
 
     @if (session()->has('message'))
@@ -546,7 +548,7 @@
 
                                 <td style="padding:4px 8px; font-size:11px; font-weight:700; color:var(--po-tx2); background:var(--po-wh); white-space:nowrap; border-right:1px solid var(--po-bd); position:sticky; left:34px; z-index:1; min-width:140px">
                                     <div style="display:flex; align-items:center; gap:4px">
-                                        <input wire:model.live="customDishCategories.{{ $shift->id }}.{{ $ci }}" type="text" class="ctrl" style="font-size:11px; font-weight:700; text-transform:uppercase; height:26px; padding:0 6px; border:1px solid transparent; background:transparent; width:100%" onfocus="this.style.borderColor='var(--po-bd)'; this.style.background='var(--po-wh)'" onblur="this.style.borderColor='transparent'; this.style.background='transparent'" @disabled($weekHasPastLockedMenus)>
+                                        <input wire:model.blur="customDishCategories.{{ $shift->id }}.{{ $ci }}" type="text" class="ctrl" style="font-size:11px; font-weight:700; text-transform:uppercase; height:26px; padding:0 6px; border:1px solid transparent; background:transparent; width:100%" onfocus="this.style.borderColor='var(--po-bd)'; this.style.background='var(--po-wh)'" onblur="this.style.borderColor='transparent'; this.style.background='transparent'" @disabled($weekHasPastLockedMenus)>
                                         @unless($weekHasPastLockedMenus || count($categories) <= 1)
                                             <button type="button" wire:click="removeCategoryRow({{ $shift->id }}, {{ $ci }})" title="{{ __('menu.actions.remove_dish') }}" style="width:20px; height:20px; border:none; background:transparent; color:var(--po-fa); cursor:pointer; font-size:11px; flex-shrink:0" onmouseover="this.style.color='var(--po-rd)'" onmouseout="this.style.color='var(--po-fa)'">
                                                 <i class="fa-solid fa-xmark"></i>
@@ -559,7 +561,7 @@
                                     <td style="padding:4px 6px; text-align:left; background:var(--po-wh); vertical-align:middle; border-right:1px solid var(--po-bd2)">
                                         @php
                                             $cellVal = $this->weekCells[$d][$shift->id][$ci] ?? ['recipe_id' => '', 'portions' => 1, 'servings' => 1];
-                                            $selectedRec = $recipes->firstWhere('id', $cellVal['recipe_id'] ?? null);
+                                            $selectedRec = $recipesById->get($cellVal['recipe_id'] ?? null);
                                             $portionsVal = (int) ($cellVal['portions'] ?? 1);
                                             $servingsVal = (int) ($cellVal['servings'] ?? $cellVal['estimated_portions'] ?? 1);
                                             $cellTitle = $selectedRec?->name ?? '';
@@ -916,7 +918,7 @@
                                 <div class="dv-field">
                                     <input wire:model="dayItems.{{ $shiftId }}.recipes.{{ $index }}.label" class="ctrl" style="font-size:11.5px; font-weight:700; color:var(--po-mu); border:none; background:transparent; outline:none; height:auto; padding:0 2px; margin-bottom:4px; width:100%" placeholder="{{ __('menu.placeholders.dish_label') }}" @disabled($dayHasPastLockedMenus)>
                                     <div style="display:flex; gap:8px; align-items:center">
-                                        @php $dayRecipe = $recipes->firstWhere('id', $item['recipe_id'] ?? null); @endphp
+                                        @php $dayRecipe = $recipesById->get($item['recipe_id'] ?? null); @endphp
                                         <button
                                             type="button"
                                             @click="openDayModal({{ $shiftId }}, {{ $index }}, @js($shiftName), @js($item['label'] ?? __('menu.labels.dish_index', ['index' => $index + 1])), '{{ $item['recipe_id'] ?? '' }}', {{ (int) ($item['portions'] ?? 1) }})"
