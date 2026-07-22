@@ -54,13 +54,13 @@ class PurchaseOrderTemplateExport implements FromArray, ShouldAutoSize, WithEven
         ]);
         $rows[] = $this->pad([]);
 
-        // Section theo nhóm nguyên liệu, đúng bố cục file mẫu
-        $grouped = $order->items->groupBy(fn ($item) => $item->ingredient?->type ?: 'Khác');
+        // Section theo nhóm nguyên liệu, đúng bố cục file MẪU ĐƠN ĐẶT HÀNG.xlsx
+        $grouped = $order->items->groupBy(fn ($item) => $item->ingredient?->typeRelation?->name ?? $item->ingredient?->type ?: 'Khác');
         $grandTotal = 0.0;
 
         foreach ($grouped as $groupName => $items) {
             $this->sectionTitleRows[] = count($rows) + 1;
-            $rows[] = $this->pad([$groupName.':']);
+            $rows[] = $this->pad([$this->getSectionTitle((string) $groupName)]);
 
             $this->headingRows[] = count($rows) + 1;
             $rows[] = self::SECTION_HEADINGS;
@@ -94,6 +94,25 @@ class PurchaseOrderTemplateExport implements FromArray, ShouldAutoSize, WithEven
         $rows[] = ['(Ký, ghi rõ họ tên)', '', '', '', '(Ký, ghi rõ họ tên)', '', '', ''];
 
         return $rows;
+    }
+
+    protected function getSectionTitle(string $groupName): string
+    {
+        $lower = mb_strtolower($groupName);
+        if (str_contains($lower, 'động vật') || str_contains($lower, 'thịt') || str_contains($lower, 'cá')) {
+            return 'Động Vật: ( Thịt, cá, tôm, ....... )';
+        }
+        if (str_contains($lower, 'thực vật') || str_contains($lower, 'rau') || str_contains($lower, 'củ')) {
+            return 'Thực vật: ( Rau, củ quả,.... )';
+        }
+        if (str_contains($lower, 'khô')) {
+            return 'Thực phẩm khô: ( Hàng khô, đồ đóng hộp,.... )';
+        }
+        if (str_contains($lower, 'gia vị')) {
+            return 'Gia vị: ( Mắm, muối, đường,.... )';
+        }
+
+        return $groupName.':';
     }
 
     /**
