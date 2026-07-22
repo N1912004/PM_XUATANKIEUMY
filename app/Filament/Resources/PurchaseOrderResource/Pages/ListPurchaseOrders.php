@@ -7,6 +7,7 @@ use App\Exports\PurchaseOrderTemplateExport;
 use App\Filament\Resources\PurchaseOrderResource;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderItem;
+use App\Models\User;
 use Carbon\Carbon;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
@@ -82,9 +83,24 @@ class ListPurchaseOrders extends Page
         $this->resetPage();
     }
 
+    /**
+     * Tra PO theo id đã scope bếp — orderId là dữ liệu client, user thường
+     * không được chạm PO của bếp khác (policy hiện chỉ check permission).
+     */
+    protected function findScopedOrder(int $orderId, array $with = []): ?PurchaseOrder
+    {
+        return PurchaseOrder::query()
+            ->with($with)
+            ->when(
+                ($user = auth()->user()) && ! $user->hasRole([User::superAdminRole(), 'Quản trị viên']),
+                fn ($query) => $query->where('kitchen_id', auth()->user()->currentKitchenId() ?? -1)
+            )
+            ->find($orderId);
+    }
+
     public function deleteOrder(int $orderId): void
     {
-        $order = PurchaseOrder::query()->find($orderId);
+        $order = $this->findScopedOrder($orderId);
 
         if (! $order) {
             return;
@@ -259,7 +275,7 @@ class ListPurchaseOrders extends Page
      */
     public function exportSingleOrder(int $orderId): BinaryFileResponse
     {
-        $order = PurchaseOrder::with(['supplier', 'kitchen', 'items.ingredient'])->find($orderId);
+        $order = $this->findScopedOrder($orderId, ['supplier', 'kitchen', 'items.ingredient']);
 
         if (! $order) {
             abort(404);

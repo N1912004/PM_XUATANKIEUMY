@@ -37,7 +37,7 @@
                 <a href="{{ \App\Filament\Resources\PurchaseOrderResource::getUrl('index') }}" class="po-btn" style="background:var(--po-wh); border:1px solid var(--po-bd); color:var(--po-tx)">
                     <i class="fa-solid fa-arrow-left"></i> {{ __('purchase_order.actions.back') }}
                 </a>
-                <button wire:click="createAndSendOrders" class="po-btn po-btn-primary" style="padding:8px 18px; font-size:13.5px">
+                <button wire:click="createAndSendOrders" wire:loading.attr="disabled" wire:target="createAndSendOrders" class="po-btn po-btn-primary" style="padding:8px 18px; font-size:13.5px">
                     <i class="fa-solid fa-paper-plane"></i> {{ __('purchase_order.actions.create_and_send') }}
                 </button>
             </div>
@@ -342,7 +342,7 @@
                     <div style="font-size:11px; opacity:0.85; text-transform:uppercase; font-weight:700">{{ __('purchase_order.create.grand_total_label') }}</div>
                     <div style="font-size:22px; font-weight:900; letter-spacing:-0.5px; white-space:nowrap">{{ number_format($grandTotal, 0, ',', '.') }} đ</div>
                 </div>
-                <button wire:click="createAndSendOrders" class="po-btn" style="background:#fff; color:#0059DD; font-weight:800; padding:10px 20px; font-size:14px; border:none; box-shadow:0 4px 12px rgba(0,0,0,0.15); white-space:nowrap; display:inline-flex; align-items:center; gap:8px; flex-shrink:0">
+                <button wire:click="createAndSendOrders" wire:loading.attr="disabled" wire:target="createAndSendOrders" class="po-btn" style="background:#fff; color:#0059DD; font-weight:800; padding:10px 20px; font-size:14px; border:none; box-shadow:0 4px 12px rgba(0,0,0,0.15); white-space:nowrap; display:inline-flex; align-items:center; gap:8px; flex-shrink:0">
                     <i class="fa-solid fa-paper-plane"></i> {{ __('purchase_order.actions.create_and_send') }}
                 </button>
             </div>
