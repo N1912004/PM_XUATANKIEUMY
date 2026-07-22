@@ -237,7 +237,9 @@ class PurchaseOrderResource extends Resource
         return [
             'index' => Pages\ListPurchaseOrders::route('/'),
             'create' => Pages\CreatePurchaseOrder::route('/create'),
-            'edit' => Pages\EditPurchaseOrder::route('/{record}/edit'),
+            'view' => Pages\ViewPurchaseOrder::route('/{record}'),
+            'edit' => Pages\ViewPurchaseOrder::route('/{record}/edit'),
+            'check' => Pages\CheckPurchaseOrder::route('/{record}/check'),
         ];
     }
 }

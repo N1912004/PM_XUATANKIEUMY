@@ -13,7 +13,7 @@
             <p class="po-subtitle">{{ __('purchase_order.list.subtitle') }}</p>
         </div>
         <div class="po-actions">
-            <a href="{{ url('/admin/list-hang') }}" class="po-btn po-btn-primary">
+            <a href="{{ \App\Filament\Resources\PurchaseOrderResource::getUrl('create') }}" class="po-btn po-btn-primary">
                 <i class="fa-solid fa-plus"></i>
                 {{ __('purchase_order.actions.create') }}
             </a>
@@ -174,25 +174,18 @@
                     <!-- Actions -->
                     <div style="display:flex;gap:5px">
                         <!-- Xem chi tiết -->
-                        <a href="{{ \App\Filament\Resources\PurchaseOrderResource::getUrl('edit', ['record' => $order]) }}" class="abt" title="{{ __('purchase_order.actions.view_details') }}">
+                        <a href="{{ \App\Filament\Resources\PurchaseOrderResource::getUrl('view', ['record' => $order]) }}" class="abt" title="{{ __('purchase_order.actions.view_details') }}">
                             <i class="fa-solid fa-eye"></i>
                         </a>
 
-                        <!-- Kiểm hàng (chuyển hướng sang kho tab nhập PO) -->
-                        @if(in_array($order->status, ['sent', 'checking']) && is_null($order->stocked_at))
-                            <a href="{{ url('/admin/stocks?tab=in&inMode=po&po_id=' . $order->id) }}" class="abt" title="{{ __('purchase_order.actions.check_goods') }}" style="color:var(--po-or)">
-                                <i class="fa-solid fa-clipboard-check"></i>
-                            </a>
-                        @endif
+                        <!-- Kiểm hàng (chuyển hướng sang trang Kiểm hàng vOrderCheck) -->
+                        <a href="{{ \App\Filament\Resources\PurchaseOrderResource::getUrl('check', ['record' => $order]) }}" class="abt" title="{{ __('purchase_order.actions.check_goods') }}" style="color:var(--po-or)">
+                            <i class="fa-solid fa-clipboard-check"></i>
+                        </a>
 
                         <!-- Xuất Excel của đơn này -->
                         <button wire:click="exportSingleOrder({{ $order->id }})" class="abt" title="{{ __('purchase_order.actions.export_excel') }}">
                             <i class="fa-solid fa-file-excel" style="color:var(--po-gn)"></i>
-                        </button>
-
-                        <!-- Menu/Xóa đơn -->
-                        <button wire:click="deleteOrder({{ $order->id }})" wire:confirm="{{ __('purchase_order.confirm.delete') }}" class="abt" title="{{ __('purchase_order.actions.delete') }}">
-                            <i class="fa-solid fa-ellipsis-vertical"></i>
                         </button>
                     </div>
                 </div>

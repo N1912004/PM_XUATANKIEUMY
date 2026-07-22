@@ -1081,6 +1081,38 @@
         background-color: var(--po-bd2) !important;
     }
 
+    /* step wizard (Tạo đơn) */
+    .oh-steps { display:flex; align-items:center; gap:0; margin-bottom:16px; background:var(--po-wh); border:1px solid var(--po-bd); border-radius:var(--po-r); padding:14px 20px; box-shadow:var(--po-sh2) }
+    .oh-step { display:flex; align-items:center; gap:9px; flex:1 }
+    .oh-step-num { width:28px; height:28px; border-radius:50%; display:grid; place-items:center; font-size:12px; font-weight:800; flex-shrink:0; transition:.2s }
+    .oh-step-active .oh-step-num { background:var(--po-bl); color:#fff; box-shadow:0 3px 8px rgba(18,103,232,.3) }
+    .oh-step-done .oh-step-num { background:var(--po-gn); color:#fff }
+    .oh-step-pending .oh-step-num { background:var(--po-bd2); color:var(--po-mu); border:1.5px solid var(--po-bd) }
+    .oh-step-lbl { font-size:12.5px; font-weight:700 }
+    .oh-step-active .oh-step-lbl { color:var(--po-bl) }
+    .oh-step-done .oh-step-lbl { color:var(--po-gn) }
+    .oh-step-pending .oh-step-lbl { color:var(--po-fa) }
+    .oh-step-line { flex:1; height:2px; background:var(--po-bd); margin:0 8px; transition:.2s }
+    .oh-step-line.done { background:var(--po-gn) }
+
+    /* NL group cards in create */
+    .oh-group-card { background:var(--po-wh); border:1px solid var(--po-bd); border-radius:var(--po-r); box-shadow:var(--po-sh2); overflow:hidden; margin-bottom:14px }
+    .oh-group-head { display:flex; align-items:center; justify-content:space-between; padding:12px 16px; border-bottom:1px solid var(--po-bd2) }
+    .oh-group-title { font-size:14px; font-weight:700; color:var(--po-tx); display:flex; align-items:center; gap:9px }
+    .oh-table { width:100%; border-collapse:collapse }
+    .oh-table th { padding:9px 12px; text-align:left; font-size:11px; font-weight:700; color:var(--po-fa); text-transform:uppercase; letter-spacing:.06em; background:var(--po-bg); border-bottom:1px solid var(--po-bd); white-space:nowrap }
+    .oh-table td { padding:10px 12px; font-size:12.5px; border-bottom:1px solid var(--po-bd2); vertical-align:middle }
+    .oh-table tbody tr:last-child td { border-bottom:none }
+    .oh-table tbody tr:hover { background:var(--po-bg) }
+    .oh-ncc-sel { height:32px; padding:0 24px 0 9px; background:var(--po-wh); border:1.5px solid var(--po-bd); border-radius:7px; font-size:12px; color:var(--po-su); cursor:pointer; outline:none; appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath d='M2 3.5l3 3 3-3' stroke='%2394A3B8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 7px center; transition:.13s; min-width:130px }
+    .oh-ncc-sel:focus { border-color:var(--po-bl-m); background:var(--po-wh) }
+    .oh-ncc-sel:hover { border-color:var(--po-bd) }
+
+    /* Grand Total Blue Banner */
+    .lhn-grand { display:flex; align-items:center; justify-content:space-between; background:linear-gradient(135deg,#1474FF,#0059DD); border-radius:var(--po-r); padding:16px 22px; color:#fff; box-shadow:0 6px 20px rgba(18,103,232,.3) }
+    .lhn-grand-lbl { font-size:14px; font-weight:700; opacity:.9 }
+    .lhn-grand-val { font-size:24px; font-weight:800; letter-spacing:-.02em }
+
     /* Dark mode cho badge trạng thái đơn (.os-*): nền hardcode sáng ở light sẽ chói trên nền
        tối, nên hạ về nền mờ (alpha) + chữ sáng — đồng bộ pattern với .ms-* / .ci-status-badge. */
     :root.dark .os-draft {
