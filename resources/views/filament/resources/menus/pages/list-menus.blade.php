@@ -277,7 +277,7 @@
             portions: 1,
             phan: 1,
             recipes: @js($this->recipesData),
-            groups: [],
+            displayLimit: 50,
 
             init() {
                 const set = new Set();
@@ -285,25 +285,43 @@
                 this.groups = Array.from(set);
             },
 
-            openModal(day, shiftId, categoryIdx, shiftName, dayDow, dayDateStr, categoryLabel, currentRecipeId, currentPortions) {
+            openModal(day, shiftId, categoryIdx, shiftName, dayDow, dayDateStr, categoryLabel, currentRecipeId, currentPortions, currentPhan, currentCustomName) {
                 this.targetDay = day;
                 this.targetShiftId = shiftId;
                 this.targetCategoryIdx = categoryIdx;
-                this.subtitle = `${shiftName} – ${dayDow} ${dayDateStr} / ${categoryLabel}`;
+                
+                const activeDishTitle = currentCustomName || categoryLabel;
+                this.subtitle = `${shiftName} – ${dayDow} ${dayDateStr} / ${activeDishTitle}`;
                 this.search = '';
                 this.activeGroup = 'all';
+                this.displayLimit = 50;
                 this.portions = currentPortions || 1;
-                this.phan = 1;
-                
+                this.phan = currentPhan || 1;
+                this.customName = currentCustomName || '';
+
+                let found = null;
                 if (currentRecipeId) {
-                    const found = this.recipes.find(r => r.id == currentRecipeId);
-                    if (found) {
-                        this.selectRecipe(found);
-                    } else {
-                        this.clearSelection();
+                    found = this.recipes.find(r => String(r.id) === String(currentRecipeId));
+                }
+
+                if (!found && activeDishTitle) {
+                    const targetName = activeDishTitle.toLowerCase().trim();
+                    found = this.recipes.find(r => r.name.toLowerCase().trim() === targetName);
+                }
+
+                if (found) {
+                    this.selectedRecipeId = found.id;
+                    this.selectedRecipeName = found.name;
+                    this.selectedRecipeGroup = found.group;
+                    this.selectedRecipeCost = found.cost_formatted;
+                    if (!this.customName) {
+                        this.customName = found.name;
                     }
                 } else {
-                    this.clearSelection();
+                    this.selectedRecipeId = null;
+                    this.selectedRecipeName = '';
+                    this.selectedRecipeGroup = '';
+                    this.selectedRecipeCost = '';
                 }
 
                 this.isOpen = true;
@@ -317,7 +335,7 @@
             },
 
             selectRecipe(rec) {
-                if (this.selectedRecipeId === rec.id) {
+                if (String(this.selectedRecipeId) === String(rec.id)) {
                     this.clearSelection();
                     return;
                 }
@@ -345,10 +363,21 @@
                 });
             },
 
+            visibleRecipes() {
+                return this.filteredRecipes().slice(0, this.displayLimit);
+            },
+
+            loadMore() {
+                if (this.displayLimit < this.filteredRecipes().length) {
+                    this.displayLimit += 50;
+                }
+            },
+
             confirmSelection() {
                 if (this.targetDay !== null && this.targetShiftId !== null && this.targetCategoryIdx !== null) {
                     $wire.set('weekCells.' + this.targetDay + '.' + this.targetShiftId + '.' + this.targetCategoryIdx + '.recipe_id', this.selectedRecipeId);
                     $wire.set('weekCells.' + this.targetDay + '.' + this.targetShiftId + '.' + this.targetCategoryIdx + '.portions', this.portions);
+                    $wire.set('weekCells.' + this.targetDay + '.' + this.targetShiftId + '.' + this.targetCategoryIdx + '.phan', this.phan);
                     if (this.customName) {
                         $wire.set('customDishCategories.' + this.targetCategoryIdx, this.customName);
                     }
@@ -472,13 +501,15 @@
             <table class="grid-table" style="width:100%; border-collapse:collapse; min-width:900px">
                 <thead>
                     <tr style="background:var(--po-bl, {{ \App\Models\Setting::get('primary_color', '#267DC1') }}); color:#fff">
-                        <th colspan="2" style="padding:12px 14px; text-align:center; min-width:160px; position:sticky; left:0; z-index:2; background:var(--po-bl, {{ \App\Models\Setting::get('primary_color', '#267DC1') }}); color:#fff">{{ __('menu.week_form.shift_day') }}</th>
+                        <th colspan="2" style="padding:10px 12px; text-align:center; min-width:160px; position:sticky; left:0; z-index:3; background:var(--po-bl, {{ \App\Models\Setting::get('primary_color', '#267DC1') }}); color:#fff; font-size:12px; font-weight:800">{{ __('menu.week_form.shift_day') }}</th>
                         @php $weekDays = $this->weekDays; @endphp
                         @foreach($weekDays as $d => $wDay)
-                            <th style="padding:12px 14px; text-align:center; min-width:145px">
-                                {{ $wDay['day_name'] }}
-                                <div style="font-size:10.5px; font-weight:500; opacity:.85; margin-top:2px">
-                                    {{ date('d/m/Y', strtotime($wDay['date'])) }}
+                            <th style="padding:10px 12px; text-align:center; min-width:140px; background:var(--po-bl, {{ \App\Models\Setting::get('primary_color', '#267DC1') }}); color:#fff; border-left:1px solid rgba(255,255,255,.15)">
+                                <div style="font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:.02em">
+                                    {{ $wDay['day_name'] }}
+                                </div>
+                                <div style="font-size:11px; font-weight:500; opacity:.9; margin-top:2px">
+                                    {{ date('d-m', strtotime($wDay['date'])) }}
                                 </div>
                             </th>
                         @endforeach
@@ -513,7 +544,7 @@
                                     <div style="display:flex; align-items:center; gap:4px">
                                         <input wire:model.live="customDishCategories.{{ $ci }}" type="text" class="ctrl" style="font-size:11px; font-weight:700; text-transform:uppercase; height:26px; padding:0 6px; border:1px solid transparent; background:transparent; width:100%" onfocus="this.style.borderColor='var(--po-bd)'; this.style.background='var(--po-wh)'" onblur="this.style.borderColor='transparent'; this.style.background='transparent'" @disabled($weekHasPastLockedMenus)>
                                         @unless($weekHasPastLockedMenus || count($categories) <= 1)
-                                            <button type="button" wire:click="removeCategoryRow({{ $ci }})" title="Xóa dòng món này" style="width:20px; height:20px; border:none; background:transparent; color:var(--po-fa); cursor:pointer; font-size:11px; flex-shrink:0" onmouseover="this.style.color='var(--po-rd)'" onmouseout="this.style.color='var(--po-fa)'">
+                                            <button type="button" wire:click="removeCategoryRow({{ $ci }})" title="{{ __('menu.actions.remove_dish') }}" style="width:20px; height:20px; border:none; background:transparent; color:var(--po-fa); cursor:pointer; font-size:11px; flex-shrink:0" onmouseover="this.style.color='var(--po-rd)'" onmouseout="this.style.color='var(--po-fa)'">
                                                 <i class="fa-solid fa-xmark"></i>
                                             </button>
                                         @endunless
@@ -521,40 +552,36 @@
                                 </td>
 
                                 @foreach($weekDays as $d => $wDay)
-                                    <td style="padding:6px 8px; text-align:center; background:var(--po-wh); vertical-align:middle">
+                                    <td style="padding:4px 6px; text-align:left; background:var(--po-wh); vertical-align:middle; border-right:1px solid var(--po-bd2)">
                                         @php
-                                            $cellVal = $this->weekCells[$d][$shift->id][$ci] ?? ['recipe_id' => '', 'portions' => 1];
+                                            $cellVal = $this->weekCells[$d][$shift->id][$ci] ?? ['recipe_id' => '', 'portions' => 1, 'phan' => 1];
                                             $selectedRec = $recipes->firstWhere('id', $cellVal['recipe_id'] ?? null);
+                                            $portionsVal = (int) ($cellVal['portions'] ?? 1);
+                                            $phanVal = (int) ($cellVal['phan'] ?? 1);
+                                            $catCustomName = $this->customDishCategories[$ci] ?? ($selectedRec?->name ?? '');
                                         @endphp
-                                        <div style="display:flex; flex-direction:column; gap:4px; min-width:135px">
+                                        <div style="min-width:130px">
                                             <button type="button" 
-                                                    @click="openModal({{ $d }}, {{ $shift->id }}, {{ $ci }}, '{{ e($shift->name) }}', '{{ e($wDay['day_name']) }}', '{{ date('d/m/Y', strtotime($wDay['date'])) }}', '{{ e($catLabel) }}', '{{ $cellVal['recipe_id'] ?? '' }}', {{ (int)($cellVal['portions'] ?? 1) }})"
+                                                    @click="openModal({{ $d }}, {{ $shift->id }}, {{ $ci }}, '{{ e($shift->name) }}', '{{ e($wDay['day_name']) }}', '{{ date('d-m', strtotime($wDay['date'])) }}', '{{ e($catLabel) }}', '{{ $cellVal['recipe_id'] ?? '' }}', {{ $portionsVal }}, {{ $phanVal }}, '{{ e($catCustomName) }}')"
                                                     @disabled($weekHasPastLockedMenus)
-                                                    style="border:1.5px solid {{ $selectedRec ? 'var(--po-bl-m, #bfdbfe)' : 'var(--po-bd, #e2e8f0)' }}; border-radius:8px; padding:6px 8px; background:{{ $selectedRec ? 'var(--po-bl-s, #eff6ff)' : '#fff' }}; text-align:left; cursor:pointer; width:100%; transition:all .15s; outline:none">
-                                                @if($selectedRec)
-                                                    <div style="font-size:12px; font-weight:700; color:var(--po-tx); line-clamp:2; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden">
-                                                        {{ $selectedRec->name }}
+                                                    style="border:1px solid {{ ($selectedRec || $catCustomName) ? 'var(--po-bl-m, #bfdbfe)' : 'var(--po-bd, #e2e8f0)' }}; border-radius:8px; padding:6px 8px; background:{{ ($selectedRec || $catCustomName) ? '#FAFCFF' : '#fff' }}; text-align:left; cursor:pointer; width:100%; transition:all .15s; outline:none; display:flex; flex-direction:column; gap:2px">
+                                                @if($selectedRec || $catCustomName)
+                                                    <div style="font-size:12px; font-weight:700; color:var(--po-tx, #0f172a); line-clamp:2; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; line-height:1.3">
+                                                        {{ $catCustomName ?: $selectedRec->name }}
                                                     </div>
-                                                    <div style="display:flex; align-items:center; justify-content:space-between; margin-top:4px">
-                                                        <span style="font-size:10px; font-weight:600; color:var(--po-bl); background:#dbeafe; padding:1px 5px; border-radius:4px">
-                                                            {{ $selectedRec->type ?? 'Món khác' }}
-                                                        </span>
-                                                        <span style="font-size:10px; font-weight:700; color:var(--po-gn, #059669)">
-                                                            {{ number_format($selectedRec->effectiveCostPerPortion(), 0, ',', '.') }}đ
-                                                        </span>
+                                                    <div style="font-size:11px; font-weight:700; color:var(--po-bl, #2563eb); display:flex; align-items:center; gap:4px">
+                                                        <span>{{ $portionsVal }} {{ __('menu.labels.portions') }}</span>
+                                                        <span style="font-weight:500; color:var(--po-mu)">· {{ $phanVal }} {{ __('menu.popup.phan_suffix') }}</span>
                                                     </div>
                                                 @else
-                                                    <div style="font-size:11.5px; font-weight:600; color:var(--po-mu); display:flex; align-items:center; justify-content:space-between">
-                                                        <span><em>{{ __('menu.placeholders.select_dish') }}</em></span>
-                                                        <i class="fa-solid fa-plus-circle" style="font-size:11px; opacity:.7; color:var(--po-bl)"></i>
+                                                    <div style="font-size:11.5px; font-weight:500; color:var(--po-mu)">
+                                                        <em>{{ __('menu.placeholders.select_dish') }}</em>
+                                                    </div>
+                                                    <div style="font-size:11px; font-weight:600; color:var(--po-bl); opacity:.8">
+                                                        {{ $portionsVal }} {{ __('menu.labels.portions') }} · {{ $phanVal }} {{ __('menu.popup.phan_suffix') }}
                                                     </div>
                                                 @endif
                                             </button>
-
-                                            <div style="display:flex; align-items:center; justify-content:center; gap:4px">
-                                                <input wire:model="weekCells.{{ $d }}.{{ $shift->id }}.{{ $ci }}.portions" type="number" min="1" class="ctrl" style="font-size:11px; height:24px; text-align:center; padding:0 4px; width:64px; font-weight:700" placeholder="{{ __('menu.placeholders.portions') }}" @disabled($weekHasPastLockedMenus)>
-                                                <span style="font-size:10px; color:var(--po-fa)">{{ __('menu.labels.portions') }}</span>
-                                            </div>
                                         </div>
                                     </td>
                                 @endforeach
@@ -597,16 +624,20 @@
         </div>
 
         <!-- ════════════════════════ POPUP CHỌN MÓN ════════════════════════ -->
-        <div x-show="isOpen" x-cloak style="position:fixed; inset:0; background:rgba(15,23,42,.45); z-index:9999; backdrop-filter:blur(4px)" @click="closeModal()"></div>
-
         <div x-show="isOpen" x-cloak 
-             style="position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); z-index:10000; width:620px; max-width:96vw; max-height:88vh; background:var(--po-wh, #fff); border-radius:16px; box-shadow:0 20px 60px rgba(15,23,42,.22); overflow:hidden; display:flex; flex-direction:column"
+             style="position:fixed; inset:0; z-index:10000; display:flex; align-items:center; justify-content:center; padding:16px; box-sizing:border-box"
              @keydown.escape.window="closeModal()">
+
+            <!-- Backdrop -->
+            <div style="position:fixed; inset:0; background:rgba(15,23,42,.48); backdrop-filter:blur(4px); z-index:1" @click="closeModal()"></div>
+
+            <!-- Modal Dialog Card -->
+            <div style="position:relative; z-index:2; width:640px; max-width:100%; height:min(660px, calc(100vh - 32px)); max-height:calc(100vh - 32px); background:var(--po-wh, #fff); border-radius:16px; box-shadow:0 20px 60px rgba(15,23,42,.25); overflow:hidden; display:flex; flex-direction:column">
 
             <!-- Popup Header -->
             <div style="display:flex; align-items:center; justify-content:space-between; padding:16px 20px; border-bottom:1px solid var(--po-bd, #e2e8f0); flex-shrink:0">
                 <div>
-                    <div style="font-size:15px; font-weight:800; color:var(--po-tx, #1e293b)">Chọn món ăn</div>
+                    <div style="font-size:15px; font-weight:800; color:var(--po-tx, #1e293b)">{{ __('menu.popup.title') }}</div>
                     <div style="font-size:12px; color:var(--po-mu, #64748b); margin-top:2px" x-text="subtitle"></div>
                 </div>
                 <button type="button" @click="closeModal()" style="width:32px; height:32px; border:none; background:#F1F5F9; border-radius:8px; cursor:pointer; font-size:16px; color:var(--po-mu); display:grid; place-items:center; transition:.13s" onmouseover="this.style.background='#E2E8F0'" onmouseout="this.style.background='#F1F5F9'">✕</button>
@@ -616,36 +647,43 @@
             <div style="padding:12px 20px 0; flex-shrink:0">
                 <div style="display:flex; align-items:center; gap:8px; background:var(--po-bg, #f8fafc); border:1.5px solid var(--po-bd, #e2e8f0); border-radius:9px; padding:0 12px; height:40px; margin-bottom:10px; transition:.13s">
                     <i class="fa-solid fa-magnifying-glass" style="color:var(--po-fa, #94a3b8); font-size:13px; flex-shrink:0"></i>
-                    <input x-ref="searchInput" x-model="search" type="text" placeholder="Tìm kiếm tên món ăn..." style="border:none; background:transparent; outline:none; font-size:13.5px; color:var(--po-tx, #1e293b); width:100%">
+                    <input x-ref="searchInput" x-model="search" @input="displayLimit = 50" type="text" placeholder="{{ __('menu.popup.search_placeholder') }}" style="border:none; background:transparent; outline:none; font-size:13.5px; color:var(--po-tx, #1e293b); width:100%">
                 </div>
                 <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px">
-                    <button type="button" class="popup-grp-btn" :class="{ 'active': activeGroup === 'all' }" @click="activeGroup = 'all'">Tất cả</button>
+                    <button type="button" class="popup-grp-btn" :class="{ 'active': activeGroup === 'all' }" @click="activeGroup = 'all'; displayLimit = 50">{{ __('menu.popup.all') }}</button>
                     <template x-for="grp in groups" :key="grp">
-                        <button type="button" class="popup-grp-btn" :class="{ 'active': activeGroup === grp }" @click="activeGroup = grp" x-text="grp"></button>
+                        <button type="button" class="popup-grp-btn" :class="{ 'active': activeGroup === grp }" @click="activeGroup = grp; displayLimit = 50" x-text="grp"></button>
                     </template>
                 </div>
             </div>
 
             <!-- Dish List -->
-            <div style="flex:1; overflow-y:auto; padding:0 20px 12px; scrollbar-width:thin">
-                <template x-for="d in filteredRecipes()" :key="d.id">
+            <div style="flex:1; min-height:0; overflow-y:auto; padding:0 20px 12px; scrollbar-width:thin" @scroll="if ($el.scrollTop + $el.clientHeight >= $el.scrollHeight - 60) loadMore()">
+                <template x-for="d in visibleRecipes()" :key="d.id">
                     <div class="popup-dish" :class="{ 'selected': selectedRecipeId == d.id }" @click="selectRecipe(d)">
                         <div class="popup-dish-chk" x-text="selectedRecipeId == d.id ? '✓' : ''"></div>
                         <div class="popup-dish-ico"><i class="fa-solid fa-bowl-food"></i></div>
                         <div style="flex:1; min-width:0">
                             <div class="popup-dish-nm" x-text="d.name"></div>
-                            <div class="popup-dish-meta" x-text="'Nhóm: ' + d.group"></div>
+                            <div class="popup-dish-meta" x-text="'{{ __('menu.popup.group_prefix') }}' + d.group"></div>
                         </div>
                         <div class="popup-dish-cost">
                             <span x-text="d.cost_formatted" style="font-size:12px; font-weight:700; color:var(--po-gn, #059669)"></span>
-                            <span style="display:block; font-size:10px; font-weight:500; color:var(--po-fa, #94a3b8)">Cost/phần</span>
+                            <span style="display:block; font-size:10px; font-weight:500; color:var(--po-fa, #94a3b8)">{{ __('menu.popup.cost_per_portion') }}</span>
                         </div>
                     </div>
                 </template>
 
+                <div x-show="filteredRecipes().length > displayLimit" style="text-align:center; padding:12px 0 4px">
+                    <button type="button" @click="loadMore()" style="padding:7px 18px; font-size:12px; font-weight:700; color:var(--po-bl, #2563eb); background:var(--po-bl-s, #eff6ff); border:1.5px solid var(--po-bl-m, #bfdbfe); border-radius:20px; cursor:pointer; transition:.15s">
+                        <i class="fa-solid fa-chevron-down" style="margin-right:4px"></i>
+                        <span>Xem thêm (Đã hiện <span x-text="visibleRecipes().length"></span> / <span x-text="filteredRecipes().length"></span> món)</span>
+                    </button>
+                </div>
+
                 <div x-show="filteredRecipes().length === 0" style="text-align:center; padding:32px; color:var(--po-fa); font-size:13px">
                     <i class="fa-solid fa-magnifying-glass" style="font-size:26px; display:block; margin-bottom:8px; opacity:.25"></i>
-                    <span>Không tìm thấy món phù hợp</span>
+                    <span>{{ __('menu.popup.no_results') }}</span>
                 </div>
             </div>
 
@@ -657,36 +695,36 @@
                             <i class="fa-solid fa-bowl-food" style="color:var(--po-bl, #2563eb); font-size:14px"></i>
                             <div>
                                 <div style="font-size:13px; font-weight:700; color:var(--po-tx, #1e293b)" x-text="selectedRecipeName"></div>
-                                <div style="font-size:11px; color:var(--po-mu, #64748b)" x-text="'Cost: ' + selectedRecipeCost + ' / phần'"></div>
+                                <div style="font-size:11px; color:var(--po-mu, #64748b)" x-text="'Cost: ' + selectedRecipeCost + ' / ' + @js(__('menu.popup.phan_suffix'))"></div>
                             </div>
                         </div>
-                        <button type="button" @click="clearSelection()" style="font-size:11px; color:var(--po-rd, #dc2626); font-weight:600; background:none; border:none; cursor:pointer">✕ Bỏ chọn</button>
+                        <button type="button" @click="clearSelection()" style="font-size:11px; color:var(--po-rd, #dc2626); font-weight:600; background:none; border:none; cursor:pointer">{{ __('menu.popup.unselect') }}</button>
                     </div>
                 </div>
 
                 <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px">
                     <i class="fa-solid fa-pen" style="color:var(--po-bl, #2563eb); font-size:13px"></i>
-                    <span style="font-size:13px; color:var(--po-tx2, #475569); white-space:nowrap">Tên món:</span>
-                    <input x-model="customName" type="text" placeholder="Chọn món hoặc tự nhập / sửa tên món tùy ý" style="flex:1; height:36px; border:1.5px solid var(--po-bd, #e2e8f0); border-radius:8px; padding:0 12px; font-size:13.5px; font-weight:600; color:var(--po-tx, #1e293b); outline:none">
+                    <span style="font-size:13px; color:var(--po-tx2, #475569); white-space:nowrap">{{ __('menu.popup.dish_name_label') }}</span>
+                    <input x-model="customName" type="text" placeholder="{{ __('menu.popup.dish_name_placeholder') }}" style="flex:1; height:36px; border:1.5px solid var(--po-bd, #e2e8f0); border-radius:8px; padding:0 12px; font-size:13.5px; font-weight:600; color:var(--po-tx, #1e293b); outline:none">
                 </div>
 
                 <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap">
                     <div style="display:flex; align-items:center; gap:8px; font-size:13px; color:var(--po-tx2)">
                         <i class="fa-solid fa-users" style="color:var(--po-bl, #2563eb)"></i>
-                        <span>Số suất:</span>
+                        <span>{{ __('menu.popup.portions_label') }}</span>
                         <input x-model.number="portions" type="number" min="1" style="width:70px; height:34px; border:1.5px solid var(--po-bd, #e2e8f0); border-radius:8px; padding:0 10px; font-size:14px; font-weight:700; color:var(--po-bl, #2563eb); text-align:center; outline:none">
-                        <span>suất</span>
+                        <span>{{ __('menu.labels.portions') }}</span>
                     </div>
                     <div style="display:flex; align-items:center; gap:8px; font-size:13px; color:var(--po-tx2)">
                         <i class="fa-solid fa-layer-group" style="color:var(--po-gn, #059669)"></i>
-                        <span>Số phần:</span>
+                        <span>{{ __('menu.popup.phan_label') }}</span>
                         <input x-model.number="phan" type="number" min="1" step="1" style="width:62px; height:34px; border:1.5px solid var(--po-bd, #e2e8f0); border-radius:8px; padding:0 10px; font-size:14px; font-weight:700; color:var(--po-gn, #059669); text-align:center; outline:none">
-                        <span>phần</span>
+                        <span>{{ __('menu.popup.phan_suffix') }}</span>
                     </div>
                     <div style="margin-left:auto; display:flex; gap:8px">
-                        <button type="button" @click="closeModal()" style="height:38px; padding:0 16px; border:1px solid var(--po-bd, #e2e8f0); border-radius:9px; background:#fff; font-size:13px; font-weight:600; cursor:pointer; color:var(--po-tx2)">Hủy</button>
+                        <button type="button" @click="closeModal()" style="height:38px; padding:0 16px; border:1px solid var(--po-bd, #e2e8f0); border-radius:9px; background:#fff; font-size:13px; font-weight:600; cursor:pointer; color:var(--po-tx2)">{{ __('menu.popup.cancel') }}</button>
                         <button type="button" @click="confirmSelection()" style="height:38px; padding:0 18px; border:none; border-radius:9px; background:linear-gradient(135deg, var(--po-bl, #2563eb), #0059DD); color:#fff; font-size:13px; font-weight:700; cursor:pointer; box-shadow:0 4px 12px rgba(18,103,232,.3); display:flex; align-items:center; gap:7px">
-                            <i class="fa-solid fa-check"></i>Xác nhận chọn
+                            <i class="fa-solid fa-check"></i>{{ __('menu.popup.confirm') }}
                         </button>
                     </div>
                 </div>

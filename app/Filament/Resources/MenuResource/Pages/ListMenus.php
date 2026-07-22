@@ -785,11 +785,11 @@ class ListMenus extends Page
 
                 $items = [];
                 foreach ($menus as $menu) {
-                    $items[] = ['recipe_id' => (string) $menu->recipe_id, 'portions' => $menu->estimated_portions];
+                    $items[] = ['recipe_id' => (string) $menu->recipe_id, 'portions' => $menu->estimated_portions, 'phan' => 1];
                 }
 
                 while (count($items) < $catCount) {
-                    $items[] = ['recipe_id' => '', 'portions' => 1];
+                    $items[] = ['recipe_id' => '', 'portions' => 1, 'phan' => 1];
                 }
 
                 $this->weekCells[$d][$shift->id] = $items;
@@ -827,7 +827,7 @@ class ListMenus extends Page
     /** Thêm 1 dòng món trống vào ô (ngày, ca) của grid tuần. */
     public function addWeekDish(int $day, int $shiftId): void
     {
-        $this->weekCells[$day][$shiftId][] = ['recipe_id' => '', 'portions' => 1];
+        $this->weekCells[$day][$shiftId][] = ['recipe_id' => '', 'portions' => 1, 'phan' => 1];
     }
 
     /** Bỏ 1 dòng món khỏi ô; luôn chừa lại tối thiểu 1 dòng trống. */
@@ -837,7 +837,7 @@ class ListMenus extends Page
         $this->weekCells[$day][$shiftId] = array_values($this->weekCells[$day][$shiftId]);
 
         if ($this->weekCells[$day][$shiftId] === []) {
-            $this->weekCells[$day][$shiftId] = [['recipe_id' => '', 'portions' => 1]];
+            $this->weekCells[$day][$shiftId] = [['recipe_id' => '', 'portions' => 1, 'phan' => 1]];
         }
     }
 
@@ -1591,7 +1591,7 @@ class ListMenus extends Page
             return [
                 'id' => (string) $recipe->id,
                 'name' => $recipe->name,
-                'group' => $recipe->type ?? 'Món khác',
+                'group' => $recipe->type ?? __('menu.popup.other_group'),
                 'cost' => $cost,
                 'cost_formatted' => number_format($cost, 0, ',', '.').'đ',
             ];
