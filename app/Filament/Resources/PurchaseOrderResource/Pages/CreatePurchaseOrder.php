@@ -86,6 +86,16 @@ class CreatePurchaseOrder extends Page
             ->where('status', 'locked')
             ->get();
 
+        // Fetch existing PO items for ingredients in this date range to mark as already ordered
+        $existingPOItems = DB::table('purchase_order_items')
+            ->join('purchase_orders', 'purchase_orders.id', '=', 'purchase_order_items.purchase_order_id')
+            ->when($kitchenId && ! auth()->user()?->hasRole(['super_admin', 'Quản trị viên']), fn ($q) => $q->where('purchase_orders.kitchen_id', $kitchenId))
+            ->where('purchase_orders.estimated_delivery_date', '>=', $this->sourceFrom)
+            ->where('purchase_orders.estimated_delivery_date', '<=', $this->sourceTo)
+            ->select('purchase_order_items.ingredient_id', 'purchase_orders.code')
+            ->get()
+            ->groupBy('ingredient_id');
+
         $aggregated = [];
 
         foreach ($menus as $menu) {
@@ -168,9 +178,20 @@ class CreatePurchaseOrder extends Page
             $ingId = $item['ingredient_id'];
             $manualQty = $this->itemQuantities[$ingId] ?? round($item['total_kg'], 2);
             $selectedSupplierId = $this->itemSuppliers[$ingId] ?? ($this->groupSuppliers[$gKey] ?? $firstSupplierId);
-            $isSelected = $this->itemSelected[$ingId] ?? true;
+
+            $existingOrders = isset($existingPOItems[$ingId])
+                ? $existingPOItems[$ingId]->pluck('code')->unique()->values()->all()
+                : [];
+
+            if (! isset($this->itemSelected[$ingId])) {
+                $isSelected = empty($existingOrders);
+            } else {
+                $isSelected = (bool) $this->itemSelected[$ingId];
+            }
+
             $split = $this->itemSplits[$ingId] ?? 'Phiếu 1';
 
+            $item['already_ordered_pos'] = $existingOrders;
             $item['selected'] = $isSelected;
             $item['quantity_manual'] = (float) $manualQty;
             $item['supplier_id'] = $selectedSupplierId;

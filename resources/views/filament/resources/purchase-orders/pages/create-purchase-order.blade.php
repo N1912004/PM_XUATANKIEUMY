@@ -141,6 +141,15 @@
                                     </td>
                                     <td style="font-weight:600; color:var(--po-tx)">
                                         <div>{{ $item['name'] }}</div>
+                                        @if(!empty($item['already_ordered_pos']))
+                                            <div style="display:flex; gap:4px; flex-wrap:wrap; margin-top:3px">
+                                                @foreach($item['already_ordered_pos'] as $poCode)
+                                                    <span style="font-size:10.5px; font-weight:700; color:#C2410C; background:#FFF7ED; border:1px solid #FED7AA; padding:1px 6px; border-radius:4px; display:inline-flex; align-items:center; gap:3px">
+                                                        <i class="fa-solid fa-file-invoice" style="font-size:9px"></i> Đã đặt - {{ $poCode }}
+                                                    </span>
+                                                @endforeach
+                                            </div>
+                                        @endif
                                     </td>
                                     <td style="font-size:12px; color:var(--po-mu)">
                                         {{ $item['dish_string'] }}
