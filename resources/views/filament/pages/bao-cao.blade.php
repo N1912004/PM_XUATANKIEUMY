@@ -485,6 +485,84 @@
         font-size: 13px;
         color: var(--po-mu);
     }
+
+    /* Media queries for responsive layouts (Tablet & Mobile) */
+    @media (max-width: 1200px) {
+        .stats-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .report-header-container {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .excel-btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .filter-bar {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 10px;
+            padding: 12px;
+        }
+
+        .filter-item {
+            width: 100%;
+            justify-content: space-between;
+        }
+
+        .date-input {
+            flex: 1;
+            width: 100%;
+        }
+
+        .week-btn {
+            width: 100%;
+        }
+
+        .search-container {
+            margin-left: 0;
+            max-width: 100%;
+            width: 100%;
+        }
+
+        .shifts-group {
+            width: 100%;
+            flex-wrap: wrap;
+            justify-content: flex-start;
+        }
+
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .dish-head {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .dish-portions-block {
+            width: 100%;
+            justify-content: space-between;
+        }
+
+        .stat-val {
+            font-size: 18px;
+            word-break: break-all;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+    }
 </style>
 
     <div class="report-header-container">
