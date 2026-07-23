@@ -12,6 +12,12 @@
         $allBatchStocked = $relatedPOs->every(fn($po) => $po->stocked_at !== null);
     @endphp
 
+    {{-- Heartbeat giữ session sống: trang kiểm hàng thường mở lâu (nhập liệu kéo dài),
+         session hết hạn giữa chừng thì bấm "Hoàn thành" sẽ dính 419 Page Expired và mất
+         dữ liệu đã gõ. Poll no-op mỗi 4 phút chạm session để nó không bao giờ hết hạn
+         khi trang còn mở. --}}
+    <span wire:poll.240s="keepAlive" style="display:none"></span>
+
     <div class="po-page w-full space-y-6" style="padding: 0 !important; background: transparent !important;">
         <!-- Header Section -->
         <div class="po-head" style="margin-bottom: 16px;">

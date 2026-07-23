@@ -108,6 +108,15 @@ class CheckPurchaseOrder extends Page
     }
 
     /**
+     * No-op cho wire:poll — mỗi round-trip chạm session nên session không hết hạn
+     * khi trang kiểm hàng còn mở (chống 419 Page Expired lúc bấm Hoàn thành).
+     */
+    public function keepAlive(): void
+    {
+        // Chỉ cần request chạm StartSession middleware là đủ.
+    }
+
+    /**
      * Một item được coi là "đã nhập" khi ô số thực nhận có giá trị (khác rỗng/null).
      * Số 0 hợp lệ (hàng không giao = nhận 0kg), chỉ ô để trống mới là "chưa kiểm".
      */
