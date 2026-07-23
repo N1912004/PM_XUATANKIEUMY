@@ -266,12 +266,33 @@ class ListHang extends Page
         return $this->allSuppliersCache ??= Supplier::all()->keyBy('id');
     }
 
-    public function bulkAssignSupplier(string $loai, int $supplierId): void
+    public function bulkAssignSupplier(string $loai, $supplierId): void
     {
+        $supplier = filled($supplierId)
+            ? Supplier::with('ingredientTypes')->find((int) $supplierId)
+            : null;
+
+        $ingredientIds = collect($this->poItems)
+            ->filter(fn ($item) => $item['loai'] === $loai)
+            ->pluck('ingredient_id')
+            ->all();
+
+        $ingredients = $supplier
+            ? Ingredient::with(['suppliers', 'typeRelation'])->whereIn('id', $ingredientIds)->get()->keyBy('id')
+            : collect();
+
         foreach ($this->poItems as $index => $item) {
-            if ($item['loai'] === $loai) {
-                $this->poItems[$index]['supplier_id'] = $supplierId;
+            if ($item['loai'] !== $loai) {
+                continue;
             }
+
+            // Chỉ auto-fill khi NCC thực sự cung cấp được nguyên liệu này;
+            // không cung cấp được thì để TRỐNG cho user tự chọn — createOrders
+            // validate bắt buộc mọi dòng tích chọn phải có NCC trước khi lưu.
+            $ingredient = $ingredients->get($item['ingredient_id']);
+            $this->poItems[$index]['supplier_id'] = ($supplier && $ingredient && $supplier->canProvideIngredient($ingredient))
+                ? $supplier->id
+                : null;
         }
     }
 
@@ -295,6 +316,24 @@ class ListHang extends Page
 
         if ($selectedItems->isEmpty()) {
             Notification::make()->title(__('list_hang.notifications.no_selected_items'))->warning()->send();
+
+            return;
+        }
+
+        // Validate: mọi dòng tích chọn BẮT BUỘC có NCC — chặn hẳn thay vì bỏ qua lặng lẽ
+        // rồi tạo các PO còn lại (dòng thiếu NCC sẽ không bao giờ được đặt mà không ai biết).
+        $missingSupplierNames = $selectedItems
+            ->filter(fn ($item) => empty($item['supplier_id']))
+            ->pluck('name');
+
+        if ($missingSupplierNames->isNotEmpty()) {
+            $count = $missingSupplierNames->count();
+            $namesList = $missingSupplierNames->take(3)->implode(', ').($count > 3 ? '...' : '');
+            Notification::make()
+                ->title('Vui lòng chọn Nhà cung cấp!')
+                ->body("Có {$count} nguyên liệu chưa chọn NCC: {$namesList}. Vui lòng chọn NCC trước khi tạo đơn.")
+                ->danger()
+                ->send();
 
             return;
         }

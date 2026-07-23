@@ -4,7 +4,6 @@
     @php
         $statsData = $this->stats();
         $ordersList = $this->orders();
-        $months = $this->monthOptions();
     @endphp
 
     <div class="po-head">
@@ -58,38 +57,36 @@
             </div>
             <div>
                 <div class="py-klbl">{{ __('purchase_order.kpi.month_value') }}</div>
-                <div class="py-kval" style="font-size:18px">
-                    {{ number_format($statsData['total_value'] / 1000000, 0) }} tr
+                <div class="py-kval" style="font-size:16px">
+                    {{ __('purchase_order.currency.amount', ['value' => number_format($statsData['total_value'], 0, ',', '.')]) }}
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Filter Bar -->
-    <div class="mp-bar" style="margin-bottom:14px">
+    <div class="mp-bar" style="margin-bottom:14px; display:flex; align-items:center; gap:10px; flex-wrap:wrap">
         <div class="mp-srch">
             <i class="fa-solid fa-magnifying-glass"></i>
             <input wire:model.live.debounce.250ms="search" type="text" placeholder="{{ __('purchase_order.placeholders.search') }}">
         </div>
 
-        <select wire:model.live="monthFilter" class="mp-sel">
-            @foreach($months as $val => $lbl)
-                <option value="{{ $val }}">{{ $lbl }}</option>
-            @endforeach
-        </select>
+        <div class="mp-date-box">
+            <span style="font-weight:600; color:var(--po-mu); white-space:nowrap">{{ __('purchase_order.filters.from_date') }}:</span>
+            <input wire:model.live="fromDate" type="date">
+        </div>
 
-        <select wire:model.live="typeFilter" class="mp-sel">
-            <option value="">{{ __('purchase_order.filters.all_types') }}</option>
-            <option value="week">{{ __('purchase_order.types.week') }}</option>
-            <option value="day">{{ __('purchase_order.types.day') }}</option>
-        </select>
+        <div class="mp-date-box">
+            <span style="font-weight:600; color:var(--po-mu); white-space:nowrap">{{ __('purchase_order.filters.to_date') }}:</span>
+            <input wire:model.live="toDate" type="date">
+        </div>
 
         <select wire:model.live="statusFilter" class="mp-sel" id="ohStFilter">
             <option value="">{{ __('purchase_order.filters.all_statuses') }}</option>
-            <option value="draft">{{ __('purchase_order.status.draft') }}</option>
             <option value="sent">{{ __('purchase_order.status.sent_short') }}</option>
             <option value="checking">{{ __('purchase_order.status.checking') }}</option>
             <option value="done">{{ __('purchase_order.status.done') }}</option>
+            <option value="cancelled">{{ __('purchase_order.status.cancelled') }}</option>
         </select>
 
         <div class="tsp"></div>
@@ -168,7 +165,7 @@
 
                     <!-- Value -->
                     <div class="oh-item-val">
-                        {{ __('purchase_order.currency.thousand', ['value' => number_format($orderTotal / 1000, 0, ',', '.')]) }}
+                        {{ __('purchase_order.currency.amount', ['value' => number_format($orderTotal, 0, ',', '.')]) }}
                     </div>
 
                     <!-- Actions -->
@@ -218,9 +215,9 @@
             </div>
             <div class="po-pagination">
                 <select wire:model.live="perPage" class="po-select" style="min-width:7rem;height:2rem;padding:0 .5rem;border-radius:.5rem">
-                    <option value="10">10 / trang</option>
-                    <option value="20">20 / trang</option>
-                    <option value="50">50 / trang</option>
+                    <option value="10">{{ __('purchase_order.pagination.per_page', ['count' => 10]) }}</option>
+                    <option value="20">{{ __('purchase_order.pagination.per_page', ['count' => 20]) }}</option>
+                    <option value="50">{{ __('purchase_order.pagination.per_page', ['count' => 50]) }}</option>
                 </select>
 
                 <nav role="navigation" aria-label="Pagination Navigation">

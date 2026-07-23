@@ -65,10 +65,10 @@
             <div style="display:flex; align-items:center; justify-content:space-between; padding:12px 16px; border-bottom:1px solid var(--po-bd2); background:#FAFBFC">
                 <div style="font-size:14px; font-weight:700; color:var(--po-tx); display:flex; align-items:center; gap:9px">
                     <span style="display:inline-block; width:11px; height:11px; border-radius:50%; background:{{ $activeColor }}"></span>
-                    Kiểm hàng – {{ $activeOrder->supplier?->name }}
+                    {{ __('purchase_order.check.section_title', ['supplier' => $activeOrder->supplier?->name]) }}
                 </div>
                 <div style="font-size:12.5px; color:var(--po-mu)">
-                    Đã kiểm: <strong style="color:var(--po-bl)">{{ $activeCheckedCount }}/{{ $activeTotalCount }}</strong> mặt hàng
+                    {{ __('purchase_order.check.checked_progress', ['checked' => $activeCheckedCount, 'total' => $activeTotalCount]) }}
                     <div style="display:inline-block; width:80px; height:6px; background:var(--po-bd2); border-radius:3px; margin-left:8px; vertical-align:middle; overflow:hidden">
                         <div style="width:{{ $progressPercent }}%; height:6px; background:var(--po-bl); border-radius:3px"></div>
                     </div>

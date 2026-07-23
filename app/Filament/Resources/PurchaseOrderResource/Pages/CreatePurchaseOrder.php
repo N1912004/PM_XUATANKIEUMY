@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\PurchaseOrderResource\Pages;
 
 use App\Filament\Resources\PurchaseOrderResource;
+use App\Models\Ingredient;
 use App\Models\Menu;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderItem;
@@ -46,6 +47,11 @@ class CreatePurchaseOrder extends Page
 
     public array $itemSelected = [];
 
+    /** @var array<int, string> Phiếu (P1/P2/P3) theo ingredient_id — tách 1 NCC thành nhiều đơn */
+    public array $itemSplits = [];
+
+    public const SPLIT_OPTIONS = ['P1', 'P2', 'P3'];
+
     public function mount(): void
     {
         abort_unless(PurchaseOrderResource::canCreate(), 403);
@@ -70,14 +76,40 @@ class CreatePurchaseOrder extends Page
         }
     }
 
-    public function updatedGroupSuppliers($value, $groupKey): void
+    public function assignGroupSupplier($value, string $groupKey): void
     {
+        $supplier = filled($value) ? Supplier::with(['ingredientTypes'])->find($value) : null;
+        $this->groupSuppliers[$groupKey] = filled($value) ? (int) $value : null;
+
         $groups = $this->getAggregatedGroupsProperty();
+
         if (isset($groups[$groupKey])) {
             foreach ($groups[$groupKey]['items'] as $item) {
-                $this->itemSuppliers[$item['ingredient_id']] = $value;
+                $ingId = $item['ingredient_id'];
+                if (! $supplier) {
+                    $this->itemSuppliers[$ingId] = null;
+
+                    continue;
+                }
+
+                $ingredient = Ingredient::with(['suppliers', 'typeRelation'])->find($ingId);
+                if ($ingredient && $this->canSupplierProvideIngredient($supplier, $ingredient)) {
+                    $this->itemSuppliers[$ingId] = (int) $value;
+                } else {
+                    $this->itemSuppliers[$ingId] = null;
+                }
             }
         }
+    }
+
+    public function updatedGroupSuppliers($value, $groupKey): void
+    {
+        $this->assignGroupSupplier($value, $groupKey);
+    }
+
+    protected function canSupplierProvideIngredient(?Supplier $supplier, Ingredient $ingredient): bool
+    {
+        return $supplier !== null && $supplier->canProvideIngredient($ingredient);
     }
 
     public function updatedItemQuantities($value, $key): void
@@ -101,9 +133,11 @@ class CreatePurchaseOrder extends Page
     {
         $kitchenId = auth()->user()?->currentKitchenId();
 
-        $menus = Menu::with(['recipe.ingredients'])
+        $menus = Menu::with(['recipe.ingredients.typeRelation', 'recipe.ingredients.suppliers', 'recipe.ingredients.unitRelation', 'recipe.ingredients.supplier'])
+            // Khoảng nửa mở [from, to+1) — cột date có thể lưu kèm giờ (SQLite trong test),
+            // so sánh '<= Y-m-d' sẽ trượt "Y-m-d 00:00:00"; cùng pattern với ListHang.
             ->where('date', '>=', $this->sourceFrom)
-            ->where('date', '<=', $this->sourceTo)
+            ->where('date', '<', Carbon::parse($this->sourceTo)->addDay()->toDateString())
             ->when(! empty($this->selectedShifts), fn ($q) => $q->whereIn('shift_id', $this->selectedShifts))
             ->when($kitchenId && ! auth()->user()?->hasRole(['super_admin', 'Quản trị viên']), fn ($q) => $q->where('kitchen_id', $kitchenId))
             ->where('status', 'locked')
@@ -162,10 +196,16 @@ class CreatePurchaseOrder extends Page
                         $groupClass = 'ot-kho';
                     }
 
-                    $groupLabel = $icon.$typeName;
+                    $displayTypeName = __('purchase_order.group_names.'.$typeName);
+                    if ($displayTypeName === 'purchase_order.group_names.'.$typeName) {
+                        $displayTypeName = $typeName;
+                    }
+
+                    $groupLabel = $icon.$displayTypeName;
 
                     $aggregated[$ingId] = [
                         'ingredient_id' => $ingId,
+                        'default_supplier_id' => $ing->supplier_id,
                         'name' => $ing->name,
                         'unit' => $ing->unitRelation?->name ?? $ing->unit ?? 'kg',
                         'qty_per_portion' => $qtyPerPortion,
@@ -205,16 +245,23 @@ class CreatePurchaseOrder extends Page
             $ingId = $item['ingredient_id'];
             $manualQty = max(0, (float) ($this->itemQuantities[$ingId] ?? round($item['total_kg'], 2)));
 
-            $rawTypeName = str_replace(['🥩 ', '🥬 ', '📦 '], '', $item['group_label']);
-            $matchedSupplier = $allSuppliers->first(function ($s) use ($rawTypeName) {
-                $sType = mb_strtolower($s->type ?? '');
-                $tName = mb_strtolower($rawTypeName);
+            if (array_key_exists($ingId, $this->itemSuppliers)) {
+                $selectedSupplierId = $this->itemSuppliers[$ingId] ? (int) $this->itemSuppliers[$ingId] : null;
+            } else {
+                // Mặc định: NCC chính của nguyên liệu, hoặc NCC khớp đúng loại nhóm.
+                // KHÔNG fallback "NCC đầu tiên trong DB" — gán bừa NCC không cung cấp
+                // được (NCC gạo cho rau) tệ hơn để trống; trống thì ô viền đỏ và
+                // createAndSendOrders đã validate bắt buộc chọn trước khi lưu.
+                $rawTypeName = str_replace(['🥩 ', '🥬 ', '📦 '], '', $item['group_label']);
+                $matchedSupplier = $allSuppliers->first(function ($s) use ($rawTypeName) {
+                    $sType = mb_strtolower($s->type ?? '');
+                    $tName = mb_strtolower($rawTypeName);
 
-                return str_contains($sType, $tName) || str_contains($tName, $sType);
-            });
+                    return str_contains($sType, $tName) || str_contains($tName, $sType);
+                });
 
-            $groupDefaultSupplierId = $matchedSupplier?->id ?: $allSuppliers->first()?->id;
-            $selectedSupplierId = $this->itemSuppliers[$ingId] ?? ($this->groupSuppliers[$gKey] ?? $groupDefaultSupplierId);
+                $selectedSupplierId = $item['default_supplier_id'] ?: $matchedSupplier?->id;
+            }
 
             $existingOrders = isset($existingPOItems[$ingId])
                 ? array_values(array_unique(array_filter($existingPOItems[$ingId]->pluck('code')->toArray())))
@@ -225,11 +272,17 @@ class CreatePurchaseOrder extends Page
             }
             $isSelected = (bool) $this->itemSelected[$ingId];
 
+            $split = $this->itemSplits[$ingId] ?? 'P1';
+            if (! in_array($split, self::SPLIT_OPTIONS, true)) {
+                $split = 'P1';
+            }
+
             $item['already_ordered_pos'] = $existingOrders;
             $item['selected'] = $isSelected;
             $item['quantity_manual'] = (float) $manualQty;
             $item['supplier_id'] = $selectedSupplierId;
-            $item['line_total'] = $isSelected ? ((float) $manualQty * $item['reference_price']) : 0;
+            $item['split'] = $split;
+            $item['line_total'] = ($isSelected && $selectedSupplierId) ? ((float) $manualQty * $item['reference_price']) : 0;
             $item['dish_string'] = implode(', ', array_slice($item['dishes'], 0, 3)).(count($item['dishes']) > 3 ? '...' : '');
 
             $groups[$gKey]['items'][] = $item;
@@ -262,31 +315,53 @@ class CreatePurchaseOrder extends Page
             return;
         }
 
+        // Validate: Mọi nguyên liệu được tích chọn BẮT BUỘC phải chọn Nhà cung cấp
+        $missingSupplierItems = [];
+        foreach ($allItems as $it) {
+            if (empty($it['supplier_id'])) {
+                $missingSupplierItems[] = $it['name'];
+            }
+        }
+
+        if (! empty($missingSupplierItems)) {
+            $count = count($missingSupplierItems);
+            $namesList = implode(', ', array_slice($missingSupplierItems, 0, 3)).($count > 3 ? '...' : '');
+            Notification::make()
+                ->title('Vui lòng chọn Nhà cung cấp!')
+                ->body("Có {$count} nguyên liệu chưa chọn NCC: {$namesList}. Vui lòng chọn NCC trước khi lưu.")
+                ->danger()
+                ->send();
+
+            return;
+        }
+
         $kitchenId = auth()->user()?->currentKitchenId();
-        $itemsGrouped = collect($allItems)->groupBy('supplier_id');
+        // Tách đơn theo NCC + Phiếu (P1/P2/P3) — mỗi cặp thành 1 PO riêng, giống ListHang
+        $itemsGrouped = collect($allItems)->groupBy(fn ($it) => $it['supplier_id'].'|'.$it['split']);
 
         $createdCount = 0;
 
         DB::transaction(function () use ($itemsGrouped, $kitchenId, &$createdCount) {
-            foreach ($itemsGrouped as $supplierId => $items) {
-                $supplier = Supplier::find($supplierId);
+            foreach ($itemsGrouped as $groupKey => $items) {
+                [$supplierId, $split] = explode('|', (string) $groupKey);
+                $supplier = Supplier::find((int) $supplierId);
                 if (! $supplier) {
                     continue;
                 }
 
                 $supplierCode = strtoupper($supplier->code ?: 'NCC');
-                $poCode = 'PO-LH-'.Carbon::parse($this->orderDate)->format('Ymd').'-'.$supplierCode;
+                $poCode = 'PO-LH-'.Carbon::parse($this->orderDate)->format('Ymd').'-'.$supplierCode.'-'.$split;
 
                 $attempts = 0;
                 while (PurchaseOrder::where('code', $poCode)->exists() && $attempts < 10) {
-                    $poCode = 'PO-LH-'.Carbon::parse($this->orderDate)->format('Ymd').'-'.$supplierCode.'-'.mt_rand(10, 99);
+                    $poCode = 'PO-LH-'.Carbon::parse($this->orderDate)->format('Ymd').'-'.$supplierCode.'-'.$split.'-'.mt_rand(10, 99);
                     $attempts++;
                 }
 
                 $po = PurchaseOrder::create([
                     'code' => $poCode,
                     'kitchen_id' => $kitchenId,
-                    'supplier_id' => $supplierId,
+                    'supplier_id' => (int) $supplierId,
                     'status' => 'sent',
                     'type' => 'day',
                     'estimated_delivery_date' => $this->orderDate,
