@@ -110,6 +110,11 @@ return array_replace_recursive($vi, [
         'group_total' => ':group group total:',
         'created_at' => 'Created: :date',
     ],
+    'detail' => [
+        'order_title' => 'Order :code – Delivery date :date',
+        'subtitle' => 'Grouped ingredients by supplier · Order date :date',
+        'supplier_total' => 'Total order for :supplier:',
+    ],
     'check' => [
         'title' => 'Checking goods – :code',
         'subtitle' => 'Compare ordered and received quantities · Delivery date :date',
