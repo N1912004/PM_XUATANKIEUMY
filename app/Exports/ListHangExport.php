@@ -2,6 +2,7 @@
 
 namespace App\Exports;
 
+use Carbon\Carbon;
 use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithEvents;
@@ -26,7 +27,7 @@ class ListHangExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
 
     public function title(): string
     {
-        return 'Danh sách hàng';
+        return __('list_hang.export.sheet_title');
     }
 
     /**
@@ -35,8 +36,18 @@ class ListHangExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
     public function array(): array
     {
         $rows = [];
-        $rows[] = ['DANH SÁCH HÀNG NGÀY '.$this->date, '', '', '', '', '', '', ''];
-        $rows[] = ['Ca', 'Món ăn', 'Số suất', 'Mã NL', 'Nguyên liệu', 'ĐL (kg/suất)', 'Tổng cần (kg)', 'ĐVT'];
+        $formattedDate = Carbon::parse($this->date)->format('d/m/Y');
+        $rows[] = [__('list_hang.export.heading', ['date' => $formattedDate]), '', '', '', '', '', '', ''];
+        $rows[] = [
+            __('list_hang.export.cols.shift'),
+            __('list_hang.export.cols.dish'),
+            __('list_hang.export.cols.portions'),
+            __('list_hang.export.cols.ing_code'),
+            __('list_hang.export.cols.ing_name'),
+            __('list_hang.export.cols.dl'),
+            __('list_hang.export.cols.total_kg'),
+            __('list_hang.export.cols.unit'),
+        ];
 
         foreach ($this->grouped as $shift) {
             foreach ($shift['dishes'] as $dish) {
@@ -56,7 +67,7 @@ class ListHangExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
         }
 
         if (count($rows) === 2) {
-            $rows[] = ['Không có dữ liệu', '', '', '', '', '', '', ''];
+            $rows[] = [__('list_hang.export.empty'), '', '', '', '', '', '', ''];
         }
 
         return $rows;

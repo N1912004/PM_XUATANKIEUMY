@@ -755,9 +755,13 @@
 
                 <div style="margin-left:auto;display:flex;align-items:center;gap:8px">
                     <span style="font-size:13.5px;font-weight:700;color:var(--tx)" class="dark:text-white">
-                        {{ strtoupper(\Carbon\Carbon::parse($date)->locale('vi')->dayName) }} – {{ \Carbon\Carbon::parse($date)->format('d/m/Y') }}
+                        @php
+                            $dt = \Carbon\Carbon::parse($date)->locale(app()->getLocale());
+                            $dowName = mb_strtoupper($dt->dayName);
+                        @endphp
+                        {{ $dowName }} – {{ $dt->format('d/m/Y') }}
                     </span>
-                    <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-150 text-green-700 border border-green-200">{{ __('list_hang.filters.in_period') }}</span>
+                    <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950 dark:text-emerald-300 dark:border-emerald-800">{{ __('list_hang.filters.in_period') }}</span>
                 </div>
             </div>
 

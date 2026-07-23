@@ -13,4 +13,19 @@ return [
     'empty' => ['no_menu' => 'Chưa lập thực đơn', 'no_menu_description' => 'Không tìm thấy thực đơn nào được lập cho ngày và ca đã chọn.', 'no_order_items' => 'Chưa có nguyên liệu để đặt', 'no_order_items_description' => 'Hãy lập & chốt thực đơn tuần trước, sau đó tạo đơn đặt hàng.', 'no_allocation' => 'Chưa có phân bổ.'],
     'notes' => ['title' => 'Lưu ý', 'separate_orders' => 'Mỗi NCC sẽ nhận đơn riêng.', 'optional_items' => 'Có thể bỏ trống nguyên liệu không đặt.', 'manual_priority' => 'SL đặt tay được ưu tiên khi tạo phiếu.'],
     'notifications' => ['invalid_order_date' => 'Ngày đặt hàng không hợp lệ', 'no_selected_items' => 'Không có nguyên liệu nào được chọn để tạo PO!', 'po_created' => 'Tạo PO thành công!'],
+    'export' => [
+        'sheet_title' => 'Danh sách hàng',
+        'heading' => 'DANH SÁCH HÀNG NGÀY :date',
+        'cols' => [
+            'shift' => 'Ca',
+            'dish' => 'Món ăn',
+            'portions' => 'Số suất',
+            'ing_code' => 'Mã NL',
+            'ing_name' => 'Nguyên liệu',
+            'dl' => 'ĐL (kg/suất)',
+            'total_kg' => 'Tổng cần (kg)',
+            'unit' => 'ĐVT',
+        ],
+        'empty' => 'Không có dữ liệu',
+    ],
 ];
