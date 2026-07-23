@@ -177,17 +177,6 @@ class CreatePurchaseOrder extends Page
                     $groupKey = 'type_'.($typeId ?: md5($typeName));
                     $typeLower = mb_strtolower($typeName);
 
-                    $icon = $typeModel?->icon ? trim($typeModel->icon).' ' : '';
-                    if (! $icon) {
-                        if (str_contains($typeLower, 'động vật') || str_contains($typeLower, 'thịt') || str_contains($typeLower, 'cá') || str_contains($typeLower, 'hải sản')) {
-                            $icon = '🥩 ';
-                        } elseif (str_contains($typeLower, 'thực vật') || str_contains($typeLower, 'rau') || str_contains($typeLower, 'củ') || str_contains($typeLower, 'quả') || str_contains($typeLower, 'trái cây')) {
-                            $icon = '🥬 ';
-                        } else {
-                            $icon = '📦 ';
-                        }
-                    }
-
                     if (str_contains($typeLower, 'động vật') || str_contains($typeLower, 'thịt') || str_contains($typeLower, 'cá')) {
                         $groupClass = 'ot-thit';
                     } elseif (str_contains($typeLower, 'thực vật') || str_contains($typeLower, 'rau') || str_contains($typeLower, 'củ')) {
@@ -201,7 +190,7 @@ class CreatePurchaseOrder extends Page
                         $displayTypeName = $typeName;
                     }
 
-                    $groupLabel = $icon.$displayTypeName;
+                    $groupLabel = $displayTypeName;
 
                     $aggregated[$ingId] = [
                         'ingredient_id' => $ingId,
