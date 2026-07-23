@@ -138,8 +138,8 @@
                                 this.open = !this.open;
                             },
                             selectSupplier(id, name) {
-                                $wire.updatedGroupSuppliers(id, '{{ $group['key'] }}');
-                                this.search = name;
+                                $wire.assignGroupSupplier(id, '{{ $group['key'] }}');
+                                this.search = name || '';
                                 this.open = false;
                             }
                         }">
@@ -154,6 +154,12 @@
                                     <input type="text" x-model="search" placeholder="{{ __('purchase_order.create.search_supplier') }}" style="width:100%; padding:6px 9px; font-size:12px; border:1px solid var(--po-bd2); border-radius:4px; outline:none; margin-bottom:4px" @click.stop>
                                     
                                     <div style="max-height:180px; overflow-y:auto">
+                                        <div @click="selectSupplier(null, '')" 
+                                             style="padding:6px 8px; font-size:12px; font-weight:600; color:var(--po-mu); cursor:pointer; border-radius:4px; border-bottom:1px solid var(--po-bd2); margin-bottom:4px"
+                                             onmouseover="this.style.background='#F1F5F9'" 
+                                             onmouseout="this.style.background='transparent'">
+                                            -- {{ __('purchase_order.create.select_supplier') }} --
+                                        </div>
                                         <template x-for="sup in filtered" :key="sup.id">
                                             <div @click="selectSupplier(sup.id, sup.name)" 
                                                  style="padding:6px 8px; font-size:12px; font-weight:600; color:var(--po-tx); cursor:pointer; border-radius:4px; transition:0.1s"
@@ -239,7 +245,8 @@
                                             left: 0,
                                             suppliers: {{ json_encode($suppliers->map(fn($s) => ['id' => $s->id, 'name' => $s->name])->values()->toArray()) }},
                                             get selectedName() {
-                                                let currentId = $wire.itemSuppliers[{{ $item['ingredient_id'] }}] || {{ $item['supplier_id'] }};
+                                                let currentId = $wire.itemSuppliers[{{ $item['ingredient_id'] }}] !== undefined ? $wire.itemSuppliers[{{ $item['ingredient_id'] }}] : {{ json_encode($item['supplier_id']) }};
+                                                if (!currentId) return '{{ __('purchase_order.create.select_supplier') }}';
                                                 let found = this.suppliers.find(s => s.id == currentId);
                                                 return found ? found.name : '{{ __('purchase_order.create.select_supplier') }}';
                                             },
@@ -269,7 +276,8 @@
                                                 this.search = '';
                                             }
                                         }">
-                                            <div x-ref="rowTrigger" @click="toggleOpen()" style="display:flex; align-items:center; justify-content:space-between; background:#fff; border:1px solid var(--po-bd); border-radius:6px; padding:4px 8px; cursor:pointer; font-size:12px; font-weight:600; color:var(--po-tx); width:100%; min-width:160px">
+                                            <div x-ref="rowTrigger" @click="toggleOpen()" 
+                                                 :style="`display:flex; align-items:center; justify-content:space-between; background:#fff; border:1.5px solid ${selectedName === '{{ __('purchase_order.create.select_supplier') }}' ? '#DC2626' : 'var(--po-bd)'}; border-radius:6px; padding:4px 8px; cursor:pointer; font-size:12px; font-weight:600; color:${selectedName === '{{ __('purchase_order.create.select_supplier') }}' ? '#DC2626' : 'var(--po-tx)'}; width:100%; min-width:160px`">
                                                 <span x-text="selectedName" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:130px"></span>
                                                 <i class="fa-solid fa-chevron-down" style="font-size:10px; color:var(--po-mu)"></i>
                                             </div>
@@ -280,6 +288,12 @@
                                                     <input type="text" x-model="search" placeholder="{{ __('purchase_order.create.search_supplier') }}" style="width:100%; padding:5px 8px; font-size:12px; border:1px solid var(--po-bd2); border-radius:4px; outline:none; margin-bottom:4px" @click.stop>
                                                     
                                                     <div style="max-height:170px; overflow-y:auto">
+                                                        <div @click="selectSupplier(null)" 
+                                                             style="padding:6px 8px; font-size:12px; font-weight:600; color:var(--po-mu); cursor:pointer; border-radius:4px; border-bottom:1px solid var(--po-bd2); margin-bottom:4px"
+                                                             onmouseover="this.style.background='#F1F5F9'" 
+                                                             onmouseout="this.style.background='transparent'">
+                                                            -- {{ __('purchase_order.create.select_supplier') }} --
+                                                        </div>
                                                         <template x-for="sup in filtered" :key="sup.id">
                                                             <div @click="selectSupplier(sup.id)" 
                                                                  style="padding:6px 8px; font-size:12px; font-weight:600; color:var(--po-tx); cursor:pointer; border-radius:4px; transition:0.1s"
