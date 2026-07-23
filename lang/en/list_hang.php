@@ -4,7 +4,7 @@ return [
     'currency' => 'VND',
     'title' => 'Ingredient List', 'heading' => 'Ingredient list — :date', 'subtitle' => 'Ingredients to prepare by date and shift', 'navigation' => ['group' => 'SUPPLY & WAREHOUSE'],
     'actions' => ['export' => 'Export Excel', 'print' => 'Print list', 'create_po' => 'Create purchase orders', 'today' => 'Today', 'back' => 'Back', 'create_send' => 'Create & send orders'],
-    'filters' => ['week' => 'Week', 'in_period' => 'In period'], 'stats' => ['shifts' => 'Serving shifts', 'portions' => 'Total portions', 'dishes' => 'Dishes to cook', 'ingredients' => 'Ingredient types'],
+    'filters' => ['week' => 'Week', 'in_period' => 'In period', 'out_of_period' => 'Out of period'], 'stats' => ['shifts' => 'Serving shifts', 'portions' => 'Total portions', 'dishes' => 'Dishes to cook', 'ingredients' => 'Ingredient types'],
     'table' => ['ingredient' => 'Ingredient', 'ingredient_name' => 'Ingredient name', 'portions' => 'Portions', 'quantity_g' => 'Qty (g)', 'quantity_kg' => 'Qty (kg)', 'order' => 'Order', 'dishes' => 'Used by dishes', 'demand' => 'Demand', 'stock' => 'Stock', 'manual_quantity' => 'Manual qty', 'unit_price' => 'Unit price', 'total' => 'Total', 'supplier' => 'Supplier', 'dish_total' => ':dish total'],
     'counts' => ['ingredients' => ':count ingredients', 'portions' => ':count portions', 'dishes' => ':count dishes', 'items' => ':count items'],
     'categories' => ['meat' => 'Meat & seafood', 'produce' => 'Vegetables & produce', 'dry' => 'Dry goods & spices'],

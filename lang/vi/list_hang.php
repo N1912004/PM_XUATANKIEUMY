@@ -4,7 +4,7 @@ return [
     'currency' => 'đ',
     'title' => 'Danh sách hàng', 'heading' => 'List hàng — :date', 'subtitle' => 'Danh sách nguyên liệu cần chuẩn bị theo ngày và ca', 'navigation' => ['group' => 'CUNG ỨNG & KHO'],
     'actions' => ['export' => 'Xuất Excel', 'print' => 'In danh sách', 'create_po' => 'Tạo đơn đặt hàng', 'today' => 'Hôm nay', 'back' => 'Quay lại', 'create_send' => 'Tạo & gửi đơn'],
-    'filters' => ['week' => 'Tuần', 'in_period' => 'Trong kỳ'], 'stats' => ['shifts' => 'Ca phục vụ', 'portions' => 'Tổng suất ăn', 'dishes' => 'Món cần nấu', 'ingredients' => 'Loại nguyên liệu'],
+    'filters' => ['week' => 'Tuần', 'in_period' => 'Trong kỳ', 'out_of_period' => 'Ngoài kỳ'], 'stats' => ['shifts' => 'Ca phục vụ', 'portions' => 'Tổng suất ăn', 'dishes' => 'Món cần nấu', 'ingredients' => 'Loại nguyên liệu'],
     'table' => ['ingredient' => 'Nguyên liệu', 'ingredient_name' => 'Tên nguyên liệu', 'portions' => 'Số suất', 'quantity_g' => 'ĐL (g)', 'quantity_kg' => 'Số KG', 'order' => 'Đặt', 'dishes' => 'Thuộc món', 'demand' => 'Nhu cầu', 'stock' => 'Tồn kho', 'manual_quantity' => 'SL đặt tay', 'unit_price' => 'Đơn giá', 'total' => 'Thành tiền', 'supplier' => 'Nhà cung cấp', 'dish_total' => 'Tổng :dish'],
     'counts' => ['ingredients' => ':count nguyên liệu', 'portions' => ':count suất', 'dishes' => ':count món', 'items' => ':count mặt hàng'],
     'categories' => ['meat' => 'Thịt & Thủy hải sản', 'produce' => 'Rau củ quả & Nông sản', 'dry' => 'Hàng khô & Gia vị'],

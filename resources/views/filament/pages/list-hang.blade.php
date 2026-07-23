@@ -758,10 +758,18 @@
                         @php
                             $dt = \Carbon\Carbon::parse($date)->locale(app()->getLocale());
                             $dowName = mb_strtoupper($dt->dayName);
+                            $selDt = \Carbon\Carbon::parse($date);
+                            $wFrom = $weekFrom ? \Carbon\Carbon::parse($weekFrom) : null;
+                            $wTo = $weekTo ? \Carbon\Carbon::parse($weekTo) : null;
+                            $inPeriod = ($wFrom && $wTo) ? ($selDt->gte($wFrom) && $selDt->lte($wTo)) : true;
                         @endphp
                         {{ $dowName }} – {{ $dt->format('d/m/Y') }}
                     </span>
-                    <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950 dark:text-emerald-300 dark:border-emerald-800">{{ __('list_hang.filters.in_period') }}</span>
+                    @if ($inPeriod)
+                        <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950 dark:text-emerald-300 dark:border-emerald-800">{{ __('list_hang.filters.in_period') }}</span>
+                    @else
+                        <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950 dark:text-amber-300 dark:border-amber-800">{{ __('list_hang.filters.out_of_period') }}</span>
+                    @endif
                 </div>
             </div>
 
