@@ -4,7 +4,6 @@
     @php
         $statsData = $this->stats();
         $ordersList = $this->orders();
-        $months = $this->monthOptions();
     @endphp
 
     <div class="po-head">
@@ -66,30 +65,28 @@
     </div>
 
     <!-- Filter Bar -->
-    <div class="mp-bar" style="margin-bottom:14px">
+    <div class="mp-bar" style="margin-bottom:14px; display:flex; align-items:center; gap:10px; flex-wrap:wrap">
         <div class="mp-srch">
             <i class="fa-solid fa-magnifying-glass"></i>
             <input wire:model.live.debounce.250ms="search" type="text" placeholder="{{ __('purchase_order.placeholders.search') }}">
         </div>
 
-        <select wire:model.live="monthFilter" class="mp-sel">
-            @foreach($months as $val => $lbl)
-                <option value="{{ $val }}">{{ $lbl }}</option>
-            @endforeach
-        </select>
+        <div style="display:inline-flex; align-items:center; gap:6px; background:#fff; padding:4px 10px; border:1px solid var(--po-bd); border-radius:8px">
+            <span style="font-size:12px; font-weight:600; color:var(--po-mu)">{{ __('purchase_order.fields.source_from') }}:</span>
+            <input wire:model.live="fromDate" type="date" class="mp-sel" style="padding:2px 4px; font-size:12px; border:none; outline:none">
+        </div>
 
-        <select wire:model.live="typeFilter" class="mp-sel">
-            <option value="">{{ __('purchase_order.filters.all_types') }}</option>
-            <option value="week">{{ __('purchase_order.types.week') }}</option>
-            <option value="day">{{ __('purchase_order.types.day') }}</option>
-        </select>
+        <div style="display:inline-flex; align-items:center; gap:6px; background:#fff; padding:4px 10px; border:1px solid var(--po-bd); border-radius:8px">
+            <span style="font-size:12px; font-weight:600; color:var(--po-mu)">{{ __('purchase_order.fields.source_to') }}:</span>
+            <input wire:model.live="toDate" type="date" class="mp-sel" style="padding:2px 4px; font-size:12px; border:none; outline:none">
+        </div>
 
         <select wire:model.live="statusFilter" class="mp-sel" id="ohStFilter">
             <option value="">{{ __('purchase_order.filters.all_statuses') }}</option>
-            <option value="draft">{{ __('purchase_order.status.draft') }}</option>
             <option value="sent">{{ __('purchase_order.status.sent_short') }}</option>
             <option value="checking">{{ __('purchase_order.status.checking') }}</option>
             <option value="done">{{ __('purchase_order.status.done') }}</option>
+            <option value="cancelled">{{ __('purchase_order.status.cancelled') }}</option>
         </select>
 
         <div class="tsp"></div>

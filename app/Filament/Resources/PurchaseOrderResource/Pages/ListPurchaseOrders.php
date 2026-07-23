@@ -26,9 +26,9 @@ class ListPurchaseOrders extends Page
 
     public string $search = '';
 
-    public string $monthFilter = '';
+    public string $fromDate = '';
 
-    public string $typeFilter = '';
+    public string $toDate = '';
 
     public string $statusFilter = '';
 
@@ -41,16 +41,19 @@ class ListPurchaseOrders extends Page
 
     protected $queryString = [
         'search' => ['except' => ''],
-        'monthFilter' => ['except' => ''],
-        'typeFilter' => ['except' => ''],
+        'fromDate' => ['except' => ''],
+        'toDate' => ['except' => ''],
         'statusFilter' => ['except' => ''],
     ];
 
     public function mount(): void
     {
-        // Default to current month if not set
-        if (empty($this->monthFilter)) {
-            $this->monthFilter = now()->format('Y-m');
+        if (empty($this->fromDate)) {
+            $this->fromDate = now()->startOfMonth()->toDateString();
+        }
+
+        if (empty($this->toDate)) {
+            $this->toDate = now()->endOfMonth()->toDateString();
         }
     }
 
@@ -59,12 +62,12 @@ class ListPurchaseOrders extends Page
         $this->resetPage();
     }
 
-    public function updatedMonthFilter(): void
+    public function updatedFromDate(): void
     {
         $this->resetPage();
     }
 
-    public function updatedTypeFilter(): void
+    public function updatedToDate(): void
     {
         $this->resetPage();
     }
@@ -77,8 +80,8 @@ class ListPurchaseOrders extends Page
     public function resetFilters(): void
     {
         $this->search = '';
-        $this->monthFilter = now()->format('Y-m');
-        $this->typeFilter = '';
+        $this->fromDate = now()->startOfMonth()->toDateString();
+        $this->toDate = now()->endOfMonth()->toDateString();
         $this->statusFilter = '';
         $this->resetPage();
     }
@@ -132,48 +135,34 @@ class ListPurchaseOrders extends Page
         return __('purchase_order.currency.amount', ['value' => number_format($value)]);
     }
 
-    public function monthOptions(): array
+    /**
+     * @return array{0: Carbon, 1: Carbon}
+     */
+    protected function dateRange(): array
     {
-        // Distinct months from purchase orders.
-        // substr(created_at, 1, 7) = 'YYYY-MM' — chạy được trên CẢ MySQL lẫn SQLite;
-        // DATE_FORMAT là hàm riêng của MySQL nên làm vỡ suite test (chạy trên SQLite).
-        $months = PurchaseOrder::query()
-            ->selectRaw('substr(created_at, 1, 7) as month_val')
-            ->distinct()
-            ->orderBy('month_val', 'desc')
-            ->pluck('month_val')
-            ->all();
+        $from = filled($this->fromDate) ? Carbon::parse($this->fromDate)->startOfDay() : now()->startOfMonth()->startOfDay();
+        $to = filled($this->toDate) ? Carbon::parse($this->toDate)->endOfDay() : now()->endOfMonth()->endOfDay();
 
-        $options = [];
-
-        // Add current month if not present
-        $currentMonth = now()->format('Y-m');
-        if (! in_array($currentMonth, $months)) {
-            $months[] = $currentMonth;
-            rsort($months);
+        if ($from > $to) {
+            return [$to->copy()->startOfDay(), $from->copy()->endOfDay()];
         }
 
-        foreach ($months as $m) {
-            $carbon = Carbon::parse($m.'-01');
-            $options[$m] = __('purchase_order.filters.month', ['month' => $carbon->format('m/Y')]);
-        }
-
-        return $options;
+        return [$from, $to];
     }
 
     public function stats(): array
     {
-        [$startOfMonth, $endOfMonth] = $this->monthRange();
+        [$start, $end] = $this->dateRange();
 
         $statusCounts = PurchaseOrder::query()
-            ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
+            ->whereBetween('created_at', [$start, $end])
             ->selectRaw('status, COUNT(*) as aggregate')
             ->groupBy('status')
             ->pluck('aggregate', 'status');
 
-        // Total value of all orders created in this filtered month (aggregated in SQL)
+        // Total value of all orders created in this filtered date range
         $totalValue = (float) PurchaseOrderItem::query()
-            ->whereHas('purchaseOrder', fn ($q) => $q->whereBetween('created_at', [$startOfMonth, $endOfMonth]))
+            ->whereHas('purchaseOrder', fn ($q) => $q->whereBetween('created_at', [$start, $end]))
             ->selectRaw('COALESCE(SUM(quantity_ordered * unit_price), 0) as aggregate')
             ->value('aggregate');
 
@@ -198,8 +187,6 @@ class ListPurchaseOrders extends Page
     {
         abort_unless(PurchaseOrderResource::canViewAny(), 403);
 
-        // Xuất .xlsx thật qua Laravel Excel (trước đây là CSV) — dùng chung baseQuery() nên
-        // file xuất tôn trọng đúng bộ lọc và phạm vi theo vai trò của bảng đang xem.
         $orders = $this->baseQuery()
             ->with(['supplier', 'kitchen', 'items'])
             ->orderByDesc('id')
@@ -211,31 +198,16 @@ class ListPurchaseOrders extends Page
         );
     }
 
-    /**
-     * @return array{0: Carbon, 1: Carbon}
-     */
-    protected function monthRange(): array
-    {
-        if (! preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $this->monthFilter)) {
-            $this->monthFilter = now()->format('Y-m');
-        }
-
-        $month = Carbon::parse($this->monthFilter.'-01');
-
-        return [$month->copy()->startOfMonth(), $month->copy()->endOfMonth()];
-    }
-
     protected function baseQuery()
     {
-        [$startOfMonth, $endOfMonth] = $this->monthRange();
+        [$start, $end] = $this->dateRange();
 
         return PurchaseOrder::query()
-            // Kitchen scoping theo convention Timekeeping: user thường chỉ thấy PO của bếp mình
             ->when(
                 ($user = auth()->user()) && ! $user->hasRole(['super_admin', 'Quản trị viên']),
                 fn ($query) => $query->where('kitchen_id', auth()->user()->currentKitchenId() ?? -1)
             )
-            ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
+            ->whereBetween('created_at', [$start, $end])
             ->when($this->search !== '', function ($query): void {
                 $search = mb_strtolower($this->search);
                 $query->where(function ($query) use ($search): void {
@@ -245,26 +217,6 @@ class ListPurchaseOrders extends Page
                             $q->whereRaw('LOWER(name) LIKE ?', ["%{$search}%"]);
                         });
                 });
-            })
-            ->when($this->typeFilter !== '', function ($query): void {
-                // Ưu tiên cột type (PO mới); fallback LIKE trên note/code cho dữ liệu cũ chưa có type
-                if ($this->typeFilter === 'week') {
-                    $query->where(function ($q) {
-                        $q->where('type', 'week')
-                            ->orWhere(fn ($qq) => $qq->whereNull('type')->where(function ($w) {
-                                $w->whereRaw('LOWER(note) LIKE ?', ['%tuần%'])
-                                    ->orWhereRaw('LOWER(code) LIKE ?', ['%tuan%']);
-                            }));
-                    });
-                } elseif ($this->typeFilter === 'day') {
-                    $query->where(function ($q) {
-                        $q->where('type', 'day')
-                            ->orWhere(fn ($qq) => $qq->whereNull('type')->where(function ($w) {
-                                $w->whereRaw('LOWER(note) LIKE ?', ['%ngày%'])
-                                    ->orWhereRaw('LOWER(code) LIKE ?', ['%ngay%']);
-                            }));
-                    });
-                }
             })
             ->when($this->statusFilter !== '', fn ($query) => $query->where('status', $this->statusFilter));
     }
