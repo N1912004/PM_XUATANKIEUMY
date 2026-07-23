@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Carbon;
 
 class WeekMenu extends Model
 {
@@ -42,21 +41,11 @@ class WeekMenu extends Model
 
     public function isPastLocked(): bool
     {
-        if ($this->status !== 'locked') {
-            return false;
-        }
-
-        $endDate = Carbon::parse($this->date_to);
-
-        return $endDate->isBefore(today());
+        return false;
     }
 
     public function editBlockReason(string $targetStatus, ?string $reason): ?string
     {
-        if ($this->isPastLocked()) {
-            return 'past';
-        }
-
         $currentRank = self::STATUS_ORDER[$this->status] ?? 0;
         $targetRank = self::STATUS_ORDER[$targetStatus] ?? 0;
 

@@ -12,7 +12,7 @@ use Filament\Tables\Table;
 
 class ShiftResource extends Resource
 {
-    protected static bool $shouldRegisterNavigation = false; // Ẩn menu 'Cấu hình ca làm việc' khỏi thanh điều hướng Sidebar
+    protected static bool $shouldRegisterNavigation = true; // Hiển thị menu 'Ca làm việc' trên thanh điều hướng Sidebar
 
     protected static ?string $model = Shift::class;
 
@@ -37,7 +37,7 @@ class ShiftResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('catalog.groups.hr');
+        return __('catalog.groups.kitchen_operations');
     }
 
     public static function form(Form $form): Form

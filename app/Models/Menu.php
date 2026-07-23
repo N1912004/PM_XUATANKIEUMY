@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 
@@ -69,12 +68,12 @@ class Menu extends Model
      */
     public function isPastLocked(): bool
     {
-        return $this->status === 'locked' && $this->date !== null && $this->date->isBefore(today());
+        return false;
     }
 
     /**
      * Bộ guard vòng đời dùng chung cho mọi màn sửa thực đơn: trả về lý do bị chặn
-     * ('past' | 'downgrade' | 'need_reason') hoặc null nếu được phép ghi.
+     * ('downgrade' | 'need_reason') hoặc null nếu được phép ghi.
      * Dùng một chỗ duy nhất để 3 trang lập thực đơn không lệch quy tắc.
      */
     public function editBlockReason(string $newStatus, ?string $reason): ?string
@@ -86,13 +85,6 @@ class Menu extends Model
         $currentStatus = $this->exists
             ? (string) $this->getRawOriginal('status')
             : (string) $this->status;
-        $currentDate = $this->exists
-            ? $this->getRawOriginal('date')
-            : $this->date;
-
-        if ($currentStatus === 'locked' && $currentDate !== null && Carbon::parse($currentDate)->isBefore(today())) {
-            return 'past';
-        }
 
         if (self::STATUS_ORDER[$newStatus] < (self::STATUS_ORDER[$currentStatus] ?? PHP_INT_MAX)) {
             return 'downgrade';

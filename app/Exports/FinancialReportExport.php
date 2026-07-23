@@ -11,11 +11,12 @@ use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 
 /**
- * Báo cáo tài chính chi phí bếp ăn: nhóm Ngày → Ca → Món, kèm số suất và TỔNG GIÁ VỐN (Cost).
+ * Báo cáo tổng hợp xuất ăn & nguyên liệu tiêu thụ theo mẫu chuẩn bluefire_demo.html:
+ * Ngày → Thứ → Ca → Món ăn → Loại món → Mã NL → Nguyên liệu → Định lượng → Số suất → Số phần → Giá vốn → Tổng KG.
  */
 class FinancialReportExport implements FromArray, ShouldAutoSize, WithEvents, WithTitle
 {
-    protected const COLS = 6;
+    protected const COLS = 11;
 
     /**
      * @param  array<int, array<string, mixed>>  $grouped
@@ -28,7 +29,7 @@ class FinancialReportExport implements FromArray, ShouldAutoSize, WithEvents, Wi
 
     public function title(): string
     {
-        return 'Báo cáo tài chính';
+        return __('report.export_title');
     }
 
     /**
@@ -37,33 +38,74 @@ class FinancialReportExport implements FromArray, ShouldAutoSize, WithEvents, Wi
     public function array(): array
     {
         $rows = [];
-        $rows[] = ['BÁO CÁO TÀI CHÍNH CHI PHÍ BẾP ĂN', '', '', '', '', ''];
-        $rows[] = ['', '', '', '', '', ''];
-        $rows[] = ['Ngày', 'Thứ', 'Ca', 'Món ăn', 'Số suất', 'Giá vốn (đ)'];
+        $rows[] = [__('report.export_heading'), '', '', '', '', '', '', '', '', '', ''];
+        $rows[] = ['', '', '', '', '', '', '', '', '', '', ''];
+        $rows[] = [
+            __('report.export_cols.date'),
+            __('report.export_cols.day'),
+            __('report.export_cols.shift'),
+            __('report.export_cols.dish'),
+            __('report.export_cols.dish_type'),
+            __('report.export_cols.ing_code'),
+            __('report.export_cols.ing_name'),
+            __('report.export_cols.dl'),
+            __('report.export_cols.portions'),
+            __('report.export_cols.cost'),
+            __('report.export_cols.total_kg'),
+        ];
 
         foreach ($this->grouped as $day) {
             foreach ($day['shifts'] as $shift) {
                 foreach ($shift['dishes'] as $dish) {
-                    $rows[] = [
-                        $day['date_formatted'],
-                        $day['day_of_week'],
-                        $shift['name'],
-                        $dish['name'],
-                        $dish['suat'],
-                        round($dish['dish_cost'] ?? 0),
-                    ];
+                    $dishCost = round($dish['dish_cost'] ?? 0);
+                    if (empty($dish['ingredients'])) {
+                        $rows[] = [
+                            $day['date_formatted'],
+                            $day['day_of_week'],
+                            $shift['name'],
+                            $dish['name'],
+                            $dish['type'] ?? '',
+                            '',
+                            '',
+                            '',
+                            $dish['suat'],
+                            $dishCost,
+                            '',
+                        ];
+                    } else {
+                        foreach ($dish['ingredients'] as $isFirst => $ing) {
+                            $rows[] = [
+                                $day['date_formatted'],
+                                $day['day_of_week'],
+                                $shift['name'],
+                                $isFirst === 0 ? $dish['name'] : '',
+                                $isFirst === 0 ? ($dish['type'] ?? '') : '',
+                                $ing['code'],
+                                $ing['name'],
+                                round(($ing['dl_g'] ?? 0) * 1000, 2),
+                                $isFirst === 0 ? $dish['suat'] : '',
+                                round((float) ($ing['line_cost'] ?? 0)),
+                                round((float) ($ing['quantity'] ?? 0), 3),
+                            ];
+                        }
+                    }
                 }
             }
         }
 
-        $rows[] = ['', '', '', '', '', ''];
+        $rows[] = ['', '', '', '', '', '', '', '', '', '', ''];
         $rows[] = [
-            'TỔNG CỘNG',
+            __('report.export_summary.total'),
             '',
             '',
-            ($this->stats['dishes'] ?? 0).' món',
+            __('report.counts.dishes', ['count' => $this->stats['dishes'] ?? 0]),
+            '',
+            '',
+            __('report.counts.ingredients', ['count' => $this->stats['ingredients'] ?? 0]),
+            '',
             $this->stats['suat'] ?? 0,
             round($this->stats['cost'] ?? 0),
+            '',
         ];
 
         return $rows;
@@ -84,8 +126,10 @@ class FinancialReportExport implements FromArray, ShouldAutoSize, WithEvents, Wi
                 $sheet->getStyle("A3:{$lastCol}3")->getFont()->setBold(true);
                 $sheet->getStyle("A{$lastRow}:{$lastCol}{$lastRow}")->getFont()->setBold(true);
 
-                // Định dạng số cho cột giá vốn
-                $sheet->getStyle("F4:F{$lastRow}")->getNumberFormat()->setFormatCode('#,##0');
+                // Định dạng căn lề và định dạng số
+                $sheet->getStyle("H4:K{$lastRow}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
+                $sheet->getStyle("J4:J{$lastRow}")->getNumberFormat()->setFormatCode('#,##0');
+                $sheet->getStyle("K4:K{$lastRow}")->getNumberFormat()->setFormatCode('#,##0.00');
             },
         ];
     }

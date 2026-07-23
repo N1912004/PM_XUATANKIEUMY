@@ -576,14 +576,14 @@
                                                         {{ $selectedRec->name }}
                                                     </div>
                                                     <div style="font-size:11px; font-weight:700; color:var(--po-bl, #2563eb); display:flex; align-items:center; gap:4px">
-                                                        <span>{{ $portionsVal }} {{ __('menu.popup.phan_suffix') }}</span>
+                                                        <span>{{ $portionsVal }} {{ __('menu.labels.portions') }}</span>
                                                     </div>
                                                 @else
                                                     <div style="font-size:11.5px; font-weight:500; color:var(--po-mu)">
                                                         <em>{{ __('menu.placeholders.select_dish') }}</em>
                                                     </div>
                                                     <div style="font-size:11px; font-weight:600; color:var(--po-bl); opacity:.8">
-                                                        {{ $portionsVal }} {{ __('menu.popup.phan_suffix') }}
+                                                        {{ $portionsVal }} {{ __('menu.labels.portions') }}
                                                     </div>
                                                 @endif
                                             </button>
@@ -947,7 +947,7 @@
                                                 {{ $dayRecipe?->name ?? __('menu.placeholders.select_dish') }}
                                             </span>
                                             <span style="font-size:11px; font-weight:700; color:var(--po-bl, #2563eb); white-space:nowrap">
-                                                {{ (int) ($item['portions'] ?? 1) }} {{ __('menu.popup.phan_suffix') }}
+                                                {{ (int) ($item['portions'] ?? 1) }} {{ __('menu.labels.portions') }}
                                             </span>
                                         </button>
                                         @unless($dayHasPastLockedMenus)

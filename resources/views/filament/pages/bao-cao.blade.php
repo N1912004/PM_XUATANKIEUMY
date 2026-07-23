@@ -226,7 +226,7 @@
     /* Stats Cards */
     .stats-grid {
         display: grid;
-        grid-template-columns: repeat(5, 1fr);
+        grid-template-columns: repeat(4, 1fr);
         gap: 12px;
         margin-top: 14px;
         margin-bottom: 14px;
@@ -417,7 +417,7 @@
         color: var(--po-mu);
         text-transform: uppercase;
         letter-spacing: 0.05em;
-        background: #f8fafc;
+        background: var(--po-bg);
         border-bottom: 1px solid var(--po-bd);
         white-space: nowrap;
     }
@@ -468,7 +468,7 @@
         padding: 60px 20px;
         text-align: center;
         color: var(--po-fa);
-        background: #fff;
+        background: var(--po-wh);
         border: 1px solid var(--po-bd);
         border-radius: 14px;
     }
@@ -485,6 +485,84 @@
         font-size: 13px;
         color: var(--po-mu);
     }
+
+    /* Media queries for responsive layouts (Tablet & Mobile) */
+    @media (max-width: 1200px) {
+        .stats-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .report-header-container {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .excel-btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .filter-bar {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 10px;
+            padding: 12px;
+        }
+
+        .filter-item {
+            width: 100%;
+            justify-content: space-between;
+        }
+
+        .date-input {
+            flex: 1;
+            width: 100%;
+        }
+
+        .week-btn {
+            width: 100%;
+        }
+
+        .search-container {
+            margin-left: 0;
+            max-width: 100%;
+            width: 100%;
+        }
+
+        .shifts-group {
+            width: 100%;
+            flex-wrap: wrap;
+            justify-content: flex-start;
+        }
+
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .dish-head {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .dish-portions-block {
+            width: 100%;
+            justify-content: space-between;
+        }
+
+        .stat-val {
+            font-size: 18px;
+            word-break: break-all;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+    }
 </style>
 
     <div class="report-header-container">
@@ -493,8 +571,10 @@
             <p class="report-subtitle">{{ __('report.subtitle') }}</p>
         </div>
         <div>
-            <button type="button" class="excel-btn" wire:click="exportExcel">
-                <i class="fa-solid fa-file-excel" style="color:#059669; font-size:15px"></i>
+            <button type="button" wire:click="exportExcel" style="height:40px;padding:0 20px;border-radius:12px;background:#16A34A;color:#ffffff;font-size:14px;font-weight:700;display:inline-flex;align-items:center;gap:8px;border:none;cursor:pointer;box-shadow:0 2px 6px rgba(22,163,74,0.25);transition:all 0.15s ease;" onmouseover="this.style.background='#15803D'" onmouseout="this.style.background='#16A34A'">
+                <svg xmlns="http://www.w3.org/2000/svg" style="width:20px;height:20px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
                 <span>{{ __('report.actions.export') }}</span>
             </button>
         </div>
@@ -555,89 +635,35 @@
     @php $stats = $this->getStats(); @endphp
     <div class="stats-grid">
         <div class="stat-card">
-            <div class="stat-icon" style="background: #E9F2F8; color: var(--po-bl);"><i class="fa-regular fa-calendar"></i></div>
+            <div class="stat-icon" style="background: var(--po-bl-s); color: var(--po-bl);"><i class="fa-regular fa-calendar"></i></div>
             <div>
                 <div class="stat-val">{{ $stats['days'] }}</div>
                 <div class="stat-lbl">{{ __('report.stats.menu_days') }}</div>
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon" style="background: #E9F2F8; color: var(--po-bl);"><i class="fa-solid fa-utensils"></i></div>
+            <div class="stat-icon" style="background: var(--po-bl-s); color: var(--po-bl);"><i class="fa-solid fa-utensils"></i></div>
             <div>
                 <div class="stat-val">{{ $stats['dishes'] }}</div>
                 <div class="stat-lbl">{{ __('report.stats.dishes') }}</div>
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon" style="background: #E9F2F8; color: var(--po-bl);"><i class="fa-solid fa-seedling"></i></div>
+            <div class="stat-icon" style="background: var(--po-bl-s); color: var(--po-bl);"><i class="fa-solid fa-seedling"></i></div>
             <div>
                 <div class="stat-val">{{ $stats['ingredients'] }}</div>
                 <div class="stat-lbl">{{ __('report.stats.ingredient_rows') }}</div>
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon" style="background: #E9F2F8; color: var(--po-bl);"><i class="fa-solid fa-users"></i></div>
+            <div class="stat-icon" style="background: var(--po-bl-s); color: var(--po-bl);"><i class="fa-solid fa-users"></i></div>
             <div>
                 <div class="stat-val">{{ number_format($stats['suat'], 0, ',', '.') }}</div>
                 <div class="stat-lbl">{{ __('report.stats.portions') }}</div>
             </div>
         </div>
-        <div class="stat-card">
-            <div class="stat-icon" style="background: #E9F2F8; color: var(--po-bl);"><i class="fa-solid fa-sack-dollar"></i></div>
-            <div>
-                <div class="stat-val">{{ number_format($stats['cost'], 0, ',', '.') }}{{ __('report.currency') }}</div>
-                <div class="stat-lbl">{{ __('report.stats.cost') }}</div>
-            </div>
-        </div>
     </div>
 
-    {{-- Tổng khối lượng TỪNG nguyên liệu tiêu thụ trong cả kỳ (BA R22) --}}
-    @php $ingredientTotals = $this->getIngredientTotals(); @endphp
-    @if(!empty($ingredientTotals))
-        <div class="day-card" x-data="{ open: false }" style="margin-bottom:16px">
-            <div class="day-header" @click="open = !open" style="cursor:pointer; user-select:none">
-                <div class="day-title">
-                    <i class="fa-solid fa-weight-hanging"></i>
-                    <span>{{ __('report.ingredients.title') }}</span>
-                    <span class="day-badge">{{ __('report.counts.ingredients', ['count' => count($ingredientTotals)]) }}</span>
-                </div>
-                <div style="display:flex; align-items:center; gap:8px">
-                    <i class="fa-solid fa-chevron-down" x-show="!open" style="font-size:12px; color:#1e40af"></i>
-                    <i class="fa-solid fa-chevron-up" x-show="open" style="font-size:12px; color:#1e40af"></i>
-                </div>
-            </div>
-            <div x-show="open" x-collapse style="padding:12px 16px">
-                <table class="ing-table" style="width:100%">
-                    <thead>
-                        <tr>
-                            <th style="width:44px">TT</th>
-                            <th>{{ __('report.table.code') }}</th>
-                            <th>{{ __('report.table.ingredient') }}</th>
-                            <th style="text-align:right">{{ __('report.table.total_consumption') }}</th>
-                            <th style="text-align:right">{{ __('report.table.value') }}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($ingredientTotals as $i => $ing)
-                            <tr>
-                                <td class="ing-num">{{ $i + 1 }}</td>
-                                <td><span class="ing-code-badge">{{ $ing['code'] }}</span></td>
-                                <td class="ing-name">{{ $ing['name'] }}</td>
-                                <td class="ing-kg-val" style="text-align:right">
-                                    @if(in_array($ing['unit'], ['Trái', 'Quả']))
-                                        {{ number_format($ing['quantity'], 0) }} {{ $ing['unit'] }}
-                                    @else
-                                        {{ number_format($ing['quantity'], 2, ',', '.') }} kg
-                                    @endif
-                                </td>
-                                <td style="text-align:right; font-weight:700; color:#dc2626">{{ number_format($ing['cost'], 0, ',', '.') }}{{ __('report.currency') }}</td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    @endif
 
     <!-- Main Report Content -->
     @php $groupedData = $this->getGroupedData(); @endphp
@@ -654,11 +680,11 @@
                     <div class="day-title">
                         <i class="fa-regular fa-calendar-days"></i>
                         <span>{{ strtoupper($day['day_of_week']) }} – {{ $day['date_formatted'] }}</span>
-                        <span class="day-badge">{{ count($day['shifts']) }} ca</span>
+                        <span class="day-badge">{{ __('report.counts.shifts', ['count' => count($day['shifts'])]) }}</span>
                     </div>
                     <div style="display:flex; align-items:center; gap:8px">
-                        <i class="fa-solid fa-chevron-down" x-show="!open" style="font-size:12px; color:#1e40af"></i>
-                        <i class="fa-solid fa-chevron-up" x-show="open" style="font-size:12px; color:#1e40af"></i>
+                        <i class="fa-solid fa-chevron-down" x-show="!open" style="font-size:12px; color:var(--po-bl)"></i>
+                        <i class="fa-solid fa-chevron-up" x-show="open" style="font-size:12px; color:var(--po-bl)"></i>
                     </div>
                 </div>
 
@@ -692,7 +718,6 @@
                                     <div style="display:flex; align-items:center; gap:8px">
                                         <div class="dish-portions-block">
                                             <span class="dish-portions-badge">{{ __('report.counts.portions', ['count' => $dish['suat']]) }}</span>
-                                            <span class="dish-portions-phan">{{ __('report.counts.servings', ['count' => $dish['phan']]) }}</span>
                                         </div>
                                         <i class="fa-solid fa-chevron-down" x-show="!open" style="font-size:11px; color:var(--po-mu)"></i>
                                         <i class="fa-solid fa-chevron-up" x-show="open" style="font-size:11px; color:var(--po-mu)"></i>
@@ -708,7 +733,6 @@
                                                 <th>{{ __('report.table.ingredient_name') }}</th>
                                                 <th style="text-align: center;">{{ __('report.table.quantity_per_portion') }}</th>
                                                 <th style="text-align: center;">{{ __('report.table.portions') }}</th>
-                                                <th style="text-align: center;">{{ __('report.table.servings') }}</th>
                                                 <th style="text-align: right;">{{ __('report.table.total_kg') }}</th>
                                             </tr>
                                         </thead>
@@ -720,7 +744,6 @@
                                                     <td class="ing-name">{{ $ing['name'] }}</td>
                                                     <td style="text-align: center;">{{ number_format($ing['dl_g'] * 1000, 0) }}</td>
                                                     <td style="text-align: center;">{{ $ing['suat'] }}</td>
-                                                    <td style="text-align: center; font-weight: 700; color: #059669;">{{ $ing['phan'] }}</td>
                                                     <td class="ing-kg-val" style="text-align: right;">
                                                         @if($ing['unit'] === 'Trái' || $ing['unit'] === 'Quả')
                                                             {{ number_format($ing['quantity'], 0) }} {{ $ing['unit'] }}
@@ -732,7 +755,7 @@
                                                 </tr>
                                             @empty
                                                 <tr>
-                                                    <td colspan="7" style="text-align: center; color: #94a3b8; padding: 12px; font-style: italic;">
+                                                    <td colspan="6" style="text-align: center; color: var(--po-fa); padding: 12px; font-style: italic;">
                                                         {{ __('report.empty.manual_dish_ingredients') }}
                                                     </td>
                                                 </tr>

@@ -1,5 +1,7 @@
 <?php
 
+require_once dirname(__DIR__).'/app/Support/IntlPolyfill.php';
+
 use App\Http\Middleware\SetLocale;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
