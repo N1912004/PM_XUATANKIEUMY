@@ -713,8 +713,11 @@
                     <p style="font-size:12.5px;color:#64748B;margin:0">{{ __('list_hang.subtitle') }}</p>
                 </div>
                 <div style="display:flex;gap:8px">
-                    <button type="button" wire:click="exportList" class="wh-action-btn" style="height:36px;">
-                        <i class="fa-solid fa-file-excel" style="color:#059669"></i>{{ __('list_hang.actions.export') }}
+                    <button type="button" wire:click="exportList" style="height:40px;padding:0 20px;border-radius:12px;background:#16A34A;color:#ffffff;font-size:14px;font-weight:700;display:inline-flex;align-items:center;gap:8px;border:none;cursor:pointer;box-shadow:0 2px 6px rgba(22,163,74,0.25);transition:all 0.15s ease;" onmouseover="this.style.background='#15803D'" onmouseout="this.style.background='#16A34A'">
+                        <svg xmlns="http://www.w3.org/2000/svg" style="width:20px;height:20px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <span>{{ __('list_hang.actions.export') }}</span>
                     </button>
                 </div>
             </div>
