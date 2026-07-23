@@ -138,15 +138,15 @@ class BaoCao extends Page
         $days = [];
         $current = $start->copy();
 
-        // Map day of week to Vietnamese
-        $dowVN = [
-            0 => 'CHỦ NHẬT',
-            1 => 'THỨ 2',
-            2 => 'THỨ 3',
-            3 => 'THỨ 4',
-            4 => 'THỨ 5',
-            5 => 'THỨ 6',
-            6 => 'THỨ 7',
+        // Map day of week to translation key
+        $dowKeys = [
+            0 => 'sunday',
+            1 => 'monday',
+            2 => 'tuesday',
+            3 => 'wednesday',
+            4 => 'thursday',
+            5 => 'friday',
+            6 => 'saturday',
         ];
 
         // Nạp shifts 1 lần và toàn bộ menus của cả khoảng ngày bằng 1 query
@@ -264,7 +264,7 @@ class BaoCao extends Page
                 $days[] = [
                     'date_str' => $dateStr,
                     'date_formatted' => $current->format('d/m/Y'),
-                    'day_of_week' => $dowVN[$current->dayOfWeek],
+                    'day_of_week' => __('menu.days.'.$dowKeys[$current->dayOfWeek]),
                     'shifts' => $shiftsData,
                 ];
             }

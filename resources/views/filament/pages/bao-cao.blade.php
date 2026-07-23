@@ -678,7 +678,7 @@
                     <div class="day-title">
                         <i class="fa-regular fa-calendar-days"></i>
                         <span>{{ strtoupper($day['day_of_week']) }} – {{ $day['date_formatted'] }}</span>
-                        <span class="day-badge">{{ count($day['shifts']) }} ca</span>
+                        <span class="day-badge">{{ __('report.counts.shifts', ['count' => count($day['shifts'])]) }}</span>
                     </div>
                     <div style="display:flex; align-items:center; gap:8px">
                         <i class="fa-solid fa-chevron-down" x-show="!open" style="font-size:12px; color:#1e40af"></i>
