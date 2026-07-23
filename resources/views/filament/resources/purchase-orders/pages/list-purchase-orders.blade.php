@@ -113,10 +113,14 @@
                     </div>
                 @elseif($order->status === 'checking')
                     <div class="oh-item-ico" style="background:var(--po-or-s);color:var(--po-or)">
-                        <i class="fa-solid fa-boxes-stacked"></i>
+                        <i class="fa-solid fa-clipboard-list"></i>
+                    </div>
+                @elseif($order->status === 'sent')
+                    <div class="oh-item-ico" style="background:var(--po-bl-s);color:var(--po-bl)">
+                        <i class="fa-solid fa-file-lines"></i>
                     </div>
                 @else
-                    <div class="oh-item-ico" style="background:var(--po-bl-s);color:var(--po-bl)">
+                    <div class="oh-item-ico" style="background:var(--po-bd2);color:var(--po-mu)">
                         <i class="fa-solid fa-file-lines"></i>
                     </div>
                 @endif
@@ -175,10 +179,12 @@
                             <i class="fa-solid fa-eye"></i>
                         </a>
 
-                        <!-- Kiểm hàng (chuyển hướng sang trang Kiểm hàng vOrderCheck) -->
-                        <a href="{{ \App\Filament\Resources\PurchaseOrderResource::getUrl('check', ['record' => $order]) }}" class="abt" title="{{ __('purchase_order.actions.check_goods') }}" style="color:var(--po-or)">
-                            <i class="fa-solid fa-clipboard-check"></i>
-                        </a>
+                        <!-- Kiểm hàng (Chỉ hiển thị khi đơn ở trạng thái 'sent' hoặc 'checking') -->
+                        @if(in_array($order->status, ['sent', 'checking'], true))
+                            <a href="{{ \App\Filament\Resources\PurchaseOrderResource::getUrl('check', ['record' => $order]) }}" class="abt" title="{{ __('purchase_order.actions.check_goods') }}" style="color:var(--po-or)">
+                                <i class="fa-solid fa-clipboard-check"></i>
+                            </a>
+                        @endif
 
                         <!-- Xuất Excel của đơn này -->
                         <button wire:click="exportSingleOrder({{ $order->id }})" class="abt" title="{{ __('purchase_order.actions.export_excel') }}">
