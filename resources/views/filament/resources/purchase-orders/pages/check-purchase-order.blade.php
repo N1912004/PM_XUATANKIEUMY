@@ -6,6 +6,10 @@
         $relatedPOs = $this->getRelatedPOsProperty();
         $activeOrder = $this->getActiveOrderProperty();
         $colors = ['#267DC1', '#059669', '#D97706', '#7C3AED', '#EA580C', '#EC4899'];
+        // Đơn đã nhập kho (stocked_at != null) là read-only: số thực nhận đã chốt vào sổ kho.
+        $activeLocked = $activeOrder->stocked_at !== null;
+        // Cả đợt đã nhập kho hết → không còn gì để kiểm, ẩn nút Hoàn thành.
+        $allBatchStocked = $relatedPOs->every(fn($po) => $po->stocked_at !== null);
     @endphp
 
     <div class="po-page w-full space-y-6" style="padding: 0 !important; background: transparent !important;">
@@ -21,9 +25,11 @@
                 <a href="{{ \App\Filament\Resources\PurchaseOrderResource::getUrl('index') }}" class="po-btn">
                     <i class="fa-solid fa-arrow-left"></i> {{ __('purchase_order.actions.back') }}
                 </a>
-                <button wire:click="completeCheck" wire:loading.attr="disabled" wire:target="completeCheck" class="po-btn po-btn-primary">
-                    <i class="fa-solid fa-circle-check"></i> {{ __('purchase_order.actions.complete_check') }}
-                </button>
+                @unless($allBatchStocked)
+                    <button wire:click="completeCheck" wire:loading.attr="disabled" wire:target="completeCheck" class="po-btn po-btn-primary">
+                        <i class="fa-solid fa-circle-check"></i> {{ __('purchase_order.actions.complete_check') }}
+                    </button>
+                @endunless
             </div>
         </div>
 
@@ -33,15 +39,20 @@
                 @php
                     $isActive = $po->id === $activeOrder->id;
                     $color = $colors[$index % count($colors)];
+                    $poLocked = $po->stocked_at !== null;
                     $checkedCount = $po->items->filter(fn($it) => isset($receivedQuantities[$it->id]) && $receivedQuantities[$it->id] !== '')->count();
                     $totalCount = $po->items->count();
                     $allDone = $totalCount > 0 && $checkedCount === $totalCount;
                 @endphp
                 <button type="button" wire:click="switchPo({{ $po->id }})"
                         class="oh-ncc-tab {{ $isActive ? 'active' : '' }}">
-                    <span class="oh-ncc-dot" style="background:{{ $isActive ? '#fff' : ($allDone ? 'var(--po-gn)' : $color) }}"></span>
+                    @if($poLocked)
+                        <i class="fa-solid fa-lock" style="font-size:10px; opacity:.7"></i>
+                    @else
+                        <span class="oh-ncc-dot" style="background:{{ $isActive ? '#fff' : ($allDone ? 'var(--po-gn)' : $color) }}"></span>
+                    @endif
                     <span>{{ $po->supplier?->name }}</span>
-                    <span class="oh-ncc-badge {{ $allDone ? 'done' : '' }}">{{ $checkedCount }}/{{ $totalCount }}</span>
+                    <span class="oh-ncc-badge {{ ($allDone || $poLocked) ? 'done' : '' }}">{{ $checkedCount }}/{{ $totalCount }}</span>
                 </button>
             @endforeach
         </div>
@@ -69,6 +80,14 @@
                     </div>
                 </div>
             </div>
+
+            @if($activeLocked)
+                <!-- Banner: đơn đã nhập kho, chỉ xem -->
+                <div style="display:flex; align-items:center; gap:9px; padding:10px 16px; background:var(--po-gn-s); border-bottom:1px solid var(--po-bd2); color:var(--po-gn-t); font-size:12.5px; font-weight:600">
+                    <i class="fa-solid fa-lock"></i>
+                    {{ __('purchase_order.check.locked_notice') }}
+                </div>
+            @endif
 
             <!-- Table Body -->
             <div style="overflow-x:auto">
@@ -117,7 +136,8 @@
                                 </td>
                                 <td style="text-align:center">
                                     <input class="oh-check-inp" type="number" step="0.01" min="0" wire:model.blur="receivedQuantities.{{ $item->id }}"
-                                           placeholder="–" style="{{ $hasDiff ? 'border-color:var(--po-or); background:var(--po-or-s); color:var(--po-or);' : '' }}">
+                                           @disabled($activeLocked)
+                                           placeholder="–" style="{{ $activeLocked ? 'background:var(--po-bd2); cursor:not-allowed;' : ($hasDiff ? 'border-color:var(--po-or); background:var(--po-or-s); color:var(--po-or);' : '') }}">
                                 </td>
                                 <td style="text-align:center">
                                     @if(!$hasValue)
@@ -132,7 +152,8 @@
                                 </td>
                                 <td>
                                     <input type="text" wire:model.blur="itemNotes.{{ $item->id }}" placeholder="{{ __('purchase_order.placeholders.note') }}"
-                                           style="height:30px; border-radius:7px; font-size:12px; width:100%; min-width:120px; border:1px solid var(--po-bd); padding:0 8px; outline:none; background:var(--po-wh); color:var(--po-tx)">
+                                           @disabled($activeLocked)
+                                           style="height:30px; border-radius:7px; font-size:12px; width:100%; min-width:120px; border:1px solid var(--po-bd); padding:0 8px; outline:none; background:{{ $activeLocked ? 'var(--po-bd2)' : 'var(--po-wh)' }}; color:var(--po-tx); {{ $activeLocked ? 'cursor:not-allowed;' : '' }}">
                                 </td>
                             </tr>
                         @endforeach

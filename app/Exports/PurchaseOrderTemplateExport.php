@@ -34,7 +34,7 @@ class PurchaseOrderTemplateExport implements FromArray, ShouldAutoSize, WithEven
 
     public function title(): string
     {
-        return $this->sheetTitle ?: 'Đơn đặt hàng';
+        return $this->sheetTitle ?: __('purchase_order.excel.sheet_title');
     }
 
     /**
@@ -45,12 +45,12 @@ class PurchaseOrderTemplateExport implements FromArray, ShouldAutoSize, WithEven
         $order = $this->order->loadMissing(['supplier', 'kitchen', 'items.ingredient']);
 
         $rows = [];
-        $rows[] = $this->pad(['ĐẶT HÀNG NHÀ CUNG CẤP']);
+        $rows[] = $this->pad([__('purchase_order.excel.header_title')]);
         $rows[] = $this->pad([
-            'Ngày: '.($order->estimated_delivery_date?->format('d/m/Y') ?? now()->format('d/m/Y'))
-            .'   |   Mã đơn: '.$order->code
-            .'   |   NCC: '.($order->supplier?->name ?? 'Chưa gán')
-            .'   |   Bếp: '.($order->kitchen?->name ?? ''),
+            __('purchase_order.excel.date', ['date' => $order->estimated_delivery_date?->format('d/m/Y') ?? now()->format('d/m/Y')])
+            .'   |   '.__('purchase_order.excel.order_code', ['code' => $order->code])
+            .'   |   '.__('purchase_order.excel.supplier', ['name' => $order->supplier?->name ?? __('purchase_order.excel.unassigned')])
+            .'   |   '.__('purchase_order.excel.kitchen', ['name' => $order->kitchen?->name ?? '']),
         ]);
         $rows[] = $this->pad([]);
 
@@ -58,12 +58,23 @@ class PurchaseOrderTemplateExport implements FromArray, ShouldAutoSize, WithEven
         $grouped = $order->items->groupBy(fn ($item) => $item->ingredient?->typeRelation?->name ?? $item->ingredient?->type ?: 'Khác');
         $grandTotal = 0.0;
 
+        $sectionHeadings = [
+            __('purchase_order.excel.col_no'),
+            __('purchase_order.excel.col_ingredient'),
+            __('purchase_order.excel.col_unit'),
+            __('purchase_order.excel.col_quantity'),
+            __('purchase_order.excel.col_price'),
+            __('purchase_order.excel.col_supplier'),
+            __('purchase_order.excel.col_total'),
+            __('purchase_order.excel.col_note'),
+        ];
+
         foreach ($grouped as $groupName => $items) {
             $this->sectionTitleRows[] = count($rows) + 1;
             $rows[] = $this->pad([$this->getSectionTitle((string) $groupName)]);
 
             $this->headingRows[] = count($rows) + 1;
-            $rows[] = self::SECTION_HEADINGS;
+            $rows[] = $sectionHeadings;
 
             $i = 1;
             foreach ($items as $item) {
@@ -73,7 +84,7 @@ class PurchaseOrderTemplateExport implements FromArray, ShouldAutoSize, WithEven
                 $rows[] = [
                     $i++,
                     $item->ingredient?->name ?? '',
-                    $item->ingredient?->unit ?? 'Kg',
+                    $item->ingredient?->unitRelation?->name ?? $item->ingredient?->unit ?? 'Kg',
                     (float) $item->quantity_ordered,
                     (float) $item->unit_price,
                     $order->supplier?->name ?? '',
@@ -86,12 +97,12 @@ class PurchaseOrderTemplateExport implements FromArray, ShouldAutoSize, WithEven
         }
 
         $this->grandTotalRow = count($rows) + 1;
-        $rows[] = ['', 'TỔNG CỘNG', '', '', '', '', $grandTotal, ''];
+        $rows[] = ['', __('purchase_order.excel.grand_total'), '', '', '', '', $grandTotal, ''];
 
         // Khối chữ ký
         $rows[] = $this->pad([]);
-        $rows[] = ['NGƯỜI ĐẶT HÀNG', '', '', '', 'NHÀ CUNG CẤP XÁC NHẬN', '', '', ''];
-        $rows[] = ['(Ký, ghi rõ họ tên)', '', '', '', '(Ký, ghi rõ họ tên)', '', '', ''];
+        $rows[] = [__('purchase_order.excel.purchaser'), '', '', '', __('purchase_order.excel.supplier_sign'), '', '', ''];
+        $rows[] = [__('purchase_order.excel.sign_note'), '', '', '', __('purchase_order.excel.sign_note'), '', '', ''];
 
         return $rows;
     }
@@ -100,16 +111,16 @@ class PurchaseOrderTemplateExport implements FromArray, ShouldAutoSize, WithEven
     {
         $lower = mb_strtolower($groupName);
         if (str_contains($lower, 'động vật') || str_contains($lower, 'thịt') || str_contains($lower, 'cá')) {
-            return 'Động Vật: ( Thịt, cá, tôm, ....... )';
+            return __('purchase_order.excel.sec_animal');
         }
         if (str_contains($lower, 'thực vật') || str_contains($lower, 'rau') || str_contains($lower, 'củ')) {
-            return 'Thực vật: ( Rau, củ quả,.... )';
+            return __('purchase_order.excel.sec_plant');
         }
         if (str_contains($lower, 'khô')) {
-            return 'Thực phẩm khô: ( Hàng khô, đồ đóng hộp,.... )';
+            return __('purchase_order.excel.sec_dry');
         }
         if (str_contains($lower, 'gia vị')) {
-            return 'Gia vị: ( Mắm, muối, đường,.... )';
+            return __('purchase_order.excel.sec_spice');
         }
 
         return $groupName.':';
