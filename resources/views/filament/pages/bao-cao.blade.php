@@ -662,53 +662,6 @@
         </div>
     </div>
 
-    {{-- Tổng khối lượng TỪNG nguyên liệu tiêu thụ trong cả kỳ (BA R22) --}}
-    @php $ingredientTotals = $this->getIngredientTotals(); @endphp
-    @if(!empty($ingredientTotals))
-        <div class="day-card" x-data="{ open: false }" style="margin-bottom:16px">
-            <div class="day-header" @click="open = !open" style="cursor:pointer; user-select:none">
-                <div class="day-title">
-                    <i class="fa-solid fa-weight-hanging"></i>
-                    <span>{{ __('report.ingredients.title') }}</span>
-                    <span class="day-badge">{{ __('report.counts.ingredients', ['count' => count($ingredientTotals)]) }}</span>
-                </div>
-                <div style="display:flex; align-items:center; gap:8px">
-                    <i class="fa-solid fa-chevron-down" x-show="!open" style="font-size:12px; color:#1e40af"></i>
-                    <i class="fa-solid fa-chevron-up" x-show="open" style="font-size:12px; color:#1e40af"></i>
-                </div>
-            </div>
-            <div x-show="open" x-collapse style="padding:12px 16px">
-                <table class="ing-table" style="width:100%">
-                    <thead>
-                        <tr>
-                            <th style="width:44px">TT</th>
-                            <th>{{ __('report.table.code') }}</th>
-                            <th>{{ __('report.table.ingredient') }}</th>
-                            <th style="text-align:right">{{ __('report.table.total_consumption') }}</th>
-                            <th style="text-align:right">{{ __('report.table.value') }}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($ingredientTotals as $i => $ing)
-                            <tr>
-                                <td class="ing-num">{{ $i + 1 }}</td>
-                                <td><span class="ing-code-badge">{{ $ing['code'] }}</span></td>
-                                <td class="ing-name">{{ $ing['name'] }}</td>
-                                <td class="ing-kg-val" style="text-align:right">
-                                    @if(in_array($ing['unit'], ['Trái', 'Quả']))
-                                        {{ number_format($ing['quantity'], 0) }} {{ $ing['unit'] }}
-                                    @else
-                                        {{ number_format($ing['quantity'], 2, ',', '.') }} kg
-                                    @endif
-                                </td>
-                                <td style="text-align:right; font-weight:700; color:#dc2626">{{ number_format($ing['cost'], 0, ',', '.') }}{{ __('report.currency') }}</td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    @endif
 
     <!-- Main Report Content -->
     @php $groupedData = $this->getGroupedData(); @endphp
