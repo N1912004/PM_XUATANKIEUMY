@@ -417,7 +417,7 @@
         color: var(--po-mu);
         text-transform: uppercase;
         letter-spacing: 0.05em;
-        background: #f8fafc;
+        background: var(--po-bg);
         border-bottom: 1px solid var(--po-bd);
         white-space: nowrap;
     }
@@ -468,7 +468,7 @@
         padding: 60px 20px;
         text-align: center;
         color: var(--po-fa);
-        background: #fff;
+        background: var(--po-wh);
         border: 1px solid var(--po-bd);
         border-radius: 14px;
     }
@@ -571,8 +571,10 @@
             <p class="report-subtitle">{{ __('report.subtitle') }}</p>
         </div>
         <div>
-            <button type="button" class="excel-btn" wire:click="exportExcel">
-                <i class="fa-solid fa-file-excel" style="color:#059669; font-size:15px"></i>
+            <button type="button" wire:click="exportExcel" style="height:40px;padding:0 20px;border-radius:12px;background:#16A34A;color:#ffffff;font-size:14px;font-weight:700;display:inline-flex;align-items:center;gap:8px;border:none;cursor:pointer;box-shadow:0 2px 6px rgba(22,163,74,0.25);transition:all 0.15s ease;" onmouseover="this.style.background='#15803D'" onmouseout="this.style.background='#16A34A'">
+                <svg xmlns="http://www.w3.org/2000/svg" style="width:20px;height:20px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
                 <span>{{ __('report.actions.export') }}</span>
             </button>
         </div>
@@ -633,28 +635,28 @@
     @php $stats = $this->getStats(); @endphp
     <div class="stats-grid">
         <div class="stat-card">
-            <div class="stat-icon" style="background: #E9F2F8; color: var(--po-bl);"><i class="fa-regular fa-calendar"></i></div>
+            <div class="stat-icon" style="background: var(--po-bl-s); color: var(--po-bl);"><i class="fa-regular fa-calendar"></i></div>
             <div>
                 <div class="stat-val">{{ $stats['days'] }}</div>
                 <div class="stat-lbl">{{ __('report.stats.menu_days') }}</div>
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon" style="background: #E9F2F8; color: var(--po-bl);"><i class="fa-solid fa-utensils"></i></div>
+            <div class="stat-icon" style="background: var(--po-bl-s); color: var(--po-bl);"><i class="fa-solid fa-utensils"></i></div>
             <div>
                 <div class="stat-val">{{ $stats['dishes'] }}</div>
                 <div class="stat-lbl">{{ __('report.stats.dishes') }}</div>
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon" style="background: #E9F2F8; color: var(--po-bl);"><i class="fa-solid fa-seedling"></i></div>
+            <div class="stat-icon" style="background: var(--po-bl-s); color: var(--po-bl);"><i class="fa-solid fa-seedling"></i></div>
             <div>
                 <div class="stat-val">{{ $stats['ingredients'] }}</div>
                 <div class="stat-lbl">{{ __('report.stats.ingredient_rows') }}</div>
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon" style="background: #E9F2F8; color: var(--po-bl);"><i class="fa-solid fa-users"></i></div>
+            <div class="stat-icon" style="background: var(--po-bl-s); color: var(--po-bl);"><i class="fa-solid fa-users"></i></div>
             <div>
                 <div class="stat-val">{{ number_format($stats['suat'], 0, ',', '.') }}</div>
                 <div class="stat-lbl">{{ __('report.stats.portions') }}</div>
@@ -681,8 +683,8 @@
                         <span class="day-badge">{{ __('report.counts.shifts', ['count' => count($day['shifts'])]) }}</span>
                     </div>
                     <div style="display:flex; align-items:center; gap:8px">
-                        <i class="fa-solid fa-chevron-down" x-show="!open" style="font-size:12px; color:#1e40af"></i>
-                        <i class="fa-solid fa-chevron-up" x-show="open" style="font-size:12px; color:#1e40af"></i>
+                        <i class="fa-solid fa-chevron-down" x-show="!open" style="font-size:12px; color:var(--po-bl)"></i>
+                        <i class="fa-solid fa-chevron-up" x-show="open" style="font-size:12px; color:var(--po-bl)"></i>
                     </div>
                 </div>
 
@@ -753,7 +755,7 @@
                                                 </tr>
                                             @empty
                                                 <tr>
-                                                    <td colspan="6" style="text-align: center; color: #94a3b8; padding: 12px; font-style: italic;">
+                                                    <td colspan="6" style="text-align: center; color: var(--po-fa); padding: 12px; font-style: italic;">
                                                         {{ __('report.empty.manual_dish_ingredients') }}
                                                     </td>
                                                 </tr>
