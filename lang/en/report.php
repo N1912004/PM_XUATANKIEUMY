@@ -10,7 +10,8 @@ return [
     'counts' => ['ingredients' => ':count ingredients', 'dishes' => ':count dishes', 'portions' => ':count portions', 'servings' => ':count servings', 'shifts' => ':count shifts'],
     'table' => ['code' => 'CODE', 'ingredient' => 'INGREDIENT', 'total_consumption' => 'TOTAL CONSUMPTION', 'value' => 'VALUE', 'ingredient_code' => 'Ingredient code', 'ingredient_name' => 'Ingredient name', 'quantity_per_portion' => 'Qty (g/portion)', 'portions' => 'Portions', 'servings' => 'Servings', 'total_kg' => 'Total kg'],
     'empty' => ['title' => 'No data for the selected range', 'description' => 'Change the date range or shift, or try another search term.', 'manual_dish_ingredients' => 'Manually entered dish – ingredients have not been defined in the menu bank'],
-    'export_title' => 'Meal Production Report',
+    'export_title' => 'Financial_Report',
+    'export_filename_prefix' => 'Financial_Report',
     'export_heading' => 'MEAL PRODUCTION & INGREDIENT CONSUMPTION REPORT',
     'export_cols' => [
         'date' => 'Date',

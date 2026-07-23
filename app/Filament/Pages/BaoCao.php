@@ -350,7 +350,12 @@ class BaoCao extends Page
     {
         abort_unless(auth()->user()?->can('page_BaoCao') ?? false, 403);
 
-        $fileName = 'BaoCao_TaiChinh_'.str_replace('-', '', (string) $this->fromDate)
+        $prefix = __('report.export_filename_prefix');
+        if (empty($prefix) || $prefix === 'report.export_filename_prefix') {
+            $prefix = app()->getLocale() === 'en' ? 'Financial_Report' : 'BaoCao_TaiChinh';
+        }
+
+        $fileName = $prefix.'_'.str_replace('-', '', (string) $this->fromDate)
             .'_'.str_replace('-', '', (string) $this->toDate).'.xlsx';
 
         return Excel::download(
