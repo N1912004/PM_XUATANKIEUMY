@@ -159,6 +159,12 @@ return array_replace_recursive($vi, [
         'no_ingredient_selected_body' => 'Please select at least 1 ingredient to create purchase orders.',
         'supplier_required_title' => 'Please select a supplier!',
         'supplier_required_body' => ':count ingredient(s) missing supplier: :names. Please assign a supplier before saving.',
+        'check_incomplete_title' => 'Goods check incomplete!',
+        'check_incomplete_body' => 'Supplier :supplier still has :count item(s) without a received quantity. Please fill them in before completing the check.',
+        'check_nothing_title' => 'No received quantity entered!',
+        'check_nothing_body' => 'Please enter received quantities for at least one supplier before completing the check.',
+        'check_all_done_title' => 'Goods check already completed',
+        'check_all_done_body' => 'All orders in this batch have been received into stock and cannot be checked again (to avoid stock ledger discrepancies).',
     ],
     'sidebar' => [
         'summary_title' => 'Order summary',

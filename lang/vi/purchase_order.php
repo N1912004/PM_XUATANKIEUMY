@@ -163,6 +163,12 @@ return [
         'no_ingredient_selected_body' => 'Vui lòng chọn ít nhất 1 nguyên liệu để tạo đơn đặt hàng.',
         'supplier_required_title' => 'Vui lòng chọn Nhà cung cấp!',
         'supplier_required_body' => 'Có :count nguyên liệu chưa chọn NCC: :names. Vui lòng chọn NCC trước khi lưu.',
+        'check_incomplete_title' => 'Chưa kiểm hết mặt hàng!',
+        'check_incomplete_body' => 'Nhà cung cấp :supplier còn :count mặt hàng chưa nhập số thực nhận. Vui lòng nhập đủ trước khi hoàn thành kiểm hàng.',
+        'check_nothing_title' => 'Chưa nhập số thực nhận!',
+        'check_nothing_body' => 'Vui lòng nhập số lượng thực nhận cho ít nhất một nhà cung cấp trước khi hoàn thành kiểm hàng.',
+        'check_all_done_title' => 'Đơn đã hoàn thành kiểm hàng',
+        'check_all_done_body' => 'Các đơn trong đợt này đã nhập kho xong, không thể kiểm lại (tránh làm lệch sổ tồn kho).',
     ],
     'sidebar' => [
         'summary_title' => 'Tóm tắt đơn hàng',
