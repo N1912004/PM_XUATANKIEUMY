@@ -76,72 +76,74 @@
             </div>
 
             <!-- Table Body -->
-            <table class="oh-table" style="width:100%">
-                <thead>
-                    <tr>
-                        <th style="text-align:center; width:36px">#</th>
-                        <th>{{ __('purchase_order.table.ingredient_name') }}</th>
-                        <th>{{ __('purchase_order.table.type') }}</th>
-                        <th style="text-align:right">{{ __('purchase_order.table.quantity_ordered') }}</th>
-                        <th style="text-align:center">{{ __('purchase_order.table.quantity_received_actual') }}</th>
-                        <th style="text-align:center; min-width:90px">{{ __('purchase_order.table.difference') }}</th>
-                        <th>{{ __('purchase_order.fields.note') }}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($activeItems as $idx => $item)
-                        @php
-                            $ordered = (float) $item->quantity_ordered;
-                            $receivedVal = $receivedQuantities[$item->id] ?? '';
-                            $hasValue = $receivedVal !== '';
-                            $receivedFloat = (float) $receivedVal;
-                            $diff = $hasValue ? ($receivedFloat - $ordered) : null;
-                            $hasDiff = $hasValue && abs($diff) > 0.001;
-
-                            $ingType = strtolower($item->ingredient?->typeRelation?->name ?? $item->ingredient?->type ?? '');
-                            $ingName = strtolower($item->ingredient?->name ?? '');
-                            
-                            $isThit = str_contains($ingType, 'động vật') || str_contains($ingType, 'thịt') || str_contains($ingType, 'cá') || str_contains($ingType, 'thủy sản') || str_contains($ingName, 'thịt') || str_contains($ingName, 'cá') || str_contains($ingName, 'gà') || str_contains($ingName, 'vịt') || str_contains($ingName, 'trứng');
-                            $isRau = str_contains($ingType, 'thực vật') || str_contains($ingType, 'rau') || str_contains($ingType, 'củ') || str_contains($ingType, 'quả') || str_contains($ingName, 'rau') || str_contains($ingName, 'củ') || str_contains($ingName, 'quả') || str_contains($ingName, 'giá') || str_contains($ingName, 'nấm');
-                        @endphp
+            <div style="overflow-x:auto">
+                <table class="oh-table" style="width:100%; min-width:650px">
+                    <thead>
                         <tr>
-                            <td style="text-align:center; color:var(--po-mu)">{{ $idx + 1 }}</td>
-                            <td style="font-weight:600; color:var(--po-tx)">{{ $item->ingredient?->name }}</td>
-                            <td>
-                                @if($isThit)
-                                    <span class="ot-thit" style="font-size:11px"><i class="fa-solid fa-drumstick-bite"></i> {{ __('purchase_order.ingredient_types.meat') }}</span>
-                                @elseif($isRau)
-                                    <span class="ot-uot" style="font-size:11px"><i class="fa-solid fa-leaf"></i> {{ __('purchase_order.ingredient_types.vegetable_wet') }}</span>
-                                @else
-                                    <span class="ot-kho" style="font-size:11px"><i class="fa-solid fa-box"></i> {{ __('purchase_order.ingredient_types.dry') }}</span>
-                                @endif
-                            </td>
-                            <td style="text-align:right; font-weight:600; color:var(--po-tx)">
-                                {{ (float) $ordered }} {{ $item->ingredient?->unitRelation?->name ?? $item->ingredient?->unit ?? 'kg' }}
-                            </td>
-                            <td style="text-align:center">
-                                <input class="oh-check-inp" type="number" step="0.01" min="0" wire:model.live="receivedQuantities.{{ $item->id }}"
-                                       placeholder="–" style="{{ $hasDiff ? 'border-color:var(--po-or); background:#FFF7ED;' : '' }}">
-                            </td>
-                            <td style="text-align:center">
-                                @if(!$hasValue)
-                                    <span class="oh-diff-pending">–</span>
-                                @elseif(abs($diff) < 0.001)
-                                    <span class="oh-diff-ok">✓ Đủ</span>
-                                @elseif($diff > 0)
-                                    <span class="oh-diff-ok">+{{ number_format($diff, 2) }}</span>
-                                @else
-                                    <span class="oh-diff-bad">{{ number_format($diff, 2) }}</span>
-                                @endif
-                            </td>
-                            <td>
-                                <input type="text" wire:model.live="itemNotes.{{ $item->id }}" placeholder="{{ __('purchase_order.placeholders.note') }}" 
-                                       style="height:30px; border-radius:7px; font-size:12px; width:100%; border:1px solid var(--po-bd); padding:0 8px; outline:none">
-                            </td>
+                            <th style="text-align:center; width:36px">#</th>
+                            <th>{{ __('purchase_order.table.ingredient_name') }}</th>
+                            <th>{{ __('purchase_order.table.type') }}</th>
+                            <th style="text-align:right">{{ __('purchase_order.table.quantity_ordered') }}</th>
+                            <th style="text-align:center">{{ __('purchase_order.table.quantity_received_actual') }}</th>
+                            <th style="text-align:center; min-width:90px">{{ __('purchase_order.table.difference') }}</th>
+                            <th>{{ __('purchase_order.table.notes') }}</th>
                         </tr>
-                    @endforeach
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        @foreach($activeItems as $idx => $item)
+                            @php
+                                $ordered = (float) $item->quantity_ordered;
+                                $receivedVal = $receivedQuantities[$item->id] ?? '';
+                                $hasValue = $receivedVal !== '';
+                                $receivedFloat = (float) $receivedVal;
+                                $diff = $hasValue ? ($receivedFloat - $ordered) : null;
+                                $hasDiff = $hasValue && abs($diff) > 0.001;
+
+                                $ingType = strtolower($item->ingredient?->typeRelation?->name ?? $item->ingredient?->type ?? '');
+                                $ingName = strtolower($item->ingredient?->name ?? '');
+                                
+                                $isThit = str_contains($ingType, 'động vật') || str_contains($ingType, 'thịt') || str_contains($ingType, 'cá') || str_contains($ingType, 'thủy sản') || str_contains($ingName, 'thịt') || str_contains($ingName, 'cá') || str_contains($ingName, 'gà') || str_contains($ingName, 'vịt') || str_contains($ingName, 'trứng');
+                                $isRau = str_contains($ingType, 'thực vật') || str_contains($ingType, 'rau') || str_contains($ingType, 'củ') || str_contains($ingType, 'quả') || str_contains($ingName, 'rau') || str_contains($ingName, 'củ') || str_contains($ingName, 'quả') || str_contains($ingName, 'giá') || str_contains($ingName, 'nấm');
+                            @endphp
+                            <tr>
+                                <td style="text-align:center; color:var(--po-mu)">{{ $idx + 1 }}</td>
+                                <td style="font-weight:600; color:var(--po-tx)">{{ $item->ingredient?->name }}</td>
+                                <td>
+                                    @if($isThit)
+                                        <span class="ot-thit" style="font-size:11px"><i class="fa-solid fa-drumstick-bite"></i> {{ __('purchase_order.ingredient_types.meat') }}</span>
+                                    @elseif($isRau)
+                                        <span class="ot-uot" style="font-size:11px"><i class="fa-solid fa-leaf"></i> {{ __('purchase_order.ingredient_types.vegetable_wet') }}</span>
+                                    @else
+                                        <span class="ot-kho" style="font-size:11px"><i class="fa-solid fa-box"></i> {{ __('purchase_order.ingredient_types.dry') }}</span>
+                                    @endif
+                                </td>
+                                <td style="text-align:right; font-weight:600; color:var(--po-tx)">
+                                    {{ (float) $ordered }} {{ $item->ingredient?->unitRelation?->name ?? $item->ingredient?->unit ?? 'kg' }}
+                                </td>
+                                <td style="text-align:center">
+                                    <input class="oh-check-inp" type="number" step="0.01" min="0" wire:model.live="receivedQuantities.{{ $item->id }}"
+                                           placeholder="–" style="{{ $hasDiff ? 'border-color:var(--po-or); background:#FFF7ED;' : '' }}">
+                                </td>
+                                <td style="text-align:center">
+                                    @if(!$hasValue)
+                                        <span class="oh-diff-pending">–</span>
+                                    @elseif(abs($diff) < 0.001)
+                                        <span class="oh-diff-ok">{{ __('purchase_order.table.sufficient') }}</span>
+                                    @elseif($diff > 0)
+                                        <span class="oh-diff-ok">+{{ number_format($diff, 2) }}</span>
+                                    @else
+                                        <span class="oh-diff-bad">{{ number_format($diff, 2) }}</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    <input type="text" wire:model.live="itemNotes.{{ $item->id }}" placeholder="{{ __('purchase_order.placeholders.note') }}" 
+                                           style="height:30px; border-radius:7px; font-size:12px; width:100%; min-width:120px; border:1px solid var(--po-bd); padding:0 8px; outline:none">
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </x-filament-panels::page>
