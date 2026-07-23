@@ -17,10 +17,10 @@
         <div class="po-head" style="margin-bottom: 20px;">
             <div>
                 <h1 class="po-title" style="font-size:20px; font-weight:800">
-                    Đơn {{ $record->code }} – Đặt hàng {{ $deliveryDateStr }}
+                    {{ __('purchase_order.detail.order_title', ['code' => $record->code, 'date' => $deliveryDateStr]) }}
                 </h1>
                 <p class="po-subtitle" style="font-size:12.5px; color:var(--po-mu)">
-                    Gộp nguyên liệu theo nhà cung cấp · Ngày đặt {{ $deliveryDateStr }}
+                    {{ __('purchase_order.detail.subtitle', ['date' => $deliveryDateStr]) }}
                 </p>
             </div>
             <div style="display:flex; gap:8px; flex-wrap:wrap">
@@ -48,6 +48,14 @@
                     $poTotal = $po->items->sum(fn($it) => $it->quantity_ordered * $it->unit_price);
                     $isActive = $po->id === $record->id;
                     $color = $colors[$index % count($colors)];
+                    $supplierName = $po->supplier?->name ?: $po->code;
+                    $sameSupplierPOs = $relatedPOs->where('supplier_id', $po->supplier_id)->values();
+                    $hasMultiplePOs = $sameSupplierPOs->count() > 1;
+                    $slipSuffix = '';
+                    if ($hasMultiplePOs) {
+                        $supplierIdx = $sameSupplierPOs->search(fn($p) => $p->id === $po->id);
+                        $slipSuffix = ' - P' . (($supplierIdx !== false ? $supplierIdx : 0) + 1);
+                    }
                 @endphp
                 <a href="{{ \App\Filament\Resources\PurchaseOrderResource::getUrl('view', ['record' => $po]) }}" 
                    class="oh-ncc-tab" 
@@ -56,7 +64,7 @@
                     
                     <span style="width:9px; height:9px; border-radius:50%; background:{{ $isActive ? '#fff' : $color }}; display:inline-block"></span>
 
-                    <span>{{ $po->supplier?->name }}</span>
+                    <span>{{ $supplierName . $slipSuffix }}</span>
 
                     <span style="display:inline-flex; align-items:center; justify-content:center; padding:2px 7px; border-radius:10px; font-size:11px; font-weight:800; 
                                  {{ $isActive ? 'background:rgba(255,255,255,0.25); color:#fff;' : 'background:var(--po-bd2); color:var(--po-mu);' }}">
@@ -78,7 +86,7 @@
                     <span style="width:10px; height:10px; border-radius:50%; background:{{ $activeColor }}; display:inline-block"></span>
                     <span style="font-size:15px; font-weight:800; color:var(--po-tx)">{{ $record->supplier?->name }}</span>
                     <span style="font-size:12px; color:var(--po-mu); font-weight:500">
-                        {{ $record->supplier?->type === 'uot' ? __('purchase_order.ingredient_types.meat_wet') : ($record->supplier?->type === 'kho' ? __('purchase_order.ingredient_types.dry') : 'Thịt/Rau/Ướt') }}
+                        {{ $record->supplier?->type === 'uot' ? __('purchase_order.ingredient_types.meat_wet') : ($record->supplier?->type === 'kho' ? __('purchase_order.ingredient_types.dry') : __('purchase_order.ingredient_types.meat_wet')) }}
                     </span>
                 </div>
                 <!-- Nút xuất Excel NCC này -->
@@ -95,7 +103,7 @@
                             <th style="padding:9px 12px; width:36px; text-align:center">#</th>
                             <th style="padding:9px 12px">{{ __('purchase_order.table.ingredient_name') }}</th>
                             <th style="padding:9px 12px; width:110px">{{ __('purchase_order.table.type') }}</th>
-                            <th style="padding:9px 12px; width:100px; text-align:center">SỐ SUẤT</th>
+                            <th style="padding:9px 12px; width:100px; text-align:center">{{ __('purchase_order.table.servings_count') }}</th>
                             <th style="padding:9px 12px; width:110px; text-align:center">{{ __('purchase_order.table.quantity') }}</th>
                             <th style="padding:9px 12px; width:120px; text-align:right">{{ __('purchase_order.table.unit_price') }}</th>
                             <th style="padding:9px 12px; width:140px; text-align:right">{{ __('purchase_order.table.line_total') }}</th>

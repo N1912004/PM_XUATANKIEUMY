@@ -26,14 +26,31 @@ class PurchaseOrdersBatchExport implements WithMultipleSheets
     {
         $used = [];
 
-        return $this->orders->map(function (PurchaseOrder $order) use (&$used): PurchaseOrderTemplateExport {
-            // Tên sheet Excel: tối đa 31 ký tự, không được trùng nhau trong cùng file
-            $base = mb_substr($order->supplier?->name ?: $order->code, 0, 25);
+        // Gom nhóm đơn theo Nhà cung cấp trong đợt này
+        $groupedBySupplier = $this->orders->groupBy(fn (PurchaseOrder $po) => $po->supplier_id ?: $po->code);
+
+        return $this->orders->map(function (PurchaseOrder $order) use (&$used, $groupedBySupplier): PurchaseOrderTemplateExport {
+            $supplierName = $order->supplier?->name ?: $order->code;
+            $supplierKey = $order->supplier_id ?: $order->code;
+            $sameSupplierOrders = $groupedBySupplier->get($supplierKey, collect())->values();
+            $hasMultiple = $sameSupplierOrders->count() > 1;
+
+            // Nếu NCC có nhiều đơn/phiếu tách trong đợt, gắn thứ tự P1, P2, P3...
+            $suffix = '';
+            if ($hasMultiple) {
+                $idx = $sameSupplierOrders->search(fn (PurchaseOrder $po) => $po->id === $order->id);
+                $suffix = ' - P'.(($idx !== false ? $idx : 0) + 1);
+            }
+
+            $maxSupplierLen = 31 - mb_strlen($suffix);
+            $base = mb_substr($supplierName, 0, max(10, $maxSupplierLen)).$suffix;
             $name = $base;
             $i = 2;
 
             while (in_array($name, $used, true)) {
-                $name = mb_substr($base, 0, 22).' ('.$i++.')';
+                $suffixLoop = ' - P'.$i++;
+                $maxLen = 31 - mb_strlen($suffixLoop);
+                $name = mb_substr($supplierName, 0, max(10, $maxLen)).$suffixLoop;
             }
 
             $used[] = $name;

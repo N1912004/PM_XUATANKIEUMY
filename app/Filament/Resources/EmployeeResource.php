@@ -14,6 +14,8 @@ use Illuminate\Database\Eloquent\Builder;
 
 class EmployeeResource extends Resource
 {
+    protected static bool $shouldRegisterNavigation = false; // Ẩn menu 'Nhân viên' khỏi thanh điều hướng Sidebar
+
     protected static ?string $model = Employee::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-users';

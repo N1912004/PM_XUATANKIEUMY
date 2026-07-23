@@ -6,6 +6,10 @@
         $relatedPOs = $this->getRelatedPOsProperty();
         $activeOrder = $this->getActiveOrderProperty();
         $colors = ['#267DC1', '#059669', '#D97706', '#7C3AED', '#EA580C', '#EC4899'];
+        // Đơn đã nhập kho (stocked_at != null) là read-only: số thực nhận đã chốt vào sổ kho.
+        $activeLocked = $activeOrder->stocked_at !== null;
+        // Cả đợt đã nhập kho hết → không còn gì để kiểm, ẩn nút Hoàn thành.
+        $allBatchStocked = $relatedPOs->every(fn($po) => $po->stocked_at !== null);
     @endphp
 
     <div class="po-page w-full space-y-6" style="padding: 0 !important; background: transparent !important;">
@@ -21,32 +25,42 @@
                 <a href="{{ \App\Filament\Resources\PurchaseOrderResource::getUrl('index') }}" class="po-btn">
                     <i class="fa-solid fa-arrow-left"></i> {{ __('purchase_order.actions.back') }}
                 </a>
-                <button wire:click="completeCheck" wire:loading.attr="disabled" wire:target="completeCheck" class="po-btn po-btn-primary">
-                    <i class="fa-solid fa-circle-check"></i> {{ __('purchase_order.actions.complete_check') }}
-                </button>
+                @unless($allBatchStocked)
+                    <button wire:click="completeCheck" wire:loading.attr="disabled" wire:target="completeCheck" class="po-btn po-btn-primary">
+                        <i class="fa-solid fa-circle-check"></i> {{ __('purchase_order.actions.complete_check') }}
+                    </button>
+                @endunless
             </div>
         </div>
 
         <!-- Supplier Selector Tabs -->
-        <div class="oh-ncc-tabs" style="display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap">
+        <div class="oh-ncc-tabs">
             @foreach($relatedPOs as $index => $po)
                 @php
                     $isActive = $po->id === $activeOrder->id;
                     $color = $colors[$index % count($colors)];
+                    $poLocked = $po->stocked_at !== null;
                     $checkedCount = $po->items->filter(fn($it) => isset($receivedQuantities[$it->id]) && $receivedQuantities[$it->id] !== '')->count();
                     $totalCount = $po->items->count();
+                    $allDone = $totalCount > 0 && $checkedCount === $totalCount;
+                    $supplierName = $po->supplier?->name ?: $po->code;
+                    $sameSupplierPOs = $relatedPOs->where('supplier_id', $po->supplier_id)->values();
+                    $hasMultiplePOs = $sameSupplierPOs->count() > 1;
+                    $slipSuffix = '';
+                    if ($hasMultiplePOs) {
+                        $supplierIdx = $sameSupplierPOs->search(fn($p) => $p->id === $po->id);
+                        $slipSuffix = ' - P' . (($supplierIdx !== false ? $supplierIdx : 0) + 1);
+                    }
                 @endphp
-                <button type="button" wire:click="switchPo({{ $po->id }})" 
-                        class="oh-ncc-tab" 
-                        style="display:flex; align-items:center; gap:8px; padding:8px 14px; border-radius:30px; font-size:13px; font-weight:700; cursor:pointer; transition:.13s; border:1px solid;
-                               {{ $isActive ? 'background:'.$color.'; color:#fff; border-color:'.$color.'; box-shadow: 0 4px 12px '.($color).'33;' : 'background:var(--po-wh); color:var(--po-tx); border-color:var(--po-bd);' }}">
-                    
-                    <span style="width:9px; height:9px; border-radius:50%; background:{{ $isActive ? '#fff' : $color }}; display:inline-block"></span>
-                    <span>{{ $po->supplier?->name }}</span>
-                    <span style="display:inline-flex; align-items:center; justify-content:center; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:800;
-                                 {{ $isActive ? 'background:rgba(255,255,255,0.25); color:#fff;' : 'background:var(--po-bd2); color:var(--po-mu);' }}">
-                        {{ $checkedCount }}/{{ $totalCount }}
-                    </span>
+                <button type="button" wire:click="switchPo({{ $po->id }})"
+                        class="oh-ncc-tab {{ $isActive ? 'active' : '' }}">
+                    @if($poLocked)
+                        <i class="fa-solid fa-lock" style="font-size:10px; opacity:.7"></i>
+                    @else
+                        <span class="oh-ncc-dot" style="background:{{ $isActive ? '#fff' : ($allDone ? 'var(--po-gn)' : $color) }}"></span>
+                    @endif
+                    <span>{{ $supplierName . $slipSuffix }}</span>
+                    <span class="oh-ncc-badge {{ ($allDone || $poLocked) ? 'done' : '' }}">{{ $checkedCount }}/{{ $totalCount }}</span>
                 </button>
             @endforeach
         </div>
@@ -62,7 +76,7 @@
 
         <div style="background:var(--po-wh); border:1px solid var(--po-bd); border-radius:var(--po-r); box-shadow:var(--po-sh2); overflow:hidden">
             <!-- Table Sub-Header -->
-            <div style="display:flex; align-items:center; justify-content:space-between; padding:12px 16px; border-bottom:1px solid var(--po-bd2); background:#FAFBFC">
+            <div style="display:flex; align-items:center; justify-content:space-between; padding:12px 16px; border-bottom:1px solid var(--po-bd2); background:var(--po-bg)">
                 <div style="font-size:14px; font-weight:700; color:var(--po-tx); display:flex; align-items:center; gap:9px">
                     <span style="display:inline-block; width:11px; height:11px; border-radius:50%; background:{{ $activeColor }}"></span>
                     {{ __('purchase_order.check.section_title', ['supplier' => $activeOrder->supplier?->name]) }}
@@ -75,6 +89,14 @@
                 </div>
             </div>
 
+            @if($activeLocked)
+                <!-- Banner: đơn đã nhập kho, chỉ xem -->
+                <div style="display:flex; align-items:center; gap:9px; padding:10px 16px; background:var(--po-gn-s); border-bottom:1px solid var(--po-bd2); color:var(--po-gn-t); font-size:12.5px; font-weight:600">
+                    <i class="fa-solid fa-lock"></i>
+                    {{ __('purchase_order.check.locked_notice') }}
+                </div>
+            @endif
+
             <!-- Table Body -->
             <div style="overflow-x:auto">
                 <table class="oh-table" style="width:100%; min-width:650px">
@@ -83,9 +105,9 @@
                             <th style="text-align:center; width:36px">#</th>
                             <th>{{ __('purchase_order.table.ingredient_name') }}</th>
                             <th>{{ __('purchase_order.table.type') }}</th>
-                            <th style="text-align:right">{{ __('purchase_order.table.quantity_ordered') }}</th>
-                            <th style="text-align:center">{{ __('purchase_order.table.quantity_received_actual') }}</th>
-                            <th style="text-align:center; min-width:90px">{{ __('purchase_order.table.difference') }}</th>
+                            <th style="text-align:center; width:100px">{{ __('purchase_order.table.quantity_ordered') }}</th>
+                            <th style="text-align:center; width:120px">{{ __('purchase_order.table.quantity_received_actual') }}</th>
+                            <th style="text-align:center; min-width:95px">{{ __('purchase_order.table.difference') }}</th>
                             <th>{{ __('purchase_order.table.notes') }}</th>
                         </tr>
                     </thead>
@@ -117,12 +139,13 @@
                                         <span class="ot-kho" style="font-size:11px"><i class="fa-solid fa-box"></i> {{ __('purchase_order.ingredient_types.dry') }}</span>
                                     @endif
                                 </td>
-                                <td style="text-align:right; font-weight:600; color:var(--po-tx)">
+                                <td style="text-align:center; font-weight:700; color:var(--po-tx)">
                                     {{ (float) $ordered }} {{ $item->ingredient?->unitRelation?->name ?? $item->ingredient?->unit ?? 'kg' }}
                                 </td>
                                 <td style="text-align:center">
-                                    <input class="oh-check-inp" type="number" step="0.01" min="0" wire:model.live="receivedQuantities.{{ $item->id }}"
-                                           placeholder="–" style="{{ $hasDiff ? 'border-color:var(--po-or); background:#FFF7ED;' : '' }}">
+                                    <input class="oh-check-inp" type="number" step="0.01" min="0" wire:model.blur="receivedQuantities.{{ $item->id }}"
+                                           @disabled($activeLocked)
+                                           placeholder="–" style="{{ $activeLocked ? 'background:var(--po-bd2); cursor:not-allowed;' : ($hasDiff ? 'border-color:var(--po-or); background:var(--po-or-s); color:var(--po-or);' : '') }}">
                                 </td>
                                 <td style="text-align:center">
                                     @if(!$hasValue)
@@ -136,8 +159,9 @@
                                     @endif
                                 </td>
                                 <td>
-                                    <input type="text" wire:model.live="itemNotes.{{ $item->id }}" placeholder="{{ __('purchase_order.placeholders.note') }}" 
-                                           style="height:30px; border-radius:7px; font-size:12px; width:100%; min-width:120px; border:1px solid var(--po-bd); padding:0 8px; outline:none">
+                                    <input type="text" wire:model.blur="itemNotes.{{ $item->id }}" placeholder="{{ __('purchase_order.placeholders.note') }}"
+                                           @disabled($activeLocked)
+                                           style="height:30px; border-radius:7px; font-size:12px; width:100%; min-width:120px; border:1px solid var(--po-bd); padding:0 8px; outline:none; background:{{ $activeLocked ? 'var(--po-bd2)' : 'var(--po-wh)' }}; color:var(--po-tx); {{ $activeLocked ? 'cursor:not-allowed;' : '' }}">
                                 </td>
                             </tr>
                         @endforeach

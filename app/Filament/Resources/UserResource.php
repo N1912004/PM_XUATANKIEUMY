@@ -19,6 +19,8 @@ use Spatie\Permission\Models\Role;
 
 class UserResource extends Resource
 {
+    protected static bool $shouldRegisterNavigation = false; // Ẩn menu 'Quản lý tài khoản' khỏi thanh điều hướng Sidebar
+
     protected static ?string $model = User::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-key';

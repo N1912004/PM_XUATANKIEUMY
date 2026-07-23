@@ -42,9 +42,17 @@ class CheckPurchaseOrder extends Page
 
         $this->activePoId = $this->record->id;
 
-        foreach ($this->record->items as $item) {
-            $this->receivedQuantities[$item->id] = $item->quantity_received > 0 ? (float) $item->quantity_received : (float) $item->quantity_ordered;
-            $this->itemNotes[$item->id] = $item->receive_note ?? '';
+        foreach ($this->getRelatedPOsProperty() as $po) {
+            foreach ($po->items as $item) {
+                if (! isset($this->receivedQuantities[$item->id])) {
+                    // Ô số thực nhận để TRỐNG khi chưa kiểm — người kiểm nhập tay số hàng
+                    // thực giao. KHÔNG prefill = số đặt (che mất mặt hàng chưa kiểm và làm
+                    // nhập kho theo số đặt thay vì số thực nhận). Chỉ giữ giá trị nếu PO
+                    // đã từng kiểm/nhập kho trước đó (quantity_received > 0).
+                    $this->receivedQuantities[$item->id] = $item->quantity_received > 0 ? (float) $item->quantity_received : '';
+                    $this->itemNotes[$item->id] = $item->receive_note ?? '';
+                }
+            }
         }
     }
 
@@ -91,11 +99,23 @@ class CheckPurchaseOrder extends Page
             $this->activePoId = $po->id;
             foreach ($po->items as $item) {
                 if (! isset($this->receivedQuantities[$item->id])) {
-                    $this->receivedQuantities[$item->id] = $item->quantity_received > 0 ? (float) $item->quantity_received : (float) $item->quantity_ordered;
+                    // Ô trống khi chưa kiểm (xem chú thích ở mount()) — không prefill số đặt.
+                    $this->receivedQuantities[$item->id] = $item->quantity_received > 0 ? (float) $item->quantity_received : '';
                     $this->itemNotes[$item->id] = $item->receive_note ?? '';
                 }
             }
         }
+    }
+
+    /**
+     * Một item được coi là "đã nhập" khi ô số thực nhận có giá trị (khác rỗng/null).
+     * Số 0 hợp lệ (hàng không giao = nhận 0kg), chỉ ô để trống mới là "chưa kiểm".
+     */
+    protected function isItemChecked(int $itemId): bool
+    {
+        $val = $this->receivedQuantities[$itemId] ?? null;
+
+        return $val !== null && $val !== '';
     }
 
     public function completeCheck()
@@ -105,21 +125,77 @@ class CheckPurchaseOrder extends Page
 
         $relatedPOs = $this->getRelatedPOsProperty();
 
-        DB::transaction(function () use ($relatedPOs) {
-            foreach ($relatedPOs as $po) {
-                // PO đã nhập kho rồi thì bỏ qua: số thực nhận đã chốt vào sổ kho,
-                // sửa lại ở đây sẽ làm chứng từ lệch tồn kho thực tế.
-                if ($po->stocked_at !== null) {
-                    continue;
-                }
+        // Phân loại PO trước khi mutate: chỉ chốt PO đã nhập ĐỦ số thực nhận cho mọi mặt hàng.
+        // PO chưa nhập gì → bỏ qua (chưa kiểm). PO nhập dở dang → chặn cả phiên, báo lỗi.
+        $poToFinalize = [];
+        $pendingCount = 0;   // số PO còn có thể kiểm (chưa nhập kho) trong đợt
 
+        foreach ($relatedPOs as $po) {
+            // PO đã nhập kho rồi thì bỏ qua: số thực nhận đã chốt vào sổ kho,
+            // sửa lại ở đây sẽ làm chứng từ lệch tồn kho thực tế.
+            if ($po->stocked_at !== null) {
+                continue;
+            }
+
+            $total = $po->items->count();
+            if ($total === 0) {
+                continue;
+            }
+
+            $pendingCount++;
+
+            $checked = $po->items->filter(fn ($item) => $this->isItemChecked((int) $item->id))->count();
+
+            if ($checked === 0) {
+                // Chưa nhập mặt hàng nào của NCC này — coi như chưa kiểm, không chốt.
+                continue;
+            }
+
+            if ($checked < $total) {
+                // Nhập dở dang: chặn toàn bộ phiên, không chốt PO nào để tránh nhập kho thiếu.
+                Notification::make()
+                    ->title(__('purchase_order.validation.check_incomplete_title'))
+                    ->body(__('purchase_order.validation.check_incomplete_body', [
+                        'supplier' => $po->supplier?->name ?? '—',
+                        'count' => $total - $checked,
+                    ]))
+                    ->danger()
+                    ->send();
+
+                return;
+            }
+
+            $poToFinalize[] = $po;
+        }
+
+        if (empty($poToFinalize)) {
+            // Không có PO nào chưa nhập kho → cả đợt đã hoàn thành, không kiểm lại được.
+            if ($pendingCount === 0) {
+                Notification::make()
+                    ->title(__('purchase_order.validation.check_all_done_title'))
+                    ->body(__('purchase_order.validation.check_all_done_body'))
+                    ->info()
+                    ->send();
+
+                return redirect()->to(PurchaseOrderResource::getUrl('index'));
+            }
+
+            Notification::make()
+                ->title(__('purchase_order.validation.check_nothing_title'))
+                ->body(__('purchase_order.validation.check_nothing_body'))
+                ->warning()
+                ->send();
+
+            return;
+        }
+
+        DB::transaction(function () use ($poToFinalize) {
+            foreach ($poToFinalize as $po) {
                 foreach ($po->items as $item) {
-                    if (isset($this->receivedQuantities[$item->id])) {
-                        $item->update([
-                            'quantity_received' => (float) $this->receivedQuantities[$item->id],
-                            'receive_note' => trim((string) ($this->itemNotes[$item->id] ?? '')) ?: null,
-                        ]);
-                    }
+                    $item->update([
+                        'quantity_received' => (float) $this->receivedQuantities[$item->id],
+                        'receive_note' => trim((string) ($this->itemNotes[$item->id] ?? '')) ?: null,
+                    ]);
                 }
 
                 // KHÔNG set stocked_at ở đây — hook PurchaseOrder::booted() cần

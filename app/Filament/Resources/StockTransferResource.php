@@ -18,6 +18,8 @@ use Illuminate\Database\Eloquent\Builder;
 
 class StockTransferResource extends Resource
 {
+    protected static bool $shouldRegisterNavigation = false; // Ẩn menu 'Điều chuyển kho' khỏi thanh điều hướng Sidebar
+
     protected static ?string $model = StockTransfer::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-arrows-right-left';

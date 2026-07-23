@@ -13,6 +13,8 @@ use Filament\Tables\Table;
 
 class KitchenTypeResource extends Resource
 {
+    protected static bool $shouldRegisterNavigation = false; // Ẩn menu 'Loại bếp / nhà ăn' khỏi thanh điều hướng Sidebar
+
     protected static ?string $model = KitchenType::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-tag';

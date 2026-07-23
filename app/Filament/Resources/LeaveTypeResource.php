@@ -13,6 +13,8 @@ use Filament\Tables\Table;
 
 class LeaveTypeResource extends Resource
 {
+    protected static bool $shouldRegisterNavigation = false; // Ẩn menu 'Loại nghỉ phép / Tăng ca' khỏi thanh điều hướng Sidebar
+
     protected static ?string $model = LeaveType::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-tag';

@@ -13,6 +13,8 @@ use Filament\Tables\Table;
 
 class RecipeTypeResource extends Resource
 {
+    protected static bool $shouldRegisterNavigation = false; // Ẩn menu 'Nhóm món' khỏi thanh điều hướng Sidebar
+
     protected static ?string $model = RecipeType::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-group';

@@ -12,6 +12,8 @@ use Filament\Tables\Table;
 
 class ShiftResource extends Resource
 {
+    protected static bool $shouldRegisterNavigation = false; // Ẩn menu 'Cấu hình ca làm việc' khỏi thanh điều hướng Sidebar
+
     protected static ?string $model = Shift::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-clock';

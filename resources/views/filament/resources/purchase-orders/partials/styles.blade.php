@@ -1123,16 +1123,74 @@
 
     /* Detail View Tabs & Table CSS */
     .oh-ncc-tabs {
-        margin-bottom: 20px;
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-bottom: 16px;
     }
-    
+
     .oh-ncc-tab {
-        transition: all 0.2s ease-in-out !important;
+        height: 36px;
+        padding: 0 16px;
+        border: 1.5px solid var(--po-bd);
+        border-radius: 9px;
+        background: var(--po-wh);
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--po-mu);
+        cursor: pointer;
+        transition: .13s ease-in-out;
+        font-family: inherit;
+        display: flex;
+        align-items: center;
+        gap: 7px;
     }
-    
+
     .oh-ncc-tab:hover {
+        border-color: var(--po-bl-m);
+        color: var(--po-bl);
         transform: translateY(-1px);
         box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+    }
+
+    .oh-ncc-tab.active {
+        background: var(--po-bl);
+        color: #fff;
+        border-color: var(--po-bl);
+        box-shadow: 0 4px 12px rgba(38, 125, 193, .25);
+    }
+
+    .oh-ncc-tab .oh-ncc-dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        flex-shrink: 0;
+        display: inline-block;
+    }
+
+    .oh-ncc-badge {
+        border-radius: 10px;
+        padding: 1px 8px;
+        font-size: 11px;
+        font-weight: 800;
+        background: var(--po-bd2);
+        color: var(--po-mu);
+    }
+
+    .oh-ncc-tab.active .oh-ncc-badge {
+        background: rgba(255, 255, 255, .25);
+        color: #fff;
+    }
+
+    /* Badge chuyển xanh khi đã kiểm đủ mặt hàng của NCC đó */
+    .oh-ncc-badge.done {
+        background: var(--po-gn-s);
+        color: var(--po-gn-t);
+    }
+
+    .oh-ncc-tab.active .oh-ncc-badge.done {
+        background: rgba(255, 255, 255, .3);
+        color: #fff;
     }
 
     .po-list-card table th {
@@ -1182,6 +1240,39 @@
     .lhn-grand { display:flex; align-items:center; justify-content:space-between; background:linear-gradient(135deg,#1474FF,#0059DD); border-radius:var(--po-r); padding:16px 22px; color:#fff; box-shadow:0 6px 20px rgba(18,103,232,.3) }
     .lhn-grand-lbl { font-size:14px; font-weight:700; opacity:.9 }
     .lhn-grand-val { font-size:24px; font-weight:800; letter-spacing:-.02em }
+
+    /* Check Goods Input & Diff Badges */
+    .oh-check-inp {
+        width: 76px;
+        height: 32px;
+        border: 1.5px solid var(--po-bd);
+        border-radius: 7px;
+        text-align: center;
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--po-tx);
+        background: var(--po-wh);
+        outline: none;
+        transition: all 0.13s ease;
+    }
+    .oh-check-inp:focus {
+        border-color: var(--po-bl);
+        box-shadow: 0 0 0 3px rgba(20, 116, 255, 0.12);
+    }
+    .oh-diff-ok {
+        font-size: 12.5px;
+        font-weight: 700;
+        color: #059669;
+    }
+    .oh-diff-bad {
+        font-size: 12.5px;
+        font-weight: 700;
+        color: #DC2626;
+    }
+    .oh-diff-pending {
+        color: var(--po-mu);
+        font-weight: 500;
+    }
 
     /* Dark mode cho badge trạng thái đơn (.os-*): nền hardcode sáng ở light sẽ chói trên nền
        tối, nên hạ về nền mờ (alpha) + chữ sáng — đồng bộ pattern với .ms-* / .ci-status-badge. */

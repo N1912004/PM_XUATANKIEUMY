@@ -10,6 +10,8 @@ use Livewire\Attributes\On;
 
 class ChatNhom extends Page
 {
+    protected static bool $shouldRegisterNavigation = false; // Ẩn menu 'Chat nhóm' khỏi Sidebar
+
     protected static ?string $navigationIcon = 'heroicon-o-chat-bubble-left-right';
 
     protected static ?int $navigationSort = 99;
