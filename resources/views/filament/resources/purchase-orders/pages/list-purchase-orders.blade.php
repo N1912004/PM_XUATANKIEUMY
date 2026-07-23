@@ -71,14 +71,14 @@
             <input wire:model.live.debounce.250ms="search" type="text" placeholder="{{ __('purchase_order.placeholders.search') }}">
         </div>
 
-        <div style="display:inline-flex; align-items:center; gap:6px; background:#fff; padding:6px 12px; border:1px solid var(--po-bd); border-radius:8px">
-            <span style="font-size:12.5px; font-weight:600; color:var(--po-mu); white-space:nowrap">{{ __('purchase_order.filters.from_date') }}:</span>
-            <input wire:model.live="fromDate" type="date" style="font-size:12.5px; font-weight:600; color:var(--po-tx); border:none; outline:none; background:transparent; cursor:pointer">
+        <div class="mp-date-box">
+            <span style="font-weight:600; color:var(--po-mu); white-space:nowrap">{{ __('purchase_order.filters.from_date') }}:</span>
+            <input wire:model.live="fromDate" type="date">
         </div>
 
-        <div style="display:inline-flex; align-items:center; gap:6px; background:#fff; padding:6px 12px; border:1px solid var(--po-bd); border-radius:8px">
-            <span style="font-size:12.5px; font-weight:600; color:var(--po-mu); white-space:nowrap">{{ __('purchase_order.filters.to_date') }}:</span>
-            <input wire:model.live="toDate" type="date" style="font-size:12.5px; font-weight:600; color:var(--po-tx); border:none; outline:none; background:transparent; cursor:pointer">
+        <div class="mp-date-box">
+            <span style="font-weight:600; color:var(--po-mu); white-space:nowrap">{{ __('purchase_order.filters.to_date') }}:</span>
+            <input wire:model.live="toDate" type="date">
         </div>
 
         <select wire:model.live="statusFilter" class="mp-sel" id="ohStFilter">
