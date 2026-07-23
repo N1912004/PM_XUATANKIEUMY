@@ -48,6 +48,14 @@
                     $poTotal = $po->items->sum(fn($it) => $it->quantity_ordered * $it->unit_price);
                     $isActive = $po->id === $record->id;
                     $color = $colors[$index % count($colors)];
+                    $supplierName = $po->supplier?->name ?: $po->code;
+                    $sameSupplierPOs = $relatedPOs->where('supplier_id', $po->supplier_id)->values();
+                    $hasMultiplePOs = $sameSupplierPOs->count() > 1;
+                    $slipSuffix = '';
+                    if ($hasMultiplePOs) {
+                        $supplierIdx = $sameSupplierPOs->search(fn($p) => $p->id === $po->id);
+                        $slipSuffix = ' - P' . (($supplierIdx !== false ? $supplierIdx : 0) + 1);
+                    }
                 @endphp
                 <a href="{{ \App\Filament\Resources\PurchaseOrderResource::getUrl('view', ['record' => $po]) }}" 
                    class="oh-ncc-tab" 
@@ -56,7 +64,7 @@
                     
                     <span style="width:9px; height:9px; border-radius:50%; background:{{ $isActive ? '#fff' : $color }}; display:inline-block"></span>
 
-                    <span>{{ $po->supplier?->name }}</span>
+                    <span>{{ $supplierName . $slipSuffix }}</span>
 
                     <span style="display:inline-flex; align-items:center; justify-content:center; padding:2px 7px; border-radius:10px; font-size:11px; font-weight:800; 
                                  {{ $isActive ? 'background:rgba(255,255,255,0.25); color:#fff;' : 'background:var(--po-bd2); color:var(--po-mu);' }}">

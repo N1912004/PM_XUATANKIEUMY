@@ -43,6 +43,14 @@
                     $checkedCount = $po->items->filter(fn($it) => isset($receivedQuantities[$it->id]) && $receivedQuantities[$it->id] !== '')->count();
                     $totalCount = $po->items->count();
                     $allDone = $totalCount > 0 && $checkedCount === $totalCount;
+                    $supplierName = $po->supplier?->name ?: $po->code;
+                    $sameSupplierPOs = $relatedPOs->where('supplier_id', $po->supplier_id)->values();
+                    $hasMultiplePOs = $sameSupplierPOs->count() > 1;
+                    $slipSuffix = '';
+                    if ($hasMultiplePOs) {
+                        $supplierIdx = $sameSupplierPOs->search(fn($p) => $p->id === $po->id);
+                        $slipSuffix = ' - P' . (($supplierIdx !== false ? $supplierIdx : 0) + 1);
+                    }
                 @endphp
                 <button type="button" wire:click="switchPo({{ $po->id }})"
                         class="oh-ncc-tab {{ $isActive ? 'active' : '' }}">
@@ -51,7 +59,7 @@
                     @else
                         <span class="oh-ncc-dot" style="background:{{ $isActive ? '#fff' : ($allDone ? 'var(--po-gn)' : $color) }}"></span>
                     @endif
-                    <span>{{ $po->supplier?->name }}</span>
+                    <span>{{ $supplierName . $slipSuffix }}</span>
                     <span class="oh-ncc-badge {{ ($allDone || $poLocked) ? 'done' : '' }}">{{ $checkedCount }}/{{ $totalCount }}</span>
                 </button>
             @endforeach
