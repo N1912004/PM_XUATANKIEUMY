@@ -13,6 +13,8 @@ use Filament\Tables\Table;
 
 class IngredientTypeResource extends Resource
 {
+    protected static bool $shouldRegisterNavigation = false; // Ẩn menu 'Loại nguyên liệu' khỏi thanh điều hướng Sidebar
+
     protected static ?string $model = IngredientType::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-tag';

@@ -18,6 +18,8 @@ use Illuminate\Database\Eloquent\Builder;
  */
 class MenuAuditLogResource extends Resource
 {
+    protected static bool $shouldRegisterNavigation = false; // Ẩn menu 'Lịch sử sửa thực đơn' khỏi thanh điều hướng Sidebar
+
     protected static ?string $model = MenuAuditLog::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-clock';

@@ -2,7 +2,7 @@
 
 return [
     'shield_resource' => [
-        'should_register_navigation' => true,
+        'should_register_navigation' => false, // Ẩn menu 'Vai trò & Phân quyền' (RoleResource) khỏi Sidebar
         'slug' => 'shield/roles',
         'navigation_sort' => 98,
         'navigation_badge' => true,

@@ -17,6 +17,8 @@ class Dashboard extends Page
 {
     use WithPagination;
 
+    protected static bool $shouldRegisterNavigation = false; // Ẩn menu 'Bảng điều khiển' (Dashboard) khỏi Sidebar
+
     protected static ?string $navigationIcon = 'heroicon-o-squares-2x2';
 
     protected static ?int $navigationSort = -10;

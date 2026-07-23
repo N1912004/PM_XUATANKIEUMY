@@ -14,6 +14,8 @@ use Illuminate\Database\Eloquent\Builder;
 
 class TimekeepingResource extends Resource
 {
+    protected static bool $shouldRegisterNavigation = false; // Ẩn menu 'Chấm công' khỏi thanh điều hướng Sidebar
+
     protected static ?string $model = Timekeeping::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-clock';

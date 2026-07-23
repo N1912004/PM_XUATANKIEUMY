@@ -13,6 +13,8 @@ use Filament\Tables\Table;
 
 class UnitResource extends Resource
 {
+    protected static bool $shouldRegisterNavigation = false; // Ẩn menu 'Đơn vị tính' khỏi thanh điều hướng Sidebar
+
     protected static ?string $model = Unit::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-scale';

@@ -13,6 +13,8 @@ use Filament\Tables\Table;
 
 class DepartmentResource extends Resource
 {
+    protected static bool $shouldRegisterNavigation = false; // Ẩn menu 'Phòng ban' khỏi thanh điều hướng Sidebar
+
     protected static ?string $model = Department::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-briefcase';
