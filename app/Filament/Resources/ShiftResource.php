@@ -12,7 +12,7 @@ use Filament\Tables\Table;
 
 class ShiftResource extends Resource
 {
-    protected static bool $shouldRegisterNavigation = true; // Hiện lại menu 'Ca làm việc' trên thanh điều hướng Sidebar
+    protected static bool $shouldRegisterNavigation = false; // Ẩn menu 'Ca làm việc' khỏi thanh điều hướng Sidebar
 
     protected static ?string $model = Shift::class;
 
