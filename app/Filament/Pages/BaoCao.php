@@ -35,6 +35,20 @@ class BaoCao extends Page
         return __('catalog.groups.kitchen_operations');
     }
 
+    /**
+     * Chặn cả XEM trang theo quyền page_BaoCao — trước đây chỉ exportExcel() check,
+     * còn view thì user nào vào được panel cũng mở được (lỗ phân quyền bất đối xứng).
+     */
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->can('page_BaoCao') ?? false;
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return static::canAccess();
+    }
+
     public ?string $fromDate = null;
 
     public ?string $toDate = null;
@@ -132,8 +146,19 @@ class BaoCao extends Page
             return $this->groupedDataMemo = [];
         }
 
-        $start = Carbon::parse($this->fromDate);
-        $end = Carbon::parse($this->toDate);
+        // fromDate/toDate bind từ client (wire:model) — chuỗi rác làm Carbon::parse ném 500.
+        try {
+            $start = Carbon::parse($this->fromDate);
+            $end = Carbon::parse($this->toDate);
+        } catch (\Throwable) {
+            return $this->groupedDataMemo = [];
+        }
+
+        // Cap độ rộng khoảng lọc: chặn payload kiểu 2000→2030 kéo toàn bộ menu về PHP
+        // (aggregate tính trong PHP, không SQL) + while-loop hàng nghìn vòng.
+        if ($end->diffInDays($start, true) > 366) {
+            $end = $start->copy()->addDays(366);
+        }
 
         $days = [];
         $current = $start->copy();
@@ -156,7 +181,9 @@ class BaoCao extends Page
         // Khoảng nửa mở [start, end+1) — sargable trên MySQL (dùng index) và đúng cả trên
         // SQLite (nơi cột date lưu kèm giờ '00:00:00' khi test)
         // Báo cáo tài chính chỉ tính thực đơn ĐÃ CHỐT — nháp/đang gửi chưa phải chi phí thực
-        $menusQuery = Menu::with(['recipe.ingredients'])
+        // Eager cả recipeType: blade đọc $recipe->type (accessor gọi relation) —
+        // thiếu là +1 query mỗi recipe (N+1 từng đo ~15 query thừa/lần load).
+        $menusQuery = Menu::with(['recipe.ingredients', 'recipe.recipeType'])
             ->where('status', 'locked')
             ->where('date', '>=', $start->toDateString())
             ->where('date', '<', $end->copy()->addDay()->toDateString())
@@ -208,11 +235,11 @@ class BaoCao extends Page
                     }
 
                     $ingredients = [];
-                    $costPerPortion = 0.0;
+                    $rawCostPerPortion = 0.0;
                     foreach ($recipe->ingredients as $ingredient) {
                         $qty = $menu->estimated_portions * $ingredient->pivot->quantity_per_portion;
                         $lineCost = $ingredient->pivot->quantity_per_portion * (float) $ingredient->reference_price;
-                        $costPerPortion += $lineCost;
+                        $rawCostPerPortion += $lineCost;
                         $ingredients[] = [
                             'code' => $ingredient->code,
                             'name' => $ingredient->name,
@@ -226,11 +253,13 @@ class BaoCao extends Page
                         ];
                     }
 
-                    // Cost override (nếu có) thay cho cost tự tính — theo quy định BA về giá vốn món
-                    if ($recipe->cost_override !== null) {
-                        $overridePerPortion = (float) $recipe->cost_override;
-                        $scale = $costPerPortion > 0 ? ($overridePerPortion / $costPerPortion) : 1.0;
-                        $costPerPortion = $overridePerPortion;
+                    // Giá vốn/suất lấy từ nguồn DUY NHẤT effectiveCostPerPortion() (override
+                    // nếu có, không thì tổng NL) — mọi màn hình cost phải cùng nguồn này.
+                    // Khi có override, line_cost từng NL được scale theo tỉ lệ để tổng cột
+                    // vẫn khớp giá vốn món (chỉ phục vụ hiển thị bảng chi tiết).
+                    $costPerPortion = $recipe->effectiveCostPerPortion();
+                    if ($recipe->cost_override !== null && $rawCostPerPortion > 0) {
+                        $scale = $costPerPortion / $rawCostPerPortion;
                         foreach ($ingredients as &$ingItem) {
                             $ingItem['line_cost'] = $ingItem['line_cost'] * $scale;
                         }

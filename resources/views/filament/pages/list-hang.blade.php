@@ -113,7 +113,7 @@
     .dark .lhn-nav-btn {
         background: #1e293b;
         border-color: #334155;
-        color: #94a3b8;
+        color: var(--fa);
     }
     .lhn-nav-btn:hover {
         background: var(--bl-s);
@@ -318,7 +318,7 @@
     }
     .dark .lhn-mon-type {
         background: #1e293b;
-        color: #94a3b8;
+        color: var(--fa);
     }
     .lhn-mon-right {
         display: flex;
@@ -364,7 +364,7 @@
     .dark .lhn-ing-table th {
         background: rgba(30, 41, 59, 0.5);
         border-color: #1e293b;
-        color: #94a3b8;
+        color: var(--fa);
     }
     .lhn-ing-table td {
         padding: 9px 12px;
@@ -375,7 +375,7 @@
     }
     .dark .lhn-ing-table td {
         border-color: #1e293b;
-        color: #cbd5e1;
+        color: var(--su, #cbd5e1);
     }
     .lhn-ing-table tr:last-child td {
         border-bottom: none;
@@ -479,7 +479,7 @@
     }
     .dark .oh-step-pending .oh-step-num {
         background: #1e293b;
-        color: #64748b;
+        color: var(--mu);
         border-color: #334155;
     }
     .oh-step-lbl {
@@ -562,7 +562,7 @@
     .dark .oh-table th {
         background: rgba(30, 41, 59, 0.4);
         border-color: #1e293b;
-        color: #94a3b8;
+        color: var(--fa);
     }
     .oh-table td {
         padding: 10px 12px;
@@ -573,7 +573,7 @@
     }
     .dark .oh-table td {
         border-color: #1e293b;
-        color: #cbd5e1;
+        color: var(--su, #cbd5e1);
     }
     .oh-table tbody tr:hover {
         background: #FAFCFF;
@@ -687,9 +687,14 @@
         font-size: 11px;
         font-weight: 700;
     }
-    .loai-thit { background: #FEF2F2; color: #DC2626; }
-    .loai-uot { background: #EFF6FF; color: #1e40af; }
-    .loai-kho { background: #FEF3C7; color: #78350F; }
+    .loai-thit { background: var(--rd-s); color: var(--rd); }
+    .loai-uot { background: var(--bl-s); color: var(--bl); }
+    .loai-kho { background: var(--am-s); color: var(--am); }
+
+    /* Nền sáng hardcode chói trên nền tối — hạ về nền mờ alpha + chữ sáng */
+    :root.dark .loai-thit { background: rgba(220, 38, 38, .18); color: #F87171; }
+    :root.dark .loai-uot { background: rgba(38, 125, 193, .18); color: #93c5fd; }
+    :root.dark .loai-kho { background: rgba(217, 119, 6, .18); color: #fbbf24; }
 
     .lhn-empty {
         display: flex;
@@ -747,10 +752,10 @@
             <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
                 <div>
                     <h1 style="font-size:20px;font-weight:800;margin:0 0 4px" class="dark:text-white">{{ __('list_hang.heading', ['date' => \Carbon\Carbon::parse($date)->format('d/m/Y')]) }}</h1>
-                    <p style="font-size:12.5px;color:#64748B;margin:0">{{ __('list_hang.subtitle') }}</p>
+                    <p style="font-size:12.5px;color:var(--mu);margin:0">{{ __('list_hang.subtitle') }}</p>
                 </div>
                 <div style="display:flex;gap:8px">
-                    <button type="button" wire:click="exportList" style="height:40px;padding:0 20px;border-radius:12px;background:#16A34A;color:#ffffff;font-size:14px;font-weight:700;display:inline-flex;align-items:center;gap:8px;border:none;cursor:pointer;box-shadow:0 2px 6px rgba(22,163,74,0.25);transition:all 0.15s ease;" onmouseover="this.style.background='#15803D'" onmouseout="this.style.background='#16A34A'">
+                    <button type="button" wire:click="exportList" style="height:40px;padding:0 20px;border-radius:12px;background:var(--gn);color:#ffffff;font-size:14px;font-weight:700;display:inline-flex;align-items:center;gap:8px;border:none;cursor:pointer;box-shadow:0 2px 6px rgba(22,163,74,0.25);transition:all 0.15s ease;" onmouseover="this.style.opacity='.88'" onmouseout="this.style.opacity='1'">
                         <svg xmlns="http://www.w3.org/2000/svg" style="width:20px;height:20px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
@@ -818,7 +823,7 @@
                     <div><div class="lhn-chip-val">{{ $stats['shifts'] }}</div><div class="lhn-chip-lbl">{{ __('list_hang.stats.shifts') }}</div></div>
                 </div>
                 <div class="lhn-chip">
-                    <div class="lhn-chip-ico" style="background:#E9F2F8; color:var(--bl);"><i class="fa-solid fa-users"></i></div>
+                    <div class="lhn-chip-ico" style="background:var(--bl-s); color:var(--bl);"><i class="fa-solid fa-users"></i></div>
                     <div><div class="lhn-chip-val">{{ number_format($stats['portions']) }}</div><div class="lhn-chip-lbl">{{ __('list_hang.stats.portions') }}</div></div>
                 </div>
                 <div class="lhn-chip">
@@ -880,19 +885,19 @@
                                         <tbody>
                                             @foreach($dish['ingredients'] as $iIdx => $ing)
                                                 <tr>
-                                                    <td style="text-align: center; color: #94a3b8;">{{ $iIdx + 1 }}</td>
+                                                    <td style="text-align: center; color: var(--fa);">{{ $iIdx + 1 }}</td>
                                                     <td style="font-weight: 700;" class="dark:text-white">
                                                         <div>{{ $ing['name'] }}</div>
-                                                        <div style="font-size:10px; color:#94a3b8; font-weight:500;">{{ $ing['code'] }}</div>
+                                                        <div style="font-size:10px; color:var(--fa); font-weight:500;">{{ $ing['code'] }}</div>
                                                     </td>
                                                     <td style="text-align: right;">{{ number_format($dish['portions']) }}</td>
-                                                    <td style="text-align: right; color:#64748b;">{{ number_format($ing['quantity_per_portion'] * 1000, 0, ',', '.') }} g</td>
+                                                    <td style="text-align: right; color:var(--mu);">{{ number_format($ing['quantity_per_portion'] * 1000, 0, ',', '.') }} g</td>
                                                     <td style="text-align: right; font-weight: 750;" class="lhn-kg">{{ number_format($ing['quantity'], 3, ',', '.') }} kg</td>
                                                 </tr>
                                             @endforeach
                                             <tr class="lhn-total-row">
-                                                <td colspan="4" style="text-align: right; padding: 10px 12px; font-weight: 800; color:#1e40af;">{{ __('list_hang.table.dish_total', ['dish' => $dish['name']]) }}:</td>
-                                                <td style="text-align: right; padding: 10px 12px; font-weight: 850; color:#1e40af;">{{ __('list_hang.counts.portions', ['count' => number_format($dish['portions'])]) }}</td>
+                                                <td colspan="4" style="text-align: right; padding: 10px 12px; font-weight: 800; color:var(--bl);">{{ __('list_hang.table.dish_total', ['dish' => $dish['name']]) }}:</td>
+                                                <td style="text-align: right; padding: 10px 12px; font-weight: 850; color:var(--bl);">{{ __('list_hang.counts.portions', ['count' => number_format($dish['portions'])]) }}</td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -922,7 +927,7 @@
                 <div class="flex justify-between items-start mb-4">
                     <div>
                         <h1 style="font-size:20px; font-weight:800; margin:0;" class="dark:text-white">{{ __('list_hang.po.title') }}</h1>
-                        <p style="font-size: 12px; color: #64748b; margin-top:2px;">{{ __('list_hang.po.subtitle') }}</p>
+                        <p style="font-size: 12px; color: var(--mu); margin-top:2px;">{{ __('list_hang.po.subtitle') }}</p>
                     </div>
                     <div class="flex gap-2">
                         <button type="button" class="wh-action-btn" wire:click="goBackToList">
@@ -940,7 +945,7 @@
                         <div class="oh-step-num"><i class="fa-solid fa-check" style="font-size:11px"></i></div>
                         <div>
                             <div class="oh-step-lbl">{{ __('list_hang.po.steps.select_list') }}</div>
-                            <div style="font-size:11px; color:#64748b;">
+                            <div style="font-size:11px; color:var(--mu);">
                                 {{ \Carbon\Carbon::parse($poSourceFrom)->format('d/m') }} - {{ \Carbon\Carbon::parse($poSourceTo)->format('d/m') }}
                             </div>
                         </div>
@@ -950,7 +955,7 @@
                         <div class="oh-step-num">2</div>
                         <div>
                             <div class="oh-step-lbl">{{ __('list_hang.po.steps.assign_supplier') }}</div>
-                            <div style="font-size:11px; color:#64748b;">{{ __('list_hang.po.steps.assign_supplier_description') }}</div>
+                            <div style="font-size:11px; color:var(--mu);">{{ __('list_hang.po.steps.assign_supplier_description') }}</div>
                         </div>
                     </div>
                     <div class="oh-step-line"></div>
@@ -958,7 +963,7 @@
                         <div class="oh-step-num">3</div>
                         <div>
                             <div class="oh-step-lbl">{{ __('list_hang.po.steps.create') }}</div>
-                            <div style="font-size:11px; color:#64748b;">{{ __('list_hang.po.steps.create_description') }}</div>
+                            <div style="font-size:11px; color:var(--mu);">{{ __('list_hang.po.steps.create_description') }}</div>
                         </div>
                     </div>
                 </div>
@@ -1020,10 +1025,10 @@
                                 <div class="oh-group-head">
                                     <div class="oh-group-title">
                                         <span class="loai-badge {{ $cat['class'] }}">{{ $cat['icon'] }} {{ $cat['label'] }}</span>
-                                        <span style="font-size:12px; color:#64748b; font-weight:400;">{{ __('list_hang.counts.ingredients', ['count' => $catItems->count()]) }}</span>
+                                        <span style="font-size:12px; color:var(--mu); font-weight:400;">{{ __('list_hang.counts.ingredients', ['count' => $catItems->count()]) }}</span>
                                     </div>
                                     <div style="display:flex; align-items:center; gap:10px;">
-                                        <span style="font-size:12px; color:#64748b;">{{ __('list_hang.po.quick_supplier') }}:</span>
+                                        <span style="font-size:12px; color:var(--mu);">{{ __('list_hang.po.quick_supplier') }}:</span>
                                         <select class="oh-ncc-sel" onchange="@this.bulkAssignSupplier('{{ $key }}', this.value)" style="height:28px; padding-top:2px;">
                                             <option value="">{{ __('list_hang.po.select_supplier') }}</option>
                                             @foreach($suppliers as $supplier)
@@ -1054,7 +1059,7 @@
                                         @foreach($poItems as $index => $item)
                                             @if($item['loai'] === $key)
                                                 <tr>
-                                                    <td style="text-align:center; color:#94a3b8;">{{ $index + 1 }}</td>
+                                                    <td style="text-align:center; color:var(--fa);">{{ $index + 1 }}</td>
                                                     <td style="text-align:center;">
                                                         <input type="checkbox" wire:model.live="poItems.{{ $index }}.checked">
                                                     </td>
@@ -1071,19 +1076,19 @@
                                                             </div>
                                                         @endif
                                                     </td>
-                                                    <td style="font-size:11px; color:#64748b;">
+                                                    <td style="font-size:11px; color:var(--mu);">
                                                         {{ implode(', ', $item['dishes']) }}
                                                     </td>
                                                     <td style="text-align:right;">{{ number_format($item['total_suat']) }}</td>
                                                     <td style="text-align:right; font-weight:600;">{{ number_format($item['total_kg'], 3, ',', '.') }} {{ $item['unit'] }}</td>
                                                     {{-- Tồn kho hiện có: SL đề xuất đã tự trừ phần này để không đặt thừa --}}
-                                                    <td style="text-align:right; color:{{ ($item['stock_qty'] ?? 0) > 0 ? '#16a34a' : '#94a3b8' }}; font-weight:600;">
+                                                    <td style="text-align:right; color:{{ ($item['stock_qty'] ?? 0) > 0 ? 'var(--gn)' : 'var(--fa)' }}; font-weight:600;">
                                                         {{ number_format($item['stock_qty'] ?? 0, 3, ',', '.') }} {{ $item['unit'] }}
                                                     </td>
                                                     <td style="text-align:center;">
-                                                        <input type="number" step="0.001" wire:model.live="poItems.{{ $index }}.quantity_manual" class="table-input" style="height:28px;">
+                                                        <input type="number" step="0.001" wire:model.blur="poItems.{{ $index }}.quantity_manual" class="table-input" style="height:28px;">
                                                     </td>
-                                                    <td style="text-align:right; color:#64748b;">{{ number_format($item['reference_price'], 0, ',', '.') }} {{ __('list_hang.currency') }}/{{ $item['unit'] }}</td>
+                                                    <td style="text-align:right; color:var(--mu);">{{ number_format($item['reference_price'], 0, ',', '.') }} {{ __('list_hang.currency') }}/{{ $item['unit'] }}</td>
                                                     <td style="text-align:right; font-weight:700; color:#ea580c;">
                                                         @if($item['checked'])
                                                             {{ number_format($item['quantity_manual'] * $item['reference_price'], 0, ',', '.') }} {{ __('list_hang.currency') }}
@@ -1092,7 +1097,7 @@
                                                         @endif
                                                     </td>
                                                     <td>
-                                                        <select wire:model.live="poItems.{{ $index }}.supplier_id" style="height:28px; font-size:11px; padding:2px; border-radius:6px; border-color:#cbd5e1; width:100%;">
+                                                        <select wire:model.live="poItems.{{ $index }}.supplier_id" style="height:28px; font-size:11px; padding:2px; border-radius:6px; border-color:var(--su, #cbd5e1); width:100%;">
                                                             @foreach($suppliers as $supplier)
                                                                 <option value="{{ $supplier->id }}">{{ $supplier->name }}</option>
                                                             @endforeach
@@ -1110,7 +1115,7 @@
                                                 ->sum(fn($it) => $it['quantity_manual'] * $it['reference_price']);
                                         @endphp
                                         <tr style="background:#F8FAFC" class="dark:bg-gray-800/40">
-                                            <td colspan="9" style="text-align:right; font-weight:700; color:#64748b;">{{ __('list_hang.po.group_total', ['group' => $cat['label']]) }}:</td>
+                                            <td colspan="9" style="text-align:right; font-weight:700; color:var(--mu);">{{ __('list_hang.po.group_total', ['group' => $cat['label']]) }}:</td>
                                             <td colspan="3" style="font-weight:800; color:var(--bl); font-size:13px;">{{ number_format($groupTotal, 0, ',', '.') }} {{ __('list_hang.currency') }}</td>
                                         </tr>
                                     </tbody>
@@ -1182,13 +1187,13 @@
                             </div>
                         @endif
                     @empty
-                        <div style="font-size:11px; color:#94a3b8; font-style:italic;">{{ __('list_hang.empty.no_allocation') }}</div>
+                        <div style="font-size:11px; color:var(--fa); font-style:italic;">{{ __('list_hang.empty.no_allocation') }}</div>
                     @endforelse
 
                 </div>
 
                 <!-- Info Box -->
-                <div style="background:#E9F2F8; color:#1e40af; border: 1px solid #A8CBE6; border-radius:12px; padding:12px; font-size:11.5px; line-height:1.4;">
+                <div style="background:var(--bl-s); color:var(--bl); border: 1px solid #A8CBE6; border-radius:12px; padding:12px; font-size:11.5px; line-height:1.4;">
                     <div style="font-weight:800; display:flex; align-items:center; gap:4px; margin-bottom:6px;">
                         <i class="fa-solid fa-circle-info"></i> {{ __('list_hang.notes.title') }}
                     </div>

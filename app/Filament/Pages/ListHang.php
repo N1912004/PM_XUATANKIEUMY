@@ -13,6 +13,7 @@ use App\Models\PurchaseOrderItem;
 use App\Models\Shift;
 use App\Models\Stock;
 use App\Models\Supplier;
+use App\Models\User;
 use Carbon\Carbon;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
@@ -53,6 +54,27 @@ class ListHang extends Page
     public static function getNavigationGroup(): ?string
     {
         return __('catalog.groups.supply_inventory');
+    }
+
+    /** Cấp quản lý xem toàn hệ thống; còn lại khóa vào bếp của mình. */
+    protected function seesAllKitchens(): bool
+    {
+        return auth()->user()?->hasRole([User::superAdminRole(), 'Quản trị viên']) ?? false;
+    }
+
+    /** Bếp bị ÉP cho user thường (null = quản lý, xem tất cả bếp). */
+    protected function enforcedKitchenId(): ?int
+    {
+        return $this->seesAllKitchens() ? null : auth()->user()?->currentKitchenId();
+    }
+
+    /**
+     * Fail-closed: user thường CHƯA gắn bếp thì không thấy dữ liệu nào (giống
+     * BelongsToKitchen), thay vì `when(null)` bỏ filter và thấy mọi bếp (fail-open).
+     */
+    protected function kitchenScopeBlocked(): bool
+    {
+        return ! $this->seesAllKitchens() && ! auth()->user()?->currentKitchenId();
     }
 
     public static function getNavigationLabel(): string
@@ -144,9 +166,10 @@ class ListHang extends Page
 
     public function loadPOIngredients(): void
     {
-        $kitchenId = auth()->user()?->currentKitchenId();
+        $kitchenId = $this->enforcedKitchenId();
 
-        if (empty($this->poSelectedShifts) || ! $this->poSourceFrom || ! $this->poSourceTo) {
+        // Fail-closed: user thường chưa gắn bếp thì không tổng hợp gì (không lộ bếp khác)
+        if ($this->kitchenScopeBlocked() || empty($this->poSelectedShifts) || ! $this->poSourceFrom || ! $this->poSourceTo) {
             $this->poItems = [];
 
             return;
@@ -164,10 +187,12 @@ class ListHang extends Page
 
         // Prefetch existing PO codes per ingredient for the order date in one query
         // (avoids one query per ingredient inside the loop below).
+        // Scope theo bếp: badge "đã đặt" không được lộ mã PO của bếp khác.
         $poDateEnd = Carbon::parse($this->poDate)->addDay()->toDateString();
         $existingPoCodesByIngredient = PurchaseOrderItem::query()
             ->whereHas('purchaseOrder', fn ($q) => $q->where('estimated_delivery_date', '>=', $this->poDate)
-                ->where('estimated_delivery_date', '<', $poDateEnd))
+                ->where('estimated_delivery_date', '<', $poDateEnd)
+                ->when($kitchenId, fn ($qq) => $qq->where('kitchen_id', $kitchenId)))
             ->with('purchaseOrder:id,code')
             ->get(['id', 'purchase_order_id', 'ingredient_id'])
             ->groupBy('ingredient_id')
@@ -299,6 +324,8 @@ class ListHang extends Page
     public function createOrders(): void
     {
         abort_unless(PurchaseOrderResource::canCreate(), 403);
+        // User thường chưa gắn bếp không được tạo PO (sẽ sinh PO kitchen_id NULL — mồ côi)
+        abort_if($this->kitchenScopeBlocked(), 403);
 
         // Quy định nghiệp vụ: ngày đặt hàng chỉ trong vòng 2 ngày kế tiếp từ hôm nay
         $orderDate = Carbon::parse($this->poDate)->startOfDay();
@@ -448,11 +475,12 @@ class ListHang extends Page
             return $this->groupedDataMemo;
         }
 
-        if (empty($this->selectedShifts) || ! $this->date) {
+        // Fail-closed: user thường chưa gắn bếp → danh sách rỗng, không thấy bếp khác
+        if ($this->kitchenScopeBlocked() || empty($this->selectedShifts) || ! $this->date) {
             return $this->groupedDataMemo = [];
         }
 
-        $kitchenId = auth()->user()?->currentKitchenId();
+        $kitchenId = $this->enforcedKitchenId();
 
         $shifts = Shift::whereIn('id', $this->selectedShifts)->get();
 
@@ -522,7 +550,8 @@ class ListHang extends Page
 
     public function getStats(): array
     {
-        if (empty($this->selectedShifts) || ! $this->date) {
+        // Fail-closed: cùng guard với getGroupedData
+        if ($this->kitchenScopeBlocked() || empty($this->selectedShifts) || ! $this->date) {
             return [
                 'shifts' => 0,
                 'portions' => 0,
@@ -531,7 +560,7 @@ class ListHang extends Page
             ];
         }
 
-        $kitchenId = auth()->user()?->currentKitchenId();
+        $kitchenId = $this->enforcedKitchenId();
 
         // Khoảng nửa mở [ngày, ngày+1) để dùng index (date, shift_id); gộp 2 aggregate vào 1 query
         $totals = Menu::where('status', 'locked')
