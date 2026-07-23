@@ -228,7 +228,13 @@ class BaoCao extends Page
 
                     // Cost override (nếu có) thay cho cost tự tính — theo quy định BA về giá vốn món
                     if ($recipe->cost_override !== null) {
-                        $costPerPortion = (float) $recipe->cost_override;
+                        $overridePerPortion = (float) $recipe->cost_override;
+                        $scale = $costPerPortion > 0 ? ($overridePerPortion / $costPerPortion) : 1.0;
+                        $costPerPortion = $overridePerPortion;
+                        foreach ($ingredients as &$ingItem) {
+                            $ingItem['line_cost'] = $ingItem['line_cost'] * $scale;
+                        }
+                        unset($ingItem);
                     }
 
                     // Tổng giá vốn món = giá vốn/suất × số suất

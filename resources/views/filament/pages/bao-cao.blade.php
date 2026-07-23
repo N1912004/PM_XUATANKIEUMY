@@ -226,7 +226,7 @@
     /* Stats Cards */
     .stats-grid {
         display: grid;
-        grid-template-columns: repeat(5, 1fr);
+        grid-template-columns: repeat(4, 1fr);
         gap: 12px;
         margin-top: 14px;
         margin-bottom: 14px;
@@ -660,13 +660,6 @@
                 <div class="stat-lbl">{{ __('report.stats.portions') }}</div>
             </div>
         </div>
-        <div class="stat-card">
-            <div class="stat-icon" style="background: #E9F2F8; color: var(--po-bl);"><i class="fa-solid fa-sack-dollar"></i></div>
-            <div>
-                <div class="stat-val">{{ number_format($stats['cost'], 0, ',', '.') }}{{ __('report.currency') }}</div>
-                <div class="stat-lbl">{{ __('report.stats.cost') }}</div>
-            </div>
-        </div>
     </div>
 
     {{-- Tổng khối lượng TỪNG nguyên liệu tiêu thụ trong cả kỳ (BA R22) --}}
@@ -770,7 +763,6 @@
                                     <div style="display:flex; align-items:center; gap:8px">
                                         <div class="dish-portions-block">
                                             <span class="dish-portions-badge">{{ __('report.counts.portions', ['count' => $dish['suat']]) }}</span>
-                                            <span class="dish-portions-phan">{{ __('report.counts.servings', ['count' => $dish['phan']]) }}</span>
                                         </div>
                                         <i class="fa-solid fa-chevron-down" x-show="!open" style="font-size:11px; color:var(--po-mu)"></i>
                                         <i class="fa-solid fa-chevron-up" x-show="open" style="font-size:11px; color:var(--po-mu)"></i>
@@ -786,7 +778,6 @@
                                                 <th>{{ __('report.table.ingredient_name') }}</th>
                                                 <th style="text-align: center;">{{ __('report.table.quantity_per_portion') }}</th>
                                                 <th style="text-align: center;">{{ __('report.table.portions') }}</th>
-                                                <th style="text-align: center;">{{ __('report.table.servings') }}</th>
                                                 <th style="text-align: right;">{{ __('report.table.total_kg') }}</th>
                                             </tr>
                                         </thead>
@@ -798,7 +789,6 @@
                                                     <td class="ing-name">{{ $ing['name'] }}</td>
                                                     <td style="text-align: center;">{{ number_format($ing['dl_g'] * 1000, 0) }}</td>
                                                     <td style="text-align: center;">{{ $ing['suat'] }}</td>
-                                                    <td style="text-align: center; font-weight: 700; color: #059669;">{{ $ing['phan'] }}</td>
                                                     <td class="ing-kg-val" style="text-align: right;">
                                                         @if($ing['unit'] === 'Trái' || $ing['unit'] === 'Quả')
                                                             {{ number_format($ing['quantity'], 0) }} {{ $ing['unit'] }}
@@ -810,7 +800,7 @@
                                                 </tr>
                                             @empty
                                                 <tr>
-                                                    <td colspan="7" style="text-align: center; color: #94a3b8; padding: 12px; font-style: italic;">
+                                                    <td colspan="6" style="text-align: center; color: #94a3b8; padding: 12px; font-style: italic;">
                                                         {{ __('report.empty.manual_dish_ingredients') }}
                                                     </td>
                                                 </tr>

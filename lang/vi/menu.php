@@ -42,7 +42,7 @@ return [
         'portions_label' => 'Số suất:',
         'portions_suffix' => 'suất',
         'phan_label' => 'Số phần',
-        'phan_suffix' => 'phần',
+        'phan_suffix' => 'suất',
         'cancel' => 'Hủy',
         'confirm' => 'Xác nhận chọn',
         'other_group' => 'Món khác',
