@@ -130,8 +130,8 @@ class CheckPurchaseOrder extends Page
         });
 
         Notification::make()
-            ->title('Hoàn thành kiểm hàng!')
-            ->body('Đã cập nhật số lượng thực nhận và ghi nhận hoàn thành đơn đặt hàng.')
+            ->title(__('purchase_order.notifications.check_completed_title'))
+            ->body(__('purchase_order.notifications.check_completed_body'))
             ->success()
             ->send();
 

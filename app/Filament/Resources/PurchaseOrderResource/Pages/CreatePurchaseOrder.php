@@ -307,8 +307,8 @@ class CreatePurchaseOrder extends Page
 
         if (empty($allItems)) {
             Notification::make()
-                ->title('Chưa có nguyên liệu nào được tích chọn!')
-                ->body('Vui lòng chọn ít nhất 1 nguyên liệu để tạo đơn đặt hàng.')
+                ->title(__('purchase_order.validation.no_ingredient_selected_title'))
+                ->body(__('purchase_order.validation.no_ingredient_selected_body'))
                 ->warning()
                 ->send();
 
@@ -327,8 +327,8 @@ class CreatePurchaseOrder extends Page
             $count = count($missingSupplierItems);
             $namesList = implode(', ', array_slice($missingSupplierItems, 0, 3)).($count > 3 ? '...' : '');
             Notification::make()
-                ->title('Vui lòng chọn Nhà cung cấp!')
-                ->body("Có {$count} nguyên liệu chưa chọn NCC: {$namesList}. Vui lòng chọn NCC trước khi lưu.")
+                ->title(__('purchase_order.validation.supplier_required_title'))
+                ->body(__('purchase_order.validation.supplier_required_body', ['count' => $count, 'names' => $namesList]))
                 ->danger()
                 ->send();
 
@@ -383,8 +383,8 @@ class CreatePurchaseOrder extends Page
         });
 
         Notification::make()
-            ->title('Tạo đơn đặt hàng thành công!')
-            ->body("Đã tạo và gửi {$createdCount} đơn đặt hàng theo Nhà cung cấp.")
+            ->title(__('purchase_order.notifications.created_success_title'))
+            ->body(__('purchase_order.notifications.created_success_body', ['count' => $createdCount]))
             ->success()
             ->send();
 

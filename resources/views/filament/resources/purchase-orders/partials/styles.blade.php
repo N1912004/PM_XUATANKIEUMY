@@ -1068,6 +1068,10 @@
         padding: 2px 8px;
         font-size: 11px;
         font-weight: 700;
+        white-space: nowrap;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
     }
 
     .ot-uot {
@@ -1077,6 +1081,10 @@
         padding: 2px 8px;
         font-size: 11px;
         font-weight: 700;
+        white-space: nowrap;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
     }
 
     .ot-thit {
@@ -1086,6 +1094,10 @@
         padding: 2px 8px;
         font-size: 11px;
         font-weight: 700;
+        white-space: nowrap;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
     }
 
     /* Actions button */

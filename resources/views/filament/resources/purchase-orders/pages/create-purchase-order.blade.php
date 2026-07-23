@@ -213,7 +213,6 @@
                                 <th style="text-align:center">{{ __('purchase_order.table.manual_qty') }}</th>
                                 <th style="text-align:right">{{ __('purchase_order.table.unit_price') }}</th>
                                 <th style="text-align:right">{{ __('purchase_order.table.line_total') }}</th>
-                                <th style="width:90px">{{ __('purchase_order.table.split') }}</th>
                                 <th style="width:180px">{{ __('purchase_order.table.supplier') }}</th>
                             </tr>
                         </thead>
@@ -257,13 +256,6 @@
                                     </td>
                                     <td style="text-align:right; font-weight:700; color:var(--po-rd)">
                                         {{ number_format($item['line_total'], 0, ',', '.') }} đ
-                                    </td>
-                                    <td>
-                                        <select wire:model.live="itemSplits.{{ $item['ingredient_id'] }}" style="height:28px; font-size:12px; font-weight:600; padding:2px 6px; border-radius:6px; border:1px solid var(--po-bd); width:100%; background:var(--po-wh); color:var(--po-tx)">
-                                            @foreach(\App\Filament\Resources\PurchaseOrderResource\Pages\CreatePurchaseOrder::SPLIT_OPTIONS as $sp)
-                                                <option value="{{ $sp }}" @selected(($item['split'] ?? 'P1') === $sp)>{{ __('purchase_order.sidebar.split_prefix') }} {{ substr($sp, 1) }}</option>
-                                            @endforeach
-                                        </select>
                                     </td>
                                     <td>
                                         <!-- Per-row Searchable Select với x-teleport body chống tràn tuyệt đối -->
@@ -343,10 +335,10 @@
                             @endforeach
                             <!-- Group Total Row -->
                             <tr style="background:#F8FAFC; font-weight:700; border-top:1px solid var(--po-bd2)">
-                                <td colspan="9" style="text-align:right; padding:10px 14px; font-size:13px; color:var(--po-mu)">
+                                <td colspan="8" style="text-align:right; padding:10px 14px; font-size:13px; color:var(--po-mu)">
                                     {{ __('purchase_order.labels.group_total', ['group' => str_replace(['🥩 ', '🥬 ', '📦 '], '', $group['label'])]) }}
                                 </td>
-                                <td colspan="2" style="text-align:left; padding:10px 14px; font-size:14px; font-weight:800; color:var(--po-bl)">
+                                <td colspan="1" style="text-align:left; padding:10px 14px; font-size:14px; font-weight:800; color:var(--po-bl)">
                                     {{ number_format($groupTotal, 0, ',', '.') }} đ
                                 </td>
                             </tr>
@@ -404,7 +396,6 @@
                         [__('purchase_order.sidebar.order_date'), \Carbon\Carbon::parse($orderDate)->format('d/m/Y')],
                         [__('purchase_order.sidebar.source_list'), \Carbon\Carbon::parse($sourceFrom)->format('d/m/Y').($isMultiDay ? ' – '.\Carbon\Carbon::parse($sourceTo)->format('d/m/Y') : '')],
                         [__('purchase_order.sidebar.shifts'), __('purchase_order.sidebar.shifts_count', ['count' => count($selectedShifts)])],
-                        [__('purchase_order.sidebar.splits'), __('purchase_order.sidebar.splits_count', ['count' => $splitCount])],
                         [__('purchase_order.sidebar.suppliers'), __('purchase_order.sidebar.suppliers_count', ['count' => $supplierCount])],
                         [__('purchase_order.sidebar.ingredients'), __('purchase_order.sidebar.ingredients_count', ['selected' => $selectedCount, 'total' => $totalCount])],
                     ];
@@ -435,34 +426,6 @@
                 @empty
                     <div style="font-size:12px; color:var(--po-mu); padding:4px 0">—</div>
                 @endforelse
-
-                @if(!empty($bySplit))
-                    <div style="font-size:13px; font-weight:800; color:var(--po-tx); margin:12px 0 8px">{{ __('purchase_order.sidebar.split_title') }}</div>
-                    @foreach($bySplit as $sp => $agg)
-                        <div style="display:flex; align-items:center; gap:8px; background:var(--po-bd2); border-radius:8px; padding:8px 10px; margin-bottom:6px">
-                            <div style="width:8px; height:8px; border-radius:50%; flex-shrink:0; background:var(--po-bl)"></div>
-                            <div style="flex:1; min-width:0">
-                                <div style="font-size:12px; font-weight:700; color:var(--po-tx)">{{ str_replace('P', __('purchase_order.sidebar.split_prefix').' ', $sp) }}</div>
-                                <div style="font-size:11px; color:var(--po-mu)">{{ __('purchase_order.sidebar.items_count', ['count' => $agg['count']]) }}</div>
-                            </div>
-                            <div style="font-size:12px; font-weight:800; color:var(--po-bl); white-space:nowrap">{{ number_format($agg['total'], 0, ',', '.') }}đ</div>
-                        </div>
-                    @endforeach
-                @endif
-            </div>
-
-            <div style="background:var(--po-bl-s); border:1px solid var(--po-bl-m); border-radius:var(--po-r); padding:14px">
-                <div style="font-size:13px; font-weight:800; color:var(--po-bl); margin-bottom:8px"><i class="fa-solid fa-circle-info"></i> {{ __('purchase_order.sidebar.notes_title') }}</div>
-                <ul style="list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:5px">
-                    @foreach([
-                        __('purchase_order.sidebar.note_each_ncc'),
-                        __('purchase_order.sidebar.note_skip_allowed'),
-                        __('purchase_order.sidebar.note_manual_priority'),
-                        __('purchase_order.sidebar.note_split_hint'),
-                    ] as $note)
-                        <li style="font-size:12px; color:var(--po-su); display:flex; gap:5px"><span style="color:var(--po-bl)">•</span>{{ $note }}</li>
-                    @endforeach
-                </ul>
             </div>
         </div><!-- /sidebar -->
 
