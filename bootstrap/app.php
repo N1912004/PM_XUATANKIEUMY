@@ -13,6 +13,11 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Live chạy sau nginx reverse-proxy (HTTPS terminate ở proxy). Không tin proxy
+        // thì $request->isSecure() = false → cookie session thiếu flag Secure / URL sinh
+        // sai scheme → Livewire POST /livewire/update dính 419 Page Expired.
+        $middleware->trustProxies(at: '*');
+
         $middleware->web(append: [
             SetLocale::class,
         ]);
