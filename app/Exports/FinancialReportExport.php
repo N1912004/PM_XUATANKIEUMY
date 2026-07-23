@@ -29,7 +29,7 @@ class FinancialReportExport implements FromArray, ShouldAutoSize, WithEvents, Wi
 
     public function title(): string
     {
-        return 'Báo cáo xuất ăn';
+        return __('report.export_title');
     }
 
     /**
@@ -38,9 +38,21 @@ class FinancialReportExport implements FromArray, ShouldAutoSize, WithEvents, Wi
     public function array(): array
     {
         $rows = [];
-        $rows[] = ['BÁO CÁO XUẤT ĂN & NGUYÊN LIỆU TIÊU THỤ', '', '', '', '', '', '', '', '', '', ''];
+        $rows[] = [__('report.export_heading'), '', '', '', '', '', '', '', '', '', ''];
         $rows[] = ['', '', '', '', '', '', '', '', '', '', ''];
-        $rows[] = ['Ngày', 'Thứ', 'Ca', 'Món ăn', 'Loại món', 'Mã NL', 'Nguyên liệu', 'ĐL (g/suất)', 'Số suất', 'Thành tiền (đ)', 'Tổng KG'];
+        $rows[] = [
+            __('report.export_cols.date'),
+            __('report.export_cols.day'),
+            __('report.export_cols.shift'),
+            __('report.export_cols.dish'),
+            __('report.export_cols.dish_type'),
+            __('report.export_cols.ing_code'),
+            __('report.export_cols.ing_name'),
+            __('report.export_cols.dl'),
+            __('report.export_cols.portions'),
+            __('report.export_cols.cost'),
+            __('report.export_cols.total_kg'),
+        ];
 
         foreach ($this->grouped as $day) {
             foreach ($day['shifts'] as $shift) {
@@ -83,13 +95,13 @@ class FinancialReportExport implements FromArray, ShouldAutoSize, WithEvents, Wi
 
         $rows[] = ['', '', '', '', '', '', '', '', '', '', ''];
         $rows[] = [
-            'TỔNG CỘNG',
+            __('report.export_summary.total'),
             '',
             '',
-            ($this->stats['dishes'] ?? 0).' món',
+            __('report.counts.dishes', ['count' => $this->stats['dishes'] ?? 0]),
             '',
             '',
-            ($this->stats['ingredients'] ?? 0).' dòng NL',
+            __('report.counts.ingredients', ['count' => $this->stats['ingredients'] ?? 0]),
             '',
             $this->stats['suat'] ?? 0,
             round($this->stats['cost'] ?? 0),
