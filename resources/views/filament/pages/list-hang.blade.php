@@ -716,12 +716,6 @@
                     <button type="button" wire:click="exportList" class="wh-action-btn" style="height:36px;">
                         <i class="fa-solid fa-file-excel" style="color:#059669"></i>{{ __('list_hang.actions.export') }}
                     </button>
-                    <button type="button" onclick="window.print()" class="wh-action-btn" style="height:36px;">
-                        <i class="fa-solid fa-print"></i>{{ __('list_hang.actions.print') }}
-                    </button>
-                    <button type="button" wire:click="goOrderCreate" class="wh-action-btn wh-action-btn-primary" style="height:36px;">
-                        <i class="fa-solid fa-cart-plus"></i>{{ __('list_hang.actions.create_po') }}
-                    </button>
                 </div>
             </div>
 
