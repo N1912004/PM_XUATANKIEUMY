@@ -118,7 +118,18 @@ return [
     ],
     'check' => [
         'title' => 'Kiểm hàng – :code',
-        'subtitle' => 'Đối chiếu số lượng đặt và thực nhận · Ngày đặt :date',
+        'subtitle' => 'Đối chiếu số lượng đặt và thực nhận · Ngày giao :date',
+        'section_title' => 'Kiểm hàng – :supplier',
+        'checked_progress' => 'Đã kiểm: :checked/:total mặt hàng',
+    ],
+    'group_names' => [
+        'Động vật' => 'Động vật',
+        'Thực vật' => 'Thực vật',
+        'Đồ uống' => 'Đồ uống',
+        'Lương thực' => 'Lương thực',
+        'Thực phẩm khô' => 'Thực phẩm khô',
+        'Gia vị' => 'Gia vị',
+        'Khác' => 'Khác',
     ],
     'ingredient_types' => [
         'meat_wet' => 'Thịt/Ướt',

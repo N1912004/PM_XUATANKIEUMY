@@ -103,10 +103,20 @@ return array_replace_recursive($vi, [
         'group_total' => ':group group total:',
         'created_at' => 'Created: :date',
     ],
-    'detail' => [
-        'order_title' => 'Order :code',
-        'subtitle' => 'Ingredients grouped by supplier · Order date :date',
-        'supplier_total' => ':supplier order total:',
+    'check' => [
+        'title' => 'Checking goods – :code',
+        'subtitle' => 'Compare ordered and received quantities · Delivery date :date',
+        'section_title' => 'Checking goods – :supplier',
+        'checked_progress' => 'Checked: :checked/:total items',
+    ],
+    'group_names' => [
+        'Động vật' => 'Meat & Animal',
+        'Thực vật' => 'Vegetables & Plants',
+        'Đồ uống' => 'Beverages',
+        'Lương thực' => 'Staple Food',
+        'Thực phẩm khô' => 'Dry Food',
+        'Gia vị' => 'Spices & Condiments',
+        'Khác' => 'Other',
     ],
     'ingredient_types' => [
         'meat_wet' => 'Meat/Wet goods',

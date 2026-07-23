@@ -189,7 +189,12 @@ class CreatePurchaseOrder extends Page
                         $groupClass = 'ot-kho';
                     }
 
-                    $groupLabel = $icon.$typeName;
+                    $displayTypeName = __('purchase_order.group_names.'.$typeName);
+                    if ($displayTypeName === 'purchase_order.group_names.'.$typeName) {
+                        $displayTypeName = $typeName;
+                    }
+
+                    $groupLabel = $icon.$displayTypeName;
 
                     $aggregated[$ingId] = [
                         'ingredient_id' => $ingId,
