@@ -42,9 +42,13 @@ class CheckPurchaseOrder extends Page
 
         $this->activePoId = $this->record->id;
 
-        foreach ($this->record->items as $item) {
-            $this->receivedQuantities[$item->id] = $item->quantity_received > 0 ? (float) $item->quantity_received : (float) $item->quantity_ordered;
-            $this->itemNotes[$item->id] = $item->receive_note ?? '';
+        foreach ($this->getRelatedPOsProperty() as $po) {
+            foreach ($po->items as $item) {
+                if (! isset($this->receivedQuantities[$item->id])) {
+                    $this->receivedQuantities[$item->id] = $item->quantity_received > 0 ? (float) $item->quantity_received : (float) $item->quantity_ordered;
+                    $this->itemNotes[$item->id] = $item->receive_note ?? '';
+                }
+            }
         }
     }
 

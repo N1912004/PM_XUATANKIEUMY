@@ -83,9 +83,9 @@
                             <th style="text-align:center; width:36px">#</th>
                             <th>{{ __('purchase_order.table.ingredient_name') }}</th>
                             <th>{{ __('purchase_order.table.type') }}</th>
-                            <th style="text-align:right">{{ __('purchase_order.table.quantity_ordered') }}</th>
-                            <th style="text-align:center">{{ __('purchase_order.table.quantity_received_actual') }}</th>
-                            <th style="text-align:center; min-width:90px">{{ __('purchase_order.table.difference') }}</th>
+                            <th style="text-align:center; width:100px">{{ __('purchase_order.table.quantity_ordered') }}</th>
+                            <th style="text-align:center; width:120px">{{ __('purchase_order.table.quantity_received_actual') }}</th>
+                            <th style="text-align:center; min-width:95px">{{ __('purchase_order.table.difference') }}</th>
                             <th>{{ __('purchase_order.table.notes') }}</th>
                         </tr>
                     </thead>
@@ -117,12 +117,12 @@
                                         <span class="ot-kho" style="font-size:11px"><i class="fa-solid fa-box"></i> {{ __('purchase_order.ingredient_types.dry') }}</span>
                                     @endif
                                 </td>
-                                <td style="text-align:right; font-weight:600; color:var(--po-tx)">
+                                <td style="text-align:center; font-weight:700; color:var(--po-tx)">
                                     {{ (float) $ordered }} {{ $item->ingredient?->unitRelation?->name ?? $item->ingredient?->unit ?? 'kg' }}
                                 </td>
                                 <td style="text-align:center">
                                     <input class="oh-check-inp" type="number" step="0.01" min="0" wire:model.live="receivedQuantities.{{ $item->id }}"
-                                           placeholder="–" style="{{ $hasDiff ? 'border-color:var(--po-or); background:#FFF7ED;' : '' }}">
+                                           placeholder="–" style="{{ $hasDiff ? 'border-color:#EA580C; background:#FFF7ED; color:#EA580C;' : '' }}">
                                 </td>
                                 <td style="text-align:center">
                                     @if(!$hasValue)

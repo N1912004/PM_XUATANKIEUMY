@@ -1183,6 +1183,39 @@
     .lhn-grand-lbl { font-size:14px; font-weight:700; opacity:.9 }
     .lhn-grand-val { font-size:24px; font-weight:800; letter-spacing:-.02em }
 
+    /* Check Goods Input & Diff Badges */
+    .oh-check-inp {
+        width: 76px;
+        height: 32px;
+        border: 1.5px solid var(--po-bd);
+        border-radius: 7px;
+        text-align: center;
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--po-tx);
+        background: var(--po-wh);
+        outline: none;
+        transition: all 0.13s ease;
+    }
+    .oh-check-inp:focus {
+        border-color: var(--po-bl);
+        box-shadow: 0 0 0 3px rgba(20, 116, 255, 0.12);
+    }
+    .oh-diff-ok {
+        font-size: 12.5px;
+        font-weight: 700;
+        color: #059669;
+    }
+    .oh-diff-bad {
+        font-size: 12.5px;
+        font-weight: 700;
+        color: #DC2626;
+    }
+    .oh-diff-pending {
+        color: var(--po-mu);
+        font-weight: 500;
+    }
+
     /* Dark mode cho badge trạng thái đơn (.os-*): nền hardcode sáng ở light sẽ chói trên nền
        tối, nên hạ về nền mờ (alpha) + chữ sáng — đồng bộ pattern với .ms-* / .ci-status-badge. */
     :root.dark .os-draft {
