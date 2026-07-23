@@ -112,10 +112,7 @@ return [
     'type' => [
         'name' => 'Tên loại nguyên liệu',
         'name_placeholder' => 'Ví dụ: Động vật, Thực vật, Gia vị...',
-        'icon' => 'Biểu tượng (Icon / Emoji)',
-        'icon_placeholder' => 'Ví dụ: 🥩, 🥬, 📦, 🧂, 🌾',
         'table_name' => 'TÊN LOẠI NGUYÊN LIỆU',
-        'table_icon' => 'BIỂU TƯỢNG',
     ],
     'delete' => [
         'in_use' => 'Không thể xóa: đang được :count nguyên liệu sử dụng',

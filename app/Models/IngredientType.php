@@ -13,7 +13,6 @@ class IngredientType extends Model
 
     protected $fillable = [
         'name',
-        'icon',
     ];
 
     public function ingredients(): HasMany

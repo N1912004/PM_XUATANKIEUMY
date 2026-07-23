@@ -355,16 +355,16 @@
         @endforelse
 
         <!-- Fixed Bottom Grand Total Blue Banner (Sticky inside content container) -->
-        <div class="lhn-grand" style="position:sticky; bottom:16px; width:100%; border-radius:12px; background:linear-gradient(135deg, #1474FF, #0059DD); color:#fff; padding:14px 24px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; box-shadow:0 8px 24px rgba(20, 116, 255, 0.35); z-index:40; margin-top:24px">
-            <div style="min-width:240px; flex:1">
-                <div style="font-size:15px; font-weight:800">
+        <div class="lhn-grand" style="position:sticky; bottom:16px; width:100%; border-radius:12px; background:linear-gradient(135deg, #1474FF, #0059DD); color:#fff; padding:12px 18px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; box-shadow:0 8px 24px rgba(20, 116, 255, 0.35); z-index:10; margin-top:24px">
+            <div style="min-width:200px; flex:1">
+                <div style="font-size:14px; font-weight:800; line-height:1.3">
                     {{ __('purchase_order.create.grand_total_header', [
                         'date' => \Carbon\Carbon::parse($orderDate)->format('d/m/Y'),
                         'from' => \Carbon\Carbon::parse($sourceFrom)->format('d/m/Y'),
                         'to' => \Carbon\Carbon::parse($sourceTo)->format('d/m/Y')
                     ]) }}
                 </div>
-                <div style="font-size:12.5px; opacity:0.9; margin-top:2px">
+                <div style="font-size:12px; opacity:0.9; margin-top:2px">
                     {{ __('purchase_order.create.grand_total_sub', [
                         'supplier_count' => $supplierCount,
                         'selected_count' => $selectedCount,
@@ -372,12 +372,12 @@
                     ]) }}
                 </div>
             </div>
-            <div style="display:flex; align-items:center; gap:20px; flex-shrink:0">
+            <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap; flex-shrink:0">
                 <div style="text-align:right">
-                    <div style="font-size:11px; opacity:0.85; text-transform:uppercase; font-weight:700">{{ __('purchase_order.create.grand_total_label') }}</div>
-                    <div style="font-size:22px; font-weight:900; letter-spacing:-0.5px; white-space:nowrap">{{ number_format($grandTotal, 0, ',', '.') }} đ</div>
+                    <div style="font-size:10.5px; opacity:0.85; text-transform:uppercase; font-weight:700">{{ __('purchase_order.create.grand_total_label') }}</div>
+                    <div style="font-size:20px; font-weight:900; letter-spacing:-0.5px; white-space:nowrap">{{ number_format($grandTotal, 0, ',', '.') }} đ</div>
                 </div>
-                <button wire:click="createAndSendOrders" wire:loading.attr="disabled" wire:target="createAndSendOrders" class="po-btn" style="background:#fff; color:#0059DD; font-weight:800; padding:10px 20px; font-size:14px; border:none; box-shadow:0 4px 12px rgba(0,0,0,0.15); white-space:nowrap; display:inline-flex; align-items:center; gap:8px; flex-shrink:0">
+                <button wire:click="createAndSendOrders" wire:loading.attr="disabled" wire:target="createAndSendOrders" class="po-btn" style="background:#fff; color:#0059DD; font-weight:800; padding:9px 18px; font-size:13.5px; border:none; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.15); white-space:nowrap; display:inline-flex; align-items:center; gap:8px; flex-shrink:0">
                     <i class="fa-solid fa-paper-plane"></i> {{ __('purchase_order.actions.create_and_send') }}
                 </button>
             </div>
