@@ -690,6 +690,43 @@
     .loai-thit { background: #FEF2F2; color: #DC2626; }
     .loai-uot { background: #EFF6FF; color: #1e40af; }
     .loai-kho { background: #FEF3C7; color: #78350F; }
+
+    .lhn-empty {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 50px 20px;
+        text-align: center;
+        background: var(--wh);
+        border: 1px solid var(--bd);
+        border-radius: var(--r);
+        box-shadow: var(--sh2);
+        margin-top: 12px;
+    }
+    .lhn-empty-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background: var(--bg);
+        border: 1px solid var(--bd);
+        display: grid;
+        place-items: center;
+        margin-bottom: 12px;
+    }
+    .lhn-empty h3 {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--tx);
+        margin: 0 0 6px 0;
+    }
+    .lhn-empty p {
+        font-size: 13px;
+        color: var(--mu);
+        margin: 0;
+        max-width: 420px;
+        line-height: 1.5;
+    }
 </style>
 @endpush
 
@@ -866,7 +903,11 @@
                 </div>
             @empty
                 <div class="lhn-empty">
-                    <i class="fa-solid fa-clipboard-question"></i>
+                    <div class="lhn-empty-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" style="width:28px;height:28px;color:var(--fa);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                    </div>
                     <h3>{{ __('list_hang.empty.no_menu') }}</h3>
                     <p>{{ __('list_hang.empty.no_menu_description') }}</p>
                 </div>
@@ -951,10 +992,14 @@
 
                 <!-- Main grouped tables -->
                 @if(empty($poItems))
-                    <div class="lhn-empty" style="background:var(--wh); border:1px solid var(--bd); border-radius:12px;">
-                        <i class="fa-solid fa-basket-shopping" style="font-size:36px; color:#94a3b8; opacity:0.5;"></i>
-                        <h3 style="font-size:15px; font-weight:700; color:var(--tx); margin:6px 0;">{{ __('list_hang.empty.no_order_items') }}</h3>
-                        <p style="font-size:12px; color:#94a3b8;">{{ __('list_hang.empty.no_order_items_description') }}</p>
+                    <div class="lhn-empty">
+                        <div class="lhn-empty-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" style="width:28px;height:28px;color:var(--fa);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                            </svg>
+                        </div>
+                        <h3>{{ __('list_hang.empty.no_order_items') }}</h3>
+                        <p>{{ __('list_hang.empty.no_order_items_description') }}</p>
                     </div>
                 @else
                     @php 
