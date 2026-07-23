@@ -75,7 +75,7 @@
     .po-page,
     .po-page * {
         box-sizing: border-box;
-        font-family: 'IBM Plex Sans', system-ui, sans-serif;
+        font-family: 'Be Vietnam Pro', 'Inter', system-ui, -apple-system, sans-serif;
     }
 
     .po-page .fa,
@@ -439,10 +439,13 @@
         flex-shrink: 0;
     }
 
-    .po-item-val {
-        font-size: 1rem;
-        font-weight: 850;
+    .po-item-val,
+    .oh-item-val {
+        font-size: 1.05rem;
+        font-weight: 700;
         color: var(--po-bl);
+        font-variant-numeric: tabular-nums;
+        letter-spacing: -0.01em;
     }
 
     /* Badges & Tags */
@@ -450,60 +453,56 @@
         background: #F1F5F9;
         color: #475569;
         border: 1px solid var(--po-bd);
-        border-radius: 999px;
-        padding: .15rem .65rem;
-        font-size: .72rem;
-        font-weight: 800;
+        border-radius: 20px;
+        padding: .2rem .75rem;
+        font-size: .75rem;
+        font-weight: 600;
         display: inline-flex;
         align-items: center;
         gap: .25rem;
-        text-transform: uppercase;
-        letter-spacing: .02em;
+        text-transform: none;
     }
 
     .os-sent {
         background: #EFF6FF;
         color: #1E40AF;
-        border: 1px solid #A8CBE6;
-        border-radius: 999px;
-        padding: .15rem .65rem;
-        font-size: .72rem;
-        font-weight: 800;
+        border: 1px solid #BFDBFE;
+        border-radius: 20px;
+        padding: .2rem .75rem;
+        font-size: .75rem;
+        font-weight: 600;
         display: inline-flex;
         align-items: center;
         gap: .25rem;
-        text-transform: uppercase;
-        letter-spacing: .02em;
+        text-transform: none;
     }
 
     .os-checking {
         background: #FFF7ED;
         color: #92400E;
         border: 1px solid #FED7AA;
-        border-radius: 999px;
-        padding: .15rem .65rem;
-        font-size: .72rem;
-        font-weight: 800;
+        border-radius: 20px;
+        padding: .2rem .75rem;
+        font-size: .75rem;
+        font-weight: 600;
         display: inline-flex;
         align-items: center;
         gap: .25rem;
-        text-transform: uppercase;
-        letter-spacing: .02em;
+        text-transform: none;
     }
 
     .os-done {
         background: #ECFDF5;
         color: #065F46;
         border: 1px solid #A7F3D0;
-        border-radius: 999px;
-        padding: .15rem .65rem;
-        font-size: .72rem;
-        font-weight: 800;
+        border-radius: 20px;
+        padding: .2rem .75rem;
+        font-size: .75rem;
+        font-weight: 600;
         display: inline-flex;
         align-items: center;
         gap: .25rem;
-        text-transform: uppercase;
-        letter-spacing: .02em;
+        text-transform: none;
     }
 
     .ot-tuan {

@@ -47,6 +47,11 @@ class CreatePurchaseOrder extends Page
 
     public array $itemSelected = [];
 
+    /** @var array<int, string> Phiếu (P1/P2/P3) theo ingredient_id — tách 1 NCC thành nhiều đơn */
+    public array $itemSplits = [];
+
+    public const SPLIT_OPTIONS = ['P1', 'P2', 'P3'];
+
     public function mount(): void
     {
         abort_unless(PurchaseOrderResource::canCreate(), 403);
@@ -129,8 +134,10 @@ class CreatePurchaseOrder extends Page
         $kitchenId = auth()->user()?->currentKitchenId();
 
         $menus = Menu::with(['recipe.ingredients.typeRelation', 'recipe.ingredients.suppliers', 'recipe.ingredients.unitRelation', 'recipe.ingredients.supplier'])
+            // Khoảng nửa mở [from, to+1) — cột date có thể lưu kèm giờ (SQLite trong test),
+            // so sánh '<= Y-m-d' sẽ trượt "Y-m-d 00:00:00"; cùng pattern với ListHang.
             ->where('date', '>=', $this->sourceFrom)
-            ->where('date', '<=', $this->sourceTo)
+            ->where('date', '<', Carbon::parse($this->sourceTo)->addDay()->toDateString())
             ->when(! empty($this->selectedShifts), fn ($q) => $q->whereIn('shift_id', $this->selectedShifts))
             ->when($kitchenId && ! auth()->user()?->hasRole(['super_admin', 'Quản trị viên']), fn ($q) => $q->where('kitchen_id', $kitchenId))
             ->where('status', 'locked')
@@ -265,10 +272,16 @@ class CreatePurchaseOrder extends Page
             }
             $isSelected = (bool) $this->itemSelected[$ingId];
 
+            $split = $this->itemSplits[$ingId] ?? 'P1';
+            if (! in_array($split, self::SPLIT_OPTIONS, true)) {
+                $split = 'P1';
+            }
+
             $item['already_ordered_pos'] = $existingOrders;
             $item['selected'] = $isSelected;
             $item['quantity_manual'] = (float) $manualQty;
             $item['supplier_id'] = $selectedSupplierId;
+            $item['split'] = $split;
             $item['line_total'] = ($isSelected && $selectedSupplierId) ? ((float) $manualQty * $item['reference_price']) : 0;
             $item['dish_string'] = implode(', ', array_slice($item['dishes'], 0, 3)).(count($item['dishes']) > 3 ? '...' : '');
 
@@ -323,30 +336,32 @@ class CreatePurchaseOrder extends Page
         }
 
         $kitchenId = auth()->user()?->currentKitchenId();
-        $itemsGrouped = collect($allItems)->groupBy('supplier_id');
+        // Tách đơn theo NCC + Phiếu (P1/P2/P3) — mỗi cặp thành 1 PO riêng, giống ListHang
+        $itemsGrouped = collect($allItems)->groupBy(fn ($it) => $it['supplier_id'].'|'.$it['split']);
 
         $createdCount = 0;
 
         DB::transaction(function () use ($itemsGrouped, $kitchenId, &$createdCount) {
-            foreach ($itemsGrouped as $supplierId => $items) {
-                $supplier = Supplier::find($supplierId);
+            foreach ($itemsGrouped as $groupKey => $items) {
+                [$supplierId, $split] = explode('|', (string) $groupKey);
+                $supplier = Supplier::find((int) $supplierId);
                 if (! $supplier) {
                     continue;
                 }
 
                 $supplierCode = strtoupper($supplier->code ?: 'NCC');
-                $poCode = 'PO-LH-'.Carbon::parse($this->orderDate)->format('Ymd').'-'.$supplierCode;
+                $poCode = 'PO-LH-'.Carbon::parse($this->orderDate)->format('Ymd').'-'.$supplierCode.'-'.$split;
 
                 $attempts = 0;
                 while (PurchaseOrder::where('code', $poCode)->exists() && $attempts < 10) {
-                    $poCode = 'PO-LH-'.Carbon::parse($this->orderDate)->format('Ymd').'-'.$supplierCode.'-'.mt_rand(10, 99);
+                    $poCode = 'PO-LH-'.Carbon::parse($this->orderDate)->format('Ymd').'-'.$supplierCode.'-'.$split.'-'.mt_rand(10, 99);
                     $attempts++;
                 }
 
                 $po = PurchaseOrder::create([
                     'code' => $poCode,
                     'kitchen_id' => $kitchenId,
-                    'supplier_id' => $supplierId,
+                    'supplier_id' => (int) $supplierId,
                     'status' => 'sent',
                     'type' => 'day',
                     'estimated_delivery_date' => $this->orderDate,

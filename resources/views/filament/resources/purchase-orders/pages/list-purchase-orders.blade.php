@@ -57,8 +57,8 @@
             </div>
             <div>
                 <div class="py-klbl">{{ __('purchase_order.kpi.month_value') }}</div>
-                <div class="py-kval" style="font-size:18px">
-                    {{ number_format($statsData['total_value'] / 1000000, 0) }} tr
+                <div class="py-kval" style="font-size:16px">
+                    {{ __('purchase_order.currency.amount', ['value' => number_format($statsData['total_value'], 0, ',', '.')]) }}
                 </div>
             </div>
         </div>
@@ -71,14 +71,14 @@
             <input wire:model.live.debounce.250ms="search" type="text" placeholder="{{ __('purchase_order.placeholders.search') }}">
         </div>
 
-        <div style="display:inline-flex; align-items:center; gap:6px; background:#fff; padding:4px 10px; border:1px solid var(--po-bd); border-radius:8px">
-            <span style="font-size:12px; font-weight:600; color:var(--po-mu)">{{ __('purchase_order.fields.source_from') }}:</span>
-            <input wire:model.live="fromDate" type="date" class="mp-sel" style="padding:2px 4px; font-size:12px; border:none; outline:none">
+        <div style="display:inline-flex; align-items:center; gap:6px; background:#fff; padding:6px 12px; border:1px solid var(--po-bd); border-radius:8px">
+            <span style="font-size:12.5px; font-weight:600; color:var(--po-mu); white-space:nowrap">{{ __('purchase_order.filters.from_date') }}:</span>
+            <input wire:model.live="fromDate" type="date" style="font-size:12.5px; font-weight:600; color:var(--po-tx); border:none; outline:none; background:transparent; cursor:pointer">
         </div>
 
-        <div style="display:inline-flex; align-items:center; gap:6px; background:#fff; padding:4px 10px; border:1px solid var(--po-bd); border-radius:8px">
-            <span style="font-size:12px; font-weight:600; color:var(--po-mu)">{{ __('purchase_order.fields.source_to') }}:</span>
-            <input wire:model.live="toDate" type="date" class="mp-sel" style="padding:2px 4px; font-size:12px; border:none; outline:none">
+        <div style="display:inline-flex; align-items:center; gap:6px; background:#fff; padding:6px 12px; border:1px solid var(--po-bd); border-radius:8px">
+            <span style="font-size:12.5px; font-weight:600; color:var(--po-mu); white-space:nowrap">{{ __('purchase_order.filters.to_date') }}:</span>
+            <input wire:model.live="toDate" type="date" style="font-size:12.5px; font-weight:600; color:var(--po-tx); border:none; outline:none; background:transparent; cursor:pointer">
         </div>
 
         <select wire:model.live="statusFilter" class="mp-sel" id="ohStFilter">
@@ -165,7 +165,7 @@
 
                     <!-- Value -->
                     <div class="oh-item-val">
-                        {{ __('purchase_order.currency.thousand', ['value' => number_format($orderTotal / 1000, 0, ',', '.')]) }}
+                        {{ __('purchase_order.currency.amount', ['value' => number_format($orderTotal, 0, ',', '.')]) }}
                     </div>
 
                     <!-- Actions -->
@@ -215,9 +215,9 @@
             </div>
             <div class="po-pagination">
                 <select wire:model.live="perPage" class="po-select" style="min-width:7rem;height:2rem;padding:0 .5rem;border-radius:.5rem">
-                    <option value="10">10 / trang</option>
-                    <option value="20">20 / trang</option>
-                    <option value="50">50 / trang</option>
+                    <option value="10">{{ __('purchase_order.pagination.per_page', ['count' => 10]) }}</option>
+                    <option value="20">{{ __('purchase_order.pagination.per_page', ['count' => 20]) }}</option>
+                    <option value="50">{{ __('purchase_order.pagination.per_page', ['count' => 50]) }}</option>
                 </select>
 
                 <nav role="navigation" aria-label="Pagination Navigation">

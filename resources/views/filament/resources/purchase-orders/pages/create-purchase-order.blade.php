@@ -11,6 +11,10 @@
         $grandTotal = 0;
         $uniqueSupplierIds = [];
 
+        // Phân bổ theo NCC + tách phiếu cho sidebar tóm tắt (chỉ tính dòng đã tích chọn)
+        $bySupplier = [];
+        $bySplit = [];
+
         foreach ($groups as $grp) {
             foreach ($grp['items'] as $item) {
                 $totalCount++;
@@ -19,11 +23,23 @@
                     $grandTotal += $item['line_total'];
                     if (!empty($item['supplier_id'])) {
                         $uniqueSupplierIds[$item['supplier_id']] = true;
+                        $sid = $item['supplier_id'];
+                        $bySupplier[$sid] ??= ['count' => 0, 'total' => 0];
+                        $bySupplier[$sid]['count']++;
+                        $bySupplier[$sid]['total'] += $item['line_total'];
                     }
+                    $sp = $item['split'] ?? 'P1';
+                    $bySplit[$sp] ??= ['count' => 0, 'total' => 0];
+                    $bySplit[$sp]['count']++;
+                    $bySplit[$sp]['total'] += $item['line_total'];
                 }
             }
         }
+        ksort($bySplit);
         $supplierCount = count($uniqueSupplierIds);
+        $splitCount = max(1, count($bySplit));
+        $supplierNamesById = $suppliers->pluck('name', 'id');
+        $nccDotColors = ['#1267E8', '#059669', '#D97706', '#7C3AED', '#DC2626', '#0891B2'];
     @endphp
 
     <div class="po-page w-full space-y-6" style="padding: 0 !important; background: transparent !important; padding-bottom: 20px !important;">
@@ -58,6 +74,11 @@
                 <span>{{ __('purchase_order.steps.step3_title') }}</span>
             </div>
         </div>
+
+        <!-- 2-col layout: content trái + sidebar tóm tắt phải (theo mẫu bluefire_demo).
+             Mobile: sidebar không ẩn — xếp xuống dưới content, full width. -->
+        <div class="oc-layout" style="display:flex; gap:16px; align-items:flex-start">
+        <div class="oc-main" style="flex:1; min-width:0">
 
         <!-- Date & Shift Filters Card -->
         <div style="background:var(--po-wh); border:1px solid var(--po-bd); border-radius:var(--po-r); padding:16px; margin-bottom:20px; box-shadow:var(--po-sh)">
@@ -192,6 +213,7 @@
                                 <th style="text-align:center">{{ __('purchase_order.table.manual_qty') }}</th>
                                 <th style="text-align:right">{{ __('purchase_order.table.unit_price') }}</th>
                                 <th style="text-align:right">{{ __('purchase_order.table.line_total') }}</th>
+                                <th style="width:90px">{{ __('purchase_order.table.split') }}</th>
                                 <th style="width:180px">{{ __('purchase_order.table.supplier') }}</th>
                             </tr>
                         </thead>
@@ -235,6 +257,13 @@
                                     </td>
                                     <td style="text-align:right; font-weight:700; color:var(--po-rd)">
                                         {{ number_format($item['line_total'], 0, ',', '.') }} đ
+                                    </td>
+                                    <td>
+                                        <select wire:model.live="itemSplits.{{ $item['ingredient_id'] }}" style="height:28px; font-size:12px; font-weight:600; padding:2px 6px; border-radius:6px; border:1px solid var(--po-bd); width:100%; background:var(--po-wh); color:var(--po-tx)">
+                                            @foreach(\App\Filament\Resources\PurchaseOrderResource\Pages\CreatePurchaseOrder::SPLIT_OPTIONS as $sp)
+                                                <option value="{{ $sp }}" @selected(($item['split'] ?? 'P1') === $sp)>{{ __('purchase_order.sidebar.split_prefix') }} {{ substr($sp, 1) }}</option>
+                                            @endforeach
+                                        </select>
                                     </td>
                                     <td>
                                         <!-- Per-row Searchable Select với x-teleport body chống tràn tuyệt đối -->
@@ -314,7 +343,7 @@
                             @endforeach
                             <!-- Group Total Row -->
                             <tr style="background:#F8FAFC; font-weight:700; border-top:1px solid var(--po-bd2)">
-                                <td colspan="8" style="text-align:right; padding:10px 14px; font-size:13px; color:var(--po-mu)">
+                                <td colspan="9" style="text-align:right; padding:10px 14px; font-size:13px; color:var(--po-mu)">
                                     {{ __('purchase_order.labels.group_total', ['group' => str_replace(['🥩 ', '🥬 ', '📦 '], '', $group['label'])]) }}
                                 </td>
                                 <td colspan="2" style="text-align:left; padding:10px 14px; font-size:14px; font-weight:800; color:var(--po-bl)">
@@ -361,5 +390,90 @@
                 </button>
             </div>
         </div>
+
+        </div><!-- /content trái -->
+
+        <!-- Sidebar Tóm tắt đơn hàng (mẫu bluefire_demo) -->
+        <div class="oc-sidebar" style="width:260px; flex-shrink:0; position:sticky; top:16px">
+            <div style="background:var(--po-wh); border:1px solid var(--po-bd); border-radius:var(--po-r); padding:14px; margin-bottom:12px; box-shadow:var(--po-sh)">
+                <div style="font-size:13px; font-weight:800; color:var(--po-tx); margin-bottom:10px">{{ __('purchase_order.sidebar.summary_title') }}</div>
+                @php
+                    $isMultiDay = $sourceFrom !== $sourceTo;
+                    $sumRows = [
+                        [__('purchase_order.sidebar.scope'), $isMultiDay ? __('purchase_order.sidebar.scope_multi_day') : __('purchase_order.sidebar.scope_single_day')],
+                        [__('purchase_order.sidebar.order_date'), \Carbon\Carbon::parse($orderDate)->format('d/m/Y')],
+                        [__('purchase_order.sidebar.source_list'), \Carbon\Carbon::parse($sourceFrom)->format('d/m/Y').($isMultiDay ? ' – '.\Carbon\Carbon::parse($sourceTo)->format('d/m/Y') : '')],
+                        [__('purchase_order.sidebar.shifts'), __('purchase_order.sidebar.shifts_count', ['count' => count($selectedShifts)])],
+                        [__('purchase_order.sidebar.splits'), __('purchase_order.sidebar.splits_count', ['count' => $splitCount])],
+                        [__('purchase_order.sidebar.suppliers'), __('purchase_order.sidebar.suppliers_count', ['count' => $supplierCount])],
+                        [__('purchase_order.sidebar.ingredients'), __('purchase_order.sidebar.ingredients_count', ['selected' => $selectedCount, 'total' => $totalCount])],
+                    ];
+                @endphp
+                @foreach($sumRows as [$k, $v])
+                    <div style="display:flex; justify-content:space-between; gap:8px; padding:5px 0; border-bottom:1px solid var(--po-bd2); font-size:12px">
+                        <span style="color:var(--po-mu); font-weight:600">{{ $k }}</span>
+                        <span style="color:var(--po-tx); font-weight:700; text-align:right">{{ $v }}</span>
+                    </div>
+                @endforeach
+                <div style="display:flex; justify-content:space-between; gap:8px; padding:7px 0 2px; font-size:12px">
+                    <span style="color:var(--po-mu); font-weight:600">{{ __('purchase_order.sidebar.grand_total') }}</span>
+                    <span style="color:var(--po-bl); font-weight:800; font-size:14px; white-space:nowrap">{{ number_format($grandTotal, 0, ',', '.') }} đ</span>
+                </div>
+            </div>
+
+            <div style="background:var(--po-wh); border:1px solid var(--po-bd); border-radius:var(--po-r); padding:14px; margin-bottom:12px; box-shadow:var(--po-sh)">
+                <div style="font-size:13px; font-weight:800; color:var(--po-tx); margin-bottom:10px">{{ __('purchase_order.sidebar.ncc_distribution') }}</div>
+                @forelse($bySupplier as $sid => $agg)
+                    <div style="display:flex; align-items:center; gap:8px; background:var(--po-bd2); border-radius:8px; padding:8px 10px; margin-bottom:6px">
+                        <div style="width:8px; height:8px; border-radius:50%; flex-shrink:0; background:{{ $nccDotColors[$loop->index % count($nccDotColors)] }}"></div>
+                        <div style="flex:1; min-width:0">
+                            <div style="font-size:12px; font-weight:700; color:var(--po-tx); overflow:hidden; text-overflow:ellipsis; white-space:nowrap">{{ $supplierNamesById[$sid] ?? 'NCC #'.$sid }}</div>
+                            <div style="font-size:11px; color:var(--po-mu)">{{ __('purchase_order.sidebar.items_count', ['count' => $agg['count']]) }}</div>
+                        </div>
+                        <div style="font-size:12px; font-weight:800; color:var(--po-bl); white-space:nowrap">{{ number_format($agg['total'], 0, ',', '.') }}đ</div>
+                    </div>
+                @empty
+                    <div style="font-size:12px; color:var(--po-mu); padding:4px 0">—</div>
+                @endforelse
+
+                @if(!empty($bySplit))
+                    <div style="font-size:13px; font-weight:800; color:var(--po-tx); margin:12px 0 8px">{{ __('purchase_order.sidebar.split_title') }}</div>
+                    @foreach($bySplit as $sp => $agg)
+                        <div style="display:flex; align-items:center; gap:8px; background:var(--po-bd2); border-radius:8px; padding:8px 10px; margin-bottom:6px">
+                            <div style="width:8px; height:8px; border-radius:50%; flex-shrink:0; background:var(--po-bl)"></div>
+                            <div style="flex:1; min-width:0">
+                                <div style="font-size:12px; font-weight:700; color:var(--po-tx)">{{ str_replace('P', __('purchase_order.sidebar.split_prefix').' ', $sp) }}</div>
+                                <div style="font-size:11px; color:var(--po-mu)">{{ __('purchase_order.sidebar.items_count', ['count' => $agg['count']]) }}</div>
+                            </div>
+                            <div style="font-size:12px; font-weight:800; color:var(--po-bl); white-space:nowrap">{{ number_format($agg['total'], 0, ',', '.') }}đ</div>
+                        </div>
+                    @endforeach
+                @endif
+            </div>
+
+            <div style="background:var(--po-bl-s); border:1px solid var(--po-bl-m); border-radius:var(--po-r); padding:14px">
+                <div style="font-size:13px; font-weight:800; color:var(--po-bl); margin-bottom:8px"><i class="fa-solid fa-circle-info"></i> {{ __('purchase_order.sidebar.notes_title') }}</div>
+                <ul style="list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:5px">
+                    @foreach([
+                        __('purchase_order.sidebar.note_each_ncc'),
+                        __('purchase_order.sidebar.note_skip_allowed'),
+                        __('purchase_order.sidebar.note_manual_priority'),
+                        __('purchase_order.sidebar.note_split_hint'),
+                    ] as $note)
+                        <li style="font-size:12px; color:var(--po-su); display:flex; gap:5px"><span style="color:var(--po-bl)">•</span>{{ $note }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        </div><!-- /sidebar -->
+
+        </div><!-- /2-col -->
     </div>
+
+    <style>
+        @media (max-width: 1100px) {
+            .oc-layout { flex-direction: column; }
+            .oc-main { width: 100%; }
+            .oc-sidebar { width: 100% !important; position: static !important; }
+        }
+    </style>
 </x-filament-panels::page>

@@ -53,7 +53,7 @@ class ListPurchaseOrders extends Page
         }
 
         if (empty($this->toDate)) {
-            $this->toDate = now()->endOfMonth()->toDateString();
+            $this->toDate = today()->toDateString();
         }
     }
 
@@ -64,11 +64,17 @@ class ListPurchaseOrders extends Page
 
     public function updatedFromDate(): void
     {
+        if ($this->fromDate > $this->toDate && ! empty($this->toDate)) {
+            $this->toDate = $this->fromDate;
+        }
         $this->resetPage();
     }
 
     public function updatedToDate(): void
     {
+        if ($this->toDate < $this->fromDate && ! empty($this->fromDate)) {
+            $this->fromDate = $this->toDate;
+        }
         $this->resetPage();
     }
 
@@ -81,7 +87,7 @@ class ListPurchaseOrders extends Page
     {
         $this->search = '';
         $this->fromDate = now()->startOfMonth()->toDateString();
-        $this->toDate = now()->endOfMonth()->toDateString();
+        $this->toDate = today()->toDateString();
         $this->statusFilter = '';
         $this->resetPage();
     }
@@ -123,16 +129,7 @@ class ListPurchaseOrders extends Page
 
     public function formatFriendly(float $value): string
     {
-        if ($value >= 1000000) {
-            $m = $value / 1000000;
-
-            return (floor($m) == $m ? number_format($m, 0) : number_format($m, 1, '.', '')).' tr';
-        }
-        if ($value >= 1000) {
-            return __('purchase_order.currency.thousand', ['value' => number_format($value / 1000, 0, '.', '.')]);
-        }
-
-        return __('purchase_order.currency.amount', ['value' => number_format($value)]);
+        return __('purchase_order.currency.amount', ['value' => number_format($value, 0, ',', '.')]);
     }
 
     /**
