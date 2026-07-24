@@ -70,19 +70,14 @@ class Supplier extends Model
         }
 
         // 2. Khớp trong danh sách NCC phụ / liên kết (bảng pivot ingredient_supplier)
-        if ($ingredient->suppliers->contains('id', $this->id)) {
+        if ($ingredient->suppliers && $ingredient->suppliers->contains('id', $this->id)) {
             return true;
         }
 
-        // 3. Nếu NCC có loại 'Tổng hợp' -> Cung cấp được tất cả (dò qua pivot loại)
-        if ($this->ingredientTypes->contains(
+        // 3. Nếu NCC có loại 'Tổng hợp' -> Cung cấp được tất cả
+        if ($this->ingredientTypes && $this->ingredientTypes->contains(
             fn (IngredientType $type): bool => str_contains(mb_strtolower($type->name), 'tổng hợp')
         )) {
-            return true;
-        }
-
-        // 4. Khớp theo danh mục loại thực phẩm (bảng pivot ingredient_type_supplier)
-        if ($ingredient->ingredient_type_id && $this->ingredientTypes->contains('id', $ingredient->ingredient_type_id)) {
             return true;
         }
 
