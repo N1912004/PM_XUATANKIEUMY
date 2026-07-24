@@ -657,8 +657,6 @@
                     'options' => [
                         ['value' => 'latest', 'label' => __('warehouse.filters.latest_updated')],
                         ['value' => 'oldest', 'label' => __('warehouse.filters.oldest_updated')],
-                        ['value' => 'name_asc', 'label' => __('warehouse.filters.name_asc')],
-                        ['value' => 'name_desc', 'label' => __('warehouse.filters.name_desc')],
                     ],
                 ])
             </div>
