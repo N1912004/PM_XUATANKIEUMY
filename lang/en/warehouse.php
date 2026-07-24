@@ -145,7 +145,8 @@ return [
     'outbound' => [
         'title' => 'Outbound flow',
         'description' => 'Issue for daily production or transfer to another branch/kitchen.',
-        'start_hint' => 'Click Create outbound slip to start.',
+        'start_hint' => 'Press Create outbound slip to start.',
+        'start_hint_html' => 'Press :button to start.',
         'production_hint' => 'System automatically summarizes ingredient quantities from locked weekly menus.',
     ],
     'transfer' => [

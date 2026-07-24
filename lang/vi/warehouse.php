@@ -144,8 +144,9 @@ return [
     ],
     'outbound' => [
         'title' => 'Luồng xuất kho',
-        'description' => 'Xuất sản xuất hàng ngày hoặc Điều chuyển đi chi nhánh/bếp khác.',
+        'description' => 'Xuất kho sản xuất theo kế hoạch/ca hoặc xuất điều chuyển.',
         'start_hint' => 'Nhấn Tạo phiếu xuất để bắt đầu.',
+        'start_hint_html' => 'Nhấn :button để bắt đầu.',
         'production_hint' => 'Hệ thống tự động tổng hợp định lượng từ thực đơn tuần đã chốt.',
     ],
     'transfer' => [

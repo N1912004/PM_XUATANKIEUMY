@@ -173,10 +173,6 @@ class ListStocks extends ListRecords
             $this->loadPOItems();
         }
 
-        if ($this->warehouseTab === 'out' && $this->outMode === null) {
-            $this->outMode = 'production';
-            $this->loadProductionItems();
-        }
     }
 
     public function updatedSelectedKitchenId($value): void
@@ -228,15 +224,14 @@ class ListStocks extends ListRecords
     {
         $this->warehouseTab = $tab;
         $this->selectedType = '';
+        $this->search = '';
+        $this->checkStocksCache = null;
+        $this->resetPage();
 
         if ($tab === 'check' && $this->actualQuantities === []) {
             $this->initEndDayCheck();
         }
 
-        if ($tab === 'out' && $this->outMode === null) {
-            $this->outMode = 'production';
-            $this->loadProductionItems();
-        }
     }
 
     /** Nạp tồn HỆ THỐNG CỦA NGÀY KIỂM KÊ vào form (chỉ khi mở tab / đổi ngày). */

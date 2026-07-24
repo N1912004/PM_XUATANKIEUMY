@@ -707,7 +707,7 @@
                                     {{ number_format($item['quantity'] * $item['unit_price'], 0, ',', '.') }}<span style="font-size: 10px; font-weight: 500; color: #94a3b8; margin-left: 1px;">{{ __('warehouse.common.currency') }}</span>
                                 </td>
                                 <td style="text-align: center; font-size: 11px; color: #64748b; font-variant-numeric: tabular-nums;">
-                                    {{ $item['updated_at']?->format('H:i d/m/Y') ?? '—' }}
+                                    {{ $item['updated_at'] ? \Carbon\Carbon::parse($item['updated_at'])->setTimezone('Asia/Ho_Chi_Minh')->format('d/m/Y H:i') : '—' }}
                                 </td>
                                 <td>
                                     @if($item['quantity'] == 0)
@@ -748,11 +748,6 @@
                                         </div>
                                         <div style="font-weight: 700; color: #334155; font-size: 0.875rem;" class="dark:text-slate-300">{{ __('warehouse.empty.no_ingredients') }}</div>
                                         <div style="color: #64748b; font-size: 0.78rem; max-width: 280px; margin: 0 auto;" class="dark:text-slate-400">{{ __('warehouse.empty.adjust_filters') }}</div>
-                                        @if($search !== '' || $selectedType !== '')
-                                            <button type="button" wire:click="$set('search', ''); $set('selectedType', '')" style="margin-top: 0.25rem; font-size: 0.78rem; font-weight: 600; color: rgb(var(--primary-600)); background: transparent; border: none; cursor: pointer; text-decoration: underline;" class="hover:text-primary-500">
-                                                {{ __('warehouse.actions.clear_filters') }}
-                                            </button>
-                                        @endif
                                     </div>
                                 </td>
                             </tr>
@@ -910,11 +905,6 @@
                                             </div>
                                             <div style="font-weight: 700; color: #334155; font-size: 0.875rem;" class="dark:text-slate-300">{{ __('warehouse.empty.no_ingredients') }}</div>
                                             <div style="color: #64748b; font-size: 0.78rem; max-width: 280px; margin: 0 auto;" class="dark:text-slate-400">{{ __('warehouse.empty.adjust_filters') }}</div>
-                                            @if($search !== '')
-                                                <button type="button" wire:click="$set('search', '')" style="margin-top: 0.25rem; font-size: 0.78rem; font-weight: 600; color: rgb(var(--primary-600)); background: transparent; border: none; cursor: pointer; text-decoration: underline;" class="hover:text-primary-500">
-                                                    {{ __('warehouse.actions.clear_filters') }}
-                                                </button>
-                                            @endif
                                         </div>
                                     </td>
                                 </tr>
@@ -1117,20 +1107,23 @@
 
         @elseif($warehouseTab === 'out')
             @if(is_null($outMode))
-                <!-- Initial Workspace for Outbound -->
-                <div style="text-align: center; padding: 3rem 1.5rem;">
-                    <div style="display:inline-flex; align-items:center; justify-content:center; width:54px; height:54px; border-radius:50%; background:#fff7ed; color:#ea580c; margin-bottom:1rem;">
-                        <i class="fa-solid fa-truck-ramp-box" style="font-size:24px"></i>
+                <!-- Initial Workspace for Outbound (Ảnh 1 Mockup) -->
+                <div>
+                    <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-3 mb-4">
+                        <div>
+                            <h3 style="font-weight: 800; font-size:0.95rem; color:#0f172a;" class="dark:text-white">{{ __('warehouse.outbound.title') }}</h3>
+                            <p style="font-size:0.75rem; color:#64748b;">{{ __('warehouse.outbound.description') }}</p>
+                        </div>
+                        <button type="button" class="wh-action-btn wh-action-btn-primary" wire:click="openOutTypeModal">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                            </svg>
+                            <span>{{ __('warehouse.actions.create_out') }}</span>
+                        </button>
                     </div>
-                    <h3 style="font-size: 1rem; font-weight: 700; color:#0f172a;" class="dark:text-white">{{ __('warehouse.outbound.title') }}</h3>
-                    <p style="font-size: 0.78rem; color:#64748b; margin-top:0.25rem; margin-bottom:1.5rem;">{{ __('warehouse.outbound.description') }}</p>
-                    <button type="button" class="wh-action-btn wh-action-btn-primary" style="margin: 0 auto;" wire:click="openOutTypeModal">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                        </svg>
-                        <span>{{ __('warehouse.actions.create_out') }}</span>
-                    </button>
-                    <div style="font-size:0.75rem; color:#94a3b8; margin-top:1rem;">{{ __('warehouse.outbound.start_hint') }}</div>
+                    <div style="font-size:0.85rem; color:#64748b; padding: 0.5rem 0;">
+                        {!! __('warehouse.outbound.start_hint_html', ['button' => '<strong style="color:#334155;" class="dark:text-slate-200">' . e(__('warehouse.actions.create_out')) . '</strong>']) !!}
+                    </div>
                 </div>
             @elseif($outMode === 'production')
                 <!-- Production Outbound Workspace (Ảnh Mockup) -->
@@ -1194,11 +1187,6 @@
                                 <div style="color: #64748b; font-size: 0.78rem; max-width: 280px; margin: 0 auto;" class="dark:text-slate-400">
                                     {{ __('warehouse.empty.adjust_filters') }}
                                 </div>
-                                @if($search !== '')
-                                    <button type="button" wire:click="$set('search', '')" style="margin-top: 0.25rem; font-size: 0.78rem; font-weight: 600; color: rgb(var(--primary-600)); background: transparent; border: none; cursor: pointer; text-decoration: underline;" class="hover:text-primary-500">
-                                        {{ __('warehouse.actions.clear_filters') }}
-                                    </button>
-                                @endif
                             </div>
                         </div>
                     @else
@@ -1336,7 +1324,7 @@
                                             <td><span style="font-weight: 700;">{{ $tf->code }}</span></td>
                                             <td>{{ $tf->sourceKitchen->name }}</td>
                                             <td>{{ $tf->destKitchen->name }}</td>
-                                            <td>{{ $tf->created_at->format('d/m/Y H:i') }}</td>
+                                            <td>{{ $tf->created_at->setTimezone('Asia/Ho_Chi_Minh')->format('d/m/Y H:i') }}</td>
                                             <td>
                                                 @if($tf->status === \App\Models\StockTransfer::STATUS_DONE)
                                                     <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-green-100 text-green-800 dark:bg-green-950/20 dark:text-green-400">
@@ -1398,7 +1386,7 @@
                     <tbody>
                         @forelse($logData as $log)
                             <tr>
-                                <td>{{ \Carbon\Carbon::parse($log['created_at'])->format('d/m/Y H:i') }}</td>
+                                <td>{{ \Carbon\Carbon::parse($log['created_at'])->setTimezone('Asia/Ho_Chi_Minh')->format('d/m/Y H:i') }}</td>
                                 <td>
                                     @php
                                         // 'Kiểm kê' lưu quantity CÓ DẤU (+ thừa / − thiếu); các loại khác dấu theo nhóm nhập/xuất
@@ -1579,7 +1567,7 @@
                         <tbody>
                             @forelse($ledgerTransactions as $log)
                                 <tr>
-                                    <td>{{ \Carbon\Carbon::parse($log['created_at'])->format('d/m/Y H:i') }}</td>
+                                    <td>{{ \Carbon\Carbon::parse($log['created_at'])->setTimezone('Asia/Ho_Chi_Minh')->format('d/m/Y H:i') }}</td>
                                     <td>
                                         @if($log['voucher_code'])
                                             <span style="font-family: monospace; font-weight: 700; background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size:10px;" class="dark:bg-gray-800">{{ $log['voucher_code'] }}</span>
