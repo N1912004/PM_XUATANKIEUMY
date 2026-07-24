@@ -48,6 +48,8 @@ class ListStocks extends ListRecords
 
     public string $selectedType = '';
 
+    public string $selectedSort = 'latest';
+
     public int $perPage = 10;
 
     public int|string|null $selectedKitchenId = null;
@@ -308,8 +310,20 @@ class ListStocks extends ListRecords
 
         $kitchenId = auth()->user()?->currentKitchenId();
 
-        return $this->checkStocksCache = Stock::with('ingredient')
+        return $this->checkStocksCache = Stock::with(['ingredient.typeRelation'])
             ->when($kitchenId, fn ($q) => $q->where('kitchen_id', $kitchenId))
+            ->when(! empty($this->search), function ($query) {
+                $searchLower = '%'.strtolower($this->search).'%';
+                $query->whereHas('ingredient', function ($q) use ($searchLower) {
+                    $q->whereRaw('LOWER(name) LIKE ?', [$searchLower])
+                        ->orWhereRaw('LOWER(code) LIKE ?', [$searchLower]);
+                });
+            })
+            ->when(! empty($this->selectedType), function ($query) {
+                $query->whereHas('ingredient.typeRelation', function ($q) {
+                    $q->where('name', $this->selectedType);
+                });
+            })
             ->get();
     }
 
@@ -1268,7 +1282,21 @@ class ListStocks extends ListRecords
             });
         }
 
-        return $query->orderBy('id')->paginate($this->perPage);
+        if ($this->selectedSort === 'oldest') {
+            $query->orderBy('stocks.updated_at', 'asc')->orderBy('stocks.id', 'asc');
+        } elseif ($this->selectedSort === 'name_asc') {
+            $query->join('ingredients', 'stocks.ingredient_id', '=', 'ingredients.id')
+                ->select('stocks.*')
+                ->orderBy('ingredients.name', 'asc');
+        } elseif ($this->selectedSort === 'name_desc') {
+            $query->join('ingredients', 'stocks.ingredient_id', '=', 'ingredients.id')
+                ->select('stocks.*')
+                ->orderBy('ingredients.name', 'desc');
+        } else {
+            $query->orderBy('stocks.updated_at', 'desc')->orderBy('stocks.id', 'desc');
+        }
+
+        return $query->paginate($this->perPage);
     }
 
     /** Bộ lọc tab Nhật ký kho: theo loại giao dịch, nguyên liệu và KHOẢNG THỜI GIAN (đối soát) */
@@ -1325,6 +1353,18 @@ class ListStocks extends ListRecords
         return StockTransaction::with(['ingredient'])
             ->latest()
             ->when($kitchenId, fn ($q) => $q->where('kitchen_id', $kitchenId))
+            ->when(! empty($this->search), function ($query) {
+                $searchLower = '%'.strtolower($this->search).'%';
+                $query->whereHas('ingredient', function ($q) use ($searchLower) {
+                    $q->whereRaw('LOWER(name) LIKE ?', [$searchLower])
+                        ->orWhereRaw('LOWER(code) LIKE ?', [$searchLower]);
+                });
+            })
+            ->when(! empty($this->selectedType), function ($query) {
+                $query->whereHas('ingredient.typeRelation', function ($q) {
+                    $q->where('name', $this->selectedType);
+                });
+            })
             ->when($this->logTypeFilter !== '', fn ($q) => $q->where('type', $this->logTypeFilter))
             ->when($this->logIngredientFilter !== '', fn ($q) => $q->where('ingredient_id', (int) $this->logIngredientFilter))
             ->when($this->logFromDate !== '', fn ($q) => $q->where('created_at', '>=', Carbon::parse($this->logFromDate)->startOfDay()))

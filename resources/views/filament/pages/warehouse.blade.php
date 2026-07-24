@@ -632,25 +632,37 @@
             <span>{{ __('warehouse.tabs.log') }}</span>
         </button>
 
-        @if($warehouseTab === 'stock')
-            <div class="filter-controls">
-                <div class="search-wrapper">
-                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                    </svg>
-                    <input type="text" wire:model.live.debounce.300ms="search" placeholder="{{ __('warehouse.placeholders.search_ingredient') }}">
-                </div>
-                <div style="min-width:190px">
-                    @include('filament.components.search-select', [
-                        'name' => 'selectedType',
-                        'live' => true,
-                        'placeholder' => __('warehouse.filters.all_types'),
-                        'emptyLabel' => __('warehouse.filters.all_types'),
-                        'options' => collect($this->getIngredientTypeOptions())->map(fn ($t) => ['value' => $t, 'label' => $t])->all(),
-                    ])
-                </div>
+        <div class="filter-controls">
+            <div class="search-wrapper">
+                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+                <input type="text" wire:model.live.debounce.300ms="search" placeholder="{{ __('warehouse.placeholders.search_ingredient') }}">
             </div>
-        @endif
+            <div style="min-width:170px">
+                @include('filament.components.search-select', [
+                    'name' => 'selectedType',
+                    'live' => true,
+                    'placeholder' => __('warehouse.filters.all_types'),
+                    'emptyLabel' => __('warehouse.filters.all_types'),
+                    'options' => collect($this->getIngredientTypeOptions())->map(fn ($t) => ['value' => $t, 'label' => $t])->all(),
+                ])
+            </div>
+            <div style="min-width:170px">
+                @include('filament.components.search-select', [
+                    'name' => 'selectedSort',
+                    'live' => true,
+                    'placeholder' => __('warehouse.filters.latest_updated'),
+                    'emptyLabel' => __('warehouse.filters.latest_updated'),
+                    'options' => [
+                        ['value' => 'latest', 'label' => __('warehouse.filters.latest_updated')],
+                        ['value' => 'oldest', 'label' => __('warehouse.filters.oldest_updated')],
+                        ['value' => 'name_asc', 'label' => __('warehouse.filters.name_asc')],
+                        ['value' => 'name_desc', 'label' => __('warehouse.filters.name_desc')],
+                    ],
+                ])
+            </div>
+        </div>
     </div>
 
     <!-- PANELS CONTENT -->

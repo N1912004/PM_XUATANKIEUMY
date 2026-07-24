@@ -91,6 +91,10 @@ return [
         'to_date' => 'Đến ngày',
 
         'all_types' => 'Tất cả loại',
+        'latest_updated' => 'Cập nhật mới nhất',
+        'oldest_updated' => 'Cũ nhất',
+        'name_asc' => 'Tên (A - Z)',
+        'name_desc' => 'Tên (Z - A)',
         'all_transaction_types' => '— Tất cả loại giao dịch —',
         'all_ingredients' => '— Tất cả nguyên liệu —',
     ],

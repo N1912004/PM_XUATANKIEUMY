@@ -91,6 +91,10 @@ return [
         'to_date' => 'To date',
 
         'all_types' => 'All types',
+        'latest_updated' => 'Latest updated',
+        'oldest_updated' => 'Oldest updated',
+        'name_asc' => 'Name (A - Z)',
+        'name_desc' => 'Name (Z - A)',
         'all_transaction_types' => '— All transaction types —',
         'all_ingredients' => '— All ingredients —',
     ],
