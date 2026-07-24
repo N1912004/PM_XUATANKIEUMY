@@ -634,6 +634,9 @@
 
             .sup-card {
                 padding: 1.35rem 1.5rem;
+                max-width: 100%;
+                box-sizing: border-box;
+                overflow: hidden;
             }
 
             .sup-card-title {
@@ -642,6 +645,11 @@
                 margin: 0 0 1rem;
                 padding-bottom: .9rem;
                 border-bottom: 1px solid var(--sup-bd2);
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: .5rem;
+                flex-wrap: wrap;
             }
 
             .sup-grid {
@@ -692,6 +700,7 @@
                 justify-content: space-between;
                 gap: 1rem;
                 margin-bottom: .9rem;
+                flex-wrap: wrap;
             }
 
             .sup-help {
@@ -891,11 +900,22 @@
 
             @media (max-width: 760px) {
                 .sup-page {
-                    padding: 1rem 0.75rem 1.5rem !important;
+                    padding: .85rem .75rem 1.5rem !important;
                 }
 
                 .sup-card {
-                    padding: 1rem;
+                    padding: 1rem .85rem;
+                }
+
+                .sup-card-title {
+                    font-size: .95rem;
+                    gap: .4rem;
+                }
+
+                .sup-ingredient-head {
+                    flex-direction: column;
+                    align-items: flex-start;
+                    gap: .35rem;
                 }
 
                 .sup-head,
@@ -924,13 +944,15 @@
 
                 .sup-bottom-bar {
                     position: static !important;
-                    margin: 1.5rem -0.75rem -1.5rem !important;
-                    padding: 1rem 0.75rem !important;
+                    margin: 1.25rem 0 0 0 !important;
+                    padding: 1rem .85rem !important;
                     flex-direction: column-reverse !important;
                     align-items: stretch !important;
                     gap: 0.5rem !important;
                     box-shadow: none !important;
-                    border-top: 1px solid var(--sup-bd) !important;
+                    border: 1px solid var(--sup-bd) !important;
+                    background: var(--sup-wh) !important;
+                    border-radius: .75rem !important;
                 }
 
                 .sup-bottom-bar .sup-btn {

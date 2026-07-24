@@ -82,7 +82,7 @@
 
                 <!-- Hồ sơ NCC: hợp đồng, chứng nhận ATTP... kèm ngày hết hạn -->
                 <div class="sup-card">
-                    <div class="sup-card-title" style="display:flex; align-items:center; justify-content:space-between">
+                    <div class="sup-card-title" style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.5rem">
                         <span>{{ __('supplier.documents.title') }}</span>
                         <button type="button" wire:click="addDocument"
                             style="background:var(--po-bl-s); color:var(--po-bl); border:none; padding:6px 12px; border-radius:8px; font-size:12px; font-weight:700; cursor:pointer">
@@ -92,15 +92,15 @@
 
                     @forelse($documents as $index => $doc)
                         <div style="display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap; padding:10px 0; border-bottom:1px dashed var(--sup-bd2)">
-                            <div class="sup-field" style="flex:2; min-width:180px">
+                            <div class="sup-field" style="flex:1 1 140px; min-width:120px">
                                 <label class="sup-label">{{ __('supplier.documents.name') }}</label>
                                 <input wire:model="documents.{{ $index }}.name" type="text" class="sup-input" placeholder="{{ __('supplier.documents.name_example') }}">
                             </div>
-                            <div class="sup-field" style="min-width:150px">
+                            <div class="sup-field" style="flex:1 1 120px; min-width:110px">
                                 <label class="sup-label">{{ __('supplier.documents.expires_at') }}</label>
                                 <input wire:model="documents.{{ $index }}.expires_at" type="date" class="sup-input">
                             </div>
-                            <div class="sup-field" style="flex:2; min-width:200px">
+                            <div class="sup-field" style="flex:1 1 140px; min-width:120px">
                                 <div style="display:flex; justify-content:space-between; align-items:center; gap:8px">
                                     <label class="sup-label">{{ __('supplier.documents.attachment') }}</label>
                                     @if(!empty($doc['file_path']))

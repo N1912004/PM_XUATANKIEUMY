@@ -32,9 +32,6 @@ class CreateSupplier extends Page
 
     public string $email = '';
 
-    /** @var array<int, int> ID loại thực phẩm (ingredient_types) NCC cung cấp. */
-    public array $selectedTypes = [];
-
     public bool $status = true;
 
     public string $notes = '';
@@ -72,12 +69,10 @@ class CreateSupplier extends Page
         $data = $this->validate($this->rules(), $this->messages(), $this->validationAttributes());
         $data['documents'] = $this->processDocuments();
 
-        // `selectedTypes` không phải cột suppliers — tách ra khỏi $data trước khi create.
-        unset($data['selectedTypes']);
-
         $supplier = Supplier::query()->create($data);
-        $supplier->ingredientTypes()->sync($this->selectedTypes);
         $this->syncIngredients($supplier);
+        // Loại thực phẩm suy trực tiếp từ loại của các nguyên liệu đã tích (không chọn tay).
+        $supplier->ingredientTypes()->sync($this->derivedTypeIds());
 
         Notification::make()
             ->title(__('supplier.notifications.saved'))
@@ -96,7 +91,7 @@ class CreateSupplier extends Page
 
         return [
             'code' => $this->code ?: '--',
-            'type' => $this->selectedTypeNames() ?: '--',
+            'type' => implode(', ', $this->derivedTypeNames()) ?: '--',
             'ingredients' => $selected->count(),
             'total' => $selected->sum(fn ($id): float => (float) ($this->ingredientCosts[$id] ?? 0)),
         ];
@@ -185,8 +180,6 @@ class CreateSupplier extends Page
                     }
                 },
             ],
-            'selectedTypes' => ['required', 'array', 'min:1'],
-            'selectedTypes.*' => ['integer', Rule::exists('ingredient_types', 'id')],
             'status' => ['boolean'],
             'notes' => ['nullable', 'string', 'max:2000'],
         ];
@@ -214,7 +207,6 @@ class CreateSupplier extends Page
             'code' => __('supplier.attributes.code'),
             'phone' => __('supplier.attributes.phone'),
             'email' => __('supplier.attributes.email'),
-            'selectedTypes' => __('supplier.attributes.type'),
         ];
     }
 
@@ -246,37 +238,46 @@ class CreateSupplier extends Page
     }
 
     /**
-     * Danh mục loại thực phẩm (ingredient_types) để NCC chọn — dùng chung với Nguyên liệu.
+     * ID các loại thực phẩm suy ra từ loại (ingredient_type_id) của những nguyên liệu đã tích —
+     * NCC không chọn loại thủ công, loại phản ánh đúng nguyên liệu NCC cung cấp.
+     *
+     * @return array<int, int>
+     */
+    protected function derivedTypeIds(): array
+    {
+        $chosenIds = collect($this->selectedIngredients)->filter()->keys();
+
+        if ($chosenIds->isEmpty()) {
+            return [];
+        }
+
+        return Ingredient::query()
+            ->whereIn('id', $chosenIds)
+            ->whereNotNull('ingredient_type_id')
+            ->pluck('ingredient_type_id')
+            ->unique()
+            ->values()
+            ->all();
+    }
+
+    /**
+     * Loại thực phẩm cung cấp (chỉ hiển thị) — tên các loại suy từ nguyên liệu đã tích.
      *
      * @return array<int, string>
      */
-    public function typeOptions(): array
+    public function derivedTypeNames(): array
     {
-        return IngredientType::query()->orderBy('name')->pluck('name', 'id')->all();
-    }
+        $ids = $this->derivedTypeIds();
 
-    /** Bật/tắt 1 loại thực phẩm — giữ `selectedTypes` là mảng ID phẳng để sync pivot. */
-    public function toggleType(int $typeId): void
-    {
-        if (in_array($typeId, $this->selectedTypes, true)) {
-            $this->selectedTypes = array_values(array_diff($this->selectedTypes, [$typeId]));
-        } else {
-            $this->selectedTypes[] = $typeId;
-        }
-    }
-
-    /** Tên các loại đã chọn, ghép dấu phẩy — chỉ để hiển thị tóm tắt. */
-    protected function selectedTypeNames(): string
-    {
-        if ($this->selectedTypes === []) {
-            return '';
+        if ($ids === []) {
+            return [];
         }
 
         return IngredientType::query()
-            ->whereIn('id', $this->selectedTypes)
+            ->whereIn('id', $ids)
             ->orderBy('name')
             ->pluck('name')
-            ->join(', ');
+            ->all();
     }
 
     public function updatedSelectedIngredients(): void

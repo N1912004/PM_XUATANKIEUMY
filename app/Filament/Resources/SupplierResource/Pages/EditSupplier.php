@@ -34,9 +34,6 @@ class EditSupplier extends Page
 
     public string $email = '';
 
-    /** @var array<int, int> ID loại thực phẩm (ingredient_types) NCC cung cấp. */
-    public array $selectedTypes = [];
-
     public bool $status = true;
 
     public string $notes = '';
