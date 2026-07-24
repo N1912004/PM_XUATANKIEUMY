@@ -639,14 +639,13 @@
                 </svg>
                 <input type="text" wire:model.live.debounce.300ms="search" placeholder="{{ __('warehouse.placeholders.search_ingredient') }}">
             </div>
-            <div style="min-width:170px">
-                @include('filament.components.search-select', [
-                    'name' => 'selectedType',
-                    'live' => true,
-                    'placeholder' => __('warehouse.filters.all_types'),
-                    'emptyLabel' => __('warehouse.filters.all_types'),
-                    'options' => collect($this->getIngredientTypeOptions())->map(fn ($t) => ['value' => $t, 'label' => $t])->all(),
-                ])
+            <div>
+                <select wire:model.live="selectedType" class="rounded-md border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:[color-scheme:dark]">
+                    <option value="">{{ __('warehouse.filters.all_types') }}</option>
+                    @foreach($this->getIngredientTypeOptions() as $t)
+                        <option value="{{ $t }}">{{ $t }}</option>
+                    @endforeach
+                </select>
             </div>
             <div>
                 <select wire:model.live="selectedSort" class="rounded-md border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:[color-scheme:dark]">

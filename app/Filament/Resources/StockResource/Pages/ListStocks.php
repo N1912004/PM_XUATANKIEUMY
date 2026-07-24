@@ -236,6 +236,7 @@ class ListStocks extends ListRecords
     public function setTab(string $tab): void
     {
         $this->warehouseTab = $tab;
+        $this->selectedType = '';
 
         if ($tab === 'check' && $this->actualQuantities === []) {
             $this->initEndDayCheck();
@@ -371,19 +372,22 @@ class ListStocks extends ListRecords
     /** @var \Illuminate\Support\Collection|null Memo 1 render — options bộ lọc loại NL từ bảng danh mục */
     protected $ingredientTypesCache = null;
 
-    public function getIngredientTypeOptions()
+    public function getIngredientTypeOptions(): array
     {
         if ($this->warehouseTab === 'log') {
-            $logTypes = collect([
-                'inbound', 'external_inbound', 'outbound', 'transfer_out', 'transfer_in', 'stock_check',
-            ])->map(fn ($k) => __('warehouse.transaction_types.'.$k))->values();
+            $types = [
+                __('warehouse.transaction_types.inbound'),
+                __('warehouse.transaction_types.external_inbound'),
+                __('warehouse.transaction_types.outbound'),
+                __('warehouse.transaction_types.transfer_out'),
+                __('warehouse.transaction_types.transfer_in'),
+                __('warehouse.transaction_types.stock_check'),
+            ];
 
-            $ingTypes = IngredientType::orderBy('name')->pluck('name');
-
-            return $logTypes->merge($ingTypes)->unique()->values();
+            return array_values(array_unique($types));
         }
 
-        return $this->ingredientTypesCache ??= IngredientType::orderBy('name')->pluck('name');
+        return IngredientType::orderBy('name')->pluck('name')->all();
     }
 
     public function openInTypeModal(): void
