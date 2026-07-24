@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Filament\Resources\SupplierResource\Pages\CreateSupplier;
 use App\Filament\Resources\SupplierResource\Pages\ListSuppliers;
+use App\Filament\Resources\SupplierResource\Pages\ViewSupplier;
 use App\Models\Ingredient;
 use App\Models\IngredientType;
 use App\Models\Supplier;
@@ -30,12 +31,12 @@ class SupplierIngredientPickerTest extends TestCase
 
         Filament::setCurrentPanel(Filament::getPanel('admin'));
 
-        foreach (['view_any_supplier', 'create_supplier'] as $permission) {
+        foreach (['view_any_supplier', 'view_supplier', 'create_supplier'] as $permission) {
             Permission::findOrCreate($permission, 'web');
         }
 
         $role = Role::create(['name' => 'NCC'.uniqid(), 'guard_name' => 'web']);
-        $role->givePermissionTo(['view_any_supplier', 'create_supplier']);
+        $role->givePermissionTo(['view_any_supplier', 'view_supplier', 'create_supplier']);
 
         $user = User::factory()->create();
         $user->assignRole($role);
@@ -208,5 +209,21 @@ class SupplierIngredientPickerTest extends TestCase
         $suppliers = $page->instance()->suppliers();
 
         $this->assertSame($new->id, $suppliers->first()->id, 'NCC mới tạo phải đứng đầu danh sách');
+    }
+
+    public function test_xem_chi_tiet_ncc_trang_read_only(): void
+    {
+        $supplier = Supplier::create([
+            'name' => 'NCC Chi Tiết Test',
+            'code' => 'NCC-VIEW-1',
+            'phone' => '0901234567',
+            'status' => true,
+        ]);
+
+        Livewire::test(ViewSupplier::class, ['record' => $supplier->id])
+            ->assertSuccessful()
+            ->assertSee('NCC Chi Tiết Test')
+            ->assertSee('NCC-VIEW-1')
+            ->assertSee('0901234567');
     }
 }
