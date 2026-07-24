@@ -916,7 +916,20 @@
             @elseif($inMode === 'po')
                 <!-- PO Inbound Workspace (Ảnh 5) -->
                 <div>
-                    <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-3 mb-4">
+                    <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-3 mb-3">
+                        <div>
+                            <h3 style="font-weight: 800; font-size:0.95rem; color:#0f172a;" class="dark:text-white">{{ __('warehouse.inbound.title') }}</h3>
+                            <p style="font-size:0.75rem; color:#64748b;">{{ __('warehouse.inbound.description') }}</p>
+                        </div>
+                        <button type="button" class="wh-action-btn wh-action-btn-primary" wire:click="openInTypeModal">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                            </svg>
+                            <span>{{ __('warehouse.actions.create_in') }}</span>
+                        </button>
+                    </div>
+
+                    <div class="flex items-center justify-between pb-3 mb-4">
                         <div class="flex items-center gap-3">
                             <div class="form-field" style="width: 320px;">
                                 <label style="font-size:0.7rem;">{{ __('warehouse.form.pending_po_code') }}</label>
@@ -1089,9 +1102,22 @@
                     <div style="font-size:0.75rem; color:#94a3b8; margin-top:1rem;">{{ __('warehouse.outbound.start_hint') }}</div>
                 </div>
             @elseif($outMode === 'production')
-                <!-- Production Outbound Workspace -->
+                <!-- Production Outbound Workspace (Ảnh Mockup) -->
                 <div>
-                    <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-3 mb-4 flex-wrap gap-2">
+                    <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-3 mb-3">
+                        <div>
+                            <h3 style="font-weight: 800; font-size:0.95rem; color:#0f172a;" class="dark:text-white">{{ __('warehouse.outbound.title') }}</h3>
+                            <p style="font-size:0.75rem; color:#64748b;">{{ __('warehouse.outbound.description') }}</p>
+                        </div>
+                        <button type="button" class="wh-action-btn wh-action-btn-primary" wire:click="openOutTypeModal">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                            </svg>
+                            <span>{{ __('warehouse.actions.create_out') }}</span>
+                        </button>
+                    </div>
+
+                    <div class="flex items-center justify-between pb-3 mb-2 flex-wrap gap-2">
                         <div class="flex items-center gap-3">
                             <div class="form-field" style="width: 160px;">
                                 <label style="font-size:0.7rem;">{{ __('warehouse.form.outbound_date') }}</label>
@@ -1115,7 +1141,7 @@
                             <span>{{ __('warehouse.actions.confirm_outbound') }}</span>
                         </button>
                     </div>
-                    <div style="font-size:11px; color:#64748b; margin-bottom:12px;">{{ __('warehouse.outbound.production_hint') }}</div>
+                    <div style="font-size:0.78rem; color:#64748b; margin-bottom:12px;">{{ __('warehouse.outbound.production_hint') }}</div>
 
                     @if(empty($prodItemsData))
                         <div style="text-align: center; color: #94a3b8; padding: 2rem; font-style: italic;">
