@@ -12,6 +12,7 @@ return [
         'create_in' => 'Tạo phiếu nhập',
         'create_out' => 'Tạo phiếu xuất',
         'end_day_check' => 'Kiểm tồn cuối ngày',
+        'check_stock_day' => 'Kiểm tra hàng tồn kho ngày',
         'create_stock' => 'Tạo tồn kho',
         'save_end_day' => 'Lưu tồn cuối ngày',
         'clear_filters' => 'Xóa bộ lọc tìm kiếm',

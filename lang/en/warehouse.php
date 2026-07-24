@@ -12,6 +12,7 @@ return [
         'create_in' => 'Create inbound slip',
         'create_out' => 'Create outbound slip',
         'end_day_check' => 'End-day stock check',
+        'check_stock_day' => 'Daily stock check',
         'create_stock' => 'Create stock',
         'save_end_day' => 'Save end-day stock',
         'clear_filters' => 'Clear search filters',
