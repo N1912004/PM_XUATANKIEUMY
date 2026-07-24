@@ -60,6 +60,15 @@ class ViewSupplier extends Page
             $this->ingredientCosts[$ingredient->id] = (float) $ingredient->pivot->reference_price;
         }
 
+        // Đảm bảo tải đủ các nguyên liệu gắn supplier_id trực tiếp (tương thích hoàn toàn với dữ liệu import/cũ)
+        $directIngredients = Ingredient::where('supplier_id', $supplier->id)->get();
+        foreach ($directIngredients as $ingredient) {
+            if (! isset($this->selectedIngredients[$ingredient->id])) {
+                $this->selectedIngredients[$ingredient->id] = true;
+                $this->ingredientCosts[$ingredient->id] = (float) $ingredient->reference_price;
+            }
+        }
+
         $this->type = implode(', ', $this->derivedTypeNames());
     }
 
