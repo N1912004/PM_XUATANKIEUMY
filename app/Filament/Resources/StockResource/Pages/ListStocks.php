@@ -861,6 +861,13 @@ class ListStocks extends ListRecords
             }
         }
 
+        if (! empty($this->search)) {
+            $searchLower = strtolower($this->search);
+            $ingredients = array_filter($ingredients, function ($item) use ($searchLower) {
+                return str_contains(strtolower($item['name']), $searchLower);
+            });
+        }
+
         $this->prodItemsData = array_values($ingredients);
     }
 
@@ -1292,6 +1299,9 @@ class ListStocks extends ListRecords
     public function updatedSearch(): void
     {
         $this->resetPage();
+        if ($this->warehouseTab === 'out' && $this->outMode === 'production') {
+            $this->loadProductionItems();
+        }
     }
 
     public function updatedSelectedType(): void

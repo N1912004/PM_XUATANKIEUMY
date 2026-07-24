@@ -632,28 +632,30 @@
             <span>{{ __('warehouse.tabs.log') }}</span>
         </button>
 
-        <div class="filter-controls">
-            <div class="search-wrapper">
-                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                </svg>
-                <input type="text" wire:model.live.debounce.300ms="search" placeholder="{{ __('warehouse.placeholders.search_ingredient') }}">
+        @if($warehouseTab !== 'out')
+            <div class="filter-controls">
+                <div class="search-wrapper">
+                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                    <input type="text" wire:model.live.debounce.300ms="search" placeholder="{{ __('warehouse.placeholders.search_ingredient') }}">
+                </div>
+                <div>
+                    <select wire:model.live="selectedType" class="rounded-md border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:[color-scheme:dark]">
+                        <option value="">{{ __('warehouse.filters.all_types') }}</option>
+                        @foreach($this->getIngredientTypeOptions() as $t)
+                            <option value="{{ $t }}">{{ $t }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <select wire:model.live="selectedSort" class="rounded-md border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:[color-scheme:dark]">
+                        <option value="latest">{{ __('warehouse.filters.latest_updated') }}</option>
+                        <option value="oldest">{{ __('warehouse.filters.oldest_updated') }}</option>
+                    </select>
+                </div>
             </div>
-            <div>
-                <select wire:model.live="selectedType" class="rounded-md border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:[color-scheme:dark]">
-                    <option value="">{{ __('warehouse.filters.all_types') }}</option>
-                    @foreach($this->getIngredientTypeOptions() as $t)
-                        <option value="{{ $t }}">{{ $t }}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div>
-                <select wire:model.live="selectedSort" class="rounded-md border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:[color-scheme:dark]">
-                    <option value="latest">{{ __('warehouse.filters.latest_updated') }}</option>
-                    <option value="oldest">{{ __('warehouse.filters.oldest_updated') }}</option>
-                </select>
-            </div>
-        </div>
+        @endif
     </div>
 
     <!-- PANELS CONTENT -->
@@ -1131,6 +1133,12 @@
                                     'placeholder' => __('warehouse.form.shift'),
                                     'options' => collect($this->getShiftsList())->map(fn ($sh) => ['value' => $sh->id, 'label' => $sh->name])->all(),
                                 ])
+                            </div>
+                            <div class="search-wrapper" style="width: 220px; height: 34px; margin-top: 15px;">
+                                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                </svg>
+                                <input type="text" wire:model.live.debounce.300ms="search" placeholder="{{ __('warehouse.placeholders.search_ingredient') }}">
                             </div>
                         </div>
                         <button type="button" class="wh-action-btn wh-action-btn-primary" wire:click="confirmProductionOut">
