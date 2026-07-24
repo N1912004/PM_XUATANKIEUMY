@@ -199,9 +199,6 @@ class ListStocks extends ListRecords
                 ->outlined()
                 ->icon('heroicon-o-clipboard-document-check')
                 ->action(fn () => $this->setTab('check')),
-            Actions\CreateAction::make()
-                ->label(__('warehouse.actions.create_stock'))
-                ->color('primary'),
         ];
     }
 
