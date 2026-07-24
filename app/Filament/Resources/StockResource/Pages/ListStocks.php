@@ -172,6 +172,20 @@ class ListStocks extends ListRecords
             $this->selectedPOId = (int) $poId;
             $this->loadPOItems();
         }
+
+        if ($this->warehouseTab === 'in' && $this->inMode === null) {
+            $this->inMode = 'po';
+            $pendingPOs = $this->getPendingPOs();
+            if (! empty($pendingPOs) && ! $this->selectedPOId) {
+                $this->selectedPOId = $pendingPOs[0]->id;
+            }
+            $this->loadPOItems();
+        }
+
+        if ($this->warehouseTab === 'out' && $this->outMode === null) {
+            $this->outMode = 'production';
+            $this->loadProductionItems();
+        }
     }
 
     public function updatedSelectedKitchenId($value): void
@@ -225,6 +239,20 @@ class ListStocks extends ListRecords
 
         if ($tab === 'check' && $this->actualQuantities === []) {
             $this->initEndDayCheck();
+        }
+
+        if ($tab === 'in' && $this->inMode === null) {
+            $this->inMode = 'po';
+            $pendingPOs = $this->getPendingPOs();
+            if (! empty($pendingPOs) && ! $this->selectedPOId) {
+                $this->selectedPOId = $pendingPOs[0]->id;
+            }
+            $this->loadPOItems();
+        }
+
+        if ($tab === 'out' && $this->outMode === null) {
+            $this->outMode = 'production';
+            $this->loadProductionItems();
         }
     }
 
@@ -543,6 +571,9 @@ class ListStocks extends ListRecords
             return;
         }
 
+        $kitchenId = auth()->user()?->currentKitchenId() ?? $po->kitchen_id;
+        $stocks = Stock::where('kitchen_id', $kitchenId)->pluck('quantity', 'ingredient_id');
+
         $this->poItemsData = [];
         foreach ($po->items as $item) {
             $this->poItemsData[] = [
@@ -550,6 +581,7 @@ class ListStocks extends ListRecords
                 'ingredient_id' => $item->ingredient_id,
                 'name' => $item->ingredient->name,
                 'unit' => $item->ingredient->unit,
+                'current_stock' => (float) ($stocks[$item->ingredient_id] ?? 0),
                 'quantity_ordered' => (float) $item->quantity_ordered,
                 'quantity_received' => (float) $item->quantity_ordered, // Pre-filled default
                 'unit_price' => (float) $item->unit_price,

@@ -950,6 +950,7 @@
                                 <thead>
                                     <tr>
                                         <th>{{ __('warehouse.table.ingredient') }}</th>
+                                        <th style="text-align: right;">{{ __('warehouse.table.current_stock') }}</th>
                                         <th style="text-align: right;">{{ __('warehouse.table.expected_qty') }}</th>
                                         <th style="text-align: center; width:140px;">{{ __('warehouse.table.received_qty') }}</th>
                                         <th style="text-align: right; width:110px;">{{ __('warehouse.table.difference') }}</th>
@@ -965,6 +966,7 @@
                                         @endphp
                                         <tr>
                                             <td style="font-weight: 700; color: #0f172a;" class="dark:text-white">{{ $item['name'] }}</td>
+                                            <td style="text-align: right; font-weight:600; color:#64748b;">{{ number_format($item['current_stock'] ?? 0, 2, ',', '.') }} {{ $item['unit'] }}</td>
                                             <td style="text-align: right; font-weight:600;">{{ number_format($item['quantity_ordered'], 2, ',', '.') }} {{ $item['unit'] }}</td>
                                             <td style="text-align: center;">
                                                 <input type="number" step="0.01" wire:model.live.debounce.400ms="poItemsData.{{ $index }}.quantity_received" class="table-input" style="width: 110px;">
