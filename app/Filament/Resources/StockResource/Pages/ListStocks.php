@@ -373,6 +373,16 @@ class ListStocks extends ListRecords
 
     public function getIngredientTypeOptions()
     {
+        if ($this->warehouseTab === 'log') {
+            $logTypes = collect([
+                'inbound', 'external_inbound', 'outbound', 'transfer_out', 'transfer_in', 'stock_check',
+            ])->map(fn ($k) => __('warehouse.transaction_types.'.$k))->values();
+
+            $ingTypes = IngredientType::orderBy('name')->pluck('name');
+
+            return $logTypes->merge($ingTypes)->unique()->values();
+        }
+
         return $this->ingredientTypesCache ??= IngredientType::orderBy('name')->pluck('name');
     }
 
@@ -1393,8 +1403,11 @@ class ListStocks extends ListRecords
                 });
             })
             ->when(! empty($this->selectedType), function ($query) {
-                $query->whereHas('ingredient.typeRelation', function ($q) {
-                    $q->where('name', $this->selectedType);
+                $query->where(function ($q) {
+                    $q->where('type', $this->selectedType)
+                        ->orWhereHas('ingredient.typeRelation', function ($sub) {
+                            $sub->where('name', $this->selectedType);
+                        });
                 });
             })
             ->when($this->logTypeFilter !== '', fn ($q) => $q->where('type', $this->logTypeFilter))
