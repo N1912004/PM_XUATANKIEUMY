@@ -1281,6 +1281,7 @@ class ListStocks extends ListRecords
     public function updatedSearch(): void
     {
         $this->resetPage();
+        $this->checkStocksCache = null;
         if ($this->warehouseTab === 'out' && $this->outMode === 'production') {
             $this->loadProductionItems();
         }
