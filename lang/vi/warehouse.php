@@ -72,7 +72,7 @@ return [
         'destination_kitchen' => 'Bếp nhận',
         'time' => 'Thời gian',
         'action' => 'Hành động',
-        'transaction_type' => 'Loại giao dịch',
+        'transaction_type' => 'Loại',
         'after_stock' => 'Tồn sau',
         'voucher_note' => 'Chứng từ / Ghi chú',
     ],
@@ -115,7 +115,7 @@ return [
         'adjust_filters' => 'Vui lòng kiểm tra lại từ khóa tìm kiếm hoặc thay đổi bộ lọc loại nguyên liệu.',
         'no_po_items' => 'Không có sản phẩm nào cần nhập kho trong PO được chọn.',
         'no_production_items' => 'Không có nguyên liệu sản xuất nào được lên lịch cho ngày và ca đã chọn.',
-        'no_stock_transactions' => 'Chưa có giao dịch kho nào được ghi nhận.',
+        'no_stock_transactions' => 'Chưa có nhật ký kho',
         'no_ledger_transactions' => 'Không tìm thấy lịch sử giao dịch nào.',
     ],
     'pagination' => [

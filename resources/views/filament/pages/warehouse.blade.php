@@ -1329,42 +1329,6 @@
 
         @elseif($warehouseTab === 'log')
             @php $logData = $this->getLogData(); @endphp
-            <!-- Bộ lọc nhật ký: loại giao dịch + nguyên liệu -->
-            <div style="display:flex; gap:10px; margin-bottom:12px; flex-wrap:wrap;">
-                @php
-                    $logTypes = collect([
-                        'inbound', 'external_inbound', 'outbound', 'transfer_out', 'transfer_in', 'stock_check',
-                    ])->map(fn ($k) => [
-                        'value' => __('warehouse.transaction_types.'.$k),
-                        'label' => __('warehouse.transaction_type_labels.'.$k),
-                    ])->all();
-                @endphp
-                <div style="min-width:200px">
-                    @include('filament.components.search-select', [
-                        'name' => 'logTypeFilter',
-                        'live' => true,
-                        'placeholder' => __('warehouse.filters.all_transaction_types'),
-                        'emptyLabel' => __('warehouse.filters.all_transaction_types'),
-                        'options' => $logTypes,
-                    ])
-                </div>
-                <div style="min-width:220px">
-                    @include('filament.components.search-select', [
-                        'name' => 'logIngredientFilter',
-                        'live' => true,
-                        'placeholder' => __('warehouse.filters.all_ingredients'),
-                        'emptyLabel' => __('warehouse.filters.all_ingredients'),
-                        'options' => collect($this->getIngredientsList())->map(fn ($ing) => [
-                            'value' => $ing->id,
-                            'label' => $ing->name,
-                            'sub' => $ing->code,
-                        ])->all(),
-                    ])
-                </div>
-                {{-- Lọc theo khoảng thời gian để đối soát đúng kỳ --}}
-                <input type="date" wire:model.live="logFromDate" class="table-input" style="height:34px" title="{{ __('warehouse.filters.from_date') }}">
-                <input type="date" wire:model.live="logToDate" class="table-input" style="height:34px" title="{{ __('warehouse.filters.to_date') }}">
-            </div>
             <div class="overflow-x-auto">
                 <table class="wh-table">
                     <thead>
@@ -1434,12 +1398,14 @@
                 </table>
             </div>
             @php $logTotal = $this->getLogTotal(); @endphp
-            <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:10px; font-size:12px; color:#64748b">
-                <span>{{ __('warehouse.log.showing', ['shown' => count($logData), 'total' => $logTotal]) }}</span>
-                @if(count($logData) < $logTotal)
-                    <button type="button" wire:click="loadMoreLog" class="wh-action-btn">{{ __('warehouse.log.load_more') }}</button>
-                @endif
-            </div>
+            @if($logTotal > 0)
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:10px; font-size:12px; color:#64748b">
+                    <span>{{ __('warehouse.log.showing', ['shown' => count($logData), 'total' => $logTotal]) }}</span>
+                    @if(count($logData) < $logTotal)
+                        <button type="button" wire:click="loadMoreLog" class="wh-action-btn">{{ __('warehouse.log.load_more') }}</button>
+                    @endif
+                </div>
+            @endif
         @endif
     </div>
 
