@@ -84,8 +84,7 @@ class ListIngredients extends ListRecords
             Actions\Action::make('export_excel')
                 ->label(__('ingredient.actions.export'))
                 ->icon('heroicon-o-document-arrow-down')
-                ->color('gray')
-                ->outlined()
+                ->color('success')
                 ->action(function () {
                     $filename = __('ingredient.excel.filename').'-'.now()->format('Ymd-His').'.xlsx';
 

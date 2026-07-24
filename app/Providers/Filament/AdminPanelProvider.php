@@ -95,15 +95,26 @@ class AdminPanelProvider extends PanelProvider
                            inside their own overflow-x wrappers instead of squeezing the sidebar. */
                         .fi-main-ctn {
                             min-width: 0 !important;
+                            width: 100% !important;
+                            max-width: 100% !important;
                         }
                         .fi-sidebar {
                             flex-shrink: 0 !important;
                         }
 
-                        /* Base font styling for all sidebar elements to match */
-                        .fi-sidebar,
-                        .fi-sidebar * {
-                            font-family: \'IBM Plex Sans\', sans-serif !important;
+                        /* Đồng bộ font chữ IBM Plex Sans cho toàn bộ hệ thống (sidebar, body, main content) */
+                        body,
+                        .fi-body,
+                        .fi-main,
+                        .fi-sidebar {
+                            font-family: \'IBM Plex Sans\', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+                        }
+
+                        /* Đồng bộ cỡ chữ tiêu đề trang chuẩn 22px / Extra Bold giữa trang tiêu chuẩn và trang custom */
+                        .fi-header-heading {
+                            font-size: 1.375rem !important;
+                            font-weight: 800 !important;
+                            letter-spacing: -0.01em !important;
                         }
 
                         /* Fix duplicate select arrows globally on custom pages */

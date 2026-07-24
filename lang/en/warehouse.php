@@ -22,6 +22,8 @@ return [
         'save_inbound' => 'Save inbound slip',
         'create_transfer' => 'Create transfer slip',
         'confirm_receive' => 'Confirm receipt',
+        'cancel_transfer' => 'Cancel slip',
+        'confirm_cancel_transfer' => 'Cancel this transfer slip? Frozen stock will be released back to the source kitchen.',
         'view_attachment' => '[View attachment]',
     ],
     'tabs' => [
@@ -121,6 +123,7 @@ return [
     'pagination' => [
         'navigation' => 'Warehouse pagination navigation',
         'showing' => 'Showing :from-:to of :total stock items',
+        'showing_results' => 'Showing :first to :last of :total records',
         'per_page' => ':count / page',
     ],
     'form' => [
@@ -229,6 +232,8 @@ return [
         'transfer_not_found' => 'Transfer slip not found!',
         'only_destination_can_receive' => 'Only destination kitchen can confirm receipt for this slip!',
         'transfer_received' => 'Receipt confirmed and stock updated successfully!',
+        'only_source_can_cancel' => 'Only the source kitchen can cancel this transfer slip!',
+        'transfer_cancelled' => 'Transfer slip cancelled and frozen stock released back to the source kitchen!',
         'select_valid_ingredient_quantity' => 'Please select a valid ingredient and quantity!',
         'stock_in_saved' => 'Stock inbound saved successfully!',
         'available_not_enough' => 'Available stock is not enough for outbound!',

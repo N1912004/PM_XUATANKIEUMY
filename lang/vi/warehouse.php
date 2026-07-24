@@ -22,6 +22,8 @@ return [
         'save_inbound' => 'Lưu phiếu nhập',
         'create_transfer' => 'Tạo phiếu điều chuyển',
         'confirm_receive' => 'Xác nhận nhận hàng',
+        'cancel_transfer' => 'Hủy phiếu',
+        'confirm_cancel_transfer' => 'Hủy phiếu điều chuyển này? Tồn đóng băng sẽ được nhả về bếp xuất.',
         'view_attachment' => '[Xem chứng từ]',
     ],
     'tabs' => [
@@ -121,6 +123,7 @@ return [
     'pagination' => [
         'navigation' => 'Điều hướng phân trang kho',
         'showing' => 'Hiển thị :from-:to trên :total mặt hàng tồn kho',
+        'showing_results' => 'Hiển thị :first đến :last trong tổng số :total bản ghi',
         'per_page' => ':count / trang',
     ],
     'form' => [
@@ -229,6 +232,8 @@ return [
         'transfer_not_found' => 'Không tìm thấy phiếu điều chuyển!',
         'only_destination_can_receive' => 'Chỉ bếp nhận mới được xác nhận nhận hàng của phiếu này!',
         'transfer_received' => 'Đã xác nhận nhận hàng thành công và cập nhật tồn kho!',
+        'only_source_can_cancel' => 'Chỉ bếp xuất mới được hủy phiếu điều chuyển này!',
+        'transfer_cancelled' => 'Đã hủy phiếu điều chuyển và nhả tồn đóng băng về bếp xuất!',
         'select_valid_ingredient_quantity' => 'Vui lòng chọn nguyên liệu và số lượng hợp lệ!',
         'stock_in_saved' => 'Đã lưu nhập kho thành công!',
         'available_not_enough' => 'Số lượng tồn khả dụng không đủ để xuất!',

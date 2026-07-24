@@ -84,6 +84,23 @@
             background: rgb(var(--primary-700)) !important;
             border-color: rgb(var(--primary-700)) !important;
         }
+        .wh-action-btn-danger {
+            background: #dc2626 !important;
+            color: #ffffff !important;
+            border-color: #dc2626 !important;
+        }
+        .wh-action-btn-danger:hover {
+            background: #b91c1c !important;
+            border-color: #b91c1c !important;
+        }
+        /* Tên nguyên liệu: đậm, tương phản đúng ở cả 2 theme (inline color cũ đè mất dark:text-white) */
+        .wh-ing-name {
+            font-weight: 700;
+            color: #0f172a;
+        }
+        .dark .wh-ing-name {
+            color: #ffffff;
+        }
 
         /* Stats cards */
         .stats-grid {
@@ -540,13 +557,21 @@
     {{-- Nếu là quản trị viên/toàn quyền, cho phép chọn bếp linh hoạt --}}
     @if(auth()->user()?->hasRole(['super_admin', 'Quản trị viên']))
         <div class="col-span-full mb-1.5 flex items-center gap-2.5 rounded-lg border border-gray-200 bg-white px-4 py-3 dark:border-gray-700 dark:bg-gray-800">
-            <span class="text-sm font-semibold text-gray-600 dark:text-gray-300">{{ __('warehouse.filters.selected_kitchen') }}</span>
-            <select wire:model.live="selectedKitchenId" class="rounded-md border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:[color-scheme:dark]">
-                <option value="all">{{ __('warehouse.filters.all_kitchens') }}</option>
-                @foreach(\App\Models\Kitchen::orderBy('name')->get() as $kit)
-                    <option value="{{ $kit->id }}">{{ $kit->name }}</option>
-                @endforeach
-            </select>
+            <span class="shrink-0 text-sm font-semibold text-gray-600 dark:text-gray-300">{{ __('warehouse.filters.selected_kitchen') }}</span>
+            <div class="w-64 max-w-full">
+                @include('filament.components.search-select', [
+                    'name' => 'selectedKitchenId',
+                    'live' => true,
+                    'nullable' => false,
+                    'placeholder' => __('warehouse.filters.all_kitchens'),
+                    'options' => collect([['value' => 'all', 'label' => __('warehouse.filters.all_kitchens')]])
+                        ->concat(\App\Models\Kitchen::orderBy('name')->get()->map(fn ($kit) => [
+                            'value' => (string) $kit->id,
+                            'label' => $kit->name,
+                        ]))
+                        ->all(),
+                ])
+            </div>
         </div>
     @elseif(! $this->operatingKitchenId())
         <div style="grid-column: 1 / -1; display:flex; gap:10px; align-items:flex-start; padding:12px 16px; margin-bottom: 6px; border-radius:8px; border:1px solid #f59e0b; background:#fffbeb; color:#92400e">
@@ -684,7 +709,7 @@
                             <tr wire:click="openLedger({{ $item['ingredient']['id'] }})" style="cursor: pointer;" title="{{ __('warehouse.tooltips.open_ledger') }}">
                                 <td style="text-align: center;">{{ ($stocksData->currentPage() - 1) * $stocksData->perPage() + $index + 1 }}</td>
                                 <td><span style="font-weight: 700;">{{ $item['ingredient']['code'] }}</span></td>
-                                <td style="font-weight: 700; color: #0f172a;" class="dark:text-white">
+                                <td class="wh-ing-name">
                                     <div style="display: flex; align-items: center; gap: 8px;">
                                         <span>{{ $item['ingredient']['name'] }}</span>
                                         <svg class="w-3.5 h-3.5 text-gray-400 opacity-0 wh-ledger-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="transition: opacity 0.15s; flex-shrink: 0;" title="{{ __('warehouse.tooltips.open_ledger') }}">
@@ -837,7 +862,7 @@
                             <input type="text" wire:model.live.debounce.300ms="search" placeholder="{{ __('warehouse.placeholders.search_ingredient') }}">
                         </div>
                     </div>
-                    <button type="button" class="wh-action-btn wh-action-btn-primary" wire:click="saveEndDay">
+                    <button type="button" class="wh-action-btn wh-action-btn-primary" wire:click="saveEndDay" wire:loading.attr="disabled" wire:target="saveEndDay">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/>
                         </svg>
@@ -966,7 +991,7 @@
                                 ])
                             </div>
                         </div>
-                        <button type="button" class="wh-action-btn wh-action-btn-primary" wire:click="confirmInboundPO">
+                        <button type="button" class="wh-action-btn wh-action-btn-primary" wire:click="confirmInboundPO" wire:loading.attr="disabled" wire:target="confirmInboundPO">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                             </svg>
@@ -999,7 +1024,7 @@
                                             $diff = (float) ($item['quantity_received'] ?? 0) - (float) $item['quantity_ordered'];
                                         @endphp
                                         <tr>
-                                            <td style="font-weight: 700; color: #0f172a;" class="dark:text-white">{{ $item['name'] }}</td>
+                                            <td class="wh-ing-name">{{ $item['name'] }}</td>
                                             <td style="text-align: right; font-weight:600; color:#64748b;">{{ number_format($item['current_stock'] ?? 0, 2, ',', '.') }} {{ $item['unit'] }}</td>
                                             <td style="text-align: right; font-weight:600;">{{ number_format($item['quantity_ordered'], 2, ',', '.') }} {{ $item['unit'] }}</td>
                                             <td style="text-align: center;">
@@ -1040,7 +1065,7 @@
                                 </svg>
                                 <span>{{ __('warehouse.actions.add_item') }}</span>
                             </button>
-                            <button type="button" class="wh-action-btn wh-action-btn-primary" wire:click="confirmDirectInbound">
+                            <button type="button" class="wh-action-btn wh-action-btn-primary" wire:click="confirmDirectInbound" wire:loading.attr="disabled" wire:target="confirmDirectInbound">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                 </svg>
@@ -1164,7 +1189,7 @@
                                 <input type="text" wire:model.live.debounce.300ms="search" placeholder="{{ __('warehouse.placeholders.search_ingredient') }}">
                             </div>
                         </div>
-                        <button type="button" class="wh-action-btn wh-action-btn-primary" wire:click="confirmProductionOut">
+                        <button type="button" class="wh-action-btn wh-action-btn-primary" wire:click="confirmProductionOut" wire:loading.attr="disabled" wire:target="confirmProductionOut">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                             </svg>
@@ -1203,7 +1228,7 @@
                                 <tbody>
                                     @foreach($prodItemsData as $index => $item)
                                         <tr>
-                                            <td style="font-weight: 700; color: #0f172a;" class="dark:text-white">{{ $item['name'] }}</td>
+                                            <td class="wh-ing-name">{{ $item['name'] }}</td>
                                             {{-- payload từ client có thể thiếu key → không được để vỡ trang (500) --}}
                                             <td style="text-align: right; font-weight:700;">{{ number_format($item['available_qty'] ?? 0, 2, ',', '.') }} {{ $item['unit'] ?? '' }}</td>
                                             <td style="text-align: right; color:#64748b;">{{ number_format($item['quantity_expected'], 2, ',', '.') }} {{ $item['unit'] }}</td>
@@ -1223,6 +1248,19 @@
             @elseif($outMode === 'transfer')
                 <!-- Transfer Outbound Workspace -->
                 <div>
+                    <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-3 mb-3">
+                        <div>
+                            <h3 style="font-weight: 800; font-size:0.95rem; color:#0f172a;" class="dark:text-white">{{ __('warehouse.outbound.title') }}</h3>
+                            <p style="font-size:0.75rem; color:#64748b;">{{ __('warehouse.outbound.description') }}</p>
+                        </div>
+                        <button type="button" class="wh-action-btn wh-action-btn-primary" wire:click="openOutTypeModal">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                            </svg>
+                            <span>{{ __('warehouse.actions.create_out') }}</span>
+                        </button>
+                    </div>
+
                     <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-3 mb-4">
                         <div class="flex items-center gap-3">
                             <div class="form-field" style="width: 260px;">
@@ -1241,7 +1279,7 @@
                                 </svg>
                                 <span>{{ __('warehouse.actions.add_item') }}</span>
                             </button>
-                            <button type="button" class="wh-action-btn wh-action-btn-primary" wire:click="confirmTransferOut">
+                            <button type="button" class="wh-action-btn wh-action-btn-primary" wire:click="confirmTransferOut" wire:loading.attr="disabled" wire:target="confirmTransferOut">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
                                 </svg>
@@ -1352,9 +1390,19 @@
                                                 @endif
                                             </td>
                                             <td style="text-align: center;">
-                                                @if($tf->status === \App\Models\StockTransfer::STATUS_IN_TRANSIT && auth()->user()?->currentKitchenId() === $tf->dest_kitchen_id)
-                                                    <button type="button" class="wh-action-btn wh-action-btn-primary" style="height:28px; font-size:10px; padding:0 8px; margin:0 auto;" wire:click="confirmTransferReceive({{ $tf->id }})">
+                                                @php $curKitchenId = auth()->user()?->currentKitchenId(); @endphp
+                                                @if($tf->status === \App\Models\StockTransfer::STATUS_IN_TRANSIT && $curKitchenId === $tf->dest_kitchen_id)
+                                                    <button type="button" class="wh-action-btn wh-action-btn-primary" style="height:28px; font-size:10px; padding:0 8px; margin:0 auto;"
+                                                            wire:click="confirmTransferReceive({{ $tf->id }})"
+                                                            wire:loading.attr="disabled" wire:target="confirmTransferReceive">
                                                         {{ __('warehouse.actions.confirm_receive') }}
+                                                    </button>
+                                                @elseif($tf->status === \App\Models\StockTransfer::STATUS_IN_TRANSIT && $curKitchenId === $tf->source_kitchen_id)
+                                                    <button type="button" class="wh-action-btn wh-action-btn-danger" style="height:28px; font-size:10px; padding:0 8px; margin:0 auto;"
+                                                            wire:click="cancelTransfer({{ $tf->id }})"
+                                                            wire:confirm="{{ __('warehouse.actions.confirm_cancel_transfer') }}"
+                                                            wire:loading.attr="disabled" wire:target="cancelTransfer">
+                                                        {{ __('warehouse.actions.cancel_transfer') }}
                                                     </button>
                                                 @else
                                                     —
@@ -1370,7 +1418,7 @@
             @endif
 
         @elseif($warehouseTab === 'log')
-            @php $logData = $this->getLogData(); @endphp
+            @php $logPaginator = $this->getLogPaginator(); @endphp
             <div class="overflow-x-auto">
                 <table class="wh-table">
                     <thead>
@@ -1384,7 +1432,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($logData as $log)
+                        @forelse($logPaginator as $log)
                             <tr>
                                 <td>{{ \Carbon\Carbon::parse($log['created_at'])->setTimezone('Asia/Ho_Chi_Minh')->format('d/m/Y H:i') }}</td>
                                 <td>
@@ -1439,15 +1487,77 @@
                     </tbody>
                 </table>
             </div>
-            @php $logTotal = $this->getLogTotal(); @endphp
-            @if($logTotal > 0)
-                <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:10px; font-size:12px; color:#64748b">
-                    <span>{{ __('warehouse.log.showing', ['shown' => count($logData), 'total' => $logTotal]) }}</span>
-                    @if(count($logData) < $logTotal)
-                        <button type="button" wire:click="loadMoreLog" class="wh-action-btn">{{ __('warehouse.log.load_more') }}</button>
+
+            <!-- PHÂN TRANG NHẬT KÝ KHO CHUẨN DỰ ÁN -->
+            <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-top:16px; font-size:12.5px; color:#64748b;">
+                <div>
+                    @if($logPaginator->total() > 0)
+                        {{ __('warehouse.pagination.showing_results', [
+                            'first' => number_format($logPaginator->firstItem()),
+                            'last' => number_format($logPaginator->lastItem()),
+                            'total' => number_format($logPaginator->total())
+                        ]) }}
                     @endif
                 </div>
-            @endif
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <div style="display:flex; align-items:center; gap:6px;">
+                        <span style="font-weight: 500;">Hiển thị:</span>
+                        <select wire:model.live="logPerPage" style="height: 30px; font-size: 12px; padding: 2px 24px 2px 8px; border-radius: 6px; border: 1px solid #cbd5e1; background-color: #fff; cursor: pointer;" class="dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200">
+                            <option value="15">15</option>
+                            <option value="30">30</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+                    </div>
+
+                    @if($logPaginator->hasPages())
+                        <nav role="navigation" aria-label="{{ __('warehouse.pagination.navigation') }}" style="display:flex; align-items:center; gap:4px;">
+                            {{-- Trang trước --}}
+                            @if ($logPaginator->onFirstPage())
+                                <span aria-disabled="true" style="opacity:.4; padding:4px;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><polyline points="15 18 9 12 15 6"/></svg>
+                                </span>
+                            @else
+                                <button type="button" wire:click="previousPage('logPage')" rel="prev" style="display:inline-flex; align-items:center; justify-content:center; min-width:28px; height:28px; border:1px solid #cbd5e1; border-radius:6px; background:transparent; cursor:pointer;" class="dark:border-gray-700">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><polyline points="15 18 9 12 15 6"/></svg>
+                                </button>
+                            @endif
+
+                            {{-- Số trang --}}
+                            @php
+                                $logCurrentPage = $logPaginator->currentPage();
+                                $logLastPage = $logPaginator->lastPage();
+                                $logPageWindow = collect([1, $logCurrentPage - 1, $logCurrentPage, $logCurrentPage + 1, $logLastPage])
+                                    ->filter(fn ($p) => $p >= 1 && $p <= $logLastPage)
+                                    ->unique()
+                                    ->sort()
+                                    ->values();
+                            @endphp
+                            @foreach ($logPageWindow as $i => $page)
+                                @if ($i > 0 && $page - $logPageWindow[$i - 1] > 1)
+                                    <span aria-hidden="true" style="padding:0 4px">…</span>
+                                @endif
+                                @if ($page == $logCurrentPage)
+                                    <span aria-current="page" style="display:inline-flex; align-items:center; justify-content:center; min-width:28px; height:28px; border-radius:6px; background:rgb(var(--primary-600)); color:#fff; font-weight:700;">{{ $page }}</span>
+                                @else
+                                    <button type="button" wire:click="gotoPage({{ $page }}, 'logPage')" style="display:inline-flex; align-items:center; justify-content:center; min-width:28px; height:28px; border:1px solid #cbd5e1; border-radius:6px; background:transparent; cursor:pointer;" class="dark:border-gray-700">{{ $page }}</button>
+                                @endif
+                            @endforeach
+
+                            {{-- Trang sau --}}
+                            @if ($logPaginator->hasMorePages())
+                                <button type="button" wire:click="nextPage('logPage')" rel="next" style="display:inline-flex; align-items:center; justify-content:center; min-width:28px; height:28px; border:1px solid #cbd5e1; border-radius:6px; background:transparent; cursor:pointer;" class="dark:border-gray-700">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><polyline points="9 18 15 12 9 6"/></svg>
+                                </button>
+                            @else
+                                <span aria-disabled="true" style="opacity:.4; padding:4px;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><polyline points="9 18 15 12 9 6"/></svg>
+                                </span>
+                            @endif
+                        </nav>
+                    @endif
+                </div>
+            </div>
         @endif
     </div>
 
@@ -1540,28 +1650,28 @@
     @if($selectedLedgerIngId)
         @php $ledgerIng = $this->getLedgerIngredient(); @endphp
         <div class="flow-modal-overlay">
-            <div class="flow-modal-container" style="width: min(720px, 94vw);">
-                <div class="flex justify-between items-center pb-3 border-b border-gray-200 dark:border-gray-700 mb-4">
+            <div class="flow-modal-container" style="width: min(760px, 94vw); max-height: 85vh; display: flex; flex-direction: column; overflow: hidden;">
+                <div class="flex justify-between items-center pb-3 border-b border-gray-200 dark:border-gray-700 mb-3 flex-shrink-0">
                     <div>
                         <h3 class="font-extrabold text-base text-gray-900 dark:text-white">{{ __('warehouse.ledger.title', ['code' => $ledgerIng->code, 'name' => $ledgerIng->name]) }}</h3>
                         <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ __('warehouse.ledger.description') }}</p>
                     </div>
-                    <button type="button" class="text-gray-400 hover:text-gray-500" wire:click="closeLedger">
+                    <button type="button" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors p-1" wire:click="closeLedger" title="Đóng">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                         </svg>
                     </button>
                 </div>
 
-                <div class="overflow-y-auto" style="max-height: 400px;">
+                <div class="overflow-y-auto flex-1 pr-1" style="max-height: calc(85vh - 90px); scrollbar-width: thin;">
                     <table class="wh-table">
-                        <thead>
+                        <thead class="sticky top-0 z-10 bg-slate-50 dark:bg-slate-800 shadow-xs">
                             <tr>
-                                <th>{{ __('warehouse.table.time') }}</th>
-                                <th>{{ __('warehouse.table.voucher_code') }}</th>
-                                <th>{{ __('warehouse.table.transaction_type') }}</th>
-                                <th style="text-align: right;">{{ __('warehouse.table.quantity') }}</th>
-                                <th style="text-align: right;">{{ __('warehouse.table.after_stock') }}</th>
+                                <th class="bg-slate-50 dark:bg-slate-800">{{ __('warehouse.table.time') }}</th>
+                                <th class="bg-slate-50 dark:bg-slate-800">{{ __('warehouse.table.voucher_code') }}</th>
+                                <th class="bg-slate-50 dark:bg-slate-800">{{ __('warehouse.table.transaction_type') }}</th>
+                                <th class="bg-slate-50 dark:bg-slate-800" style="text-align: right;">{{ __('warehouse.table.quantity') }}</th>
+                                <th class="bg-slate-50 dark:bg-slate-800" style="text-align: right;">{{ __('warehouse.table.after_stock') }}</th>
                             </tr>
                         </thead>
                         <tbody>
