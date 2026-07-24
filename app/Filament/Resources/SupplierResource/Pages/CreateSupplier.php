@@ -280,6 +280,16 @@ class CreateSupplier extends Page
             ->all();
     }
 
+    /**
+     * Tương thích ngược: trả về danh sách loại thực phẩm (suy từ nguyên liệu đã tích).
+     *
+     * @return array<int, string>
+     */
+    public function typeOptions(): array
+    {
+        return $this->derivedTypeNames();
+    }
+
     public function updatedSelectedIngredients(): void
     {
         // Khởi tạo key trong mảng ingredientCosts cho các nguyên liệu mới được chọn

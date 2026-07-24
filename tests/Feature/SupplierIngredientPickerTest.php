@@ -15,8 +15,9 @@ use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 /**
- * Ô "Loại thực phẩm cung cấp" của NCC được chọn trực tiếp từ danh mục `ingredient_types`
- * (lưu ID chuẩn qua pivot `ingredient_type_supplier`), thay cho chuỗi `type` tự sinh cũ.
+ * Ô "Loại thực phẩm cung cấp" của NCC là read-only: suy trực tiếp từ loại
+ * (`ingredient_type_id`) của các nguyên liệu đã tích, lưu ID chuẩn qua pivot
+ * `ingredient_type_supplier`. Không còn chọn loại thủ công, không còn cột `type` chuỗi.
  */
 class SupplierIngredientPickerTest extends TestCase
 {
@@ -48,22 +49,34 @@ class SupplierIngredientPickerTest extends TestCase
         ]);
     }
 
-    public function test_toggle_loai_thuc_pham_cap_nhat_selected_types(): void
+    public function test_loai_thuc_pham_suy_tu_nguyen_lieu_da_tich(): void
     {
-        $meat = IngredientType::firstOrCreate(['name' => 'Động vật']);
-        $veg = IngredientType::firstOrCreate(['name' => 'Thực vật']);
+        $bo = $this->makeIngredient('Thịt bò', 'Động vật');
+        $bap = $this->makeIngredient('Bắp mỹ', 'Thực vật');
 
         $page = Livewire::test(CreateSupplier::class)
-            ->call('toggleType', $meat->id)
-            ->call('toggleType', $veg->id);
+            ->set('selectedIngredients', [$bo->id => true, $bap->id => true]);
 
-        $selected = $page->get('selectedTypes');
-        sort($selected);
-        $this->assertSame([$meat->id, $veg->id], $selected, 'Chọn loại phải lưu ID vào selectedTypes');
+        $names = $page->instance()->derivedTypeNames();
+        sort($names);
+        $this->assertSame(['Thực vật', 'Động vật'], $names, 'Loại hiển thị suy từ loại nguyên liệu đã tích');
 
-        // Bỏ chọn 1 loại thì selectedTypes co lại (giữ mảng ID phẳng)
-        $page->call('toggleType', $veg->id);
-        $this->assertSame([$meat->id], array_values($page->get('selectedTypes')));
+        // Bỏ tích 1 nguyên liệu thì loại tương ứng biến mất.
+        $page->set('selectedIngredients', [$bo->id => true, $bap->id => false]);
+        $this->assertSame(['Động vật'], array_values($page->instance()->derivedTypeNames()));
+    }
+
+    public function test_type_options_method_exists_and_returns_derived_types(): void
+    {
+        $bo = $this->makeIngredient('Thịt bò', 'Động vật');
+        $bap = $this->makeIngredient('Bắp mỹ', 'Thực vật');
+
+        $page = Livewire::test(CreateSupplier::class)
+            ->set('selectedIngredients', [$bo->id => true, $bap->id => true]);
+
+        $names = $page->instance()->typeOptions();
+        sort($names);
+        $this->assertSame(['Thực vật', 'Động vật'], $names);
     }
 
     public function test_nguyen_lieu_da_tich_luon_nam_dau_va_khong_bien_mat_khi_tim_kiem(): void
@@ -82,16 +95,15 @@ class SupplierIngredientPickerTest extends TestCase
         $this->assertTrue($rows->contains('name', 'Cá thu'), 'Kết quả tìm kiếm vẫn hiển thị');
     }
 
-    public function test_luu_duoc_ncc_voi_loai_thuc_pham_da_chon(): void
+    public function test_luu_ncc_loai_suy_tu_nguyen_lieu_da_tich(): void
     {
-        $type = IngredientType::firstOrCreate(['name' => 'Thực vật']);
         $ingredient = $this->makeIngredient('Bắp mỹ', 'Thực vật');
+        $type = IngredientType::where('name', 'Thực vật')->firstOrFail();
 
-        $page = Livewire::test(CreateSupplier::class)
+        Livewire::test(CreateSupplier::class)
             ->set('name', 'NCC Rau sạch')
             ->set('code', 'NCC-TEST-1')
             ->set('phone', '0900000000')
-            ->call('toggleType', $type->id)
             ->set('selectedIngredients', [$ingredient->id => true])
             ->set('ingredientCosts.'.$ingredient->id, 45000)
             ->call('save')
@@ -99,7 +111,7 @@ class SupplierIngredientPickerTest extends TestCase
 
         $supplier = Supplier::where('code', 'NCC-TEST-1')->firstOrFail();
 
-        // Loại thực phẩm lưu qua pivot bằng ID chuẩn (không còn cột type chuỗi)
+        // Loại thực phẩm lưu qua pivot bằng ID chuẩn, suy từ loại nguyên liệu đã tích.
         $this->assertDatabaseHas('ingredient_type_supplier', [
             'supplier_id' => $supplier->id,
             'ingredient_type_id' => $type->id,
@@ -110,16 +122,6 @@ class SupplierIngredientPickerTest extends TestCase
             'ingredient_id' => $ingredient->id,
             'reference_price' => 45000,
         ]);
-    }
-
-    public function test_luu_ncc_khong_chon_loai_thi_bao_loi(): void
-    {
-        Livewire::test(CreateSupplier::class)
-            ->set('name', 'NCC Thiếu Loại')
-            ->set('code', 'NCC-NOLOAI')
-            ->set('phone', '0900000000')
-            ->call('save')
-            ->assertHasErrors('selectedTypes');
     }
 
     public function test_saved_ingredient_auto_syncs_pivot_table(): void

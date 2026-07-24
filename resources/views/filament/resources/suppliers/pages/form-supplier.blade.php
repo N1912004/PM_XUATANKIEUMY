@@ -54,22 +54,17 @@
 
                         <div class="sup-field sup-field-full">
                             <label class="sup-label">{{ __('supplier.fields.food_types') }} <span class="sup-required">*</span></label>
+                            {{-- Read-only: loại suy trực tiếp từ nguyên liệu đã tích ở bảng dưới, không chọn tay --}}
+                            @php $derivedTypes = $this->derivedTypeNames(); @endphp
                             <div style="display:flex; flex-wrap:wrap; gap:8px; padding:10px 12px; min-height:42px; height:auto !important; background:var(--sup-bg); border:1.5px solid var(--sup-bd2); border-radius:.7rem; align-items:center">
-                                @forelse($this->typeOptions() as $typeId => $typeName)
-                                    @php $isPicked = in_array($typeId, $selectedTypes ?? [], false); @endphp
-                                    <button type="button" wire:click="toggleType({{ $typeId }})"
-                                            wire:key="sup-type-{{ $typeId }}"
-                                            style="cursor:pointer; padding:5px 12px; border-radius:9999px; font-size:12px; font-weight:700; border:1.5px solid {{ $isPicked ? 'var(--po-bl)' : 'var(--sup-bd2)' }}; background:{{ $isPicked ? 'var(--po-bl)' : 'transparent' }}; color:{{ $isPicked ? '#fff' : 'var(--sup-mu)' }}; transition:all .12s">
-                                        @if($isPicked)<i class="fa-solid fa-check" style="font-size:10px; margin-right:4px"></i>@endif
-                                        {{ $typeName }}
-                                    </button>
+                                @forelse($derivedTypes as $typeName)
+                                    <span style="padding:5px 12px; border-radius:9999px; font-size:12px; font-weight:700; border:1.5px solid var(--po-bl); background:var(--po-bl); color:#fff">{{ $typeName }}</span>
                                 @empty
                                     <span style="color:var(--sup-mu); font-size:13px">
                                         {{ __('supplier.empty.no_food_types') }}
                                     </span>
                                 @endforelse
                             </div>
-                            @error('selectedTypes') <span class="sup-error">{{ $message }}</span> @enderror
                         </div>
 
                         <div class="sup-field sup-field-full">
@@ -172,9 +167,9 @@
                             </thead>
                             <tbody>
                                 @forelse($ingredients as $ing)
-                                    <tr>
+                                    <tr wire:key="sup-ing-row-{{ $ing->id }}">
                                         <td style="text-align:center">
-                                            <input type="checkbox" wire:model.live="selectedIngredients.{{ $ing->id }}" class="sup-check">
+                                            <input type="checkbox" wire:model.live="selectedIngredients.{{ $ing->id }}" wire:key="sup-ing-chk-{{ $ing->id }}" class="sup-check">
                                         </td>
                                         <td style="font-weight:700;color:var(--sup-bl)">{{ $ing->code }}</td>
                                         <td class="sup-name">{{ $ing->name }}</td>
