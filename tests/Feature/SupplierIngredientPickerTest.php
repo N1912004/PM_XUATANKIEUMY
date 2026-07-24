@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Filament\Resources\SupplierResource\Pages\CreateSupplier;
+use App\Filament\Resources\SupplierResource\Pages\ListSuppliers;
 use App\Models\Ingredient;
 use App\Models\IngredientType;
 use App\Models\Supplier;
@@ -185,5 +186,27 @@ class SupplierIngredientPickerTest extends TestCase
 
         // Gạo không thuộc NCC Đậu Hủ Vũ Biên -> FALSE (chặt chẽ Option A, không từ khóa mờ)
         $this->assertFalse($supplierProcessed->canProvideIngredient($ingredientGao));
+    }
+
+    public function test_suppliers_list_orders_newest_first(): void
+    {
+        $old = Supplier::create([
+            'name' => 'NCC Cũ',
+            'code' => 'NCC-OLD-1',
+            'phone' => '0900000001',
+            'status' => true,
+        ]);
+
+        $new = Supplier::create([
+            'name' => 'NCC Mới Tạo',
+            'code' => 'NCC-NEW-1',
+            'phone' => '0900000002',
+            'status' => true,
+        ]);
+
+        $page = Livewire::test(ListSuppliers::class);
+        $suppliers = $page->instance()->suppliers();
+
+        $this->assertSame($new->id, $suppliers->first()->id, 'NCC mới tạo phải đứng đầu danh sách');
     }
 }

@@ -113,7 +113,7 @@ class SuppliersExport implements FromArray, ShouldAutoSize, WithEvents, WithTitl
     private function suppliers(): Collection
     {
         // Clone để không ảnh hưởng truy vấn gốc; giữ nguyên bộ lọc đã truyền vào.
-        $query = $this->query ? clone $this->query : Supplier::query()->withCount('ingredients')->orderBy('id');
+        $query = $this->query ? clone $this->query : Supplier::query()->withCount('ingredients')->orderByDesc('id');
 
         return $query->with('ingredientTypes')->get();
     }

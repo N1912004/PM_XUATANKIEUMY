@@ -93,7 +93,7 @@ class ListSuppliers extends Page
         // (tìm kiếm, loại, trạng thái) và phạm vi quyền đều được giữ nguyên.
         $query = $this->baseQuery()
             ->withCount('ingredients')
-            ->orderBy('id');
+            ->orderByDesc('id');
 
         $fileName = 'nha-cung-cap-'.now()->format('Ymd-His').'.xlsx';
 
@@ -104,7 +104,7 @@ class ListSuppliers extends Page
     {
         return $this->baseQuery()
             ->withCount('ingredients')
-            ->orderBy('id')
+            ->orderByDesc('id')
             ->paginate($this->perPage);
     }
 
