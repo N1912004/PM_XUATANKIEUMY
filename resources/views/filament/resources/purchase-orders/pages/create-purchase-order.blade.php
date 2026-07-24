@@ -302,10 +302,10 @@
                                                 <span x-text="selectedName" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:130px"></span>
                                                 <i class="fa-solid fa-chevron-down" style="font-size:10px; color:${selectedName === '{{ __('purchase_order.create.select_supplier') }}' ? '#DC2626' : 'var(--po-mu)'}"></i>
                                             </div>
-                                            <div x-show="selectedName === '{{ __('purchase_order.create.select_supplier') }}'" 
-                                                 style="font-size:11px; font-weight:700; color:#DC2626; margin-top:3px; display:flex; align-items:center; gap:3px">
-                                                <i class="fa-solid fa-circle-exclamation" style="font-size:10px"></i> Chưa chọn NCC hợp lệ!
-                                            </div>
+                                             <div x-show="selectedName === '{{ __('purchase_order.create.select_supplier') }}'" 
+                                                  style="font-size:11px; font-weight:700; color:#DC2626; margin-top:3px; display:flex; align-items:center; gap:3px">
+                                                 <i class="fa-solid fa-circle-exclamation" style="font-size:10px"></i> {{ __('purchase_order.create.invalid_supplier') }}
+                                             </div>
 
                                             <template x-teleport="body">
                                                 <div x-show="open" x-cloak @click.outside="open = false" 

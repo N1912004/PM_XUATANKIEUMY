@@ -329,8 +329,8 @@ class CreatePurchaseOrder extends Page
             $count = count($missingSupplierItems);
             $namesList = implode(', ', array_slice($missingSupplierItems, 0, 3)).($count > 3 ? '...' : '');
             Notification::make()
-                ->title('Chưa chọn Nhà cung cấp hợp lệ!')
-                ->body("Có {$count} nguyên liệu chưa có NCC hợp lệ: {$namesList}. Vui lòng chọn NCC phù hợp trước khi tạo đơn.")
+                ->title(__('purchase_order.validation.supplier_required_title'))
+                ->body(__('purchase_order.validation.supplier_required_body', ['count' => $count, 'names' => $namesList]))
                 ->danger()
                 ->send();
 
@@ -359,7 +359,7 @@ class CreatePurchaseOrder extends Page
                     'status' => 'sent',
                     'type' => 'day',
                     'estimated_delivery_date' => $this->orderDate,
-                    'note' => 'Đơn đặt hàng tạo từ trang Tạo đơn đặt hàng ngày '.Carbon::parse($this->orderDate)->format('d/m/Y'),
+                    'note' => __('purchase_order.create.auto_note', ['date' => Carbon::parse($this->orderDate)->format('d/m/Y')]),
                 ]);
 
                 $po->updateQuietly(['code' => 'PO-'.$po->id]);
