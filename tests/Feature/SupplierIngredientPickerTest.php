@@ -4,6 +4,8 @@ namespace Tests\Feature;
 
 use App\Filament\Resources\SupplierResource\Pages\CreateSupplier;
 use App\Models\Ingredient;
+use App\Models\IngredientType;
+use App\Models\Supplier;
 use App\Models\User;
 use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -13,9 +15,8 @@ use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 /**
- * Ô "Loại thực phẩm cung cấp" của NCC được suy ra từ danh sách nguyên liệu đã chọn.
- * Tích/bỏ tích nguyên liệu (wire:model.live) phải dội ngược lên ô "Loại thực phẩm cung cấp",
- * nếu không form báo thiếu loại thực phẩm và không lưu được.
+ * Ô "Loại thực phẩm cung cấp" của NCC được chọn trực tiếp từ danh mục `ingredient_types`
+ * (lưu ID chuẩn qua pivot `ingredient_type_supplier`), thay cho chuỗi `type` tự sinh cũ.
  */
 class SupplierIngredientPickerTest extends TestCase
 {
@@ -47,22 +48,22 @@ class SupplierIngredientPickerTest extends TestCase
         ]);
     }
 
-    public function test_them_nguyen_lieu_tu_dong_cap_nhat_loai_thuc_pham(): void
+    public function test_toggle_loai_thuc_pham_cap_nhat_selected_types(): void
     {
-        $beef = $this->makeIngredient('Bắp bò', 'BÒ');
-        $fish = $this->makeIngredient('Cá cơm khô', 'CÁ');
+        $meat = IngredientType::firstOrCreate(['name' => 'Động vật']);
+        $veg = IngredientType::firstOrCreate(['name' => 'Thực vật']);
 
         $page = Livewire::test(CreateSupplier::class)
-            ->set('selectedIngredients', [$beef->id => true, $fish->id => true]);
+            ->call('toggleType', $meat->id)
+            ->call('toggleType', $veg->id);
 
-        $types = array_filter(array_map('trim', explode(',', $page->get('type'))));
+        $selected = $page->get('selectedTypes');
+        sort($selected);
+        $this->assertSame([$meat->id, $veg->id], $selected, 'Chọn loại phải lưu ID vào selectedTypes');
 
-        sort($types);
-        $this->assertSame(['BÒ', 'CÁ'], $types, 'Loại thực phẩm phải tự suy ra từ nguyên liệu đã chọn');
-
-        // Bỏ tích nguyên liệu thì loại thực phẩm cũng phải co lại theo
-        $page->set('selectedIngredients', [$beef->id => true, $fish->id => false]);
-        $this->assertSame('BÒ', trim($page->get('type')));
+        // Bỏ chọn 1 loại thì selectedTypes co lại (giữ mảng ID phẳng)
+        $page->call('toggleType', $veg->id);
+        $this->assertSame([$meat->id], array_values($page->get('selectedTypes')));
     }
 
     public function test_nguyen_lieu_da_tich_luon_nam_dau_va_khong_bien_mat_khi_tim_kiem(): void
@@ -81,22 +82,27 @@ class SupplierIngredientPickerTest extends TestCase
         $this->assertTrue($rows->contains('name', 'Cá thu'), 'Kết quả tìm kiếm vẫn hiển thị');
     }
 
-    public function test_luu_duoc_ncc_sau_khi_chon_nguyen_lieu_bang_o_tim_kiem(): void
+    public function test_luu_duoc_ncc_voi_loai_thuc_pham_da_chon(): void
     {
+        $type = IngredientType::firstOrCreate(['name' => 'Thực vật']);
         $ingredient = $this->makeIngredient('Bắp mỹ', 'Thực vật');
 
-        Livewire::test(CreateSupplier::class)
+        $page = Livewire::test(CreateSupplier::class)
             ->set('name', 'NCC Rau sạch')
             ->set('code', 'NCC-TEST-1')
             ->set('phone', '0900000000')
+            ->call('toggleType', $type->id)
             ->set('selectedIngredients', [$ingredient->id => true])
             ->set('ingredientCosts.'.$ingredient->id, 45000)
             ->call('save')
             ->assertHasNoErrors();
 
-        $this->assertDatabaseHas('suppliers', [
-            'code' => 'NCC-TEST-1',
-            'type' => 'Thực vật', // suy ra từ nguyên liệu, không nhập tay
+        $supplier = Supplier::where('code', 'NCC-TEST-1')->firstOrFail();
+
+        // Loại thực phẩm lưu qua pivot bằng ID chuẩn (không còn cột type chuỗi)
+        $this->assertDatabaseHas('ingredient_type_supplier', [
+            'supplier_id' => $supplier->id,
+            'ingredient_type_id' => $type->id,
         ]);
 
         // Giá NCC ↔ nguyên liệu được lưu vào bảng báo giá
@@ -106,13 +112,22 @@ class SupplierIngredientPickerTest extends TestCase
         ]);
     }
 
+    public function test_luu_ncc_khong_chon_loai_thi_bao_loi(): void
+    {
+        Livewire::test(CreateSupplier::class)
+            ->set('name', 'NCC Thiếu Loại')
+            ->set('code', 'NCC-NOLOAI')
+            ->set('phone', '0900000000')
+            ->call('save')
+            ->assertHasErrors('selectedTypes');
+    }
+
     public function test_saved_ingredient_auto_syncs_pivot_table(): void
     {
-        $supplier = \App\Models\Supplier::create([
+        $supplier = Supplier::create([
             'name' => 'NCC Tự Động Sync',
             'code' => 'NCC-SYNC-1',
             'phone' => '0901111111',
-            'type' => 'Rau củ',
             'status' => true,
         ]);
 
@@ -136,11 +151,10 @@ class SupplierIngredientPickerTest extends TestCase
 
     public function test_can_provide_ingredient_strict_option_a(): void
     {
-        $supplierProcessed = \App\Models\Supplier::create([
+        $supplierProcessed = Supplier::create([
             'name' => 'Đậu Hủ Vũ Biên',
             'code' => 'NCC-DH-1',
             'phone' => '0902222222',
-            'type' => 'Thực phẩm chế biến',
             'status' => true,
         ]);
 

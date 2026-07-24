@@ -154,14 +154,11 @@ class IngredientsImport implements ToCollection
                             continue;
                         }
 
-                        // `suppliers.type` là NOT NULL không có default — NCC tạo tự động
-                        // khi import mặc định là 'Tổng hợp' để không vỡ ràng buộc.
+                        // NCC tạo tự động khi import chưa gán loại thực phẩm (pivot trống);
+                        // người dùng bổ sung loại sau ở trang NCC.
                         $supplier = Supplier::query()->firstOrCreate(
                             ['name' => $sName],
-                            [
-                                'code' => 'SUP_'.strtoupper(uniqid()),
-                                'type' => 'Tổng hợp',
-                            ]
+                            ['code' => 'SUP_'.strtoupper(uniqid())]
                         );
                         $supplierIds[] = $supplier->id;
                     }

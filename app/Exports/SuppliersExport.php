@@ -49,7 +49,7 @@ class SuppliersExport implements FromArray, ShouldAutoSize, WithEvents, WithTitl
                 $supplier->name,
                 $supplier->phone,
                 $supplier->email,
-                $supplier->type,
+                $supplier->ingredientTypes->pluck('name')->join(', '),
                 $supplier->ingredients_count,
                 $supplier->status ? 'Đang hoạt động' : 'Tạm khóa',
             ];
@@ -115,6 +115,6 @@ class SuppliersExport implements FromArray, ShouldAutoSize, WithEvents, WithTitl
         // Clone để không ảnh hưởng truy vấn gốc; giữ nguyên bộ lọc đã truyền vào.
         $query = $this->query ? clone $this->query : Supplier::query()->withCount('ingredients')->orderBy('id');
 
-        return $query->get();
+        return $query->with('ingredientTypes')->get();
     }
 }

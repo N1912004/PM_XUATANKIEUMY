@@ -14,7 +14,6 @@ class Supplier extends Model
     protected $fillable = [
         'code',
         'name',
-        'type',
         'contact_name',
         'phone',
         'email',
@@ -27,17 +26,6 @@ class Supplier extends Model
         'status' => 'boolean',
         'documents' => 'array',
     ];
-
-    protected static function booted(): void
-    {
-        // `type` là chuỗi loại (ghép dấu phẩy) do form/import ghi vào; giữ pivot
-        // `ingredient_type_supplier` luôn khớp để lọc theo quan hệ chuẩn Filament.
-        static::saved(function (Supplier $supplier): void {
-            if ($supplier->wasChanged('type') || $supplier->wasRecentlyCreated) {
-                $supplier->syncIngredientTypesFromString();
-            }
-        });
-    }
 
     public function ingredients(): BelongsToMany
     {
@@ -58,24 +46,6 @@ class Supplier extends Model
     public function ingredientTypes(): BelongsToMany
     {
         return $this->belongsToMany(IngredientType::class, 'ingredient_type_supplier');
-    }
-
-    /**
-     * Đồng bộ pivot từ cột `type`: tách dấu phẩy, tự tạo loại còn thiếu trong
-     * danh mục để không mất dữ liệu, rồi sync id.
-     */
-    public function syncIngredientTypesFromString(): void
-    {
-        $names = collect(explode(',', (string) $this->type))
-            ->map(fn (string $name): string => trim($name))
-            ->filter()
-            ->unique();
-
-        $ids = $names->map(
-            fn (string $name): int => IngredientType::query()->firstOrCreate(['name' => $name])->getKey()
-        )->all();
-
-        $this->ingredientTypes()->sync($ids);
     }
 
     public function purchaseOrders(): HasMany
@@ -104,9 +74,10 @@ class Supplier extends Model
             return true;
         }
 
-        // 3. Nếu loại của NCC là 'Tổng hợp' -> Cung cấp được tất cả
-        $supplierTypeLower = mb_strtolower((string) $this->type);
-        if (str_contains($supplierTypeLower, 'tổng hợp')) {
+        // 3. Nếu NCC có loại 'Tổng hợp' -> Cung cấp được tất cả (dò qua pivot loại)
+        if ($this->ingredientTypes->contains(
+            fn (IngredientType $type): bool => str_contains(mb_strtolower($type->name), 'tổng hợp')
+        )) {
             return true;
         }
 

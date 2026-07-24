@@ -629,6 +629,7 @@
             .sup-form-stack {
                 display: grid;
                 gap: 1.1rem;
+                min-width: 0;
             }
 
             .sup-card {
@@ -756,6 +757,7 @@
             .sup-side {
                 display: grid;
                 gap: 1rem;
+                min-width: 0;
             }
 
             .sup-toggle-row {
@@ -871,7 +873,7 @@
                 text-decoration: none;
             }
 
-            @media (max-width: 1200px) {
+            @media (max-width: 1350px) {
                 .sup-kpis {
                     grid-template-columns: repeat(2, minmax(0, 1fr));
                 }
@@ -881,7 +883,21 @@
                 }
             }
 
+            @media (max-width: 900px) {
+                .sup-grid {
+                    grid-template-columns: 1fr;
+                }
+            }
+
             @media (max-width: 760px) {
+                .sup-page {
+                    padding: 1rem 0.75rem 1.5rem !important;
+                }
+
+                .sup-card {
+                    padding: 1rem;
+                }
+
                 .sup-head,
                 .sup-toolbar,
                 .sup-footer {
@@ -908,8 +924,8 @@
 
                 .sup-bottom-bar {
                     position: static !important;
-                    margin: 1.5rem -1.75rem -2rem !important;
-                    padding: 1rem 1.75rem !important;
+                    margin: 1.5rem -0.75rem -1.5rem !important;
+                    padding: 1rem 0.75rem !important;
                     flex-direction: column-reverse !important;
                     align-items: stretch !important;
                     gap: 0.5rem !important;

@@ -54,22 +54,22 @@
 
                         <div class="sup-field sup-field-full">
                             <label class="sup-label">{{ __('supplier.fields.food_types') }} <span class="sup-required">*</span></label>
-                            <div class="sup-input" style="display:flex; flex-wrap:wrap; gap:6px; padding:8px 12px; min-height:42px; background:var(--sup-bg); border:1.5px solid var(--sup-bd2); border-radius:.5rem; align-items:center">
-                                @php
-                                    $selectedTypes = array_filter(explode(', ', $this->type));
-                                @endphp
-                                @forelse($selectedTypes as $sType)
-                                    <span style="background:var(--po-bl-s); color:var(--po-bl); padding:4px 10px; border-radius:9999px; font-size:12px; font-weight:700">
-                                        {{ $sType }}
-                                    </span>
+                            <div style="display:flex; flex-wrap:wrap; gap:8px; padding:10px 12px; min-height:42px; height:auto !important; background:var(--sup-bg); border:1.5px solid var(--sup-bd2); border-radius:.7rem; align-items:center">
+                                @forelse($this->typeOptions() as $typeId => $typeName)
+                                    @php $isPicked = in_array($typeId, $selectedTypes ?? [], false); @endphp
+                                    <button type="button" wire:click="toggleType({{ $typeId }})"
+                                            wire:key="sup-type-{{ $typeId }}"
+                                            style="cursor:pointer; padding:5px 12px; border-radius:9999px; font-size:12px; font-weight:700; border:1.5px solid {{ $isPicked ? 'var(--po-bl)' : 'var(--sup-bd2)' }}; background:{{ $isPicked ? 'var(--po-bl)' : 'transparent' }}; color:{{ $isPicked ? '#fff' : 'var(--sup-mu)' }}; transition:all .12s">
+                                        @if($isPicked)<i class="fa-solid fa-check" style="font-size:10px; margin-right:4px"></i>@endif
+                                        {{ $typeName }}
+                                    </button>
                                 @empty
                                     <span style="color:var(--sup-mu); font-size:13px">
                                         {{ __('supplier.empty.no_food_types') }}
                                     </span>
                                 @endforelse
                             </div>
-                            <input type="hidden" wire:model="type" required>
-                            @error('type') <span class="sup-error">{{ $message }}</span> @enderror
+                            @error('selectedTypes') <span class="sup-error">{{ $message }}</span> @enderror
                         </div>
 
                         <div class="sup-field sup-field-full">

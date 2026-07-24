@@ -5,6 +5,7 @@ namespace App\Filament\Resources\SupplierResource\Pages;
 use App\Filament\Resources\SupplierResource;
 use App\Filament\Resources\SupplierResource\Concerns\ManagesSupplierDocuments;
 use App\Models\Ingredient;
+use App\Models\IngredientType;
 use App\Models\Supplier;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
@@ -31,7 +32,8 @@ class CreateSupplier extends Page
 
     public string $email = '';
 
-    public string $type = '';
+    /** @var array<int, int> ID loại thực phẩm (ingredient_types) NCC cung cấp. */
+    public array $selectedTypes = [];
 
     public bool $status = true;
 
@@ -70,7 +72,11 @@ class CreateSupplier extends Page
         $data = $this->validate($this->rules(), $this->messages(), $this->validationAttributes());
         $data['documents'] = $this->processDocuments();
 
+        // `selectedTypes` không phải cột suppliers — tách ra khỏi $data trước khi create.
+        unset($data['selectedTypes']);
+
         $supplier = Supplier::query()->create($data);
+        $supplier->ingredientTypes()->sync($this->selectedTypes);
         $this->syncIngredients($supplier);
 
         Notification::make()
@@ -90,7 +96,7 @@ class CreateSupplier extends Page
 
         return [
             'code' => $this->code ?: '--',
-            'type' => $this->type ?: '--',
+            'type' => $this->selectedTypeNames() ?: '--',
             'ingredients' => $selected->count(),
             'total' => $selected->sum(fn ($id): float => (float) ($this->ingredientCosts[$id] ?? 0)),
         ];
@@ -179,7 +185,8 @@ class CreateSupplier extends Page
                     }
                 },
             ],
-            'type' => ['required', 'string', 'max:255'],
+            'selectedTypes' => ['required', 'array', 'min:1'],
+            'selectedTypes.*' => ['integer', Rule::exists('ingredient_types', 'id')],
             'status' => ['boolean'],
             'notes' => ['nullable', 'string', 'max:2000'],
         ];
@@ -207,7 +214,7 @@ class CreateSupplier extends Page
             'code' => __('supplier.attributes.code'),
             'phone' => __('supplier.attributes.phone'),
             'email' => __('supplier.attributes.email'),
-            'type' => __('supplier.attributes.type'),
+            'selectedTypes' => __('supplier.attributes.type'),
         ];
     }
 
@@ -239,43 +246,41 @@ class CreateSupplier extends Page
     }
 
     /**
-     * Lấy các Loại Nguyên liệu từ danh sách nguyên liệu đã chọn.
+     * Danh mục loại thực phẩm (ingredient_types) để NCC chọn — dùng chung với Nguyên liệu.
      *
-     * @return array<string, string>
+     * @return array<int, string>
      */
-    public function getAvailableTypes(): array
+    public function typeOptions(): array
     {
-        $selectedIds = collect($this->selectedIngredients)
-            ->filter()
-            ->keys();
+        return IngredientType::query()->orderBy('name')->pluck('name', 'id')->all();
+    }
 
-        if ($selectedIds->isEmpty()) {
-            return [];
+    /** Bật/tắt 1 loại thực phẩm — giữ `selectedTypes` là mảng ID phẳng để sync pivot. */
+    public function toggleType(int $typeId): void
+    {
+        if (in_array($typeId, $this->selectedTypes, true)) {
+            $this->selectedTypes = array_values(array_diff($this->selectedTypes, [$typeId]));
+        } else {
+            $this->selectedTypes[] = $typeId;
+        }
+    }
+
+    /** Tên các loại đã chọn, ghép dấu phẩy — chỉ để hiển thị tóm tắt. */
+    protected function selectedTypeNames(): string
+    {
+        if ($this->selectedTypes === []) {
+            return '';
         }
 
-        $types = Ingredient::query()
-            ->whereIn('id', $selectedIds)
-            ->with('typeRelation')
-            ->get()
-            ->pluck('type')
-            ->filter()
-            ->unique()
-            ->values()
-            ->all();
-
-        $options = [];
-        foreach ($types as $type) {
-            $options[$type] = $type;
-        }
-
-        return $options;
+        return IngredientType::query()
+            ->whereIn('id', $this->selectedTypes)
+            ->orderBy('name')
+            ->pluck('name')
+            ->join(', ');
     }
 
     public function updatedSelectedIngredients(): void
     {
-        $types = array_keys($this->getAvailableTypes());
-        $this->type = implode(', ', $types);
-
         // Khởi tạo key trong mảng ingredientCosts cho các nguyên liệu mới được chọn
         // để Livewire 3 đồng bộ hoàn chỉnh dữ liệu từ Alpine qua @entangle
         foreach ($this->selectedIngredients as $id => $selected) {
