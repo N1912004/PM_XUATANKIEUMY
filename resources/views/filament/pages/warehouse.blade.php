@@ -869,7 +869,7 @@
                                 $systemQty = $this->getSystemQuantities($checkDate);
                                 $openingQty = $this->getOpeningQuantities();
                             @endphp
-                            @foreach($stocksData as $index => $item)
+                            @forelse($stocksData as $index => $item)
                                 @php
                                     $sysQty = $systemQty[$item->id] ?? 0;
                                     $diff = ($actualQuantities[$item->id] ?? $sysQty) - $sysQty;
@@ -899,7 +899,26 @@
                                                class="w-full border border-gray-300 rounded px-2 py-1 text-xs dark:bg-gray-800 dark:border-gray-700">
                                     </td>
                                 </tr>
-                            @endforeach
+                            @empty
+                                <tr>
+                                    <td colspan="7" style="text-align: center; padding: 3rem 1.5rem;">
+                                        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.75rem;">
+                                            <div style="width: 48px; height: 48px; border-radius: 50%; background: #f1f5f9; display: flex; align-items: center; justify-content: center; color: #94a3b8;" class="dark:bg-slate-800 dark:color-slate-400">
+                                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                                </svg>
+                                            </div>
+                                            <div style="font-weight: 700; color: #334155; font-size: 0.875rem;" class="dark:text-slate-300">{{ __('warehouse.empty.no_ingredients') }}</div>
+                                            <div style="color: #64748b; font-size: 0.78rem; max-width: 280px; margin: 0 auto;" class="dark:text-slate-400">{{ __('warehouse.empty.adjust_filters') }}</div>
+                                            @if($search !== '')
+                                                <button type="button" wire:click="$set('search', '')" style="margin-top: 0.25rem; font-size: 0.78rem; font-weight: 600; color: rgb(var(--primary-600)); background: transparent; border: none; cursor: pointer; text-decoration: underline;" class="hover:text-primary-500">
+                                                    {{ __('warehouse.actions.clear_filters') }}
+                                                </button>
+                                            @endif
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>
@@ -1162,8 +1181,25 @@
                     <div style="font-size:0.78rem; color:#64748b; margin-bottom:12px;">{{ __('warehouse.outbound.production_hint') }}</div>
 
                     @if(empty($prodItemsData))
-                        <div style="text-align: center; color: #94a3b8; padding: 2rem; font-style: italic;">
-                            {{ __('warehouse.empty.no_production_items') }}
+                        <div style="text-align: center; padding: 3rem 1.5rem;">
+                            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.75rem;">
+                                <div style="width: 48px; height: 48px; border-radius: 50%; background: #f1f5f9; display: flex; align-items: center; justify-content: center; color: #94a3b8;" class="dark:bg-slate-800 dark:color-slate-400">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                    </svg>
+                                </div>
+                                <div style="font-weight: 700; color: #334155; font-size: 0.875rem;" class="dark:text-slate-300">
+                                    {{ $search !== '' ? __('warehouse.empty.no_ingredients') : __('warehouse.empty.no_production_items') }}
+                                </div>
+                                <div style="color: #64748b; font-size: 0.78rem; max-width: 280px; margin: 0 auto;" class="dark:text-slate-400">
+                                    {{ __('warehouse.empty.adjust_filters') }}
+                                </div>
+                                @if($search !== '')
+                                    <button type="button" wire:click="$set('search', '')" style="margin-top: 0.25rem; font-size: 0.78rem; font-weight: 600; color: rgb(var(--primary-600)); background: transparent; border: none; cursor: pointer; text-decoration: underline;" class="hover:text-primary-500">
+                                        {{ __('warehouse.actions.clear_filters') }}
+                                    </button>
+                                @endif
+                            </div>
                         </div>
                     @else
                         <div class="overflow-x-auto">
