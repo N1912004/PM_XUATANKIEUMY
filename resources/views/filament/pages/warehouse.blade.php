@@ -648,17 +648,11 @@
                     'options' => collect($this->getIngredientTypeOptions())->map(fn ($t) => ['value' => $t, 'label' => $t])->all(),
                 ])
             </div>
-            <div style="min-width:170px">
-                @include('filament.components.search-select', [
-                    'name' => 'selectedSort',
-                    'live' => true,
-                    'placeholder' => __('warehouse.filters.latest_updated'),
-                    'emptyLabel' => __('warehouse.filters.latest_updated'),
-                    'options' => [
-                        ['value' => 'latest', 'label' => __('warehouse.filters.latest_updated')],
-                        ['value' => 'oldest', 'label' => __('warehouse.filters.oldest_updated')],
-                    ],
-                ])
+            <div>
+                <select wire:model.live="selectedSort" class="rounded-md border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:[color-scheme:dark]">
+                    <option value="latest">{{ __('warehouse.filters.latest_updated') }}</option>
+                    <option value="oldest">{{ __('warehouse.filters.oldest_updated') }}</option>
+                </select>
             </div>
         </div>
     </div>
