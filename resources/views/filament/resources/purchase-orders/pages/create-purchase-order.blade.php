@@ -298,9 +298,13 @@
                                             }
                                         }">
                                             <div x-ref="rowTrigger" @click="toggleOpen()" 
-                                                 :style="`display:flex; align-items:center; justify-content:space-between; background:#fff; border:1.5px solid ${selectedName === '{{ __('purchase_order.create.select_supplier') }}' ? '#DC2626' : 'var(--po-bd)'}; border-radius:6px; padding:4px 8px; cursor:pointer; font-size:12px; font-weight:600; color:${selectedName === '{{ __('purchase_order.create.select_supplier') }}' ? '#DC2626' : 'var(--po-tx)'}; width:100%; min-width:160px`">
+                                                 :style="`display:flex; align-items:center; justify-content:space-between; background:${selectedName === '{{ __('purchase_order.create.select_supplier') }}' ? '#FEF2F2' : '#fff'}; border:1.5px solid ${selectedName === '{{ __('purchase_order.create.select_supplier') }}' ? '#DC2626' : 'var(--po-bd)'}; border-radius:6px; padding:4px 8px; cursor:pointer; font-size:12px; font-weight:600; color:${selectedName === '{{ __('purchase_order.create.select_supplier') }}' ? '#DC2626' : 'var(--po-tx)'}; width:100%; min-width:160px`">
                                                 <span x-text="selectedName" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:130px"></span>
-                                                <i class="fa-solid fa-chevron-down" style="font-size:10px; color:var(--po-mu)"></i>
+                                                <i class="fa-solid fa-chevron-down" style="font-size:10px; color:${selectedName === '{{ __('purchase_order.create.select_supplier') }}' ? '#DC2626' : 'var(--po-mu)'}"></i>
+                                            </div>
+                                            <div x-show="selectedName === '{{ __('purchase_order.create.select_supplier') }}'" 
+                                                 style="font-size:11px; font-weight:700; color:#DC2626; margin-top:3px; display:flex; align-items:center; gap:3px">
+                                                <i class="fa-solid fa-circle-exclamation" style="font-size:10px"></i> Chưa chọn NCC hợp lệ!
                                             </div>
 
                                             <template x-teleport="body">

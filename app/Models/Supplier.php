@@ -115,32 +115,6 @@ class Supplier extends Model
             return true;
         }
 
-        // 5. Khớp từ khóa tương đồng loại nguyên liệu & loại nhà cung cấp
-        $ingTypeName = mb_strtolower($ingredient->typeRelation?->name ?? (is_string($ingredient->type) ? $ingredient->type : ''));
-        if ($ingTypeName) {
-            if (str_contains($supplierTypeLower, $ingTypeName) || str_contains($ingTypeName, $supplierTypeLower)) {
-                return true;
-            }
-
-            // Nhóm thịt / động vật / hải sản
-            if ((str_contains($supplierTypeLower, 'thịt') || str_contains($supplierTypeLower, 'động vật') || str_contains($supplierTypeLower, 'hải sản') || str_contains($supplierTypeLower, 'tươi')) &&
-                (str_contains($ingTypeName, 'thịt') || str_contains($ingTypeName, 'động vật') || str_contains($ingTypeName, 'cá') || str_contains($ingTypeName, 'hải sản'))) {
-                return true;
-            }
-
-            // Nhóm rau / củ / quả / thực vật
-            if ((str_contains($supplierTypeLower, 'rau') || str_contains($supplierTypeLower, 'củ') || str_contains($supplierTypeLower, 'quả') || str_contains($supplierTypeLower, 'thực vật')) &&
-                (str_contains($ingTypeName, 'rau') || str_contains($ingTypeName, 'củ') || str_contains($ingTypeName, 'quả') || str_contains($ingTypeName, 'thực vật'))) {
-                return true;
-            }
-
-            // Nhóm khô / lương thực / gạo / gia vị
-            if ((str_contains($supplierTypeLower, 'khô') || str_contains($supplierTypeLower, 'lương thực') || str_contains($supplierTypeLower, 'gạo') || str_contains($supplierTypeLower, 'chế biến')) &&
-                (str_contains($ingTypeName, 'khô') || str_contains($ingTypeName, 'lương thực') || str_contains($ingTypeName, 'gạo') || str_contains($ingTypeName, 'gia vị') || str_contains($ingTypeName, 'chế biến'))) {
-                return true;
-            }
-        }
-
         return false;
     }
 }

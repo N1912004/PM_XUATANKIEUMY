@@ -37,6 +37,20 @@ class PurchaseOrder extends Model
         'stocked_at' => 'datetime',
     ];
 
+    /**
+     * Sinh mã đơn đặt hàng ngắn gọn theo ID đơn: PO-{id} (ví dụ PO-1, PO-2...).
+     */
+    public static function generateCode(?int $id = null): string
+    {
+        if ($id) {
+            return 'PO-'.$id;
+        }
+
+        $nextId = (DB::table('purchase_orders')->max('id') ?? 0) + 1;
+
+        return 'PO-'.$nextId;
+    }
+
     public function supplier(): BelongsTo
     {
         return $this->belongsTo(Supplier::class);
@@ -54,6 +68,12 @@ class PurchaseOrder extends Model
 
     protected static function booted(): void
     {
+        static::created(function (PurchaseOrder $purchaseOrder): void {
+            if (empty($purchaseOrder->code) || str_starts_with($purchaseOrder->code, 'PO-TEMP')) {
+                $purchaseOrder->updateQuietly(['code' => 'PO-'.$purchaseOrder->id]);
+            }
+        });
+
         static::updated(function (PurchaseOrder $purchaseOrder) {
             // Chỉ tự động nhập kho 1 LẦN DUY NHẤT: khi đơn chuyển sang 'done' và chưa từng nhập kho.
             if (! ($purchaseOrder->wasChanged('status')

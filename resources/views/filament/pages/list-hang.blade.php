@@ -1097,11 +1097,17 @@
                                                         @endif
                                                     </td>
                                                     <td>
-                                                        <select wire:model.live="poItems.{{ $index }}.supplier_id" style="height:28px; font-size:11px; padding:2px; border-radius:6px; border-color:var(--su, #cbd5e1); width:100%;">
+                                                        <select wire:model.live="poItems.{{ $index }}.supplier_id" style="height:28px; font-size:11px; padding:2px; border-radius:6px; width:100%; border:{{ ($item['checked'] && empty($item['supplier_id'])) ? '1.5px solid #DC2626; background-color:#FEF2F2; color:#DC2626;' : '1px solid var(--su, #cbd5e1);' }}">
+                                                            <option value="">{{ __('list_hang.po.select_supplier') }}</option>
                                                             @foreach($suppliers as $supplier)
                                                                 <option value="{{ $supplier->id }}">{{ $supplier->name }}</option>
                                                             @endforeach
                                                         </select>
+                                                        @if($item['checked'] && empty($item['supplier_id']))
+                                                            <div style="font-size:10px; font-weight:700; color:#DC2626; margin-top:2px; display:flex; align-items:center; gap:2px">
+                                                                <i class="fa-solid fa-circle-exclamation"></i> Bắt buộc chọn NCC!
+                                                            </div>
+                                                        @endif
                                                     </td>
                                                 </tr>
                                             @endif
