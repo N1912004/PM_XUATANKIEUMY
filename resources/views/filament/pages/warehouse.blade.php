@@ -844,7 +844,6 @@
                                 <th style="width: 36px; text-align: center;">#</th>
                                 <th>{{ __('warehouse.table.ingredient') }}</th>
                                 <th>{{ __('warehouse.table.unit') }}</th>
-                                <th style="text-align: right;">{{ __('warehouse.table.opening_stock') }}</th>
                                 <th style="text-align: right;">{{ __('warehouse.table.system_stock') }}</th>
                                 <th style="text-align: center; width: 180px;">{{ __('warehouse.table.actual_end_day_stock') }}</th>
                                 <th style="text-align: right;">{{ __('warehouse.table.difference') }}</th>
@@ -869,7 +868,6 @@
                                         <div style="font-size:10px; color:#64748b;">{{ $item->ingredient->code }} · {{ $item->ingredient->type }}</div>
                                     </td>
                                     <td>{{ $item->ingredient->unit }}</td>
-                                    <td style="text-align: right; color:#64748b;">{{ number_format($openingQty[$item->id] ?? 0, 2, ',', '.') }}</td>
                                     <td style="text-align: right; font-weight: 700;">{{ number_format($sysQty, 2, ',', '.') }}</td>
                                     <td style="text-align: center;">
                                         <input type="number"
