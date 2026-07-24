@@ -539,6 +539,28 @@
                 background: var(--sup-rd) !important;
             }
 
+            .sup-type-pill {
+                display: inline-flex !important;
+                align-items: center !important;
+                gap: 6px !important;
+                padding: 5px 14px !important;
+                border-radius: 9999px !important;
+                font-size: 13px !important;
+                font-weight: 700 !important;
+                background: #EFF6FF !important;
+                color: #1D4ED8 !important;
+                border: 1.5px solid #BFDBFE !important;
+                box-shadow: 0 1px 2px rgba(29, 78, 216, 0.06) !important;
+                line-height: 1.3 !important;
+            }
+
+            :root.dark .sup-type-pill,
+            .dark .sup-type-pill {
+                background: rgba(37, 99, 235, 0.22) !important;
+                color: #93C5FD !important;
+                border-color: rgba(147, 197, 253, 0.35) !important;
+            }
+
             .sup-row-actions {
                 display: flex;
                 gap: .35rem;
@@ -629,10 +651,14 @@
             .sup-form-stack {
                 display: grid;
                 gap: 1.1rem;
+                min-width: 0;
             }
 
             .sup-card {
                 padding: 1.35rem 1.5rem;
+                max-width: 100%;
+                box-sizing: border-box;
+                overflow: hidden;
             }
 
             .sup-card-title {
@@ -641,6 +667,11 @@
                 margin: 0 0 1rem;
                 padding-bottom: .9rem;
                 border-bottom: 1px solid var(--sup-bd2);
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: .5rem;
+                flex-wrap: wrap;
             }
 
             .sup-grid {
@@ -691,6 +722,7 @@
                 justify-content: space-between;
                 gap: 1rem;
                 margin-bottom: .9rem;
+                flex-wrap: wrap;
             }
 
             .sup-help {
@@ -756,6 +788,7 @@
             .sup-side {
                 display: grid;
                 gap: 1rem;
+                min-width: 0;
             }
 
             .sup-toggle-row {
@@ -871,7 +904,7 @@
                 text-decoration: none;
             }
 
-            @media (max-width: 1200px) {
+            @media (max-width: 1350px) {
                 .sup-kpis {
                     grid-template-columns: repeat(2, minmax(0, 1fr));
                 }
@@ -881,7 +914,32 @@
                 }
             }
 
+            @media (max-width: 900px) {
+                .sup-grid {
+                    grid-template-columns: 1fr;
+                }
+            }
+
             @media (max-width: 760px) {
+                .sup-page {
+                    padding: .85rem .75rem 1.5rem !important;
+                }
+
+                .sup-card {
+                    padding: 1rem .85rem;
+                }
+
+                .sup-card-title {
+                    font-size: .95rem;
+                    gap: .4rem;
+                }
+
+                .sup-ingredient-head {
+                    flex-direction: column;
+                    align-items: flex-start;
+                    gap: .35rem;
+                }
+
                 .sup-head,
                 .sup-toolbar,
                 .sup-footer {
@@ -908,13 +966,15 @@
 
                 .sup-bottom-bar {
                     position: static !important;
-                    margin: 1.5rem -1.75rem -2rem !important;
-                    padding: 1rem 1.75rem !important;
+                    margin: 1.25rem 0 0 0 !important;
+                    padding: 1rem .85rem !important;
                     flex-direction: column-reverse !important;
                     align-items: stretch !important;
                     gap: 0.5rem !important;
                     box-shadow: none !important;
-                    border-top: 1px solid var(--sup-bd) !important;
+                    border: 1px solid var(--sup-bd) !important;
+                    background: var(--sup-wh) !important;
+                    border-radius: .75rem !important;
                 }
 
                 .sup-bottom-bar .sup-btn {

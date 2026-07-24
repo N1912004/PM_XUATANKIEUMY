@@ -217,7 +217,7 @@ class CreatePurchaseOrder extends Page
             }
         }
 
-        $allSuppliers = $this->suppliers;
+        $allSuppliers = $this->suppliers->keyBy('id');
 
         $groups = [];
         foreach ($aggregated as $item) {
@@ -252,6 +252,18 @@ class CreatePurchaseOrder extends Page
                 $selectedSupplierId = $item['default_supplier_id'] ?: $matchedSupplier?->id;
             }
 
+            $isSupplierValid = false;
+            if ($selectedSupplierId) {
+                $supplier = $allSuppliers->get($selectedSupplierId);
+                $ingredientObj = Ingredient::with(['suppliers', 'typeRelation'])->find($ingId);
+                $isSupplierValid = ($supplier && $ingredientObj && $supplier->canProvideIngredient($ingredientObj));
+            }
+
+            // Nếu NCC đã chọn không cung cấp được nguyên liệu này → để TRỐNG (null) để giao diện báo lỗi đỏ
+            if (! $isSupplierValid) {
+                $selectedSupplierId = null;
+            }
+
             $existingOrders = isset($existingPOItems[$ingId])
                 ? array_values(array_unique(array_filter($existingPOItems[$ingId]->pluck('code')->toArray())))
                 : [];
@@ -270,6 +282,7 @@ class CreatePurchaseOrder extends Page
             $item['selected'] = $isSelected;
             $item['quantity_manual'] = (float) $manualQty;
             $item['supplier_id'] = $selectedSupplierId;
+            $item['supplier_valid'] = $isSupplierValid;
             $item['split'] = $split;
             $item['line_total'] = ($isSelected && $selectedSupplierId) ? ((float) $manualQty * $item['reference_price']) : 0;
             $item['dish_string'] = implode(', ', array_slice($item['dishes'], 0, 3)).(count($item['dishes']) > 3 ? '...' : '');
@@ -304,10 +317,10 @@ class CreatePurchaseOrder extends Page
             return;
         }
 
-        // Validate: Mọi nguyên liệu được tích chọn BẮT BUỘC phải chọn Nhà cung cấp
+        // Validate: Mọi nguyên liệu được tích chọn BẮT BUỘC phải chọn Nhà cung cấp hợp lệ
         $missingSupplierItems = [];
         foreach ($allItems as $it) {
-            if (empty($it['supplier_id'])) {
+            if (empty($it['supplier_id']) || empty($it['supplier_valid'])) {
                 $missingSupplierItems[] = $it['name'];
             }
         }
@@ -338,24 +351,18 @@ class CreatePurchaseOrder extends Page
                     continue;
                 }
 
-                $supplierCode = strtoupper($supplier->code ?: 'NCC');
-                $poCode = 'PO-LH-'.Carbon::parse($this->orderDate)->format('Ymd').'-'.$supplierCode.'-'.$split;
-
-                $attempts = 0;
-                while (PurchaseOrder::where('code', $poCode)->exists() && $attempts < 10) {
-                    $poCode = 'PO-LH-'.Carbon::parse($this->orderDate)->format('Ymd').'-'.$supplierCode.'-'.$split.'-'.mt_rand(10, 99);
-                    $attempts++;
-                }
-
+                // Code format ngắn gọn theo ID: PO-{id} (ví dụ PO-1, PO-2...)
                 $po = PurchaseOrder::create([
-                    'code' => $poCode,
+                    'code' => 'PO-TEMP',
                     'kitchen_id' => $kitchenId,
                     'supplier_id' => (int) $supplierId,
                     'status' => 'sent',
                     'type' => 'day',
                     'estimated_delivery_date' => $this->orderDate,
-                    'note' => 'Đơn đặt hàng tạo từ trang Tạo đơn đặt hàng ngày '.Carbon::parse($this->orderDate)->format('d/m/Y'),
+                    'note' => __('purchase_order.create.auto_note', ['date' => Carbon::parse($this->orderDate)->format('d/m/Y')]),
                 ]);
+
+                $po->updateQuietly(['code' => 'PO-'.$po->id]);
 
                 foreach ($items as $it) {
                     PurchaseOrderItem::create([

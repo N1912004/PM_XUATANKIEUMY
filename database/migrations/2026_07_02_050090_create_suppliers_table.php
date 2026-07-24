@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('code')->unique();
             $table->string('name');
-            $table->string('type'); // Thịt / Rau củ / Thực phẩm khô / Gia vị / Hải sản / Tổng hợp
+            $table->string('type')->nullable(); // Thịt / Rau củ / Thực phẩm khô / Gia vị / Hải sản / Tổng hợp (đã chuyển sang pivot)
             $table->string('contact_name')->nullable();
             $table->string('phone')->nullable();
             $table->string('email')->nullable();

@@ -54,22 +54,17 @@
 
                         <div class="sup-field sup-field-full">
                             <label class="sup-label">{{ __('supplier.fields.food_types') }} <span class="sup-required">*</span></label>
-                            <div class="sup-input" style="display:flex; flex-wrap:wrap; gap:6px; padding:8px 12px; min-height:42px; background:var(--sup-bg); border:1.5px solid var(--sup-bd2); border-radius:.5rem; align-items:center">
-                                @php
-                                    $selectedTypes = array_filter(explode(', ', $this->type));
-                                @endphp
-                                @forelse($selectedTypes as $sType)
-                                    <span style="background:var(--po-bl-s); color:var(--po-bl); padding:4px 10px; border-radius:9999px; font-size:12px; font-weight:700">
-                                        {{ $sType }}
-                                    </span>
+                            {{-- Read-only: loại suy trực tiếp từ nguyên liệu đã tích ở bảng dưới, không chọn tay --}}
+                            @php $derivedTypes = $this->derivedTypeNames(); @endphp
+                            <div style="display:flex; flex-wrap:wrap; gap:8px; padding:10px 12px; min-height:42px; height:auto !important; background:var(--sup-bg); border:1.5px solid var(--sup-bd2); border-radius:.7rem; align-items:center">
+                                @forelse($derivedTypes as $typeName)
+                                    <span class="sup-type-pill"><i class="fa-solid fa-tag" style="font-size:11px"></i> {{ $typeName }}</span>
                                 @empty
                                     <span style="color:var(--sup-mu); font-size:13px">
                                         {{ __('supplier.empty.no_food_types') }}
                                     </span>
                                 @endforelse
                             </div>
-                            <input type="hidden" wire:model="type" required>
-                            @error('type') <span class="sup-error">{{ $message }}</span> @enderror
                         </div>
 
                         <div class="sup-field sup-field-full">
@@ -82,7 +77,7 @@
 
                 <!-- Hồ sơ NCC: hợp đồng, chứng nhận ATTP... kèm ngày hết hạn -->
                 <div class="sup-card">
-                    <div class="sup-card-title" style="display:flex; align-items:center; justify-content:space-between">
+                    <div class="sup-card-title" style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:0.5rem">
                         <span>{{ __('supplier.documents.title') }}</span>
                         <button type="button" wire:click="addDocument"
                             style="background:var(--po-bl-s); color:var(--po-bl); border:none; padding:6px 12px; border-radius:8px; font-size:12px; font-weight:700; cursor:pointer">
@@ -92,15 +87,15 @@
 
                     @forelse($documents as $index => $doc)
                         <div style="display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap; padding:10px 0; border-bottom:1px dashed var(--sup-bd2)">
-                            <div class="sup-field" style="flex:2; min-width:180px">
+                            <div class="sup-field" style="flex:1 1 140px; min-width:120px">
                                 <label class="sup-label">{{ __('supplier.documents.name') }}</label>
                                 <input wire:model="documents.{{ $index }}.name" type="text" class="sup-input" placeholder="{{ __('supplier.documents.name_example') }}">
                             </div>
-                            <div class="sup-field" style="min-width:150px">
+                            <div class="sup-field" style="flex:1 1 120px; min-width:110px">
                                 <label class="sup-label">{{ __('supplier.documents.expires_at') }}</label>
                                 <input wire:model="documents.{{ $index }}.expires_at" type="date" class="sup-input">
                             </div>
-                            <div class="sup-field" style="flex:2; min-width:200px">
+                            <div class="sup-field" style="flex:1 1 140px; min-width:120px">
                                 <div style="display:flex; justify-content:space-between; align-items:center; gap:8px">
                                     <label class="sup-label">{{ __('supplier.documents.attachment') }}</label>
                                     @if(!empty($doc['file_path']))
@@ -172,9 +167,9 @@
                             </thead>
                             <tbody>
                                 @forelse($ingredients as $ing)
-                                    <tr>
+                                    <tr wire:key="sup-ing-row-{{ $ing->id }}">
                                         <td style="text-align:center">
-                                            <input type="checkbox" wire:model.live="selectedIngredients.{{ $ing->id }}" class="sup-check">
+                                            <input type="checkbox" wire:model.live="selectedIngredients.{{ $ing->id }}" wire:key="sup-ing-chk-{{ $ing->id }}" class="sup-check">
                                         </td>
                                         <td style="font-weight:700;color:var(--sup-bl)">{{ $ing->code }}</td>
                                         <td class="sup-name">{{ $ing->name }}</td>
@@ -297,12 +292,6 @@
         <!-- Footer -->
         <div class="sup-bottom-bar">
             <a href="{{ \App\Filament\Resources\SupplierResource::getUrl('index') }}" class="sup-btn">{{ __('supplier.actions.cancel') }}</a>
-            <button type="button" wire:click="saveDraft" class="sup-btn">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
-                </svg>
-                {{ __('supplier.actions.save_draft') }}
-            </button>
             <button type="submit" class="sup-btn sup-btn-primary">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                     <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>

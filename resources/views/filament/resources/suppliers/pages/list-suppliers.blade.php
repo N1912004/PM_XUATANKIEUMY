@@ -281,7 +281,7 @@
                             </td>
                             <td style="text-align:center">
                                 <div class="sup-row-actions" style="justify-content:center">
-                                    <a href="{{ \App\Filament\Resources\SupplierResource::getUrl('edit', ['record' => $supplier->id]) }}" class="sup-row-action" title="Xem" style="color: var(--sup-mu)">
+                                    <a href="{{ \App\Filament\Resources\SupplierResource::getUrl('view', ['record' => $supplier->id]) }}" class="sup-row-action" title="Xem" style="color: var(--sup-mu)">
                                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
                                             <circle cx="12" cy="12" r="3"/>

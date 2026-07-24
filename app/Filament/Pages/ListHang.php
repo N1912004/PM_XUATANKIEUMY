@@ -347,18 +347,25 @@ class ListHang extends Page
             return;
         }
 
-        // Validate: mọi dòng tích chọn BẮT BUỘC có NCC — chặn hẳn thay vì bỏ qua lặng lẽ
-        // rồi tạo các PO còn lại (dòng thiếu NCC sẽ không bao giờ được đặt mà không ai biết).
-        $missingSupplierNames = $selectedItems
-            ->filter(fn ($item) => empty($item['supplier_id']))
+        // Validate: mọi dòng tích chọn BẮT BUỘC có NCC HỢP LỆ — chặn hẳn nếu chưa có hoặc NCC không phù hợp.
+        $invalidSupplierNames = $selectedItems
+            ->filter(function ($item) {
+                if (empty($item['supplier_id'])) {
+                    return true;
+                }
+                $supplier = Supplier::with('ingredientTypes')->find((int) $item['supplier_id']);
+                $ingredient = Ingredient::with(['suppliers', 'typeRelation'])->find((int) $item['ingredient_id']);
+
+                return ! ($supplier && $ingredient && $supplier->canProvideIngredient($ingredient));
+            })
             ->pluck('name');
 
-        if ($missingSupplierNames->isNotEmpty()) {
-            $count = $missingSupplierNames->count();
-            $namesList = $missingSupplierNames->take(3)->implode(', ').($count > 3 ? '...' : '');
+        if ($invalidSupplierNames->isNotEmpty()) {
+            $count = $invalidSupplierNames->count();
+            $namesList = $invalidSupplierNames->take(3)->implode(', ').($count > 3 ? '...' : '');
             Notification::make()
-                ->title('Vui lòng chọn Nhà cung cấp!')
-                ->body("Có {$count} nguyên liệu chưa chọn NCC: {$namesList}. Vui lòng chọn NCC trước khi tạo đơn.")
+                ->title('Chưa chọn Nhà cung cấp hợp lệ!')
+                ->body("Có {$count} nguyên liệu chưa chọn NCC hợp lệ: {$namesList}. Vui lòng chọn NCC phù hợp trước khi tạo đơn.")
                 ->danger()
                 ->send();
 
@@ -401,19 +408,9 @@ class ListHang extends Page
                     continue;
                 }
 
-                // Code format: PO-LH-YYYYMMDD-NCC-P1
-                $nccCode = strtolower(str_replace(' ', '', $supplier->code ?: 'NCC'));
-                $poCode = 'PO-LH-'.Carbon::parse($this->poDate)->format('Ymd').'-'.strtoupper($nccCode).'-'.$split;
-
-                // Avoid duplicates
-                $attempts = 0;
-                while (PurchaseOrder::where('code', $poCode)->exists() && $attempts < 10) {
-                    $poCode = 'PO-LH-'.Carbon::parse($this->poDate)->format('Ymd').'-'.strtoupper($nccCode).'-'.$split.'-'.mt_rand(10, 99);
-                    $attempts++;
-                }
-
+                // Code format ngắn gọn theo ID: PO-{id} (ví dụ PO-1, PO-2...)
                 $po = PurchaseOrder::create([
-                    'code' => $poCode,
+                    'code' => 'PO-TEMP',
                     'kitchen_id' => $kitchenId,
                     'supplier_id' => $supplierId,
                     'status' => 'draft',
@@ -421,6 +418,8 @@ class ListHang extends Page
                     'estimated_delivery_date' => $this->poDate,
                     'note' => 'Đơn đặt hàng tự động tạo từ List hàng ngày '.Carbon::parse($this->poDate)->format('d/m/Y')." ({$split})",
                 ]);
+
+                $po->updateQuietly(['code' => 'PO-'.$po->id]);
 
                 foreach ($items as $item) {
                     // Giá theo NCC (pivot) nếu có báo giá > 0, ngược lại dùng giá tham chiếu chung
@@ -439,7 +438,7 @@ class ListHang extends Page
                 }
 
                 $poCount++;
-                $poCodes[] = $poCode;
+                $poCodes[] = $po->code;
             }
         });
 

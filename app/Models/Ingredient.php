@@ -107,6 +107,19 @@ class Ingredient extends Model
 
     protected static function booted(): void
     {
+        static::saved(function (Ingredient $ingredient): void {
+            if ($ingredient->supplier_id) {
+                $supplier = Supplier::find($ingredient->supplier_id);
+                if ($supplier) {
+                    $supplier->ingredients()->syncWithoutDetaching([
+                        $ingredient->id => [
+                            'reference_price' => (float) ($ingredient->reference_price ?? 0),
+                        ],
+                    ]);
+                }
+            }
+        });
+
         // Khi ĐƠN GIÁ THAM CHIẾU của nguyên liệu thay đổi → mọi món ăn đang hoạt động
         // dùng nguyên liệu này tự động chuyển về 'pending' (Chờ rà soát) để kiểm soát giá vốn.
         static::updated(function (Ingredient $ingredient): void {

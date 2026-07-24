@@ -5,6 +5,7 @@ namespace App\Filament\Resources\SupplierResource\Pages;
 use App\Filament\Resources\SupplierResource;
 use App\Filament\Resources\SupplierResource\Concerns\ManagesSupplierDocuments;
 use App\Models\Ingredient;
+use App\Models\IngredientType;
 use App\Models\Supplier;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
@@ -33,8 +34,6 @@ class EditSupplier extends Page
 
     public string $email = '';
 
-    public string $type = '';
-
     public bool $status = true;
 
     public string $notes = '';
@@ -49,14 +48,13 @@ class EditSupplier extends Page
 
     public function mount(int|string $record): void
     {
-        $supplier = Supplier::query()->with('ingredients')->findOrFail($record);
+        $supplier = Supplier::query()->with(['ingredients'])->findOrFail($record);
 
         $this->supplierId = $supplier->id;
         $this->name = $supplier->name;
         $this->code = $supplier->code;
         $this->phone = (string) $supplier->phone;
         $this->email = (string) $supplier->email;
-        $this->type = $supplier->type;
         $this->status = (bool) $supplier->status;
         $this->notes = (string) $supplier->notes;
         $this->documents = $supplier->documents ?? [];
@@ -90,6 +88,8 @@ class EditSupplier extends Page
 
         $supplier->update($data);
         $this->syncIngredients($supplier);
+        // Loại thực phẩm suy trực tiếp từ loại của các nguyên liệu đã tích (không chọn tay).
+        $supplier->ingredientTypes()->sync($this->derivedTypeIds());
 
         Notification::make()
             ->title(__('supplier.notifications.saved'))
@@ -108,7 +108,7 @@ class EditSupplier extends Page
 
         return [
             'code' => $this->code ?: '--',
-            'type' => $this->type ?: '--',
+            'type' => implode(', ', $this->derivedTypeNames()) ?: '--',
             'ingredients' => $selected->count(),
             'total' => $selected->sum(fn ($id): float => (float) ($this->ingredientCosts[$id] ?? 0)),
         ];
@@ -192,7 +192,6 @@ class EditSupplier extends Page
                     }
                 },
             ],
-            'type' => ['required', 'string', 'max:255'],
             'status' => ['boolean'],
             'notes' => ['nullable', 'string', 'max:2000'],
         ];
@@ -220,7 +219,6 @@ class EditSupplier extends Page
             'code' => __('supplier.attributes.code'),
             'phone' => __('supplier.attributes.phone'),
             'email' => __('supplier.attributes.email'),
-            'type' => __('supplier.attributes.type'),
         ];
     }
 
@@ -260,43 +258,60 @@ class EditSupplier extends Page
     }
 
     /**
-     * Lấy các Loại Nguyên liệu từ danh sách nguyên liệu đã chọn.
+     * ID các loại thực phẩm suy ra từ loại (ingredient_type_id) của những nguyên liệu đã tích —
+     * NCC không chọn loại thủ công, loại phản ánh đúng nguyên liệu NCC cung cấp.
      *
-     * @return array<string, string>
+     * @return array<int, int>
      */
-    public function getAvailableTypes(): array
+    protected function derivedTypeIds(): array
     {
-        $selectedIds = collect($this->selectedIngredients)
-            ->filter()
-            ->keys();
+        $chosenIds = collect($this->selectedIngredients)->filter()->keys();
 
-        if ($selectedIds->isEmpty()) {
+        if ($chosenIds->isEmpty()) {
             return [];
         }
 
-        $types = Ingredient::query()
-            ->whereIn('id', $selectedIds)
-            ->with('typeRelation')
-            ->get()
-            ->pluck('type')
-            ->filter()
+        return Ingredient::query()
+            ->whereIn('id', $chosenIds)
+            ->whereNotNull('ingredient_type_id')
+            ->pluck('ingredient_type_id')
             ->unique()
             ->values()
             ->all();
+    }
 
-        $options = [];
-        foreach ($types as $type) {
-            $options[$type] = $type;
+    /**
+     * Loại thực phẩm cung cấp (chỉ hiển thị) — tên các loại suy từ nguyên liệu đã tích.
+     *
+     * @return array<int, string>
+     */
+    public function derivedTypeNames(): array
+    {
+        $ids = $this->derivedTypeIds();
+
+        if ($ids === []) {
+            return [];
         }
 
-        return $options;
+        return IngredientType::query()
+            ->whereIn('id', $ids)
+            ->orderBy('name')
+            ->pluck('name')
+            ->all();
+    }
+
+    /**
+     * Tương thích ngược: trả về danh sách loại thực phẩm (suy từ nguyên liệu đã tích).
+     *
+     * @return array<int, string>
+     */
+    public function typeOptions(): array
+    {
+        return $this->derivedTypeNames();
     }
 
     public function updatedSelectedIngredients(): void
     {
-        $types = array_keys($this->getAvailableTypes());
-        $this->type = implode(', ', $types);
-
         // Khởi tạo key trong mảng ingredientCosts cho các nguyên liệu mới được chọn
         // để Livewire 3 đồng bộ hoàn chỉnh dữ liệu từ Alpine qua @entangle
         foreach ($this->selectedIngredients as $id => $selected) {
