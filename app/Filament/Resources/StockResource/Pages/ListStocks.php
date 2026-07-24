@@ -173,15 +173,6 @@ class ListStocks extends ListRecords
             $this->loadPOItems();
         }
 
-        if ($this->warehouseTab === 'in' && $this->inMode === null) {
-            $this->inMode = 'po';
-            $pendingPOs = $this->getPendingPOs();
-            if (! empty($pendingPOs) && ! $this->selectedPOId) {
-                $this->selectedPOId = $pendingPOs[0]->id;
-            }
-            $this->loadPOItems();
-        }
-
         if ($this->warehouseTab === 'out' && $this->outMode === null) {
             $this->outMode = 'production';
             $this->loadProductionItems();
@@ -240,15 +231,6 @@ class ListStocks extends ListRecords
 
         if ($tab === 'check' && $this->actualQuantities === []) {
             $this->initEndDayCheck();
-        }
-
-        if ($tab === 'in' && $this->inMode === null) {
-            $this->inMode = 'po';
-            $pendingPOs = $this->getPendingPOs();
-            if (! empty($pendingPOs) && ! $this->selectedPOId) {
-                $this->selectedPOId = $pendingPOs[0]->id;
-            }
-            $this->loadPOItems();
         }
 
         if ($tab === 'out' && $this->outMode === null) {

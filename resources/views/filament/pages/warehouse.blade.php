@@ -640,20 +640,22 @@
                     </svg>
                     <input type="text" wire:model.live.debounce.300ms="search" placeholder="{{ __('warehouse.placeholders.search_ingredient') }}">
                 </div>
-                <div>
-                    <select wire:model.live="selectedType" class="rounded-md border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:[color-scheme:dark]">
-                        <option value="">{{ __('warehouse.filters.all_types') }}</option>
-                        @foreach($this->getIngredientTypeOptions() as $t)
-                            <option value="{{ $t }}">{{ $t }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div>
-                    <select wire:model.live="selectedSort" class="rounded-md border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:[color-scheme:dark]">
-                        <option value="latest">{{ __('warehouse.filters.latest_updated') }}</option>
-                        <option value="oldest">{{ __('warehouse.filters.oldest_updated') }}</option>
-                    </select>
-                </div>
+                @if($warehouseTab !== 'in')
+                    <div>
+                        <select wire:model.live="selectedType" class="rounded-md border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:[color-scheme:dark]">
+                            <option value="">{{ __('warehouse.filters.all_types') }}</option>
+                            @foreach($this->getIngredientTypeOptions() as $t)
+                                <option value="{{ $t }}">{{ $t }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <select wire:model.live="selectedSort" class="rounded-md border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:[color-scheme:dark]">
+                            <option value="latest">{{ __('warehouse.filters.latest_updated') }}</option>
+                            <option value="oldest">{{ __('warehouse.filters.oldest_updated') }}</option>
+                        </select>
+                    </div>
+                @endif
             </div>
         @endif
     </div>
@@ -899,20 +901,23 @@
 
         @elseif($warehouseTab === 'in')
             @if(is_null($inMode))
-                <!-- Initial Workspace for Inbound (Ảnh 3) -->
-                <div style="text-align: center; padding: 3rem 1.5rem;">
-                    <div style="display:inline-flex; align-items:center; justify-content:center; width:54px; height:54px; border-radius:50%; background:#eff6ff; color:#1e40af; margin-bottom:1rem;">
-                        <i class="fa-solid fa-boxes-packing" style="font-size:24px"></i>
+                <!-- Initial Workspace for Inbound (Ảnh 2 Mockup) -->
+                <div>
+                    <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-3 mb-4">
+                        <div>
+                            <h3 style="font-weight: 800; font-size:0.95rem; color:#0f172a;" class="dark:text-white">{{ __('warehouse.inbound.title') }}</h3>
+                            <p style="font-size:0.75rem; color:#64748b;">{{ __('warehouse.inbound.description') }}</p>
+                        </div>
+                        <button type="button" class="wh-action-btn wh-action-btn-primary" wire:click="openInTypeModal">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                            </svg>
+                            <span>{{ __('warehouse.actions.create_in') }}</span>
+                        </button>
                     </div>
-                    <h3 style="font-size: 1rem; font-weight: 700; color:#0f172a;" class="dark:text-white">{{ __('warehouse.inbound.title') }}</h3>
-                    <p style="font-size: 0.78rem; color:#64748b; margin-top:0.25rem; margin-bottom:1.5rem;">{{ __('warehouse.inbound.description') }}</p>
-                    <button type="button" class="wh-action-btn wh-action-btn-primary" style="margin: 0 auto;" wire:click="openInTypeModal">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                        </svg>
-                        <span>{{ __('warehouse.actions.create_in') }}</span>
-                    </button>
-                    <div style="font-size:0.75rem; color:#94a3b8; margin-top:1rem;">{{ __('warehouse.inbound.start_hint') }}</div>
+                    <div style="font-size:0.85rem; color:#64748b; padding: 0.5rem 0;">
+                        Nhấn <strong style="color:#334155;" class="dark:text-slate-200">Tạo phiếu nhập</strong> để bắt đầu.
+                    </div>
                 </div>
             @elseif($inMode === 'po')
                 <!-- PO Inbound Workspace (Ảnh 5) -->
