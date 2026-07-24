@@ -58,7 +58,7 @@
                             @php $derivedTypes = $this->derivedTypeNames(); @endphp
                             <div style="display:flex; flex-wrap:wrap; gap:8px; padding:10px 12px; min-height:42px; height:auto !important; background:var(--sup-bg); border:1.5px solid var(--sup-bd2); border-radius:.7rem; align-items:center">
                                 @forelse($derivedTypes as $typeName)
-                                    <span style="padding:5px 12px; border-radius:9999px; font-size:12px; font-weight:700; border:1.5px solid var(--po-bl); background:var(--po-bl); color:#fff">{{ $typeName }}</span>
+                                    <span class="sup-type-pill"><i class="fa-solid fa-tag" style="font-size:11px"></i> {{ $typeName }}</span>
                                 @empty
                                     <span style="color:var(--sup-mu); font-size:13px">
                                         {{ __('supplier.empty.no_food_types') }}

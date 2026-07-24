@@ -539,6 +539,28 @@
                 background: var(--sup-rd) !important;
             }
 
+            .sup-type-pill {
+                display: inline-flex !important;
+                align-items: center !important;
+                gap: 6px !important;
+                padding: 5px 14px !important;
+                border-radius: 9999px !important;
+                font-size: 13px !important;
+                font-weight: 700 !important;
+                background: #EFF6FF !important;
+                color: #1D4ED8 !important;
+                border: 1.5px solid #BFDBFE !important;
+                box-shadow: 0 1px 2px rgba(29, 78, 216, 0.06) !important;
+                line-height: 1.3 !important;
+            }
+
+            :root.dark .sup-type-pill,
+            .dark .sup-type-pill {
+                background: rgba(37, 99, 235, 0.22) !important;
+                color: #93C5FD !important;
+                border-color: rgba(147, 197, 253, 0.35) !important;
+            }
+
             .sup-row-actions {
                 display: flex;
                 gap: .35rem;
