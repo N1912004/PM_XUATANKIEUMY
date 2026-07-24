@@ -50,7 +50,7 @@ class ListStocks extends ListRecords
 
     public int $perPage = 10;
 
-    public ?int $selectedKitchenId = null;
+    public int|string|null $selectedKitchenId = null;
 
     // End day check properties
     public ?string $checkDate = null;
@@ -127,8 +127,8 @@ class ListStocks extends ListRecords
         $this->prodDate = now()->toDateString();
         $this->outReason = __('warehouse.notes.default_out_reason');
 
-        $this->selectedKitchenId = auth()->user()?->currentKitchenId();
-        $kitchenId = $this->selectedKitchenId;
+        $this->selectedKitchenId = session('active_kitchen_id') ?? auth()->user()?->currentKitchenId() ?? 'all';
+        $kitchenId = is_numeric($this->selectedKitchenId) ? (int) $this->selectedKitchenId : null;
 
         // actualQuantities khởi tạo LAZY khi user mở tab kiểm kê (setTab('check'))
         // — không nạp toàn bộ bảng Stock vào payload Livewire cho mọi lần vào trang
@@ -174,7 +174,12 @@ class ListStocks extends ListRecords
 
     public function updatedSelectedKitchenId($value): void
     {
-        session(['active_kitchen_id' => $value ? (int) $value : null]);
+        if ($value === 'all' || empty($value)) {
+            session(['active_kitchen_id' => 'all']);
+        } else {
+            session(['active_kitchen_id' => (int) $value]);
+        }
+
         $this->redirect(request()->header('Referer') ?? request()->url());
     }
 
