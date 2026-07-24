@@ -137,7 +137,8 @@ return [
     'inbound' => [
         'title' => 'Inbound flow',
         'description' => 'Receive by purchase order (PO) or direct market purchase.',
-        'start_hint' => 'Click Create inbound slip to start.',
+        'start_hint' => 'Press Create inbound slip to start.',
+        'start_hint_html' => 'Press :button to start.',
         'direct_title' => 'Direct purchase / Direct inbound',
         'direct_description' => 'Receive directly from market without purchase order.',
     ],

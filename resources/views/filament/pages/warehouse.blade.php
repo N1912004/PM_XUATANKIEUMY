@@ -916,7 +916,7 @@
                         </button>
                     </div>
                     <div style="font-size:0.85rem; color:#64748b; padding: 0.5rem 0;">
-                        Nhấn <strong style="color:#334155;" class="dark:text-slate-200">Tạo phiếu nhập</strong> để bắt đầu.
+                        {!! __('warehouse.inbound.start_hint_html', ['button' => '<strong style="color:#334155;" class="dark:text-slate-200">' . e(__('warehouse.actions.create_in')) . '</strong>']) !!}
                     </div>
                 </div>
             @elseif($inMode === 'po')

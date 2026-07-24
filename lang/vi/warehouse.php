@@ -138,6 +138,7 @@ return [
         'title' => 'Luồng nhập kho',
         'description' => 'Nhập theo Đơn đặt hàng (PO) hoặc Nhập mua ngoài trực tiếp.',
         'start_hint' => 'Nhấn Tạo phiếu nhập để bắt đầu.',
+        'start_hint_html' => 'Nhấn :button để bắt đầu.',
         'direct_title' => 'Nhập mua ngoài / Nhập kho trực tiếp',
         'direct_description' => 'Nhập trực tiếp từ thị trường không qua đơn hàng PO.',
     ],
