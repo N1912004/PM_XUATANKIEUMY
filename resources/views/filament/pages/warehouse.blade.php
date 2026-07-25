@@ -700,10 +700,10 @@
                                 <td>{{ $item['ingredient']['type'] ?? '—' }}</td>
                                 <td>{{ str_starts_with($item['ingredient']['supplier']['name'] ?? '', 'test_') ? __('warehouse.common.test_supplier') : ($item['ingredient']['supplier']['name'] ?? '—') }}</td>
                                 <td style="text-align: right; font-weight: 750;">
-                                    {{ number_format($item['quantity'], 2, ',', '.') }}<span style="font-size: 11px; font-weight: 500; color: #94a3b8; margin-left: 2px;">{{ $item['ingredient']['unit'] ?? '' }}</span>
+                                    {{ $this->formatQty($item['quantity']) }}<span style="font-size: 11px; font-weight: 500; color: #94a3b8; margin-left: 2px;">{{ $item['ingredient']['unit'] ?? '' }}</span>
                                 </td>
                                 <td style="text-align: right; color: #64748b;">
-                                    {{ number_format($item['min_quantity'], 2, ',', '.') }}<span style="font-size: 11px; font-weight: 500; color: #94a3b8; margin-left: 2px;">{{ $item['ingredient']['unit'] ?? '' }}</span>
+                                    {{ $this->formatQty($item['min_quantity']) }}<span style="font-size: 11px; font-weight: 500; color: #94a3b8; margin-left: 2px;">{{ $item['ingredient']['unit'] ?? '' }}</span>
                                 </td>
                                 <td style="text-align: right;">
                                     {{ number_format($item['unit_price'], 0, ',', '.') }}<span style="font-size: 10px; font-weight: 500; color: #94a3b8; margin-left: 1px;">{{ __('warehouse.common.currency') }}</span>
@@ -882,16 +882,47 @@
                                         <div style="font-size:10px; color:#64748b;">{{ $item->ingredient?->code ?? '—' }} · {{ $item->ingredient?->type ?? '—' }}</div>
                                     </td>
                                     <td>{{ $item->ingredient?->unit ?? '—' }}</td>
-                                    <td style="text-align: right; font-weight: 700;">{{ number_format($sysQty, 2, ',', '.') }}</td>
+                                    <td style="text-align: right; font-weight: 700;">{{ $this->formatQty($sysQty) }}</td>
                                     <td style="text-align: center;">
-                                        <input type="number"
-                                               step="0.01"
-                                               min="0"
-                                               wire:model.blur="actualQuantities.{{ $item->id }}"
-                                               class="w-28 text-center border border-gray-300 rounded px-2 py-1 text-xs dark:bg-gray-800 dark:border-gray-700">
+                                        <div x-data="{
+                                            raw: $wire.entangle('actualQuantities.{{ $item->id }}'),
+                                            display: '',
+                                            fmt(v) {
+                                                let n = parseFloat(v);
+                                                if (isNaN(n) || n < 0) n = 0;
+                                                if (!n && n !== 0) return '';
+                                                let parts = String(n).split('.');
+                                                parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                                                return parts.join(',');
+                                            },
+                                            init() { this.display = (this.raw !== null && this.raw !== '') ? this.fmt(this.raw) : ''; },
+                                            onInput(e) {
+                                                let clean = e.target.value.replace(/[^0-9,]/g, '').replace(',', '.');
+                                                let n = parseFloat(clean) || 0;
+                                                if (n < 0) n = 0;
+                                                this.raw = n;
+                                                this.display = this.fmt(n);
+                                                e.target.value = this.display;
+                                            },
+                                            onBlur(e) {
+                                                let clean = e.target.value.replace(/[^0-9,]/g, '').replace(',', '.');
+                                                let n = parseFloat(clean) || 0;
+                                                if (n < 0) n = 0;
+                                                this.raw = n;
+                                                this.display = this.fmt(n);
+                                                e.target.value = this.display;
+                                            }
+                                        }">
+                                            <input type="text"
+                                                   inputmode="decimal"
+                                                   :value="display"
+                                                   x-on:input="onInput($event)"
+                                                   x-on:blur="onBlur($event)"
+                                                   class="w-28 text-center border border-gray-300 rounded px-2 py-1 text-xs dark:bg-gray-800 dark:border-gray-700">
+                                        </div>
                                     </td>
                                     <td style="text-align: right; font-weight: 700; color: {{ $diff < 0 ? '#ef4444' : ($diff > 0 ? '#16a34a' : 'inherit') }}">
-                                        {{ ($diff > 0 ? '+' : '') . number_format($diff, 2, ',', '.') }}
+                                        {{ ($diff > 0 ? '+' : '') . $this->formatQty($diff) }}
                                     </td>
                                     <td>
                                         <input type="text" 
@@ -998,16 +1029,46 @@
                                         <tr>
                                             <td class="wh-ing-name">{{ $item['name'] }}</td>
                                             <td style="text-align: center; font-weight: 600; color: #64748b;">
-                                                {{ number_format($item['quantity_ordered'], 2, ',', '.') }} {{ $item['unit'] }}
+                                                {{ $this->formatQty($item['quantity_ordered']) }} {{ $item['unit'] }}
                                             </td>
                                             <td style="text-align: center;">
-                                                <input type="number" step="0.01" wire:model.live.debounce.400ms="poItemsData.{{ $index }}.quantity_received" class="table-input" style="width: 100px; font-weight: 700; text-align: center;">
+                                                <input type="number"
+                                                       min="0"
+                                                       step="0.01"
+                                                       wire:model.live.debounce.400ms="poItemsData.{{ $index }}.quantity_received"
+                                                       x-data="{}"
+                                                       x-on:input="if($el.value < 0) $el.value = 0; if($el.value.length > 1 && $el.value.startsWith('0') && !$el.value.startsWith('0.')) $el.value = String(parseFloat($el.value) || 0);"
+                                                       x-on:blur="if($el.value < 0 || !$el.value) $el.value = 0;"
+                                                       class="table-input"
+                                                       style="width: 100px; font-weight: 700; text-align: center;">
                                                 @if($diff != 0)
                                                     <input type="text" wire:model="poItemsData.{{ $index }}.receive_note" class="table-input" style="width: 100%; margin-top: 4px; font-size: 11px;" placeholder="{{ __('warehouse.placeholders.required_when_different') }}">
                                                 @endif
                                             </td>
                                             <td style="text-align: right;">
-                                                <input type="number" step="1000" wire:model="poItemsData.{{ $index }}.unit_price" class="table-input" style="width: 130px; text-align: right; font-weight: 600;">
+                                                <div x-data="{
+                                                    val: @entangle('poItemsData.'.$index.'.unit_price'),
+                                                    display: '',
+                                                    init() { this.updateDisplay(); },
+                                                    updateDisplay() {
+                                                        let num = Math.max(0, parseFloat(this.val) || 0);
+                                                        this.val = num;
+                                                        this.display = num ? num.toLocaleString('en-US') : '0';
+                                                    },
+                                                    onInput(e) {
+                                                        let clean = e.target.value.replace(/[^0-9.]/g, '');
+                                                        let num = Math.max(0, parseFloat(clean) || 0);
+                                                        this.val = num;
+                                                        this.display = num ? num.toLocaleString('en-US') : '0';
+                                                    }
+                                                }">
+                                                    <input type="text"
+                                                           :value="display"
+                                                           x-on:input="onInput($event)"
+                                                           x-on:blur="updateDisplay()"
+                                                           class="table-input"
+                                                           style="width: 130px; text-align: right; font-weight: 600;">
+                                                </div>
                                             </td>
                                         </tr>
                                     @endforeach
@@ -1076,10 +1137,40 @@
                                             ])
                                         </td>
                                         <td style="text-align: center;">
-                                            <input type="number" step="0.01" wire:model="directItemsData.{{ $index }}.quantity" class="table-input" style="width:110px;">
+                                            <input type="number"
+                                                   min="0"
+                                                   step="1"
+                                                   wire:model="directItemsData.{{ $index }}.quantity"
+                                                   x-data="{}"
+                                                   x-on:input="if($el.value < 0) $el.value = 0; if($el.value.length > 1 && $el.value.startsWith('0') && !$el.value.startsWith('0.')) $el.value = String(parseInt($el.value, 10) || 0);"
+                                                   x-on:blur="if($el.value < 0 || !$el.value) $el.value = 0;"
+                                                   class="table-input"
+                                                   style="width:110px; text-align:center; font-weight:700;">
                                         </td>
                                         <td style="text-align: right;">
-                                            <input type="number" step="1000" wire:model="directItemsData.{{ $index }}.unit_price" class="table-input" style="width:140px; text-align:right;">
+                                            <div x-data="{
+                                                val: @entangle('directItemsData.'.$index.'.unit_price'),
+                                                display: '',
+                                                init() { this.updateDisplay(); },
+                                                updateDisplay() {
+                                                    let num = Math.max(0, parseFloat(this.val) || 0);
+                                                    this.val = num;
+                                                    this.display = num ? num.toLocaleString('en-US') : '0';
+                                                },
+                                                onInput(e) {
+                                                    let clean = e.target.value.replace(/[^0-9.]/g, '');
+                                                    let num = Math.max(0, parseFloat(clean) || 0);
+                                                    this.val = num;
+                                                    this.display = num ? num.toLocaleString('en-US') : '0';
+                                                }
+                                            }">
+                                                <input type="text"
+                                                       :value="display"
+                                                       x-on:input="onInput($event)"
+                                                       x-on:blur="updateDisplay()"
+                                                       class="table-input"
+                                                       style="width:140px; text-align:right; font-weight:600;">
+                                            </div>
                                         </td>
                                         <td style="text-align: center;">
                                             <button type="button" class="btn-icon-danger" wire:click="removeDirectRow({{ $index }})">
@@ -1196,8 +1287,8 @@
                                         <tr>
                                             <td class="wh-ing-name">{{ $item['name'] }}</td>
                                             {{-- payload từ client có thể thiếu key → không được để vỡ trang (500) --}}
-                                            <td style="text-align: right; font-weight:700;">{{ number_format($item['available_qty'] ?? 0, 2, ',', '.') }} {{ $item['unit'] ?? '' }}</td>
-                                            <td style="text-align: right; color:#64748b;">{{ number_format($item['quantity_expected'], 2, ',', '.') }} {{ $item['unit'] }}</td>
+                                            <td style="text-align: right; font-weight:700;">{{ $this->formatQty($item['available_qty'] ?? 0) }} {{ $item['unit'] ?? '' }}</td>
+                                            <td style="text-align: right; color:#64748b;">{{ $this->formatQty($item['quantity_expected']) }} {{ $item['unit'] }}</td>
                                             <td style="text-align: center;">
                                                 <input type="number" step="0.01" wire:model="prodItemsData.{{ $index }}.quantity_actual" class="table-input" style="width: 120px;">
                                                 @if(($prodItemsData[$index]['quantity_actual'] ?? 0) > ($item['available_qty'] ?? 0))
@@ -1285,7 +1376,7 @@
                                             ])
                                         </td>
                                         <td style="text-align: right; font-weight:700;">
-                                            {{ number_format($item['available_qty'] ?? 0, 2, ',', '.') }}<span style="font-size: 11px; font-weight: 500; color: #94a3b8; margin-left: 2px;">{{ $item['unit'] ?? '' }}</span>
+                                            {{ $this->formatQty($item['available_qty'] ?? 0) }}<span style="font-size: 11px; font-weight: 500; color: #94a3b8; margin-left: 2px;">{{ $item['unit'] ?? '' }}</span>
                                         </td>
                                         <td style="text-align: center;">
                                             <input type="number" step="0.01" wire:model="transferItemsData.{{ $index }}.quantity" class="table-input" style="width: 120px;">
@@ -1428,9 +1519,9 @@
                                 </td>
                                 <td style="font-weight: 700;">{{ $log['ingredient']['name'] ?? '—' }}</td>
                                 <td style="text-align: right; font-weight: 750; color: {{ $isInflow ? '#16a34a' : '#ef4444' }}">
-                                    {{ $isInflow ? '+' : '-' }}{{ number_format(abs($log['quantity']), 2, ',', '.') }}
+                                    {{ $isInflow ? '+' : '-' }}{{ $this->formatQty(abs($log['quantity'])) }}
                                 </td>
-                                <td style="text-align: right; font-weight: 700;">{{ number_format($log['after_quantity'], 2, ',', '.') }}</td>
+                                <td style="text-align: right; font-weight: 700;">{{ $this->formatQty($log['after_quantity']) }}</td>
                                 <td>
                                     @if($log['voucher_code'])
                                         <span style="font-family: monospace; font-weight: 700; background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size:11px;" class="dark:bg-gray-800">{{ $log['voucher_code'] }}</span> — 
@@ -1537,17 +1628,13 @@
                         <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ __('warehouse.modal.inbound_type_desc') }}</p>
                     </div>
                     <button type="button" class="text-gray-400 hover:text-gray-500" wire:click="closeModals">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                        </svg>
+                        <i class="fa-solid fa-xmark text-lg"></i>
                     </button>
                 </div>
                 <div class="grid gap-3">
                     <button type="button" class="flow-modal-choice" wire:click="startInbound('po')">
-                        <div class="p-2 bg-primary-50 text-primary-600 rounded-lg dark:bg-primary-950/20 dark:text-primary-400">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                            </svg>
+                        <div class="p-2.5 bg-primary-50 text-primary-600 rounded-lg dark:bg-primary-950/20 dark:text-primary-400 text-lg">
+                            <i class="fa-solid fa-file-invoice"></i>
                         </div>
                         <div>
                             <div class="font-bold text-gray-900 dark:text-white text-sm">{{ __('warehouse.modal.inbound_po') }}</div>
@@ -1555,10 +1642,8 @@
                         </div>
                     </button>
                     <button type="button" class="flow-modal-choice" wire:click="startInbound('direct')">
-                        <div class="p-2 bg-primary-50 text-primary-600 rounded-lg dark:bg-primary-950/20 dark:text-primary-400">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
-                            </svg>
+                        <div class="p-2.5 bg-primary-50 text-primary-600 rounded-lg dark:bg-primary-950/20 dark:text-primary-400 text-lg">
+                            <i class="fa-solid fa-basket-shopping"></i>
                         </div>
                         <div>
                             <div class="font-bold text-gray-900 dark:text-white text-sm">{{ __('warehouse.modal.inbound_direct') }}</div>
@@ -1579,17 +1664,13 @@
                         <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ __('warehouse.modal.outbound_type_desc') }}</p>
                     </div>
                     <button type="button" class="text-gray-400 hover:text-gray-500" wire:click="closeModals">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                        </svg>
+                        <i class="fa-solid fa-xmark text-lg"></i>
                     </button>
                 </div>
                 <div class="grid gap-3">
                     <button type="button" class="flow-modal-choice" wire:click="startOutbound('production')">
-                        <div class="p-2 bg-orange-50 text-orange-600 rounded-lg dark:bg-orange-950/20 dark:text-orange-400">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
-                            </svg>
+                        <div class="p-2.5 bg-orange-50 text-orange-600 rounded-lg dark:bg-orange-950/20 dark:text-orange-400 text-lg">
+                            <i class="fa-solid fa-kitchen-set"></i>
                         </div>
                         <div>
                             <div class="font-bold text-gray-900 dark:text-white text-sm">{{ __('warehouse.modal.production_outbound') }}</div>
@@ -1597,10 +1678,8 @@
                         </div>
                     </button>
                     <button type="button" class="flow-modal-choice" wire:click="startOutbound('transfer')">
-                        <div class="p-2 bg-blue-50 text-blue-600 rounded-lg dark:bg-blue-950/20 dark:text-blue-400">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
-                            </svg>
+                        <div class="p-2.5 bg-blue-50 text-blue-600 rounded-lg dark:bg-blue-950/20 dark:text-blue-400 text-lg">
+                            <i class="fa-solid fa-right-left"></i>
                         </div>
                         <div>
                             <div class="font-bold text-gray-900 dark:text-white text-sm">{{ __('warehouse.modal.transfer_outbound') }}</div>
@@ -1670,9 +1749,9 @@
                                         @endif
                                     </td>
                                     <td style="text-align: right; font-weight: 700; color: {{ $isInflow ? '#16a34a' : '#ef4444' }}">
-                                        {{ $isInflow ? '+' : '-' }}{{ number_format(abs($log['quantity']), 2, ',', '.') }}
+                                        {{ $isInflow ? '+' : '-' }}{{ $this->formatQty(abs($log['quantity'])) }}
                                     </td>
-                                    <td style="text-align: right; font-weight: 700;">{{ number_format($log['after_quantity'], 2, ',', '.') }}</td>
+                                    <td style="text-align: right; font-weight: 700;">{{ $this->formatQty($log['after_quantity']) }}</td>
                                 </tr>
                             @empty
                                 <tr>

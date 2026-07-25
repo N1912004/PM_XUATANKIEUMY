@@ -231,9 +231,9 @@ class AdminPanelProvider extends PanelProvider
                         }
 
                         /* FORCE all child elements of active item (like span label, icons) to inherit white color */
-                        .fi-sidebar-item.fi-active > .fi-sidebar-item-button *,
-                        .fi-sidebar-item-active > .fi-sidebar-item-button *,
-                        .fi-sidebar-item-active > a * {
+                        .fi-sidebar-item.fi-active > .fi-sidebar-item-button *:not(.fi-sidebar-item-icon):not(.fi-sidebar-item-icon *),
+                        .fi-sidebar-item-active > .fi-sidebar-item-button *:not(.fi-sidebar-item-icon):not(.fi-sidebar-item-icon *),
+                        .fi-sidebar-item-active > a *:not(.fi-sidebar-item-icon):not(.fi-sidebar-item-icon *) {
                             color: #ffffff !important;
                         }
 

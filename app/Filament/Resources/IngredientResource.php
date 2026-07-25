@@ -112,7 +112,9 @@ class IngredientResource extends Resource
                                             ->label(__('ingredient.form.status'))
                                             ->default(true)
                                             ->onColor('primary')
-                                            ->offColor('danger'),
+                                            ->offColor('danger')
+                                            ->live()
+                                            ->helperText(fn (Forms\Get $get) => $get('status') ? __('ingredient.status.active') : __('ingredient.status.inactive')),
                                     ]),
 
                                 Forms\Components\Section::make(__('ingredient.form.summary'))

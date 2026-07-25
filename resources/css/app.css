@@ -1805,6 +1805,12 @@ textarea.fi-textarea-input {
   justify-content: flex-end !important;
   gap: 12px !important;
   padding: 16px 0 !important;
+  grid-column: 1 / -1 !important;
+}
+
+.fi-form-actions .fi-ac {
+  flex-wrap: nowrap !important;
+  justify-content: flex-end !important;
 }
 
 /* Primary Submit Button in Form Actions (Tạo / Lưu) */

@@ -38,6 +38,11 @@ class ListStocks extends ListRecords
         return __('warehouse.title');
     }
 
+    public function getBreadcrumbs(): array
+    {
+        return [];
+    }
+
     public function getSubheading(): ?string
     {
         return __('warehouse.subheading');
@@ -174,6 +179,14 @@ class ListStocks extends ListRecords
             $this->loadPOItems();
         }
 
+    }
+
+    public function formatQty(float|int|string|null $value): string
+    {
+        $val = (float) ($value ?? 0);
+        $formatted = number_format($val, 2, ',', '.');
+
+        return str_ends_with($formatted, ',00') ? substr($formatted, 0, -3) : rtrim($formatted, '0');
     }
 
     public function updatedSelectedKitchenId($value): void
@@ -674,6 +687,18 @@ class ListStocks extends ListRecords
 
         $userKitchenId = auth()->user()?->currentKitchenId();
 
+        foreach ($this->poItemsData as $itemData) {
+            if ((float) ($itemData['quantity_received'] ?? 0) < 0 || (float) ($itemData['unit_price'] ?? 0) < 0) {
+                Notification::make()
+                    ->title(__('warehouse.notifications.negative_stock_title'))
+                    ->body(__('Số lượng và đơn giá không được là số âm'))
+                    ->danger()
+                    ->send();
+
+                return;
+            }
+        }
+
         $done = DB::transaction(function () use ($userKitchenId): bool {
             // Khóa PO và kiểm tra lại trạng thái NGAY TRONG transaction:
             // bấm đúp / 2 người cùng xác nhận thì người sau thấy stocked_at đã có và dừng.
@@ -802,6 +827,18 @@ class ListStocks extends ListRecords
     public function confirmDirectInbound(): void
     {
         abort_unless(StockResource::canCreate(), 403);
+
+        foreach ($this->directItemsData as $item) {
+            if ((float) ($item['quantity'] ?? 0) < 0 || (float) ($item['unit_price'] ?? 0) < 0) {
+                Notification::make()
+                    ->title(__('warehouse.notifications.negative_stock_title'))
+                    ->body(__('Số lượng và đơn giá không được là số âm'))
+                    ->danger()
+                    ->send();
+
+                return;
+            }
+        }
 
         if (empty($this->directItemsData)) {
             Notification::make()->title(__('warehouse.notifications.add_at_least_one_item'))->danger()->send();
