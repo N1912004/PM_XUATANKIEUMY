@@ -41,6 +41,7 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->spa()
+            ->darkMode(false)
             ->maxContentWidth(MaxWidth::Full)
             // Trang đăng nhập theo mẫu BlueFire (2 cột) — kế thừa nguyên luồng auth Filament
             ->login(Login::class)
@@ -61,7 +62,7 @@ class AdminPanelProvider extends PanelProvider
                 PanelsRenderHook::USER_MENU_BEFORE,
                 fn () => new HtmlString(
                     view('filament.components.language-switcher')->render().'
-                    <span class="text-sm font-bold text-gray-700 dark:text-gray-200 mr-3" style="align-self: center;">
+                    <span class="text-sm font-bold text-gray-700 dark:text-gray-200 mr-1.5" style="align-self: center; margin-right: 0.35rem;">
                         '.e(filament()->auth()->user()?->name ?? auth()->user()?->name ?? 'Admin').'
                     </span>
                 '
@@ -85,7 +86,7 @@ class AdminPanelProvider extends PanelProvider
             ->colors([
                 'primary' => $this->getSetting('primary_color', '#267DC1'),
             ])
-            ->font('IBM Plex Sans')
+            ->font('Inter')
             ->renderHook(
                 PanelsRenderHook::HEAD_END,
                 fn () => new HtmlString('
@@ -102,19 +103,26 @@ class AdminPanelProvider extends PanelProvider
                             flex-shrink: 0 !important;
                         }
 
-                        /* Đồng bộ font chữ IBM Plex Sans cho toàn bộ hệ thống (sidebar, body, main content) */
+                        /* Đồng bộ font chữ Inter cho toàn bộ hệ thống (sidebar, body, main content) */
                         body,
                         .fi-body,
                         .fi-main,
                         .fi-sidebar {
-                            font-family: \'IBM Plex Sans\', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+                            font-family: \'Inter\', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
                         }
 
-                        /* Đồng bộ cỡ chữ tiêu đề trang chuẩn 22px / Extra Bold giữa trang tiêu chuẩn và trang custom */
+                        /* Đồng bộ cỡ chữ tiêu đề trang chuẩn 26px / Extra Bold giữa trang tiêu chuẩn và trang custom */
                         .fi-header-heading {
-                            font-size: 1.375rem !important;
+                            font-size: 1.625rem !important;
                             font-weight: 800 !important;
-                            letter-spacing: -0.01em !important;
+                            line-height: 1.25 !important;
+                            letter-spacing: -0.03em !important;
+                        }
+
+                        @media (max-width: 639.98px) {
+                            .fi-header-heading {
+                                font-size: 1.3125rem !important;
+                            }
                         }
 
                         /* Fix duplicate select arrows globally on custom pages */

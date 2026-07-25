@@ -9,7 +9,6 @@ use Filament\Forms\Form;
 use Filament\Infolists;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
-use Filament\Support\RawJs;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -47,76 +46,90 @@ class IngredientResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Section::make(__('ingredient.form.section'))
+                Forms\Components\Grid::make(['default' => 1, 'lg' => 3])
                     ->schema([
-                        Forms\Components\TextInput::make('name')
-                            ->label(__('ingredient.form.name'))
-                            ->required()
-                            ->unique(ignoreRecord: true)
-                            ->maxLength(255)
-                            ->validationMessages([
-                                'unique' => __('ingredient.validation.name_unique'),
+                        // Left Column: Main Form Fields (span 2)
+                        Forms\Components\Group::make()
+                            ->schema([
+                                Forms\Components\Section::make(__('ingredient.form.section'))
+                                    ->schema([
+                                        Forms\Components\TextInput::make('name')
+                                            ->label(__('ingredient.form.name'))
+                                            ->required()
+                                            ->unique(ignoreRecord: true)
+                                            ->maxLength(255)
+                                            ->live(onBlur: true)
+                                            ->validationMessages([
+                                                'unique' => __('ingredient.validation.name_unique'),
+                                            ])
+                                            ->placeholder(__('ingredient.form.name_placeholder')),
+                                        Forms\Components\TextInput::make('code')
+                                            ->label(__('ingredient.form.code'))
+                                            ->unique(ignoreRecord: true)
+                                            ->maxLength(50)
+                                            ->regex('/^[A-Za-z0-9_-]+$/')
+                                            ->live(onBlur: true)
+                                            ->validationMessages([
+                                                'unique' => __('ingredient.validation.code_unique'),
+                                                'regex' => __('ingredient.validation.code_regex'),
+                                            ])
+                                            ->placeholder(__('ingredient.form.code_placeholder')),
+                                        Forms\Components\Select::make('supplier_id')
+                                            ->label(__('ingredient.filter.supplier'))
+                                            ->relationship('supplier', 'name')
+                                            ->searchable()
+                                            ->preload()
+                                            ->live()
+                                            ->placeholder(__('ingredient.form.supplier_placeholder')),
+                                        Forms\Components\Select::make('unit_id')
+                                            ->label(__('ingredient.form.unit'))
+                                            ->relationship('unitRelation', 'name')
+                                            ->required()
+                                            ->searchable()
+                                            ->preload()
+                                            ->live()
+                                            ->placeholder(__('ingredient.form.unit_placeholder')),
+                                        Forms\Components\Select::make('ingredient_type_id')
+                                            ->label(__('ingredient.form.type'))
+                                            ->relationship('typeRelation', 'name')
+                                            ->required()
+                                            ->searchable()
+                                            ->preload()
+                                            ->live()
+                                            ->columnSpanFull()
+                                            ->placeholder(__('ingredient.form.type_placeholder')),
+                                    ])
+                                    ->columns(2),
                             ])
-                            ->placeholder(__('ingredient.form.name_placeholder')),
-                        Forms\Components\TextInput::make('code')
-                            ->label(__('ingredient.form.code'))
-                            ->required()
-                            ->unique(ignoreRecord: true)
-                            ->maxLength(50)
-                            ->regex('/^[A-Za-z0-9_-]+$/')
-                            ->validationMessages([
-                                'unique' => __('ingredient.validation.code_unique'),
-                                'regex' => __('ingredient.validation.code_regex'),
+                            ->columnSpan(['lg' => 2]),
+
+                        // Right Sidebar: Quick Settings, Summary & Notice (span 1)
+                        Forms\Components\Group::make()
+                            ->schema([
+                                Forms\Components\Section::make(__('ingredient.form.quick_settings'))
+                                    ->schema([
+                                        Forms\Components\Toggle::make('status')
+                                            ->label(__('ingredient.form.status'))
+                                            ->default(true)
+                                            ->onColor('primary')
+                                            ->offColor('danger'),
+                                    ]),
+
+                                Forms\Components\Section::make(__('ingredient.form.summary'))
+                                    ->schema([
+                                        Forms\Components\Placeholder::make('form_summary')
+                                            ->hiddenLabel()
+                                            ->content(fn (Forms\Get $get) => view('filament.resources.ingredients.form-summary', [
+                                                'get' => $get,
+                                            ])),
+                                    ]),
+
+                                Forms\Components\Placeholder::make('form_notice')
+                                    ->hiddenLabel()
+                                    ->content(fn () => view('filament.resources.ingredients.form-notice')),
                             ])
-                            ->placeholder(__('ingredient.form.code_placeholder')),
-                        Forms\Components\Select::make('unit_id')
-                            ->label(__('ingredient.form.unit'))
-                            ->relationship('unitRelation', 'name')
-                            ->required()
-                            ->searchable()
-                            ->preload()
-                            ->createOptionForm([
-                                Forms\Components\TextInput::make('name')
-                                    ->label(__('ingredient.form.unit_name'))
-                                    ->required()
-                                    ->maxLength(255)
-                                    ->unique('units', 'name'),
-                            ])
-                            ->placeholder(__('ingredient.form.unit_placeholder')),
-                        Forms\Components\Select::make('ingredient_type_id')
-                            ->label(__('ingredient.form.type'))
-                            ->relationship('typeRelation', 'name')
-                            ->required()
-                            ->searchable()
-                            ->preload()
-                            ->createOptionForm([
-                                Forms\Components\TextInput::make('name')
-                                    ->label(__('ingredient.form.type_name'))
-                                    ->required()
-                                    ->maxLength(255)
-                                    ->unique('ingredient_types', 'name'),
-                            ])
-                            ->placeholder(__('ingredient.form.type_placeholder')),
-                        Forms\Components\TextInput::make('reference_price')
-                            ->label(__('ingredient.form.reference_price'))
-                            ->required()
-                            ->numeric()
-                            ->minValue(0)
-                            ->default(0)
-                            ->prefix('VND')
-                            ->placeholder(__('ingredient.form.reference_price_placeholder'))
-                            ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
-                            ->stripCharacters(['.', ','])
-                            ->formatStateUsing(fn ($state) => $state ? round((float) $state) : 0)
-                            ->dehydrateStateUsing(fn ($state) => $state ? (float) str_replace([',', '.'], '', (string) $state) : 0),
-                        Forms\Components\Toggle::make('status')
-                            ->label(__('ingredient.form.status'))
-                            ->default(true)
-                            ->onColor('primary')
-                            ->offColor('danger')
-                            ->columnSpanFull(),
-                    ])
-                    ->columns(2),
+                            ->columnSpan(['lg' => 1]),
+                    ]),
             ]);
     }
 
@@ -202,62 +215,65 @@ class IngredientResource extends Resource
                     ->label(__('ingredient.table.code'))
                     ->searchable()
                     ->sortable()
+                    ->alignStart()
                     ->color('primary')
                     ->weight('semibold')
-                    ->size('sm'),
+                    ->size('sm')
+                    // Mã thật dài ~13 ký tự (p90 = 14, max thường 14); chỉ rút gọn những mã bất
+                    // thường dài hơn 18 ký tự để một dòng xấu không kéo rộng cả cột.
+                    ->limit(18)
+                    ->tooltip(fn ($state): ?string => is_string($state) && mb_strlen($state) > 18 ? $state : null)
+                    ->width('180px'),
                 Tables\Columns\TextColumn::make('name')
                     ->label(__('ingredient.table.name'))
                     ->searchable()
                     ->sortable()
-                    ->weight('bold'),
+                    ->alignStart()
+                    ->weight('bold')
+                    ->wrap(),
                 Tables\Columns\TextColumn::make('suppliers_display')
                     ->label(__('ingredient.table.supplier'))
-                    ->badge()
+                    // Chữ thường, không dùng ->badge(): padding ngang của badge đẩy chữ thụt vào
+                    // 8px so với tiêu đề cột, làm cột này lệch hẳn so với các cột còn lại.
                     ->state(function ($record) {
                         $names = $record->suppliers->pluck('name')->toArray();
                         $total = count($names);
-                        if ($total <= 2) {
-                            return $names;
+                        if ($total > 2) {
+                            $names = [...array_slice($names, 0, 2), __('ingredient.table.more_suppliers', ['count' => $total - 2])];
                         }
 
-                        return [...array_slice($names, 0, 2), __('ingredient.table.more_suppliers', ['count' => $total - 2])];
+                        return implode(', ', $names);
                     })
                     // Cột ảo (state) không map cột DB → phải tự viết query tìm qua quan hệ n-n suppliers.
                     // Filament tự OR khối này với search của code/name trong ô tìm kiếm chung.
                     ->searchable(query: fn (Builder $query, string $search): Builder => $query->whereHas('suppliers', fn (Builder $q) => $q->where('name', 'like', "%{$search}%")))
-                    ->color(fn (string $state): string => str_starts_with($state, '+') ? 'gray' : 'success')
-                    ->size('sm'),
+                    ->alignStart()
+                    ->size('sm')
+                    ->wrap(),
                 Tables\Columns\TextColumn::make('unitRelation.name')
                     ->label(__('ingredient.table.unit'))
-                    ->size('sm'),
+                    ->alignStart()
+                    ->size('sm')
+                    ->width('110px'),
                 Tables\Columns\TextColumn::make('typeRelation.name')
                     ->label(__('ingredient.table.type'))
-                    ->size('sm'),
-                Tables\Columns\TextColumn::make('reference_price')
-                    ->label(__('ingredient.table.reference_price'))
-                    ->html()
-                    ->formatStateUsing(function ($state) {
-                        if ($state === null) {
-                            return '—';
-                        }
-                        $formatted = number_format($state, 0, ',', '.');
+                    ->alignStart()
+                    ->size('sm')
+                    ->width('140px'),
 
-                        return "<strong>{$formatted}</strong><span style=\"font-size: 10px; font-weight: 500; color: #94a3b8; margin-left: 2px;\">đ</span>";
-                    })
-                    ->alignRight()
-                    ->extraAttributes([
-                        'style' => 'font-variant-numeric: tabular-nums;',
-                    ])
-                    ->sortable()
-                    ->size('sm'),
                 Tables\Columns\TextColumn::make('status')
                     ->label(__('ingredient.table.status'))
                     ->badge()
                     ->formatStateUsing(fn ($state) => $state ? __('ingredient.status.active') : __('ingredient.status.inactive'))
                     ->icon(fn ($state) => $state ? 'heroicon-o-check-circle' : 'heroicon-o-x-circle')
-                    ->color(fn ($state) => $state ? 'success' : 'danger'),
+                    ->color(fn ($state) => $state ? 'success' : 'danger')
+                    ->alignStart()
+                    ->width('160px'),
             ])
             ->defaultSort('id', 'desc')
+            ->searchPlaceholder(__('ingredient.table.search_placeholder'))
+            ->paginated([10, 20, 50])
+            ->defaultPaginationPageOption(10)
             ->filters([
                 Tables\Filters\SelectFilter::make('suppliers')
                     ->label(__('ingredient.filter.supplier'))
@@ -274,9 +290,13 @@ class IngredientResource extends Resource
                     ->relationship('typeRelation', 'name')
                     ->searchable()
                     ->preload(),
-                Tables\Filters\TrashedFilter::make(),
+                Tables\Filters\TrashedFilter::make()
+                    ->label(__('ingredient.filter.trashed')),
             ])
             ->filtersLayout(Tables\Enums\FiltersLayout::AboveContent)
+            ->emptyStateIcon('heroicon-o-magnifying-glass')
+            ->emptyStateHeading(__('ingredient.table.empty_heading'))
+            ->emptyStateDescription(__('ingredient.table.empty_description'))
             ->actions([
                 Tables\Actions\ViewAction::make()
                     ->iconButton(),
@@ -289,6 +309,8 @@ class IngredientResource extends Resource
                 Tables\Actions\ForceDeleteAction::make()
                     ->iconButton(),
             ])
+            ->actionsColumnLabel(__('ingredient.table.action'))
+            ->actionsPosition(Tables\Enums\ActionsPosition::AfterColumns)
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),

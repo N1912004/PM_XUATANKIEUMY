@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,12 +12,22 @@ class WeekMenu extends Model
 {
     use HasFactory;
 
+    public const TYPE_WEEK = 'week';
+
+    public const TYPE_DAY = 'day';
+
     protected $fillable = [
         'kitchen_id',
+        'type',
         'date_from',
         'date_to',
         'status',
         'audit_reason',
+    ];
+
+    protected $casts = [
+        'date_from' => 'date:Y-m-d',
+        'date_to' => 'date:Y-m-d',
     ];
 
     public const FINALIZED_STATUSES = ['sent', 'locked'];
@@ -37,6 +48,26 @@ class WeekMenu extends Model
     public function menus(): HasMany
     {
         return $this->hasMany(Menu::class, 'week_menu_id');
+    }
+
+    public function scopeWeek(Builder $query): Builder
+    {
+        return $query->where('type', self::TYPE_WEEK);
+    }
+
+    public function scopeDay(Builder $query): Builder
+    {
+        return $query->where('type', self::TYPE_DAY);
+    }
+
+    public function isDay(): bool
+    {
+        return $this->type === self::TYPE_DAY;
+    }
+
+    public function isWeek(): bool
+    {
+        return $this->type === self::TYPE_WEEK || empty($this->type);
     }
 
     public function isPastLocked(): bool

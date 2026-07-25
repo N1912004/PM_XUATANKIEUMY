@@ -2,10 +2,18 @@
 
 return [
     'cost_source_notice' => 'Đơn giá nguyên liệu được lấy từ module Nguyên liệu / Nhà cung cấp và dùng để tự động tính cost nguyên liệu trên 1 phần.',
+    'breadcrumb' => [
+        'home' => 'Xuất ăn',
+        'list' => 'Danh sách nguyên liệu',
+        'create' => 'Thêm nguyên liệu',
+        'edit' => 'Chỉnh sửa nguyên liệu',
+        'view' => 'Chi tiết nguyên liệu',
+    ],
     'navigation' => [
         'group' => 'catalog.groups.ingredients_inventory',
         'ingredient' => 'Nguyên liệu',
         'ingredient_plural' => 'Danh sách nguyên liệu',
+        'subheading' => 'Quản lý danh sách nguyên liệu theo tên, mã, nhà cung cấp, đơn vị và loại nguyên liệu',
         'unit' => 'Đơn vị tính',
         'unit_plural' => 'Danh sách đơn vị tính',
         'type' => 'Loại nguyên liệu',
@@ -13,10 +21,13 @@ return [
     ],
     'form' => [
         'section' => 'Thông tin nguyên liệu',
+        'quick_settings' => 'Thiết lập nhanh',
+        'summary' => 'Tóm tắt thông tin',
         'name' => 'Tên nguyên liệu',
         'name_placeholder' => 'Nhập tên nguyên liệu',
         'code' => 'Mã nguyên liệu',
         'code_placeholder' => 'Nhập mã nguyên liệu',
+        'supplier_placeholder' => 'Chọn nhà cung cấp',
         'unit' => 'Đơn vị',
         'unit_placeholder' => 'Chọn đơn vị',
         'unit_name' => 'Tên đơn vị',
@@ -36,7 +47,11 @@ return [
         'type' => 'LOẠI NL',
         'reference_price' => 'THÀNH TIỀN',
         'status' => 'TRẠNG THÁI',
+        'action' => 'THAO TÁC',
         'more_suppliers' => '+:count NCC',
+        'empty_heading' => 'Không tìm thấy nguyên liệu',
+        'empty_description' => 'Thử đổi từ khóa tìm kiếm hoặc xóa bớt bộ lọc.',
+        'search_placeholder' => 'Tìm tên hoặc mã nguyên liệu...',
     ],
     'status' => [
         'active' => 'Đang hoạt động',
@@ -53,6 +68,7 @@ return [
         'supplier' => 'Nhà cung cấp',
         'unit' => 'Đơn vị',
         'type' => 'Loại NL',
+        'trashed' => 'Bản ghi đã xóa',
     ],
     'actions' => [
         'import' => 'Nhập Excel',
@@ -62,6 +78,9 @@ return [
         'export' => 'Xuất Excel',
         'create' => 'Thêm nguyên liệu',
         'create_desc' => 'Chỉ khai báo các thông tin cần thiết: tên, mã, đơn vị và loại nguyên liệu',
+        'save' => 'Lưu nguyên liệu',
+        'save_draft' => 'Lưu nháp',
+        'cancel' => 'Hủy',
         'back' => 'Quay lại',
         'edit' => 'Chỉnh sửa',
         'view_desc' => 'Thông tin chi tiết của nguyên liệu trong danh mục',

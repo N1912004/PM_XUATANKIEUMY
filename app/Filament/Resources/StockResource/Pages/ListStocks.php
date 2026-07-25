@@ -371,6 +371,7 @@ class ListStocks extends ListRecords
         $kitchenId = auth()->user()?->currentKitchenId();
 
         return $this->checkStocksCache = Stock::with(['ingredient.typeRelation'])
+            ->whereHas('ingredient')
             ->when($kitchenId, fn ($q) => $q->where('kitchen_id', $kitchenId))
             ->when(! empty($this->search), function ($query) {
                 $searchLower = '%'.strtolower($this->search).'%';
@@ -1433,7 +1434,8 @@ class ListStocks extends ListRecords
     public function getWarehouseData(): LengthAwarePaginator
     {
         $kitchenId = auth()->user()?->currentKitchenId();
-        $query = Stock::with(['ingredient.supplier']);
+        $query = Stock::with(['ingredient.supplier'])
+            ->whereHas('ingredient');
 
         if ($kitchenId) {
             $query->where('kitchen_id', $kitchenId);

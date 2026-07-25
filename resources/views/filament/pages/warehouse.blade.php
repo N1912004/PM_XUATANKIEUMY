@@ -136,16 +136,15 @@
             font-size: 1.125rem;
             margin-bottom: 0.5rem;
         }
-        /* KPI icon đồng nhất màu brand — màu chỉ dùng mã hóa trạng thái ở dòng dữ liệu
-           (badge "Sắp hết" amber, chênh lệch xanh/đỏ), không tô ngẫu nhiên trên thẻ thống kê. */
-        .ico-blue,
-        .ico-green,
-        .ico-orange,
-        .ico-purple { background: rgb(var(--primary-50)); color: rgb(var(--primary-600)); }
-        :root.dark .ico-blue,
-        :root.dark .ico-green,
-        :root.dark .ico-orange,
-        :root.dark .ico-purple { background: rgb(var(--primary-950) / .2); color: rgb(var(--primary-400)); }
+        /* KPI Stat Badge Colors (Matching bluefire_demo.html ki-b, ki-g, ki-o, ki-p) */
+        .ico-blue { background: #EBF3FF !important; color: #1267E8 !important; }
+        .ico-green { background: #ECFDF5 !important; color: #059669 !important; }
+        .ico-orange { background: #FFF7ED !important; color: #EA580C !important; }
+        .ico-purple { background: #F5F3FF !important; color: #7C3AED !important; }
+        :root.dark .ico-blue { background: rgba(18, 103, 232, 0.18) !important; color: #60A5FA !important; }
+        :root.dark .ico-green { background: rgba(5, 150, 105, 0.18) !important; color: #34D399 !important; }
+        :root.dark .ico-orange { background: rgba(234, 88, 12, 0.18) !important; color: #FB923C !important; }
+        :root.dark .ico-purple { background: rgba(124, 58, 237, 0.18) !important; color: #A78BFA !important; }
         
         .stat-val {
             font-size: 1.375rem;
@@ -584,9 +583,7 @@
     @endif
         <div class="stat-card">
             <div class="stat-icon ico-blue">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-                </svg>
+                <i class="fa-solid fa-boxes-stacked"></i>
             </div>
             <div class="stat-val">{{ $stats['items'] }}</div>
             <div class="stat-lbl">{{ __('warehouse.stats.stock_items') }}</div>
@@ -594,9 +591,7 @@
         </div>
         <div class="stat-card">
             <div class="stat-icon ico-green">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
+                <i class="fa-solid fa-sack-dollar"></i>
             </div>
             <div class="stat-val">{{ number_format($stats['value'], 0, ',', '.') }}{{ __('warehouse.common.currency') }}</div>
             <div class="stat-lbl">{{ __('warehouse.stats.stock_value') }}</div>
@@ -604,9 +599,7 @@
         </div>
         <div class="stat-card">
             <div class="stat-icon ico-orange">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                </svg>
+                <i class="fa-solid fa-triangle-exclamation"></i>
             </div>
             <div class="stat-val">{{ $stats['low'] }}</div>
             <div class="stat-lbl">{{ __('warehouse.stats.low_stock') }}</div>
@@ -614,9 +607,7 @@
         </div>
         <div class="stat-card">
             <div class="stat-icon ico-purple">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
-                </svg>
+                <i class="fa-solid fa-clipboard-list"></i>
             </div>
             <div class="stat-val">{{ $stats['check'] }}</div>
             <div class="stat-lbl">{{ __('warehouse.stats.need_check_today') }}</div>
@@ -627,46 +618,34 @@
     <!-- Tab bar -->
     <div class="tabs-bar">
         <button class="tab-btn @if($warehouseTab === 'stock') active @endif" wire:click="setTab('stock')">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
-            </svg>
+            <i class="fa-solid fa-layer-group"></i>
             <span>{{ __('warehouse.tabs.stock') }}</span>
         </button>
         <button class="tab-btn @if($warehouseTab === 'check') active @endif" wire:click="setTab('check')">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
-            </svg>
+            <i class="fa-solid fa-clipboard-check"></i>
             <span>{{ __('warehouse.tabs.check') }}</span>
         </button>
         <button class="tab-btn @if($warehouseTab === 'in') active @endif" wire:click="setTab('in')">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 13l-7 7-7-7m14-6l-7 7-7-7"/>
-            </svg>
+            <i class="fa-solid fa-arrow-down"></i>
             <span>{{ __('warehouse.tabs.inbound') }}</span>
         </button>
         <button class="tab-btn @if($warehouseTab === 'out') active @endif" wire:click="setTab('out')">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 11l7-7 7 7M5 19l7-7 7 7"/>
-            </svg>
+            <i class="fa-solid fa-arrow-up"></i>
             <span>{{ __('warehouse.tabs.outbound') }}</span>
         </button>
         <button class="tab-btn @if($warehouseTab === 'log') active @endif" wire:click="setTab('log')">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
+            <i class="fa-solid fa-clock-rotate-left"></i>
             <span>{{ __('warehouse.tabs.log') }}</span>
         </button>
 
         @if(in_array($warehouseTab, ['stock', 'log']))
             <div class="filter-controls">
                 <div class="search-wrapper">
-                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                    </svg>
+                    <i class="fa-solid fa-magnifying-glass" style="font-size:12px; color:#94a3b8; margin-right:4px;"></i>
                     <input type="text" wire:model.live.debounce.300ms="search" placeholder="{{ __('warehouse.placeholders.search_ingredient') }}">
                 </div>
                 <div>
-                    <select wire:model.live="selectedType" class="rounded-md border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:[color-scheme:dark]">
+                    <select wire:model.live="selectedType" class="type-select">
                         <option value="">{{ __('warehouse.filters.all_types') }}</option>
                         @foreach($this->getIngredientTypeOptions() as $t)
                             <option value="{{ $t }}">{{ $t }}</option>
@@ -674,7 +653,7 @@
                     </select>
                 </div>
                 <div>
-                    <select wire:model.live="selectedSort" class="rounded-md border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:[color-scheme:dark]">
+                    <select wire:model.live="selectedSort" class="type-select">
                         <option value="latest">{{ __('warehouse.filters.latest_updated') }}</option>
                         <option value="oldest">{{ __('warehouse.filters.oldest_updated') }}</option>
                     </select>
@@ -706,24 +685,25 @@
                     </thead>
                     <tbody>
                         @forelse($stocksData as $index => $item)
-                            <tr wire:click="openLedger({{ $item['ingredient']['id'] }})" style="cursor: pointer;" title="{{ __('warehouse.tooltips.open_ledger') }}">
+                            @if(empty($item['ingredient'])) @continue @endif
+                            <tr wire:click="openLedger({{ $item['ingredient']['id'] ?? 0 }})" style="cursor: pointer;" title="{{ __('warehouse.tooltips.open_ledger') }}">
                                 <td style="text-align: center;">{{ ($stocksData->currentPage() - 1) * $stocksData->perPage() + $index + 1 }}</td>
-                                <td><span style="font-weight: 700;">{{ $item['ingredient']['code'] }}</span></td>
+                                <td><span style="font-weight: 700;">{{ $item['ingredient']['code'] ?? '—' }}</span></td>
                                 <td class="wh-ing-name">
                                     <div style="display: flex; align-items: center; gap: 8px;">
-                                        <span>{{ $item['ingredient']['name'] }}</span>
+                                        <span>{{ $item['ingredient']['name'] ?? '—' }}</span>
                                         <svg class="w-3.5 h-3.5 text-gray-400 opacity-0 wh-ledger-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="transition: opacity 0.15s; flex-shrink: 0;" title="{{ __('warehouse.tooltips.open_ledger') }}">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
                                         </svg>
                                     </div>
                                 </td>
-                                <td>{{ $item['ingredient']['type'] }}</td>
+                                <td>{{ $item['ingredient']['type'] ?? '—' }}</td>
                                 <td>{{ str_starts_with($item['ingredient']['supplier']['name'] ?? '', 'test_') ? __('warehouse.common.test_supplier') : ($item['ingredient']['supplier']['name'] ?? '—') }}</td>
                                 <td style="text-align: right; font-weight: 750;">
-                                    {{ number_format($item['quantity'], 2, ',', '.') }}<span style="font-size: 11px; font-weight: 500; color: #94a3b8; margin-left: 2px;">{{ $item['ingredient']['unit'] }}</span>
+                                    {{ number_format($item['quantity'], 2, ',', '.') }}<span style="font-size: 11px; font-weight: 500; color: #94a3b8; margin-left: 2px;">{{ $item['ingredient']['unit'] ?? '' }}</span>
                                 </td>
                                 <td style="text-align: right; color: #64748b;">
-                                    {{ number_format($item['min_quantity'], 2, ',', '.') }}<span style="font-size: 11px; font-weight: 500; color: #94a3b8; margin-left: 2px;">{{ $item['ingredient']['unit'] }}</span>
+                                    {{ number_format($item['min_quantity'], 2, ',', '.') }}<span style="font-size: 11px; font-weight: 500; color: #94a3b8; margin-left: 2px;">{{ $item['ingredient']['unit'] ?? '' }}</span>
                                 </td>
                                 <td style="text-align: right;">
                                     {{ number_format($item['unit_price'], 0, ',', '.') }}<span style="font-size: 10px; font-weight: 500; color: #94a3b8; margin-left: 1px;">{{ __('warehouse.common.currency') }}</span>
@@ -891,16 +871,17 @@
                             @endphp
                             @forelse($stocksData as $index => $item)
                                 @php
-                                    $sysQty = $systemQty[$item->id] ?? 0;
-                                    $diff = ($actualQuantities[$item->id] ?? $sysQty) - $sysQty;
+                                    $sysQty = (float) ($systemQty[$item->id] ?? 0);
+                                    $actualVal = $actualQuantities[$item->id] ?? null;
+                                    $diff = ($actualVal === null || $actualVal === '' ? $sysQty : (float) $actualVal) - $sysQty;
                                 @endphp
                                 <tr>
                                     <td style="text-align: center;">{{ $index + 1 }}</td>
                                     <td>
-                                        <div style="font-weight: 700;">{{ $item->ingredient->name }}</div>
-                                        <div style="font-size:10px; color:#64748b;">{{ $item->ingredient->code }} · {{ $item->ingredient->type }}</div>
+                                        <div style="font-weight: 700;">{{ $item->ingredient?->name ?? '—' }}</div>
+                                        <div style="font-size:10px; color:#64748b;">{{ $item->ingredient?->code ?? '—' }} · {{ $item->ingredient?->type ?? '—' }}</div>
                                     </td>
-                                    <td>{{ $item->ingredient->unit }}</td>
+                                    <td>{{ $item->ingredient?->unit ?? '—' }}</td>
                                     <td style="text-align: right; font-weight: 700;">{{ number_format($sysQty, 2, ',', '.') }}</td>
                                     <td style="text-align: center;">
                                         <input type="number"
@@ -910,7 +891,7 @@
                                                class="w-28 text-center border border-gray-300 rounded px-2 py-1 text-xs dark:bg-gray-800 dark:border-gray-700">
                                     </td>
                                     <td style="text-align: right; font-weight: 700; color: {{ $diff < 0 ? '#ef4444' : ($diff > 0 ? '#16a34a' : 'inherit') }}">
-                                        {{ $diff > 0 ? '+' . $diff : $diff }}
+                                        {{ ($diff > 0 ? '+' : '') . number_format($diff, 2, ',', '.') }}
                                     </td>
                                     <td>
                                         <input type="text" 
@@ -965,36 +946,31 @@
                     <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-3 mb-3">
                         <div>
                             <h3 style="font-weight: 800; font-size:0.95rem; color:#0f172a;" class="dark:text-white">{{ __('warehouse.inbound.title') }}</h3>
-                            <p style="font-size:0.75rem; color:#64748b;">{{ __('warehouse.inbound.description') }}</p>
+                            <p style="font-size:0.75rem; color:#64748b;">Nhập theo Đơn đặt hàng (PO) hoặc Nhập mua ngoài.</p>
                         </div>
                         <button type="button" class="wh-action-btn wh-action-btn-primary" wire:click="openInTypeModal">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                            </svg>
+                            <i class="fa-solid fa-plus"></i>
                             <span>{{ __('warehouse.actions.create_in') }}</span>
                         </button>
                     </div>
 
                     <div class="flex items-center justify-between pb-3 mb-4">
                         <div class="flex items-center gap-3">
-                            <div class="form-field" style="width: 320px;">
-                                <label style="font-size:0.7rem;">{{ __('warehouse.form.pending_po_code') }}</label>
+                            <div class="form-field" style="width: 340px;">
+                                <label style="font-size:0.7rem; color:#94a3b8;">{{ __('warehouse.form.pending_po_code') }}</label>
                                 @include('filament.components.search-select', [
                                     'name' => 'selectedPOId',
                                     'live' => true,
                                     'placeholder' => __('warehouse.placeholders.select_po'),
                                     'options' => collect($this->getPendingPOs())->map(fn ($po) => [
                                         'value' => $po->id,
-                                        'label' => $po->code,
-                                        'sub' => $po->supplier?->name,
+                                        'label' => $po->code . ($po->supplier?->name ? ' - ' . $po->supplier->name : ''),
                                     ])->all(),
                                 ])
                             </div>
                         </div>
                         <button type="button" class="wh-action-btn wh-action-btn-primary" wire:click="confirmInboundPO" wire:loading.attr="disabled" wire:target="confirmInboundPO">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                            </svg>
+                            <i class="fa-solid fa-check"></i>
                             <span>{{ __('warehouse.actions.confirm_inbound') }}</span>
                         </button>
                     </div>
@@ -1009,39 +985,29 @@
                                 <thead>
                                     <tr>
                                         <th>{{ __('warehouse.table.ingredient') }}</th>
-                                        <th style="text-align: right;">{{ __('warehouse.table.current_stock') }}</th>
-                                        <th style="text-align: right;">{{ __('warehouse.table.expected_qty') }}</th>
-                                        <th style="text-align: center; width:140px;">{{ __('warehouse.table.received_qty') }}</th>
-                                        <th style="text-align: right; width:110px;">{{ __('warehouse.table.difference') }}</th>
-                                        <th style="text-align: right; width:140px;">{{ __('warehouse.table.po_locked_price') }}</th>
-                                        <th style="width:200px;">{{ __('warehouse.table.difference_reason') }}</th>
+                                        <th style="text-align: center;">{{ __('warehouse.table.expected_qty') }}</th>
+                                        <th style="text-align: center; width: 150px;">{{ __('warehouse.table.received_qty') }}</th>
+                                        <th style="text-align: right; width: 160px;">{{ __('warehouse.table.unit_price') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach($poItemsData as $index => $item)
                                         @php
-                                            // Chênh lệch = thực nhận − đặt; thừa xanh, thiếu đỏ (quy định kiểm hàng BA)
                                             $diff = (float) ($item['quantity_received'] ?? 0) - (float) $item['quantity_ordered'];
                                         @endphp
                                         <tr>
                                             <td class="wh-ing-name">{{ $item['name'] }}</td>
-                                            <td style="text-align: right; font-weight:600; color:#64748b;">{{ number_format($item['current_stock'] ?? 0, 2, ',', '.') }} {{ $item['unit'] }}</td>
-                                            <td style="text-align: right; font-weight:600;">{{ number_format($item['quantity_ordered'], 2, ',', '.') }} {{ $item['unit'] }}</td>
+                                            <td style="text-align: center; font-weight: 600; color: #64748b;">
+                                                {{ number_format($item['quantity_ordered'], 2, ',', '.') }} {{ $item['unit'] }}
+                                            </td>
                                             <td style="text-align: center;">
-                                                <input type="number" step="0.01" wire:model.live.debounce.400ms="poItemsData.{{ $index }}.quantity_received" class="table-input" style="width: 110px;">
-                                            </td>
-                                            <td style="text-align: right; font-weight:750; color: {{ $diff > 0 ? '#16a34a' : ($diff < 0 ? '#ef4444' : 'inherit') }}">
-                                                {{ $diff == 0 ? '—' : ($diff > 0 ? '+' : '').number_format($diff, 2, ',', '.') }}
-                                            </td>
-                                            <td style="text-align: right; font-weight:600;">
-                                                {{ number_format($item['unit_price'], 0, ',', '.') }}{{ __('warehouse.common.currency') }}
-                                            </td>
-                                            <td>
+                                                <input type="number" step="0.01" wire:model.live.debounce.400ms="poItemsData.{{ $index }}.quantity_received" class="table-input" style="width: 100px; font-weight: 700; text-align: center;">
                                                 @if($diff != 0)
-                                                    <input type="text" wire:model="poItemsData.{{ $index }}.receive_note" class="table-input" style="width: 100%;" placeholder="{{ __('warehouse.placeholders.required_when_different') }}">
-                                                @else
-                                                    <span style="color:#94a3b8; font-size:11px;">—</span>
+                                                    <input type="text" wire:model="poItemsData.{{ $index }}.receive_note" class="table-input" style="width: 100%; margin-top: 4px; font-size: 11px;" placeholder="{{ __('warehouse.placeholders.required_when_different') }}">
                                                 @endif
+                                            </td>
+                                            <td style="text-align: right;">
+                                                <input type="number" step="1000" wire:model="poItemsData.{{ $index }}.unit_price" class="table-input" style="width: 130px; text-align: right; font-weight: 600;">
                                             </td>
                                         </tr>
                                     @endforeach

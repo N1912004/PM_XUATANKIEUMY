@@ -29,6 +29,16 @@ class ListIngredients extends ListRecords
         return __('ingredient.navigation.ingredient_plural');
     }
 
+    public function getSubheading(): ?string
+    {
+        return __('ingredient.navigation.subheading');
+    }
+
+    public function getBreadcrumbs(): array
+    {
+        return [];
+    }
+
     protected function getHeaderActions(): array
     {
         return [
@@ -84,7 +94,7 @@ class ListIngredients extends ListRecords
             Actions\Action::make('export_excel')
                 ->label(__('ingredient.actions.export'))
                 ->icon('heroicon-o-document-arrow-down')
-                ->color('success')
+                ->color('gray')
                 ->action(function () {
                     $filename = __('ingredient.excel.filename').'-'.now()->format('Ymd-His').'.xlsx';
 
@@ -209,5 +219,10 @@ class ListIngredients extends ListRecords
         return [
             IngredientStatsOverview::class,
         ];
+    }
+
+    public function getHeaderWidgetsColumns(): int|string|array
+    {
+        return 1;
     }
 }

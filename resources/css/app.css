@@ -30,9 +30,39 @@
     --font-weight-bold: 700;
 }
 
-/* Fix xung đột dịch chuyển (translate) giữa Tailwind v3 của Filament và Tailwind v4 của dự án */
-.fi-fo-toggle span {
-    transform: none !important;
+/* Fix xung đột dịch chuyển (translate) giữa Tailwind v3 của Filament và Tailwind v4 của dự án
+   khi bấm nút Toggle (bật/tắt trạng thái): núm tròn trượt sang phải khi Bật và về trái khi Tắt.
+
+   Lưu ý selector: `.fi-fo-toggle` CHÍNH LÀ thẻ <button>, không phải phần tử bọc nó — viết
+   `.fi-fo-toggle button > span` sẽ không khớp gì cả. Núm là con <span> trực tiếp của button.
+
+   Khoảng dịch: button rộng 44px (w-11) trừ 2×2px border trừ núm 20px (w-5) = 20px.
+
+   Điểm mấu chốt: `.translate-x-5` của Tailwind v4 đặt thuộc tính CSS `translate` (tách rời),
+   còn bản v3 mà Filament build ra lại đặt `transform`. Cả hai cùng khớp phần tử này nên hai
+   phép dịch CỘNG DỒN thành 40px và núm văng ra ngoài khung. Phải vô hiệu hoá `translate`
+   rồi mới đặt một `transform` duy nhất. */
+.fi-fo-toggle > span,
+button.fi-fo-toggle > span {
+    /* v4 builds `translate: var(--tw-translate-x) var(--tw-translate-y)`; zeroing the variable
+       neutralises that layer no matter which sheet declared it, leaving `transform` in charge. */
+    --tw-translate-x: 0px !important;
+    --tw-translate-y: 0px !important;
+    translate: 0 0 !important;
+}
+
+.fi-fo-toggle[aria-checked="true"] > span,
+button.fi-fo-toggle[aria-checked="true"] > span {
+    transform: translateX(20px) !important;
+}
+
+.fi-fo-toggle[aria-checked="false"] > span,
+button.fi-fo-toggle[aria-checked="false"] > span {
+    transform: translateX(0) !important;
+}
+
+.fi-fo-toggle > span {
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
 /* Cùng họ xung đột trên: Tailwind v4 đè utilities lưới responsive của Filament v3
@@ -73,4 +103,1869 @@
 .fi-sidebar-header > div[x-show*="sidebar.isOpen"] .fi-logo {
     justify-content: center !important;
     width: 100% !important;
+}
+
+/* ==========================================================================
+   BLUEFIRE DEMO DESIGN SYSTEM & FILAMENT V3 PIXEL-PERFECT STYLING
+   ========================================================================== */
+
+:root {
+  --bl:#1267E8;--bl-d:#0C50BB;--bl-s:#EBF3FF;--bl-m:#BFDBFE;
+  --gn:#059669;--gn-s:#ECFDF5;--gn-t:#065F46;
+  --or:#EA580C;--or-s:#FFF7ED;--or-t:#9A3412;
+  --pu:#7C3AED;--pu-s:#F5F3FF;
+  --rd:#DC2626;--rd-s:#FEF2F2;--rd-t:#991B1B;
+  --am:#D97706;--am-s:#FFFBEB;
+  --sk:#0284C7;--sk-s:#F0F9FF;
+  --pk:#E11D48;--pk-s:#FFF1F2;
+  --bg:#F4F7FB;--wh:#fff;
+  --tx:#0F172A;--su:#334155;--mu:#64748B;--fa:#94A3B8;
+  --bd:#E2E8F0;--bd2:#F1F5F9;
+  --sh:0 1px 3px rgba(15,23,42,.05),0 4px 16px rgba(15,23,42,.05);
+  --sh2:0 1px 2px rgba(15,23,42,.04);
+  --r:14px;--sb:220px;--tb:62px;--fb:64px;
+}
+
+/* Base Body Background & Typography */
+body, .fi-body, .fi-main {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+  background-color: var(--bg) !important;
+  color: var(--tx) !important;
+}
+
+.fi-main-ctn {
+  background-color: var(--bg) !important;
+}
+
+/* Strip redundant outer Tailwind padding layers to tighten left & right margins.
+   Scope note: these utility classes also sit on elements INSIDE the table card (the pagination
+   footer carries `px-3 sm:px-6`). Stripping those too glues the "Hiển thị 1–10 trên…" label to
+   the card edge, so the pagination bar is excluded here and sets its own padding further down. */
+.fi-main-ctn .px-4:not(.fi-pagination),
+.fi-main-ctn .sm\:px-6:not(.fi-pagination),
+.fi-main-ctn .lg\:px-8:not(.fi-pagination),
+.fi-main .px-4:not(.fi-pagination),
+.fi-main .sm\:px-6:not(.fi-pagination),
+.fi-main .lg\:px-8:not(.fi-pagination),
+.fi-page .px-4:not(.fi-pagination),
+.fi-page .sm\:px-6:not(.fi-pagination),
+.fi-page .lg\:px-8:not(.fi-pagination),
+.fi-page > div {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+.fi-page {
+  padding: 16px 20px 28px !important;
+  margin: 0 !important;
+  max-width: 100% !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* Filament wraps every page body in `<section class="flex flex-col gap-y-8 py-8">` — that py-8
+   (32px top + bottom) sits on top of .fi-page's own padding and leaves a large empty band above
+   the page title. Trim it and tighten the 32px inter-block gap to something closer to the cards. */
+.fi-page > section {
+  padding-top: 0 !important;
+  padding-bottom: 12px !important;
+  gap: 16px !important;
+}
+
+/* Page Header Title & Subtitle */
+.fi-header {
+  margin-bottom: 12px !important;
+}
+
+.fi-header-heading {
+  font-size: 26px !important;
+  font-weight: 800 !important;
+  line-height: 1.25 !important;
+  letter-spacing: -0.03em !important;
+  color: var(--tx) !important;
+}
+
+.fi-header-subheading {
+  font-size: 13px !important;
+  line-height: 1.5 !important;
+  color: var(--mu) !important;
+  margin-top: 4px !important;
+}
+
+@media (max-width: 639.98px) {
+  .fi-header-heading {
+    font-size: 21px !important;
+  }
+}
+
+/* Action Buttons (Primary with Bluefire Gradient) */
+.fi-btn.fi-btn-color-primary,
+button[type="submit"]:not(.fi-btn-color-gray),
+.btn-p {
+  background: linear-gradient(135deg, #1474FF, #0059DD) !important;
+  color: #ffffff !important;
+  border: none !important;
+  border-radius: 9px !important;
+  font-weight: 600 !important;
+  font-size: 13px !important;
+  box-shadow: 0 6px 16px rgba(18, 103, 232, 0.28) !important;
+  transition: all 0.14s ease !important;
+}
+
+.fi-btn.fi-btn-color-primary:hover,
+button[type="submit"]:not(.fi-btn-color-gray):hover,
+.btn-p:hover {
+  background: linear-gradient(135deg, #105FCC, #004FC4) !important;
+  box-shadow: 0 10px 20px rgba(18, 103, 232, 0.35) !important;
+  transform: translateY(-1px) !important;
+}
+
+.fi-btn.fi-btn-color-gray,
+.fi-btn.fi-btn-color-custom {
+  height: 40px !important;
+  border-radius: 9px !important;
+  border: 1px solid var(--bd) !important;
+  background: var(--wh) !important;
+  color: var(--tx) !important;
+  font-weight: 600 !important;
+  font-size: 13px !important;
+  box-shadow: var(--sh2) !important;
+}
+
+.fi-btn.fi-btn-color-gray:hover {
+  background: #F8FAFC !important;
+  box-shadow: 0 2px 8px rgba(15,23,42,.07) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Stats Overview Grid (KPI Cards - krow / kcard) */
+.fi-page-header-widgets-ctn,
+.fi-page-header-widgets-ctn > *,
+.fi-header + div,
+.fi-header + div > *,
+div:has(> .krow) {
+  display: block !important;
+  grid-template-columns: 1fr !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  flex: 1 1 100% !important;
+  grid-column: 1 / -1 !important;
+}
+
+.krow {
+  display: grid !important;
+  grid-template-columns: repeat(4, 1fr) !important;
+  gap: 12px !important;
+  margin-bottom: 12px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+@media (max-width: 1023.98px) {
+  .krow {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+@media (max-width: 639.98px) {
+  .krow {
+    grid-template-columns: repeat(1, 1fr) !important;
+  }
+}
+
+.kcard {
+  background: var(--wh) !important;
+  border: 1px solid var(--bd) !important;
+  border-radius: var(--r) !important;
+  padding: 12px 14px !important;
+  box-shadow: var(--sh2) !important;
+  transition: 0.14s ease !important;
+  position: relative !important;
+  overflow: hidden !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.kcard:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.09) !important;
+}
+
+.ktop {
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  margin-bottom: 8px !important;
+}
+
+.kico {
+  width: 38px !important;
+  height: 38px !important;
+  border-radius: 10px !important;
+  display: grid !important;
+  place-items: center !important;
+  font-size: 16px !important;
+}
+
+.ki-b { background: var(--bl-s) !important; color: var(--bl) !important; }
+.ki-g { background: var(--gn-s) !important; color: var(--gn) !important; }
+.ki-o { background: var(--or-s) !important; color: var(--or) !important; }
+.ki-p { background: var(--pu-s) !important; color: var(--pu) !important; }
+
+.kval {
+  font-size: 28px !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.03em !important;
+  line-height: 1 !important;
+  color: var(--tx) !important;
+  margin-bottom: 2px !important;
+}
+
+.klbl {
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  color: var(--su) !important;
+}
+
+.knote {
+  font-size: 11px !important;
+  color: var(--fa) !important;
+  margin-top: 5px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 3px !important;
+}
+
+/* Table Container (tcard) */
+.fi-ta-ctn {
+  background: var(--wh) !important;
+  border: 1px solid var(--bd) !important;
+  border-radius: var(--r) !important;
+  box-shadow: var(--sh2) !important;
+  overflow: hidden !important;
+}
+
+/* Table Header Toolbar (tbar & Bulk Actions) */
+.fi-ta-header-toolbar {
+  padding: 13px 16px !important;
+  border-bottom: 1px solid var(--bd2) !important;
+  background: var(--wh) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  flex-wrap: wrap !important;
+}
+
+.fi-ta-header-toolbar > div {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+}
+
+.fi-ta-header-toolbar > div:first-child,
+.fi-ta-bulk-actions,
+.fi-ta-bulk-actions-ctn {
+  flex-shrink: 0 !important;
+  min-width: max-content !important;
+}
+
+.fi-ta-bulk-actions,
+div.fi-ta-bulk-actions {
+  display: inline-flex !important;
+  align-items: center !important;
+  position: relative !important;
+}
+
+.fi-ta-bulk-actions .fi-icon-btn,
+.fi-ta-bulk-actions button.fi-icon-btn {
+  display: none !important;
+}
+
+.fi-ta-bulk-actions button,
+.fi-ta-bulk-actions .fi-btn,
+.fi-ta-header-toolbar > button,
+.fi-ta-header-toolbar > div > button {
+  white-space: nowrap !important;
+  width: auto !important;
+  min-width: max-content !important;
+  max-width: none !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  flex-shrink: 0 !important;
+  padding: 0 14px !important;
+  height: 36px !important;
+  border-radius: 8px !important;
+  background: #FFFFFF !important;
+  border: 1px solid #CBD5E1 !important;
+  color: #0F172A !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+  position: relative !important;
+  z-index: 2 !important;
+}
+
+.fi-ta-header-toolbar button span,
+.fi-ta-bulk-actions button span {
+  white-space: nowrap !important;
+  display: inline-block !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+}
+
+/* Primary Blue Gradient Buttons in Header & Toolbar (e.g. + Thêm nguyên liệu) */
+.fi-header-actions .fi-btn.fi-btn-color-primary,
+.fi-header-actions a.fi-btn.fi-btn-color-primary,
+.fi-ta-header-toolbar .fi-btn.fi-btn-color-primary,
+.fi-ta-header-toolbar a.fi-btn.fi-btn-color-primary,
+.fi-ta-header-toolbar button.fi-btn-color-primary {
+  background: linear-gradient(135deg, #1474FF, #0059DD) !important;
+  color: #FFFFFF !important;
+  border: none !important;
+  box-shadow: 0 4px 12px rgba(18, 103, 232, 0.28) !important;
+}
+
+.fi-header-actions .fi-btn.fi-btn-color-primary:hover,
+.fi-header-actions a.fi-btn.fi-btn-color-primary:hover,
+.fi-ta-header-toolbar .fi-btn.fi-btn-color-primary:hover,
+.fi-ta-header-toolbar a.fi-btn.fi-btn-color-primary:hover,
+.fi-ta-header-toolbar button.fi-btn-color-primary:hover {
+  background: linear-gradient(135deg, #105FCC, #004FC4) !important;
+  box-shadow: 0 6px 16px rgba(18, 103, 232, 0.35) !important;
+}
+
+/* Excel Export Action Button (Matching Green Icon Screenshot) */
+button[wire\:click*="export_excel"] .fi-btn-icon,
+button[wire\:click*="export_excel"] svg,
+button[wire\:click*="export"] .fi-btn-icon,
+button[wire\:click*="export"] svg,
+.fi-header-actions button[wire\:click*="export"] svg,
+.fi-ac-action[wire\:click*="export"] svg {
+  color: #0F9D58 !important; /* Excel Green */
+}
+
+/* Bulk Selection Indicator ("X bản ghi đã chọn...") */
+.fi-ta-selection-indicator,
+div[wire\:key*="selection-indicator"] {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 10px 16px !important;
+  background: var(--bl-s) !important;
+  border-bottom: 1px solid var(--bl-m) !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: var(--bl) !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.fi-ta-selection-indicator button {
+  color: var(--bl) !important;
+  font-weight: 600 !important;
+  text-decoration: underline !important;
+  margin-left: 8px !important;
+}
+
+/* Search Box (.tsbox style) */
+.fi-ta-search-field,
+.fi-ta-search-input-wrp {
+  background: var(--bg) !important;
+  border: 1px solid var(--bd) !important;
+  border-radius: 8px !important;
+  transition: all 0.13s ease !important;
+  min-width: 240px !important;
+  max-width: 320px !important;
+  height: 36px !important;
+  box-shadow: none !important;
+  overflow: hidden !important;
+}
+
+.fi-ta-search-field:focus-within,
+.fi-ta-search-input-wrp:focus-within {
+  border-color: #93C5FD !important;
+  background: #fff !important;
+  box-shadow: 0 0 0 3px rgba(18,103,232,.08) !important;
+}
+
+.fi-ta-search-field .fi-input-wrp,
+.fi-ta-search-input-wrp .fi-input-wrp,
+.fi-ta-search-field input,
+.fi-ta-search-input-wrp input {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+  font-size: 13px !important;
+  color: var(--tx) !important;
+  height: 100% !important;
+}
+
+.fi-ta-search-field input::placeholder,
+.fi-ta-search-input-wrp input::placeholder {
+  color: var(--fa) !important;
+}
+
+/* Table Header Row & Cells */
+.fi-ta-table thead tr {
+  background: #F8FAFC !important;
+}
+
+.fi-ta-header-cell {
+  padding: 10px 12px !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  color: var(--fa) !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.07em !important;
+  border-bottom: 1px solid var(--bd) !important;
+}
+
+/* Table Body Rows & Cells */
+.fi-ta-row {
+  border-bottom: 1px solid var(--bd2) !important;
+  transition: background 0.1s ease !important;
+}
+
+.fi-ta-row:hover {
+  background: #F8FAFC !important;
+}
+
+.fi-ta-row:last-child {
+  border-bottom: none !important;
+}
+
+/* Filament ships .fi-ta-cell as `p-0` and puts the real padding on the inner `.fi-ta-text`
+   (`px-3 py-4`), while the header cell carries its padding directly. Adding horizontal padding
+   here as well would stack on top of that inner px-3 and push every value 12px right of its
+   column heading — so the vertical rhythm is set here and the horizontal offset is left to
+   .fi-ta-text alone. */
+.fi-ta-cell {
+  padding: 0 !important;
+  vertical-align: middle !important;
+  font-size: 13px !important;
+}
+
+.fi-ta-table .fi-ta-text {
+  padding-top: 10px !important;
+  padding-bottom: 10px !important;
+}
+
+/* Table Footer & Pagination (tf / pgwrap) */
+.fi-ta-pagination {
+  padding: 12px 16px !important;
+  border-top: 1px solid var(--bd2) !important;
+  background: var(--wh) !important;
+}
+
+/* Hide Nhập Excel button on top page header actions to match Image 2 mockup */
+.fi-header-actions button[wire\:click*="import_excel"],
+.fi-header-actions .fi-btn-color-gray:nth-child(1) {
+  display: none !important;
+}
+
+/* Hide Column Toggle Button ("Chuyển đổi cột") */
+.fi-ta-header-toolbar button[title*="Chuyển đổi cột"],
+.fi-ta-header-toolbar button[title*="Toggle columns"],
+.fi-ta-header-toolbar button:has(svg path[d*="M14 17h2.75"]) {
+  display: none !important;
+}
+
+/* Hide Topbar Theme Switcher (Sun / Moon / System mode toggle) */
+.fi-theme-switcher,
+.fi-theme-switcher-btn,
+.fi-topbar div:has(> .fi-theme-switcher),
+.fi-topbar div:has(button[aria-label*="theme"]),
+.fi-topbar div:has(button[aria-label*="light"]),
+.fi-topbar div:has(button[aria-label*="dark"]),
+.fi-topbar button:has(svg.fi-theme-switcher-btn-icon) {
+  display: none !important;
+}
+
+/* Topbar Full-Width Bar & Right-Side Items Spacing (Matching Mockup Image 2) */
+.fi-topbar,
+header.fi-topbar,
+.fi-topbar nav,
+.fi-topbar > nav {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+div[x-persist*="topbar.end"],
+.fi-topbar .ms-auto,
+.fi-topbar nav > div.ms-auto {
+  margin-right: 20px !important;
+}
+
+/* Hide Table Checkbox column on List Ingredients page so STT is column #1 */
+th.fi-ta-header-cell-checkbox,
+td.fi-ta-cell-checkbox,
+.fi-ta-table th:first-child:has(input[type="checkbox"]),
+.fi-ta-table td:first-child:has(input[type="checkbox"]) {
+  display: none !important;
+}
+
+/* Filter Above Content Section & Single Row Toolbar (.tbar style - Image 1 placement) */
+.fi-ta-ctn > div:has(.fi-ta-filters-above-content-ctn) {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: flex-end !important;
+  justify-content: flex-start !important;
+  /* wrap instead of overflowing the card when the viewport (or an open sidebar) squeezes the table */
+  flex-wrap: wrap !important;
+  gap: 12px 16px !important;
+  padding: 14px 18px !important;
+  border-bottom: 1px solid var(--bd2) !important;
+  background: var(--wh) !important;
+}
+
+.fi-ta-header-toolbar {
+  order: 1 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  /* `divide-y` on the parent .fi-ta-header-ctn draws a border-top on this toolbar; since the
+     flex reorder above moves it beside the filters, that divider surfaced as a stray line
+     floating above the search box. Clear both edges, not just the bottom one. */
+  border: none !important;
+  background: transparent !important;
+  display: flex !important;
+  align-items: flex-end !important;
+  gap: 14px !important;
+  width: auto !important;
+}
+
+.fi-ta-filters-above-content-ctn {
+  order: 2 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border-bottom: none !important;
+  background: transparent !important;
+  display: flex !important;
+  align-items: flex-end !important;
+  flex-wrap: wrap !important;
+  gap: 12px 14px !important;
+  width: auto !important;
+  min-width: 0 !important;
+}
+
+.fi-ta-filters-above-content-ctn form,
+.fi-ta-filters-above-content-ctn .grid,
+.fi-ta-filters-above-content-ctn [class*="grid"] {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: flex-end !important;
+  flex-wrap: wrap !important;
+  gap: 12px 14px !important;
+  grid-template-columns: none !important;
+  min-width: 0 !important;
+}
+
+.fi-ta-filters-above-content-ctn .fi-fo-field-wrp,
+.fi-ta-filters-above-content-ctn .fi-fo-field-wrp > div,
+.fi-ta-filters-above-content-ctn .fi-fo-field-wrp-ctn {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  justify-content: flex-end !important;
+  gap: 4px !important;
+  margin-bottom: 0 !important;
+  width: auto !important;
+  /* `min-width: max-content` would forbid shrinking and force horizontal overflow */
+  min-width: 0 !important;
+}
+
+.fi-ta-filters-above-content-ctn .fi-fo-field-wrp {
+  flex: 0 1 auto !important;
+}
+
+/* Place Search field on the far left before filters with full untruncated placeholder */
+.fi-ta-search-field,
+.fi-ta-search-input-wrp {
+  order: 1 !important;
+  margin: 0 !important;
+  height: 38px !important;
+  /* shrinkable: 310px is the ideal width, but it may compress to 190px before anything wraps */
+  flex: 0 1 310px !important;
+  min-width: 190px !important;
+  max-width: 310px !important;
+  background: #F8FAFC !important;
+  border: 1px solid #E2E8F0 !important;
+  border-radius: 8px !important;
+  box-shadow: none !important;
+  align-self: flex-end !important;
+}
+
+.fi-ta-search-field input,
+.fi-ta-search-input-wrp input {
+  font-size: 13px !important;
+  padding-left: 34px !important;
+  padding-right: 10px !important;
+  width: 100% !important;
+  color: #1E293B !important;
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Eradicate <h4 class="text-base font-semibold...">Bộ lọc</h4> and section headers in table filters
+   completely. `.fi-ta-ctn h4` alone would also hide the empty-state heading, which is an <h4> too. */
+.fi-ta-ctn h4:not(.fi-ta-empty-state-heading),
+.fi-ta-ctn .fi-section-header,
+.fi-ta-ctn .fi-section-header-heading,
+.fi-ta-ctn .fi-section-header-text,
+.fi-ta-ctn .fi-section-header-actions,
+.fi-ta-filters-above-content-ctn h4,
+.fi-ta-filters-above-content-ctn .fi-section-header,
+.fi-ta-filters-above-content-ctn header,
+.fi-ta-filters-above-content-ctn .fi-section-header-heading,
+.fi-ta-filters-above-content-ctn .fi-section-header-text,
+.fi-ta-filters-above-content-ctn .fi-section-header-actions,
+.fi-ta-filters-above-content-ctn section > div:first-child,
+.fi-ta-filters-above-content-ctn form > div > div:first-child:has(h2, h3, h4, header, span) {
+  display: none !important;
+}
+
+.fi-ta-filters-above-content-ctn section,
+.fi-ta-filters-above-content-ctn .fi-section {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+/* Remove ghost white background, ring, and double nested borders on outer filter wrappers */
+.fi-ta-filters-above-content-ctn .fi-fo-field-wrp,
+.fi-ta-filters-above-content-ctn .fi-fo-field-wrp > div,
+.fi-ta-filters-above-content-ctn .fi-input-wrp,
+.fi-ta-filters-above-content-ctn .fi-select,
+.fi-ta-filters-above-content-ctn [class*="fi-input-wrp"],
+.fi-ta-filters-above-content-ctn [class*="ring-"] {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  --tw-ring-color: transparent !important;
+  --tw-ring-shadow: none !important;
+  --tw-shadow: none !important;
+}
+
+/* Filter Labels (.fgl style - High-Contrast Dark Slate #1E293B, Crisp & Sharp) */
+.fi-ta-filters-above-content-ctn label,
+.fi-ta-filters-above-content-ctn .fi-fo-field-wrp-label,
+.fi-ta-filters-above-content-ctn .fi-fo-field-wrp-label span {
+  display: block !important;
+  font-size: 11.5px !important;
+  font-weight: 700 !important;
+  color: #1E293B !important; /* Sharp High-Contrast Dark Slate */
+  text-transform: none !important;
+  letter-spacing: normal !important;
+  padding: 0 !important;
+  margin: 0 0 0 1px !important;
+  /* Filament's label span carries `leading-6` (24px) for a 11.5px glyph — that ~10px of leading
+     is what visually detaches the label from its select. Collapse it to the text height. */
+  line-height: 15px !important;
+  opacity: 1 !important;
+  white-space: nowrap !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+/* Kill the row gaps Filament stacks between the label row and the input row */
+.fi-ta-filters-above-content-ctn .fi-fo-field-wrp,
+.fi-ta-filters-above-content-ctn .fi-fo-field-wrp > .grid,
+.fi-ta-filters-above-content-ctn .fi-fo-field-wrp .grid.gap-y-2,
+.fi-ta-filters-above-content-ctn .fi-fo-field-wrp .gap-y-2 {
+  row-gap: 5px !important;
+  gap: 5px !important;
+}
+
+/* the label sits in its own flex row whose height would otherwise pad the gap back in */
+.fi-ta-filters-above-content-ctn .fi-fo-field-wrp label,
+.fi-ta-filters-above-content-ctn .fi-fo-field-wrp .flex.items-center:has(label) {
+  min-height: 0 !important;
+  height: auto !important;
+  align-items: flex-end !important;
+}
+
+/* Filter Select Inputs (.fsel style - Clean Single Border, High-Contrast #0F172A Text) */
+.fi-ta-filters-above-content-ctn select,
+.fi-ta-filters-above-content-ctn .fi-select-input,
+.fi-ta-filters-above-content-ctn select option {
+  height: 38px !important;
+  min-width: 120px !important;
+  max-width: 240px !important;
+  padding: 0 32px 0 12px !important;
+  background-color: #FFFFFF !important;
+  border: 1px solid #CBD5E1 !important;
+  border-radius: 8px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: #0F172A !important; /* Deepest High-Contrast Slate-900 */
+  box-shadow: none !important;
+  outline: none !important;
+  opacity: 1 !important;
+  cursor: pointer !important;
+  transition: all 0.13s ease !important;
+  -webkit-font-smoothing: antialiased !important;
+}
+
+/* A ->searchable() filter is NOT a native <select>: Filament swaps it for Choices.js and sets the
+   real <select> to display:none, so the .fsel rule above never reaches it. The visible control is
+   .choices__inner, which the wrapper-reset rule further up has stripped of border/background —
+   hence the frameless, overflowing filters. Re-apply the same .fsel frame here. Two class levels
+   outrank the bare `.choices__inner { overflow: visible }` rule later in this file. */
+.fi-ta-filters-above-content-ctn .choices,
+.fi-ta-filters-above-content-ctn .choices__inner {
+  min-width: 150px !important;
+  max-width: 240px !important;
+  width: 100% !important;
+}
+
+/* .choices itself must stay overflow:visible or the open dropdown panel gets clipped */
+.fi-ta-filters-above-content-ctn .choices {
+  overflow: visible !important;
+}
+
+.fi-ta-filters-above-content-ctn .choices__inner {
+  display: flex !important;
+  align-items: center !important;
+  height: 38px !important;
+  min-height: 38px !important;
+  /* right padding leaves room for BOTH the clear (×) button and the chevron */
+  padding: 0 56px 0 12px !important;
+  background-color: #FFFFFF !important;
+  border: 1px solid #CBD5E1 !important;
+  border-radius: 8px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: #0F172A !important;
+  box-shadow: none !important;
+  outline: none !important;
+  cursor: pointer !important;
+  overflow: hidden !important;
+  transition: all 0.13s ease !important;
+  -webkit-font-smoothing: antialiased !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 11 11'%3E%3Cpath d='M2 4l3.5 3.5L9 4' stroke='%2364748B' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 11px center !important;
+}
+
+/* Long supplier/type names must ellipsis inside the frame instead of spilling past it */
+.fi-ta-filters-above-content-ctn .choices__list--single,
+.fi-ta-filters-above-content-ctn .choices__list--single .choices__item {
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: #0F172A !important;
+  line-height: 36px !important;
+}
+
+.fi-ta-filters-above-content-ctn .choices__placeholder {
+  color: #94A3B8 !important;
+  font-weight: 500 !important;
+  opacity: 1 !important;
+}
+
+/* Clear (×) button. Choices renders it as a <button> INSIDE .choices__item, so the generic
+   `.fi-ta-filters-above-content-ctn button` rule further down styles it as a 36px-tall white
+   pill with a border — that is the grey box overlapping the label text. Reset it to a small
+   round × pinned to the right, clear of the chevron at `right: 11px`. */
+.fi-ta-filters-above-content-ctn .choices__button {
+  position: absolute !important;
+  top: 50% !important;
+  right: 32px !important;
+  transform: translateY(-50%) !important;
+  width: 18px !important;
+  height: 18px !important;
+  min-width: 18px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+  border-radius: 50% !important;
+  background-color: #E2E8F0 !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='9' viewBox='0 0 9 9'%3E%3Cpath d='M1.5 1.5l6 6M7.5 1.5l-6 6' stroke='%2364748B' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  background-size: 9px 9px !important;
+  box-shadow: none !important;
+  opacity: 0.85 !important;
+  cursor: pointer !important;
+  /* text-indent hides the literal "Remove item" label while keeping it readable to screen readers */
+  text-indent: -9999px !important;
+  overflow: hidden !important;
+  transition: background-color 0.13s ease, opacity 0.13s ease !important;
+}
+
+.fi-ta-filters-above-content-ctn .choices__button:hover {
+  background-color: #CBD5E1 !important;
+  opacity: 1 !important;
+}
+
+/* the item is the positioning context for the absolutely-placed × */
+.fi-ta-filters-above-content-ctn .choices__list--single .choices__item {
+  position: static !important;
+}
+
+.fi-ta-filters-above-content-ctn .choices:hover .choices__inner {
+  border-color: #CBD5E1 !important;
+}
+
+.fi-ta-filters-above-content-ctn .choices.is-open .choices__inner,
+.fi-ta-filters-above-content-ctn .choices.is-focused .choices__inner {
+  border-color: #93C5FD !important;
+  box-shadow: 0 0 0 3px rgba(18, 103, 232, 0.07) !important;
+}
+
+/* Fix filter dropdown popup list menu width so text is never squished/compressed vertically */
+.choices__list--dropdown,
+.choices[data-type*="select-one"] .choices__list--dropdown,
+.fi-ta-filters-above-content-ctn .choices__list--dropdown,
+.fi-ta-filters-above-content-ctn [class*="choices__list--dropdown"],
+.fi-dropdown-panel {
+  min-width: 240px !important;
+  width: max-content !important;
+  max-width: 380px !important;
+  z-index: 99999 !important;
+}
+
+.choices__list--dropdown .choices__item,
+.choices__list--dropdown .choices__item--choice,
+.fi-dropdown-list-item,
+.fi-dropdown-list-item span {
+  white-space: nowrap !important;
+  padding: 8px 14px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  color: #0F172A !important;
+}
+
+.choices__list--dropdown .choices__input,
+.choices__list--dropdown input[type="search"] {
+  min-width: 180px !important;
+  padding: 6px 10px !important;
+  font-size: 13px !important;
+}
+
+.fi-ta-filters-above-content-ctn select:hover,
+.fi-ta-filters-above-content-ctn .fi-select-input:hover {
+  border-color: #CBD5E1 !important;
+}
+
+.fi-ta-filters-above-content-ctn select:focus,
+.fi-ta-filters-above-content-ctn .fi-select-input:focus {
+  border-color: #93C5FD !important;
+  box-shadow: 0 0 0 3px rgba(18,103,232,.07) !important;
+}
+
+/* Filter Reset Button ("Đặt lại" - .fbtn style).
+   Scoped to .fi-btn / .fi-link / the reset button only — a bare `… button` selector here also
+   catches the Choices clear (×) button nested inside each select and renders it as a white pill.
+   Filament ships this control as a `fi-link fi-color-danger` (red text, no frame); restyle it as
+   a neutral outlined button matching the selects next to it. */
+.fi-ta-filters-above-content-ctn .fi-btn,
+.fi-ta-filters-above-content-ctn .fi-link,
+.fi-ta-filters-above-content-ctn button[wire\:click*="resetTableFilters"],
+.fi-ta-filters-above-content-ctn button[type="submit"] {
+  height: 38px !important;
+  padding: 0 14px !important;
+  background: var(--wh) !important;
+  border: 1px solid var(--bd) !important;
+  border-radius: 8px !important;
+  font-size: 12.5px !important;
+  font-weight: 600 !important;
+  color: var(--su) !important;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+  align-self: flex-end !important;
+  transition: all 0.13s ease !important;
+}
+
+.fi-ta-filters-above-content-ctn .fi-btn:hover,
+.fi-ta-filters-above-content-ctn .fi-link:hover,
+.fi-ta-filters-above-content-ctn button[wire\:click*="resetTableFilters"]:hover,
+.fi-ta-filters-above-content-ctn button[type="submit"]:hover {
+  background: var(--bg) !important;
+  border-color: #CBD5E1 !important;
+  color: var(--tx) !important;
+}
+
+/* Filament paints the label via `fi-color-danger` + a --c-* custom-property chain on the inner
+   <span>, so styling only the <button> leaves the text red. Override the vars and the span. */
+.fi-ta-filters-above-content-ctn .fi-link,
+.fi-ta-filters-above-content-ctn .fi-link * {
+  --c-400: 100 116 139 !important;
+  --c-500: 71 85 105 !important;
+  --c-600: 71 85 105 !important;
+}
+
+.fi-ta-filters-above-content-ctn .fi-link .fi-link-label,
+.fi-ta-filters-above-content-ctn .fi-link span,
+.fi-ta-filters-above-content-ctn .fi-link:hover .fi-link-label,
+.fi-ta-filters-above-content-ctn .fi-link:hover span {
+  color: var(--su) !important;
+  font-size: 12.5px !important;
+  font-weight: 600 !important;
+}
+
+.fi-ta-filters-above-content-ctn .fi-link svg {
+  color: var(--su) !important;
+  width: 15px !important;
+  height: 15px !important;
+}
+
+/* Funnel-with-× icon for the reset link. Filament's blade renders this control as a plain
+   <x-filament::link> with no icon slot, so the glyph is injected as a ::before background
+   rather than by overriding the vendor view. */
+.fi-ta-filters-above-content-ctn .fi-link::before,
+.fi-ta-filters-above-content-ctn button[wire\:click*="resetTableFilters"]::before {
+  content: "" !important;
+  flex: 0 0 auto !important;
+  width: 15px !important;
+  height: 15px !important;
+  margin-right: 7px !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%23334155'%3E%3Cpath d='M2.6 3.4A.9.9 0 0 1 3.4 3h13.2a.9.9 0 0 1 .68 1.49l-4.9 5.6a.9.9 0 0 0-.22.59v1.55a3.9 3.9 0 0 0-1.8 1.06V10.6L2.72 4.35A.9.9 0 0 1 2.6 3.4Z'/%3E%3Cpath d='M14.5 12a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Zm1.6 4.4a.6.6 0 0 1-.85.85l-.75-.75-.75.75a.6.6 0 1 1-.85-.85l.75-.75-.75-.75a.6.6 0 0 1 .85-.85l.75.75.75-.75a.6.6 0 0 1 .85.85l-.75.75.75.75Z'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  background-size: contain !important;
+}
+
+/* Filament wraps the reset button in `div.flex.items-center.justify-between`, the FIRST child of
+   .fi-ta-filters — so it renders before the selects. Push that wrapper to the end of the row. */
+.fi-ta-filters-above-content-ctn .fi-ta-filters > div:has(.fi-link),
+.fi-ta-filters-above-content-ctn .fi-ta-filters > div:has(button[wire\:click*="resetTableFilters"]) {
+  order: 99 !important;
+  flex: 0 0 auto !important;
+  width: auto !important;
+  align-self: flex-end !important;
+}
+
+/* ── Table Filter Bar Responsive ──
+   Desktop keeps everything on one row; below 1280px the bar wraps (flex-wrap above), and below
+   640px each control goes full-width so nothing is squeezed into an unreadable sliver. */
+@media (max-width: 1279.98px) {
+  .fi-ta-ctn > div:has(.fi-ta-filters-above-content-ctn) {
+    padding: 12px 14px !important;
+  }
+
+  .fi-ta-filters-above-content-ctn .choices,
+  .fi-ta-filters-above-content-ctn .choices__inner,
+  .fi-ta-filters-above-content-ctn select,
+  .fi-ta-filters-above-content-ctn .fi-select-input {
+    min-width: 140px !important;
+    max-width: 200px !important;
+  }
+}
+
+@media (max-width: 639.98px) {
+  .fi-ta-ctn > div:has(.fi-ta-filters-above-content-ctn) {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+
+  .fi-ta-header-toolbar,
+  .fi-ta-filters-above-content-ctn,
+  .fi-ta-filters-above-content-ctn form,
+  .fi-ta-filters-above-content-ctn .grid,
+  .fi-ta-filters-above-content-ctn [class*="grid"],
+  .fi-ta-filters-above-content-ctn .fi-ta-filters {
+    width: 100% !important;
+    align-items: stretch !important;
+    justify-content: flex-start !important;
+  }
+
+  /* the toolbar right-aligns its children by default, which leaves the search box floating */
+  .fi-ta-header-toolbar > *,
+  .fi-ta-header-toolbar .fi-ta-search-field {
+    flex: 1 1 100% !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+  }
+
+  .fi-ta-search-field,
+  .fi-ta-search-input-wrp {
+    flex: 1 1 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    width: 100% !important;
+  }
+
+  .fi-ta-filters-above-content-ctn .fi-fo-field-wrp {
+    flex: 1 1 calc(50% - 7px) !important;
+    min-width: 0 !important;
+  }
+
+  .fi-ta-filters-above-content-ctn .choices,
+  .fi-ta-filters-above-content-ctn .choices__inner,
+  .fi-ta-filters-above-content-ctn select,
+  .fi-ta-filters-above-content-ctn .fi-select-input {
+    min-width: 0 !important;
+    max-width: none !important;
+    width: 100% !important;
+  }
+
+  /* the reset button gets its own full-width row rather than a cramped stub */
+  .fi-ta-filters-above-content-ctn .fi-btn,
+  .fi-ta-filters-above-content-ctn button[wire\:click*="resetTableFilters"] {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+}
+
+/* ── Table Column Alignment & Sizing ──
+   All data columns read left-aligned (a straight edge is easier to scan down); only the actions
+   column is centred. Narrow columns get a fixed width via ->width() in the resource, while
+   name / supplier stay fluid so the table fills the viewport without jumping between filters. */
+.fi-ta-table {
+  width: 100% !important;
+  table-layout: auto !important;
+}
+
+/* Actions column: centre both the header label and the icon-button row */
+.fi-ta-table th.fi-ta-actions-header-cell,
+.fi-ta-table th:last-child,
+.fi-ta-table td.fi-ta-actions-cell,
+.fi-ta-table td:last-child {
+  text-align: center !important;
+  white-space: nowrap !important;
+  width: 132px !important;
+}
+
+.fi-ta-table td.fi-ta-actions-cell .fi-ta-actions,
+.fi-ta-table td:last-child .fi-ta-actions {
+  justify-content: center !important;
+  flex-wrap: nowrap !important;
+  gap: 4px !important;
+}
+
+/* Filament lays the header label out with an inner flex span (`justify-start` / `justify-end`),
+   so text-align on the <th> alone does not move it — the span needs centring too.
+   Centred columns: STT (row index) and the actions column. */
+.fi-ta-table th.fi-ta-header-cell-actions > span,
+.fi-ta-table th.fi-ta-header-cell-actions .fi-ta-header-cell-label,
+.fi-ta-table thead th:last-child > span,
+.fi-ta-table th.fi-table-header-cell-index > span {
+  justify-content: center !important;
+  width: 100% !important;
+  text-align: center !important;
+}
+
+.fi-ta-table td.fi-table-cell-index,
+.fi-ta-table td.fi-table-cell-index .fi-ta-text {
+  text-align: center !important;
+}
+
+.fi-ta-table td.fi-table-cell-index .fi-ta-text-item {
+  justify-content: center !important;
+}
+
+/* every other header label stays flush left, in line with its cell content */
+.fi-ta-table thead th:not(:last-child):not(.fi-ta-header-cell-actions):not(.fi-table-header-cell-index) > span {
+  justify-content: flex-start !important;
+  text-align: left !important;
+}
+
+/* Keep short-value columns from being squeezed below their label width */
+.fi-ta-table th,
+.fi-ta-table td {
+  vertical-align: middle !important;
+}
+
+/* The code column has a fixed width; an over-long value must ellipsis inside it rather than
+   stretch the column (one bad row would otherwise widen it for every row).
+   The cap goes on the <td> only — putting it on the <th> too squeezes the header label and
+   makes it collide with the next column's heading. */
+.fi-ta-table td.fi-table-cell-code {
+  max-width: 180px !important;
+}
+
+/* Filament nests the value in `.fi-ta-text > div.flex > div.flex.max-w-max`; the inner
+   `max-w-max` is what overflows, so the clamp has to land on every level of that chain. */
+.fi-ta-table td.fi-table-cell-code .fi-ta-text,
+.fi-ta-table td.fi-table-cell-code .fi-ta-text > div,
+.fi-ta-table td.fi-table-cell-code .fi-ta-text > div > div {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+}
+
+.fi-ta-table td.fi-table-cell-code .fi-ta-text-item,
+.fi-ta-table td.fi-table-cell-code .fi-ta-text > div > div > * {
+  display: block !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+/* Below the desktop breakpoint the table scrolls horizontally instead of crushing columns —
+   the wrapper already has overflow-x, this just stops the cells from collapsing into each other. */
+@media (max-width: 1023.98px) {
+  .fi-ta-content {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  .fi-ta-table {
+    min-width: 900px !important;
+  }
+}
+
+/* ── Table Empty State ──
+   Matches the mockup: a faint magnifier over muted text, no circular badge.
+   Filament wraps the icon in a rounded grey `.fi-ta-empty-state-icon-ctn` bubble by default. */
+.fi-ta-empty-state {
+  padding: 42px 16px !important;
+  background: var(--wh) !important;
+}
+
+.fi-ta-empty-state-content {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 0 !important;
+  max-width: 420px !important;
+  margin: 0 auto !important;
+}
+
+.fi-ta-empty-state-icon-ctn {
+  width: auto !important;
+  height: auto !important;
+  padding: 0 !important;
+  margin: 0 0 8px 0 !important;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+.fi-ta-empty-state-icon-ctn .fi-icon,
+.fi-ta-empty-state-icon-ctn svg {
+  width: 26px !important;
+  height: 26px !important;
+  color: var(--fa) !important;
+  opacity: 0.35 !important;
+  stroke-width: 1.6 !important;
+}
+
+.fi-ta-empty-state-heading {
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  color: var(--fa) !important;
+  margin: 0 !important;
+}
+
+.fi-ta-empty-state-description {
+  font-size: 12.5px !important;
+  font-weight: 400 !important;
+  color: var(--fa) !important;
+  opacity: 0.8 !important;
+  margin: 5px 0 0 0 !important;
+}
+
+/* Pagination Footer (.tf & .pgwrap style) */
+.fi-ta-pagination,
+.fi-pagination {
+  padding: 14px 18px !important;
+  border-top: 1px solid var(--bd2) !important;
+  background: var(--wh) !important;
+}
+
+.fi-ta-pagination-records-label,
+.fi-pagination-records-label,
+.fi-ta-pagination p,
+.fi-pagination p,
+.fi-ta-pagination span,
+.fi-pagination span {
+  font-size: 12px !important;
+  color: var(--mu) !important;
+}
+
+/* Hide overlapping "Per page" / "Mỗi trang" prefix badge inside pagination select */
+.fi-ta-pagination-records-per-page-select .fi-input-wrp-prefix,
+.fi-pagination-records-per-page-select .fi-input-wrp-prefix,
+.fi-ta-pagination .fi-input-wrp-prefix,
+.fi-pagination .fi-input-wrp-prefix {
+  display: none !important;
+}
+
+.fi-ta-pagination-records-per-page-select .fi-input-wrp,
+.fi-pagination-records-per-page-select .fi-input-wrp,
+.fi-ta-pagination .fi-input-wrp,
+.fi-pagination .fi-input-wrp {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.fi-ta-pagination-records-per-page-select select,
+.fi-pagination-records-per-page-select select,
+.fi-ta-pagination select,
+.fi-pagination select {
+  height: 30px !important;
+  padding: 0 24px 0 9px !important;
+  background: var(--wh) !important;
+  border: 1px solid var(--bd) !important;
+  border-radius: 7px !important;
+  font-size: 12px !important;
+  color: var(--su) !important;
+  box-shadow: none !important;
+}
+
+/* Pagination item buttons (.pgb style) */
+.fi-pagination-items {
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.fi-pagination-item {
+  border: none !important;
+  background: transparent !important;
+}
+
+.fi-ta-pagination-item button,
+.fi-pagination-item-button,
+.fi-pagination-item button {
+  width: 30px !important;
+  height: 30px !important;
+  min-width: 30px !important;
+  border-radius: 7px !important;
+  border: 1px solid var(--bd) !important;
+  background: var(--wh) !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  color: var(--mu) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  transition: all 0.11s ease !important;
+  box-shadow: none !important;
+}
+
+.fi-ta-pagination-item button:hover:not(:disabled),
+.fi-pagination-item-button:hover:not(:disabled),
+.fi-pagination-item button:hover:not(:disabled) {
+  background: var(--bl-s) !important;
+  color: var(--bl) !important;
+  border-color: var(--bl-m) !important;
+}
+
+/* Active Page Button (Solid Blue Gradient) */
+.fi-pagination-item.fi-active button,
+.fi-pagination-item.fi-active .fi-pagination-item-button,
+.fi-pagination-item-button.bg-gray-50,
+.fi-pagination-item-button[aria-current="page"] {
+  background: linear-gradient(135deg, #1474FF, #0059DD) !important;
+  color: #FFFFFF !important;
+  border-color: transparent !important;
+  box-shadow: 0 4px 12px rgba(18, 103, 232, 0.3) !important;
+}
+
+.fi-pagination-item.fi-active span,
+.fi-pagination-item.fi-active .fi-pagination-item-label {
+  color: #FFFFFF !important;
+  font-weight: 700 !important;
+}
+
+/* Table Action Column Header & Cell (.abts / .abt style) */
+.fi-ta-actions-cell,
+th.fi-ta-header-cell-actions {
+  text-align: center !important;
+  width: 128px !important;
+  min-width: 128px !important;
+}
+
+.fi-ta-actions-cell .fi-ta-actions,
+td.fi-ta-actions-cell div.fi-ta-actions {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 4px !important;
+  width: 100% !important;
+}
+
+.fi-ta-actions-cell .fi-ta-action,
+td.fi-ta-actions-cell div.fi-ta-action {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  position: static !important;
+  flex-shrink: 0 !important;
+}
+
+.fi-ta-actions-cell .fi-ta-action button,
+.fi-ta-actions-cell .fi-ta-action a,
+.fi-ta-actions-cell .fi-icon-btn {
+  width: 28px !important;
+  height: 28px !important;
+  min-width: 28px !important;
+  min-height: 28px !important;
+  max-width: 28px !important;
+  max-height: 28px !important;
+  border-radius: 7px !important;
+  border: 1px solid var(--bd) !important;
+  background: var(--wh) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 12px !important;
+  color: var(--mu) !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  transition: all 0.11s ease !important;
+  box-sizing: border-box !important;
+  box-shadow: none !important;
+}
+
+.fi-ta-actions-cell .fi-ta-action button:hover,
+.fi-ta-actions-cell .fi-ta-action a:hover,
+.fi-ta-actions-cell .fi-icon-btn:hover {
+  background: var(--bl-s) !important;
+  color: var(--bl) !important;
+  border-color: var(--bl-m) !important;
+}
+
+.fi-ta-actions-cell .fi-ta-action button.fi-color-danger:hover,
+.fi-ta-actions-cell .fi-ta-action button[wire\:click*="delete"]:hover,
+.fi-ta-actions-cell .fi-ta-action button[wire\:click*="forceDelete"]:hover {
+  background: #FEF2F2 !important;
+  color: var(--rd) !important;
+  border-color: #FECACA !important;
+}
+
+/* Fix Dropdown Panel & Dropdown List Items */
+.fi-dropdown-panel,
+div.fi-dropdown-panel {
+  padding: 6px !important;
+  border-radius: 10px !important;
+  background: #FFFFFF !important;
+  border: 1px solid var(--bd) !important;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.12) !important;
+  z-index: 9999 !important;
+  width: max-content !important;
+  min-width: 240px !important;
+  max-width: 360px !important;
+}
+
+.fi-dropdown-list {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 2px !important;
+  width: 100% !important;
+}
+
+.fi-dropdown-list-item,
+button.fi-dropdown-list-item,
+a.fi-dropdown-list-item {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 10px !important;
+  padding: 8px 12px !important;
+  height: 38px !important;
+  width: 100% !important;
+  border-radius: 6px !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  text-align: left !important;
+  white-space: nowrap !important;
+}
+
+.fi-dropdown-list-item:hover {
+  background: #F4F7FB !important;
+}
+
+.fi-dropdown-list-item-label,
+.fi-dropdown-list-item span.fi-dropdown-list-item-label,
+.fi-dropdown-list-item span {
+  display: inline-block !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  color: var(--tx) !important;
+  line-height: 1.3 !important;
+  white-space: nowrap !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.fi-dropdown-list-item-icon,
+.fi-dropdown-list-item > svg:not(.animate-spin) {
+  width: 16px !important;
+  height: 16px !important;
+  font-size: 16px !important;
+  flex-shrink: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.fi-dropdown-list-item.fi-color-danger,
+.fi-dropdown-list-item.fi-color-danger .fi-dropdown-list-item-label,
+.fi-dropdown-list-item.fi-color-danger .fi-dropdown-list-item-icon,
+.fi-dropdown-list-item.fi-color-danger > svg {
+  color: #DC2626 !important;
+}
+
+/* Disable / Hide all spinning indicators ("xoay xoay") */
+.animate-spin,
+svg.animate-spin,
+.fi-btn-loading-indicator,
+.fi-loading-indicator,
+[wire\:loading] {
+  display: none !important;
+}
+
+/* ==========================================================================
+   FORM / CREATE / EDIT PAGE STYLING (Matching bluefire_demo.html FORM VIEW)
+   - .fc  → .fi-section (form card)
+   - .fch → .fi-section-header (section header with icon + title)
+   - .fci → section header icon badge
+   - .fct → section header title text
+   - .field/.ctrl → Filament form field wrappers & inputs
+   - .ffoot → form action footer
+   ========================================================================== */
+
+/* ── Breadcrumbs ── */
+.fi-breadcrumbs {
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  color: var(--mu) !important;
+}
+
+.fi-breadcrumbs a {
+  color: var(--mu) !important;
+  transition: color 0.13s ease !important;
+}
+
+.fi-breadcrumbs a:hover {
+  color: var(--bl) !important;
+}
+
+.fi-breadcrumbs li:last-child span {
+  color: var(--fa) !important;
+}
+
+/* ── Form Page Header (.fph) ── */
+.fi-resource-create-record-page .fi-header,
+.fi-resource-edit-record-page .fi-header {
+  margin-bottom: 18px !important;
+}
+
+.fi-resource-create-record-page .fi-header-heading,
+.fi-resource-edit-record-page .fi-header-heading {
+  font-size: 22px !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.025em !important;
+  color: var(--tx) !important;
+  margin-bottom: 4px !important;
+}
+
+.fi-resource-create-record-page .fi-header-subheading,
+.fi-resource-edit-record-page .fi-header-subheading {
+  font-size: 13px !important;
+  color: var(--mu) !important;
+  margin: 0 !important;
+}
+
+/* ── Form Section Card (.fc) ── */
+.fi-section {
+  background: var(--wh) !important;
+  border: 1px solid var(--bd) !important;
+  border-radius: var(--r) !important;
+  box-shadow: var(--sh2) !important;
+  overflow: visible !important;
+}
+
+.fi-section-content-ctn {
+  padding: 22px 24px !important;
+}
+
+/* ── Form Section Header (.fch) ── */
+.fi-section-header {
+  display: flex !important;
+  align-items: center !important;
+  gap: 9px !important;
+  padding: 16px 24px !important;
+  border-bottom: 1px solid var(--bd2) !important;
+  background: transparent !important;
+}
+
+.fi-section-header-heading {
+  font-size: 14.5px !important;
+  font-weight: 700 !important;
+  color: var(--tx) !important;
+}
+
+.fi-section-header-description {
+  font-size: 12.5px !important;
+  color: var(--mu) !important;
+  font-weight: 400 !important;
+}
+
+/* Section Header Icon Badge (.fci) */
+.fi-section-header .fi-icon-btn,
+.fi-section-header svg.fi-section-header-icon {
+  width: 30px !important;
+  height: 30px !important;
+  border-radius: 7px !important;
+  display: grid !important;
+  place-items: center !important;
+  font-size: 13px !important;
+  flex-shrink: 0 !important;
+}
+
+/* ── Form Field Labels (.field label) ── */
+.fi-fo-field-wrp-label,
+.fi-fo-field-wrp label {
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  color: var(--su) !important;
+}
+
+.fi-fo-field-wrp-label span.text-danger-600,
+.fi-fo-field-wrp-label sup {
+  color: #EF4444 !important;
+}
+
+/* ── Form Input Controls (.ctrl) ── */
+.fi-section .fi-input-wrp,
+.fi-form-component-container .fi-input-wrp,
+.fi-fo-field-wrp:not(.fi-ta-filters-above-content-ctn *) .fi-input-wrp {
+  min-height: 40px !important;
+  border: 1px solid var(--bd) !important;
+  border-radius: 8px !important;
+  background: var(--wh) !important;
+  box-shadow: none !important;
+  transition: all 0.13s ease !important;
+  overflow: visible !important;
+}
+
+/* Ensure Searchable Select / Choices Dropdown panel is never clipped */
+.fi-fo-select .fi-input-wrp,
+.fi-fo-select,
+.choices,
+.choices__inner {
+  overflow: visible !important;
+}
+
+.choices__list--dropdown,
+.choices[aria-expanded="true"] .choices__list--dropdown {
+  z-index: 9999 !important;
+  background: var(--wh) !important;
+  border: 1px solid var(--bd) !important;
+  border-radius: 8px !important;
+  box-shadow: var(--sh) !important;
+}
+
+.fi-section .fi-input-wrp input,
+.fi-form-component-container .fi-input-wrp input,
+.fi-fo-field-wrp:not(.fi-ta-filters-above-content-ctn *) .fi-input-wrp input {
+  border: none !important;
+  background: transparent !important;
+  color: var(--tx) !important;
+  padding: 0 12px !important;
+  font-size: 13px !important;
+  outline: none !important;
+  height: 100% !important;
+  box-shadow: none !important;
+}
+
+.fi-fo-field-wrp:not(.fi-ta-filters-above-content-ctn *) input::placeholder,
+.fi-fo-field-wrp:not(.fi-ta-filters-above-content-ctn *) select::placeholder {
+  color: var(--fa) !important;
+}
+
+/* Form Input Focus State */
+.fi-section .fi-input-wrp:focus-within,
+.fi-form-component-container .fi-input-wrp:focus-within {
+  border-color: #93C5FD !important;
+  box-shadow: 0 0 0 3px rgba(18, 103, 232, 0.08) !important;
+}
+
+/* Input Hover State */
+.fi-input-wrp:hover:not(:focus-within),
+.fi-input:hover:not(:focus-within),
+.fi-select:hover:not(:focus-within) {
+  border-color: #CBD5E1 !important;
+}
+
+/* Input Prefix (VND) */
+.fi-input-wrp-prefix,
+.fi-fo-text-input .fi-input-wrp-prefix {
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: var(--mu) !important;
+  background: var(--bd2) !important;
+  padding: 0 12px !important;
+  border-right: 1px solid var(--bd) !important;
+  display: flex !important;
+  align-items: center !important;
+  height: 100% !important;
+}
+
+/* Select Dropdown Arrow */
+.fi-select .fi-select-input {
+  padding-right: 32px !important;
+  appearance: none !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 11 11'%3E%3Cpath d='M2 4l3.5 3.5L9 4' stroke='%2364748B' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 11px center !important;
+}
+
+/* Select Create Button (+) */
+.fi-fo-select .fi-btn,
+.fi-select-create-option-btn,
+button[wire\:click*="createOption"] {
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  border-radius: 8px !important;
+  border: 1px solid var(--bd) !important;
+  background: var(--wh) !important;
+  color: var(--mu) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.13s ease !important;
+  box-shadow: none !important;
+  font-size: 14px !important;
+  padding: 0 !important;
+}
+
+.fi-fo-select .fi-btn:hover,
+.fi-select-create-option-btn:hover,
+button[wire\:click*="createOption"]:hover {
+  background: var(--bl-s) !important;
+  color: var(--bl) !important;
+  border-color: var(--bl-m) !important;
+}
+
+/* Textarea (.ctrl textarea) */
+.fi-fo-textarea textarea,
+textarea.fi-textarea-input {
+  min-height: 76px !important;
+  padding: 10px 12px !important;
+  resize: vertical !important;
+  line-height: 1.6 !important;
+  border: 1px solid var(--bd) !important;
+  border-radius: 8px !important;
+  font-size: 13px !important;
+  color: var(--tx) !important;
+  background: var(--wh) !important;
+}
+
+.fi-fo-textarea textarea:focus {
+  border-color: #93C5FD !important;
+  box-shadow: 0 0 0 3px rgba(18, 103, 232, 0.08) !important;
+}
+
+/* Toggle Switch */
+.fi-fo-toggle .fi-toggle-input {
+  border-radius: 12px !important;
+}
+
+.fi-fo-toggle label,
+.fi-fo-toggle .fi-fo-field-wrp-label {
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: var(--su) !important;
+}
+
+/* ── Form Action Footer (.ffoot) ── */
+.fi-form-actions,
+.fi-resource-create-record-page .fi-form-actions,
+.fi-resource-edit-record-page .fi-form-actions {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 12px !important;
+  padding: 16px 0 !important;
+}
+
+/* Primary Submit Button in Form Actions (Tạo / Lưu) */
+.fi-form-actions .fi-btn.fi-btn-color-primary,
+.fi-form-actions button[type="submit"] {
+  height: 40px !important;
+  padding: 0 20px !important;
+  border-radius: 9px !important;
+  background: linear-gradient(135deg, #1474FF, #0059DD) !important;
+  color: #fff !important;
+  border: none !important;
+  font-weight: 600 !important;
+  font-size: 13px !important;
+  box-shadow: 0 6px 16px rgba(18, 103, 232, 0.28) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  white-space: nowrap !important;
+  transition: all 0.14s ease !important;
+}
+
+.fi-form-actions .fi-btn.fi-btn-color-primary:hover,
+.fi-form-actions button[type="submit"]:hover {
+  background: linear-gradient(135deg, #105FCC, #004FC4) !important;
+  box-shadow: 0 10px 20px rgba(18, 103, 232, 0.35) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Secondary/Gray Buttons in Form Actions (Tạo & tạo thêm / Quay lại) */
+.fi-form-actions .fi-btn.fi-btn-color-gray,
+.fi-form-actions a.fi-btn {
+  height: 40px !important;
+  padding: 0 16px !important;
+  border-radius: 9px !important;
+  border: 1px solid var(--bd) !important;
+  background: var(--wh) !important;
+  color: var(--tx) !important;
+  font-weight: 600 !important;
+  font-size: 13px !important;
+  box-shadow: var(--sh2) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  white-space: nowrap !important;
+  transition: all 0.14s ease !important;
+}
+
+.fi-form-actions .fi-btn.fi-btn-color-gray:hover,
+.fi-form-actions a.fi-btn:hover {
+  background: #F8FAFC !important;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.07) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* ── Form Grid Layout ── */
+.fi-fo-component-ctn {
+  gap: 13px 18px !important;
+}
+
+/* ── Fieldset / Grouped Fields ── */
+.fi-fieldset {
+  background: var(--wh) !important;
+  border: 1px solid var(--bd) !important;
+  border-radius: var(--r) !important;
+  padding: 18px 20px !important;
+}
+
+/* ── Validation Error Messages ── */
+.fi-fo-field-wrp-error-message {
+  font-size: 11.5px !important;
+  font-weight: 500 !important;
+  color: var(--rd) !important;
+  margin-top: 4px !important;
+}
+
+/* ── Helper / Hint Text ── */
+.fi-fo-field-wrp-hint {
+  font-size: 11.5px !important;
+  color: var(--fa) !important;
+}
+
+/* ── Date Picker Input ── */
+input[type="date"].fi-input,
+.fi-fo-date-time-picker input {
+  color-scheme: light !important;
+}
+
+/* ── File Upload ── */
+.fi-fo-file-upload .filepond--wrapper {
+  border: 1px dashed var(--bd) !important;
+  border-radius: 8px !important;
+  background: var(--bd2) !important;
+}
+
+/* ── Repeater Items ── */
+.fi-fo-repeater-item {
+  background: var(--wh) !important;
+  border: 1px solid var(--bd) !important;
+  border-radius: 10px !important;
+  padding: 16px !important;
+  box-shadow: var(--sh2) !important;
+}
+
+/* ── Form Responsive ── */
+@media (max-width: 960px) {
+  .fi-section-content-ctn {
+    padding: 16px !important;
+  }
+
+  .fi-section-header {
+    padding: 12px 16px !important;
+  }
+
+  .fi-form-actions {
+    flex-wrap: wrap !important;
+    justify-content: flex-end !important;
+  }
+}
+
+/* ── Section Header Alignment (Left-aligned & Vertically Aligned with Form Fields) ── */
+.fi-section-header,
+header.fi-section-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  padding: 16px 24px !important;
+  border-bottom: 1px solid var(--bd2) !important;
+  background: transparent !important;
+  margin: 0 !important;
+}
+
+.fi-section-header > div,
+.fi-section-header-heading,
+header.fi-section-header h3,
+header.fi-section-header div {
+  text-align: left !important;
+  justify-content: flex-start !important;
+  align-items: flex-start !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100% !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  color: var(--tx) !important;
+}
+
+.fi-section-content-ctn,
+.fi-section-content {
+  padding: 22px 24px !important;
+  margin: 0 !important;
+}
+
+.fi-section-content > div:first-child,
+.fi-section-content .grid {
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+}
+
+.fi-section-header-text {
+  text-align: left !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100% !important;
 }

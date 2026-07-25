@@ -20,6 +20,15 @@ class ViewIngredient extends ViewRecord
         return __('ingredient.actions.view_desc');
     }
 
+    public function getBreadcrumbs(): array
+    {
+        return [
+            '/admin' => __('ingredient.breadcrumb.home'),
+            $this->getResource()::getUrl('index') => __('ingredient.breadcrumb.list'),
+            __('ingredient.breadcrumb.view'),
+        ];
+    }
+
     protected function getHeaderActions(): array
     {
         return [

@@ -150,5 +150,7 @@
   "Hồ sơ NCC sắp hết hạn / quá hạn": "Supplier Documents Expiring / Overdue",
   "hồ sơ": "documents",
   "Quá hạn": "Overdue",
-  "Hết hạn": "Expires"
+  "Hết hạn": "Expires",
+  "Hiển thị :first–:last trên :total nguyên liệu": "Showing :first–:last of :total ingredients",
+  "per_page_suffix": "/ page"
 }
