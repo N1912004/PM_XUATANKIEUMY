@@ -779,7 +779,7 @@ td.fi-ta-cell-checkbox,
 .fi-ta-filters-above-content-ctn .fi-fo-field-wrp-label span {
   display: block !important;
   font-size: 12.5px !important;
-  font-weight: 600 !important;
+  font-weight: 500 !important;
   color: #334155 !important; /* Slate-700 readable label */
   text-transform: none !important;
   letter-spacing: normal !important;
@@ -822,7 +822,7 @@ td.fi-ta-cell-checkbox,
   border: 1px solid #CBD5E1 !important;
   border-radius: 8px !important;
   font-size: 13px !important;
-  font-weight: 500 !important;
+  font-weight: 400 !important;
   color: #0F172A !important; /* Deepest High-Contrast Slate-900 */
   box-shadow: none !important;
   outline: none !important;
@@ -860,7 +860,7 @@ td.fi-ta-cell-checkbox,
   border: 1px solid #CBD5E1 !important;
   border-radius: 8px !important;
   font-size: 13px !important;
-  font-weight: 600 !important;
+  font-weight: 400 !important;
   color: #0F172A !important;
   box-shadow: none !important;
   outline: none !important;
@@ -885,7 +885,7 @@ td.fi-ta-cell-checkbox,
   text-overflow: ellipsis !important;
   white-space: nowrap !important;
   font-size: 13px !important;
-  font-weight: 600 !important;
+  font-weight: 400 !important;
   color: #0F172A !important;
   line-height: 36px !important;
 }
@@ -1002,7 +1002,7 @@ td.fi-ta-cell-checkbox,
   border: 1px solid var(--bd) !important;
   border-radius: 8px !important;
   font-size: 12.5px !important;
-  font-weight: 600 !important;
+  font-weight: 500 !important;
   color: var(--su) !important;
   white-space: nowrap !important;
   flex-shrink: 0 !important;
@@ -1034,7 +1034,7 @@ td.fi-ta-cell-checkbox,
 .fi-ta-filters-above-content-ctn .fi-link:hover span {
   color: var(--su) !important;
   font-size: 12.5px !important;
-  font-weight: 600 !important;
+  font-weight: 500 !important;
 }
 
 .fi-ta-filters-above-content-ctn .fi-link svg {
