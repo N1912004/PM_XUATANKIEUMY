@@ -73,20 +73,21 @@
     .emp-page {
         font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         color: var(--po-tx);
+        padding: 22px 28px 36px;
     }
 
     /* Header styling */
     .emp-head {
         display: flex;
         justify-content: space-between;
-        align-items: center;
-        margin-bottom: 20px;
+        align-items: flex-start;
+        margin-bottom: 18px;
         flex-wrap: wrap;
         gap: 12px;
     }
 
     .emp-title {
-        font-size: 20px;
+        font-size: 22px;
         font-weight: 800;
         color: var(--po-tx);
         letter-spacing: -.02em;
@@ -95,7 +96,7 @@
     .emp-subtitle {
         font-size: 13px;
         color: var(--po-mu);
-        margin-top: 2px;
+        margin-top: 0;
     }
 
     .emp-actions {
@@ -147,58 +148,66 @@
     }
 
     /* KPIs stats strip */
-    .krow {
+    .emp-page .krow {
         display: grid;
         gap: 12px;
+        margin-bottom: 18px !important;
     }
 
-    .kcard {
-        background: var(--po-wh);
-        border: 1px solid var(--po-bd);
-        border-radius: var(--po-r);
-        padding: 16px;
-        box-shadow: var(--po-sh2);
+    .emp-page .kcard {
+        background: var(--po-wh) !important;
+        border: 1px solid var(--po-bd) !important;
+        border-radius: var(--po-r) !important;
+        padding: 16px !important;
+        box-shadow: var(--po-sh2) !important;
+        position: relative;
+        overflow: hidden;
+        transition: .14s ease;
     }
 
-    .ktop {
+    .emp-page .kcard:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 22px rgba(15, 23, 42, .09);
+    }
+
+    .emp-page .ktop {
         display: flex;
-        align-items: center;
+        align-items: center !important;
         margin-bottom: 8px;
     }
 
     .kico {
-        width: 32px;
-        height: 32px;
-        border-radius: 8px;
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
         display: grid;
         place-items: center;
-        font-size: 14px;
+        font-size: 16px;
     }
 
-    .ki-b,
-    .ki-g,
-    .ki-o,
-    .ki-p { background: var(--po-bl-s); color: var(--po-bl); }
+    .emp-page .ki-b { background: var(--po-bl-s) !important; color: var(--po-bl) !important; }
+    .emp-page .ki-g { background: var(--po-gn-s) !important; color: var(--po-gn) !important; }
+    .emp-page .ki-o { background: var(--po-or-s) !important; color: var(--po-or) !important; }
+    .emp-page .ki-p { background: var(--po-pu-s) !important; color: var(--po-pu) !important; }
 
     .kval {
-        font-size: 24px;
+        font-size: 28px;
         font-weight: 800;
         letter-spacing: -.03em;
-        line-height: 1.1;
+        line-height: 1;
         color: var(--po-tx);
     }
 
     .klbl {
-        font-size: 11.5px;
-        font-weight: 700;
+        font-size: 12px;
+        font-weight: 600;
         color: var(--po-su);
-        margin-top: 4px;
     }
 
     .knote {
-        font-size: 10.5px;
+        font-size: 11px;
         color: var(--po-fa);
-        margin-top: 2px;
+        margin-top: 5px;
     }
 
     /* Top Filters Card */
@@ -249,45 +258,37 @@
     .area-tabs {
         display: flex;
         gap: 6px;
-        border-bottom: 1.5px solid var(--po-bd2);
-        padding-bottom: 2px;
-        margin-bottom: 16px;
+        margin-bottom: 14px;
         flex-wrap: wrap;
+        align-items: center;
     }
 
     .area-tab {
-        padding: 10px 18px;
-        font-size: 13.5px;
-        font-weight: 700;
-        color: var(--po-mu);
+        height: 36px;
+        padding: 0 13px;
+        font-size: 12.5px;
+        font-weight: 600;
+        color: var(--po-su);
         background: var(--po-wh);
         border: 1px solid var(--po-bd);
-        border-radius: 8px 8px 0 0;
+        border-radius: 8px;
         cursor: pointer;
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        border-bottom: none;
         transition: .13s;
         outline: none !important;
     }
 
     .area-tab.active {
-        background: var(--po-wh);
+        background: var(--po-bl-s);
         color: var(--po-bl);
-        border-color: var(--po-bd) var(--po-bd) transparent var(--po-bd);
-        position: relative;
-        font-weight: 800;
+        border-color: var(--po-bl-m);
+        font-weight: 700;
     }
 
     .area-tab.active::after {
-        content: "";
-        position: absolute;
-        bottom: -2px;
-        left: 0;
-        right: 0;
-        height: 2px;
-        background: var(--po-wh);
+        content: none;
     }
 
     .tsp {

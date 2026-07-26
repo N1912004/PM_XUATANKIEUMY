@@ -1,4 +1,4 @@
-<div class="emp-page w-full space-y-6">
+<div class="emp-page bf-list-page w-full">
     @include('filament.resources.menus.partials.styles')
 
     @php
@@ -23,14 +23,14 @@
              VIEW 1: DANH SÁCH THỰC ĐƠN CHÍNH
              ========================================================================= -->
         <!-- Header Section -->
-        <div class="emp-head" style="margin-bottom: 14px;">
+        <div class="emp-head" style="margin-bottom: 16px;">
             <div>
                 <h1 class="emp-title">{{ __('menu.list.title') }}</h1>
                 <p class="emp-subtitle">{{ __('menu.list.subtitle') }}</p>
             </div>
             <div class="emp-actions">
                 <button wire:click="loadWeekMenu({{ $kitchens->first()?->id ?? 1 }}, '{{ now()->startOfWeek()->toDateString() }}', null, false)" class="emp-btn">
-                    <i class="fa-solid fa-calendar-days"></i>
+                    <i class="fa-regular fa-calendar-week"></i>
                     {{ __('menu.actions.create_week') }}
                 </button>
                 <button wire:click="loadDayMenu({{ $kitchens->first()?->id ?? 1 }}, '{{ now()->toDateString() }}', false)" class="emp-btn emp-btn-primary">
@@ -43,28 +43,28 @@
         <!-- KPIs Stats -->
         <div class="mp-krow" style="margin-bottom: 16px;">
             <div class="mp-kcard">
-                <div class="mp-kico" style="background:var(--po-bl-s); color:var(--po-bl)"><i class="fa-solid fa-calendar-days"></i></div>
+                <div class="mp-kico" style="background:var(--po-bl-s); color:var(--po-bl)"><i class="fa-regular fa-calendar-week"></i></div>
                 <div>
                     <div class="mp-klbl">{{ __('menu.kpi.running_weekly') }}</div>
                     <div class="mp-kval">{{ $stats['total_active_weeks'] }}</div>
                 </div>
             </div>
             <div class="mp-kcard">
-                <div class="mp-kico" style="background:var(--po-bl-s); color:var(--po-bl)"><i class="fa-solid fa-paper-plane"></i></div>
+                <div class="mp-kico" style="background:var(--po-gn-s); color:var(--po-gn)"><i class="fa-solid fa-circle-check"></i></div>
                 <div>
                     <div class="mp-klbl">{{ __('menu.kpi.sent_this_month') }}</div>
                     <div class="mp-kval">{{ $stats['sent_month'] }}</div>
                 </div>
             </div>
             <div class="mp-kcard">
-                <div class="mp-kico" style="background:var(--po-bl-s); color:var(--po-bl)"><i class="fa-solid fa-file-pen"></i></div>
+                <div class="mp-kico" style="background:var(--po-or-s); color:var(--po-or)"><i class="fa-solid fa-clock-rotate-left"></i></div>
                 <div>
                     <div class="mp-klbl">{{ __('menu.kpi.still_draft') }}</div>
                     <div class="mp-kval">{{ $stats['pending'] }}</div>
                 </div>
             </div>
             <div class="mp-kcard">
-                <div class="mp-kico" style="background:var(--po-bl-s); color:var(--po-bl)"><i class="fa-solid fa-lock"></i></div>
+                <div class="mp-kico" style="background:var(--po-ms-locked-bg); color:var(--po-ms-locked-text)"><i class="fa-solid fa-lock"></i></div>
                 <div>
                     <div class="mp-klbl">{{ __('menu.kpi.locked_this_month') }}</div>
                     <div class="mp-kval">{{ $stats['locked_month'] }}</div>

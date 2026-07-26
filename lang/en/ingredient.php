@@ -13,6 +13,7 @@ return [
         'group' => 'catalog.groups.ingredients_inventory',
         'ingredient' => 'Ingredient',
         'ingredient_plural' => 'Ingredient List',
+        'list_heading' => 'Ingredient List',
         'subheading' => 'Manage ingredient list by name, code, supplier, unit, and ingredient type',
         'unit' => 'Unit of Measure',
         'unit_plural' => 'Units of Measure',

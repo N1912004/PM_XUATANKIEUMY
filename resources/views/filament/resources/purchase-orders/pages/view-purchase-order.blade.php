@@ -12,7 +12,7 @@
         $activeColor = $colors[($activeColorIndex !== false ? $activeColorIndex : 0) % count($colors)];
     @endphp
 
-    <div class="po-page w-full space-y-6" style="padding: 0 !important; background: transparent !important;">
+    <div class="po-page w-full" style="padding: 0 !important; background: transparent !important;">
         <!-- Header Section -->
         <div class="po-head" style="margin-bottom: 20px;">
             <div>

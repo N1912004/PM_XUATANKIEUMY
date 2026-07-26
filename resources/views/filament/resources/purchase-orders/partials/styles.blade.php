@@ -106,6 +106,35 @@
         overflow-x: hidden;
     }
 
+    .po-list-page {
+        padding: 20px 24px 36px !important;
+    }
+
+    .po-list-page .po-head {
+        align-items: flex-start;
+        gap: 16px;
+        margin-bottom: 16px;
+    }
+
+    .po-list-page .po-title {
+        font-size: 22px !important;
+        line-height: 1.25 !important;
+        letter-spacing: -.025em;
+    }
+
+    .po-list-page .po-subtitle {
+        font-size: 13px;
+        margin-top: 4px;
+    }
+
+    .po-list-page .po-btn {
+        font-size: 13px;
+        font-weight: 600;
+        border-width: 1px;
+        border-radius: 9px;
+        padding: 0 16px;
+    }
+
     .po-head {
         display: flex;
         justify-content: space-between;
@@ -746,14 +775,14 @@
 
     .py-kcard {
         background: var(--po-wh);
-        border: 1.5px solid var(--po-bd2);
+        border: 1px solid var(--po-bd);
         border-radius: 12px;
-        padding: 14px 16px;
+        padding: 14px;
         box-shadow: var(--po-sh2);
         transition: .13s;
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 9px;
         min-width: 0;
     }
 
@@ -763,17 +792,17 @@
     }
 
     .py-kico {
-        width: 40px;
-        height: 40px;
-        border-radius: 11px;
+        width: 32px;
+        height: 32px;
+        border-radius: 9px;
         display: grid;
         place-items: center;
-        font-size: 17px;
+        font-size: 14px;
         flex-shrink: 0;
     }
 
     .py-klbl {
-        font-size: 11px;
+        font-size: 10.5px;
         font-weight: 600;
         color: var(--po-mu);
         margin-bottom: 3px;
@@ -781,7 +810,7 @@
     }
 
     .py-kval {
-        font-size: 20px;
+        font-size: 22px;
         font-weight: 800;
         color: var(--po-tx);
         letter-spacing: -.025em;

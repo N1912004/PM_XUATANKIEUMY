@@ -13,6 +13,7 @@ return [
         'group' => 'catalog.groups.ingredients_inventory',
         'ingredient' => 'Nguyên liệu',
         'ingredient_plural' => 'Danh sách nguyên liệu',
+        'list_heading' => 'List nguyên liệu',
         'subheading' => 'Quản lý danh sách nguyên liệu theo tên, mã, nhà cung cấp, đơn vị và loại nguyên liệu',
         'unit' => 'Đơn vị tính',
         'unit_plural' => 'Danh sách đơn vị tính',

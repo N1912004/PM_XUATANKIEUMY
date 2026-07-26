@@ -1,4 +1,4 @@
-<div class="emp-page w-full space-y-6">
+<div class="emp-page bf-list-page w-full">
     
 <style>
     :root {
@@ -52,6 +52,7 @@
     .emp-page {
         font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         color: var(--po-tx);
+        padding: 20px 24px 36px;
     }
 
     .report-header-container {
@@ -71,20 +72,20 @@
     }
 
     .report-subtitle {
-        font-size: 13px;
+        font-size: 12.5px;
         color: var(--po-mu);
-        margin-top: 2px;
+        margin-top: 0;
     }
 
     .excel-btn {
-        height: 38px;
-        padding: 0 16px;
+        height: 36px;
+        padding: 0 14px;
         border: 1px solid var(--po-bd);
         border-radius: 8px;
         background: var(--po-wh);
         cursor: pointer;
         font-size: 13px;
-        font-weight: 700;
+        font-weight: 600;
         display: flex;
         align-items: center;
         gap: 6px;
@@ -105,25 +106,26 @@
         gap: 10px;
         background: var(--po-wh);
         border: 1px solid var(--po-bd);
-        border-radius: 14px;
-        padding: 12px 16px;
+        border-radius: var(--po-r);
+        padding: 13px 18px;
         box-shadow: var(--po-sh2);
+        margin-bottom: 16px;
     }
 
     .filter-item {
         display: flex;
         align-items: center;
         gap: 6px;
-        font-size: 13px;
+        font-size: 12.5px;
         color: var(--po-mu);
     }
 
     .date-input {
-        height: 36px;
+        height: 40px;
         border: 1.5px solid var(--po-bl-m);
-        border-radius: 8px;
+        border-radius: 9px;
         padding: 0 12px;
-        font-size: 13px;
+        font-size: 14px;
         font-weight: 700;
         background: var(--po-bl-s);
         color: var(--po-bl);
@@ -228,18 +230,18 @@
         display: grid;
         grid-template-columns: repeat(4, 1fr);
         gap: 12px;
-        margin-top: 14px;
+        margin-top: 0;
         margin-bottom: 14px;
     }
 
     .stat-card {
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 8px;
         background: var(--po-wh);
         border: 1px solid var(--po-bd);
         border-radius: var(--po-r);
-        padding: 14px 16px;
+        padding: 10px 14px;
         box-shadow: var(--po-sh2);
         transition: .13s;
     }
@@ -249,17 +251,17 @@
     }
 
     .stat-icon {
-        width: 38px;
-        height: 38px;
-        border-radius: 9px;
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
         display: grid;
         place-items: center;
-        font-size: 16px;
+        font-size: 14px;
         flex-shrink: 0;
     }
 
     .stat-val {
-        font-size: 22px;
+        font-size: 18px;
         font-weight: 800;
         color: var(--po-tx);
         line-height: 1.1;
@@ -571,10 +573,8 @@
             <p class="report-subtitle">{{ __('report.subtitle') }}</p>
         </div>
         <div>
-            <button type="button" wire:click="exportExcel" style="height:40px;padding:0 20px;border-radius:12px;background:#16A34A;color:#ffffff;font-size:14px;font-weight:700;display:inline-flex;align-items:center;gap:8px;border:none;cursor:pointer;box-shadow:0 2px 6px rgba(22,163,74,0.25);transition:all 0.15s ease;" onmouseover="this.style.background='#15803D'" onmouseout="this.style.background='#16A34A'">
-                <svg xmlns="http://www.w3.org/2000/svg" style="width:20px;height:20px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
+            <button type="button" wire:click="exportExcel" class="excel-btn">
+                <i class="fa-solid fa-file-excel" style="color:var(--po-gn)"></i>
                 <span>{{ __('report.actions.export') }}</span>
             </button>
         </div>

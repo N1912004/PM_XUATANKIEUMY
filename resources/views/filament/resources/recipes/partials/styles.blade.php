@@ -51,6 +51,19 @@
         --sh: 0 1px 2px rgba(0, 0, 0, .4);
     }
 
+    .recipe-page,
+    .recipe-page * {
+        box-sizing: border-box;
+        font-family: "Inter", system-ui, sans-serif;
+    }
+
+    .recipe-page {
+        color: var(--tx);
+        min-height: 100vh;
+        padding: 20px 22px 36px;
+        background: var(--bg);
+    }
+
     /* ══ NGÂN HÀNG THỰC ĐƠN ══ */
     .mn-root {
         flex: 1;
@@ -522,7 +535,7 @@
         min-width: 250px;
     }
     .ph-l h1 {
-        font-size: 1.5rem !important;
+        font-size: 22px !important;
         font-weight: 800 !important;
         color: var(--tx) !important;
         line-height: 1.2 !important;
@@ -543,8 +556,8 @@
     .ph-r a,
     .ph-r .fi-ac-action {
         white-space: nowrap !important;
-        height: 38px !important;
-        line-height: 38px !important;
+        height: 34px !important;
+        line-height: 34px !important;
         display: inline-flex !important;
         align-items: center !important;
         justify-content: center !important;

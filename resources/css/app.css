@@ -348,6 +348,39 @@ body, .fi-body, .fi-main {
   box-sizing: border-box !important;
 }
 
+/* Shared Bluefire spacing for every list screen.
+   Custom list pages render directly below <main>, while standard Filament
+   ListRecords pages render as .fi-page. Both structures use the same inset so
+   titles and cards never sit against the sidebar or viewport edge. */
+.fi-page.fi-resource-list-records-page,
+main > .bf-list-page {
+  padding: 22px 28px 36px !important;
+  box-sizing: border-box !important;
+}
+
+.fi-resource-list-records-page > section > .fi-header {
+  margin-bottom: 18px !important;
+}
+
+.fi-resource-list-records-page > section > .fi-header .fi-header-heading,
+.bf-list-page .emp-title,
+.bf-list-page .po-title,
+.bf-list-page .sup-title,
+.bf-list-page .report-title,
+.bf-list-page .ph-l h1 {
+  font-size: 22px !important;
+  font-weight: 800 !important;
+  line-height: 1.25 !important;
+  letter-spacing: -0.025em !important;
+}
+
+@media (max-width: 767.98px) {
+  .fi-page.fi-resource-list-records-page,
+  main > .bf-list-page {
+    padding: 16px !important;
+  }
+}
+
 /* Filament wraps every page body in `<section class="flex flex-col gap-y-8 py-8">` — that py-8
    (32px top + bottom) sits on top of .fi-page's own padding and leaves a large empty band above
    the page title. Trim it and tighten the 32px inter-block gap to something closer to the cards. */
@@ -601,16 +634,22 @@ div.fi-ta-bulk-actions {
   font-weight: 600 !important;
 }
 
-/* Primary Blue Gradient Buttons in Header & Toolbar (e.g. + Thêm nguyên liệu) */
+/* Header Action Buttons (e.g. Xuất Excel, Nhập Excel, + Thêm nguyên liệu - Matching /admin/list-hang 100%) */
 .fi-header-actions .fi-btn.fi-btn-color-primary,
 .fi-header-actions a.fi-btn.fi-btn-color-primary,
 .fi-ta-header-toolbar .fi-btn.fi-btn-color-primary,
 .fi-ta-header-toolbar a.fi-btn.fi-btn-color-primary,
 .fi-ta-header-toolbar button.fi-btn-color-primary {
+  height: 36px !important;
+  padding: 0 14px !important;
   background: linear-gradient(135deg, #1474FF, #0059DD) !important;
   color: #FFFFFF !important;
   border: none !important;
-  box-shadow: 0 4px 12px rgba(18, 103, 232, 0.28) !important;
+  border-radius: 8px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  box-shadow: 0 6px 16px rgba(18, 103, 232, 0.28) !important;
+  transition: all 0.14s ease !important;
 }
 
 .fi-header-actions .fi-btn.fi-btn-color-primary:hover,
@@ -622,14 +661,67 @@ div.fi-ta-bulk-actions {
   box-shadow: 0 6px 16px rgba(18, 103, 232, 0.35) !important;
 }
 
-/* Excel Export Action Button (Matching Green Icon Screenshot) */
-button[wire\:click*="export_excel"] .fi-btn-icon,
-button[wire\:click*="export_excel"] svg,
-button[wire\:click*="export"] .fi-btn-icon,
-button[wire\:click*="export"] svg,
+/* Secondary Header Action Buttons (e.g. Xuất Excel, Nhập Excel - Matching /admin/list-hang 100%) */
+.btn-export-excel,
+.btn-import-excel,
+.fi-header-actions .fi-btn.fi-btn-color-gray,
+.fi-header-actions a.fi-btn.fi-btn-color-gray,
+.fi-header-actions button[wire\:click*="export"],
+.fi-header-actions button[wire\:click*="import"] {
+  height: 36px !important;
+  padding: 0 14px !important;
+  background: #FFFFFF !important;
+  border: 1px solid #CBD5E1 !important;
+  border-radius: 8px !important;
+  color: #0F172A !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  box-shadow: none !important;
+  transition: all 0.14s ease !important;
+  --tw-ring-color: transparent !important;
+  --tw-ring-shadow: none !important;
+}
+
+.btn-export-excel:hover,
+.btn-import-excel:hover,
+.fi-header-actions .fi-btn.fi-btn-color-gray:hover,
+.fi-header-actions a.fi-btn.fi-btn-color-gray:hover,
+.fi-header-actions button[wire\:click*="export"]:hover,
+.fi-header-actions button[wire\:click*="import"]:hover {
+  background: #F8FAFC !important;
+  border-color: #CBD5E1 !important;
+  color: #0F172A !important;
+  transform: translateY(-1px) !important;
+}
+
+.btn-export-excel .fi-btn-label,
+.btn-import-excel .fi-btn-label,
+.fi-header-actions .fi-btn.fi-btn-color-gray .fi-btn-label {
+  color: #0F172A !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+}
+
+/* Excel Export Icon (Emerald Green #059669 Matching List Hang 100%) */
+.btn-export-excel svg,
+.btn-export-excel .fi-btn-icon,
+.btn-export-excel svg path,
 .fi-header-actions button[wire\:click*="export"] svg,
-.fi-ac-action[wire\:click*="export"] svg {
-  color: #0F9D58 !important; /* Excel Green */
+.fi-header-actions button[wire\:click*="export"] .fi-btn-icon,
+.fi-header-actions button[wire\:click*="export"] svg path {
+  color: #059669 !important;
+  stroke: #059669 !important;
+}
+
+/* Excel Import Icon (Brand Blue #1267E8 Matching List Hang) */
+.btn-import-excel svg,
+.btn-import-excel .fi-btn-icon,
+.btn-import-excel svg path,
+.fi-header-actions button[wire\:click*="import"] svg,
+.fi-header-actions button[wire\:click*="import"] .fi-btn-icon,
+.fi-header-actions button[wire\:click*="import"] svg path {
+  color: #1267E8 !important;
+  stroke: #1267E8 !important;
 }
 
 /* Bulk Selection Indicator ("X bản ghi đã chọn...") */
@@ -764,12 +856,6 @@ div[wire\:key*="selection-indicator"] {
   background: var(--wh) !important;
 }
 
-/* Hide Nhập Excel button on top page header actions to match Image 2 mockup */
-.fi-header-actions button[wire\:click*="import_excel"],
-.fi-header-actions .fi-btn-color-gray:nth-child(1) {
-  display: none !important;
-}
-
 /* Hide Column Toggle Button ("Chuyển đổi cột") */
 .fi-ta-header-toolbar button[title*="Chuyển đổi cột"],
 .fi-ta-header-toolbar button[title*="Toggle columns"],
@@ -795,6 +881,8 @@ header.fi-topbar,
 .fi-topbar > nav {
   width: 100% !important;
   max-width: 100% !important;
+  height: var(--tb) !important;
+  min-height: var(--tb) !important;
 }
 
 div[x-persist*="topbar.end"],

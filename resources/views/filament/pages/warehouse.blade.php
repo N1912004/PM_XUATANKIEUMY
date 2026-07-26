@@ -1,5 +1,34 @@
 @push('styles')
 <style>
+        .fi-page:has(.stats-grid) {
+            padding: 22px 28px 36px !important;
+        }
+        .fi-page:has(.stats-grid) > section > .fi-header {
+            margin-bottom: 18px !important;
+        }
+        .fi-page:has(.stats-grid) > section > .fi-header .fi-header-heading {
+            color: #0f172a !important;
+            font-size: 22px !important;
+            font-weight: 800 !important;
+            letter-spacing: -.025em !important;
+        }
+        .fi-page:has(.stats-grid) > section > .fi-header .fi-header-subheading {
+            margin-top: 4px !important;
+            color: #64748b !important;
+            font-size: 13px !important;
+        }
+        .fi-page:has(.stats-grid) > section > .fi-header .fi-header-actions .fi-btn {
+            min-height: 40px !important;
+            padding: 0 16px !important;
+            border-radius: 9px !important;
+            font-size: 13px !important;
+            font-weight: 600 !important;
+        }
+        .fi-page:has(.stats-grid) > section > .fi-header .fi-header-actions .fi-btn.fi-color-primary {
+            background: linear-gradient(135deg, #1474ff, #0059dd) !important;
+            box-shadow: 0 6px 16px rgba(18, 103, 232, .28) !important;
+        }
+        :root.dark .fi-page:has(.stats-grid) > section > .fi-header .fi-header-heading { color: #f8fafc !important; }
         .wh-header-container {
             display: flex;
             align-items: flex-start;
@@ -9,7 +38,7 @@
             gap: 0.75rem;
         }
         .wh-title {
-            font-size: 1.25rem;
+            font-size: 1.375rem;
             font-weight: 800;
             margin: 0 0 0.25rem;
             color: #0f172a;
@@ -18,7 +47,7 @@
             color: #ffffff;
         }
         .wh-subtitle {
-            font-size: 0.78rem;
+            font-size: 0.8125rem;
             color: #64748b;
             margin: 0;
         }
@@ -31,29 +60,32 @@
         }
 
         /* Fix responsive cho Header Actions của Filament khi thu nhỏ màn hình */
-        .fi-header {
+        .fi-page:has(.stats-grid) > section > .fi-header {
             flex-wrap: wrap !important;
             gap: 1rem !important;
         }
-        .fi-header-actions {
+        .fi-page:has(.stats-grid) > section > .fi-header .fi-header-actions {
             flex-wrap: wrap !important;
             gap: 0.5rem !important;
         }
         @media (max-width: 1023px) {
-            .fi-header {
+            .fi-page:has(.stats-grid) > section > .fi-header {
                 flex-direction: column !important;
                 align-items: flex-start !important;
             }
-            .fi-header-actions {
+            .fi-page:has(.stats-grid) > section > .fi-header .fi-header-actions {
                 width: 100% !important;
                 justify-content: flex-start !important;
             }
         }
+        @media (max-width: 767px) {
+            .fi-page:has(.stats-grid) { padding: 16px !important; }
+        }
         .wh-action-btn {
-            height: 38px;
-            padding: 0 0.875rem;
-            border: 1px solid #cbd5e1;
-            border-radius: 8px;
+            height: 40px;
+            padding: 0 1rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 9px;
             background: #ffffff;
             cursor: pointer;
             font-size: 0.8125rem;
@@ -106,8 +138,8 @@
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 1rem;
-            margin-bottom: 1.25rem;
+            gap: 0.75rem;
+            margin-bottom: 1.125rem;
         }
         @media (max-width: 768px) {
             .stats-grid {
@@ -117,7 +149,7 @@
         .stat-card {
             background: #ffffff;
             border: 1px solid #e2e8f0;
-            border-radius: 12px;
+            border-radius: 14px;
             padding: 1rem;
             box-shadow: 0 1px 3px rgba(0,0,0,0.02);
             position: relative;
@@ -129,7 +161,7 @@
         .stat-icon {
             width: 38px;
             height: 38px;
-            border-radius: 8px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -147,7 +179,7 @@
         :root.dark .ico-purple { background: rgba(124, 58, 237, 0.18) !important; color: #A78BFA !important; }
         
         .stat-val {
-            font-size: 1.375rem;
+            font-size: 1.75rem;
             font-weight: 800;
             color: #0f172a;
             line-height: 1.2;
@@ -178,10 +210,10 @@
             display: flex;
             align-items: center;
             border: 1px solid #e2e8f0;
-            border-radius: 12px;
+            border-radius: 14px;
             background: #ffffff;
             padding: 0.375rem;
-            margin-bottom: 1.25rem;
+            margin-bottom: 0.875rem;
             flex-wrap: wrap;
             gap: 0.375rem;
         }
@@ -190,8 +222,8 @@
             background: #0f172a;
         }
         .tab-btn {
-            height: 34px;
-            padding: 0 0.875rem;
+            height: 36px;
+            padding: 0 0.8125rem;
             border-radius: 8px;
             font-size: 0.8125rem;
             font-weight: 600;
@@ -235,7 +267,7 @@
             border-radius: 8px;
             background: #ffffff;
             padding: 0 0.625rem;
-            height: 34px;
+            height: 36px;
             width: 240px;
         }
         .dark .search-wrapper {
@@ -255,7 +287,7 @@
             color: #ffffff;
         }
         .type-select {
-            height: 34px;
+            height: 36px;
             border: 1px solid #cbd5e1;
             border-radius: 8px;
             font-size: 0.78rem;
@@ -291,10 +323,10 @@
         .wh-card {
             background: #ffffff;
             border: 1px solid #e2e8f0;
-            border-radius: 12px;
+            border-radius: 14px;
             overflow: hidden;
             box-shadow: 0 1px 3px rgba(0,0,0,0.02);
-            padding: 1.25rem;
+            padding: 1rem;
         }
         .dark .wh-card {
             background: #0f172a;
@@ -306,11 +338,11 @@
             font-size: 0.8125rem;
         }
         .wh-table th {
-            padding: 0.75rem 1rem;
+            padding: 0.625rem 0.75rem;
             text-align: left;
             font-size: 0.68rem;
             font-weight: 850;
-            color: #475569;
+            color: #94a3b8;
             text-transform: uppercase;
             letter-spacing: 0.05em;
             background: #f8fafc;
@@ -322,7 +354,7 @@
             border-color: #334155;
         }
         .wh-table td {
-            padding: 0.75rem 1rem;
+            padding: 0.625rem 0.75rem;
             border-bottom: 1px solid #f1f5f9;
             color: #334155;
             font-variant-numeric: tabular-nums;
