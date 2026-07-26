@@ -773,14 +773,14 @@ td.fi-ta-cell-checkbox,
   --tw-shadow: none !important;
 }
 
-/* Filter Labels (.fgl style - High-Contrast Dark Slate #1E293B, Crisp & Sharp) */
+/* Filter Labels (.fgl style - Clean Slate #334155, Crisp & Clear) */
 .fi-ta-filters-above-content-ctn label,
 .fi-ta-filters-above-content-ctn .fi-fo-field-wrp-label,
 .fi-ta-filters-above-content-ctn .fi-fo-field-wrp-label span {
   display: block !important;
-  font-size: 11.5px !important;
-  font-weight: 700 !important;
-  color: #1E293B !important; /* Sharp High-Contrast Dark Slate */
+  font-size: 12.5px !important;
+  font-weight: 600 !important;
+  color: #334155 !important; /* Slate-700 readable label */
   text-transform: none !important;
   letter-spacing: normal !important;
   padding: 0 !important;
@@ -822,7 +822,7 @@ td.fi-ta-cell-checkbox,
   border: 1px solid #CBD5E1 !important;
   border-radius: 8px !important;
   font-size: 13px !important;
-  font-weight: 600 !important;
+  font-weight: 500 !important;
   color: #0F172A !important; /* Deepest High-Contrast Slate-900 */
   box-shadow: none !important;
   outline: none !important;
