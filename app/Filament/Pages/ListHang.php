@@ -136,19 +136,24 @@ class ListHang extends Page
         $this->updatedDate();
     }
 
+    /** Sang trang /admin/list-hang/create — mang theo ngày & ca đang xem. */
     public function goOrderCreate(): void
     {
-        $this->mode = 'create_po';
-        $this->poDate = $this->date;
-        $this->poSourceFrom = $this->date;
-        $this->poSourceTo = $this->date;
-        $this->poSelectedShifts = $this->selectedShifts;
-        $this->loadPOIngredients();
+        abort_unless(PurchaseOrderResource::canCreate(), 403);
+
+        $this->redirect(ListHangCreate::getUrl([
+            'date' => $this->date,
+            'shifts' => implode(',', $this->selectedShifts),
+        ]), navigate: true);
     }
 
+    /**
+     * Gọi thẳng tên lớp, không dùng self::/static:: — Filament::getUrl() nội bộ vẫn
+     * gọi static::getRouteName(), nên từ ListHangCreate nó sẽ trỏ ngược về chính nó.
+     */
     public function goBackToList(): void
     {
-        $this->mode = 'list';
+        $this->redirect(ListHang::getUrl(), navigate: true);
     }
 
     /**
@@ -457,7 +462,7 @@ class ListHang extends Page
 
         $notification->send();
 
-        $this->mode = 'list';
+        $this->goBackToList();
     }
 
     /**

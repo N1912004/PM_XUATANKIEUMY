@@ -26,6 +26,7 @@
         --mu: #64748B;
         --fa: #94A3B8;
         --wh: #FFFFFF;
+        --bg: #F8FAFC; /* Thiếu ở light nên khối 'Ca lấy nguyên liệu' bị mất nền xám */
         --r: 12px;
         --sh2: 0 2px 4px rgba(15,23,42,.02);
     }
@@ -497,6 +498,102 @@
         font-size: 24px;
         font-weight: 800;
         letter-spacing: -.02em;
+    }
+
+    /* Nút hành động + ô nhập của wizard tạo đơn.
+       Trước đây dùng chung class .wh-action-btn/.form-field nhưng CSS của chúng chỉ
+       nằm trong warehouse.blade.php, không load ở trang này nên nút mất hẳn khung. */
+    .lhn-act-btn {
+        height: 38px;
+        padding: 0 16px;
+        border: 1px solid var(--bd);
+        border-radius: 9px;
+        background: var(--wh);
+        color: var(--tx);
+        font-size: 13px;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        cursor: pointer;
+        white-space: nowrap;
+        transition: background .16s ease, border-color .16s ease, box-shadow .16s ease;
+    }
+    .lhn-act-btn:hover:not(:disabled) {
+        background: var(--bd2);
+    }
+    .lhn-act-btn:disabled {
+        opacity: .6;
+        cursor: not-allowed;
+    }
+    .lhn-act-btn-primary {
+        background: var(--bl);
+        border-color: var(--bl);
+        color: #fff;
+        box-shadow: 0 4px 12px rgba(18, 103, 232, .28);
+    }
+    .lhn-act-btn-primary:hover:not(:disabled) {
+        background: #0F58CC;
+        border-color: #0F58CC;
+    }
+    .dark .lhn-act-btn {
+        background: #1e293b;
+        border-color: #334155;
+        color: #cbd5e1;
+    }
+    .dark .lhn-act-btn:hover:not(:disabled) {
+        background: #334155;
+    }
+    .dark .lhn-act-btn-primary {
+        background: var(--bl);
+        border-color: var(--bl);
+        color: #fff;
+    }
+
+    .form-field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+    .form-field label {
+        font-size: 12px;
+        font-weight: 700;
+        color: #475569;
+    }
+    .dark .form-field label {
+        color: #cbd5e1;
+    }
+    /* :not(...) để khỏi thổi checkbox 'Ca lấy nguyên liệu' lên cỡ ô nhập */
+    .form-field input:not([type="checkbox"]):not([type="radio"]),
+    .form-field select,
+    .form-field textarea {
+        height: 38px;
+        border: 1px solid #CBD5E1;
+        border-radius: 8px;
+        padding: 0 12px;
+        font-size: 13px;
+        background: #fff;
+        color: var(--tx);
+        outline: none;
+    }
+    .form-field input[type="checkbox"],
+    .form-field input[type="radio"] {
+        width: 14px;
+        height: 14px;
+        padding: 0;
+        flex: 0 0 auto;
+    }
+    .form-field input:not([type="checkbox"]):not([type="radio"]):focus,
+    .form-field select:focus {
+        border-color: var(--bl);
+        box-shadow: 0 0 0 3px rgba(18, 103, 232, .12);
+    }
+    .dark .form-field input,
+    .dark .form-field select,
+    .dark .form-field textarea {
+        border-color: #334155;
+        background: #1e293b;
+        color: #fff;
     }
 
     /* step wizard */
@@ -1003,11 +1100,13 @@
                         <p style="font-size: 12px; color: var(--mu); margin-top:2px;">{{ __('list_hang.po.subtitle') }}</p>
                     </div>
                     <div class="flex gap-2">
-                        <button type="button" class="wh-action-btn" wire:click="goBackToList">
+                        <button type="button" class="lhn-act-btn" wire:click="goBackToList">
                             <i class="fa-solid fa-arrow-left"></i>{{ __('list_hang.actions.back') }}
                         </button>
-                        <button type="button" class="wh-action-btn wh-action-btn-primary" wire:click="createOrders" wire:loading.attr="disabled" wire:target="createOrders">
-                            <i class="fa-solid fa-paper-plane"></i>{{ __('list_hang.actions.create_send') }}
+                        <button type="button" class="lhn-act-btn lhn-act-btn-primary" wire:click="createOrders" wire:loading.attr="disabled" wire:target="createOrders">
+                            <i class="fa-solid fa-paper-plane" wire:loading.remove wire:target="createOrders"></i>
+                            <i class="fa-solid fa-spinner fa-spin" wire:loading wire:target="createOrders"></i>
+                            {{ __('list_hang.actions.create_send') }}
                         </button>
                     </div>
                 </div>
