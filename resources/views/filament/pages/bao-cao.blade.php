@@ -2,8 +2,8 @@
     
 <style>
     :root {
-        --po-bl: {{ \App\Models\Setting::get('primary_color', '#267DC1') }};
-        --po-bl-d: {{ \App\Models\Setting::get('primary_color', '#267DC1') }};
+        --po-bl: #1267E8;
+        --po-bl-d: #1267E8;
         --po-bl-s: #E9F2F8;
         --po-bl-m: #A8CBE6;
         --po-gn: #059669;

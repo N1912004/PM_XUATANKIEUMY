@@ -47,7 +47,7 @@ class AdminPanelProvider extends PanelProvider
             ->login(Login::class)
             ->profile(EditProfile::class)
             ->sidebarCollapsibleOnDesktop()
-            ->sidebarWidth('15rem')
+            ->sidebarWidth('13.75rem')
             ->collapsedSidebarWidth('4rem')
             ->brandName($siteName)
             ->brandLogo(fn () => request()->routeIs('filament.admin.auth.login') ? new HtmlString('') : view('filament.components.brand-logo', ['siteName' => $this->getSetting('site_name', 'Bluefire Catering')]))
@@ -84,7 +84,7 @@ class AdminPanelProvider extends PanelProvider
                 fn (): string => Blade::render("@vite(['resources/css/app.css', 'resources/js/app.js'])"),
             )
             ->colors([
-                'primary' => $this->getSetting('primary_color', '#267DC1'),
+                'primary' => '#1267E8',
             ])
             ->font('Inter')
             ->renderHook(
@@ -156,10 +156,10 @@ class AdminPanelProvider extends PanelProvider
 
                         /* Parent menu group labels (menu cha) - Extra Bold and High Contrast */
                         .fi-sidebar-group-label {
-                            color: #111827 !important; /* Slate-900 */
-                            font-weight: 800 !important; /* Extra Bold */
-                            font-size: 0.78rem !important;
-                            letter-spacing: 0.05em !important;
+                            color: #94A3B8 !important;
+                            font-weight: 700 !important;
+                            font-size: 0.625rem !important;
+                            letter-spacing: 0.08em !important;
                             text-transform: uppercase !important;
                         }
                         .dark .fi-sidebar-group-label {
@@ -174,15 +174,15 @@ class AdminPanelProvider extends PanelProvider
 
                         /* Base inactive menu item styling - darker, crisp, and bold */
                         .fi-sidebar-item-button {
-                            font-size: 0.92rem !important;
-                            letter-spacing: -0.01em !important;
+                            font-size: 0.8125rem !important;
+                            letter-spacing: 0 !important;
                             transition: all 0.2s ease !important;
                         }
                         
                         /* Inactive menu item text color and font weight (excluding icons) */
                         .fi-sidebar-item:not(.fi-active):not(.fi-sidebar-item-active) .fi-sidebar-item-label {
-                            color: #1f2937 !important; /* Slate-800 */
-                            font-weight: 600 !important;
+                            color: #334155 !important;
+                            font-weight: 500 !important;
                         }
 
                         /* Inactive items: Dark Mode base style */
@@ -218,7 +218,7 @@ class AdminPanelProvider extends PanelProvider
                         .fi-sidebar-item-active > a {
                             background-color: rgb(var(--primary-600)) !important;
                             color: #ffffff !important;
-                            font-weight: 600 !important;
+                            font-weight: 500 !important;
                             box-shadow: 0 4px 6px -1px rgba(var(--primary-600), 0.2), 0 2px 4px -2px rgba(var(--primary-600), 0.2) !important;
                         }
                         
@@ -263,9 +263,9 @@ class AdminPanelProvider extends PanelProvider
                          * Khi Active: Chuyển sang khung mờ trắng + Icon trắng tinh trên nền primary gradient.
                          */
                         .fi-sidebar-item-icon {
-                            width: 1.65rem !important;
-                            height: 1.65rem !important;
-                            padding: 0.22rem !important;
+                            width: 1.5rem !important;
+                            height: 1.5rem !important;
+                            padding: 0.3125rem !important;
                             border-radius: 0.375rem !important;
                             flex-shrink: 0 !important;
                             transition: all 0.15s ease !important;
@@ -515,15 +515,20 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->navigationGroups([
                 NavigationGroup::make()
-                    ->label(fn () => __('catalog.groups.ingredients_inventory')),
+                    ->label(fn () => __('catalog.groups.ingredients_inventory'))
+                    ->collapsible(false),
                 NavigationGroup::make()
-                    ->label(fn () => __('catalog.groups.supply_inventory')),
+                    ->label(fn () => __('catalog.groups.supply_inventory'))
+                    ->collapsible(false),
                 NavigationGroup::make()
-                    ->label(fn () => __('catalog.groups.area_kitchen')),
+                    ->label(fn () => __('catalog.groups.area_kitchen'))
+                    ->collapsible(false),
                 NavigationGroup::make()
-                    ->label(fn () => __('catalog.groups.kitchen_operations')),
+                    ->label(fn () => __('catalog.groups.kitchen_operations'))
+                    ->collapsible(false),
                 NavigationGroup::make()
-                    ->label(fn () => __('catalog.groups.hr')),
+                    ->label(fn () => __('catalog.groups.hr'))
+                    ->collapsible(false),
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([

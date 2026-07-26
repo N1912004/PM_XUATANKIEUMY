@@ -23,9 +23,6 @@ return [
         'logo_helper' => 'Logo displayed on sidebar. Recommended: PNG/SVG, transparent background, 200x60px.',
         'favicon' => 'Favicon',
         'favicon_helper' => 'Small icon displayed on browser tab. Recommended: SVG or PNG 32x32px.',
-        'primary_color' => 'Primary Color',
-        'primary_color_desc' => 'Customize UI colors.',
-        'primary_color_helper' => 'Main color for buttons, links, and highlighted UI elements.',
     ],
     'company' => [
         'title' => 'Company Details',

@@ -52,7 +52,6 @@ class SystemSettings extends Page implements HasForms
             'company_address' => Setting::get('company_address'),
             'company_phone' => Setting::get('company_phone'),
             'company_email' => Setting::get('company_email'),
-            'primary_color' => Setting::get('primary_color', '#267DC1'),
         ]);
     }
 
@@ -114,15 +113,6 @@ class SystemSettings extends Page implements HasForms
                                             ->maxSize(1024)
                                             ->helperText(__('settings.branding.favicon_helper')),
                                     ]),
-
-                                Forms\Components\Section::make(__('settings.branding.primary_color'))
-                                    ->description(__('settings.branding.primary_color_desc'))
-                                    ->icon('heroicon-o-swatch')
-                                    ->schema([
-                                        Forms\Components\ColorPicker::make('primary_color')
-                                            ->label(__('settings.branding.primary_color'))
-                                            ->helperText(__('settings.branding.primary_color_helper')),
-                                    ]),
                             ]),
 
                         // Tab 2: Công ty
@@ -171,7 +161,6 @@ class SystemSettings extends Page implements HasForms
             'site_description' => 'branding',
             'site_logo' => 'branding',
             'site_favicon' => 'branding',
-            'primary_color' => 'branding',
             'company_name' => 'company',
             'company_address' => 'company',
             'company_phone' => 'company',

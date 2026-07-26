@@ -1,7 +1,7 @@
 <style>
     :root {
-        --bl: {{ \App\Models\Setting::get('primary_color', '#267DC1') }};
-        --bl-d: {{ \App\Models\Setting::get('primary_color', '#267DC1') }};
+        --bl: #1267E8;
+        --bl-d: #1267E8;
         --bl-s: #E9F2F8;
         --bl-m: #A8CBE6;
         --gn: #059669;

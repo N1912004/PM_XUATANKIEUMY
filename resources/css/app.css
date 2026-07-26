@@ -127,6 +127,190 @@ button.fi-fo-toggle[aria-checked="false"] > span {
   --r:14px;--sb:220px;--tb:62px;--fb:64px;
 }
 
+/* Sidebar follows the compact geometry used by bluefire_demo.html. */
+.fi-sidebar {
+  width: 4rem !important;
+  border-right: 1px solid var(--bd) !important;
+  background: var(--wh) !important;
+  transition: width 0.2s ease, transform 0.2s ease !important;
+}
+
+.fi-sidebar.fi-sidebar-open {
+  width: var(--sb) !important;
+}
+
+.fi-sidebar-header {
+  height: var(--tb) !important;
+  min-height: var(--tb) !important;
+  padding: 0 16px !important;
+  border-bottom: 1px solid var(--bd) !important;
+  box-shadow: none !important;
+  --tw-ring-shadow: 0 0 #0000 !important;
+}
+
+.fi-sidebar-nav {
+  gap: 0 !important;
+  padding: 12px 8px 8px !important;
+  scrollbar-gutter: auto !important;
+  scrollbar-width: thin;
+  scrollbar-color: var(--bd) transparent;
+}
+
+.fi-sidebar-nav::-webkit-scrollbar {
+  width: 3px;
+}
+
+.fi-sidebar-nav::-webkit-scrollbar-thumb {
+  border-radius: 4px;
+  background: var(--bd);
+}
+
+.fi-sidebar-nav-groups {
+  width: 100% !important;
+  gap: 2px !important;
+  margin: 0 !important;
+}
+
+.fi-sidebar-group {
+  gap: 0 !important;
+  margin-bottom: 2px !important;
+}
+
+.fi-sidebar-group-button {
+  min-height: 0 !important;
+  padding: 8px 10px 4px !important;
+  cursor: default !important;
+}
+
+.fi-sidebar-group-label {
+  color: var(--fa) !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  line-height: 14px !important;
+  letter-spacing: 0.08em !important;
+}
+
+.fi-sidebar-group-items,
+.fi-sidebar-item {
+  gap: 0 !important;
+}
+
+.fi-sidebar-item-button {
+  justify-content: flex-start !important;
+  width: 100% !important;
+  height: 38px !important;
+  min-height: 38px !important;
+  gap: 9px !important;
+  padding: 0 9px !important;
+  border-radius: 8px !important;
+  color: var(--su) !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  line-height: 1.25 !important;
+  letter-spacing: 0 !important;
+  transition: 0.13s ease !important;
+}
+
+.fi-sidebar:not(.fi-sidebar-open) .fi-sidebar-item-button {
+  justify-content: center !important;
+  gap: 0 !important;
+  padding: 0 !important;
+}
+
+.fi-sidebar-item-label {
+  font-size: 13px !important;
+  line-height: 1.25 !important;
+}
+
+.fi-sidebar-item:not(.fi-active):not(.fi-sidebar-item-active) .fi-sidebar-item-label {
+  color: var(--su) !important;
+  font-weight: 500 !important;
+}
+
+.fi-sidebar-item:not(.fi-active):not(.fi-sidebar-item-active) > .fi-sidebar-item-button:hover {
+  background: var(--bd2) !important;
+  color: var(--tx) !important;
+}
+
+.fi-sidebar-item-icon {
+  width: 24px !important;
+  height: 24px !important;
+  padding: 5px !important;
+  border-radius: 6px !important;
+}
+
+.fi-sidebar-item.fi-active > .fi-sidebar-item-button,
+.fi-sidebar-item-active > .fi-sidebar-item-button,
+.fi-sidebar-item-active > a,
+.fi-sidebar-item-button[aria-current='page'] {
+  background: linear-gradient(135deg, #1474FF, #0059DD) !important;
+  color: #fff !important;
+  font-weight: 500 !important;
+  box-shadow: 0 6px 16px rgba(18, 103, 232, 0.22) !important;
+}
+
+.fi-sidebar-item.fi-active > .fi-sidebar-item-button:hover,
+.fi-sidebar-item-active > .fi-sidebar-item-button:hover,
+.fi-sidebar-item-active > a:hover {
+  background: linear-gradient(135deg, #105FCC, #004FC4) !important;
+}
+
+.fi-sidebar-item.fi-active .fi-sidebar-item-icon,
+.fi-sidebar-item-active .fi-sidebar-item-icon,
+.fi-sidebar-item-button[aria-current='page'] .fi-sidebar-item-icon {
+  background: rgba(255, 255, 255, 0.2) !important;
+  color: #fff !important;
+}
+
+.fi-sidebar > .border-t {
+  padding: 8px !important;
+  border-color: var(--bd) !important;
+  background: var(--wh) !important;
+}
+
+.sidebar-footer-settings-btn {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  height: 38px;
+  gap: 9px;
+  padding: 0 9px;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--su);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.25;
+  text-decoration: none;
+  transition: 0.13s ease;
+}
+
+.sidebar-footer-settings-btn:hover {
+  background: var(--bd2);
+  color: var(--tx);
+}
+
+.sidebar-footer-settings-icon {
+  width: 24px;
+  height: 24px;
+  padding: 5px;
+  border-radius: 6px;
+  flex-shrink: 0;
+  background: var(--bd2);
+  color: var(--mu);
+}
+
+.fi-sidebar:not(.fi-sidebar-open) .sidebar-footer-settings-btn {
+  justify-content: center;
+  gap: 0;
+  padding: 0;
+}
+
+.fi-sidebar:not(.fi-sidebar-open) .sidebar-footer-settings-btn span {
+  display: none;
+}
+
 /* Base Body Background & Typography */
 body, .fi-body, .fi-main {
   font-family: 'Inter', system-ui, -apple-system, sans-serif !important;

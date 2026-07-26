@@ -502,11 +502,11 @@
         <div class="tcard" style="overflow-x:auto">
             <table class="grid-table" style="width:100%; border-collapse:collapse; min-width:900px">
                 <thead>
-                    <tr style="background:var(--po-bl, {{ \App\Models\Setting::get('primary_color', '#267DC1') }}); color:#fff">
-                        <th colspan="2" style="padding:10px 12px; text-align:center; min-width:160px; position:sticky; left:0; z-index:3; background:var(--po-bl, {{ \App\Models\Setting::get('primary_color', '#267DC1') }}); color:#fff; font-size:12px; font-weight:800">{{ __('menu.week_form.shift_day') }}</th>
+                    <tr style="background:var(--po-bl, #1267E8); color:#fff">
+                        <th colspan="2" style="padding:10px 12px; text-align:center; min-width:160px; position:sticky; left:0; z-index:3; background:var(--po-bl, #1267E8); color:#fff; font-size:12px; font-weight:800">{{ __('menu.week_form.shift_day') }}</th>
                         @php $weekDays = $this->weekDays; @endphp
                         @foreach($weekDays as $d => $wDay)
-                            <th style="padding:10px 12px; text-align:center; min-width:140px; background:var(--po-bl, {{ \App\Models\Setting::get('primary_color', '#267DC1') }}); color:#fff; border-left:1px solid rgba(255,255,255,.15)">
+                            <th style="padding:10px 12px; text-align:center; min-width:140px; background:var(--po-bl, #1267E8); color:#fff; border-left:1px solid rgba(255,255,255,.15)">
                                 <div style="font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:.02em">
                                     {{ $wDay['day_name'] }}
                                 </div>
