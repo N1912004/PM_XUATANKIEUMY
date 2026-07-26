@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800&display=swap');
 /* Font Awesome bundle qua Vite — thay cho <link> CDN cdnjs rải trong từng blade (SPA-safe, dùng được offline) */
 @import '@fortawesome/fontawesome-free/css/all.min.css';
 @import 'tailwindcss';
@@ -9,7 +9,7 @@
 @source '../**/*.js';
 
 @theme {
-    --font-sans: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+    --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
         
     --text-2xs: 0.6875rem;
@@ -28,6 +28,7 @@
     --font-weight-medium: 500;
     --font-weight-semibold: 600;
     --font-weight-bold: 700;
+    --font-weight-extrabold: 800;
 }
 
 /* Fix xung đột dịch chuyển (translate) giữa Tailwind v3 của Filament và Tailwind v4 của dự án
@@ -514,7 +515,11 @@ div[wire\:key*="selection-indicator"] {
   background: #F8FAFC !important;
 }
 
-.fi-ta-header-cell {
+.fi-ta-header-cell,
+.fi-ta-header-cell *,
+.fi-ta-header-cell-label,
+.fi-ta-header-cell button,
+.fi-ta-header-cell span {
   padding: 10px 12px !important;
   font-size: 11px !important;
   font-weight: 700 !important;
@@ -543,10 +548,17 @@ div[wire\:key*="selection-indicator"] {
    here as well would stack on top of that inner px-3 and push every value 12px right of its
    column heading — so the vertical rhythm is set here and the horizontal offset is left to
    .fi-ta-text alone. */
-.fi-ta-cell {
-  padding: 0 !important;
+.fi-ta-cell,
+.fi-ta-cell *,
+.fi-ta-text-item,
+.fi-ta-text-item-label,
+.fi-ta-text-item span {
   vertical-align: middle !important;
   font-size: 13px !important;
+}
+
+.fi-ta-cell {
+  padding: 0 !important;
 }
 
 .fi-ta-table .fi-ta-text {
