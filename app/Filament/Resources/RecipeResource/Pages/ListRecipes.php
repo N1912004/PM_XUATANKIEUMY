@@ -357,7 +357,7 @@ class ListRecipes extends Page
         return Actions\Action::make('export')
             ->label(__('recipe.actions.export'))
             ->icon('heroicon-o-document-arrow-down')
-            ->color('gray')
+            ->color('success')
             ->action(fn () => Excel::download(
                 new RecipeExport($this->buildRecipesQuery()),
                 'ngan-hang-thuc-don-'.now()->format('Ymd-His').'.xlsx',

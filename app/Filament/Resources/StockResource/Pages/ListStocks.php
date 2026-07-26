@@ -14,6 +14,7 @@ use App\Models\Stock;
 use App\Models\StockTransaction;
 use App\Models\StockTransfer;
 use App\Models\StockTransferItem;
+use App\Models\User;
 use Carbon\Carbon;
 use Filament\Actions;
 use Filament\Notifications\Notification;
@@ -37,6 +38,11 @@ class ListStocks extends ListRecords
         return __('warehouse.title');
     }
 
+    public function getBreadcrumbs(): array
+    {
+        return [];
+    }
+
     public function getSubheading(): ?string
     {
         return __('warehouse.subheading');
@@ -48,9 +54,11 @@ class ListStocks extends ListRecords
 
     public string $selectedType = '';
 
+    public string $selectedSort = 'latest';
+
     public int $perPage = 10;
 
-    public ?int $selectedKitchenId = null;
+    public int|string|null $selectedKitchenId = null;
 
     // End day check properties
     public ?string $checkDate = null;
@@ -127,8 +135,8 @@ class ListStocks extends ListRecords
         $this->prodDate = now()->toDateString();
         $this->outReason = __('warehouse.notes.default_out_reason');
 
-        $this->selectedKitchenId = auth()->user()?->currentKitchenId();
-        $kitchenId = $this->selectedKitchenId;
+        $this->selectedKitchenId = session('active_kitchen_id') ?? auth()->user()?->currentKitchenId() ?? 'all';
+        $kitchenId = is_numeric($this->selectedKitchenId) ? (int) $this->selectedKitchenId : null;
 
         // actualQuantities khởi tạo LAZY khi user mở tab kiểm kê (setTab('check'))
         // — không nạp toàn bộ bảng Stock vào payload Livewire cho mọi lần vào trang
@@ -170,12 +178,59 @@ class ListStocks extends ListRecords
             $this->selectedPOId = (int) $poId;
             $this->loadPOItems();
         }
+
+    }
+
+    public function formatQty(float|int|string|null $value): string
+    {
+        $val = (float) ($value ?? 0);
+        $formatted = number_format($val, 2, ',', '.');
+
+        return str_ends_with($formatted, ',00') ? substr($formatted, 0, -3) : rtrim($formatted, '0');
     }
 
     public function updatedSelectedKitchenId($value): void
     {
-        session(['active_kitchen_id' => $value ? (int) $value : null]);
-        $this->redirect(request()->header('Referer') ?? request()->url());
+        if ($value === 'all' || empty($value)) {
+            session(['active_kitchen_id' => 'all']);
+            $this->selectedKitchenId = 'all';
+        } else {
+            session(['active_kitchen_id' => (int) $value]);
+            $this->selectedKitchenId = (int) $value;
+        }
+
+        // Đổi bếp KHÔNG reload cả trang (trước dùng redirect) — mọi getter đọc currentKitchenId()
+        // qua session nên Livewire tự render lại đúng bếp. Chỉ cần dọn cache/ state theo bếp cũ:
+        $kitchenId = is_numeric($this->selectedKitchenId) ? (int) $this->selectedKitchenId : null;
+
+        // Cache dữ liệu theo bếp — phải xóa để nạp lại theo bếp mới
+        $this->checkStocksCache = null;
+        $this->systemQtyCache = [];
+
+        // Bếp nhận mặc định (điều chuyển) phải khác bếp nguồn mới
+        $firstKitchen = Kitchen::where('id', '!=', $kitchenId)->first();
+        $this->destKitchenId = $firstKitchen?->id;
+
+        // Đóng mọi luồng nhập/xuất/kiểm kê đang mở dở của bếp cũ + xóa dữ liệu form theo bếp
+        $this->inMode = null;
+        $this->outMode = null;
+        $this->selectedPOId = null;
+        $this->poItemsData = [];
+        $this->directItemsData = [];
+        $this->prodItemsData = [];
+        $this->transferItemsData = [];
+        $this->actualQuantities = [];
+        $this->checkNotes = [];
+        $this->selectedLedgerIngId = null;
+        $this->ledgerTransactions = [];
+
+        // Nếu đang ở tab kiểm kê thì nạp lại tồn hệ thống của bếp mới
+        if ($this->warehouseTab === 'check') {
+            $this->initEndDayCheck();
+        }
+
+        $this->resetPage();
+        $this->resetPage('logPage');
     }
 
     protected function getHeaderActions(): array
@@ -189,8 +244,7 @@ class ListStocks extends ListRecords
                 ->action(fn () => $this->openInTypeModal()),
             Actions\Action::make('create_out')
                 ->label(__('warehouse.actions.create_out'))
-                ->color('gray')
-                ->outlined()
+                ->color('primary')
                 ->icon('heroicon-o-document-arrow-up')
                 ->action(fn () => $this->openOutTypeModal()),
             Actions\Action::make('check_end_day')
@@ -199,9 +253,6 @@ class ListStocks extends ListRecords
                 ->outlined()
                 ->icon('heroicon-o-clipboard-document-check')
                 ->action(fn () => $this->setTab('check')),
-            Actions\CreateAction::make()
-                ->label(__('warehouse.actions.create_stock'))
-                ->color('primary'),
         ];
     }
 
@@ -218,10 +269,16 @@ class ListStocks extends ListRecords
     public function setTab(string $tab): void
     {
         $this->warehouseTab = $tab;
+        $this->selectedType = '';
+        $this->search = '';
+        $this->checkStocksCache = null;
+        $this->resetPage();
+        $this->resetPage('logPage');
 
         if ($tab === 'check' && $this->actualQuantities === []) {
             $this->initEndDayCheck();
         }
+
     }
 
     /** Nạp tồn HỆ THỐNG CỦA NGÀY KIỂM KÊ vào form (chỉ khi mở tab / đổi ngày). */
@@ -266,17 +323,37 @@ class ListStocks extends ListRecords
         }
 
         $stocks = $this->getCheckStocks();
+
+        // Điều chỉnh kiểm kê CỦA CHÍNH ngày này (voucher KK-<ngày>) là phần chốt của ngày đó,
+        // KHÔNG phải biến động "sau ngày" — nếu tính nó vào, lưu lại cùng số đếm cho ngày quá khứ
+        // sẽ trừ tồn thêm mỗi lần (không idempotent). Loại ra để diff hội tụ về 0.
+        $selfCheckVoucher = 'KK-'.Carbon::parse($date)->format('Ymd');
+
+        // Gộp theo CẢ (ingredient_id, kitchen_id): một nguyên liệu có thể tồn ở nhiều bếp
+        // (admin xem "tất cả bếp"), gộp chỉ theo ingredient_id sẽ trừ chồng biến động của bếp khác.
         $after = StockTransaction::query()
             ->whereIn('ingredient_id', $stocks->pluck('ingredient_id'))
             ->whereIn('kitchen_id', $stocks->pluck('kitchen_id')->unique())
             ->where('created_at', '>=', Carbon::parse($date)->addDay()->startOfDay())
-            ->groupBy('ingredient_id')
-            ->selectRaw('ingredient_id, SUM(quantity) as delta')
-            ->pluck('delta', 'ingredient_id');
+            // Chỉ loại điều chỉnh KK của CHÍNH ngày này; giữ mọi biến động khác (kể cả
+            // voucher NULL — SQL 'NULL != x' ra NULL nên phải OR whereNull, không thì mất dòng).
+            ->where(function ($q) use ($selfCheckVoucher): void {
+                $q->whereNull('voucher_code')
+                    ->orWhere('voucher_code', '!=', $selfCheckVoucher);
+            })
+            ->groupBy('ingredient_id', 'kitchen_id')
+            ->selectRaw('ingredient_id, kitchen_id, SUM(quantity) as delta')
+            ->get();
+
+        $deltaByStock = [];
+        foreach ($after as $row) {
+            $deltaByStock[$row->ingredient_id.'-'.$row->kitchen_id] = (float) $row->delta;
+        }
 
         $result = [];
         foreach ($stocks as $stock) {
-            $result[$stock->id] = (float) $stock->quantity - (float) ($after[$stock->ingredient_id] ?? 0);
+            $delta = $deltaByStock[$stock->ingredient_id.'-'.$stock->kitchen_id] ?? 0;
+            $result[$stock->id] = (float) $stock->quantity - $delta;
         }
 
         return $this->systemQtyCache[$date] = $result;
@@ -306,8 +383,21 @@ class ListStocks extends ListRecords
 
         $kitchenId = auth()->user()?->currentKitchenId();
 
-        return $this->checkStocksCache = Stock::with('ingredient')
+        return $this->checkStocksCache = Stock::with(['ingredient.typeRelation'])
+            ->whereHas('ingredient')
             ->when($kitchenId, fn ($q) => $q->where('kitchen_id', $kitchenId))
+            ->when(! empty($this->search), function ($query) {
+                $searchLower = '%'.strtolower($this->search).'%';
+                $query->whereHas('ingredient', function ($q) use ($searchLower) {
+                    $q->whereRaw('LOWER(name) LIKE ?', [$searchLower])
+                        ->orWhereRaw('LOWER(code) LIKE ?', [$searchLower]);
+                });
+            })
+            ->when(! empty($this->selectedType), function ($query) {
+                $query->whereHas('ingredient.typeRelation', function ($q) {
+                    $q->where('name', $this->selectedType);
+                });
+            })
             ->get();
     }
 
@@ -327,9 +417,22 @@ class ListStocks extends ListRecords
     /** @var \Illuminate\Support\Collection|null Memo 1 render — options bộ lọc loại NL từ bảng danh mục */
     protected $ingredientTypesCache = null;
 
-    public function getIngredientTypeOptions()
+    public function getIngredientTypeOptions(): array
     {
-        return $this->ingredientTypesCache ??= IngredientType::orderBy('name')->pluck('name');
+        if ($this->warehouseTab === 'log') {
+            $types = [
+                __('warehouse.transaction_types.inbound'),
+                __('warehouse.transaction_types.external_inbound'),
+                __('warehouse.transaction_types.outbound'),
+                __('warehouse.transaction_types.transfer_out'),
+                __('warehouse.transaction_types.transfer_in'),
+                __('warehouse.transaction_types.stock_check'),
+            ];
+
+            return array_values(array_unique($types));
+        }
+
+        return IngredientType::orderBy('name')->pluck('name')->all();
     }
 
     public function openInTypeModal(): void
@@ -527,6 +630,9 @@ class ListStocks extends ListRecords
             return;
         }
 
+        $kitchenId = auth()->user()?->currentKitchenId() ?? $po->kitchen_id;
+        $stocks = Stock::where('kitchen_id', $kitchenId)->pluck('quantity', 'ingredient_id');
+
         $this->poItemsData = [];
         foreach ($po->items as $item) {
             $this->poItemsData[] = [
@@ -534,6 +640,7 @@ class ListStocks extends ListRecords
                 'ingredient_id' => $item->ingredient_id,
                 'name' => $item->ingredient->name,
                 'unit' => $item->ingredient->unit,
+                'current_stock' => (float) ($stocks[$item->ingredient_id] ?? 0),
                 'quantity_ordered' => (float) $item->quantity_ordered,
                 'quantity_received' => (float) $item->quantity_ordered, // Pre-filled default
                 'unit_price' => (float) $item->unit_price,
@@ -578,10 +685,30 @@ class ListStocks extends ListRecords
             }
         }
 
-        $done = DB::transaction(function (): bool {
+        $userKitchenId = auth()->user()?->currentKitchenId();
+
+        foreach ($this->poItemsData as $itemData) {
+            if ((float) ($itemData['quantity_received'] ?? 0) < 0 || (float) ($itemData['unit_price'] ?? 0) < 0) {
+                Notification::make()
+                    ->title(__('warehouse.notifications.negative_stock_title'))
+                    ->body(__('Số lượng và đơn giá không được là số âm'))
+                    ->danger()
+                    ->send();
+
+                return;
+            }
+        }
+
+        $done = DB::transaction(function () use ($userKitchenId): bool {
             // Khóa PO và kiểm tra lại trạng thái NGAY TRONG transaction:
             // bấm đúp / 2 người cùng xác nhận thì người sau thấy stocked_at đã có và dừng.
-            $po = PurchaseOrder::query()->whereKey($this->selectedPOId)->lockForUpdate()->first();
+            // Chỉ nhận PO thuộc ĐÚNG bếp của user (Shield policy không xét kitchen — payload
+            // client có thể trỏ sang PO của bếp khác); admin (kitchen null) không giới hạn.
+            $po = PurchaseOrder::query()
+                ->whereKey($this->selectedPOId)
+                ->when($userKitchenId, fn ($q) => $q->where('kitchen_id', $userKitchenId))
+                ->lockForUpdate()
+                ->first();
 
             if (! $po) {
                 Notification::make()->title(__('warehouse.notifications.po_not_found'))->danger()->send();
@@ -589,13 +716,15 @@ class ListStocks extends ListRecords
                 return false;
             }
 
-            if ($po->status === 'done' || $po->stocked_at !== null) {
+            // Chỉ PO đang chờ nhập mới được nhập kho — chặn draft/cancelled bị flip thẳng sang done,
+            // và done/stocked (bấm đúp, 2 người) thì dừng.
+            if (! in_array($po->status, ['sent', 'checking'], true) || $po->stocked_at !== null) {
                 Notification::make()->title(__('warehouse.notifications.po_already_stocked'))->warning()->send();
 
                 return false;
             }
 
-            $kitchenId = auth()->user()?->currentKitchenId() ?? $po->kitchen_id;
+            $kitchenId = $userKitchenId ?? $po->kitchen_id;
 
             foreach ($this->poItemsData as $itemData) {
                 $qtyReceived = (float) ($itemData['quantity_received'] ?? 0);
@@ -699,6 +828,18 @@ class ListStocks extends ListRecords
     {
         abort_unless(StockResource::canCreate(), 403);
 
+        foreach ($this->directItemsData as $item) {
+            if ((float) ($item['quantity'] ?? 0) < 0 || (float) ($item['unit_price'] ?? 0) < 0) {
+                Notification::make()
+                    ->title(__('warehouse.notifications.negative_stock_title'))
+                    ->body(__('Số lượng và đơn giá không được là số âm'))
+                    ->danger()
+                    ->send();
+
+                return;
+            }
+        }
+
         if (empty($this->directItemsData)) {
             Notification::make()->title(__('warehouse.notifications.add_at_least_one_item'))->danger()->send();
 
@@ -720,23 +861,38 @@ class ListStocks extends ListRecords
             ],
         );
 
+        // Fail-closed: nhập kho trực tiếp phải gắn ĐÚNG một bếp. Admin xem "tất cả bếp" (kitchen null)
+        // hay thủ kho chưa gắn bếp đều không được ghi tồn vào kitchen_id null (tồn "vô chủ").
         $kitchenId = auth()->user()?->currentKitchenId();
+        if (! $kitchenId) {
+            Notification::make()
+                ->title(__('warehouse.notifications.select_specific_kitchen'))
+                ->warning()
+                ->send();
+
+            return;
+        }
+
+        // Lọc dòng hợp lệ TRƯỚC khi lưu file — tránh lưu hóa đơn mồ côi + báo thành công giả khi
+        // mọi dòng đều qty ≤ 0.
+        $validItems = array_filter($this->directItemsData, function ($item): bool {
+            return ! empty($item['ingredient_id']) && (float) ($item['quantity'] ?? 0) > 0;
+        });
+
+        if ($validItems === []) {
+            Notification::make()->title(__('warehouse.notifications.add_at_least_one_item'))->danger()->send();
+
+            return;
+        }
+
         $path = $this->directInvoiceFile->store('stock-vouchers', 'public');
 
-        foreach ($this->directItemsData as $itemData) {
-            $ingId = $itemData['ingredient_id'];
-            $qty = (float) ($itemData['quantity'] ?? 0);
-            $price = (float) ($itemData['unit_price'] ?? 0);
-
-            if (! $ingId || $qty <= 0) {
-                continue;
-            }
-
+        foreach ($validItems as $itemData) {
             Stock::recordExternalInbound(
                 kitchenId: $kitchenId,
-                ingredientId: $ingId,
-                quantity: $qty,
-                unitPrice: $price,
+                ingredientId: $itemData['ingredient_id'],
+                quantity: (float) $itemData['quantity'],
+                unitPrice: (float) ($itemData['unit_price'] ?? 0),
                 attachmentUrl: $path,
                 note: __('warehouse.notes.direct_inbound')
             );
@@ -797,6 +953,13 @@ class ListStocks extends ListRecords
                     ];
                 }
             }
+        }
+
+        if (! empty($this->search)) {
+            $searchLower = strtolower($this->search);
+            $ingredients = array_filter($ingredients, function ($item) use ($searchLower) {
+                return str_contains(strtolower($item['name']), $searchLower);
+            });
         }
 
         $this->prodItemsData = array_values($ingredients);
@@ -960,10 +1123,18 @@ class ListStocks extends ListRecords
             return;
         }
 
+        // Chặn tự-điều-chuyển: bếp nhận trùng bếp xuất là vô nghĩa (đóng băng rồi cộng lại chính
+        // tồn của mình) — UI ẩn bếp mình nhưng payload có thể giả, phải chặn server-side.
+        if ((int) $this->destKitchenId === (int) $sourceKitchenId) {
+            Notification::make()->title(__('warehouse.notifications.select_destination_kitchen'))->danger()->send();
+
+            return;
+        }
+
         // Chặn server-side: bếp nhận phải CÙNG KHU VỰC với bếp xuất (không tin select đã lọc ở UI)
         $sourceAreaId = Kitchen::whereKey($sourceKitchenId)->value('area_id');
         $destAreaId = Kitchen::whereKey($this->destKitchenId)->value('area_id');
-        if ($sourceAreaId && $destAreaId !== $sourceAreaId) {
+        if ($destAreaId !== $sourceAreaId) {
             Notification::make()
                 ->title(__('warehouse.notifications.cross_area_transfer_title'))
                 ->body(__('warehouse.notifications.cross_area_transfer_body'))
@@ -1056,17 +1227,68 @@ class ListStocks extends ListRecords
             return;
         }
 
-        // Chỉ BẾP NHẬN mới được xác nhận nhận hàng (blade chỉ ẩn nút — không đủ, phải chặn server-side)
-        $kitchenId = auth()->user()?->currentKitchenId();
-        if ($kitchenId !== null && (int) $transfer->dest_kitchen_id !== (int) $kitchenId) {
+        // Chỉ BẾP NHẬN mới được xác nhận nhận hàng (blade chỉ ẩn nút — không đủ, phải chặn server-side).
+        // Fail-closed: kitchen null hợp lệ CHỈ với admin (xem "tất cả bếp"); thủ kho chưa gắn bếp
+        // (kitchen null) KHÔNG được xác nhận thay bếp khác.
+        $user = auth()->user();
+        $isAdmin = (bool) $user?->hasRole([User::superAdminRole(), 'Quản trị viên']);
+        $kitchenId = $user?->currentKitchenId();
+
+        $allowed = $isAdmin || ($kitchenId !== null && (int) $transfer->dest_kitchen_id === (int) $kitchenId);
+        if (! $allowed) {
             Notification::make()->title(__('warehouse.notifications.only_destination_can_receive'))->danger()->send();
 
             return;
         }
 
-        $transfer->confirmReceived(auth()->id());
+        // confirmReceived() no-op nếu phiếu không còn ở trạng thái chờ nhận — báo đúng kết quả thật
+        $received = $transfer->confirmReceived(auth()->id());
+
+        if ($received === false) {
+            Notification::make()->title(__('warehouse.notifications.transfer_not_found'))->warning()->send();
+
+            return;
+        }
 
         Notification::make()->title(__('warehouse.notifications.transfer_received'))->success()->send();
+    }
+
+    /**
+     * Hủy phiếu điều chuyển đang trên đường: nhả lượng đóng băng về bếp xuất (không đổi tồn thật).
+     * Chỉ BẾP XUẤT (hoặc admin) được hủy — bếp nhận chỉ có quyền xác nhận nhận.
+     */
+    public function cancelTransfer(int $transferId): void
+    {
+        abort_unless(StockResource::canEdit(new Stock), 403);
+
+        $transfer = StockTransfer::find($transferId);
+        if (! $transfer) {
+            Notification::make()->title(__('warehouse.notifications.transfer_not_found'))->danger()->send();
+
+            return;
+        }
+
+        // Fail-closed: kitchen null chỉ hợp lệ với admin; thủ kho phải đúng BẾP XUẤT của phiếu.
+        $user = auth()->user();
+        $isAdmin = (bool) $user?->hasRole([User::superAdminRole(), 'Quản trị viên']);
+        $kitchenId = $user?->currentKitchenId();
+
+        $allowed = $isAdmin || ($kitchenId !== null && (int) $transfer->source_kitchen_id === (int) $kitchenId);
+        if (! $allowed) {
+            Notification::make()->title(__('warehouse.notifications.only_source_can_cancel'))->danger()->send();
+
+            return;
+        }
+
+        $cancelled = $transfer->cancel();
+
+        if ($cancelled === false) {
+            Notification::make()->title(__('warehouse.notifications.transfer_not_found'))->warning()->send();
+
+            return;
+        }
+
+        Notification::make()->title(__('warehouse.notifications.transfer_cancelled'))->success()->send();
     }
 
     // Helper Lists
@@ -1230,6 +1452,10 @@ class ListStocks extends ListRecords
     public function updatedSearch(): void
     {
         $this->resetPage();
+        $this->checkStocksCache = null;
+        if ($this->warehouseTab === 'out' && $this->outMode === 'production') {
+            $this->loadProductionItems();
+        }
     }
 
     public function updatedSelectedType(): void
@@ -1245,7 +1471,8 @@ class ListStocks extends ListRecords
     public function getWarehouseData(): LengthAwarePaginator
     {
         $kitchenId = auth()->user()?->currentKitchenId();
-        $query = Stock::with(['ingredient.supplier']);
+        $query = Stock::with(['ingredient.supplier'])
+            ->whereHas('ingredient');
 
         if ($kitchenId) {
             $query->where('kitchen_id', $kitchenId);
@@ -1266,7 +1493,21 @@ class ListStocks extends ListRecords
             });
         }
 
-        return $query->orderBy('id')->paginate($this->perPage);
+        if ($this->selectedSort === 'oldest') {
+            $query->orderBy('stocks.updated_at', 'asc')->orderBy('stocks.id', 'asc');
+        } elseif ($this->selectedSort === 'name_asc') {
+            $query->join('ingredients', 'stocks.ingredient_id', '=', 'ingredients.id')
+                ->select('stocks.*')
+                ->orderBy('ingredients.name', 'asc');
+        } elseif ($this->selectedSort === 'name_desc') {
+            $query->join('ingredients', 'stocks.ingredient_id', '=', 'ingredients.id')
+                ->select('stocks.*')
+                ->orderBy('ingredients.name', 'desc');
+        } else {
+            $query->orderBy('stocks.updated_at', 'desc')->orderBy('stocks.id', 'desc');
+        }
+
+        return $query->paginate($this->perPage);
     }
 
     /** Bộ lọc tab Nhật ký kho: theo loại giao dịch, nguyên liệu và KHOẢNG THỜI GIAN (đối soát) */
@@ -1278,37 +1519,41 @@ class ListStocks extends ListRecords
 
     public string $logToDate = '';
 
-    public int $logPerPage = 50;
+    public int $logPerPage = 15;
 
-    public function loadMoreLog(): void
+    public function updatedLogPerPage(): void
     {
-        $this->logPerPage += 50;
+        $this->resetPage('logPage');
     }
 
-    /** Đổi bộ lọc thì xem lại từ đầu (tránh giữ trang đã mở rộng của bộ lọc cũ). */
     public function updatedLogTypeFilter(): void
     {
-        $this->logPerPage = 50;
+        $this->resetPage('logPage');
     }
 
     public function updatedLogIngredientFilter(): void
     {
-        $this->logPerPage = 50;
+        $this->resetPage('logPage');
     }
 
     public function updatedLogFromDate(): void
     {
-        $this->logPerPage = 50;
+        $this->resetPage('logPage');
     }
 
     public function updatedLogToDate(): void
     {
-        $this->logPerPage = 50;
+        $this->resetPage('logPage');
     }
 
     public function getLogTotal(): int
     {
         return $this->logQuery()->count();
+    }
+
+    public function getLogPaginator()
+    {
+        return $this->logQuery()->paginate($this->logPerPage, ['*'], 'logPage');
     }
 
     public function getLogData(): array
@@ -1323,6 +1568,21 @@ class ListStocks extends ListRecords
         return StockTransaction::with(['ingredient'])
             ->latest()
             ->when($kitchenId, fn ($q) => $q->where('kitchen_id', $kitchenId))
+            ->when(! empty($this->search), function ($query) {
+                $searchLower = '%'.strtolower($this->search).'%';
+                $query->whereHas('ingredient', function ($q) use ($searchLower) {
+                    $q->whereRaw('LOWER(name) LIKE ?', [$searchLower])
+                        ->orWhereRaw('LOWER(code) LIKE ?', [$searchLower]);
+                });
+            })
+            ->when(! empty($this->selectedType), function ($query) {
+                $query->where(function ($q) {
+                    $q->where('type', $this->selectedType)
+                        ->orWhereHas('ingredient.typeRelation', function ($sub) {
+                            $sub->where('name', $this->selectedType);
+                        });
+                });
+            })
             ->when($this->logTypeFilter !== '', fn ($q) => $q->where('type', $this->logTypeFilter))
             ->when($this->logIngredientFilter !== '', fn ($q) => $q->where('ingredient_id', (int) $this->logIngredientFilter))
             ->when($this->logFromDate !== '', fn ($q) => $q->where('created_at', '>=', Carbon::parse($this->logFromDate)->startOfDay()))

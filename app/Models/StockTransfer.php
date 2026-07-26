@@ -70,14 +70,14 @@ class StockTransfer extends Model
     /**
      * Bếp nhận xác nhận: chính thức trừ tồn bếp xuất, cộng tồn bếp nhận, sinh giao dịch 2 đầu.
      */
-    public function confirmReceived(?int $receivedBy = null): void
+    public function confirmReceived(?int $receivedBy = null): bool
     {
-        DB::transaction(function () use ($receivedBy): void {
+        return DB::transaction(function () use ($receivedBy): bool {
             // Guard status phải nằm TRONG transaction trên bản ghi đã khóa:
             // 2 người cùng bấm xác nhận thì người sau chờ lock, đọc lại status = Hoàn thành và dừng.
             $locked = self::whereKey($this->id)->lockForUpdate()->first();
             if (! $locked || $locked->status !== self::STATUS_IN_TRANSIT) {
-                return;
+                return false;
             }
 
             foreach ($this->items as $item) {
@@ -151,19 +151,21 @@ class StockTransfer extends Model
                 'status' => self::STATUS_DONE,
                 'received_by' => $receivedBy ?? $this->received_by,
             ]);
+
+            return true;
         });
     }
 
     /**
      * Hủy phiếu: chỉ nhả lượng đóng băng về lại bếp xuất, không thay đổi tồn thật.
      */
-    public function cancel(): void
+    public function cancel(): bool
     {
-        DB::transaction(function (): void {
+        return DB::transaction(function (): bool {
             // Guard status trong transaction + lock (chống hủy trùng / hủy song song với xác nhận nhận)
             $locked = self::whereKey($this->id)->lockForUpdate()->first();
             if (! $locked || $locked->status !== self::STATUS_IN_TRANSIT) {
-                return;
+                return false;
             }
 
             foreach ($this->items as $item) {
@@ -180,6 +182,8 @@ class StockTransfer extends Model
             }
 
             $this->update(['status' => self::STATUS_CANCELLED]);
+
+            return true;
         });
     }
 }

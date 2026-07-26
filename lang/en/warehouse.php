@@ -12,6 +12,7 @@ return [
         'create_in' => 'Create inbound slip',
         'create_out' => 'Create outbound slip',
         'end_day_check' => 'End-day stock check',
+        'check_stock_day' => 'Daily stock check',
         'create_stock' => 'Create stock',
         'save_end_day' => 'Save end-day stock',
         'clear_filters' => 'Clear search filters',
@@ -21,6 +22,8 @@ return [
         'save_inbound' => 'Save inbound slip',
         'create_transfer' => 'Create transfer slip',
         'confirm_receive' => 'Confirm receipt',
+        'cancel_transfer' => 'Cancel slip',
+        'confirm_cancel_transfer' => 'Cancel this transfer slip? Frozen stock will be released back to the source kitchen.',
         'view_attachment' => '[View attachment]',
     ],
     'tabs' => [
@@ -90,6 +93,10 @@ return [
         'to_date' => 'To date',
 
         'all_types' => 'All types',
+        'latest_updated' => 'Latest updated',
+        'oldest_updated' => 'Oldest updated',
+        'name_asc' => 'Name (A - Z)',
+        'name_desc' => 'Name (Z - A)',
         'all_transaction_types' => '— All transaction types —',
         'all_ingredients' => '— All ingredients —',
     ],
@@ -116,6 +123,7 @@ return [
     'pagination' => [
         'navigation' => 'Warehouse pagination navigation',
         'showing' => 'Showing :from-:to of :total stock items',
+        'showing_results' => 'Showing :first to :last of :total records',
         'per_page' => ':count / page',
     ],
     'form' => [
@@ -132,14 +140,16 @@ return [
     'inbound' => [
         'title' => 'Inbound flow',
         'description' => 'Receive by purchase order (PO) or direct market purchase.',
-        'start_hint' => 'Click Create inbound slip to start.',
+        'start_hint' => 'Press Create inbound slip to start.',
+        'start_hint_html' => 'Press :button to start.',
         'direct_title' => 'Direct purchase / Direct inbound',
         'direct_description' => 'Receive directly from market without purchase order.',
     ],
     'outbound' => [
         'title' => 'Outbound flow',
         'description' => 'Issue for daily production or transfer to another branch/kitchen.',
-        'start_hint' => 'Click Create outbound slip to start.',
+        'start_hint' => 'Press Create outbound slip to start.',
+        'start_hint_html' => 'Press :button to start.',
         'production_hint' => 'System automatically summarizes ingredient quantities from locked weekly menus.',
     ],
     'transfer' => [
@@ -222,6 +232,8 @@ return [
         'transfer_not_found' => 'Transfer slip not found!',
         'only_destination_can_receive' => 'Only destination kitchen can confirm receipt for this slip!',
         'transfer_received' => 'Receipt confirmed and stock updated successfully!',
+        'only_source_can_cancel' => 'Only the source kitchen can cancel this transfer slip!',
+        'transfer_cancelled' => 'Transfer slip cancelled and frozen stock released back to the source kitchen!',
         'select_valid_ingredient_quantity' => 'Please select a valid ingredient and quantity!',
         'stock_in_saved' => 'Stock inbound saved successfully!',
         'available_not_enough' => 'Available stock is not enough for outbound!',

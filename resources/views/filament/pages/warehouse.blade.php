@@ -84,6 +84,23 @@
             background: rgb(var(--primary-700)) !important;
             border-color: rgb(var(--primary-700)) !important;
         }
+        .wh-action-btn-danger {
+            background: #dc2626 !important;
+            color: #ffffff !important;
+            border-color: #dc2626 !important;
+        }
+        .wh-action-btn-danger:hover {
+            background: #b91c1c !important;
+            border-color: #b91c1c !important;
+        }
+        /* Tên nguyên liệu: đậm, tương phản đúng ở cả 2 theme (inline color cũ đè mất dark:text-white) */
+        .wh-ing-name {
+            font-weight: 700;
+            color: #0f172a;
+        }
+        .dark .wh-ing-name {
+            color: #ffffff;
+        }
 
         /* Stats cards */
         .stats-grid {
@@ -119,16 +136,15 @@
             font-size: 1.125rem;
             margin-bottom: 0.5rem;
         }
-        /* KPI icon đồng nhất màu brand — màu chỉ dùng mã hóa trạng thái ở dòng dữ liệu
-           (badge "Sắp hết" amber, chênh lệch xanh/đỏ), không tô ngẫu nhiên trên thẻ thống kê. */
-        .ico-blue,
-        .ico-green,
-        .ico-orange,
-        .ico-purple { background: rgb(var(--primary-50)); color: rgb(var(--primary-600)); }
-        :root.dark .ico-blue,
-        :root.dark .ico-green,
-        :root.dark .ico-orange,
-        :root.dark .ico-purple { background: rgb(var(--primary-950) / .2); color: rgb(var(--primary-400)); }
+        /* KPI Stat Badge Colors (Matching bluefire_demo.html ki-b, ki-g, ki-o, ki-p) */
+        .ico-blue { background: #EBF3FF !important; color: #1267E8 !important; }
+        .ico-green { background: #ECFDF5 !important; color: #059669 !important; }
+        .ico-orange { background: #FFF7ED !important; color: #EA580C !important; }
+        .ico-purple { background: #F5F3FF !important; color: #7C3AED !important; }
+        :root.dark .ico-blue { background: rgba(18, 103, 232, 0.18) !important; color: #60A5FA !important; }
+        :root.dark .ico-green { background: rgba(5, 150, 105, 0.18) !important; color: #34D399 !important; }
+        :root.dark .ico-orange { background: rgba(234, 88, 12, 0.18) !important; color: #FB923C !important; }
+        :root.dark .ico-purple { background: rgba(124, 58, 237, 0.18) !important; color: #A78BFA !important; }
         
         .stat-val {
             font-size: 1.375rem;
@@ -540,13 +556,21 @@
     {{-- Nếu là quản trị viên/toàn quyền, cho phép chọn bếp linh hoạt --}}
     @if(auth()->user()?->hasRole(['super_admin', 'Quản trị viên']))
         <div class="col-span-full mb-1.5 flex items-center gap-2.5 rounded-lg border border-gray-200 bg-white px-4 py-3 dark:border-gray-700 dark:bg-gray-800">
-            <span class="text-sm font-semibold text-gray-600 dark:text-gray-300">{{ __('warehouse.filters.selected_kitchen') }}</span>
-            <select wire:model.live="selectedKitchenId" class="rounded-md border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 dark:[color-scheme:dark]">
-                <option value="all">{{ __('warehouse.filters.all_kitchens') }}</option>
-                @foreach(\App\Models\Kitchen::orderBy('name')->get() as $kit)
-                    <option value="{{ $kit->id }}">{{ $kit->name }}</option>
-                @endforeach
-            </select>
+            <span class="shrink-0 text-sm font-semibold text-gray-600 dark:text-gray-300">{{ __('warehouse.filters.selected_kitchen') }}</span>
+            <div class="w-64 max-w-full">
+                @include('filament.components.search-select', [
+                    'name' => 'selectedKitchenId',
+                    'live' => true,
+                    'nullable' => false,
+                    'placeholder' => __('warehouse.filters.all_kitchens'),
+                    'options' => collect([['value' => 'all', 'label' => __('warehouse.filters.all_kitchens')]])
+                        ->concat(\App\Models\Kitchen::orderBy('name')->get()->map(fn ($kit) => [
+                            'value' => (string) $kit->id,
+                            'label' => $kit->name,
+                        ]))
+                        ->all(),
+                ])
+            </div>
         </div>
     @elseif(! $this->operatingKitchenId())
         <div style="grid-column: 1 / -1; display:flex; gap:10px; align-items:flex-start; padding:12px 16px; margin-bottom: 6px; border-radius:8px; border:1px solid #f59e0b; background:#fffbeb; color:#92400e">
@@ -559,9 +583,7 @@
     @endif
         <div class="stat-card">
             <div class="stat-icon ico-blue">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
-                </svg>
+                <i class="fa-solid fa-boxes-stacked"></i>
             </div>
             <div class="stat-val">{{ $stats['items'] }}</div>
             <div class="stat-lbl">{{ __('warehouse.stats.stock_items') }}</div>
@@ -569,9 +591,7 @@
         </div>
         <div class="stat-card">
             <div class="stat-icon ico-green">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
+                <i class="fa-solid fa-sack-dollar"></i>
             </div>
             <div class="stat-val">{{ number_format($stats['value'], 0, ',', '.') }}{{ __('warehouse.common.currency') }}</div>
             <div class="stat-lbl">{{ __('warehouse.stats.stock_value') }}</div>
@@ -579,9 +599,7 @@
         </div>
         <div class="stat-card">
             <div class="stat-icon ico-orange">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
-                </svg>
+                <i class="fa-solid fa-triangle-exclamation"></i>
             </div>
             <div class="stat-val">{{ $stats['low'] }}</div>
             <div class="stat-lbl">{{ __('warehouse.stats.low_stock') }}</div>
@@ -589,9 +607,7 @@
         </div>
         <div class="stat-card">
             <div class="stat-icon ico-purple">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
-                </svg>
+                <i class="fa-solid fa-clipboard-list"></i>
             </div>
             <div class="stat-val">{{ $stats['check'] }}</div>
             <div class="stat-lbl">{{ __('warehouse.stats.need_check_today') }}</div>
@@ -602,52 +618,45 @@
     <!-- Tab bar -->
     <div class="tabs-bar">
         <button class="tab-btn @if($warehouseTab === 'stock') active @endif" wire:click="setTab('stock')">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
-            </svg>
+            <i class="fa-solid fa-layer-group"></i>
             <span>{{ __('warehouse.tabs.stock') }}</span>
         </button>
         <button class="tab-btn @if($warehouseTab === 'check') active @endif" wire:click="setTab('check')">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
-            </svg>
+            <i class="fa-solid fa-clipboard-check"></i>
             <span>{{ __('warehouse.tabs.check') }}</span>
         </button>
         <button class="tab-btn @if($warehouseTab === 'in') active @endif" wire:click="setTab('in')">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 13l-7 7-7-7m14-6l-7 7-7-7"/>
-            </svg>
+            <i class="fa-solid fa-arrow-down"></i>
             <span>{{ __('warehouse.tabs.inbound') }}</span>
         </button>
         <button class="tab-btn @if($warehouseTab === 'out') active @endif" wire:click="setTab('out')">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 11l7-7 7 7M5 19l7-7 7 7"/>
-            </svg>
+            <i class="fa-solid fa-arrow-up"></i>
             <span>{{ __('warehouse.tabs.outbound') }}</span>
         </button>
         <button class="tab-btn @if($warehouseTab === 'log') active @endif" wire:click="setTab('log')">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
+            <i class="fa-solid fa-clock-rotate-left"></i>
             <span>{{ __('warehouse.tabs.log') }}</span>
         </button>
 
-        @if($warehouseTab === 'stock')
+        @if(in_array($warehouseTab, ['stock', 'log']))
             <div class="filter-controls">
                 <div class="search-wrapper">
-                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                    </svg>
+                    <i class="fa-solid fa-magnifying-glass" style="font-size:12px; color:#94a3b8; margin-right:4px;"></i>
                     <input type="text" wire:model.live.debounce.300ms="search" placeholder="{{ __('warehouse.placeholders.search_ingredient') }}">
                 </div>
-                <div style="min-width:190px">
-                    @include('filament.components.search-select', [
-                        'name' => 'selectedType',
-                        'live' => true,
-                        'placeholder' => __('warehouse.filters.all_types'),
-                        'emptyLabel' => __('warehouse.filters.all_types'),
-                        'options' => collect($this->getIngredientTypeOptions())->map(fn ($t) => ['value' => $t, 'label' => $t])->all(),
-                    ])
+                <div>
+                    <select wire:model.live="selectedType" class="type-select">
+                        <option value="">{{ __('warehouse.filters.all_types') }}</option>
+                        @foreach($this->getIngredientTypeOptions() as $t)
+                            <option value="{{ $t }}">{{ $t }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <select wire:model.live="selectedSort" class="type-select">
+                        <option value="latest">{{ __('warehouse.filters.latest_updated') }}</option>
+                        <option value="oldest">{{ __('warehouse.filters.oldest_updated') }}</option>
+                    </select>
                 </div>
             </div>
         @endif
@@ -676,24 +685,25 @@
                     </thead>
                     <tbody>
                         @forelse($stocksData as $index => $item)
-                            <tr wire:click="openLedger({{ $item['ingredient']['id'] }})" style="cursor: pointer;" title="{{ __('warehouse.tooltips.open_ledger') }}">
+                            @if(empty($item['ingredient'])) @continue @endif
+                            <tr wire:click="openLedger({{ $item['ingredient']['id'] ?? 0 }})" style="cursor: pointer;" title="{{ __('warehouse.tooltips.open_ledger') }}">
                                 <td style="text-align: center;">{{ ($stocksData->currentPage() - 1) * $stocksData->perPage() + $index + 1 }}</td>
-                                <td><span style="font-weight: 700;">{{ $item['ingredient']['code'] }}</span></td>
-                                <td style="font-weight: 700; color: #0f172a;" class="dark:text-white">
+                                <td><span style="font-weight: 700;">{{ $item['ingredient']['code'] ?? '—' }}</span></td>
+                                <td class="wh-ing-name">
                                     <div style="display: flex; align-items: center; gap: 8px;">
-                                        <span>{{ $item['ingredient']['name'] }}</span>
+                                        <span>{{ $item['ingredient']['name'] ?? '—' }}</span>
                                         <svg class="w-3.5 h-3.5 text-gray-400 opacity-0 wh-ledger-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="transition: opacity 0.15s; flex-shrink: 0;" title="{{ __('warehouse.tooltips.open_ledger') }}">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
                                         </svg>
                                     </div>
                                 </td>
-                                <td>{{ $item['ingredient']['type'] }}</td>
+                                <td>{{ $item['ingredient']['type'] ?? '—' }}</td>
                                 <td>{{ str_starts_with($item['ingredient']['supplier']['name'] ?? '', 'test_') ? __('warehouse.common.test_supplier') : ($item['ingredient']['supplier']['name'] ?? '—') }}</td>
                                 <td style="text-align: right; font-weight: 750;">
-                                    {{ number_format($item['quantity'], 2, ',', '.') }}<span style="font-size: 11px; font-weight: 500; color: #94a3b8; margin-left: 2px;">{{ $item['ingredient']['unit'] }}</span>
+                                    {{ $this->formatQty($item['quantity']) }}<span style="font-size: 11px; font-weight: 500; color: #94a3b8; margin-left: 2px;">{{ $item['ingredient']['unit'] ?? '' }}</span>
                                 </td>
                                 <td style="text-align: right; color: #64748b;">
-                                    {{ number_format($item['min_quantity'], 2, ',', '.') }}<span style="font-size: 11px; font-weight: 500; color: #94a3b8; margin-left: 2px;">{{ $item['ingredient']['unit'] }}</span>
+                                    {{ $this->formatQty($item['min_quantity']) }}<span style="font-size: 11px; font-weight: 500; color: #94a3b8; margin-left: 2px;">{{ $item['ingredient']['unit'] ?? '' }}</span>
                                 </td>
                                 <td style="text-align: right;">
                                     {{ number_format($item['unit_price'], 0, ',', '.') }}<span style="font-size: 10px; font-weight: 500; color: #94a3b8; margin-left: 1px;">{{ __('warehouse.common.currency') }}</span>
@@ -702,7 +712,7 @@
                                     {{ number_format($item['quantity'] * $item['unit_price'], 0, ',', '.') }}<span style="font-size: 10px; font-weight: 500; color: #94a3b8; margin-left: 1px;">{{ __('warehouse.common.currency') }}</span>
                                 </td>
                                 <td style="text-align: center; font-size: 11px; color: #64748b; font-variant-numeric: tabular-nums;">
-                                    {{ $item['updated_at']?->format('H:i d/m/Y') ?? '—' }}
+                                    {{ $item['updated_at'] ? \Carbon\Carbon::parse($item['updated_at'])->setTimezone('Asia/Ho_Chi_Minh')->format('d/m/Y H:i') : '—' }}
                                 </td>
                                 <td>
                                     @if($item['quantity'] == 0)
@@ -743,11 +753,6 @@
                                         </div>
                                         <div style="font-weight: 700; color: #334155; font-size: 0.875rem;" class="dark:text-slate-300">{{ __('warehouse.empty.no_ingredients') }}</div>
                                         <div style="color: #64748b; font-size: 0.78rem; max-width: 280px; margin: 0 auto;" class="dark:text-slate-400">{{ __('warehouse.empty.adjust_filters') }}</div>
-                                        @if($search !== '' || $selectedType !== '')
-                                            <button type="button" wire:click="$set('search', ''); $set('selectedType', '')" style="margin-top: 0.25rem; font-size: 0.78rem; font-weight: 600; color: rgb(var(--primary-600)); background: transparent; border: none; cursor: pointer; text-decoration: underline;" class="hover:text-primary-500">
-                                                {{ __('warehouse.actions.clear_filters') }}
-                                            </button>
-                                        @endif
                                     </div>
                                 </td>
                             </tr>
@@ -824,12 +829,20 @@
 
         @elseif($warehouseTab === 'check')
             <div>
-                <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-3 mb-4">
-                    <div class="flex items-center gap-2">
-                        <span class="text-xs font-bold text-gray-500">{{ __('warehouse.form.check_date') }}:</span>
-                        <input type="date" class="date-input" wire:model.live="checkDate" style="height:34px; border: 1px solid #cbd5e1; border-radius: 6px; padding: 0 8px; font-size:12px;">
+                <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-3 mb-4 flex-wrap gap-2">
+                    <div class="flex items-center gap-3">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-bold text-gray-500">{{ __('warehouse.form.check_date') }}:</span>
+                            <input type="date" class="date-input" wire:model.live="checkDate" style="height:34px; border: 1px solid #cbd5e1; border-radius: 6px; padding: 0 8px; font-size:12px;">
+                        </div>
+                        <div class="search-wrapper" style="width: 220px; height: 34px;">
+                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                            </svg>
+                            <input type="text" wire:model.live.debounce.300ms="search" placeholder="{{ __('warehouse.placeholders.search_ingredient') }}">
+                        </div>
                     </div>
-                    <button type="button" class="wh-action-btn wh-action-btn-primary" wire:click="saveEndDay">
+                    <button type="button" class="wh-action-btn wh-action-btn-primary" wire:click="saveEndDay" wire:loading.attr="disabled" wire:target="saveEndDay">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/>
                         </svg>
@@ -844,7 +857,6 @@
                                 <th style="width: 36px; text-align: center;">#</th>
                                 <th>{{ __('warehouse.table.ingredient') }}</th>
                                 <th>{{ __('warehouse.table.unit') }}</th>
-                                <th style="text-align: right;">{{ __('warehouse.table.opening_stock') }}</th>
                                 <th style="text-align: right;">{{ __('warehouse.table.system_stock') }}</th>
                                 <th style="text-align: center; width: 180px;">{{ __('warehouse.table.actual_end_day_stock') }}</th>
                                 <th style="text-align: right;">{{ __('warehouse.table.difference') }}</th>
@@ -857,29 +869,60 @@
                                 $systemQty = $this->getSystemQuantities($checkDate);
                                 $openingQty = $this->getOpeningQuantities();
                             @endphp
-                            @foreach($stocksData as $index => $item)
+                            @forelse($stocksData as $index => $item)
                                 @php
-                                    $sysQty = $systemQty[$item->id] ?? 0;
-                                    $diff = ($actualQuantities[$item->id] ?? $sysQty) - $sysQty;
+                                    $sysQty = (float) ($systemQty[$item->id] ?? 0);
+                                    $actualVal = $actualQuantities[$item->id] ?? null;
+                                    $diff = ($actualVal === null || $actualVal === '' ? $sysQty : (float) $actualVal) - $sysQty;
                                 @endphp
                                 <tr>
                                     <td style="text-align: center;">{{ $index + 1 }}</td>
                                     <td>
-                                        <div style="font-weight: 700;">{{ $item->ingredient->name }}</div>
-                                        <div style="font-size:10px; color:#64748b;">{{ $item->ingredient->code }} · {{ $item->ingredient->type }}</div>
+                                        <div style="font-weight: 700;">{{ $item->ingredient?->name ?? '—' }}</div>
+                                        <div style="font-size:10px; color:#64748b;">{{ $item->ingredient?->code ?? '—' }} · {{ $item->ingredient?->type ?? '—' }}</div>
                                     </td>
-                                    <td>{{ $item->ingredient->unit }}</td>
-                                    <td style="text-align: right; color:#64748b;">{{ number_format($openingQty[$item->id] ?? 0, 2, ',', '.') }}</td>
-                                    <td style="text-align: right; font-weight: 700;">{{ number_format($sysQty, 2, ',', '.') }}</td>
+                                    <td>{{ $item->ingredient?->unit ?? '—' }}</td>
+                                    <td style="text-align: right; font-weight: 700;">{{ $this->formatQty($sysQty) }}</td>
                                     <td style="text-align: center;">
-                                        <input type="number"
-                                               step="0.01"
-                                               min="0"
-                                               wire:model.blur="actualQuantities.{{ $item->id }}"
-                                               class="w-28 text-center border border-gray-300 rounded px-2 py-1 text-xs dark:bg-gray-800 dark:border-gray-700">
+                                        <div x-data="{
+                                            raw: $wire.entangle('actualQuantities.{{ $item->id }}'),
+                                            display: '',
+                                            fmt(v) {
+                                                let n = parseFloat(v);
+                                                if (isNaN(n) || n < 0) n = 0;
+                                                if (!n && n !== 0) return '';
+                                                let parts = String(n).split('.');
+                                                parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                                                return parts.join(',');
+                                            },
+                                            init() { this.display = (this.raw !== null && this.raw !== '') ? this.fmt(this.raw) : ''; },
+                                            onInput(e) {
+                                                let clean = e.target.value.replace(/[^0-9,]/g, '').replace(',', '.');
+                                                let n = parseFloat(clean) || 0;
+                                                if (n < 0) n = 0;
+                                                this.raw = n;
+                                                this.display = this.fmt(n);
+                                                e.target.value = this.display;
+                                            },
+                                            onBlur(e) {
+                                                let clean = e.target.value.replace(/[^0-9,]/g, '').replace(',', '.');
+                                                let n = parseFloat(clean) || 0;
+                                                if (n < 0) n = 0;
+                                                this.raw = n;
+                                                this.display = this.fmt(n);
+                                                e.target.value = this.display;
+                                            }
+                                        }">
+                                            <input type="text"
+                                                   inputmode="decimal"
+                                                   :value="display"
+                                                   x-on:input="onInput($event)"
+                                                   x-on:blur="onBlur($event)"
+                                                   class="w-28 text-center border border-gray-300 rounded px-2 py-1 text-xs dark:bg-gray-800 dark:border-gray-700">
+                                        </div>
                                     </td>
                                     <td style="text-align: right; font-weight: 700; color: {{ $diff < 0 ? '#ef4444' : ($diff > 0 ? '#16a34a' : 'inherit') }}">
-                                        {{ $diff > 0 ? '+' . $diff : $diff }}
+                                        {{ ($diff > 0 ? '+' : '') . $this->formatQty($diff) }}
                                     </td>
                                     <td>
                                         <input type="text" 
@@ -888,7 +931,21 @@
                                                class="w-full border border-gray-300 rounded px-2 py-1 text-xs dark:bg-gray-800 dark:border-gray-700">
                                     </td>
                                 </tr>
-                            @endforeach
+                            @empty
+                                <tr>
+                                    <td colspan="7" style="text-align: center; padding: 3rem 1.5rem;">
+                                        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.75rem;">
+                                            <div style="width: 48px; height: 48px; border-radius: 50%; background: #f1f5f9; display: flex; align-items: center; justify-content: center; color: #94a3b8;" class="dark:bg-slate-800 dark:color-slate-400">
+                                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                                </svg>
+                                            </div>
+                                            <div style="font-weight: 700; color: #334155; font-size: 0.875rem;" class="dark:text-slate-300">{{ __('warehouse.empty.no_ingredients') }}</div>
+                                            <div style="color: #64748b; font-size: 0.78rem; max-width: 280px; margin: 0 auto;" class="dark:text-slate-400">{{ __('warehouse.empty.adjust_filters') }}</div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>
@@ -896,44 +953,55 @@
 
         @elseif($warehouseTab === 'in')
             @if(is_null($inMode))
-                <!-- Initial Workspace for Inbound (Ảnh 3) -->
-                <div style="text-align: center; padding: 3rem 1.5rem;">
-                    <div style="display:inline-flex; align-items:center; justify-content:center; width:54px; height:54px; border-radius:50%; background:#eff6ff; color:#1e40af; margin-bottom:1rem;">
-                        <i class="fa-solid fa-boxes-packing" style="font-size:24px"></i>
+                <!-- Initial Workspace for Inbound (Ảnh 2 Mockup) -->
+                <div>
+                    <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-3 mb-4">
+                        <div>
+                            <h3 style="font-weight: 800; font-size:0.95rem; color:#0f172a;" class="dark:text-white">{{ __('warehouse.inbound.title') }}</h3>
+                            <p style="font-size:0.75rem; color:#64748b;">{{ __('warehouse.inbound.description') }}</p>
+                        </div>
+                        <button type="button" class="wh-action-btn wh-action-btn-primary" wire:click="openInTypeModal">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                            </svg>
+                            <span>{{ __('warehouse.actions.create_in') }}</span>
+                        </button>
                     </div>
-                    <h3 style="font-size: 1rem; font-weight: 700; color:#0f172a;" class="dark:text-white">{{ __('warehouse.inbound.title') }}</h3>
-                    <p style="font-size: 0.78rem; color:#64748b; margin-top:0.25rem; margin-bottom:1.5rem;">{{ __('warehouse.inbound.description') }}</p>
-                    <button type="button" class="wh-action-btn wh-action-btn-primary" style="margin: 0 auto;" wire:click="openInTypeModal">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                        </svg>
-                        <span>{{ __('warehouse.actions.create_in') }}</span>
-                    </button>
-                    <div style="font-size:0.75rem; color:#94a3b8; margin-top:1rem;">{{ __('warehouse.inbound.start_hint') }}</div>
+                    <div style="font-size:0.85rem; color:#64748b; padding: 0.5rem 0;">
+                        {!! __('warehouse.inbound.start_hint_html', ['button' => '<strong style="color:#334155;" class="dark:text-slate-200">' . e(__('warehouse.actions.create_in')) . '</strong>']) !!}
+                    </div>
                 </div>
             @elseif($inMode === 'po')
                 <!-- PO Inbound Workspace (Ảnh 5) -->
                 <div>
-                    <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-3 mb-4">
+                    <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-3 mb-3">
+                        <div>
+                            <h3 style="font-weight: 800; font-size:0.95rem; color:#0f172a;" class="dark:text-white">{{ __('warehouse.inbound.title') }}</h3>
+                            <p style="font-size:0.75rem; color:#64748b;">Nhập theo Đơn đặt hàng (PO) hoặc Nhập mua ngoài.</p>
+                        </div>
+                        <button type="button" class="wh-action-btn wh-action-btn-primary" wire:click="openInTypeModal">
+                            <i class="fa-solid fa-plus"></i>
+                            <span>{{ __('warehouse.actions.create_in') }}</span>
+                        </button>
+                    </div>
+
+                    <div class="flex items-center justify-between pb-3 mb-4">
                         <div class="flex items-center gap-3">
-                            <div class="form-field" style="width: 320px;">
-                                <label style="font-size:0.7rem;">{{ __('warehouse.form.pending_po_code') }}</label>
+                            <div class="form-field" style="width: 340px;">
+                                <label style="font-size:0.7rem; color:#94a3b8;">{{ __('warehouse.form.pending_po_code') }}</label>
                                 @include('filament.components.search-select', [
                                     'name' => 'selectedPOId',
                                     'live' => true,
                                     'placeholder' => __('warehouse.placeholders.select_po'),
                                     'options' => collect($this->getPendingPOs())->map(fn ($po) => [
                                         'value' => $po->id,
-                                        'label' => $po->code,
-                                        'sub' => $po->supplier?->name,
+                                        'label' => $po->code . ($po->supplier?->name ? ' - ' . $po->supplier->name : ''),
                                     ])->all(),
                                 ])
                             </div>
                         </div>
-                        <button type="button" class="wh-action-btn wh-action-btn-primary" wire:click="confirmInboundPO">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                            </svg>
+                        <button type="button" class="wh-action-btn wh-action-btn-primary" wire:click="confirmInboundPO" wire:loading.attr="disabled" wire:target="confirmInboundPO">
+                            <i class="fa-solid fa-check"></i>
                             <span>{{ __('warehouse.actions.confirm_inbound') }}</span>
                         </button>
                     </div>
@@ -948,37 +1016,59 @@
                                 <thead>
                                     <tr>
                                         <th>{{ __('warehouse.table.ingredient') }}</th>
-                                        <th style="text-align: right;">{{ __('warehouse.table.expected_qty') }}</th>
-                                        <th style="text-align: center; width:140px;">{{ __('warehouse.table.received_qty') }}</th>
-                                        <th style="text-align: right; width:110px;">{{ __('warehouse.table.difference') }}</th>
-                                        <th style="text-align: right; width:140px;">{{ __('warehouse.table.po_locked_price') }}</th>
-                                        <th style="width:200px;">{{ __('warehouse.table.difference_reason') }}</th>
+                                        <th style="text-align: center;">{{ __('warehouse.table.expected_qty') }}</th>
+                                        <th style="text-align: center; width: 150px;">{{ __('warehouse.table.received_qty') }}</th>
+                                        <th style="text-align: right; width: 160px;">{{ __('warehouse.table.unit_price') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach($poItemsData as $index => $item)
                                         @php
-                                            // Chênh lệch = thực nhận − đặt; thừa xanh, thiếu đỏ (quy định kiểm hàng BA)
                                             $diff = (float) ($item['quantity_received'] ?? 0) - (float) $item['quantity_ordered'];
                                         @endphp
                                         <tr>
-                                            <td style="font-weight: 700; color: #0f172a;" class="dark:text-white">{{ $item['name'] }}</td>
-                                            <td style="text-align: right; font-weight:600;">{{ number_format($item['quantity_ordered'], 2, ',', '.') }} {{ $item['unit'] }}</td>
+                                            <td class="wh-ing-name">{{ $item['name'] }}</td>
+                                            <td style="text-align: center; font-weight: 600; color: #64748b;">
+                                                {{ $this->formatQty($item['quantity_ordered']) }} {{ $item['unit'] }}
+                                            </td>
                                             <td style="text-align: center;">
-                                                <input type="number" step="0.01" wire:model.live.debounce.400ms="poItemsData.{{ $index }}.quantity_received" class="table-input" style="width: 110px;">
-                                            </td>
-                                            <td style="text-align: right; font-weight:750; color: {{ $diff > 0 ? '#16a34a' : ($diff < 0 ? '#ef4444' : 'inherit') }}">
-                                                {{ $diff == 0 ? '—' : ($diff > 0 ? '+' : '').number_format($diff, 2, ',', '.') }}
-                                            </td>
-                                            <td style="text-align: right; font-weight:600;">
-                                                {{ number_format($item['unit_price'], 0, ',', '.') }}{{ __('warehouse.common.currency') }}
-                                            </td>
-                                            <td>
+                                                <input type="number"
+                                                       min="0"
+                                                       step="0.01"
+                                                       wire:model.live.debounce.400ms="poItemsData.{{ $index }}.quantity_received"
+                                                       x-data="{}"
+                                                       x-on:input="if($el.value < 0) $el.value = 0; if($el.value.length > 1 && $el.value.startsWith('0') && !$el.value.startsWith('0.')) $el.value = String(parseFloat($el.value) || 0);"
+                                                       x-on:blur="if($el.value < 0 || !$el.value) $el.value = 0;"
+                                                       class="table-input"
+                                                       style="width: 100px; font-weight: 700; text-align: center;">
                                                 @if($diff != 0)
-                                                    <input type="text" wire:model="poItemsData.{{ $index }}.receive_note" class="table-input" style="width: 100%;" placeholder="{{ __('warehouse.placeholders.required_when_different') }}">
-                                                @else
-                                                    <span style="color:#94a3b8; font-size:11px;">—</span>
+                                                    <input type="text" wire:model="poItemsData.{{ $index }}.receive_note" class="table-input" style="width: 100%; margin-top: 4px; font-size: 11px;" placeholder="{{ __('warehouse.placeholders.required_when_different') }}">
                                                 @endif
+                                            </td>
+                                            <td style="text-align: right;">
+                                                <div x-data="{
+                                                    val: @entangle('poItemsData.'.$index.'.unit_price'),
+                                                    display: '',
+                                                    init() { this.updateDisplay(); },
+                                                    updateDisplay() {
+                                                        let num = Math.max(0, parseFloat(this.val) || 0);
+                                                        this.val = num;
+                                                        this.display = num ? num.toLocaleString('en-US') : '0';
+                                                    },
+                                                    onInput(e) {
+                                                        let clean = e.target.value.replace(/[^0-9.]/g, '');
+                                                        let num = Math.max(0, parseFloat(clean) || 0);
+                                                        this.val = num;
+                                                        this.display = num ? num.toLocaleString('en-US') : '0';
+                                                    }
+                                                }">
+                                                    <input type="text"
+                                                           :value="display"
+                                                           x-on:input="onInput($event)"
+                                                           x-on:blur="updateDisplay()"
+                                                           class="table-input"
+                                                           style="width: 130px; text-align: right; font-weight: 600;">
+                                                </div>
                                             </td>
                                         </tr>
                                     @endforeach
@@ -1002,7 +1092,7 @@
                                 </svg>
                                 <span>{{ __('warehouse.actions.add_item') }}</span>
                             </button>
-                            <button type="button" class="wh-action-btn wh-action-btn-primary" wire:click="confirmDirectInbound">
+                            <button type="button" class="wh-action-btn wh-action-btn-primary" wire:click="confirmDirectInbound" wire:loading.attr="disabled" wire:target="confirmDirectInbound">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                                 </svg>
@@ -1047,10 +1137,40 @@
                                             ])
                                         </td>
                                         <td style="text-align: center;">
-                                            <input type="number" step="0.01" wire:model="directItemsData.{{ $index }}.quantity" class="table-input" style="width:110px;">
+                                            <input type="number"
+                                                   min="0"
+                                                   step="1"
+                                                   wire:model="directItemsData.{{ $index }}.quantity"
+                                                   x-data="{}"
+                                                   x-on:input="if($el.value < 0) $el.value = 0; if($el.value.length > 1 && $el.value.startsWith('0') && !$el.value.startsWith('0.')) $el.value = String(parseInt($el.value, 10) || 0);"
+                                                   x-on:blur="if($el.value < 0 || !$el.value) $el.value = 0;"
+                                                   class="table-input"
+                                                   style="width:110px; text-align:center; font-weight:700;">
                                         </td>
                                         <td style="text-align: right;">
-                                            <input type="number" step="1000" wire:model="directItemsData.{{ $index }}.unit_price" class="table-input" style="width:140px; text-align:right;">
+                                            <div x-data="{
+                                                val: @entangle('directItemsData.'.$index.'.unit_price'),
+                                                display: '',
+                                                init() { this.updateDisplay(); },
+                                                updateDisplay() {
+                                                    let num = Math.max(0, parseFloat(this.val) || 0);
+                                                    this.val = num;
+                                                    this.display = num ? num.toLocaleString('en-US') : '0';
+                                                },
+                                                onInput(e) {
+                                                    let clean = e.target.value.replace(/[^0-9.]/g, '');
+                                                    let num = Math.max(0, parseFloat(clean) || 0);
+                                                    this.val = num;
+                                                    this.display = num ? num.toLocaleString('en-US') : '0';
+                                                }
+                                            }">
+                                                <input type="text"
+                                                       :value="display"
+                                                       x-on:input="onInput($event)"
+                                                       x-on:blur="updateDisplay()"
+                                                       class="table-input"
+                                                       style="width:140px; text-align:right; font-weight:600;">
+                                            </div>
                                         </td>
                                         <td style="text-align: center;">
                                             <button type="button" class="btn-icon-danger" wire:click="removeDirectRow({{ $index }})">
@@ -1069,25 +1189,41 @@
 
         @elseif($warehouseTab === 'out')
             @if(is_null($outMode))
-                <!-- Initial Workspace for Outbound -->
-                <div style="text-align: center; padding: 3rem 1.5rem;">
-                    <div style="display:inline-flex; align-items:center; justify-content:center; width:54px; height:54px; border-radius:50%; background:#fff7ed; color:#ea580c; margin-bottom:1rem;">
-                        <i class="fa-solid fa-truck-ramp-box" style="font-size:24px"></i>
+                <!-- Initial Workspace for Outbound (Ảnh 1 Mockup) -->
+                <div>
+                    <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-3 mb-4">
+                        <div>
+                            <h3 style="font-weight: 800; font-size:0.95rem; color:#0f172a;" class="dark:text-white">{{ __('warehouse.outbound.title') }}</h3>
+                            <p style="font-size:0.75rem; color:#64748b;">{{ __('warehouse.outbound.description') }}</p>
+                        </div>
+                        <button type="button" class="wh-action-btn wh-action-btn-primary" wire:click="openOutTypeModal">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                            </svg>
+                            <span>{{ __('warehouse.actions.create_out') }}</span>
+                        </button>
                     </div>
-                    <h3 style="font-size: 1rem; font-weight: 700; color:#0f172a;" class="dark:text-white">{{ __('warehouse.outbound.title') }}</h3>
-                    <p style="font-size: 0.78rem; color:#64748b; margin-top:0.25rem; margin-bottom:1.5rem;">{{ __('warehouse.outbound.description') }}</p>
-                    <button type="button" class="wh-action-btn wh-action-btn-primary" style="margin: 0 auto;" wire:click="openOutTypeModal">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                        </svg>
-                        <span>{{ __('warehouse.actions.create_out') }}</span>
-                    </button>
-                    <div style="font-size:0.75rem; color:#94a3b8; margin-top:1rem;">{{ __('warehouse.outbound.start_hint') }}</div>
+                    <div style="font-size:0.85rem; color:#64748b; padding: 0.5rem 0;">
+                        {!! __('warehouse.outbound.start_hint_html', ['button' => '<strong style="color:#334155;" class="dark:text-slate-200">' . e(__('warehouse.actions.create_out')) . '</strong>']) !!}
+                    </div>
                 </div>
             @elseif($outMode === 'production')
-                <!-- Production Outbound Workspace -->
+                <!-- Production Outbound Workspace (Ảnh Mockup) -->
                 <div>
-                    <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-3 mb-4 flex-wrap gap-2">
+                    <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-3 mb-3">
+                        <div>
+                            <h3 style="font-weight: 800; font-size:0.95rem; color:#0f172a;" class="dark:text-white">{{ __('warehouse.outbound.title') }}</h3>
+                            <p style="font-size:0.75rem; color:#64748b;">{{ __('warehouse.outbound.description') }}</p>
+                        </div>
+                        <button type="button" class="wh-action-btn wh-action-btn-primary" wire:click="openOutTypeModal">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                            </svg>
+                            <span>{{ __('warehouse.actions.create_out') }}</span>
+                        </button>
+                    </div>
+
+                    <div class="flex items-center justify-between pb-3 mb-2 flex-wrap gap-2">
                         <div class="flex items-center gap-3">
                             <div class="form-field" style="width: 160px;">
                                 <label style="font-size:0.7rem;">{{ __('warehouse.form.outbound_date') }}</label>
@@ -1103,19 +1239,37 @@
                                     'options' => collect($this->getShiftsList())->map(fn ($sh) => ['value' => $sh->id, 'label' => $sh->name])->all(),
                                 ])
                             </div>
+                            <div class="search-wrapper" style="width: 220px; height: 34px; margin-top: 15px;">
+                                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                </svg>
+                                <input type="text" wire:model.live.debounce.300ms="search" placeholder="{{ __('warehouse.placeholders.search_ingredient') }}">
+                            </div>
                         </div>
-                        <button type="button" class="wh-action-btn wh-action-btn-primary" wire:click="confirmProductionOut">
+                        <button type="button" class="wh-action-btn wh-action-btn-primary" wire:click="confirmProductionOut" wire:loading.attr="disabled" wire:target="confirmProductionOut">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                             </svg>
                             <span>{{ __('warehouse.actions.confirm_outbound') }}</span>
                         </button>
                     </div>
-                    <div style="font-size:11px; color:#64748b; margin-bottom:12px;">{{ __('warehouse.outbound.production_hint') }}</div>
+                    <div style="font-size:0.78rem; color:#64748b; margin-bottom:12px;">{{ __('warehouse.outbound.production_hint') }}</div>
 
                     @if(empty($prodItemsData))
-                        <div style="text-align: center; color: #94a3b8; padding: 2rem; font-style: italic;">
-                            {{ __('warehouse.empty.no_production_items') }}
+                        <div style="text-align: center; padding: 3rem 1.5rem;">
+                            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.75rem;">
+                                <div style="width: 48px; height: 48px; border-radius: 50%; background: #f1f5f9; display: flex; align-items: center; justify-content: center; color: #94a3b8;" class="dark:bg-slate-800 dark:color-slate-400">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                    </svg>
+                                </div>
+                                <div style="font-weight: 700; color: #334155; font-size: 0.875rem;" class="dark:text-slate-300">
+                                    {{ $search !== '' ? __('warehouse.empty.no_ingredients') : __('warehouse.empty.no_production_items') }}
+                                </div>
+                                <div style="color: #64748b; font-size: 0.78rem; max-width: 280px; margin: 0 auto;" class="dark:text-slate-400">
+                                    {{ __('warehouse.empty.adjust_filters') }}
+                                </div>
+                            </div>
                         </div>
                     @else
                         <div class="overflow-x-auto">
@@ -1131,10 +1285,10 @@
                                 <tbody>
                                     @foreach($prodItemsData as $index => $item)
                                         <tr>
-                                            <td style="font-weight: 700; color: #0f172a;" class="dark:text-white">{{ $item['name'] }}</td>
+                                            <td class="wh-ing-name">{{ $item['name'] }}</td>
                                             {{-- payload từ client có thể thiếu key → không được để vỡ trang (500) --}}
-                                            <td style="text-align: right; font-weight:700;">{{ number_format($item['available_qty'] ?? 0, 2, ',', '.') }} {{ $item['unit'] ?? '' }}</td>
-                                            <td style="text-align: right; color:#64748b;">{{ number_format($item['quantity_expected'], 2, ',', '.') }} {{ $item['unit'] }}</td>
+                                            <td style="text-align: right; font-weight:700;">{{ $this->formatQty($item['available_qty'] ?? 0) }} {{ $item['unit'] ?? '' }}</td>
+                                            <td style="text-align: right; color:#64748b;">{{ $this->formatQty($item['quantity_expected']) }} {{ $item['unit'] }}</td>
                                             <td style="text-align: center;">
                                                 <input type="number" step="0.01" wire:model="prodItemsData.{{ $index }}.quantity_actual" class="table-input" style="width: 120px;">
                                                 @if(($prodItemsData[$index]['quantity_actual'] ?? 0) > ($item['available_qty'] ?? 0))
@@ -1151,6 +1305,19 @@
             @elseif($outMode === 'transfer')
                 <!-- Transfer Outbound Workspace -->
                 <div>
+                    <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-3 mb-3">
+                        <div>
+                            <h3 style="font-weight: 800; font-size:0.95rem; color:#0f172a;" class="dark:text-white">{{ __('warehouse.outbound.title') }}</h3>
+                            <p style="font-size:0.75rem; color:#64748b;">{{ __('warehouse.outbound.description') }}</p>
+                        </div>
+                        <button type="button" class="wh-action-btn wh-action-btn-primary" wire:click="openOutTypeModal">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                            </svg>
+                            <span>{{ __('warehouse.actions.create_out') }}</span>
+                        </button>
+                    </div>
+
                     <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-3 mb-4">
                         <div class="flex items-center gap-3">
                             <div class="form-field" style="width: 260px;">
@@ -1169,7 +1336,7 @@
                                 </svg>
                                 <span>{{ __('warehouse.actions.add_item') }}</span>
                             </button>
-                            <button type="button" class="wh-action-btn wh-action-btn-primary" wire:click="confirmTransferOut">
+                            <button type="button" class="wh-action-btn wh-action-btn-primary" wire:click="confirmTransferOut" wire:loading.attr="disabled" wire:target="confirmTransferOut">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
                                 </svg>
@@ -1209,7 +1376,7 @@
                                             ])
                                         </td>
                                         <td style="text-align: right; font-weight:700;">
-                                            {{ number_format($item['available_qty'] ?? 0, 2, ',', '.') }}<span style="font-size: 11px; font-weight: 500; color: #94a3b8; margin-left: 2px;">{{ $item['unit'] ?? '' }}</span>
+                                            {{ $this->formatQty($item['available_qty'] ?? 0) }}<span style="font-size: 11px; font-weight: 500; color: #94a3b8; margin-left: 2px;">{{ $item['unit'] ?? '' }}</span>
                                         </td>
                                         <td style="text-align: center;">
                                             <input type="number" step="0.01" wire:model="transferItemsData.{{ $index }}.quantity" class="table-input" style="width: 120px;">
@@ -1252,7 +1419,7 @@
                                             <td><span style="font-weight: 700;">{{ $tf->code }}</span></td>
                                             <td>{{ $tf->sourceKitchen->name }}</td>
                                             <td>{{ $tf->destKitchen->name }}</td>
-                                            <td>{{ $tf->created_at->format('d/m/Y H:i') }}</td>
+                                            <td>{{ $tf->created_at->setTimezone('Asia/Ho_Chi_Minh')->format('d/m/Y H:i') }}</td>
                                             <td>
                                                 @if($tf->status === \App\Models\StockTransfer::STATUS_DONE)
                                                     <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-green-100 text-green-800 dark:bg-green-950/20 dark:text-green-400">
@@ -1280,9 +1447,19 @@
                                                 @endif
                                             </td>
                                             <td style="text-align: center;">
-                                                @if($tf->status === \App\Models\StockTransfer::STATUS_IN_TRANSIT && auth()->user()?->currentKitchenId() === $tf->dest_kitchen_id)
-                                                    <button type="button" class="wh-action-btn wh-action-btn-primary" style="height:28px; font-size:10px; padding:0 8px; margin:0 auto;" wire:click="confirmTransferReceive({{ $tf->id }})">
+                                                @php $curKitchenId = auth()->user()?->currentKitchenId(); @endphp
+                                                @if($tf->status === \App\Models\StockTransfer::STATUS_IN_TRANSIT && $curKitchenId === $tf->dest_kitchen_id)
+                                                    <button type="button" class="wh-action-btn wh-action-btn-primary" style="height:28px; font-size:10px; padding:0 8px; margin:0 auto;"
+                                                            wire:click="confirmTransferReceive({{ $tf->id }})"
+                                                            wire:loading.attr="disabled" wire:target="confirmTransferReceive">
                                                         {{ __('warehouse.actions.confirm_receive') }}
+                                                    </button>
+                                                @elseif($tf->status === \App\Models\StockTransfer::STATUS_IN_TRANSIT && $curKitchenId === $tf->source_kitchen_id)
+                                                    <button type="button" class="wh-action-btn wh-action-btn-danger" style="height:28px; font-size:10px; padding:0 8px; margin:0 auto;"
+                                                            wire:click="cancelTransfer({{ $tf->id }})"
+                                                            wire:confirm="{{ __('warehouse.actions.confirm_cancel_transfer') }}"
+                                                            wire:loading.attr="disabled" wire:target="cancelTransfer">
+                                                        {{ __('warehouse.actions.cancel_transfer') }}
                                                     </button>
                                                 @else
                                                     —
@@ -1298,43 +1475,7 @@
             @endif
 
         @elseif($warehouseTab === 'log')
-            @php $logData = $this->getLogData(); @endphp
-            <!-- Bộ lọc nhật ký: loại giao dịch + nguyên liệu -->
-            <div style="display:flex; gap:10px; margin-bottom:12px; flex-wrap:wrap;">
-                @php
-                    $logTypes = collect([
-                        'inbound', 'external_inbound', 'outbound', 'transfer_out', 'transfer_in', 'stock_check',
-                    ])->map(fn ($k) => [
-                        'value' => __('warehouse.transaction_types.'.$k),
-                        'label' => __('warehouse.transaction_type_labels.'.$k),
-                    ])->all();
-                @endphp
-                <div style="min-width:200px">
-                    @include('filament.components.search-select', [
-                        'name' => 'logTypeFilter',
-                        'live' => true,
-                        'placeholder' => __('warehouse.filters.all_transaction_types'),
-                        'emptyLabel' => __('warehouse.filters.all_transaction_types'),
-                        'options' => $logTypes,
-                    ])
-                </div>
-                <div style="min-width:220px">
-                    @include('filament.components.search-select', [
-                        'name' => 'logIngredientFilter',
-                        'live' => true,
-                        'placeholder' => __('warehouse.filters.all_ingredients'),
-                        'emptyLabel' => __('warehouse.filters.all_ingredients'),
-                        'options' => collect($this->getIngredientsList())->map(fn ($ing) => [
-                            'value' => $ing->id,
-                            'label' => $ing->name,
-                            'sub' => $ing->code,
-                        ])->all(),
-                    ])
-                </div>
-                {{-- Lọc theo khoảng thời gian để đối soát đúng kỳ --}}
-                <input type="date" wire:model.live="logFromDate" class="table-input" style="height:34px" title="{{ __('warehouse.filters.from_date') }}">
-                <input type="date" wire:model.live="logToDate" class="table-input" style="height:34px" title="{{ __('warehouse.filters.to_date') }}">
-            </div>
+            @php $logPaginator = $this->getLogPaginator(); @endphp
             <div class="overflow-x-auto">
                 <table class="wh-table">
                     <thead>
@@ -1348,9 +1489,9 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($logData as $log)
+                        @forelse($logPaginator as $log)
                             <tr>
-                                <td>{{ \Carbon\Carbon::parse($log['created_at'])->format('d/m/Y H:i') }}</td>
+                                <td>{{ \Carbon\Carbon::parse($log['created_at'])->setTimezone('Asia/Ho_Chi_Minh')->format('d/m/Y H:i') }}</td>
                                 <td>
                                     @php
                                         // 'Kiểm kê' lưu quantity CÓ DẤU (+ thừa / − thiếu); các loại khác dấu theo nhóm nhập/xuất
@@ -1378,9 +1519,9 @@
                                 </td>
                                 <td style="font-weight: 700;">{{ $log['ingredient']['name'] ?? '—' }}</td>
                                 <td style="text-align: right; font-weight: 750; color: {{ $isInflow ? '#16a34a' : '#ef4444' }}">
-                                    {{ $isInflow ? '+' : '-' }}{{ number_format(abs($log['quantity']), 2, ',', '.') }}
+                                    {{ $isInflow ? '+' : '-' }}{{ $this->formatQty(abs($log['quantity'])) }}
                                 </td>
-                                <td style="text-align: right; font-weight: 700;">{{ number_format($log['after_quantity'], 2, ',', '.') }}</td>
+                                <td style="text-align: right; font-weight: 700;">{{ $this->formatQty($log['after_quantity']) }}</td>
                                 <td>
                                     @if($log['voucher_code'])
                                         <span style="font-family: monospace; font-weight: 700; background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size:11px;" class="dark:bg-gray-800">{{ $log['voucher_code'] }}</span> — 
@@ -1403,12 +1544,76 @@
                     </tbody>
                 </table>
             </div>
-            @php $logTotal = $this->getLogTotal(); @endphp
-            <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:10px; font-size:12px; color:#64748b">
-                <span>{{ __('warehouse.log.showing', ['shown' => count($logData), 'total' => $logTotal]) }}</span>
-                @if(count($logData) < $logTotal)
-                    <button type="button" wire:click="loadMoreLog" class="wh-action-btn">{{ __('warehouse.log.load_more') }}</button>
-                @endif
+
+            <!-- PHÂN TRANG NHẬT KÝ KHO CHUẨN DỰ ÁN -->
+            <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-top:16px; font-size:12.5px; color:#64748b;">
+                <div>
+                    @if($logPaginator->total() > 0)
+                        {{ __('warehouse.pagination.showing_results', [
+                            'first' => number_format($logPaginator->firstItem()),
+                            'last' => number_format($logPaginator->lastItem()),
+                            'total' => number_format($logPaginator->total())
+                        ]) }}
+                    @endif
+                </div>
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <div style="display:flex; align-items:center; gap:6px;">
+                        <span style="font-weight: 500;">Hiển thị:</span>
+                        <select wire:model.live="logPerPage" style="height: 30px; font-size: 12px; padding: 2px 24px 2px 8px; border-radius: 6px; border: 1px solid #cbd5e1; background-color: #fff; cursor: pointer;" class="dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200">
+                            <option value="15">15</option>
+                            <option value="30">30</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+                    </div>
+
+                    @if($logPaginator->hasPages())
+                        <nav role="navigation" aria-label="{{ __('warehouse.pagination.navigation') }}" style="display:flex; align-items:center; gap:4px;">
+                            {{-- Trang trước --}}
+                            @if ($logPaginator->onFirstPage())
+                                <span aria-disabled="true" style="opacity:.4; padding:4px;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><polyline points="15 18 9 12 15 6"/></svg>
+                                </span>
+                            @else
+                                <button type="button" wire:click="previousPage('logPage')" rel="prev" style="display:inline-flex; align-items:center; justify-content:center; min-width:28px; height:28px; border:1px solid #cbd5e1; border-radius:6px; background:transparent; cursor:pointer;" class="dark:border-gray-700">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><polyline points="15 18 9 12 15 6"/></svg>
+                                </button>
+                            @endif
+
+                            {{-- Số trang --}}
+                            @php
+                                $logCurrentPage = $logPaginator->currentPage();
+                                $logLastPage = $logPaginator->lastPage();
+                                $logPageWindow = collect([1, $logCurrentPage - 1, $logCurrentPage, $logCurrentPage + 1, $logLastPage])
+                                    ->filter(fn ($p) => $p >= 1 && $p <= $logLastPage)
+                                    ->unique()
+                                    ->sort()
+                                    ->values();
+                            @endphp
+                            @foreach ($logPageWindow as $i => $page)
+                                @if ($i > 0 && $page - $logPageWindow[$i - 1] > 1)
+                                    <span aria-hidden="true" style="padding:0 4px">…</span>
+                                @endif
+                                @if ($page == $logCurrentPage)
+                                    <span aria-current="page" style="display:inline-flex; align-items:center; justify-content:center; min-width:28px; height:28px; border-radius:6px; background:rgb(var(--primary-600)); color:#fff; font-weight:700;">{{ $page }}</span>
+                                @else
+                                    <button type="button" wire:click="gotoPage({{ $page }}, 'logPage')" style="display:inline-flex; align-items:center; justify-content:center; min-width:28px; height:28px; border:1px solid #cbd5e1; border-radius:6px; background:transparent; cursor:pointer;" class="dark:border-gray-700">{{ $page }}</button>
+                                @endif
+                            @endforeach
+
+                            {{-- Trang sau --}}
+                            @if ($logPaginator->hasMorePages())
+                                <button type="button" wire:click="nextPage('logPage')" rel="next" style="display:inline-flex; align-items:center; justify-content:center; min-width:28px; height:28px; border:1px solid #cbd5e1; border-radius:6px; background:transparent; cursor:pointer;" class="dark:border-gray-700">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><polyline points="9 18 15 12 9 6"/></svg>
+                                </button>
+                            @else
+                                <span aria-disabled="true" style="opacity:.4; padding:4px;">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><polyline points="9 18 15 12 9 6"/></svg>
+                                </span>
+                            @endif
+                        </nav>
+                    @endif
+                </div>
             </div>
         @endif
     </div>
@@ -1423,17 +1628,13 @@
                         <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ __('warehouse.modal.inbound_type_desc') }}</p>
                     </div>
                     <button type="button" class="text-gray-400 hover:text-gray-500" wire:click="closeModals">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                        </svg>
+                        <i class="fa-solid fa-xmark text-lg"></i>
                     </button>
                 </div>
                 <div class="grid gap-3">
                     <button type="button" class="flow-modal-choice" wire:click="startInbound('po')">
-                        <div class="p-2 bg-primary-50 text-primary-600 rounded-lg dark:bg-primary-950/20 dark:text-primary-400">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                            </svg>
+                        <div class="p-2.5 bg-primary-50 text-primary-600 rounded-lg dark:bg-primary-950/20 dark:text-primary-400 text-lg">
+                            <i class="fa-solid fa-file-invoice"></i>
                         </div>
                         <div>
                             <div class="font-bold text-gray-900 dark:text-white text-sm">{{ __('warehouse.modal.inbound_po') }}</div>
@@ -1441,10 +1642,8 @@
                         </div>
                     </button>
                     <button type="button" class="flow-modal-choice" wire:click="startInbound('direct')">
-                        <div class="p-2 bg-primary-50 text-primary-600 rounded-lg dark:bg-primary-950/20 dark:text-primary-400">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
-                            </svg>
+                        <div class="p-2.5 bg-primary-50 text-primary-600 rounded-lg dark:bg-primary-950/20 dark:text-primary-400 text-lg">
+                            <i class="fa-solid fa-basket-shopping"></i>
                         </div>
                         <div>
                             <div class="font-bold text-gray-900 dark:text-white text-sm">{{ __('warehouse.modal.inbound_direct') }}</div>
@@ -1465,17 +1664,13 @@
                         <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ __('warehouse.modal.outbound_type_desc') }}</p>
                     </div>
                     <button type="button" class="text-gray-400 hover:text-gray-500" wire:click="closeModals">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                        </svg>
+                        <i class="fa-solid fa-xmark text-lg"></i>
                     </button>
                 </div>
                 <div class="grid gap-3">
                     <button type="button" class="flow-modal-choice" wire:click="startOutbound('production')">
-                        <div class="p-2 bg-orange-50 text-orange-600 rounded-lg dark:bg-orange-950/20 dark:text-orange-400">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
-                            </svg>
+                        <div class="p-2.5 bg-orange-50 text-orange-600 rounded-lg dark:bg-orange-950/20 dark:text-orange-400 text-lg">
+                            <i class="fa-solid fa-kitchen-set"></i>
                         </div>
                         <div>
                             <div class="font-bold text-gray-900 dark:text-white text-sm">{{ __('warehouse.modal.production_outbound') }}</div>
@@ -1483,10 +1678,8 @@
                         </div>
                     </button>
                     <button type="button" class="flow-modal-choice" wire:click="startOutbound('transfer')">
-                        <div class="p-2 bg-blue-50 text-blue-600 rounded-lg dark:bg-blue-950/20 dark:text-blue-400">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
-                            </svg>
+                        <div class="p-2.5 bg-blue-50 text-blue-600 rounded-lg dark:bg-blue-950/20 dark:text-blue-400 text-lg">
+                            <i class="fa-solid fa-right-left"></i>
                         </div>
                         <div>
                             <div class="font-bold text-gray-900 dark:text-white text-sm">{{ __('warehouse.modal.transfer_outbound') }}</div>
@@ -1502,34 +1695,34 @@
     @if($selectedLedgerIngId)
         @php $ledgerIng = $this->getLedgerIngredient(); @endphp
         <div class="flow-modal-overlay">
-            <div class="flow-modal-container" style="width: min(720px, 94vw);">
-                <div class="flex justify-between items-center pb-3 border-b border-gray-200 dark:border-gray-700 mb-4">
+            <div class="flow-modal-container" style="width: min(760px, 94vw); max-height: 85vh; display: flex; flex-direction: column; overflow: hidden;">
+                <div class="flex justify-between items-center pb-3 border-b border-gray-200 dark:border-gray-700 mb-3 flex-shrink-0">
                     <div>
                         <h3 class="font-extrabold text-base text-gray-900 dark:text-white">{{ __('warehouse.ledger.title', ['code' => $ledgerIng->code, 'name' => $ledgerIng->name]) }}</h3>
                         <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ __('warehouse.ledger.description') }}</p>
                     </div>
-                    <button type="button" class="text-gray-400 hover:text-gray-500" wire:click="closeLedger">
+                    <button type="button" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors p-1" wire:click="closeLedger" title="Đóng">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                         </svg>
                     </button>
                 </div>
 
-                <div class="overflow-y-auto" style="max-height: 400px;">
+                <div class="overflow-y-auto flex-1 pr-1" style="max-height: calc(85vh - 90px); scrollbar-width: thin;">
                     <table class="wh-table">
-                        <thead>
+                        <thead class="sticky top-0 z-10 bg-slate-50 dark:bg-slate-800 shadow-xs">
                             <tr>
-                                <th>{{ __('warehouse.table.time') }}</th>
-                                <th>{{ __('warehouse.table.voucher_code') }}</th>
-                                <th>{{ __('warehouse.table.transaction_type') }}</th>
-                                <th style="text-align: right;">{{ __('warehouse.table.quantity') }}</th>
-                                <th style="text-align: right;">{{ __('warehouse.table.after_stock') }}</th>
+                                <th class="bg-slate-50 dark:bg-slate-800">{{ __('warehouse.table.time') }}</th>
+                                <th class="bg-slate-50 dark:bg-slate-800">{{ __('warehouse.table.voucher_code') }}</th>
+                                <th class="bg-slate-50 dark:bg-slate-800">{{ __('warehouse.table.transaction_type') }}</th>
+                                <th class="bg-slate-50 dark:bg-slate-800" style="text-align: right;">{{ __('warehouse.table.quantity') }}</th>
+                                <th class="bg-slate-50 dark:bg-slate-800" style="text-align: right;">{{ __('warehouse.table.after_stock') }}</th>
                             </tr>
                         </thead>
                         <tbody>
                             @forelse($ledgerTransactions as $log)
                                 <tr>
-                                    <td>{{ \Carbon\Carbon::parse($log['created_at'])->format('d/m/Y H:i') }}</td>
+                                    <td>{{ \Carbon\Carbon::parse($log['created_at'])->setTimezone('Asia/Ho_Chi_Minh')->format('d/m/Y H:i') }}</td>
                                     <td>
                                         @if($log['voucher_code'])
                                             <span style="font-family: monospace; font-weight: 700; background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-size:10px;" class="dark:bg-gray-800">{{ $log['voucher_code'] }}</span>
@@ -1556,9 +1749,9 @@
                                         @endif
                                     </td>
                                     <td style="text-align: right; font-weight: 700; color: {{ $isInflow ? '#16a34a' : '#ef4444' }}">
-                                        {{ $isInflow ? '+' : '-' }}{{ number_format(abs($log['quantity']), 2, ',', '.') }}
+                                        {{ $isInflow ? '+' : '-' }}{{ $this->formatQty(abs($log['quantity'])) }}
                                     </td>
-                                    <td style="text-align: right; font-weight: 700;">{{ number_format($log['after_quantity'], 2, ',', '.') }}</td>
+                                    <td style="text-align: right; font-weight: 700;">{{ $this->formatQty($log['after_quantity']) }}</td>
                                 </tr>
                             @empty
                                 <tr>

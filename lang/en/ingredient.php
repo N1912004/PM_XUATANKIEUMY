@@ -2,10 +2,18 @@
 
 return [
     'cost_source_notice' => 'Ingredient prices come from the Ingredients / Suppliers module and are used to calculate the ingredient cost per portion automatically.',
+    'breadcrumb' => [
+        'home' => 'Catering',
+        'list' => 'Ingredient List',
+        'create' => 'Add Ingredient',
+        'edit' => 'Edit Ingredient',
+        'view' => 'Ingredient Details',
+    ],
     'navigation' => [
         'group' => 'catalog.groups.ingredients_inventory',
         'ingredient' => 'Ingredient',
         'ingredient_plural' => 'Ingredient List',
+        'subheading' => 'Manage ingredient list by name, code, supplier, unit, and ingredient type',
         'unit' => 'Unit of Measure',
         'unit_plural' => 'Units of Measure',
         'type' => 'Ingredient Type',
@@ -13,10 +21,13 @@ return [
     ],
     'form' => [
         'section' => 'Ingredient Information',
+        'quick_settings' => 'Quick Settings',
+        'summary' => 'Information Summary',
         'name' => 'Ingredient Name',
         'name_placeholder' => 'Enter ingredient name',
         'code' => 'Ingredient Code',
         'code_placeholder' => 'Enter ingredient code',
+        'supplier_placeholder' => 'Select supplier',
         'unit' => 'Unit',
         'unit_placeholder' => 'Select unit',
         'unit_name' => 'Unit name',
@@ -36,7 +47,11 @@ return [
         'type' => 'TYPE',
         'reference_price' => 'AMOUNT',
         'status' => 'STATUS',
+        'action' => 'ACTION',
         'more_suppliers' => '+:count suppliers',
+        'empty_heading' => 'No ingredients found',
+        'empty_description' => 'Try a different search term or clear some filters.',
+        'search_placeholder' => 'Search by name or code...',
     ],
     'status' => [
         'active' => 'Active',
@@ -53,6 +68,7 @@ return [
         'supplier' => 'Supplier',
         'unit' => 'Unit',
         'type' => 'Type',
+        'trashed' => 'Deleted records',
     ],
     'actions' => [
         'import' => 'Import Excel',
@@ -62,6 +78,9 @@ return [
         'export' => 'Export Excel',
         'create' => 'Add Ingredient',
         'create_desc' => 'Only declare the essentials: name, code, unit and ingredient type',
+        'save' => 'Save Ingredient',
+        'save_draft' => 'Save Draft',
+        'cancel' => 'Cancel',
         'back' => 'Back',
         'edit' => 'Edit',
         'view_desc' => 'Detailed information of the ingredient in the catalog',
