@@ -515,18 +515,25 @@ div[wire\:key*="selection-indicator"] {
   background: #F8FAFC !important;
 }
 
+.fi-ta-header-cell {
+  padding: 10px 12px !important;
+  border-bottom: 1px solid var(--bd) !important;
+}
+
 .fi-ta-header-cell,
 .fi-ta-header-cell *,
 .fi-ta-header-cell-label,
 .fi-ta-header-cell button,
 .fi-ta-header-cell span {
-  padding: 10px 12px !important;
   font-size: 11px !important;
   font-weight: 700 !important;
   color: var(--fa) !important;
   text-transform: uppercase !important;
   letter-spacing: 0.07em !important;
-  border-bottom: 1px solid var(--bd) !important;
+}
+
+.fi-ta-header-cell * {
+  border-bottom: none !important;
 }
 
 /* Table Body Rows & Cells */
