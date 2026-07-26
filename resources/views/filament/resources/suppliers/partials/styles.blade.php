@@ -78,7 +78,7 @@
             .sup-page,
             .sup-page * {
                 box-sizing: border-box;
-                font-family: "IBM Plex Sans", system-ui, sans-serif;
+                font-family: "Inter", system-ui, sans-serif;
             }
 
             .sup-page {

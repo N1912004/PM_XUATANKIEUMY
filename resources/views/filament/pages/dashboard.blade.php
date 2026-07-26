@@ -2,7 +2,7 @@
     <!-- Custom styling to override standard styles and provide a premium wow-factor -->
     <style>
         .custom-dashboard-container {
-            font-family: 'IBM Plex Sans', sans-serif;
+            font-family: 'Inter', system-ui, sans-serif;
         }
         .premium-card {
             background: #ffffff;
