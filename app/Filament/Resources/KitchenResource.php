@@ -15,7 +15,7 @@ class KitchenResource extends Resource
 {
     protected static ?string $model = Kitchen::class;
 
-    protected static ?string $navigationIcon = 'fa-store';
+    protected static ?string $navigationIcon = 'fa-fire-burner'; // Bếp lửa — sát nghĩa 'Nhà ăn / bếp' hơn icon cửa hàng cũ
 
     protected static ?int $navigationSort = 2;
 

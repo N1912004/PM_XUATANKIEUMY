@@ -17,7 +17,7 @@ class AreaResource extends Resource
 
     protected static ?string $navigationIcon = 'fa-location-dot';
 
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 3; // Đứng sau 'Nhà ăn / bếp' (2) trong nhóm HỆ THỐNG
 
     public static function getNavigationLabel(): string
     {
@@ -31,7 +31,7 @@ class AreaResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('catalog.groups.chat_group');
+        return __('catalog.groups.system');
     }
 
     public static function form(Form $form): Form

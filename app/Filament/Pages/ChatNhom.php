@@ -10,7 +10,7 @@ use Livewire\Attributes\On;
 
 class ChatNhom extends Page
 {
-    protected static bool $shouldRegisterNavigation = true;
+    protected static bool $shouldRegisterNavigation = false; // Ẩn menu 'Chat nhóm' khỏi thanh điều hướng Sidebar
 
     protected static ?string $navigationIcon = 'fa-comments';
 
