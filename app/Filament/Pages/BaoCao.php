@@ -14,7 +14,7 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class BaoCao extends Page
 {
-    protected static ?string $navigationIcon = 'heroicon-o-chart-bar';
+    protected static ?string $navigationIcon = 'fa-chart-column';
 
     protected static ?int $navigationSort = 9;
 
@@ -32,7 +32,7 @@ class BaoCao extends Page
 
     public static function getNavigationGroup(): ?string
     {
-        return __('catalog.groups.kitchen_operations');
+        return __('catalog.groups.catering');
     }
 
     /**

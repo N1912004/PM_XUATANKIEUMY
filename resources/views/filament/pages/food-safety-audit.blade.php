@@ -38,10 +38,10 @@
                 wire:click="exportExcel"
                 wire:loading.attr="disabled"
                 wire:target="exportExcel"
-                class="emp-btn emp-btn-primary"
+                class="emp-btn"
                 aria-label="{{ __('food_safety.accessibility.export_excel') }}"
             >
-                <i wire:loading.remove wire:target="exportExcel" class="fa-solid fa-file-excel"></i>
+                <i wire:loading.remove wire:target="exportExcel" class="fa-solid fa-file-excel" style="color:#059669"></i>
                 <i wire:loading wire:target="exportExcel" class="fa-solid fa-spinner fa-spin"></i>
                 <span>{{ __('food_safety.actions.export_excel') }}</span>
             </button>

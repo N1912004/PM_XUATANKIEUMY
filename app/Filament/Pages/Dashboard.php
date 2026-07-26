@@ -19,7 +19,7 @@ class Dashboard extends Page
 
     protected static bool $shouldRegisterNavigation = false; // Ẩn menu 'Bảng điều khiển' (Dashboard) khỏi Sidebar
 
-    protected static ?string $navigationIcon = 'heroicon-o-squares-2x2';
+    protected static ?string $navigationIcon = 'fa-house';
 
     protected static ?int $navigationSort = -10;
 

@@ -16,7 +16,7 @@ class ShiftResource extends Resource
 
     protected static ?string $model = Shift::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-clock';
+    protected static ?string $navigationIcon = 'fa-clock';
 
     protected static ?int $navigationSort = 9;
 
@@ -37,7 +37,7 @@ class ShiftResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('catalog.groups.kitchen_operations');
+        return __('catalog.groups.system');
     }
 
     public static function form(Form $form): Form

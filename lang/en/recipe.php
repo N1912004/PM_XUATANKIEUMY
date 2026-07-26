@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'breadcrumb' => ['home' => 'Catering', 'list' => 'Menu Bank', 'create' => 'Add Dish', 'edit' => 'Edit Dish', 'view' => 'Dish Details'],
     'navigation' => ['label' => 'Menu Bank', 'group' => 'KITCHEN OPERATIONS'],
     'model' => ['singular' => 'Dish', 'plural' => 'Menu Bank'],
     'sections' => ['information' => 'Dish information', 'ingredients_cost' => 'Ingredients and cost per portion'],

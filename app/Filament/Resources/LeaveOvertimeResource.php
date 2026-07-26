@@ -18,7 +18,7 @@ class LeaveOvertimeResource extends Resource
 
     protected static ?string $model = LeaveOvertime::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-sun';
+    protected static ?string $navigationIcon = 'fa-umbrella-beach';
 
     protected static ?int $navigationSort = 3;
 

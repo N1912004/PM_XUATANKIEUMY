@@ -44,7 +44,7 @@ class ListIngredients extends ListRecords
         return [
             Actions\Action::make('import_excel')
                 ->label(__('ingredient.actions.import'))
-                ->icon('heroicon-o-document-arrow-up')
+                ->icon(new HtmlString('<i class="fa-solid fa-file-arrow-up" style="color:#1267E8;font-size:15px"></i>'))
                 ->color('gray')
                 ->outlined()
                 ->extraAttributes(['class' => 'btn-import-excel'])
@@ -94,7 +94,7 @@ class ListIngredients extends ListRecords
                 }),
             Actions\Action::make('export_excel')
                 ->label(__('ingredient.actions.export'))
-                ->icon('heroicon-o-document-arrow-down')
+                ->icon(new HtmlString('<i class="fa-solid fa-file-excel" style="color:#059669;font-size:15px"></i>'))
                 ->color('gray')
                 ->outlined()
                 ->extraAttributes(['class' => 'btn-export-excel'])

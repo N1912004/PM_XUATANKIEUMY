@@ -14,7 +14,7 @@ class FoodSafetyAuditResource extends Resource
 {
     protected static ?string $model = FoodSafetyAudit::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-shield-check';
+    protected static ?string $navigationIcon = 'fa-clipboard-check';
 
     protected static ?int $navigationSort = 8;
 
@@ -35,7 +35,7 @@ class FoodSafetyAuditResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('catalog.groups.kitchen_operations');
+        return __('catalog.groups.catering');
     }
 
     public static function form(Form $form): Form

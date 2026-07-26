@@ -23,7 +23,7 @@ class RecipeTypeResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('catalog.groups.ingredients_inventory');
+        return __('catalog.groups.system');
     }
 
     public static function getNavigationLabel(): string

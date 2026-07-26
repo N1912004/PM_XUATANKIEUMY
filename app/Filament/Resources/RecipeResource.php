@@ -28,7 +28,7 @@ class RecipeResource extends Resource
 {
     protected static ?string $model = Recipe::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-book-open';
+    protected static ?string $navigationIcon = 'fa-utensils';
 
     protected static ?int $navigationSort = 1;
 
@@ -49,7 +49,7 @@ class RecipeResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('catalog.groups.kitchen_operations');
+        return __('catalog.groups.catering');
     }
 
     public static function form(Form $form): Form

@@ -31,8 +31,8 @@
         </div>
         <div class="emp-actions">
             <button wire:click="exportLeaveOvertimes" class="emp-btn">
-                <i class="fa-solid fa-download" style="font-size: 13px;"></i>
-                {{ __('leave_overtime.actions.export') }}
+                <i class="fa-solid fa-file-excel" style="color:var(--po-gn)"></i>
+                <span>{{ __('leave_overtime.actions.export') }}</span>
             </button>
             <a href="{{ \App\Filament\Resources\LeaveOvertimeResource::getUrl('create') }}" class="emp-btn emp-btn-primary">
                 <i class="fa-solid fa-plus"></i>

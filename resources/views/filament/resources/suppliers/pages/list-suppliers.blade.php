@@ -19,15 +19,10 @@
                 wire:click="exportExcel"
                 wire:loading.attr="disabled"
                 wire:target="exportExcel"
-                class="{{ $fiBtn }} fi-btn-color-success"
+                class="{{ $fiBtn }}"
             >
-                <svg wire:loading.remove wire:target="exportExcel" class="fi-btn-icon h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m.75 12 3 3m0 0 3-3m-3 3v-6m-1.5-9H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"/>
-                </svg>
-                <svg wire:loading wire:target="exportExcel" class="animate-spin fi-btn-icon h-5 w-5" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path clip-rule="evenodd" d="M12 19C15.866 19 19 15.866 19 12C19 8.13401 15.866 5 12 5C8.13401 5 5 8.13401 5 12C5 15.866 8.13401 19 12 19ZM12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" fill-rule="evenodd" fill="currentColor" opacity="0.2"/>
-                    <path d="M2 12C2 6.47715 6.47715 2 12 2V5C8.13401 5 5 8.13401 5 12H2Z" fill="currentColor"/>
-                </svg>
+                <i wire:loading.remove wire:target="exportExcel" class="fa-solid fa-file-excel" style="color:var(--po-gn)"></i>
+                <i wire:loading wire:target="exportExcel" class="fa-solid fa-spinner fa-spin"></i>
                 <span class="fi-btn-label">{{ __('supplier.actions.export_excel') }}</span>
             </button>
             <a

@@ -273,39 +273,40 @@ class AdminPanelProvider extends PanelProvider
                             color: #1267E8 !important;
                         }
 
-                        /* 1. TỔNG QUAN & NGUYÊN LIỆU & KHO & CUNG ỨNG & VẬN HÀNH BẾP (Light Mode) */
+                        /* 1. TỔNG QUAN & NGUYÊN LIỆU & NHÂN SỰ & CHAT (Blue - nb) */
                         .fi-sidebar-group:first-child .fi-sidebar-item:first-child .fi-sidebar-item-icon,
                         a[href$="/admin"] .fi-sidebar-item-icon,
                         a[href$="/admin/"] .fi-sidebar-item-icon,
                         a[href*="/admin/ingredients"] .fi-sidebar-item-icon,
                         a[href*="/admin/units"] .fi-sidebar-item-icon,
                         a[href*="/admin/ingredient-types"] .fi-sidebar-item-icon,
-                        a[href*="/admin/menus"] .fi-sidebar-item-icon,
-                        a[href*="/admin/lap-thuc-don-tuan"] .fi-sidebar-item-icon,
                         a[href*="/admin/employees"] .fi-sidebar-item-icon,
                         a[href*="/admin/users"] .fi-sidebar-item-icon,
                         a[href*="/admin/chat-nhom"] .fi-sidebar-item-icon {
                             background-color: #EBF3FF !important; color: #1267E8 !important;
                         }
 
+                        /* Ngân hàng thực đơn & NCC (Amber - na) */
                         a[href*="/admin/recipes"] .fi-sidebar-item-icon,
                         a[href*="/admin/recipe-types"] .fi-sidebar-item-icon,
-                        a[href*="/admin/menu-audit-logs"] .fi-sidebar-item-icon {
+                        a[href*="/admin/menu-audit-logs"] .fi-sidebar-item-icon,
+                        a[href*="/admin/suppliers"] .fi-sidebar-item-icon {
                             background-color: #FFFBEB !important; color: #D97706 !important;
                         }
 
+                        /* Kho & Cung ứng & Vận hành bếp (Green - nt) */
                         a[href*="/admin/stocks"] .fi-sidebar-item-icon,
                         a[href*="/admin/stock-transactions"] .fi-sidebar-item-icon,
                         a[href*="/admin/stock-transfers"] .fi-sidebar-item-icon,
                         a[href*="/admin/list-hang"] .fi-sidebar-item-icon,
                         a[href*="/admin/purchase-orders"] .fi-sidebar-item-icon,
-                        a[href*="/admin/bao-cao"] .fi-sidebar-item-icon {
+                        a[href*="/admin/bao-cao"] .fi-sidebar-item-icon,
+                        a[href*="/admin/menus"] .fi-sidebar-item-icon,
+                        a[href*="/admin/lap-thuc-don-tuan"] .fi-sidebar-item-icon {
                             background-color: #ECFDF5 !important; color: #059669 !important;
                         }
 
-                        a[href*="/admin/suppliers"] .fi-sidebar-item-icon {
-                            background-color: #FFF7ED !important; color: #EA580C !important;
-                        }
+                        /* NCC đã gộp vào nhóm Amber ở trên */
 
                         a[href*="/admin/food-safety-audits"] .fi-sidebar-item-icon,
                         a[href*="/admin/timekeepings"] .fi-sidebar-item-icon,
@@ -352,25 +353,24 @@ class AdminPanelProvider extends PanelProvider
 
                         /* 3. Dark Mode Support */
                         .dark a[href*="/admin/recipes"] .fi-sidebar-item-icon,
-                        .dark a[href*="/admin/recipe-types"] .fi-sidebar-item-icon {
+                        .dark a[href*="/admin/recipe-types"] .fi-sidebar-item-icon,
+                        .dark a[href*="/admin/suppliers"] .fi-sidebar-item-icon {
                             background-color: rgba(217, 119, 6, 0.18) !important; color: #FBBF24 !important;
                         }
                         .dark a[href*="/admin/stocks"] .fi-sidebar-item-icon,
                         .dark a[href*="/admin/list-hang"] .fi-sidebar-item-icon,
                         .dark a[href*="/admin/purchase-orders"] .fi-sidebar-item-icon,
-                        .dark a[href*="/admin/bao-cao"] .fi-sidebar-item-icon {
+                        .dark a[href*="/admin/bao-cao"] .fi-sidebar-item-icon,
+                        .dark a[href*="/admin/menus"] .fi-sidebar-item-icon,
+                        .dark a[href*="/admin/lap-thuc-don-tuan"] .fi-sidebar-item-icon {
                             background-color: rgba(5, 150, 105, 0.18) !important; color: #34D399 !important;
                         }
                         .dark a[href$="/admin"] .fi-sidebar-item-icon,
                         .dark a[href*="/admin/ingredients"] .fi-sidebar-item-icon,
-                        .dark a[href*="/admin/menus"] .fi-sidebar-item-icon,
                         .dark a[href*="/admin/employees"] .fi-sidebar-item-icon,
                         .dark a[href*="/admin/chat-nhom"] .fi-sidebar-item-icon,
                         .dark a[href*="/admin/users"] .fi-sidebar-item-icon {
                             background-color: rgba(18, 103, 232, 0.18) !important; color: #60A5FA !important;
-                        }
-                        .dark a[href*="/admin/suppliers"] .fi-sidebar-item-icon {
-                            background-color: rgba(234, 88, 12, 0.18) !important; color: #FB923C !important;
                         }
                         .dark a[href*="/admin/food-safety-audits"] .fi-sidebar-item-icon,
                         .dark a[href*="/admin/timekeepings"] .fi-sidebar-item-icon,
@@ -515,20 +515,20 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->navigationGroups([
                 NavigationGroup::make()
-                    ->label(fn () => __('catalog.groups.ingredients_inventory'))
+                    ->label(fn () => __('catalog.groups.overview'))
                     ->collapsible(false),
                 NavigationGroup::make()
-                    ->label(fn () => __('catalog.groups.supply_inventory'))
-                    ->collapsible(false),
-                NavigationGroup::make()
-                    ->label(fn () => __('catalog.groups.area_kitchen'))
-                    ->collapsible(false),
-                NavigationGroup::make()
-                    ->label(fn () => __('catalog.groups.kitchen_operations'))
+                    ->label(fn () => __('catalog.groups.catering'))
                     ->collapsible(false),
                 NavigationGroup::make()
                     ->label(fn () => __('catalog.groups.hr'))
                     ->collapsible(false),
+                NavigationGroup::make()
+                    ->label(fn () => __('catalog.groups.chat_group'))
+                    ->collapsible(false),
+                NavigationGroup::make()
+                    ->label(fn () => __('catalog.groups.system'))
+                    ->collapsible(true),
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([

@@ -43,7 +43,7 @@ class MenuAuditLogResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('catalog.groups.kitchen_operations');
+        return __('catalog.groups.catering');
     }
 
     /** Quyền xem gắn theo quyền xem thực đơn — không cần permission Shield riêng */
