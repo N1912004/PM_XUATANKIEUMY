@@ -1,6 +1,12 @@
 <?php
 
 $translations = [
+    'breadcrumb' => [
+        'home' => 'Xuất ăn',
+        'area' => ['list' => 'Khu vực', 'create' => 'Thêm khu vực', 'edit' => 'Chỉnh sửa khu vực'],
+        'kitchen' => ['list' => 'Nhà ăn / bếp', 'create' => 'Thêm nhà ăn / bếp', 'edit' => 'Chỉnh sửa nhà ăn / bếp'],
+        'shift' => ['list' => 'Cấu hình ca làm việc', 'create' => 'Thêm ca làm việc', 'edit' => 'Chỉnh sửa ca làm việc'],
+    ],
     'area_section' => 'Thông tin khu vực',
     'kitchen_section' => 'Thông tin nhà ăn / bếp',
     'kitchen_status' => ['active' => 'Đang hoạt động', 'paused' => 'Tạm dừng', 'maintenance' => 'Bảo trì'],

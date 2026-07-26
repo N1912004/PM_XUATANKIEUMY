@@ -12,6 +12,15 @@ class EditMenu extends EditRecord
 {
     protected static string $resource = MenuResource::class;
 
+    public function getBreadcrumbs(): array
+    {
+        return [
+            '#' => __('menu.breadcrumb.home'),
+            MenuResource::getUrl('index') => __('menu.breadcrumb.list'),
+            __('menu.breadcrumb.edit'),
+        ];
+    }
+
     protected function getHeaderActions(): array
     {
         return [

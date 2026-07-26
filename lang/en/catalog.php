@@ -1,6 +1,12 @@
 <?php
 
 $translations = [
+    'breadcrumb' => [
+        'home' => 'Catering',
+        'area' => ['list' => 'Areas', 'create' => 'Add area', 'edit' => 'Edit area'],
+        'kitchen' => ['list' => 'Kitchens', 'create' => 'Add kitchen', 'edit' => 'Edit kitchen'],
+        'shift' => ['list' => 'Shift configuration', 'create' => 'Add shift', 'edit' => 'Edit shift'],
+    ],
     'area_section' => 'Area information',
     'kitchen_section' => 'Kitchen information',
     'kitchen_status' => ['active' => 'Active', 'paused' => 'Paused', 'maintenance' => 'Maintenance'],

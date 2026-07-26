@@ -12,6 +12,15 @@ class EditUser extends EditRecord
 {
     protected static string $resource = UserResource::class;
 
+    public function getBreadcrumbs(): array
+    {
+        return [
+            '#' => __('user.breadcrumb.home'),
+            UserResource::getUrl('index') => __('user.breadcrumb.list'),
+            __('user.breadcrumb.edit'),
+        ];
+    }
+
     protected function getHeaderActions(): array
     {
         return [

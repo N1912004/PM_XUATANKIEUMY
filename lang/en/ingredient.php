@@ -8,6 +8,9 @@ return [
         'create' => 'Add Ingredient',
         'edit' => 'Edit Ingredient',
         'view' => 'Ingredient Details',
+        'unit_list' => 'Units',
+        'unit_create' => 'Add unit',
+        'unit_edit' => 'Edit unit',
     ],
     'navigation' => [
         'group' => 'catalog.groups.ingredients_inventory',

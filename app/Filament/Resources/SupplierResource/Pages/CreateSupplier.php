@@ -22,6 +22,15 @@ class CreateSupplier extends Page
 
     protected static string $resource = SupplierResource::class;
 
+    public function getBreadcrumbs(): array
+    {
+        return [
+            '#' => __('supplier.breadcrumb.home'),
+            SupplierResource::getUrl('index') => __('supplier.breadcrumb.list'),
+            __('supplier.breadcrumb.create'),
+        ];
+    }
+
     protected static string $view = 'filament.resources.suppliers.pages.form-supplier';
 
     public string $name = '';

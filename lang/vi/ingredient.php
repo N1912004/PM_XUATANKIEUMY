@@ -8,6 +8,9 @@ return [
         'create' => 'Thêm nguyên liệu',
         'edit' => 'Chỉnh sửa nguyên liệu',
         'view' => 'Chi tiết nguyên liệu',
+        'unit_list' => 'Đơn vị tính',
+        'unit_create' => 'Thêm đơn vị tính',
+        'unit_edit' => 'Chỉnh sửa đơn vị tính',
     ],
     'navigation' => [
         'group' => 'catalog.groups.ingredients_inventory',

@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'breadcrumb' => ['home' => 'Xuất ăn', 'list' => 'Tài khoản', 'create' => 'Thêm tài khoản', 'edit' => 'Chỉnh sửa tài khoản'],
     'navigation' => 'Quản lý tài khoản',
     'model' => 'tài khoản',
     'group' => 'NHÂN SỰ',

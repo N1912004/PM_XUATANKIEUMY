@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'breadcrumb' => ['home' => 'Catering', 'list' => 'Accounts', 'create' => 'Add account', 'edit' => 'Edit account'],
     'navigation' => 'User accounts',
     'model' => 'account',
     'group' => 'HUMAN RESOURCES',

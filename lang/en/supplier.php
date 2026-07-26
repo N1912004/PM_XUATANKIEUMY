@@ -4,7 +4,7 @@ $vi = require __DIR__.'/../vi/supplier.php';
 
 return array_replace_recursive($vi, [
     'navigation' => ['label' => 'Suppliers', 'model' => 'Supplier', 'plural' => 'Suppliers', 'group' => 'SUPPLY & WAREHOUSE'],
-    'breadcrumb' => ['home' => 'Catering'],
+    'breadcrumb' => ['home' => 'Catering', 'list' => 'Suppliers', 'create' => 'Add supplier', 'edit' => 'Edit supplier', 'view' => 'Supplier details'],
     'list' => ['title' => 'Suppliers', 'subtitle' => 'Manage supplier information, supplied food types, and ingredient pricing'],
     'form' => ['information' => 'Supplier information', 'quick_settings' => 'Quick settings', 'create_title' => 'Add supplier', 'edit_title' => 'Edit supplier', 'subtitle' => 'Enter supplier information and configure its ingredient price list'],
     'fields' => ['name' => 'Supplier name', 'name_short' => 'Supplier name', 'code' => 'Supplier code', 'code_short' => 'Supplier code', 'type' => 'Category', 'food_types' => 'Supplied food types', 'contact_name' => 'Representative', 'phone' => 'Phone number', 'email' => 'Email address', 'notes' => 'Notes', 'active' => 'Active', 'status' => 'Status'],

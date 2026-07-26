@@ -11,6 +11,15 @@ class CreateShift extends CreateRecord
 {
     protected static string $resource = ShiftResource::class;
 
+    public function getBreadcrumbs(): array
+    {
+        return [
+            '#' => __('catalog.breadcrumb.home'),
+            ShiftResource::getUrl('index') => __('catalog.breadcrumb.shift.list'),
+            __('catalog.breadcrumb.shift.create'),
+        ];
+    }
+
     public ?string $fromView = null;
 
     public ?string $fromDate = null;
