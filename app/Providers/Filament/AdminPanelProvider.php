@@ -146,6 +146,15 @@ class AdminPanelProvider extends PanelProvider
                             line-height: 1;
                         }
 
+                        /* Center FontAwesome glyphs inside the 20x20 icon slot (no !important on display:
+                           Livewire toggles inline display on the loading spinner). */
+                        .fi-btn-icon:has(> [class*="fa-"]) {
+                            display: inline-flex;
+                            align-items: center;
+                            justify-content: center;
+                            line-height: 1;
+                        }
+
                         /* Force correct branding color and high contrast on all primary buttons */
                         .fi-btn.fi-btn-color-primary,
                         button[type="submit"]:not(.fi-btn-color-gray) {

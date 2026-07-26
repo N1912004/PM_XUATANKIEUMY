@@ -1,4 +1,36 @@
-<div class="recipe-page bf-list-page w-full">
+{{--
+    Hộp xác nhận dùng modal trong trang (Alpine) thay cho wire:confirm.
+    Lý do: confirm() gốc của trình duyệt bị Chrome chặn sau vài lần bấm
+    ("Ngăn trang này tạo thêm hộp thoại") khiến nút xóa như mất tác dụng.
+--}}
+<div class="recipe-page bf-list-page w-full"
+     x-data="{
+        cf: { open: false, title: '', message: '', confirmLabel: '', danger: true, method: null, arg: null, busy: false },
+        askConfirm(method, arg, title, message, confirmLabel, danger = true) {
+            this.cf = { open: true, title, message, confirmLabel, danger, method, arg, busy: false };
+        },
+        closeConfirm() {
+            if (this.cf.busy) return;
+            this.cf.open = false;
+            this.cf.method = null;
+        },
+        async runConfirm() {
+            if (this.cf.busy || ! this.cf.method) return;
+            this.cf.busy = true;
+            try {
+                if (this.cf.arg === null) {
+                    await $wire.call(this.cf.method);
+                } else {
+                    await $wire.call(this.cf.method, this.cf.arg);
+                }
+            } finally {
+                this.cf.busy = false;
+                this.cf.open = false;
+                this.cf.method = null;
+            }
+        },
+     }"
+     @keydown.escape.window="closeConfirm()">
     @include('filament.resources.recipes.partials.styles')
 
     @php
@@ -205,14 +237,14 @@
             </div>
             <div style="display:flex;gap:8px">
                 @if($trashedFilter === 'only')
-                    <button type="button" wire:click="bulkRestore" wire:confirm="{{ __('recipe.confirm.bulk_restore') }}" class="mn-fbtn" style="background:#fff;border-color:var(--bl);color:var(--bl);height:30px;font-size:12px">
+                    <button type="button" @click="askConfirm('bulkRestore', null, @js(__('recipe.bulk.restore')), @js(__('recipe.confirm.bulk_restore')), @js(__('recipe.bulk.restore')), false)" class="mn-fbtn" style="background:#fff;border-color:var(--bl);color:var(--bl);height:30px;font-size:12px">
                         <i class="fa-solid fa-rotate-left"></i> {{ __('recipe.bulk.restore') }}
                     </button>
-                    <button type="button" wire:click="bulkForceDelete" wire:confirm="{{ __('recipe.confirm.bulk_force_delete') }}" class="mn-fbtn" style="background:var(--rd-s);border-color:#fecaca;color:var(--rd);height:30px;font-size:12px">
+                    <button type="button" @click="askConfirm('bulkForceDelete', null, @js(__('recipe.bulk.force_delete')), @js(__('recipe.confirm.bulk_force_delete')), @js(__('recipe.bulk.force_delete')))" class="mn-fbtn" style="background:var(--rd-s);border-color:#fecaca;color:var(--rd);height:30px;font-size:12px">
                         <i class="fa-solid fa-trash-can"></i> {{ __('recipe.bulk.force_delete') }}
                     </button>
                 @else
-                    <button type="button" wire:click="bulkDelete" wire:confirm="{{ __('recipe.confirm.bulk_delete') }}" class="mn-fbtn" style="background:var(--rd-s);border-color:#fecaca;color:var(--rd);height:30px;font-size:12px">
+                    <button type="button" @click="askConfirm('bulkDelete', null, @js(__('recipe.bulk.delete')), @js(__('recipe.confirm.bulk_delete')), @js(__('recipe.bulk.delete')))" class="mn-fbtn" style="background:var(--rd-s);border-color:#fecaca;color:var(--rd);height:30px;font-size:12px">
                         <i class="fa-solid fa-trash"></i> {{ __('recipe.bulk.delete') }}
                     </button>
                 @endif
@@ -318,11 +350,11 @@
                                 <div style="display:flex;gap:4px">
                                     @if($recipe->trashed())
                                         <!-- Khôi phục món ăn -->
-                                        <button type="button" wire:click="restoreRecipe({{ $recipe->id }})" wire:confirm="{{ __('recipe.confirm.restore') }}" class="abt" style="color: var(--bl); border-color: var(--bl-m);" title="{{ __('recipe.actions.restore') }}">
+                                        <button type="button" @click="askConfirm('restoreRecipe', {{ $recipe->id }}, @js(__('recipe.actions.restore')), @js(__('recipe.confirm.restore')), @js(__('recipe.actions.restore')), false)" class="abt" style="color: var(--bl); border-color: var(--bl-m);" title="{{ __('recipe.actions.restore') }}">
                                             <i class="fa-solid fa-rotate-left"></i>
                                         </button>
                                         <!-- Xóa vĩnh viễn -->
-                                        <button type="button" wire:click="forceDeleteRecipe({{ $recipe->id }})" wire:confirm="{{ __('recipe.confirm.force_delete') }}" class="abt abt-danger" title="{{ __('recipe.actions.force_delete') }}">
+                                        <button type="button" @click="askConfirm('forceDeleteRecipe', {{ $recipe->id }}, @js(__('recipe.actions.force_delete')), @js(__('recipe.confirm.force_delete')), @js(__('recipe.actions.force_delete')))" class="abt abt-danger" title="{{ __('recipe.actions.force_delete') }}">
                                             <i class="fa-solid fa-trash-can"></i>
                                         </button>
                                     @else
@@ -335,7 +367,7 @@
                                             <i class="fa-solid fa-pen"></i>
                                         </a>
                                         <!-- Xóa món -->
-                                        <button type="button" wire:click="deleteRecipe({{ $recipe->id }})" wire:confirm="{{ __('recipe.confirm.delete') }}" class="abt abt-danger" title="{{ __('recipe.actions.delete') }}">
+                                        <button type="button" @click="askConfirm('deleteRecipe', {{ $recipe->id }}, @js(__('recipe.actions.delete')), @js(__('recipe.confirm.delete')), @js(__('recipe.actions.delete')))" class="abt abt-danger" title="{{ __('recipe.actions.delete') }}">
                                             <i class="fa-solid fa-trash"></i>
                                         </button>
                                     @endif
@@ -473,6 +505,31 @@
             </div>
         @endif
     </div>
+
+    {{-- Hộp thoại xác nhận trong trang (teleport ra body để không bị overflow của bảng cắt) --}}
+    <template x-teleport="body">
+        <div x-show="cf.open" x-cloak class="rcf-overlay" @click.self="closeConfirm()">
+            <div class="rcf-box" role="dialog" aria-modal="true">
+                <div class="rcf-head">
+                    <span class="rcf-ico" :class="cf.danger ? 'rcf-ico-danger' : 'rcf-ico-info'">
+                        <i class="fa-solid" :class="cf.danger ? 'fa-triangle-exclamation' : 'fa-rotate-left'"></i>
+                    </span>
+                    <h3 class="rcf-title" x-text="cf.title"></h3>
+                </div>
+                <p class="rcf-msg" x-text="cf.message"></p>
+                <div class="rcf-actions">
+                    <button type="button" class="rcf-btn rcf-btn-ghost" @click="closeConfirm()" :disabled="cf.busy">
+                        {{ __('recipe.actions.cancel') }}
+                    </button>
+                    <button type="button" class="rcf-btn" :class="cf.danger ? 'rcf-btn-danger' : 'rcf-btn-primary'"
+                            @click="runConfirm()" :disabled="cf.busy">
+                        <i class="fa-solid fa-spinner fa-spin" x-show="cf.busy"></i>
+                        <span x-text="cf.confirmLabel"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </template>
 
     {{-- Modal của Action import/export (wizard 2 bước) --}}
     <x-filament-actions::modals />
