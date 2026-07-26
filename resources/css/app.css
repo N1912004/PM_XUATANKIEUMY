@@ -1796,16 +1796,46 @@ textarea.fi-textarea-input {
   color: var(--su) !important;
 }
 
-/* ── Form Action Footer (.ffoot) ── */
-.fi-form-actions,
+/* ── Form Action Footer (.ffoot) ──
+   Thanh nút dính đáy khung nhìn và trải hết chiều ngang vùng nội dung (form + cột phải),
+   thay vì trôi theo nội dung và để lại khoảng trống lớn giữa trang trên form ngắn.
+   `left` bám theo bề rộng sidebar; khi sidebar thu gọn Filament đổi --sidebar-width nên
+   dùng luôn biến đó thay vì hardcode. */
 .fi-resource-create-record-page .fi-form-actions,
 .fi-resource-edit-record-page .fi-form-actions {
+  position: fixed !important;
+  left: var(--sidebar-width, 15rem) !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  z-index: 20 !important;
+  padding: 12px 20px !important;
+  background: var(--wh) !important;
+  border-top: 1px solid var(--bd) !important;
+  box-shadow: 0 -2px 12px rgba(15, 23, 42, 0.06) !important;
+  transition: left 0.2s ease !important;
+}
+
+.fi-form-actions {
   display: flex !important;
   align-items: center !important;
   justify-content: flex-end !important;
   gap: 12px !important;
   padding: 16px 0 !important;
   grid-column: 1 / -1 !important;
+}
+
+/* chừa chỗ cho thanh cố định để nội dung cuối trang không bị che */
+.fi-resource-create-record-page .fi-page > section,
+.fi-resource-edit-record-page .fi-page > section {
+  padding-bottom: 76px !important;
+}
+
+@media (max-width: 1023.98px) {
+  .fi-resource-create-record-page .fi-form-actions,
+  .fi-resource-edit-record-page .fi-form-actions {
+    left: 0 !important;
+    padding: 10px 14px !important;
+  }
 }
 
 .fi-form-actions .fi-ac {

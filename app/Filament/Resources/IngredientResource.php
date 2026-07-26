@@ -13,6 +13,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\HtmlString;
 
 class IngredientResource extends Resource
 {
@@ -108,13 +109,42 @@ class IngredientResource extends Resource
                             ->schema([
                                 Forms\Components\Section::make(__('ingredient.form.quick_settings'))
                                     ->schema([
-                                        Forms\Components\Toggle::make('status')
-                                            ->label(__('ingredient.form.status'))
-                                            ->default(true)
-                                            ->onColor('primary')
-                                            ->offColor('danger')
-                                            ->live()
-                                            ->helperText(fn (Forms\Get $get) => $get('status') ? __('ingredient.status.active') : __('ingredient.status.inactive')),
+                                        // Thứ tự trên một hàng: nhãn "Trạng thái" → công tắc →
+                                        // chữ trạng thái hiện tại.
+                                        // Không dùng inlineLabel(): nó chia lưới 3 cột, cột nhãn
+                                        // chỉ rộng 99px nên "Trạng thái" bị bẻ thành nhiều dòng.
+                                        Forms\Components\Grid::make()
+                                            ->schema([
+                                                Forms\Components\Placeholder::make('status_title')
+                                                    // nhãn sr-only: mặc định Filament đọc thành
+                                                    // "Status title", vô nghĩa với trình đọc màn hình
+                                                    ->label(__('ingredient.form.status'))
+                                                    ->hiddenLabel()
+                                                    ->content(new HtmlString(
+                                                        '<span class="text-sm font-medium text-gray-950 dark:text-white whitespace-nowrap">'
+                                                        .e(__('ingredient.form.status'))
+                                                        .'</span>'
+                                                    ))
+                                                    ->columnSpan(3),
+                                                Forms\Components\Toggle::make('status')
+                                                    ->label(__('ingredient.form.status'))
+                                                    ->hiddenLabel()
+                                                    ->default(true)
+                                                    ->onColor('primary')
+                                                    ->offColor('danger')
+                                                    ->live()
+                                                    ->columnSpan(2),
+                                                Forms\Components\Placeholder::make('status_label')
+                                                    ->label(__('ingredient.form.status'))
+                                                    ->hiddenLabel()
+                                                    ->content(fn (Forms\Get $get) => view('filament.resources.ingredients.form-status', [
+                                                        'active' => (bool) $get('status'),
+                                                    ]))
+                                                    ->columnSpan(5),
+                                            ])
+                                            // khai báo cho cả breakpoint mặc định, nếu không
+                                            // Filament sập về 1 cột dưới 640px và 3 phần tách dòng
+                                            ->columns(['default' => 10, 'sm' => 10]),
                                     ]),
 
                                 Forms\Components\Section::make(__('ingredient.form.summary'))
