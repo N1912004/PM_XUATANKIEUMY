@@ -65,11 +65,21 @@
     .recipe-page .far,
     .recipe-page [class*="fa-"] {
         font-family: "Font Awesome 6 Free", "Font Awesome 6 Brands" !important;
+        display: inline-block !important;
+        width: auto !important;
+        height: auto !important;
+        line-height: 1 !important;
     }
 
     .recipe-page .fa-solid,
     .recipe-page .fas {
         font-weight: 900 !important;
+    }
+
+    .recipe-page .fi-btn-icon {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
     }
 
     .recipe-page {

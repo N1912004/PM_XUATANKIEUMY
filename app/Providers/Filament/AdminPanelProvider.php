@@ -137,6 +137,22 @@ class AdminPanelProvider extends PanelProvider
                             padding-right: 2rem !important;
                         }
 
+                        /* Fix FontAwesome icon aspect ratio inside Filament button icon containers */
+                        .fi-btn-icon [class*="fa-"],
+                        .fi-btn-icon i {
+                            width: auto !important;
+                            height: auto !important;
+                            max-width: 100% !important;
+                            max-height: 100% !important;
+                            display: inline-block !important;
+                            line-height: 1 !important;
+                        }
+                        .fi-btn-icon {
+                            display: inline-flex !important;
+                            align-items: center !important;
+                            justify-content: center !important;
+                        }
+
                         /* Force correct branding color and high contrast on all primary buttons */
                         .fi-btn.fi-btn-color-primary,
                         button[type="submit"]:not(.fi-btn-color-gray) {
