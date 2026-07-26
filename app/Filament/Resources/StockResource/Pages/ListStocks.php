@@ -664,20 +664,14 @@ class ListStocks extends ListRecords
             return;
         }
 
-        // Kiểm hàng: dòng nào lệch số lượng (thực nhận ≠ đặt) bắt buộc ghi lý do.
-        // Số ĐẶT đối chiếu từ DB — payload Livewire có thể bị sửa để né việc ghi lý do.
-        $orderedByItemId = PurchaseOrderItem::query()
-            ->where('purchase_order_id', $this->selectedPOId)
-            ->pluck('quantity_ordered', 'id');
-
         foreach ($this->poItemsData as $itemData) {
             $qtyReceived = (float) ($itemData['quantity_received'] ?? 0);
-            $qtyOrdered = (float) ($orderedByItemId[$itemData['id'] ?? 0] ?? 0);
-            // Lệch là phải có lý do — kể cả nhận 0 (thiếu TOÀN BỘ), trường hợp nghiêm trọng nhất
-            if ($qtyReceived !== $qtyOrdered && trim((string) ($itemData['receive_note'] ?? '')) === '') {
+            $unitPrice = (float) ($itemData['unit_price'] ?? 0);
+
+            if ($qtyReceived < 0 || $unitPrice < 0) {
                 Notification::make()
-                    ->title(__('warehouse.notifications.missing_difference_reason_title'))
-                    ->body(__('warehouse.notifications.po_difference_body', ['name' => e($itemData['name'] ?? '')]))
+                    ->title(__('warehouse.notifications.negative_stock_title'))
+                    ->body(__('warehouse.notifications.negative_stock_body'))
                     ->danger()
                     ->send();
 

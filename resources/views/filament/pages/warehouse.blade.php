@@ -1041,9 +1041,6 @@
                                                        x-on:blur="if($el.value < 0 || !$el.value) $el.value = 0;"
                                                        class="table-input"
                                                        style="width: 100px; font-weight: 700; text-align: center;">
-                                                @if($diff != 0)
-                                                    <input type="text" wire:model="poItemsData.{{ $index }}.receive_note" class="table-input" style="width: 100%; margin-top: 4px; font-size: 11px;" placeholder="{{ __('warehouse.placeholders.required_when_different') }}">
-                                                @endif
                                             </td>
                                             <td style="text-align: right;">
                                                 <div x-data="{
