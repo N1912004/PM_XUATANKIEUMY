@@ -18,7 +18,7 @@ class TimekeepingResource extends Resource
 
     protected static ?string $model = Timekeeping::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-clock';
+    protected static ?string $navigationIcon = 'fa-clock';
 
     protected static ?int $navigationSort = 2;
 

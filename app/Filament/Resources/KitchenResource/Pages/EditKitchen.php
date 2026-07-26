@@ -10,6 +10,15 @@ class EditKitchen extends EditRecord
 {
     protected static string $resource = KitchenResource::class;
 
+    public function getBreadcrumbs(): array
+    {
+        return [
+            '#' => __('catalog.breadcrumb.home'),
+            KitchenResource::getUrl('index') => __('catalog.breadcrumb.kitchen.list'),
+            __('catalog.breadcrumb.kitchen.edit'),
+        ];
+    }
+
     protected function getHeaderActions(): array
     {
         return [

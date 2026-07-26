@@ -3,8 +3,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <style>
             :root {
-                --sup-bl: {{ \App\Models\Setting::get('primary_color', '#267DC1') }};
-                --sup-bl-d: {{ \App\Models\Setting::get('primary_color', '#267DC1') }};
+                --sup-bl: #1267E8;
+                --sup-bl-d: #1267E8;
                 --sup-bl-s: #E9F2F8;
                 --sup-bl-m: #A8CBE6;
                 --sup-gn: #059669;
@@ -16,6 +16,7 @@
                 --sup-pu-s: #F5F3FF;
                 --sup-rd: #DC2626;
                 --sup-rd-s: #FEF2F2;
+                --sup-rd-bd: #FECACA;
                 --sup-bg: #F8FAFC;
                 --sup-wh: #FFFFFF;
                 --sup-tx: #0F172A;
@@ -36,6 +37,7 @@
                 --sup-or-s: rgba(234, 88, 12, .18);
                 --sup-pu-s: rgba(124, 58, 237, .18);
                 --sup-rd-s: rgba(220, 38, 38, .18);
+                --sup-rd-bd: rgba(248, 113, 113, .45);
                 --sup-gn-t: #34D399;
                 --sup-rd: #F87171;
                 --sup-bg: #0b1120;
@@ -81,9 +83,24 @@
                 font-family: "Inter", system-ui, sans-serif;
             }
 
+            .sup-page .fa,
+            .sup-page .fa-solid,
+            .sup-page .fa-regular,
+            .sup-page .fa-brands,
+            .sup-page .fas,
+            .sup-page .far,
+            .sup-page [class*="fa-"] {
+                font-family: "Font Awesome 6 Free", "Font Awesome 6 Brands" !important;
+            }
+
+            .sup-page .fa-solid,
+            .sup-page .fas {
+                font-weight: 900 !important;
+            }
+
             .sup-page {
                 color: var(--sup-tx);
-                padding: 1.5rem 1.75rem 2rem !important;
+                padding: 22px 28px 36px !important;
                 background: var(--sup-bg);
                 min-height: 100vh;
             }
@@ -94,22 +111,21 @@
                 justify-content: space-between;
                 gap: 1rem;
                 margin-bottom: 1.125rem;
-                padding-top: 0.5rem;
             }
 
             .sup-title {
-                font-size: 1.75rem !important;
-                line-height: 1.35 !important;
+                font-size: 22px !important;
+                line-height: 1.25 !important;
                 font-weight: 800 !important;
                 letter-spacing: -.025em !important;
-                margin: 0 0 .35rem !important;
+                margin: 0 0 4px !important;
                 color: var(--sup-tx) !important;
             }
 
             .sup-subtitle {
                 margin: 0;
                 color: var(--sup-mu);
-                font-size: .9rem;
+                font-size: 13px;
             }
 
             .sup-actions {
@@ -120,14 +136,14 @@
             }
 
             .sup-btn {
-                height: 2.55rem;
-                border-radius: .65rem;
+                height: 40px;
+                border-radius: 9px;
                 border: 1px solid var(--sup-bd);
                 padding: 0 1rem;
                 background: var(--sup-wh);
                 color: var(--sup-tx);
-                font-weight: 700;
-                font-size: .84rem;
+                font-weight: 600;
+                font-size: 13px;
                 display: inline-flex;
                 align-items: center;
                 justify-content: center;
@@ -156,11 +172,16 @@
                 color: #fff;
             }
 
+            .sup-btn-danger {
+                color: var(--sup-rd);
+                border-color: var(--sup-rd-bd);
+            }
+
             .sup-kpis {
                 display: grid;
                 grid-template-columns: repeat(4, minmax(0, 1fr));
-                gap: 1rem;
-                margin-bottom: 1.25rem;
+                gap: 12px;
+                margin-bottom: 18px;
             }
 
             .sup-kpi,
@@ -172,18 +193,18 @@
             }
 
             .sup-kpi {
-                min-height: 8.75rem;
-                padding: 1.45rem 1.55rem;
+                min-height: 0;
+                padding: 16px;
             }
 
             .sup-kpi-icon,
             .sup-side-icon {
                 display: inline-grid;
                 place-items: center;
-                border-radius: .75rem;
-                width: 2.35rem;
-                height: 2.35rem;
-                margin-bottom: .9rem;
+                border-radius: 10px;
+                width: 38px;
+                height: 38px;
+                margin-bottom: 8px;
             }
 
             .sup-kpi-icon svg,
@@ -196,30 +217,31 @@
                 height: 1rem;
             }
 
-            .sup-ico-blue,
-            .sup-ico-orange,
-            .sup-ico-green,
-            .sup-ico-purple { background: var(--sup-bl-s); color: var(--sup-bl); }
+            .sup-ico-blue { background: var(--sup-bl-s); color: var(--sup-bl); }
+            .sup-ico-orange { background: var(--sup-or-s); color: var(--sup-or); }
+            .sup-ico-green { background: var(--sup-gn-s); color: var(--sup-gn); }
+            .sup-ico-purple { background: var(--sup-pu-s); color: var(--sup-pu); }
 
             .sup-kpi-value {
-                font-size: 2rem;
+                font-size: 28px;
                 line-height: 1;
                 font-weight: 800;
                 letter-spacing: -.035em;
                 color: var(--sup-tx);
-                margin-bottom: .35rem;
+                margin-bottom: 2px;
             }
 
             .sup-kpi-label {
                 color: var(--sup-su);
-                font-size: .86rem;
-                font-weight: 800;
-                margin-bottom: .45rem;
+                font-size: 12px;
+                font-weight: 600;
+                margin-bottom: 0;
             }
 
             .sup-kpi-note {
                 color: var(--sup-fa);
-                font-size: .82rem;
+                font-size: 11px;
+                margin-top: 5px;
                 display: flex;
                 gap: .3rem;
                 align-items: center;
@@ -234,22 +256,23 @@
             .sup-toolbar {
                 display: flex;
                 align-items: end;
-                gap: .75rem;
-                padding: 1rem 1.45rem;
+                gap: 9px;
+                padding: 13px 16px;
                 border-bottom: 1px solid var(--sup-bd2);
                 flex-wrap: wrap;
             }
 
             .sup-search {
-                height: 2.75rem;
-                min-width: 19rem;
-                border-radius: .7rem;
+                height: 38px;
+                min-width: 260px;
+                max-width: 320px;
+                border-radius: 8px;
                 border: 1px solid var(--sup-bd);
-                background: #F7FAFE;
+                background: var(--sup-bg);
                 display: flex;
                 align-items: center;
                 gap: .6rem;
-                padding: 0 .85rem;
+                padding: 0 11px;
                 color: var(--sup-fa);
             }
 
@@ -259,7 +282,7 @@
                 background: transparent;
                 color: var(--sup-tx);
                 width: 100%;
-                font-size: .9rem;
+                font-size: 13px;
             }
 
             .sup-search input::placeholder {
@@ -269,26 +292,26 @@
             .sup-filter {
                 display: flex;
                 flex-direction: column;
-                gap: .25rem;
+                gap: 2px;
             }
 
             .sup-filter label {
                 color: var(--sup-fa);
-                font-size: .72rem;
-                font-weight: 800;
+                font-size: 10px;
+                font-weight: 600;
                 letter-spacing: .04em;
             }
 
             .sup-select,
             .sup-input {
-                height: 2.55rem;
+                height: 34px;
                 border: 1px solid var(--sup-bd);
-                border-radius: .65rem;
+                border-radius: 7px;
                 background: var(--sup-wh);
                 color: var(--sup-su);
                 padding: 0 .9rem;
                 outline: none;
-                font-size: .9rem;
+                font-size: 12.5px;
                 width: 100%;
             }
 
@@ -654,7 +677,7 @@
                 min-width: 0;
             }
 
-            .sup-card {
+            .sup-form-layout .sup-card {
                 padding: 1.35rem 1.5rem;
                 max-width: 100%;
                 box-sizing: border-box;
@@ -700,8 +723,8 @@
                 color: #EF4444;
             }
 
-            .sup-input,
-            .sup-select {
+            .sup-form-layout .sup-input,
+            .sup-form-layout .sup-select {
                 height: 3rem;
                 border-radius: .7rem;
             }

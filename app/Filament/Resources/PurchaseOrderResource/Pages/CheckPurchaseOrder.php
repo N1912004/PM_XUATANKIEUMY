@@ -14,6 +14,15 @@ class CheckPurchaseOrder extends Page
 {
     protected static string $resource = PurchaseOrderResource::class;
 
+    public function getBreadcrumbs(): array
+    {
+        return [
+            '#' => __('purchase_order.breadcrumb.home'),
+            PurchaseOrderResource::getUrl('index') => __('purchase_order.breadcrumb.list'),
+            __('purchase_order.breadcrumb.check'),
+        ];
+    }
+
     protected static string $view = 'filament.resources.purchase-orders.pages.check-purchase-order';
 
     public function getHeading(): string

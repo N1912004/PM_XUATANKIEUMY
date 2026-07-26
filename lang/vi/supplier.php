@@ -2,7 +2,7 @@
 
 return [
     'navigation' => ['label' => 'Nhà cung cấp', 'model' => 'Nhà cung cấp', 'plural' => 'Nhà cung cấp', 'group' => 'CUNG ỨNG & KHO'],
-    'breadcrumb' => ['home' => 'Xuất ăn'],
+    'breadcrumb' => ['home' => 'Xuất ăn', 'list' => 'Nhà cung cấp', 'create' => 'Thêm nhà cung cấp', 'edit' => 'Sửa nhà cung cấp', 'view' => 'Chi tiết nhà cung cấp'],
     'list' => ['title' => 'Nhà cung cấp', 'subtitle' => 'Quản lý thông tin NCC, loại thực phẩm cung cấp và bảng giá theo từng nguyên liệu'],
     'form' => ['information' => 'Thông tin nhà cung cấp', 'quick_settings' => 'Thiết lập nhanh', 'create_title' => 'Thêm nhà cung cấp', 'edit_title' => 'Sửa nhà cung cấp', 'subtitle' => 'Khai báo thông tin NCC và thiết lập bảng giá nguyên liệu mà NCC đó cung cấp'],
     'fields' => ['name' => 'Tên nhà cung cấp', 'name_short' => 'Tên NCC', 'code' => 'Mã nhà cung cấp', 'code_short' => 'Mã NCC', 'type' => 'Phân loại', 'food_types' => 'Loại thực phẩm cung cấp', 'contact_name' => 'Người đại diện', 'phone' => 'Số điện thoại', 'email' => 'Địa chỉ email', 'notes' => 'Ghi chú', 'active' => 'Hoạt động', 'status' => 'Trạng thái'],

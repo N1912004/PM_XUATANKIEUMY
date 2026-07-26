@@ -22,6 +22,15 @@ class EditSupplier extends Page
 
     protected static string $resource = SupplierResource::class;
 
+    public function getBreadcrumbs(): array
+    {
+        return [
+            '#' => __('supplier.breadcrumb.home'),
+            SupplierResource::getUrl('index') => __('supplier.breadcrumb.list'),
+            __('supplier.breadcrumb.edit'),
+        ];
+    }
+
     protected static string $view = 'filament.resources.suppliers.pages.form-supplier';
 
     public int $supplierId;

@@ -23,9 +23,6 @@ return [
         'logo_helper' => 'Logo hiển thị trên sidebar. Khuyến nghị: PNG/SVG, nền trong suốt, kích thước 200x60px.',
         'favicon' => 'Favicon',
         'favicon_helper' => 'Biểu tượng nhỏ hiển thị trên tab trình duyệt. Khuyến nghị: SVG hoặc PNG 32x32px.',
-        'primary_color' => 'Màu chủ đạo',
-        'primary_color_desc' => 'Tùy chỉnh màu sắc giao diện.',
-        'primary_color_helper' => 'Màu chính dùng cho nút, link và các thành phần giao diện nổi bật.',
     ],
     'company' => [
         'title' => 'Thông tin doanh nghiệp',

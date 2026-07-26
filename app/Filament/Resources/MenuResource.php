@@ -17,7 +17,7 @@ class MenuResource extends Resource
 
     protected static ?string $model = Menu::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-calendar-days';
+    protected static ?string $navigationIcon = 'fa-calendar-days';
 
     protected static ?int $navigationSort = 7;
 
@@ -38,7 +38,7 @@ class MenuResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('catalog.groups.kitchen_operations');
+        return __('catalog.groups.catering');
     }
 
     public static function form(Form $form): Form

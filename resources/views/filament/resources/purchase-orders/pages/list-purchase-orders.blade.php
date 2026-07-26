@@ -1,4 +1,4 @@
-<div class="po-page w-full space-y-6">
+<div class="po-page po-list-page bf-list-page w-full">
     @include('filament.resources.purchase-orders.partials.styles')
 
     @php
@@ -32,7 +32,7 @@
         </div>
 
         <div class="py-kcard">
-            <div class="py-kico" style="background:var(--po-bl-s);color:var(--po-bl)">
+            <div class="py-kico" style="background:var(--po-or-s);color:var(--po-or)">
                 <i class="fa-solid fa-boxes-stacked"></i>
             </div>
             <div>
@@ -42,7 +42,7 @@
         </div>
 
         <div class="py-kcard">
-            <div class="py-kico" style="background:var(--po-bl-s);color:var(--po-bl)">
+            <div class="py-kico" style="background:var(--po-gn-s);color:var(--po-gn)">
                 <i class="fa-solid fa-circle-check"></i>
             </div>
             <div>
@@ -52,7 +52,7 @@
         </div>
 
         <div class="py-kcard">
-            <div class="py-kico" style="background:var(--po-bl-s);color:var(--po-bl)">
+            <div class="py-kico" style="background:var(--po-gn-s);color:var(--po-gn)">
                 <i class="fa-solid fa-sack-dollar"></i>
             </div>
             <div>

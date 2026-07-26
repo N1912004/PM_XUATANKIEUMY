@@ -12,6 +12,15 @@ class ViewSupplier extends Page
 {
     protected static string $resource = SupplierResource::class;
 
+    public function getBreadcrumbs(): array
+    {
+        return [
+            '#' => __('supplier.breadcrumb.home'),
+            SupplierResource::getUrl('index') => __('supplier.breadcrumb.list'),
+            __('supplier.breadcrumb.view'),
+        ];
+    }
+
     protected static string $view = 'filament.resources.suppliers.pages.view-supplier';
 
     public int $supplierId;

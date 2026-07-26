@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'breadcrumb' => ['home' => 'Xuất ăn', 'list' => 'Lập thực đơn', 'create' => 'Thêm thực đơn', 'edit' => 'Chỉnh sửa thực đơn'],
     'navigation' => ['label' => 'Lập thực đơn', 'group' => 'VẬN HÀNH BẾP'],
     'model' => ['singular' => 'Thực đơn', 'plural' => 'Lập thực đơn'],
     'fields' => ['date' => 'Ngày áp dụng', 'shift' => 'Ca làm việc', 'recipe' => 'Món ăn', 'recipe_name' => 'Tên món ăn', 'recipe_type' => 'Nhóm món', 'estimated_portions' => 'Số suất ăn dự kiến', 'status' => 'Trạng thái', 'audit_reason' => 'Lý do sửa (bắt buộc khi sửa thực đơn ĐÃ CHỐT)', 'kitchen' => 'Bếp ăn'],

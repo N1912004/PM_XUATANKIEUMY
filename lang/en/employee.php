@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'breadcrumb' => ['home' => 'Catering', 'list' => 'Employees', 'create' => 'Add employee', 'edit' => 'Edit employee'],
     'navigation' => 'Employees', 'group' => 'HUMAN RESOURCES', 'create_title' => 'Add employee', 'edit_title' => 'Edit employee',
     'create_description' => 'Enter information to create a new employee profile', 'edit_description' => 'Update employee information and records',
     'sections' => ['avatar' => 'Profile image', 'personal' => 'Personal information', 'work' => 'Employment information', 'address' => 'Address & emergency contact', 'documents' => 'Attached documents'],

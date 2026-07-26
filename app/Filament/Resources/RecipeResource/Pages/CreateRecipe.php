@@ -13,6 +13,15 @@ class CreateRecipe extends CreateRecord
 {
     protected static string $resource = RecipeResource::class;
 
+    public function getBreadcrumbs(): array
+    {
+        return [
+            '#' => __('recipe.breadcrumb.home'),
+            RecipeResource::getUrl('index') => __('recipe.breadcrumb.list'),
+            __('recipe.breadcrumb.create'),
+        ];
+    }
+
     public function getTitle(): string|Htmlable
     {
         return __('recipe.pages.create.title');

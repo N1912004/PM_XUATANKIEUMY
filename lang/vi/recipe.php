@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'breadcrumb' => ['home' => 'Xuất ăn', 'list' => 'Ngân Hàng Thực đơn', 'create' => 'Thêm món ăn', 'edit' => 'Chỉnh sửa món ăn', 'view' => 'Chi tiết món ăn'],
     'navigation' => ['label' => 'Ngân Hàng Thực đơn', 'group' => 'VẬN HÀNH BẾP'],
     'model' => ['singular' => 'Món ăn', 'plural' => 'Ngân Hàng Thực đơn'],
     'sections' => ['information' => 'Thông tin món ăn', 'ingredients_cost' => 'Bảng nguyên liệu & cost trên 1 phần'],

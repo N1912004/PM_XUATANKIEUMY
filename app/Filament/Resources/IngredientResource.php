@@ -18,28 +18,28 @@ class IngredientResource extends Resource
 {
     protected static ?string $model = Ingredient::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-list-bullet';
+    protected static ?string $navigationIcon = 'fa-tag';
 
     protected static ?int $navigationSort = 4;
 
     public static function getNavigationLabel(): string
     {
-        return __('ingredient.navigation.ingredient_plural');
+        return __('ingredient.navigation.list_heading');
     }
 
     public static function getModelLabel(): string
     {
-        return __('ingredient.navigation.ingredient');
+        return __('ingredient.model.singular');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('ingredient.navigation.ingredient_plural');
+        return __('ingredient.model.plural');
     }
 
     public static function getNavigationGroup(): ?string
     {
-        return __('catalog.groups.ingredients_inventory');
+        return __('catalog.groups.catering');
     }
 
     public static function form(Form $form): Form

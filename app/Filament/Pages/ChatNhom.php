@@ -10,11 +10,11 @@ use Livewire\Attributes\On;
 
 class ChatNhom extends Page
 {
-    protected static bool $shouldRegisterNavigation = false; // Ẩn menu 'Chat nhóm' khỏi Sidebar
+    protected static bool $shouldRegisterNavigation = false; // Ẩn menu 'Chat nhóm' khỏi thanh điều hướng Sidebar
 
-    protected static ?string $navigationIcon = 'heroicon-o-chat-bubble-left-right';
+    protected static ?string $navigationIcon = 'fa-comments';
 
-    protected static ?int $navigationSort = 99;
+    protected static ?int $navigationSort = 1;
 
     public static function getNavigationLabel(): string
     {
@@ -28,7 +28,7 @@ class ChatNhom extends Page
 
     public static function getNavigationGroup(): ?string
     {
-        return null;
+        return __('catalog.groups.chat_group');
     }
 
     protected static string $view = 'filament.pages.chat-nhom';

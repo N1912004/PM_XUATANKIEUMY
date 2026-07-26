@@ -1,8 +1,8 @@
 @push('styles')
 <style>
     :root {
-        --bl: {{ \App\Models\Setting::get('primary_color', '#267DC1') }};
-        --bl-d: {{ \App\Models\Setting::get('primary_color', '#267DC1') }};
+        --bl: #1267E8;
+        --bl-d: #1267E8;
         --bl-s: #E9F2F8;
         --bl-m: #A8CBE6;
         --gn: #059669;
@@ -26,6 +26,7 @@
         --mu: #64748B;
         --fa: #94A3B8;
         --wh: #FFFFFF;
+        --bg: #F8FAFC; /* Thiếu ở light nên khối 'Ca lấy nguyên liệu' bị mất nền xám */
         --r: 12px;
         --sh2: 0 2px 4px rgba(15,23,42,.02);
     }
@@ -50,11 +51,80 @@
     }
 
     /* ══ LIST HÀNG NGÀY ══ */
+    .fi-page:has(.lhn-root) {
+        padding: 22px 28px 36px !important;
+    }
     .lhn-root {
         flex: 1;
         overflow-y: auto;
         scrollbar-width: thin;
         scrollbar-color: var(--bd) transparent;
+    }
+    .fi-page:has(.lhn-root) > section > .fi-header { display: none !important; }
+
+    @media (max-width: 767px) {
+        .fi-page:has(.lhn-root) { padding: 16px !important; }
+    }
+
+    .lhn-page-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 14px;
+        flex-wrap: wrap;
+    }
+    .lhn-page-head h1 {
+        margin: 0 0 4px;
+        color: var(--tx);
+        font-size: 22px;
+        font-weight: 800;
+        letter-spacing: -.025em;
+    }
+    .lhn-page-actions {
+        display: flex;
+        gap: 8px;
+    }
+    .lhn-head-btn {
+        height: 36px;
+        padding: 0 14px;
+        border: 1px solid var(--bd);
+        border-radius: 8px;
+        background: var(--wh);
+        color: var(--tx);
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        box-shadow: var(--sh2);
+        transition: .14s ease;
+        white-space: nowrap;
+    }
+    .lhn-head-btn:hover {
+        background: #F8FAFC;
+        transform: translateY(-1px);
+    }
+    .lhn-head-btn-primary {
+        border-color: transparent;
+        background: linear-gradient(135deg, #1474FF, #0059DD);
+        color: #fff;
+        box-shadow: 0 6px 16px rgba(18, 103, 232, .28);
+    }
+    .lhn-head-btn-primary:hover {
+        background: linear-gradient(135deg, #105FCC, #004FC4);
+    }
+    :root.dark .lhn-head-btn {
+        background: #0f172a;
+        border-color: #334155;
+        color: #f1f5f9;
+    }
+    :root.dark .lhn-head-btn-primary {
+        background: linear-gradient(135deg, #1474FF, #0059DD);
+        border-color: transparent;
+        color: #fff;
     }
 
     /* date picker bar */
@@ -430,6 +500,102 @@
         letter-spacing: -.02em;
     }
 
+    /* Nút hành động + ô nhập của wizard tạo đơn.
+       Trước đây dùng chung class .wh-action-btn/.form-field nhưng CSS của chúng chỉ
+       nằm trong warehouse.blade.php, không load ở trang này nên nút mất hẳn khung. */
+    .lhn-act-btn {
+        height: 38px;
+        padding: 0 16px;
+        border: 1px solid var(--bd);
+        border-radius: 9px;
+        background: var(--wh);
+        color: var(--tx);
+        font-size: 13px;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        cursor: pointer;
+        white-space: nowrap;
+        transition: background .16s ease, border-color .16s ease, box-shadow .16s ease;
+    }
+    .lhn-act-btn:hover:not(:disabled) {
+        background: var(--bd2);
+    }
+    .lhn-act-btn:disabled {
+        opacity: .6;
+        cursor: not-allowed;
+    }
+    .lhn-act-btn-primary {
+        background: var(--bl);
+        border-color: var(--bl);
+        color: #fff;
+        box-shadow: 0 4px 12px rgba(18, 103, 232, .28);
+    }
+    .lhn-act-btn-primary:hover:not(:disabled) {
+        background: #0F58CC;
+        border-color: #0F58CC;
+    }
+    .dark .lhn-act-btn {
+        background: #1e293b;
+        border-color: #334155;
+        color: #cbd5e1;
+    }
+    .dark .lhn-act-btn:hover:not(:disabled) {
+        background: #334155;
+    }
+    .dark .lhn-act-btn-primary {
+        background: var(--bl);
+        border-color: var(--bl);
+        color: #fff;
+    }
+
+    .form-field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+    .form-field label {
+        font-size: 12px;
+        font-weight: 700;
+        color: #475569;
+    }
+    .dark .form-field label {
+        color: #cbd5e1;
+    }
+    /* :not(...) để khỏi thổi checkbox 'Ca lấy nguyên liệu' lên cỡ ô nhập */
+    .form-field input:not([type="checkbox"]):not([type="radio"]),
+    .form-field select,
+    .form-field textarea {
+        height: 38px;
+        border: 1px solid #CBD5E1;
+        border-radius: 8px;
+        padding: 0 12px;
+        font-size: 13px;
+        background: #fff;
+        color: var(--tx);
+        outline: none;
+    }
+    .form-field input[type="checkbox"],
+    .form-field input[type="radio"] {
+        width: 14px;
+        height: 14px;
+        padding: 0;
+        flex: 0 0 auto;
+    }
+    .form-field input:not([type="checkbox"]):not([type="radio"]):focus,
+    .form-field select:focus {
+        border-color: var(--bl);
+        box-shadow: 0 0 0 3px rgba(18, 103, 232, .12);
+    }
+    .dark .form-field input,
+    .dark .form-field select,
+    .dark .form-field textarea {
+        border-color: #334155;
+        background: #1e293b;
+        color: #fff;
+    }
+
     /* step wizard */
     .oh-steps {
         display: flex;
@@ -747,20 +913,24 @@
             }
         </style>
         <!-- LIST HÀNG VIEW (MẪU ẢNH 1 & 2) -->
-        <div class="lhn-root w-full space-y-6" id="lh-print-area">
+        <div class="lhn-root w-full" id="lh-print-area">
             <!-- Header bar -->
-            <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
+            <div class="lhn-page-head">
                 <div>
-                    <h1 style="font-size:20px;font-weight:800;margin:0 0 4px" class="dark:text-white">{{ __('list_hang.heading', ['date' => \Carbon\Carbon::parse($date)->format('d/m/Y')]) }}</h1>
+                    <h1>{{ __('list_hang.page_heading') }}</h1>
                     <p style="font-size:12.5px;color:var(--mu);margin:0">{{ __('list_hang.subtitle') }}</p>
                 </div>
-                <div style="display:flex;gap:8px">
-                    <button type="button" wire:click="exportList" style="height:40px;padding:0 20px;border-radius:12px;background:var(--gn);color:#ffffff;font-size:14px;font-weight:700;display:inline-flex;align-items:center;gap:8px;border:none;cursor:pointer;box-shadow:0 2px 6px rgba(22,163,74,0.25);transition:all 0.15s ease;" onmouseover="this.style.opacity='.88'" onmouseout="this.style.opacity='1'">
-                        <svg xmlns="http://www.w3.org/2000/svg" style="width:20px;height:20px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
+                <div class="lhn-page-actions">
+                    <button type="button" wire:click="exportList" class="lhn-head-btn">
+                        <i class="fa-solid fa-file-excel" style="color:var(--gn)"></i>
                         <span>{{ __('list_hang.actions.export') }}</span>
                     </button>
+                    @if(\App\Filament\Resources\PurchaseOrderResource::canCreate())
+                        <button type="button" wire:click="goOrderCreate" class="lhn-head-btn lhn-head-btn-primary">
+                            <i class="fa-solid fa-cart-plus"></i>
+                            <span>{{ __('list_hang.actions.create_po') }}</span>
+                        </button>
+                    @endif
                 </div>
             </div>
 
@@ -930,11 +1100,13 @@
                         <p style="font-size: 12px; color: var(--mu); margin-top:2px;">{{ __('list_hang.po.subtitle') }}</p>
                     </div>
                     <div class="flex gap-2">
-                        <button type="button" class="wh-action-btn" wire:click="goBackToList">
+                        <button type="button" class="lhn-act-btn" wire:click="goBackToList">
                             <i class="fa-solid fa-arrow-left"></i>{{ __('list_hang.actions.back') }}
                         </button>
-                        <button type="button" class="wh-action-btn wh-action-btn-primary" wire:click="createOrders" wire:loading.attr="disabled" wire:target="createOrders">
-                            <i class="fa-solid fa-paper-plane"></i>{{ __('list_hang.actions.create_send') }}
+                        <button type="button" class="lhn-act-btn lhn-act-btn-primary" wire:click="createOrders" wire:loading.attr="disabled" wire:target="createOrders">
+                            <i class="fa-solid fa-paper-plane" wire:loading.remove wire:target="createOrders"></i>
+                            <i class="fa-solid fa-spinner fa-spin" wire:loading wire:target="createOrders"></i>
+                            {{ __('list_hang.actions.create_send') }}
                         </button>
                     </div>
                 </div>

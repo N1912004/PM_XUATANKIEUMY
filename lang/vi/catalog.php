@@ -1,15 +1,21 @@
 <?php
 
 $translations = [
+    'breadcrumb' => [
+        'home' => 'Xuất ăn',
+        'area' => ['list' => 'Khu vực', 'create' => 'Thêm khu vực', 'edit' => 'Chỉnh sửa khu vực'],
+        'kitchen' => ['list' => 'Nhà ăn / bếp', 'create' => 'Thêm nhà ăn / bếp', 'edit' => 'Chỉnh sửa nhà ăn / bếp'],
+        'shift' => ['list' => 'Cấu hình ca làm việc', 'create' => 'Thêm ca làm việc', 'edit' => 'Chỉnh sửa ca làm việc'],
+    ],
     'area_section' => 'Thông tin khu vực',
     'kitchen_section' => 'Thông tin nhà ăn / bếp',
     'kitchen_status' => ['active' => 'Đang hoạt động', 'paused' => 'Tạm dừng', 'maintenance' => 'Bảo trì'],
     'groups' => [
-        'ingredients_inventory' => 'NGUYÊN LIỆU & KHO',
-        'supply_inventory' => 'CUNG ỨNG & KHO',
-        'area_kitchen' => 'KHU VỰC & NHÀ ĂN',
-        'kitchen_operations' => 'VẬN HÀNH BẾP',
+        'overview' => 'TỔNG QUAN',
+        'catering' => 'XUẤT ĂN',
         'hr' => 'NHÂN SỰ',
+        'chat_group' => 'CHAT NHÓM',
+        'system' => 'HỆ THỐNG',
     ],
     'common' => ['index' => 'STT', 'active' => 'Hoạt động', 'status' => 'TRẠNG THÁI', 'active_status' => 'Trạng thái hoạt động', 'notes' => 'Ghi chú', 'sort_order' => 'Thứ tự hiển thị', 'sort_order_upper' => 'THỨ TỰ', 'in_use' => 'Đang sử dụng', 'in_use_upper' => 'ĐANG DÙNG', 'created_at' => 'NGÀY TẠO'],
     'area' => ['label' => 'Khu vực', 'fields' => ['name' => 'Tên khu vực', 'code' => 'Mã khu vực', 'manager' => 'Quản lý phụ trách'], 'placeholders' => ['name' => 'VD: Đông Nai / Hồ Chí Minh', 'code' => 'VD: KV-DN', 'notes' => 'Phạm vi vận hành, ca sản xuất, khách hàng chính...'], 'table' => ['code' => 'MÃ', 'name' => 'KHU VỰC', 'manager' => 'QUẢN LÝ PHỤ TRÁCH', 'kitchens_count' => 'SỐ NHÀ ĂN / BẾP'], 'errors' => ['in_use' => 'Không thể xóa khu vực này vì vẫn còn nhà ăn/bếp trực thuộc.'], 'notifications' => ['deleted' => 'Xóa khu vực thành công.']],

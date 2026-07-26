@@ -1,8 +1,8 @@
 @push('styles')
 <style>
     :root {
-        --bl: {{ \App\Models\Setting::get('primary_color', '#267DC1') }};
-        --bl-d: {{ \App\Models\Setting::get('primary_color', '#267DC1') }};
+        --bl: #1267E8;
+        --bl-d: #1267E8;
         --bl-s: #E9F2F8;
         --bl-m: #A8CBE6;
         --gn: #059669;
@@ -49,6 +49,37 @@
         --bd: #334155;
         --bd2: #263449;
         --sh: 0 1px 2px rgba(0, 0, 0, .4);
+    }
+
+    .recipe-page,
+    .recipe-page * {
+        box-sizing: border-box;
+        font-family: "Inter", system-ui, sans-serif;
+    }
+
+    .recipe-page .fa,
+    .recipe-page .fa-solid,
+    .recipe-page .fa-regular,
+    .recipe-page .fa-brands,
+    .recipe-page .fas,
+    .recipe-page .far,
+    .recipe-page [class*="fa-"] {
+        font-family: "Font Awesome 6 Free", "Font Awesome 6 Brands" !important;
+        width: auto;
+        height: auto;
+        line-height: 1;
+    }
+
+    .recipe-page .fa-solid,
+    .recipe-page .fas {
+        font-weight: 900 !important;
+    }
+
+    .recipe-page {
+        color: var(--tx);
+        min-height: 100vh;
+        padding: 20px 22px 36px;
+        background: var(--bg);
     }
 
     /* ══ NGÂN HÀNG THỰC ĐƠN ══ */
@@ -522,7 +553,7 @@
         min-width: 250px;
     }
     .ph-l h1 {
-        font-size: 1.5rem !important;
+        font-size: 22px !important;
         font-weight: 800 !important;
         color: var(--tx) !important;
         line-height: 1.2 !important;
@@ -543,8 +574,8 @@
     .ph-r a,
     .ph-r .fi-ac-action {
         white-space: nowrap !important;
-        height: 38px !important;
-        line-height: 38px !important;
+        height: 34px !important;
+        line-height: 34px !important;
         display: inline-flex !important;
         align-items: center !important;
         justify-content: center !important;
@@ -765,6 +796,107 @@
         color: var(--fa);
         font-size: 12px;
         text-align: center;
+    }
+
+    /* Hộp thoại xác nhận xóa/khôi phục (teleport ra body nên không nằm trong .recipe-page) */
+    .rcf-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 60;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+        background: rgba(15, 23, 42, .55);
+        backdrop-filter: blur(2px);
+        font-family: "Inter", system-ui, sans-serif;
+    }
+    .rcf-box {
+        width: 100%;
+        max-width: 420px;
+        background: var(--wh);
+        border: 1px solid var(--bd);
+        border-radius: var(--r);
+        box-shadow: 0 20px 45px rgba(15, 23, 42, .25);
+        padding: 20px;
+    }
+    .rcf-head {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+    .rcf-ico {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 34px;
+        height: 34px;
+        border-radius: 9px;
+        font-size: 15px;
+        flex: 0 0 auto;
+    }
+    .rcf-ico-danger {
+        background: var(--rd-s);
+        color: var(--rd);
+    }
+    .rcf-ico-info {
+        background: var(--bl-s);
+        color: var(--bl);
+    }
+    .rcf-title {
+        margin: 0;
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--tx);
+    }
+    .rcf-msg {
+        margin: 0 0 18px;
+        font-size: 13px;
+        line-height: 1.55;
+        color: var(--su);
+    }
+    .rcf-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+    }
+    .rcf-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        height: 34px;
+        padding: 0 14px;
+        border-radius: 8px;
+        border: 1px solid transparent;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: filter .14s ease, background .14s ease;
+    }
+    .rcf-btn:disabled {
+        opacity: .6;
+        cursor: not-allowed;
+    }
+    .rcf-btn-ghost {
+        background: var(--wh);
+        border-color: var(--bd);
+        color: var(--su);
+    }
+    .rcf-btn-ghost:hover:not(:disabled) {
+        background: var(--bd2);
+    }
+    .rcf-btn-danger {
+        background: var(--rd);
+        color: #fff;
+    }
+    .rcf-btn-primary {
+        background: var(--bl);
+        color: #fff;
+    }
+    .rcf-btn-danger:hover:not(:disabled),
+    .rcf-btn-primary:hover:not(:disabled) {
+        filter: brightness(.94);
     }
 </style>
 @endpush

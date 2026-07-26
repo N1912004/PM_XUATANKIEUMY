@@ -19,9 +19,9 @@ class PurchaseOrderResource extends Resource
 
     protected static ?string $model = PurchaseOrder::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-shopping-cart';
+    protected static ?string $navigationIcon = 'fa-cart-shopping';
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 6;
 
     public static function getNavigationLabel(): string
     {
@@ -40,7 +40,7 @@ class PurchaseOrderResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('catalog.groups.supply_inventory');
+        return __('catalog.groups.catering');
     }
 
     public static function form(Form $form): Form

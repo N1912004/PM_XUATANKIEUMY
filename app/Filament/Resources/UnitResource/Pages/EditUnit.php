@@ -11,6 +11,15 @@ class EditUnit extends EditRecord
 {
     protected static string $resource = UnitResource::class;
 
+    public function getBreadcrumbs(): array
+    {
+        return [
+            '#' => __('ingredient.breadcrumb.home'),
+            UnitResource::getUrl('index') => __('ingredient.breadcrumb.unit_list'),
+            __('ingredient.breadcrumb.unit_edit'),
+        ];
+    }
+
     protected function getHeaderActions(): array
     {
         return [

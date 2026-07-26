@@ -26,7 +26,7 @@ class ListIngredients extends ListRecords
 
     public function getTitle(): string
     {
-        return __('ingredient.navigation.ingredient_plural');
+        return __('ingredient.navigation.list_heading');
     }
 
     public function getSubheading(): ?string
@@ -44,9 +44,10 @@ class ListIngredients extends ListRecords
         return [
             Actions\Action::make('import_excel')
                 ->label(__('ingredient.actions.import'))
-                ->icon('heroicon-o-document-arrow-up')
+                ->icon(new HtmlString('<i class="fa-solid fa-file-arrow-up" style="color:#1267E8;font-size:15px"></i>'))
                 ->color('gray')
                 ->outlined()
+                ->extraAttributes(['class' => 'btn-import-excel'])
                 ->modalSubmitActionLabel(__('ingredient.import.confirm'))
                 ->steps([
                     Step::make(__('ingredient.import.step_upload'))
@@ -93,8 +94,10 @@ class ListIngredients extends ListRecords
                 }),
             Actions\Action::make('export_excel')
                 ->label(__('ingredient.actions.export'))
-                ->icon('heroicon-o-document-arrow-down')
+                ->icon(new HtmlString('<i class="fa-solid fa-file-excel" style="color:#059669;font-size:15px"></i>'))
                 ->color('gray')
+                ->outlined()
+                ->extraAttributes(['class' => 'btn-export-excel'])
                 ->action(function () {
                     $filename = __('ingredient.excel.filename').'-'.now()->format('Ymd-His').'.xlsx';
 

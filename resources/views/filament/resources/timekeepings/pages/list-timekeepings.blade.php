@@ -1,4 +1,4 @@
-<div class="emp-page w-full space-y-6">
+<div class="emp-page bf-list-page w-full">
     @include('filament.resources.timekeepings.partials.styles')
 
     @php
@@ -65,8 +65,8 @@
         </div>
         <div>
             <button wire:click="exportTimekeepings" class="emp-btn">
-                <i class="fa-solid fa-download" style="font-size: 13px;"></i>
-                {{ __('timekeeping.actions.export') }}
+                <i class="fa-solid fa-file-excel" style="color:var(--po-gn)"></i>
+                <span>{{ __('timekeeping.actions.export') }}</span>
             </button>
         </div>
     </div>

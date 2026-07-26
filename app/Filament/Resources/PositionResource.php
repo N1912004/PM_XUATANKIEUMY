@@ -23,7 +23,7 @@ class PositionResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('catalog.groups.hr');
+        return __('catalog.groups.system');
     }
 
     public static function getNavigationLabel(): string

@@ -2,8 +2,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <style>
     :root {
-        --po-bl: {{ \App\Models\Setting::get('primary_color', '#267DC1') }};
-        --po-bl-d: {{ \App\Models\Setting::get('primary_color', '#267DC1') }};
+        --po-bl: #1267E8;
+        --po-bl-d: #1267E8;
         --po-bl-s: #E9F2F8;
         --po-bl-m: #A8CBE6;
         --po-gn: #059669;
@@ -26,6 +26,15 @@
         --po-mu: #64748B;
         --po-fa: #94A3B8;
         --po-wh: #fff;
+        --po-ms-draft-bg: #F1F5F9;
+        --po-ms-draft-text: #475569;
+        --po-ms-sent-bg: #EFF6FF;
+        --po-ms-sent-text: #1E40AF;
+        --po-ms-sent-border: #BFDBFE;
+        --po-ms-locked-bg: #FEF3C7;
+        --po-ms-locked-text: #78350F;
+        --po-ms-locked-border: #FDE68A;
+        --po-ms-locked-dot: #F59E0B;
         --po-sh: 0 1px 3px rgba(15,23,42,.05), 0 4px 16px rgba(15,23,42,.05);
         --po-sh2: 0 1px 2px rgba(15,23,42,.04);
         --po-r: 12px;
@@ -47,6 +56,15 @@
         --po-fa: #64748b;
         --po-bd: #334155;
         --po-bd2: #263449;
+        --po-ms-draft-bg: #263449;
+        --po-ms-draft-text: #CBD5E1;
+        --po-ms-sent-bg: rgba(18, 103, 232, .18);
+        --po-ms-sent-text: #93C5FD;
+        --po-ms-sent-border: rgba(147, 197, 253, .45);
+        --po-ms-locked-bg: rgba(245, 158, 11, .18);
+        --po-ms-locked-text: #FCD34D;
+        --po-ms-locked-border: rgba(252, 211, 77, .45);
+        --po-ms-locked-dot: #FBBF24;
         --po-sh: 0 1px 2px rgba(0, 0, 0, .4);
     }
 
@@ -72,20 +90,21 @@
     .emp-page {
         font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         color: var(--po-tx);
+        padding: 20px 24px 36px;
     }
 
     /* Header styling */
     .emp-head {
         display: flex;
         justify-content: space-between;
-        align-items: center;
-        margin-bottom: 20px;
+        align-items: flex-start;
+        margin-bottom: 18px;
         flex-wrap: wrap;
         gap: 12px;
     }
 
     .emp-title {
-        font-size: 20px;
+        font-size: 22px;
         font-weight: 800;
         color: var(--po-tx);
         letter-spacing: -.02em;
@@ -94,7 +113,7 @@
     .emp-subtitle {
         font-size: 13px;
         color: var(--po-mu);
-        margin-top: 2px;
+        margin-top: 0;
     }
 
     .emp-actions {
@@ -140,6 +159,7 @@
         display: grid;
         grid-template-columns: repeat(4, 1fr);
         gap: 12px;
+        margin-bottom: 16px;
     }
 
     .mp-kcard {
@@ -151,15 +171,21 @@
         display: flex;
         align-items: center;
         gap: 12px;
+        transition: .13s;
+    }
+
+    .mp-kcard:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(15, 23, 42, .08);
     }
 
     .mp-kico {
-        width: 38px;
-        height: 38px;
-        border-radius: 9px;
+        width: 40px;
+        height: 40px;
+        border-radius: 11px;
         display: grid;
         place-items: center;
-        font-size: 16px;
+        font-size: 17px;
         flex-shrink: 0;
     }
 
@@ -167,6 +193,7 @@
         font-size: 22px;
         font-weight: 800;
         color: var(--po-tx);
+        letter-spacing: -.025em;
         line-height: 1.1;
     }
 
@@ -174,7 +201,7 @@
         font-size: 11px;
         font-weight: 600;
         color: var(--po-mu);
-        margin-bottom: 2px;
+        margin-bottom: 3px;
     }
 
     /* Filter Bar */
@@ -182,21 +209,17 @@
         display: flex;
         align-items: center;
         gap: 8px;
-        background: var(--po-wh);
-        border: 1px solid var(--po-bd);
-        border-radius: var(--po-r);
-        padding: 8px 12px;
-        box-shadow: var(--po-sh2);
         flex-wrap: wrap;
+        margin-bottom: 14px;
     }
 
     .mp-sel {
-        height: 34px;
-        padding: 0 24px 0 10px;
+        height: 38px;
+        padding: 0 28px 0 11px;
         background: var(--po-wh);
         border: 1px solid var(--po-bd);
-        border-radius: 8px;
-        font-size: 12.5px;
+        border-radius: 9px;
+        font-size: 13px;
         color: var(--po-su);
         cursor: pointer;
         outline: none;
@@ -208,12 +231,12 @@
     }
 
     .mp-date-filter {
-        height: 34px;
-        padding: 0 10px;
+        height: 38px;
+        padding: 0 11px;
         background: var(--po-wh);
         border: 1px solid var(--po-bd);
-        border-radius: 8px;
-        font-size: 12.5px;
+        border-radius: 9px;
+        font-size: 13px;
         color: var(--po-su);
         outline: none;
         min-width: 160px;
@@ -254,18 +277,19 @@
         background: var(--po-wh);
         border: 1px solid var(--po-bd);
         border-radius: var(--po-r);
-        padding: 14px 16px;
+        padding: 16px 18px;
         display: flex;
         align-items: center;
         gap: 14px;
         cursor: pointer;
         box-shadow: var(--po-sh2);
-        transition: .12s;
+        transition: .14s;
     }
 
     .mp-item:hover {
         border-color: var(--po-bl-m);
-        background: var(--po-bg);
+        box-shadow: 0 4px 16px rgba(18, 103, 232, .10);
+        transform: translateY(-1px);
     }
 
     .emp-bottom-bar {
@@ -367,9 +391,9 @@
     }
 
     .mp-item-ico {
-        width: 42px;
-        height: 42px;
-        border-radius: 10px;
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
         display: grid;
         place-items: center;
         font-size: 18px;
@@ -378,83 +402,110 @@
 
     .mp-item-info {
         flex: 1;
+        min-width: 0;
     }
 
     .mp-item-title {
-        font-size: 13.5px;
-        font-weight: 800;
+        font-size: 14px;
+        font-weight: 700;
         color: var(--po-tx);
+        margin-bottom: 3px;
     }
 
     .mp-item-sub {
-        font-size: 11.5px;
+        font-size: 12px;
         color: var(--po-mu);
-        margin-top: 3px;
     }
 
     .mp-item-meta {
         display: flex;
-        gap: 12px;
+        align-items: center;
+        gap: 10px;
         margin-top: 6px;
         flex-wrap: wrap;
     }
 
     .mp-item-tag {
-        font-size: 11px;
-        color: var(--po-fa);
+        font-size: 11.5px;
+        color: var(--po-mu);
         display: inline-flex;
         align-items: center;
         gap: 4px;
+    }
+
+    .mp-item-tag i {
+        font-size: 11px;
+        color: var(--po-fa);
     }
 
     .mp-item-right {
         display: flex;
         flex-direction: column;
         align-items: flex-end;
-        gap: 6px;
+        gap: 7px;
+        flex-shrink: 0;
     }
 
     /* Status Pill (Thực đơn) */
     .ms-draft {
-        background: var(--po-bd2);
-        color: var(--po-su);
+        background: var(--po-ms-draft-bg);
+        color: var(--po-ms-draft-text);
         border: 1px solid var(--po-bd);
-        font-size: 13px;
+        font-size: 11.5px;
         font-weight: 700;
-        padding: 5px 14px;
+        padding: 3px 10px;
         border-radius: 20px;
-        box-shadow: 0 1px 2px rgba(0,0,0,.04);
         display: inline-flex;
         align-items: center;
-        gap: 6px;
+        gap: 4px;
     }
+
+    .ms-draft::before,
+    .ms-sent::before,
+    .ms-locked::before {
+        content: "";
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+
+    .ms-draft::before { background: var(--po-fa); }
 
     .ms-sent {
-        background: var(--po-bl-s);
-        color: var(--po-bl);
-        border: 1px solid var(--po-bl-m);
-        font-size: 13px;
+        background: var(--po-ms-sent-bg);
+        color: var(--po-ms-sent-text);
+        border: 1px solid var(--po-ms-sent-border);
+        font-size: 11.5px;
         font-weight: 700;
-        padding: 5px 14px;
+        padding: 3px 10px;
         border-radius: 20px;
-        box-shadow: 0 1px 2px rgba(0,0,0,.04);
         display: inline-flex;
         align-items: center;
-        gap: 6px;
+        gap: 4px;
     }
 
+    .ms-sent::before { background: var(--po-bl); }
+
     .ms-locked {
-        background: var(--po-or-s);
-        color: var(--po-or);
-        border: 1px solid var(--po-or);
-        font-size: 13px;
+        background: var(--po-ms-locked-bg);
+        color: var(--po-ms-locked-text);
+        border: 1px solid var(--po-ms-locked-border);
+        font-size: 11.5px;
         font-weight: 700;
-        padding: 5px 14px;
+        padding: 3px 10px;
         border-radius: 20px;
-        box-shadow: 0 1px 2px rgba(0,0,0,.04);
         display: inline-flex;
         align-items: center;
-        gap: 6px;
+        gap: 4px;
+    }
+
+    .ms-locked::before { background: var(--po-ms-locked-dot); }
+
+    .ms-draft > i,
+    .ms-sent > i,
+    .ms-locked > i {
+        display: none;
     }
 
     /* abt action button */

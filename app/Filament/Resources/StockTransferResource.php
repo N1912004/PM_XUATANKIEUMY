@@ -43,7 +43,7 @@ class StockTransferResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('catalog.groups.ingredients_inventory');
+        return __('catalog.groups.catering');
     }
 
     public static function form(Form $form): Form

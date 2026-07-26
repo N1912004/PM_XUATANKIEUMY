@@ -18,7 +18,7 @@
          khi trang còn mở. --}}
     <span wire:poll.240s="keepAlive" style="display:none"></span>
 
-    <div class="po-page w-full space-y-6" style="padding: 0 !important; background: transparent !important;">
+    <div class="po-page w-full" style="padding: 0 !important; background: transparent !important;">
         <!-- Header Section -->
         <div class="po-head" style="margin-bottom: 16px;">
             <div>

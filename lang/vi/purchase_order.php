@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'breadcrumb' => ['home' => 'Xuất ăn', 'list' => 'Đặt hàng', 'create' => 'Tạo đơn đặt hàng', 'view' => 'Chi tiết đơn hàng', 'check' => 'Kiểm hàng'],
     'navigation' => ['label' => 'Đặt hàng', 'model' => 'Đơn đặt hàng', 'plural' => 'Đặt hàng', 'group' => 'CUNG ỨNG & KHO'],
     'list' => ['title' => 'Đặt hàng', 'subtitle' => 'Quản lý đơn đặt hàng nguyên liệu theo nhà cung cấp từ list hàng đã chốt'],
     'create' => [

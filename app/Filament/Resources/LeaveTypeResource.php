@@ -23,7 +23,7 @@ class LeaveTypeResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('leave_overtime.group');
+        return __('catalog.groups.system');
     }
 
     public static function getNavigationLabel(): string

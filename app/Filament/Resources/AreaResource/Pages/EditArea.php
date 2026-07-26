@@ -10,6 +10,15 @@ class EditArea extends EditRecord
 {
     protected static string $resource = AreaResource::class;
 
+    public function getBreadcrumbs(): array
+    {
+        return [
+            '#' => __('catalog.breadcrumb.home'),
+            AreaResource::getUrl('index') => __('catalog.breadcrumb.area.list'),
+            __('catalog.breadcrumb.area.edit'),
+        ];
+    }
+
     protected function getHeaderActions(): array
     {
         return [

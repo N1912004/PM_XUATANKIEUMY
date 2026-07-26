@@ -15,7 +15,7 @@ class KitchenResource extends Resource
 {
     protected static ?string $model = Kitchen::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-building-storefront';
+    protected static ?string $navigationIcon = 'fa-fire-burner'; // Bếp lửa — sát nghĩa 'Nhà ăn / bếp' hơn icon cửa hàng cũ
 
     protected static ?int $navigationSort = 2;
 
@@ -31,7 +31,7 @@ class KitchenResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('catalog.groups.area_kitchen');
+        return __('catalog.groups.system');
     }
 
     public static function form(Form $form): Form

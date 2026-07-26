@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'breadcrumb' => ['home' => 'Xuất ăn', 'list' => 'Nhân viên', 'create' => 'Thêm nhân viên', 'edit' => 'Chỉnh sửa nhân viên'],
     'navigation' => 'Nhân viên',
     'group' => 'NHÂN SỰ',
     'create_title' => 'Thêm nhân viên mới',

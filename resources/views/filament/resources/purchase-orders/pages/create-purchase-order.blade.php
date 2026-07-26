@@ -42,7 +42,7 @@
         $nccDotColors = ['#1267E8', '#059669', '#D97706', '#7C3AED', '#DC2626', '#0891B2'];
     @endphp
 
-    <div class="po-page w-full space-y-6" style="padding: 0 !important; background: transparent !important; padding-bottom: 20px !important;">
+    <div class="po-page w-full" style="padding: 0 !important; background: transparent !important; padding-bottom: 20px !important;">
         <!-- Header Bar -->
         <div class="po-head" style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 16px;">
             <div>

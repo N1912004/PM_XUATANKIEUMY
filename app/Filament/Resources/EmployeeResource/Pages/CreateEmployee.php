@@ -15,6 +15,15 @@ class CreateEmployee extends Page
 
     protected static string $resource = EmployeeResource::class;
 
+    public function getBreadcrumbs(): array
+    {
+        return [
+            '#' => __('employee.breadcrumb.home'),
+            EmployeeResource::getUrl('index') => __('employee.breadcrumb.list'),
+            __('employee.breadcrumb.create'),
+        ];
+    }
+
     protected static string $view = 'filament.resources.employees.pages.edit-employee';
 
     // Form fields

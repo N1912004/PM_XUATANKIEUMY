@@ -23,7 +23,7 @@ class KitchenTypeResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('catalog.groups.area_kitchen');
+        return __('catalog.groups.system');
     }
 
     public static function getNavigationLabel(): string

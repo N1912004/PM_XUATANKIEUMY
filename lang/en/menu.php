@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'breadcrumb' => ['home' => 'Catering', 'list' => 'Menu Planning', 'create' => 'Add menu', 'edit' => 'Edit menu'],
     'navigation' => ['label' => 'Menu Planning', 'group' => 'KITCHEN OPERATIONS'],
     'model' => ['singular' => 'Menu', 'plural' => 'Menu Planning'],
     'fields' => ['date' => 'Effective date', 'shift' => 'Shift', 'recipe' => 'Dish', 'recipe_name' => 'Dish name', 'recipe_type' => 'Dish group', 'estimated_portions' => 'Estimated portions', 'status' => 'Status', 'audit_reason' => 'Edit reason (required when editing a LOCKED menu)', 'kitchen' => 'Kitchen'],
