@@ -72,7 +72,7 @@
 
     html:has(.lg-page), body:has(.lg-page) { overflow: hidden; height: 100%; }
     .lg-page {
-        height: 100vh; font-family: 'IBM Plex Sans', system-ui, sans-serif;
+        height: 100vh; font-family: 'Inter', system-ui, sans-serif;
         background: var(--lg-bg); color: var(--lg-ink); position: relative; overflow: hidden;
         -webkit-font-smoothing: antialiased;
     }

@@ -75,7 +75,7 @@
     .po-page,
     .po-page * {
         box-sizing: border-box;
-        font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
 
     .po-page .fa,

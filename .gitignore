@@ -33,3 +33,4 @@ Thumbs.db
 
 # Tài liệu/bản sao lưu cục bộ (Excel nghiệp vụ, kết quả kiểm thử giao diện) — không đưa lên git
 /.archive
+AGENTS.md

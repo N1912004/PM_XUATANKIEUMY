@@ -68,7 +68,7 @@
     }
 
     .chat-page {
-        font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         color: var(--tx);
         background: transparent;
         height: calc(100vh - 11rem);
