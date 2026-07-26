@@ -30,7 +30,7 @@
             </div>
             <div class="emp-actions">
                 <button wire:click="loadWeekMenu({{ $kitchens->first()?->id ?? 1 }}, '{{ now()->startOfWeek()->toDateString() }}', null, false)" class="emp-btn">
-                    <i class="fa-regular fa-calendar-week"></i>
+                    <i class="fa-solid fa-calendar-days"></i>
                     {{ __('menu.actions.create_week') }}
                 </button>
                 <button wire:click="loadDayMenu({{ $kitchens->first()?->id ?? 1 }}, '{{ now()->toDateString() }}', false)" class="emp-btn emp-btn-primary">
@@ -43,7 +43,7 @@
         <!-- KPIs Stats -->
         <div class="mp-krow" style="margin-bottom: 16px;">
             <div class="mp-kcard">
-                <div class="mp-kico" style="background:var(--po-bl-s); color:var(--po-bl)"><i class="fa-regular fa-calendar-week"></i></div>
+                <div class="mp-kico" style="background:var(--po-bl-s); color:var(--po-bl)"><i class="fa-solid fa-calendar-days"></i></div>
                 <div>
                     <div class="mp-klbl">{{ __('menu.kpi.running_weekly') }}</div>
                     <div class="mp-kval">{{ $stats['total_active_weeks'] }}</div>

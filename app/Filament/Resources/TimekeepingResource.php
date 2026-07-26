@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Builder;
 
 class TimekeepingResource extends Resource
 {
-    protected static bool $shouldRegisterNavigation = false; // Ẩn menu 'Chấm công' khỏi thanh điều hướng Sidebar
+    protected static bool $shouldRegisterNavigation = true; // Hiển thị menu 'Chấm công' trên thanh điều hướng Sidebar
 
     protected static ?string $model = Timekeeping::class;
 

@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Builder;
 
 class LeaveOvertimeResource extends Resource
 {
-    protected static bool $shouldRegisterNavigation = false; // Ẩn menu 'Nghỉ phép & Tăng ca' khỏi thanh điều hướng Sidebar
+    protected static bool $shouldRegisterNavigation = true; // Hiển thị menu 'Nghỉ phép & Tăng ca' trên thanh điều hướng Sidebar
 
     protected static ?string $model = LeaveOvertime::class;
 
