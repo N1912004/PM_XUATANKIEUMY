@@ -555,8 +555,8 @@
 
     {{-- Nếu là quản trị viên/toàn quyền, cho phép chọn bếp linh hoạt --}}
     @if(auth()->user()?->hasRole(['super_admin', 'Quản trị viên']))
-        <div class="col-span-full mb-1.5 flex items-center gap-2.5 rounded-lg border border-gray-200 bg-white px-4 py-3 dark:border-gray-700 dark:bg-gray-800">
-            <span class="shrink-0 text-sm font-semibold text-gray-600 dark:text-gray-300">{{ __('warehouse.filters.selected_kitchen') }}</span>
+        <div class="col-span-full mb-3 flex items-center gap-3.5 rounded-xl border border-gray-200 bg-white px-5 py-3.5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+            <span class="shrink-0 text-sm font-semibold text-gray-700 dark:text-gray-200">{{ __('warehouse.filters.selected_kitchen') }}</span>
             <div class="w-64 max-w-full">
                 @include('filament.components.search-select', [
                     'name' => 'selectedKitchenId',
