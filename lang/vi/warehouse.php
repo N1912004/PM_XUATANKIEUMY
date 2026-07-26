@@ -87,7 +87,7 @@ return [
         'in_transit' => 'Đang chuyển',
     ],
     'filters' => [
-        'selected_kitchen' => 'Đang chọn Bếp ăn:',
+        'selected_kitchen' => 'Bếp ăn:',
         'all_kitchens' => 'Tất cả các bếp',
         'from_date' => 'Từ ngày',
         'to_date' => 'Đến ngày',

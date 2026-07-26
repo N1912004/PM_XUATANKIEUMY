@@ -87,7 +87,7 @@ return [
         'in_transit' => 'In transit',
     ],
     'filters' => [
-        'selected_kitchen' => 'Selected kitchen:',
+        'selected_kitchen' => 'Kitchen:',
         'all_kitchens' => 'All kitchens',
         'from_date' => 'From date',
         'to_date' => 'To date',
