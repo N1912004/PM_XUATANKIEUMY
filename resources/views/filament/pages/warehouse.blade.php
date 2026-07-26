@@ -699,17 +699,17 @@
                                 </td>
                                 <td>{{ $item['ingredient']['type'] ?? '—' }}</td>
                                 <td>{{ str_starts_with($item['ingredient']['supplier']['name'] ?? '', 'test_') ? __('warehouse.common.test_supplier') : ($item['ingredient']['supplier']['name'] ?? '—') }}</td>
-                                <td style="text-align: right; font-weight: 750;">
-                                    {{ $this->formatQty($item['quantity']) }}<span style="font-size: 11px; font-weight: 500; color: #94a3b8; margin-left: 2px;">{{ $item['ingredient']['unit'] ?? '' }}</span>
+                                <td style="text-align: right; font-weight: 700;">
+                                    {{ $this->formatQty($item['quantity']) }} {{ $item['ingredient']['unit'] ?? '' }}
                                 </td>
                                 <td style="text-align: right; color: #64748b;">
-                                    {{ $this->formatQty($item['min_quantity']) }}<span style="font-size: 11px; font-weight: 500; color: #94a3b8; margin-left: 2px;">{{ $item['ingredient']['unit'] ?? '' }}</span>
+                                    {{ $this->formatQty($item['min_quantity']) }} {{ $item['ingredient']['unit'] ?? '' }}
                                 </td>
-                                <td style="text-align: right;">
-                                    {{ number_format($item['unit_price'], 0, ',', '.') }}<span style="font-size: 10px; font-weight: 500; color: #94a3b8; margin-left: 1px;">{{ __('warehouse.common.currency') }}</span>
+                                <td style="text-align: right; font-weight: 600;">
+                                    {{ number_format($item['unit_price'], 0, ',', '.') }} {{ __('warehouse.common.currency') }}
                                 </td>
                                 <td style="text-align: right; font-weight: 700; color: rgb(var(--primary-600));" class="dark:text-primary-400">
-                                    {{ number_format($item['quantity'] * $item['unit_price'], 0, ',', '.') }}<span style="font-size: 10px; font-weight: 500; color: #94a3b8; margin-left: 1px;">{{ __('warehouse.common.currency') }}</span>
+                                    {{ number_format($item['quantity'] * $item['unit_price'], 0, ',', '.') }} {{ __('warehouse.common.currency') }}
                                 </td>
                                 <td style="text-align: center; font-size: 11px; color: #64748b; font-variant-numeric: tabular-nums;">
                                     {{ $item['updated_at'] ? \Carbon\Carbon::parse($item['updated_at'])->setTimezone('Asia/Ho_Chi_Minh')->format('d/m/Y H:i') : '—' }}
@@ -1376,7 +1376,7 @@
                                             ])
                                         </td>
                                         <td style="text-align: right; font-weight:700;">
-                                            {{ $this->formatQty($item['available_qty'] ?? 0) }}<span style="font-size: 11px; font-weight: 500; color: #94a3b8; margin-left: 2px;">{{ $item['unit'] ?? '' }}</span>
+                                            {{ $this->formatQty($item['available_qty'] ?? 0) }} {{ $item['unit'] ?? '' }}
                                         </td>
                                         <td style="text-align: center;">
                                             <input type="number" step="0.01" wire:model="transferItemsData.{{ $index }}.quantity" class="table-input" style="width: 120px;">
