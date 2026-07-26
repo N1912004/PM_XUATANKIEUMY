@@ -85,7 +85,7 @@
     .po-page .fas,
     .po-page .far,
     .po-page .fab {
-        font-family: "Font Awesome 7 Free" !important;
+        font-family: "Font Awesome 6 Free", "Font Awesome 6 Brands" !important;
     }
 
     .po-page .fa-solid,

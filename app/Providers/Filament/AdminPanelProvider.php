@@ -78,10 +78,10 @@ class AdminPanelProvider extends PanelProvider
                 PanelsRenderHook::BODY_END,
                 fn (): string => Blade::render("@livewire('edit-profile-modal')"),
             )
-            // Nạp Laravel Echo (Reverb) cho chat realtime + app.css (bundle Font Awesome thay CDN).
+            // Nạp Laravel Echo (Reverb) cho chat realtime + app.css + FontAwesome 6 CDN.
             ->renderHook(
                 PanelsRenderHook::HEAD_END,
-                fn (): string => Blade::render("@vite(['resources/css/app.css', 'resources/js/app.js'])"),
+                fn (): string => '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">'.Blade::render("@vite(['resources/css/app.css', 'resources/js/app.js'])"),
             )
             ->colors([
                 'primary' => '#1267E8',

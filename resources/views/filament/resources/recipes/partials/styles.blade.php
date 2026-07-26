@@ -57,6 +57,21 @@
         font-family: "Inter", system-ui, sans-serif;
     }
 
+    .recipe-page .fa,
+    .recipe-page .fa-solid,
+    .recipe-page .fa-regular,
+    .recipe-page .fa-brands,
+    .recipe-page .fas,
+    .recipe-page .far,
+    .recipe-page [class*="fa-"] {
+        font-family: "Font Awesome 6 Free", "Font Awesome 6 Brands" !important;
+    }
+
+    .recipe-page .fa-solid,
+    .recipe-page .fas {
+        font-weight: 900 !important;
+    }
+
     .recipe-page {
         color: var(--tx);
         min-height: 100vh;

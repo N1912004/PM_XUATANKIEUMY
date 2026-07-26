@@ -21,7 +21,7 @@
                 wire:target="exportExcel"
                 class="{{ $fiBtn }}"
             >
-                <i wire:loading.remove wire:target="exportExcel" class="fa-solid fa-file-excel" style="color:var(--po-gn)"></i>
+                <i wire:loading.remove wire:target="exportExcel" class="fa-solid fa-file-excel" style="color:#059669"></i>
                 <i wire:loading wire:target="exportExcel" class="fa-solid fa-spinner fa-spin"></i>
                 <span class="fi-btn-label">{{ __('supplier.actions.export_excel') }}</span>
             </button>

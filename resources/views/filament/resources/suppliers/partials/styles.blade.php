@@ -83,6 +83,21 @@
                 font-family: "Inter", system-ui, sans-serif;
             }
 
+            .sup-page .fa,
+            .sup-page .fa-solid,
+            .sup-page .fa-regular,
+            .sup-page .fa-brands,
+            .sup-page .fas,
+            .sup-page .far,
+            .sup-page [class*="fa-"] {
+                font-family: "Font Awesome 6 Free", "Font Awesome 6 Brands" !important;
+            }
+
+            .sup-page .fa-solid,
+            .sup-page .fas {
+                font-weight: 900 !important;
+            }
+
             .sup-page {
                 color: var(--sup-tx);
                 padding: 22px 28px 36px !important;
