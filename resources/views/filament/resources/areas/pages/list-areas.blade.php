@@ -31,10 +31,6 @@
             <p class="emp-subtitle">{{ __('catalog.area.unified.subtitle') }}</p>
         </div>
         <div class="emp-actions">
-            <button type="button" wire:click="resetForms" class="emp-btn">
-                <i class="fa-solid fa-rotate-left"></i>
-                {{ __('catalog.common.refresh') }}
-            </button>
             @if($activeTab === 'area')
                 <a href="{{ $createAreaUrl }}" wire:navigate class="emp-btn emp-btn-primary">
                     <i class="fa-solid fa-plus"></i>

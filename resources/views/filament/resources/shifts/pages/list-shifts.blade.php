@@ -28,10 +28,6 @@
             <p class="emp-subtitle">{{ __('catalog.shift.list.subtitle') }}</p>
         </div>
         <div class="emp-actions">
-            <button type="button" wire:click="resetFilters" class="emp-btn">
-                <i class="fa-solid fa-rotate-left"></i>
-                {{ __('catalog.common.refresh') }}
-            </button>
             <a href="{{ $createUrl }}" wire:navigate class="emp-btn emp-btn-primary">
                 <i class="fa-solid fa-plus"></i>
                 {{ __('catalog.shift.list.create') }}
