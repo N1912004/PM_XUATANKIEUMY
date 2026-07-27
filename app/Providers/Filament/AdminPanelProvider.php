@@ -111,17 +111,31 @@ class AdminPanelProvider extends PanelProvider
                             font-family: \'Inter\', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
                         }
 
-                        /* Đồng bộ cỡ chữ tiêu đề trang chuẩn 26px / Extra Bold giữa trang tiêu chuẩn và trang custom */
-                        .fi-header-heading {
-                            font-size: 1.625rem !important;
+                        /* Quy chuẩn đồng bộ 100% cỡ chữ tiêu đề 20px / Extra Bold 800 toàn hệ thống */
+                        h1.fi-header-heading,
+                        .fi-header h1,
+                        .fi-header-heading,
+                        .fi-resource-create-record-page .fi-header-heading,
+                        .fi-resource-edit-record-page .fi-header-heading,
+                        .fi-resource-list-records-page section .fi-header .fi-header-heading,
+                        .fi-page section .fi-header .fi-header-heading,
+                        .wh-title,
+                        .sup-title,
+                        .lhn-page-head h1,
+                        .emp-title,
+                        .po-title,
+                        .ph-l h1 {
+                            font-size: 20px !important;
                             font-weight: 800 !important;
                             line-height: 1.25 !important;
-                            letter-spacing: -0.03em !important;
+                            letter-spacing: -0.02em !important;
                         }
 
                         @media (max-width: 639.98px) {
+                            h1.fi-header-heading,
+                            .fi-header h1,
                             .fi-header-heading {
-                                font-size: 1.3125rem !important;
+                                font-size: 18px !important;
                             }
                         }
 
@@ -519,19 +533,20 @@ class AdminPanelProvider extends PanelProvider
                             color: #ffffff !important;
                         }
 
-                        /* Recipe create/edit form: match BA mockup spacing and cost table emphasis */
-                        .fi-resource-recipes .fi-header-heading {
-                            font-size: 1.875rem !important;
-                            line-height: 2.25rem !important;
+                        /* Recipe create/edit form header: 20px font-size and 800 font-weight */
+                        .fi-resource-recipes .fi-header-heading,
+                        .fi-resource-recipes h1.fi-header-heading {
+                            font-size: 20px !important;
+                            line-height: 1.25 !important;
                             font-weight: 800 !important;
-                            color: #111827 !important;
+                            letter-spacing: -0.02em !important;
                         }
                         .dark .fi-resource-recipes .fi-header-heading {
                             color: #ffffff !important;
                         }
                         .fi-resource-recipes .fi-header-subheading {
                             color: #64748b !important;
-                            font-size: 1rem !important;
+                            font-size: 13px !important;
                             font-weight: 500 !important;
                         }
                         .fi-resource-recipes .recipe-form-section,

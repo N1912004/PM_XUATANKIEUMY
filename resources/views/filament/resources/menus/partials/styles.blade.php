@@ -104,7 +104,7 @@
     }
 
     .emp-title {
-        font-size: 22px;
+        font-size: 20px;
         font-weight: 800;
         color: var(--po-tx);
         letter-spacing: -.02em;

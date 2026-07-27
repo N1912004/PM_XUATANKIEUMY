@@ -7,9 +7,9 @@
         margin-bottom: 18px !important;
     }
     .fi-page:has(.ing-widget) > section > .fi-header .fi-header-heading {
-        font-size: 22px !important;
+        font-size: 20px !important;
         font-weight: 800 !important;
-        letter-spacing: -.025em !important;
+        letter-spacing: -.02em !important;
     }
     .fi-page:has(.ing-widget) > section > .fi-header .fi-header-subheading {
         margin-top: 4px !important;

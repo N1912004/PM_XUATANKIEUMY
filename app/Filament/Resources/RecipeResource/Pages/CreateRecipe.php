@@ -15,11 +15,7 @@ class CreateRecipe extends CreateRecord
 
     public function getBreadcrumbs(): array
     {
-        return [
-            '#' => __('recipe.breadcrumb.home'),
-            RecipeResource::getUrl('index') => __('recipe.breadcrumb.list'),
-            __('recipe.breadcrumb.create'),
-        ];
+        return [];
     }
 
     public function getTitle(): string|Htmlable

@@ -368,10 +368,10 @@ main > .bf-list-page {
 .bf-list-page .sup-title,
 .bf-list-page .report-title,
 .bf-list-page .ph-l h1 {
-  font-size: 22px !important;
+  font-size: 20px !important;
   font-weight: 800 !important;
   line-height: 1.25 !important;
-  letter-spacing: -0.025em !important;
+  letter-spacing: -0.02em !important;
 }
 
 @media (max-width: 767.98px) {
@@ -392,20 +392,21 @@ main > .bf-list-page {
 
 /* Page Header Title & Subtitle */
 .fi-header {
-  margin-bottom: 12px !important;
+  margin-bottom: 10px !important;
 }
 
+h1.fi-header-heading,
+.fi-header h1,
 .fi-header-heading {
-  font-size: 26px !important;
+  font-size: 20px !important;
   font-weight: 800 !important;
-  line-height: 1.25 !important;
-  letter-spacing: -0.03em !important;
   color: var(--tx) !important;
+  line-height: 1.25 !important;
+  letter-spacing: -0.02em !important;
 }
 
 .fi-header-subheading {
   font-size: 13px !important;
-  line-height: 1.5 !important;
   color: var(--mu) !important;
   margin-top: 4px !important;
 }
@@ -1864,20 +1865,22 @@ svg.animate-spin,
 /* ── Form Page Header (.fph) ── */
 .fi-resource-create-record-page .fi-header,
 .fi-resource-edit-record-page .fi-header {
-  margin-bottom: 18px !important;
+  margin-bottom: 12px !important;
 }
 
 .fi-resource-create-record-page .fi-header-heading,
-.fi-resource-edit-record-page .fi-header-heading {
-  font-size: 22px !important;
+.fi-resource-edit-record-page .fi-header-heading,
+.fi-header-heading {
+  font-size: 20px !important;
   font-weight: 800 !important;
-  letter-spacing: -0.025em !important;
+  letter-spacing: -0.02em !important;
   color: var(--tx) !important;
   margin-bottom: 4px !important;
 }
 
 .fi-resource-create-record-page .fi-header-subheading,
-.fi-resource-edit-record-page .fi-header-subheading {
+.fi-resource-edit-record-page .fi-header-subheading,
+.fi-header-subheading {
   font-size: 13px !important;
   color: var(--mu) !important;
   margin: 0 !important;
@@ -1892,8 +1895,9 @@ svg.animate-spin,
   overflow: visible !important;
 }
 
-.fi-section-content-ctn {
-  padding: 22px 24px !important;
+.fi-section-content-ctn,
+.fi-section-content {
+  padding: 16px 18px !important;
 }
 
 /* ── Form Section Header (.fch) ── */
@@ -1901,7 +1905,7 @@ svg.animate-spin,
   display: flex !important;
   align-items: center !important;
   gap: 9px !important;
-  padding: 16px 24px !important;
+  padding: 12px 18px !important;
   border-bottom: 1px solid var(--bd2) !important;
   background: transparent !important;
 }
@@ -1933,7 +1937,7 @@ svg.animate-spin,
 /* ── Form Field Labels (.field label) ── */
 .fi-fo-field-wrp-label,
 .fi-fo-field-wrp label {
-  font-size: 12px !important;
+  font-size: 12.5px !important;
   font-weight: 600 !important;
   color: var(--su) !important;
 }
@@ -1944,10 +1948,11 @@ svg.animate-spin,
 }
 
 /* ── Form Input Controls (.ctrl) ── */
-.fi-section .fi-input-wrp,
-.fi-form-component-container .fi-input-wrp,
-.fi-fo-field-wrp:not(.fi-ta-filters-above-content-ctn *) .fi-input-wrp {
-  min-height: 40px !important;
+.fi-section .fi-input-wrp:not(.fi-fo-textarea),
+.fi-form-component-container .fi-input-wrp:not(.fi-fo-textarea),
+.fi-fo-field-wrp:not(.fi-ta-filters-above-content-ctn *) .fi-input-wrp:not(.fi-fo-textarea) {
+  min-height: 36px !important;
+  height: 36px !important;
   border: 1px solid var(--bd) !important;
   border-radius: 8px !important;
   background: var(--wh) !important;
@@ -1958,10 +1963,37 @@ svg.animate-spin,
 
 /* Ensure Searchable Select / Choices Dropdown panel is never clipped */
 .fi-fo-select .fi-input-wrp,
-.fi-fo-select,
-.choices,
-.choices__inner {
+.fi-fo-select {
   overflow: visible !important;
+}
+
+/* Ensure Select (Choices.js) matches TextInput height and sizing 100% */
+.fi-fo-select .choices,
+.fi-fo-select .choices__inner {
+  min-height: 34px !important;
+  height: 34px !important;
+  padding: 0 12px !important;
+  margin: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  display: flex !important;
+  align-items: center !important;
+  box-shadow: none !important;
+  overflow: visible !important;
+}
+
+.fi-fo-select .choices__list--single,
+.fi-fo-select .choices__list--single .choices__item,
+.fi-fo-select .choices__placeholder {
+  font-size: 13px !important;
+  line-height: 34px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  color: var(--tx) !important;
+}
+
+.fi-fo-select .choices__placeholder {
+  color: var(--fa) !important;
 }
 
 .choices__list--dropdown,
@@ -2056,28 +2088,51 @@ button[wire\:click*="createOption"]:hover {
   border-color: var(--bl-m) !important;
 }
 
-/* Textarea (.ctrl textarea) */
-.fi-fo-textarea textarea,
-textarea.fi-textarea-input {
-  min-height: 76px !important;
-  padding: 10px 12px !important;
-  resize: vertical !important;
-  line-height: 1.6 !important;
+/* Textarea Input Wrapper & Control - Pixel-perfect integration with Filament form grid */
+.fi-input-wrp.fi-fo-textarea {
+  min-height: 84px !important;
+  height: auto !important;
   border: 1px solid var(--bd) !important;
   border-radius: 8px !important;
-  font-size: 13px !important;
-  color: var(--tx) !important;
   background: var(--wh) !important;
+  box-shadow: none !important;
+  overflow: hidden !important;
+  transition: all 0.13s ease !important;
 }
 
-.fi-fo-textarea textarea:focus {
+.fi-input-wrp.fi-fo-textarea:focus-within {
   border-color: #93C5FD !important;
   box-shadow: 0 0 0 3px rgba(18, 103, 232, 0.08) !important;
 }
 
-/* Toggle Switch */
+.fi-fo-textarea textarea,
+textarea.fi-textarea-input {
+  display: block !important;
+  width: 100% !important;
+  min-height: 76px !important;
+  padding: 8px 12px !important;
+  line-height: 1.5 !important;
+  border: none !important;
+  border-radius: 0 !important;
+  font-size: 13px !important;
+  color: var(--tx) !important;
+  background: transparent !important;
+  box-sizing: border-box !important;
+  outline: none !important;
+  box-shadow: none !important;
+  resize: vertical !important;
+}
+
+/* Toggle Switch Alignment */
 .fi-fo-toggle .fi-toggle-input {
   border-radius: 12px !important;
+}
+
+.fi-fo-toggle,
+.fi-fo-field-wrp:has(.fi-fo-toggle) .fi-fo-field-wrp-label {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
 }
 
 .fi-fo-toggle label,
@@ -2085,6 +2140,7 @@ textarea.fi-textarea-input {
   font-size: 13px !important;
   font-weight: 600 !important;
   color: var(--su) !important;
+  margin: 0 !important;
 }
 
 /* ── Form Action Footer (.ffoot) ──
@@ -2231,7 +2287,7 @@ input[type="date"].fi-input,
   background: var(--wh) !important;
   border: 1px solid var(--bd) !important;
   border-radius: 10px !important;
-  padding: 16px !important;
+  padding: 12px 16px !important;
   box-shadow: var(--sh2) !important;
 }
 
@@ -2257,7 +2313,7 @@ header.fi-section-header {
   display: flex !important;
   align-items: center !important;
   justify-content: flex-start !important;
-  padding: 16px 24px !important;
+  padding: 12px 18px !important;
   border-bottom: 1px solid var(--bd2) !important;
   background: transparent !important;
   margin: 0 !important;
@@ -2273,14 +2329,14 @@ header.fi-section-header div {
   margin: 0 !important;
   padding: 0 !important;
   width: 100% !important;
-  font-size: 15px !important;
+  font-size: 14.5px !important;
   font-weight: 700 !important;
   color: var(--tx) !important;
 }
 
 .fi-section-content-ctn,
 .fi-section-content {
-  padding: 22px 24px !important;
+  padding: 16px 18px !important;
   margin: 0 !important;
 }
 
@@ -2288,6 +2344,7 @@ header.fi-section-header div {
 .fi-section-content .grid {
   margin-left: 0 !important;
   padding-left: 0 !important;
+  gap: 14px !important;
 }
 
 .fi-section-header-text {
@@ -2295,4 +2352,75 @@ header.fi-section-header div {
   margin: 0 !important;
   padding: 0 !important;
   width: 100% !important;
+}
+
+/* ── Recipe Resource Create/Edit Section & Repeater Pixel-Perfect Styling ── */
+.recipe-total-cost {
+  background: #FEF3C7 !important;
+  border-radius: 8px !important;
+  padding: 12px 16px !important;
+  text-align: center !important;
+  margin-top: 10px !important;
+}
+
+.recipe-total-cost p,
+.recipe-total-cost span,
+.recipe-total-cost div {
+  color: #92400E !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  text-align: center !important;
+  width: 100% !important;
+}
+
+.recipe-line-total {
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  color: #EA580C !important;
+  display: flex !important;
+  align-items: center !important;
+  height: 36px !important;
+}
+
+/* ── Place "+ Thêm nguyên liệu" button on Card 2 Section Header Top Right ── */
+.recipe-cost-section {
+  position: relative !important;
+}
+
+.recipe-cost-section button[wire\:click*="recipeIngredients"],
+.recipe-cost-section button[wire\:click*="mountFormComponentAction('data.recipeIngredients'"] {
+  position: absolute !important;
+  top: 12px !important;
+  right: 20px !important;
+  z-index: 15 !important;
+  height: 32px !important;
+  padding: 0 14px !important;
+  border-radius: 8px !important;
+  border: 1px solid var(--bd) !important;
+  background: var(--wh) !important;
+  color: var(--tx) !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  box-shadow: var(--sh2) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  transition: all 0.13s ease !important;
+}
+
+.recipe-cost-section button[wire\:click*="recipeIngredients"]:hover,
+.recipe-cost-section button[wire\:click*="mountFormComponentAction('data.recipeIngredients'"]:hover {
+  background: var(--bl-s) !important;
+  color: var(--bl) !important;
+  border-color: var(--bl-m) !important;
+}
+
+/* Remove bottom empty space left by the add button container inside the repeater */
+.recipe-cost-section .fi-fo-repeater > div.flex.justify-end,
+.recipe-cost-section .fi-fo-repeater > div:has(button[wire\:click*="recipeIngredients"]) {
+  margin: 0 !important;
+  padding: 0 !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  overflow: visible !important;
 }

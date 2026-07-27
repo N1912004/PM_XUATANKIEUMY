@@ -73,18 +73,18 @@
             <table style="width:100%; border-collapse:collapse; text-align:left; font-size:13px">
                 <thead>
                     <tr style="border-bottom:1.5px solid var(--po-bd2); color:var(--po-mu); font-weight:700; text-transform:uppercase; font-size:11px; background:var(--po-bd2)">
-                        <th style="padding:12px 14px; width:60px">{{ __('catalog.common.index') }}</th>
-                        <th style="padding:12px 14px; width:100px; text-align:center">{{ __('catalog.shift.table.sort_order') }}</th>
-                        <th style="padding:12px 14px">{{ __('catalog.shift.list.columns.name') }}</th>
-                        <th style="padding:12px 14px">{{ __('catalog.shift.list.columns.time_range') }}</th>
-                        <th style="padding:12px 14px">{{ __('catalog.common.created_at') }}</th>
-                        <th style="padding:12px 14px; text-align:center; width:100px">{{ __('catalog.common.actions_upper') }}</th>
+                        <th style="padding:12px 14px; width:70px; text-align:center">{{ __('catalog.common.index') }}</th>
+                        <th style="padding:12px 14px; width:150px; text-align:center; white-space:nowrap">{{ __('catalog.shift.table.sort_order') }}</th>
+                        <th style="padding:12px 14px; width:22%">{{ __('catalog.shift.list.columns.name') }}</th>
+                        <th style="padding:12px 14px; width:28%">{{ __('catalog.shift.list.columns.time_range') }}</th>
+                        <th style="padding:12px 14px; width:25%; white-space:nowrap">{{ __('catalog.common.created_at') }}</th>
+                        <th style="padding:12px 14px; text-align:center; width:110px; white-space:nowrap">{{ __('catalog.common.actions_upper') }}</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($shifts as $index => $row)
                         <tr style="border-bottom:1px solid var(--po-bd2); color:var(--po-tx)" class="emp-row">
-                            <td style="padding:12px 14px; font-weight:600; color:var(--po-mu)">
+                            <td style="padding:12px 14px; text-align:center; font-weight:600; color:var(--po-mu)">
                                 {{ $shifts->firstItem() + $index }}
                             </td>
                             <td style="padding:12px 14px; text-align:center; font-weight:800; color:var(--po-bl); font-variant-numeric:tabular-nums">
@@ -96,7 +96,7 @@
                             <td style="padding:12px 14px; font-variant-numeric:tabular-nums; font-weight:600">
                                 {{ $row->time_range }}
                             </td>
-                            <td style="padding:12px 14px; color:var(--po-mu); font-variant-numeric:tabular-nums">
+                            <td style="padding:12px 14px; color:var(--po-mu); font-variant-numeric:tabular-nums; white-space:nowrap">
                                 {{ $row->created_at?->format('d/m/Y H:i') ?? '—' }}
                             </td>
                             <td style="padding:12px 14px; text-align:center">
