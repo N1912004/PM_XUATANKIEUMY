@@ -17,7 +17,7 @@ class MenuResource extends Resource
 
     protected static ?string $model = Menu::class;
 
-    protected static ?string $navigationIcon = 'fa-calendar-days';
+    protected static ?string $navigationIcon = 'fa-calendar-week';
 
     protected static ?int $navigationSort = 7;
 

@@ -14,7 +14,7 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class BaoCao extends Page
 {
-    protected static ?string $navigationIcon = 'fa-chart-pie'; // Biểu đồ tròn — hợp với báo cáo cơ cấu chi phí
+    protected static ?string $navigationIcon = 'fa-chart-column';
 
     protected static ?int $navigationSort = 9;
 
