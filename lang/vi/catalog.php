@@ -55,7 +55,39 @@ $translations = [
     'kitchen_type' => ['label' => 'Loại bếp / nhà ăn', 'fields' => ['name' => 'Tên loại'], 'placeholders' => ['name' => 'Nhập tên loại bếp / nhà ăn (VD: Bếp sản xuất, Nhà ăn phục vụ...)'], 'helpers' => ['active' => 'Tắt thì không còn xuất hiện ở các form chọn loại, dữ liệu cũ giữ nguyên.'], 'table' => ['name' => 'TÊN LOẠI', 'count' => 'SỐ NHÀ ĂN / BẾP'], 'errors' => ['in_use' => 'Không thể xóa loại này vì đang có :count nhà ăn/bếp sử dụng.', 'bulk_in_use' => 'Không thể xóa hàng loạt. Các loại sau đang được sử dụng: :names']],
     'department' => ['label' => 'Phòng ban', 'fields' => ['name' => 'Tên phòng ban'], 'placeholders' => ['name' => 'Nhập tên phòng ban (VD: Phòng hành chính, Phòng kỹ thuật...)'], 'helpers' => ['active' => 'Tắt thì không còn xuất hiện ở các form chọn phòng ban, dữ liệu cũ giữ nguyên.'], 'table' => ['name' => 'TÊN PHÒNG BAN', 'count' => 'SỐ NHÂN VIÊN'], 'errors' => ['in_use' => 'Không thể xóa phòng ban này vì đang có :count nhân viên trực thuộc.', 'bulk_in_use' => 'Không thể xóa hàng loạt. Các phòng ban sau đang có nhân viên: :names']],
     'position' => ['label' => 'Chức vụ', 'fields' => ['name' => 'Tên chức vụ'], 'placeholders' => ['name' => 'Nhập tên chức vụ (VD: Tổ trưởng bếp, Chuyên viên...)'], 'helpers' => ['active' => 'Tắt thì không còn xuất hiện ở các form chọn chức vụ, dữ liệu cũ giữ nguyên.'], 'table' => ['name' => 'TÊN CHỨC VỤ', 'count' => 'SỐ NHÂN VIÊN'], 'errors' => ['in_use' => 'Không thể xóa chức vụ này vì đang có :count nhân viên trực thuộc.', 'bulk_in_use' => 'Không thể xóa hàng loạt. Các chức vụ sau đang có nhân viên: :names']],
-    'shift' => ['navigation' => 'Cấu hình ca làm việc', 'label' => 'Ca làm việc', 'fields' => ['name' => 'Tên ca', 'time_from' => 'Giờ bắt đầu', 'time_to' => 'Giờ kết thúc', 'sort_order' => 'Thứ tự ưu tiên'], 'placeholders' => ['name' => 'Ví dụ: Ca 1'], 'validation' => ['time_required' => 'Giờ bắt đầu và giờ kết thúc là bắt buộc.', 'different_times' => 'Giờ kết thúc phải khác giờ bắt đầu.', 'max_duration' => 'Thời lượng ca không được vượt quá 12 giờ.'], 'table' => ['time_range' => 'Khung giờ', 'sort_order' => 'THỨ TỰ ƯU TIÊN']],
+    'shift' => [
+        'navigation' => 'Cấu hình ca làm việc',
+        'label' => 'Ca làm việc',
+        'section' => 'Thông tin ca làm việc',
+        'fields' => ['name' => 'Tên ca', 'time_from' => 'Giờ bắt đầu', 'time_to' => 'Giờ kết thúc', 'sort_order' => 'Thứ tự ưu tiên'],
+        'placeholders' => ['name' => 'Ví dụ: Ca 1'],
+        'validation' => [
+            'time_required' => 'Giờ bắt đầu và giờ kết thúc là bắt buộc.',
+            'different_times' => 'Giờ kết thúc phải khác giờ bắt đầu.',
+            'max_duration' => 'Thời lượng ca không được vượt quá 12 giờ.',
+            'sort_order_unique' => 'Thứ tự ưu tiên này đã trùng với một ca khác, vui lòng nhập số khác.',
+        ],
+        'table' => ['time_range' => 'Khung giờ', 'sort_order' => 'THỨ TỰ ƯU TIÊN'],
+        'notifications' => ['deleted' => 'Đã xóa ca làm việc thành công.'],
+        'list' => [
+            'title' => 'Cấu hình ca làm việc',
+            'subtitle' => 'Quản lý các ca sản xuất / phục vụ trong hệ thống',
+            'create' => 'Thêm ca làm việc',
+            'search_placeholder' => 'Tìm ca làm việc...',
+            'confirm_delete' => 'Bạn có chắc chắn muốn xóa ca làm việc này?',
+            'empty' => 'Chưa có ca làm việc nào được tạo',
+            'errors' => ['in_use' => 'Không thể xóa ca này vì đang được sử dụng trong thực đơn.'],
+            'columns' => ['name' => 'TÊN CA', 'time_range' => 'KHUNG GIỜ'],
+            'kpi' => [
+                'total_label' => 'Tổng số ca',
+                'total_note' => 'Đã cấu hình',
+                'in_use_label' => 'Đang sử dụng',
+                'in_use_note' => 'Có trong thực đơn',
+                'unused_label' => 'Chưa sử dụng',
+                'unused_note' => 'Chưa gán thực đơn',
+            ],
+        ],
+    ],
 ];
 
 $translations['area']['unified'] = [

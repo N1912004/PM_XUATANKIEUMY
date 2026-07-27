@@ -55,7 +55,39 @@ $translations = [
     'kitchen_type' => ['label' => 'Kitchen types', 'fields' => ['name' => 'Type name'], 'placeholders' => ['name' => 'Enter a kitchen type name'], 'helpers' => ['active' => 'Disable to hide this value from selection forms while preserving existing data.'], 'table' => ['name' => 'TYPE NAME', 'count' => 'KITCHENS'], 'errors' => ['in_use' => 'This type cannot be deleted because :count kitchens use it.', 'bulk_in_use' => 'Bulk deletion is unavailable. These types are in use: :names']],
     'department' => ['label' => 'Departments', 'fields' => ['name' => 'Department name'], 'placeholders' => ['name' => 'Enter a department name'], 'helpers' => ['active' => 'Disable to hide this department from selection forms while preserving existing data.'], 'table' => ['name' => 'DEPARTMENT', 'count' => 'EMPLOYEES'], 'errors' => ['in_use' => 'This department cannot be deleted because it has :count employees.', 'bulk_in_use' => 'Bulk deletion is unavailable. These departments have employees: :names']],
     'position' => ['label' => 'Positions', 'fields' => ['name' => 'Position name'], 'placeholders' => ['name' => 'Enter a position name'], 'helpers' => ['active' => 'Disable to hide this position from selection forms while preserving existing data.'], 'table' => ['name' => 'POSITION', 'count' => 'EMPLOYEES'], 'errors' => ['in_use' => 'This position cannot be deleted because it has :count employees.', 'bulk_in_use' => 'Bulk deletion is unavailable. These positions have employees: :names']],
-    'shift' => ['navigation' => 'Shift configuration', 'label' => 'Shifts', 'fields' => ['name' => 'Shift name', 'time_from' => 'Start time', 'time_to' => 'End time', 'sort_order' => 'Sort order'], 'placeholders' => ['name' => 'E.g. Shift 1'], 'validation' => ['time_required' => 'Start and end times are required.', 'different_times' => 'The end time must differ from the start time.', 'max_duration' => 'A shift may not exceed 12 hours.'], 'table' => ['time_range' => 'Time range', 'sort_order' => 'SORT ORDER']],
+    'shift' => [
+        'navigation' => 'Shift configuration',
+        'label' => 'Shifts',
+        'section' => 'Shift information',
+        'fields' => ['name' => 'Shift name', 'time_from' => 'Start time', 'time_to' => 'End time', 'sort_order' => 'Sort order'],
+        'placeholders' => ['name' => 'E.g. Shift 1'],
+        'validation' => [
+            'time_required' => 'Start and end times are required.',
+            'different_times' => 'The end time must differ from the start time.',
+            'max_duration' => 'A shift may not exceed 12 hours.',
+            'sort_order_unique' => 'This sort order is already taken by another shift. Please enter a different number.',
+        ],
+        'table' => ['time_range' => 'Time range', 'sort_order' => 'SORT ORDER'],
+        'notifications' => ['deleted' => 'Shift deleted successfully.'],
+        'list' => [
+            'title' => 'Shift configuration',
+            'subtitle' => 'Manage production / service shifts in the system',
+            'create' => 'Add shift',
+            'search_placeholder' => 'Search shifts...',
+            'confirm_delete' => 'Are you sure you want to delete this shift?',
+            'empty' => 'No shifts have been created yet',
+            'errors' => ['in_use' => 'Cannot delete this shift because it is being used in menus.'],
+            'columns' => ['name' => 'SHIFT NAME', 'time_range' => 'TIME RANGE'],
+            'kpi' => [
+                'total_label' => 'Total shifts',
+                'total_note' => 'Configured',
+                'in_use_label' => 'In use',
+                'in_use_note' => 'Assigned to menus',
+                'unused_label' => 'Unused',
+                'unused_note' => 'Not assigned to menus',
+            ],
+        ],
+    ],
 ];
 
 $translations['area']['unified'] = [
