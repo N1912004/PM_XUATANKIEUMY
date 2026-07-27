@@ -235,7 +235,7 @@ class RecipeResource extends Resource
                             ->itemNumbers()
                             ->addAction(fn (Action $action): Action => $action->label(__('recipe.actions.add_ingredient'))->icon('heroicon-m-plus'))
                             ->addActionAlignment(Alignment::End)
-                            ->deleteAction(fn (Action $action): Action => $action->icon('heroicon-m-trash')->label(''))
+                            ->deletable(false)
                             ->reorderable(false)
                             ->collapsible(false)
                             ->itemLabel(fn (): HtmlString => new HtmlString(
