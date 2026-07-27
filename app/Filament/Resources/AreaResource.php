@@ -7,9 +7,6 @@ use App\Models\Area;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Tables;
-use Filament\Tables\Contracts\HasTable;
-use Filament\Tables\Table;
 
 class AreaResource extends Resource
 {
@@ -71,57 +68,6 @@ class AreaResource extends Resource
                             ->default(true)
                             ->required(),
                     ]),
-            ]);
-    }
-
-    public static function table(Table $table): Table
-    {
-        return $table
-            ->columns([
-                Tables\Columns\TextColumn::make('index')
-                    ->label(__('catalog.common.index'))
-                    ->state(static function (HasTable $livewire, \stdClass $rowLoop): string {
-                        return (string) ($rowLoop->iteration);
-                    }),
-                Tables\Columns\TextColumn::make('code')
-                    ->label(__('catalog.area.table.code'))
-                    ->searchable()
-                    ->sortable()
-                    ->weight('bold'),
-                Tables\Columns\TextColumn::make('name')
-                    ->label(__('catalog.area.table.name'))
-                    ->searchable()
-                    ->sortable()
-                    ->weight('bold'),
-                Tables\Columns\TextColumn::make('manager.name')
-                    ->label(__('catalog.area.table.manager'))
-                    ->sortable()
-                    ->weight('semibold'),
-                Tables\Columns\TextColumn::make('kitchens_count')
-                    ->label(__('catalog.area.table.kitchens_count'))
-                    ->counts('kitchens')
-                    ->badge()
-                    ->color('primary')
-                    ->alignCenter()
-                    ->sortable(),
-                Tables\Columns\IconColumn::make('status')
-                    ->label(__('catalog.common.status'))
-                    ->boolean()
-                    ->sortable(),
-            ])
-            ->filters([
-                Tables\Filters\TernaryFilter::make('status')
-                    ->label(__('catalog.common.active_status')),
-            ])
-            ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
             ]);
     }
 

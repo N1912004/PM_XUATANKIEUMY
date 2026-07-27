@@ -7,13 +7,9 @@ use App\Models\Shift;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Tables;
-use Filament\Tables\Table;
 
 class ShiftResource extends Resource
 {
-    protected static bool $shouldRegisterNavigation = true; // Hiển thị menu 'Ca làm việc' trên thanh điều hướng Sidebar
-
     protected static ?string $model = Shift::class;
 
     protected static ?string $navigationIcon = 'fa-clock';
@@ -84,68 +80,6 @@ class ShiftResource extends Resource
                                     ]),
                             ]),
                     ]),
-            ]);
-    }
-
-    public static function table(Table $table): Table
-    {
-        return $table
-            ->defaultSort('sort_order', 'asc')
-            ->columns([
-                Tables\Columns\TextColumn::make('index')
-                    ->label(__('catalog.common.index'))
-                    ->state(static function (Tables\Contracts\HasTable $livewire, \stdClass $rowLoop): string {
-                        $currentPage = method_exists($livewire, 'getTablePage') ? $livewire->getTablePage() : 1;
-                        $recordsPerPage = method_exists($livewire, 'getTableRecordsPerPage') ? $livewire->getTableRecordsPerPage() : 10;
-                        $perPage = is_numeric($recordsPerPage) ? (int) $recordsPerPage : 10;
-
-                        return (string) ($rowLoop->iteration + ($perPage * ($currentPage - 1)));
-                    })
-                    ->alignCenter()
-                    ->extraAttributes([
-                        'style' => 'font-variant-numeric: tabular-nums; font-weight: 600; color: #64748b;',
-                    ])
-                    ->width('56px'),
-                Tables\Columns\TextColumn::make('sort_order')
-                    ->label(__('catalog.shift.table.sort_order'))
-                    ->sortable()
-                    ->alignCenter()
-                    ->width('120px'),
-                Tables\Columns\TextColumn::make('name')
-                    ->label(__('catalog.shift.fields.name'))
-                    ->searchable()
-                    ->sortable()
-                    ->weight('bold'),
-                Tables\Columns\TextColumn::make('time_range')
-                    ->label(__('catalog.shift.table.time_range'))
-                    ->searchable()
-                    ->sortable()
-                    ->extraAttributes([
-                        'style' => 'font-variant-numeric: tabular-nums;',
-                    ]),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->label(__('catalog.common.created_at'))
-                    ->dateTime('d/m/Y H:i')
-                    ->extraAttributes([
-                        'style' => 'font-variant-numeric: tabular-nums;',
-                    ])
-                    ->sortable()
-                    ->color('gray'),
-            ])
-            ->defaultSort('id', 'desc')
-            ->filters([
-                //
-            ])
-            ->actions([
-                Tables\Actions\EditAction::make()
-                    ->iconButton(),
-                Tables\Actions\DeleteAction::make()
-                    ->iconButton(),
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
             ]);
     }
 
