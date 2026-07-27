@@ -15,7 +15,9 @@ class KitchenResource extends Resource
 {
     protected static ?string $model = Kitchen::class;
 
-    protected static ?string $navigationIcon = 'fa-fire-burner'; // Bếp lửa — sát nghĩa 'Nhà ăn / bếp' hơn icon cửa hàng cũ
+    protected static bool $shouldRegisterNavigation = false;
+
+    protected static ?string $navigationIcon = 'fa-fire-burner';
 
     protected static ?int $navigationSort = 2;
 
@@ -45,6 +47,7 @@ class KitchenResource extends Resource
                                 Forms\Components\TextInput::make('name')
                                     ->label(__('catalog.kitchen.fields.name'))
                                     ->required()
+                                    ->unique(Kitchen::class, 'name', ignoreRecord: true)
                                     ->placeholder(__('catalog.kitchen.placeholders.name'))
                                     ->maxLength(255),
                                 Forms\Components\Select::make('area_id')
@@ -63,12 +66,18 @@ class KitchenResource extends Resource
                                     ->label(__('catalog.kitchen.fields.capacity'))
                                     ->numeric()
                                     ->default(0)
-                                    ->required(),
+                                    ->required()
+                                    ->dehydrateStateUsing(fn ($state) => abs((int) $state))
+                                    ->extraInputAttributes([
+                                        'x-on:keydown' => "if(['-', '+', 'e', 'E'].includes(\$event.key)) \$event.preventDefault()",
+                                        'x-on:input' => "let v = \$event.target.value.replace(/[^0-9]/g, '').replace(/^0+(?=\\d)/, ''); \$event.target.value = v",
+                                    ]),
                                 Forms\Components\Select::make('manager_id')
                                     ->label(__('catalog.kitchen.fields.manager'))
                                     ->relationship('manager', 'name')
                                     ->searchable()
-                                    ->preload(),
+                                    ->preload()
+                                    ->nullable(),
                                 Forms\Components\Select::make('status')
                                     ->label(__('catalog.common.status'))
                                     ->options([

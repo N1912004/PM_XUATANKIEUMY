@@ -4,10 +4,16 @@ namespace App\Filament\Resources\AreaResource\Pages;
 
 use App\Filament\Resources\AreaResource;
 use Filament\Resources\Pages\CreateRecord;
+use Illuminate\Contracts\Support\Htmlable;
 
 class CreateArea extends CreateRecord
 {
     protected static string $resource = AreaResource::class;
+
+    public function getTitle(): string|Htmlable
+    {
+        return __('catalog.breadcrumb.area.create');
+    }
 
     public function getBreadcrumbs(): array
     {

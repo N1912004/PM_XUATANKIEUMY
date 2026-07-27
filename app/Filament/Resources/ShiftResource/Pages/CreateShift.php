@@ -6,10 +6,16 @@ use App\Filament\Resources\MenuResource;
 use App\Filament\Resources\ShiftResource;
 use Filament\Actions\Action;
 use Filament\Resources\Pages\CreateRecord;
+use Illuminate\Contracts\Support\Htmlable;
 
 class CreateShift extends CreateRecord
 {
     protected static string $resource = ShiftResource::class;
+
+    public function getTitle(): string|Htmlable
+    {
+        return __('catalog.breadcrumb.shift.create');
+    }
 
     public function getBreadcrumbs(): array
     {
