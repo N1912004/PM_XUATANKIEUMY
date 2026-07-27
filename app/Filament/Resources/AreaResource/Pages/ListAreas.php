@@ -16,22 +16,64 @@ class ListAreas extends Page
 
     protected static string $view = 'filament.resources.areas.pages.list-areas';
 
-    public $areaSearch = '';
+    public string $activeTab = 'area';
+
+    public string $areaSearch = '';
+
+    public string $canteenSearch = '';
+
+    public ?int $canteenAreaFilter = null;
 
     protected $queryString = [
+        'activeTab' => ['except' => 'area'],
         'areaSearch' => ['except' => ''],
+        'canteenSearch' => ['except' => ''],
+        'canteenAreaFilter' => ['except' => null],
     ];
+
+    public function setTab(string $tab): void
+    {
+        $this->activeTab = $tab;
+    }
 
     public function updatedAreaSearch(): void
     {
         $this->resetPage('areasPage');
     }
 
+    public function updatedCanteenSearch(): void
+    {
+        $this->resetPage('canteensPage');
+    }
+
+    public function updatedCanteenAreaFilter(): void
+    {
+        $this->resetPage('canteensPage');
+    }
+
+    public function resetAreaFilters(): void
+    {
+        $this->areaSearch = '';
+        $this->resetPage('areasPage');
+    }
+
+    public function resetCanteenFilters(): void
+    {
+        $this->canteenSearch = '';
+        $this->canteenAreaFilter = null;
+        $this->resetPage('canteensPage');
+    }
+
+    public function resetForms(): void
+    {
+        $this->resetAreaFilters();
+        $this->resetCanteenFilters();
+    }
+
     public function deleteArea($id): void
     {
         $area = Area::find($id);
         if ($area) {
-            // Kiểm tra ràng buộc: còn nhà ăn/bếp trực thuộc thì không cho xóa
             if ($area->kitchens()->exists()) {
                 session()->flash('error', __('catalog.area.errors.in_use'));
 
@@ -42,10 +84,13 @@ class ListAreas extends Page
         }
     }
 
-    public function resetFilters(): void
+    public function deleteCanteen($id): void
     {
-        $this->areaSearch = '';
-        $this->resetPage('areasPage');
+        $kitchen = Kitchen::find($id);
+        if ($kitchen) {
+            $kitchen->delete();
+            session()->flash('message', __('catalog.kitchen.notifications.deleted'));
+        }
     }
 
     public function areas()
@@ -61,13 +106,30 @@ class ListAreas extends Page
         return $query->paginate(10, ['*'], 'areasPage');
     }
 
+    public function kitchens()
+    {
+        $query = Kitchen::with(['area', 'kitchenType', 'manager']);
+        if ($this->canteenSearch) {
+            $query->where('name', 'like', '%'.$this->canteenSearch.'%');
+        }
+        if ($this->canteenAreaFilter) {
+            $query->where('area_id', $this->canteenAreaFilter);
+        }
+
+        return $query->paginate(10, ['*'], 'canteensPage');
+    }
+
     public function getStats(): array
     {
+        $areaManagers = Area::whereNotNull('manager_id')->pluck('manager_id')->toArray();
+        $kitchenManagers = Kitchen::whereNotNull('manager_id')->pluck('manager_id')->toArray();
+        $uniqueManagers = count(array_unique(array_merge($areaManagers, $kitchenManagers)));
+
         return [
             'total_areas' => Area::count(),
             'active_areas' => Area::where('status', true)->count(),
             'total_kitchens' => Kitchen::count(),
-            'managers' => Area::whereNotNull('manager_id')->distinct('manager_id')->count('manager_id'),
+            'managers' => $uniqueManagers ?: Area::whereNotNull('manager_id')->count(),
         ];
     }
 }

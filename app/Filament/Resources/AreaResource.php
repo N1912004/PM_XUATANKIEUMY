@@ -45,28 +45,31 @@ class AreaResource extends Resource
                                 Forms\Components\TextInput::make('name')
                                     ->label(__('catalog.area.fields.name'))
                                     ->required()
+                                    ->unique(Area::class, 'name', ignoreRecord: true)
                                     ->placeholder(__('catalog.area.placeholders.name'))
                                     ->maxLength(255),
                                 Forms\Components\TextInput::make('code')
                                     ->label(__('catalog.area.fields.code'))
                                     ->required()
+                                    ->unique(Area::class, 'code', ignoreRecord: true)
                                     ->placeholder(__('catalog.area.placeholders.code'))
                                     ->maxLength(255),
                                 Forms\Components\Select::make('manager_id')
                                     ->label(__('catalog.area.fields.manager'))
                                     ->relationship('manager', 'name')
                                     ->searchable()
-                                    ->preload(),
-                                Forms\Components\Toggle::make('status')
-                                    ->label(__('catalog.common.active'))
-                                    ->default(true)
-                                    ->required(),
+                                    ->preload()
+                                    ->columnSpanFull(),
                             ]),
                         Forms\Components\Textarea::make('notes')
                             ->label(__('catalog.common.notes'))
                             ->placeholder(__('catalog.area.placeholders.notes'))
                             ->rows(3)
                             ->columnSpanFull(),
+                        Forms\Components\Toggle::make('status')
+                            ->label(__('catalog.common.active'))
+                            ->default(true)
+                            ->required(),
                     ]),
             ]);
     }

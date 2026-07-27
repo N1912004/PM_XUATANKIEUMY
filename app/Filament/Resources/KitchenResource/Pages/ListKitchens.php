@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\KitchenResource\Pages;
 
+use App\Filament\Resources\AreaResource;
 use App\Filament\Resources\KitchenResource;
 use App\Models\Area;
 use App\Models\Kitchen;
@@ -16,6 +17,11 @@ class ListKitchens extends Page
     protected static string $resource = KitchenResource::class;
 
     protected static string $view = 'filament.resources.kitchens.pages.list-kitchens';
+
+    public function mount(): mixed
+    {
+        return redirect()->to(AreaResource::getUrl('index').'?activeTab=canteen');
+    }
 
     // FILTERS
     public $kitchenSearch = '';

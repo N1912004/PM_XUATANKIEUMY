@@ -5,10 +5,16 @@ namespace App\Filament\Resources\AreaResource\Pages;
 use App\Filament\Resources\AreaResource;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Contracts\Support\Htmlable;
 
 class EditArea extends EditRecord
 {
     protected static string $resource = AreaResource::class;
+
+    public function getTitle(): string|Htmlable
+    {
+        return __('catalog.breadcrumb.area.edit');
+    }
 
     public function getBreadcrumbs(): array
     {

@@ -3,7 +3,7 @@
 $translations = [
     'breadcrumb' => [
         'home' => 'Xuất ăn',
-        'area' => ['list' => 'Khu vực', 'create' => 'Thêm khu vực', 'edit' => 'Chỉnh sửa khu vực'],
+        'area' => ['list' => 'Khu vực & nhà ăn', 'create' => 'Thêm khu vực', 'edit' => 'Chỉnh sửa khu vực'],
         'kitchen' => ['list' => 'Nhà ăn / bếp', 'create' => 'Thêm nhà ăn / bếp', 'edit' => 'Chỉnh sửa nhà ăn / bếp'],
         'shift' => ['list' => 'Cấu hình ca làm việc', 'create' => 'Thêm ca làm việc', 'edit' => 'Chỉnh sửa ca làm việc'],
     ],
@@ -17,16 +17,52 @@ $translations = [
         'chat_group' => 'CHAT NHÓM',
         'system' => 'HỆ THỐNG',
     ],
-    'common' => ['index' => 'STT', 'active' => 'Hoạt động', 'status' => 'TRẠNG THÁI', 'active_status' => 'Trạng thái hoạt động', 'notes' => 'Ghi chú', 'sort_order' => 'Thứ tự hiển thị', 'sort_order_upper' => 'THỨ TỰ', 'in_use' => 'Đang sử dụng', 'in_use_upper' => 'ĐANG DÙNG', 'created_at' => 'NGÀY TẠO'],
-    'area' => ['label' => 'Khu vực', 'fields' => ['name' => 'Tên khu vực', 'code' => 'Mã khu vực', 'manager' => 'Quản lý phụ trách'], 'placeholders' => ['name' => 'VD: Đông Nai / Hồ Chí Minh', 'code' => 'VD: KV-DN', 'notes' => 'Phạm vi vận hành, ca sản xuất, khách hàng chính...'], 'table' => ['code' => 'MÃ', 'name' => 'KHU VỰC', 'manager' => 'QUẢN LÝ PHỤ TRÁCH', 'kitchens_count' => 'SỐ NHÀ ĂN / BẾP'], 'errors' => ['in_use' => 'Không thể xóa khu vực này vì vẫn còn nhà ăn/bếp trực thuộc.'], 'notifications' => ['deleted' => 'Xóa khu vực thành công.']],
-    'kitchen' => ['label' => 'Nhà ăn / bếp', 'fields' => ['name' => 'Tên nhà ăn / bếp', 'area' => 'Thuộc khu vực', 'type' => 'Phân loại', 'capacity' => 'Công suất phục vụ (suất/ngày)', 'manager' => 'Quản lý nhà bếp'], 'placeholders' => ['name' => 'VD: Bếp chính Nhơn Trạch'], 'table' => ['name' => 'TÊN NHÀ BẾP / NHÀ ĂN', 'area' => 'KHU VỰC', 'type' => 'PHÂN LOẠI', 'capacity' => 'CÔNG SUẤT (SUẤT/NGÀY)', 'manager' => 'QUẢN LÝ'], 'notifications' => ['deleted' => 'Xóa nhà ăn/bếp thành công.']],
+    'common' => [
+        'index' => 'STT',
+        'active' => 'Hoạt động',
+        'status' => 'TRẠNG THÁI',
+        'active_status' => 'Trạng thái hoạt động',
+        'notes' => 'Ghi chú',
+        'sort_order' => 'Thứ tự hiển thị',
+        'sort_order_upper' => 'THỨ TỰ',
+        'in_use' => 'Đang sử dụng',
+        'in_use_upper' => 'ĐANG DÙNG',
+        'created_at' => 'NGÀY TẠO',
+        'actions' => 'Thao tác',
+        'actions_upper' => 'THAO TÁC',
+        'edit' => 'Sửa',
+        'delete' => 'Xóa',
+        'reset_filters' => 'Xóa lọc',
+        'refresh' => 'Làm mới',
+        'clear_selection' => 'Xóa chọn',
+        'area_prefix' => 'Khu vực: :name',
+    ],
+    'area' => [
+        'label' => 'Khu vực',
+        'fields' => ['name' => 'Tên khu vực', 'code' => 'Mã khu vực', 'manager' => 'Quản lý phụ trách'],
+        'placeholders' => ['name' => 'VD: Đông Nai / Hồ Chí Minh', 'code' => 'VD: KV-DN', 'notes' => 'Phạm vi vận hành, ca sản xuất, khách hàng chính...'],
+        'table' => ['code' => 'MÃ', 'name' => 'KHU VỰC', 'manager' => 'QUẢN LÝ PHỤ TRÁCH', 'kitchens_count' => 'NHÀ ĂN'],
+        'errors' => ['in_use' => 'Không thể xóa khu vực này vì vẫn còn nhà ăn/bếp trực thuộc.'],
+        'notifications' => ['deleted' => 'Xóa khu vực thành công.'],
+    ],
+    'kitchen' => [
+        'label' => 'Nhà ăn / bếp',
+        'fields' => ['name' => 'Tên nhà ăn / bếp', 'area' => 'Thuộc khu vực', 'type' => 'Phân loại', 'capacity' => 'Công suất phục vụ (suất/ngày)', 'manager' => 'Quản lý nhà bếp'],
+        'placeholders' => ['name' => 'VD: Bếp chính Nhơn Trạch'],
+        'table' => ['name' => 'NHÀ ĂN / BẾP', 'area' => 'KHU VỰC', 'type' => 'LOẠI', 'capacity' => 'CÔNG SUẤT', 'manager' => 'PHỤ TRÁCH'],
+        'notifications' => ['deleted' => 'Đã xóa nhà ăn / bếp thành công!'],
+    ],
     'kitchen_type' => ['label' => 'Loại bếp / nhà ăn', 'fields' => ['name' => 'Tên loại'], 'placeholders' => ['name' => 'Nhập tên loại bếp / nhà ăn (VD: Bếp sản xuất, Nhà ăn phục vụ...)'], 'helpers' => ['active' => 'Tắt thì không còn xuất hiện ở các form chọn loại, dữ liệu cũ giữ nguyên.'], 'table' => ['name' => 'TÊN LOẠI', 'count' => 'SỐ NHÀ ĂN / BẾP'], 'errors' => ['in_use' => 'Không thể xóa loại này vì đang có :count nhà ăn/bếp sử dụng.', 'bulk_in_use' => 'Không thể xóa hàng loạt. Các loại sau đang được sử dụng: :names']],
     'department' => ['label' => 'Phòng ban', 'fields' => ['name' => 'Tên phòng ban'], 'placeholders' => ['name' => 'Nhập tên phòng ban (VD: Phòng hành chính, Phòng kỹ thuật...)'], 'helpers' => ['active' => 'Tắt thì không còn xuất hiện ở các form chọn phòng ban, dữ liệu cũ giữ nguyên.'], 'table' => ['name' => 'TÊN PHÒNG BAN', 'count' => 'SỐ NHÂN VIÊN'], 'errors' => ['in_use' => 'Không thể xóa phòng ban này vì đang có :count nhân viên trực thuộc.', 'bulk_in_use' => 'Không thể xóa hàng loạt. Các phòng ban sau đang có nhân viên: :names']],
     'position' => ['label' => 'Chức vụ', 'fields' => ['name' => 'Tên chức vụ'], 'placeholders' => ['name' => 'Nhập tên chức vụ (VD: Tổ trưởng bếp, Chuyên viên...)'], 'helpers' => ['active' => 'Tắt thì không còn xuất hiện ở các form chọn chức vụ, dữ liệu cũ giữ nguyên.'], 'table' => ['name' => 'TÊN CHỨC VỤ', 'count' => 'SỐ NHÂN VIÊN'], 'errors' => ['in_use' => 'Không thể xóa chức vụ này vì đang có :count nhân viên trực thuộc.', 'bulk_in_use' => 'Không thể xóa hàng loạt. Các chức vụ sau đang có nhân viên: :names']],
     'shift' => ['navigation' => 'Cấu hình ca làm việc', 'label' => 'Ca làm việc', 'fields' => ['name' => 'Tên ca', 'time_from' => 'Giờ bắt đầu', 'time_to' => 'Giờ kết thúc', 'sort_order' => 'Thứ tự ưu tiên'], 'placeholders' => ['name' => 'Ví dụ: Ca 1'], 'validation' => ['time_required' => 'Giờ bắt đầu và giờ kết thúc là bắt buộc.', 'different_times' => 'Giờ kết thúc phải khác giờ bắt đầu.', 'max_duration' => 'Thời lượng ca không được vượt quá 12 giờ.'], 'table' => ['time_range' => 'Khung giờ', 'sort_order' => 'THỨ TỰ ƯU TIÊN']],
 ];
 
-$translations['common'] += ['actions' => 'Thao tác', 'edit' => 'Sửa', 'delete' => 'Xóa', 'reset_filters' => 'Xóa lọc'];
+$translations['area']['unified'] = [
+    'title' => 'Khu vực & nhà ăn',
+    'subtitle' => 'Quản lý các khu vực vận hành và các nhà ăn / bếp sản xuất trực thuộc từng khu vực',
+];
+
 $translations['area']['list'] = [
     'title' => 'Khu vực',
     'subtitle' => 'Quản lý các khu vực vận hành và các nhà ăn / bếp sản xuất trực thuộc từng khu vực',
@@ -34,11 +70,11 @@ $translations['area']['list'] = [
     'search_placeholder' => 'Tìm khu vực...',
     'no_notes' => 'Chưa có ghi chú',
     'confirm_delete' => 'Bạn có chắc chắn muốn xóa khu vực này?',
-    'empty' => 'Không tìm thấy khu vực nào.',
+    'empty' => 'Không tìm thấy khu vực nào',
     'kpi' => [
         'total_label' => 'Khu vực', 'total_note' => 'Đang quản lý',
         'active_label' => 'Đang hoạt động', 'active_note' => 'Khu vực khả dụng',
-        'kitchens_label' => 'Nhà ăn / bếp', 'kitchens_note' => 'Tổng cơ sở trực thuộc',
+        'kitchens_label' => 'Nhà ăn / bếp', 'kitchens_note' => 'Tổng cơ sở sản xuất',
         'managers_label' => 'Quản lý phụ trách', 'managers_note' => 'Theo khu vực',
     ],
     'columns' => ['code' => 'Mã', 'area' => 'Khu vực', 'manager' => 'Quản lý', 'kitchens' => 'Nhà ăn'],
@@ -46,10 +82,10 @@ $translations['area']['list'] = [
 $translations['kitchen']['list'] = [
     'title' => 'Nhà ăn / bếp',
     'subtitle' => 'Quản lý các nhà ăn / bếp sản xuất trực thuộc từng khu vực vận hành',
-    'create' => 'Thêm nhà ăn / bếp',
+    'create' => 'Thêm nhà ăn',
     'search_placeholder' => 'Tìm nhà ăn / bếp...',
-    'confirm_delete' => 'Bạn có chắc chắn muốn xóa nhà ăn/bếp này?',
-    'empty' => 'Không tìm thấy nhà ăn hay bếp sản xuất nào.',
+    'confirm_delete' => 'Bạn có chắc chắn muốn xóa nhà ăn này?',
+    'empty' => 'Khu vực này chưa có nhà ăn / bếp sản xuất',
     'capacity_value' => ':count suất/ngày',
     'kpi' => [
         'total_label' => 'Nhà ăn / bếp', 'total_note' => 'Tổng cơ sở sản xuất',
@@ -58,7 +94,7 @@ $translations['kitchen']['list'] = [
         'managers_label' => 'Quản lý nhà bếp', 'managers_note' => 'Theo cơ sở',
     ],
     'filters' => ['all_areas' => 'Tất cả khu vực', 'all_types' => 'Tất cả loại', 'all_statuses' => 'Tất cả trạng thái'],
-    'columns' => ['kitchen' => 'Nhà ăn / bếp', 'area' => 'Khu vực', 'type' => 'Loại', 'capacity' => 'Công suất', 'manager' => 'Phụ trách'],
+    'columns' => ['kitchen' => 'NHÀ ĂN / BẾP', 'area' => 'KHU VỰC', 'type' => 'LOẠI', 'capacity' => 'CÔNG SUẤT', 'manager' => 'PHỤ TRÁCH'],
 ];
 
 return $translations;
