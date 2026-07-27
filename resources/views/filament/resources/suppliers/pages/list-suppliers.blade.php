@@ -19,7 +19,7 @@
                 wire:click="exportExcel"
                 wire:loading.attr="disabled"
                 wire:target="exportExcel"
-                class="{{ $fiBtn }}"
+                class="{{ $fiBtn }} fi-btn-color-success"
             >
                 <i wire:loading.remove wire:target="exportExcel" class="fa-solid fa-file-excel" style="color:#059669"></i>
                 <i wire:loading wire:target="exportExcel" class="fa-solid fa-spinner fa-spin"></i>
