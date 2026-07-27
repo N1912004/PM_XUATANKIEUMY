@@ -15,7 +15,7 @@ class AreaResource extends Resource
 {
     protected static ?string $model = Area::class;
 
-    protected static ?string $navigationIcon = 'fa-location-dot';
+    protected static ?string $navigationIcon = 'fa-map-pin';
 
     protected static ?int $navigationSort = 3; // Đứng sau 'Nhà ăn / bếp' (2) trong nhóm HỆ THỐNG
 
