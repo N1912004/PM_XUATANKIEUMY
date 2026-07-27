@@ -206,7 +206,7 @@
         font-size: 13.5px;
         font-weight: 700;
         color: var(--po-mu);
-        background: #fff;
+        background: var(--po-wh);
         border: 1px solid var(--po-bd);
         border-radius: 8px 8px 0 0;
         cursor: pointer;
@@ -214,14 +214,20 @@
         align-items: center;
         gap: 6px;
         border-bottom: none;
-        transition: .13s;
+        transition: background .15s, color .15s, border-color .15s;
         outline: none !important;
     }
 
-    .area-tab.active {
-        background: var(--po-wh);
+    .area-tab:not(.active):hover {
+        background: var(--po-bl-s);
         color: var(--po-bl);
-        border-color: var(--po-bd) var(--po-bd) transparent var(--po-bd);
+        border-color: var(--po-bl-m);
+    }
+
+    .area-tab.active {
+        background: var(--po-bl);
+        color: #fff;
+        border-color: var(--po-bl);
         position: relative;
         font-weight: 800;
     }
@@ -233,7 +239,7 @@
         left: 0;
         right: 0;
         height: 2px;
-        background: #fff;
+        background: var(--po-bl);
     }
 
     /* Card tables */

@@ -553,10 +553,11 @@
         min-width: 250px;
     }
     .ph-l h1 {
-        font-size: 22px !important;
+        font-size: 20px !important;
         font-weight: 800 !important;
         color: var(--tx) !important;
-        line-height: 1.2 !important;
+        line-height: 1.25 !important;
+        letter-spacing: -0.02em !important;
     }
     .ph-l p {
         font-size: 13px;

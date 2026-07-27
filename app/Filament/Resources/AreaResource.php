@@ -55,8 +55,7 @@ class AreaResource extends Resource
                                     ->label(__('catalog.area.fields.manager'))
                                     ->relationship('manager', 'name')
                                     ->searchable()
-                                    ->preload()
-                                    ->columnSpanFull(),
+                                    ->preload(),
                             ]),
                         Forms\Components\Textarea::make('notes')
                             ->label(__('catalog.common.notes'))
@@ -64,9 +63,11 @@ class AreaResource extends Resource
                             ->rows(3)
                             ->columnSpanFull(),
                         Forms\Components\Toggle::make('status')
-                            ->label(__('catalog.common.active'))
+                            ->label(__('catalog.common.active_status'))
                             ->default(true)
-                            ->required(),
+                            ->required()
+                            ->inline()
+                            ->columnSpanFull(),
                     ]),
             ]);
     }

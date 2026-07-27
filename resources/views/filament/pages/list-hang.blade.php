@@ -77,9 +77,9 @@
     .lhn-page-head h1 {
         margin: 0 0 4px;
         color: var(--tx);
-        font-size: 22px;
+        font-size: 20px;
         font-weight: 800;
-        letter-spacing: -.025em;
+        letter-spacing: -.02em;
     }
     .lhn-page-actions {
         display: flex;

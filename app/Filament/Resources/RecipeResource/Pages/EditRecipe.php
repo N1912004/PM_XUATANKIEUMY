@@ -13,11 +13,7 @@ class EditRecipe extends EditRecord
 
     public function getBreadcrumbs(): array
     {
-        return [
-            '#' => __('recipe.breadcrumb.home'),
-            RecipeResource::getUrl('index') => __('recipe.breadcrumb.list'),
-            __('recipe.breadcrumb.edit'),
-        ];
+        return [];
     }
 
     protected ?float $costOverrideBeforeSave = null;

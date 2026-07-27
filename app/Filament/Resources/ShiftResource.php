@@ -42,22 +42,25 @@ class ShiftResource extends Resource
             ->schema([
                 Forms\Components\Section::make(__('catalog.shift.section'))
                     ->schema([
-                        Forms\Components\TextInput::make('name')
-                            ->label(__('catalog.shift.fields.name'))
-                            ->placeholder(__('catalog.shift.placeholders.name'))
-                            ->required()
-                            ->unique(Shift::class, 'name', ignoreRecord: true)
-                            ->maxLength(255),
-                        Forms\Components\TextInput::make('sort_order')
-                            ->label(__('catalog.shift.fields.sort_order'))
-                            ->numeric()
-                            ->minValue(1)
-                            ->default(fn (): int => ((int) Shift::max('sort_order')) + 1)
-                            ->unique(Shift::class, 'sort_order', ignoreRecord: true)
-                            ->validationMessages([
-                                'unique' => __('catalog.shift.validation.sort_order_unique'),
-                            ])
-                            ->required(),
+                        Forms\Components\Grid::make(2)
+                            ->schema([
+                                Forms\Components\TextInput::make('name')
+                                    ->label(__('catalog.shift.fields.name'))
+                                    ->placeholder(__('catalog.shift.placeholders.name'))
+                                    ->required()
+                                    ->unique(Shift::class, 'name', ignoreRecord: true)
+                                    ->maxLength(255),
+                                Forms\Components\TextInput::make('sort_order')
+                                    ->label(__('catalog.shift.fields.sort_order'))
+                                    ->numeric()
+                                    ->minValue(1)
+                                    ->default(fn (): int => ((int) Shift::max('sort_order')) + 1)
+                                    ->unique(Shift::class, 'sort_order', ignoreRecord: true)
+                                    ->validationMessages([
+                                        'unique' => __('catalog.shift.validation.sort_order_unique'),
+                                    ])
+                                    ->required(),
+                            ]),
                         Forms\Components\Grid::make(2)
                             ->schema([
                                 Forms\Components\TimePicker::make('time_from')

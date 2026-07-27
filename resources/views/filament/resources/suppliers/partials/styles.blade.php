@@ -114,10 +114,10 @@
             }
 
             .sup-title {
-                font-size: 22px !important;
+                font-size: 20px !important;
                 line-height: 1.25 !important;
                 font-weight: 800 !important;
-                letter-spacing: -.025em !important;
+                letter-spacing: -.02em !important;
                 margin: 0 0 4px !important;
                 color: var(--sup-tx) !important;
             }

@@ -111,17 +111,31 @@ class AdminPanelProvider extends PanelProvider
                             font-family: \'Inter\', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
                         }
 
-                        /* Đồng bộ cỡ chữ tiêu đề trang chuẩn 26px / Extra Bold giữa trang tiêu chuẩn và trang custom */
-                        .fi-header-heading {
-                            font-size: 1.625rem !important;
+                        /* Quy chuẩn đồng bộ 100% cỡ chữ tiêu đề 20px / Extra Bold 800 toàn hệ thống */
+                        h1.fi-header-heading,
+                        .fi-header h1,
+                        .fi-header-heading,
+                        .fi-resource-create-record-page .fi-header-heading,
+                        .fi-resource-edit-record-page .fi-header-heading,
+                        .fi-resource-list-records-page section .fi-header .fi-header-heading,
+                        .fi-page section .fi-header .fi-header-heading,
+                        .wh-title,
+                        .sup-title,
+                        .lhn-page-head h1,
+                        .emp-title,
+                        .po-title,
+                        .ph-l h1 {
+                            font-size: 20px !important;
                             font-weight: 800 !important;
                             line-height: 1.25 !important;
-                            letter-spacing: -0.03em !important;
+                            letter-spacing: -0.02em !important;
                         }
 
                         @media (max-width: 639.98px) {
+                            h1.fi-header-heading,
+                            .fi-header h1,
                             .fi-header-heading {
-                                font-size: 1.3125rem !important;
+                                font-size: 18px !important;
                             }
                         }
 
@@ -208,15 +222,115 @@ class AdminPanelProvider extends PanelProvider
                             color: #e5e7eb !important; /* Gray-200 */
                         }
 
-                        /* Inactive items hover style: Light Mode */
+                        /* Inactive items hover style: Light Mode — match icon group color */
                         .fi-sidebar-item:not(.fi-active):not(.fi-sidebar-item-active) > .fi-sidebar-item-button:hover,
                         .fi-sidebar-item:not(.fi-active):not(.fi-sidebar-item-active) > a:hover {
-                            background-color: #f3f4f6 !important; /* Slate-100 */
+                            background-color: #f3f4f6 !important; /* Slate-100 default */
                             color: #111827 !important; /* Slate-900 */
                         }
                         .fi-sidebar-item:not(.fi-active):not(.fi-sidebar-item-active) > .fi-sidebar-item-button:hover *,
                         .fi-sidebar-item:not(.fi-active):not(.fi-sidebar-item-active) > a:hover * {
                             color: #111827 !important;
+                        }
+
+                        /* Green hover — Kho, Danh sách hàng, Đặt hàng, Thực đơn, Báo cáo */
+                        li:has(a[href*="/admin/stocks"]) > .fi-sidebar-item-button:hover,
+                        li:has(a[href*="/admin/list-hang"]) > .fi-sidebar-item-button:hover,
+                        li:has(a[href*="/admin/purchase-orders"]) > .fi-sidebar-item-button:hover,
+                        li:has(a[href*="/admin/menus"]) > .fi-sidebar-item-button:hover,
+                        li:has(a[href*="/admin/lap-thuc-don-tuan"]) > .fi-sidebar-item-button:hover,
+                        li:has(a[href*="/admin/bao-cao"]) > .fi-sidebar-item-button:hover,
+                        li:has(a[href*="/admin/stock-transfers"]) > .fi-sidebar-item-button:hover,
+                        li:has(a[href*="/admin/stock-transactions"]) > .fi-sidebar-item-button:hover {
+                            background-color: #ECFDF5 !important;
+                            color: #065F46 !important;
+                        }
+                        li:has(a[href*="/admin/stocks"]) > .fi-sidebar-item-button:hover *,
+                        li:has(a[href*="/admin/list-hang"]) > .fi-sidebar-item-button:hover *,
+                        li:has(a[href*="/admin/purchase-orders"]) > .fi-sidebar-item-button:hover *,
+                        li:has(a[href*="/admin/menus"]) > .fi-sidebar-item-button:hover *,
+                        li:has(a[href*="/admin/lap-thuc-don-tuan"]) > .fi-sidebar-item-button:hover *,
+                        li:has(a[href*="/admin/bao-cao"]) > .fi-sidebar-item-button:hover *,
+                        li:has(a[href*="/admin/stock-transfers"]) > .fi-sidebar-item-button:hover *,
+                        li:has(a[href*="/admin/stock-transactions"]) > .fi-sidebar-item-button:hover * {
+                            color: #065F46 !important;
+                        }
+
+                        /* Amber hover — Ngân hàng thực đơn, NCC, Loại NL */
+                        li:has(a[href*="/admin/recipes"]) > .fi-sidebar-item-button:hover,
+                        li:has(a[href*="/admin/recipe-types"]) > .fi-sidebar-item-button:hover,
+                        li:has(a[href*="/admin/suppliers"]) > .fi-sidebar-item-button:hover {
+                            background-color: #FFFBEB !important;
+                            color: #92400E !important;
+                        }
+                        li:has(a[href*="/admin/recipes"]) > .fi-sidebar-item-button:hover *,
+                        li:has(a[href*="/admin/recipe-types"]) > .fi-sidebar-item-button:hover *,
+                        li:has(a[href*="/admin/suppliers"]) > .fi-sidebar-item-button:hover * {
+                            color: #92400E !important;
+                        }
+
+                        /* Blue hover — Ingredients, HR, Chat */
+                        li:has(a[href*="/admin/ingredients"]) > .fi-sidebar-item-button:hover,
+                        li:has(a[href*="/admin/units"]) > .fi-sidebar-item-button:hover,
+                        li:has(a[href*="/admin/ingredient-types"]) > .fi-sidebar-item-button:hover,
+                        li:has(a[href*="/admin/employees"]) > .fi-sidebar-item-button:hover,
+                        li:has(a[href*="/admin/users"]) > .fi-sidebar-item-button:hover,
+                        li:has(a[href*="/admin/chat-nhom"]) > .fi-sidebar-item-button:hover {
+                            background-color: #EBF3FF !important;
+                            color: #1D4ED8 !important;
+                        }
+                        li:has(a[href*="/admin/ingredients"]) > .fi-sidebar-item-button:hover *,
+                        li:has(a[href*="/admin/units"]) > .fi-sidebar-item-button:hover *,
+                        li:has(a[href*="/admin/ingredient-types"]) > .fi-sidebar-item-button:hover *,
+                        li:has(a[href*="/admin/employees"]) > .fi-sidebar-item-button:hover *,
+                        li:has(a[href*="/admin/users"]) > .fi-sidebar-item-button:hover *,
+                        li:has(a[href*="/admin/chat-nhom"]) > .fi-sidebar-item-button:hover * {
+                            color: #1D4ED8 !important;
+                        }
+
+                        /* Sky hover — Kiểm thực, Ca, Khu vực, Bếp */
+                        li:has(a[href*="/admin/food-safety-audits"]) > .fi-sidebar-item-button:hover,
+                        li:has(a[href*="/admin/timekeepings"]) > .fi-sidebar-item-button:hover,
+                        li:has(a[href*="/admin/shifts"]) > .fi-sidebar-item-button:hover,
+                        li:has(a[href*="/admin/areas"]) > .fi-sidebar-item-button:hover,
+                        li:has(a[href*="/admin/kitchens"]) > .fi-sidebar-item-button:hover,
+                        li:has(a[href*="/admin/kitchen-types"]) > .fi-sidebar-item-button:hover {
+                            background-color: #F0F9FF !important;
+                            color: #0369A1 !important;
+                        }
+                        li:has(a[href*="/admin/food-safety-audits"]) > .fi-sidebar-item-button:hover *,
+                        li:has(a[href*="/admin/timekeepings"]) > .fi-sidebar-item-button:hover *,
+                        li:has(a[href*="/admin/shifts"]) > .fi-sidebar-item-button:hover *,
+                        li:has(a[href*="/admin/areas"]) > .fi-sidebar-item-button:hover *,
+                        li:has(a[href*="/admin/kitchens"]) > .fi-sidebar-item-button:hover *,
+                        li:has(a[href*="/admin/kitchen-types"]) > .fi-sidebar-item-button:hover * {
+                            color: #0369A1 !important;
+                        }
+
+                        /* Pink hover — Nghỉ phép */
+                        li:has(a[href*="/admin/leave-overtimes"]) > .fi-sidebar-item-button:hover,
+                        li:has(a[href*="/admin/leave-types"]) > .fi-sidebar-item-button:hover {
+                            background-color: #FFF1F2 !important;
+                            color: #BE123C !important;
+                        }
+                        li:has(a[href*="/admin/leave-overtimes"]) > .fi-sidebar-item-button:hover *,
+                        li:has(a[href*="/admin/leave-types"]) > .fi-sidebar-item-button:hover * {
+                            color: #BE123C !important;
+                        }
+
+                        /* Purple hover — Phòng ban, Vị trí, Phân quyền */
+                        li:has(a[href*="/admin/departments"]) > .fi-sidebar-item-button:hover,
+                        li:has(a[href*="/admin/positions"]) > .fi-sidebar-item-button:hover,
+                        li:has(a[href*="/shield/roles"]) > .fi-sidebar-item-button:hover,
+                        li:has(a[href*="/roles"]) > .fi-sidebar-item-button:hover {
+                            background-color: #F5F3FF !important;
+                            color: #6D28D9 !important;
+                        }
+                        li:has(a[href*="/admin/departments"]) > .fi-sidebar-item-button:hover *,
+                        li:has(a[href*="/admin/positions"]) > .fi-sidebar-item-button:hover *,
+                        li:has(a[href*="/shield/roles"]) > .fi-sidebar-item-button:hover *,
+                        li:has(a[href*="/roles"]) > .fi-sidebar-item-button:hover * {
+                            color: #6D28D9 !important;
                         }
 
                         /* Inactive items hover style: Dark Mode override */
@@ -292,7 +406,6 @@ class AdminPanelProvider extends PanelProvider
                         }
 
                         /* 1. TỔNG QUAN & NGUYÊN LIỆU & NHÂN SỰ & CHAT (Blue - nb) */
-                        .fi-sidebar-group:first-child .fi-sidebar-item:first-child .fi-sidebar-item-icon,
                         a[href$="/admin"] .fi-sidebar-item-icon,
                         a[href$="/admin/"] .fi-sidebar-item-icon,
                         a[href*="/admin/ingredients"] .fi-sidebar-item-icon,
@@ -351,16 +464,20 @@ class AdminPanelProvider extends PanelProvider
                             background-color: #F1F5F9 !important; color: #64748B !important;
                         }
 
-                        /* 2. Menu ACTIVE: Đặt sau cùng với selector rộng để luôn ghi đè khi mục đang được chọn */
-                        .fi-sidebar-item-active .fi-sidebar-item-icon,
-                        .fi-sidebar-item.fi-active .fi-sidebar-item-icon,
-                        .fi-sidebar-item-button-active .fi-sidebar-item-icon,
-                        a[aria-current="page"] .fi-sidebar-item-icon,
-                        a.fi-active .fi-sidebar-item-icon,
-                        .fi-active .fi-sidebar-item-icon,
-                        li:has(a[aria-current="page"]) .fi-sidebar-item-icon {
-                            background-color: rgba(255, 255, 255, 0.22) !important;
+                        /* 2. Menu ACTIVE: Chỉ tô trắng icon của ĐÚNG MỤC ĐANG ACTIVE (dùng > để không lan sang mục khác) */
+                        .fi-sidebar-item-active > .fi-sidebar-item-button .fi-sidebar-item-icon,
+                        .fi-sidebar-item.fi-active > .fi-sidebar-item-button .fi-sidebar-item-icon,
+                        a.fi-sidebar-item-button-active .fi-sidebar-item-icon,
+                        a[aria-current="page"] .fi-sidebar-item-icon {
+                            background-color: rgba(255, 255, 255, 0.25) !important;
                             color: #ffffff !important;
+                        }
+                        .fi-sidebar-item-active > .fi-sidebar-item-button .fi-sidebar-item-icon *,
+                        .fi-sidebar-item.fi-active > .fi-sidebar-item-button .fi-sidebar-item-icon *,
+                        a.fi-sidebar-item-button-active .fi-sidebar-item-icon *,
+                        a[aria-current="page"] .fi-sidebar-item-icon * {
+                            color: #ffffff !important;
+                            fill: #ffffff !important;
                         }
 
                         /* Hover nhẹ cho icon chưa active */
@@ -409,27 +526,27 @@ class AdminPanelProvider extends PanelProvider
                         }
 
                         /* Giữ nguyên Active White trên Dark Mode */
-                        .dark .fi-sidebar-item-active .fi-sidebar-item-icon,
-                        .dark .fi-sidebar-item.fi-active .fi-sidebar-item-icon,
-                        .dark a[aria-current="page"] .fi-sidebar-item-icon,
-                        .dark .fi-active .fi-sidebar-item-icon {
+                        .dark .fi-sidebar-item-active > .fi-sidebar-item-button .fi-sidebar-item-icon,
+                        .dark .fi-sidebar-item.fi-active > .fi-sidebar-item-button .fi-sidebar-item-icon,
+                        .dark a[aria-current="page"] .fi-sidebar-item-icon {
                             background-color: rgba(255, 255, 255, 0.22) !important;
                             color: #ffffff !important;
                         }
 
-                        /* Recipe create/edit form: match BA mockup spacing and cost table emphasis */
-                        .fi-resource-recipes .fi-header-heading {
-                            font-size: 1.875rem !important;
-                            line-height: 2.25rem !important;
+                        /* Recipe create/edit form header: 20px font-size and 800 font-weight */
+                        .fi-resource-recipes .fi-header-heading,
+                        .fi-resource-recipes h1.fi-header-heading {
+                            font-size: 20px !important;
+                            line-height: 1.25 !important;
                             font-weight: 800 !important;
-                            color: #111827 !important;
+                            letter-spacing: -0.02em !important;
                         }
                         .dark .fi-resource-recipes .fi-header-heading {
                             color: #ffffff !important;
                         }
                         .fi-resource-recipes .fi-header-subheading {
                             color: #64748b !important;
-                            font-size: 1rem !important;
+                            font-size: 13px !important;
                             font-weight: 500 !important;
                         }
                         .fi-resource-recipes .recipe-form-section,

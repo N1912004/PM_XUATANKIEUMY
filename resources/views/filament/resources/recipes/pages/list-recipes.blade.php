@@ -152,69 +152,44 @@
             >
         </div>
 
-        <div class="mn-filter-select"
-            x-data="{
-                open: false,
-                search: '',
-                selected: @entangle('typeFilter').live,
-                options: {{ json_encode($types) }},
-                get filtered() {
-                    let q = this.search.toLowerCase();
-                    return Object.entries(this.options).filter(([val, lbl]) => lbl.toLowerCase().includes(q));
-                },
-                get label() {
-                    if (this.selected === '' || this.selected === null || this.selected === undefined) return @js(__('recipe.fields.type'));
-                    return this.options[this.selected] || @js(__('recipe.fields.type'));
-                },
-                selectOption(val) {
-                    this.selected = val;
-                    this.open = false;
-                },
-                toggle() {
-                    this.open = ! this.open;
-                    if (this.open) {
-                        this.search = '';
-                        this.$nextTick(() => this.$refs.search?.focus());
-                    }
-                }
-            }"
-            @click.outside="open = false"
-            @keydown.escape.stop="open = false"
-        >
-            <button type="button" class="mn-sel" style="display: flex; align-items: center; justify-content: space-between; gap: 8px; min-width: 160px; text-align: left;" @click="toggle()">
-                <span x-text="label" style="text-overflow: ellipsis; overflow: hidden; white-space: nowrap;"></span>
-            </button>
-            <div x-show="open" x-cloak class="mn-dropdown-panel" style="min-width: 160px;">
-                <input x-ref="search" x-model="search" type="text" placeholder="{{ __('recipe.placeholders.search_short') }}" class="mn-dropdown-search">
-                <ul class="mn-dropdown-list">
-                    <li>
-                        <button type="button" class="mn-dropdown-item" :class="(selected === '' || selected === null) && 'selected'" @click="selectOption('')">
-                            {{ __('recipe.filters.all_groups') }}
-                        </button>
-                    </li>
-                    <template x-for="[val, lbl] in filtered" :key="val">
-                        <li>
-                            <button type="button" class="mn-dropdown-item" :class="selected == val && 'selected'" @click="selectOption(val)" x-text="lbl">
-                            </button>
-                        </li>
-                    </template>
-                    <li x-show="filtered.length === 0" class="mn-dropdown-empty">{{ __('recipe.empty.no_results') }}</li>
-                </ul>
-            </div>
+        <div style="min-width: 170px;">
+            @include('filament.components.search-select', [
+                'name' => 'typeFilter',
+                'live' => true,
+                'placeholder' => __('recipe.filters.all_groups'),
+                'searchPlaceholder' => __('recipe.placeholders.search_short'),
+                'options' => collect($this->typeOptions())->map(fn($lbl, $val) => ['value' => (string)$val, 'label' => (string)$lbl])->values()->all(),
+            ])
         </div>
 
-        <select wire:model.live="statusFilter" class="mn-sel">
-            <option value="">{{ __('recipe.fields.status') }}</option>
-            <option value="active">{{ __('recipe.status.active_applied') }}</option>
-            <option value="pending">{{ __('recipe.status.pending') }}</option>
-            <option value="inactive">{{ __('recipe.status.inactive') }}</option>
-        </select>
+        <div style="min-width: 150px;">
+            @include('filament.components.search-select', [
+                'name' => 'statusFilter',
+                'live' => true,
+                'placeholder' => __('recipe.fields.status'),
+                'searchPlaceholder' => __('common.select.search_placeholder'),
+                'emptyLabel' => __('recipe.fields.status'),
+                'options' => [
+                    ['value' => 'active', 'label' => __('recipe.status.active_applied')],
+                    ['value' => 'pending', 'label' => __('recipe.status.pending')],
+                    ['value' => 'inactive', 'label' => __('recipe.status.inactive')],
+                ],
+            ])
+        </div>
 
-        <select wire:model.live="trashedFilter" class="mn-sel">
-            <option value="">{{ __('recipe.trash.without') }}</option>
-            <option value="with">{{ __('recipe.trash.with') }}</option>
-            <option value="only">{{ __('recipe.trash.only') }}</option>
-        </select>
+        <div style="min-width: 150px;">
+            @include('filament.components.search-select', [
+                'name' => 'trashedFilter',
+                'live' => true,
+                'placeholder' => __('recipe.trash.without'),
+                'searchPlaceholder' => __('common.select.search_placeholder'),
+                'emptyLabel' => __('recipe.trash.without'),
+                'options' => [
+                    ['value' => 'with', 'label' => __('recipe.trash.with')],
+                    ['value' => 'only', 'label' => __('recipe.trash.only')],
+                ],
+            ])
+        </div>
 
         <button wire:click="resetFilters" class="mn-fbtn" title="{{ __('recipe.actions.reset_filters') }}">
             <i class="fa-solid fa-sliders"></i>

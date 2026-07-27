@@ -145,12 +145,12 @@
     }
 
     .po-title {
-        font-size: 1.62rem !important;
+        font-size: 20px !important;
         font-weight: 800 !important;
         color: var(--po-tx) !important;
-        letter-spacing: -.02em;
-        line-height: 1.35 !important;
-        margin: 0 !important;
+        letter-spacing: -.02em !important;
+        line-height: 1.25 !important;
+        margin: 0 0 4px !important;
     }
 
     .po-subtitle {

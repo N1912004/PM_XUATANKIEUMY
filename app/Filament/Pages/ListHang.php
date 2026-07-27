@@ -87,6 +87,11 @@ class ListHang extends Page
         return __('list_hang.title');
     }
 
+    public function getHeading(): string
+    {
+        return '';
+    }
+
     public function mount(): void
     {
         $this->date = now()->toDateString();

@@ -141,14 +141,14 @@ class RecipeResource extends Resource
                             ])
                             ->default('active')
                             ->native(false),
-                        Forms\Components\Textarea::make('description')
+                        Forms\Components\TextInput::make('description')
                             ->label(__('recipe.fields.description'))
                             ->placeholder(__('recipe.placeholders.description'))
-                            ->rows(3)
+                            ->maxLength(255)
                             ->columnSpan(2),
                     ]),
 
-                Forms\Components\Section::make()
+                Forms\Components\Section::make(__('recipe.sections.ingredients_cost'))
                     ->extraAttributes(['class' => 'recipe-cost-section'])
                     ->schema([
                         Forms\Components\Repeater::make('recipeIngredients')
@@ -233,7 +233,7 @@ class RecipeResource extends Resource
                             ])
                             ->columns(12)
                             ->itemNumbers()
-                            ->addActionLabel(__('recipe.actions.add_ingredient'))
+                            ->addAction(fn (Action $action): Action => $action->label(__('recipe.actions.add_ingredient'))->icon('heroicon-m-plus'))
                             ->addActionAlignment(Alignment::End)
                             ->deleteAction(fn (Action $action): Action => $action->icon('heroicon-m-trash')->label(''))
                             ->reorderable(false)
@@ -272,7 +272,7 @@ class RecipeResource extends Resource
                         */
                         Forms\Components\Placeholder::make('cost_note')
                             ->hiddenLabel()
-                            ->content(__('recipe.messages.ingredient_price_source'))
+                            ->content(fn (): HtmlString => new HtmlString('<div style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--mu);margin-top:6px"><i class="fa-solid fa-circle-info" style="color:var(--bl)"></i> '.e(__('recipe.messages.ingredient_price_source')).'</div>'))
                             ->extraAttributes(['class' => 'recipe-cost-note'])
                             ->columnSpanFull(),
                     ])

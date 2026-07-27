@@ -8,9 +8,9 @@
         }
         .fi-page:has(.stats-grid) > section > .fi-header .fi-header-heading {
             color: #0f172a !important;
-            font-size: 22px !important;
+            font-size: 20px !important;
             font-weight: 800 !important;
-            letter-spacing: -.025em !important;
+            letter-spacing: -.02em !important;
         }
         .fi-page:has(.stats-grid) > section > .fi-header .fi-header-subheading {
             margin-top: 4px !important;
@@ -38,7 +38,7 @@
             gap: 0.75rem;
         }
         .wh-title {
-            font-size: 1.375rem;
+            font-size: 20px;
             font-weight: 800;
             margin: 0 0 0.25rem;
             color: #0f172a;
@@ -47,7 +47,7 @@
             color: #ffffff;
         }
         .wh-subtitle {
-            font-size: 0.8125rem;
+            font-size: 13px;
             color: #64748b;
             margin: 0;
         }
