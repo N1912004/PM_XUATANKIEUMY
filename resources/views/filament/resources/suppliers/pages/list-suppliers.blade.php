@@ -266,36 +266,36 @@
         <div class="sup-table-wrap">
             <table class="sup-table">
                 <thead>
-                    <tr>
-                        <th style="width:56px;text-align:center">STT</th>
-                        <th style="width:110px">{{ __('supplier.table.code') }}</th>
-                        <th>{{ __('supplier.table.name_short') }}</th>
-                        <th style="width:130px">{{ __('supplier.table.phone') }}</th>
-                        <th>Email</th>
-                        <th style="width:180px">{{ __('supplier.table.food_types') }}</th>
-                        <th style="width:130px;text-align:center">{{ __('supplier.table.ingredient_count') }}</th>
-                        <th style="width:140px">{{ __('supplier.table.status') }}</th>
-                        <th style="text-align:center;width:120px">{{ __('supplier.table.actions') }}</th>
+                    <tr style="border-bottom:1.5px solid var(--sup-bd2, #f1f5f9); color:var(--sup-mu, #64748b); font-weight:700; text-transform:uppercase; font-size:11px; background:var(--sup-bd2, #f1f5f9)">
+                        <th style="padding:12px 14px; width:70px; text-align:center">STT</th>
+                        <th style="padding:12px 14px; width:130px; text-align:center; white-space:nowrap">{{ __('supplier.table.code') }}</th>
+                        <th style="padding:12px 14px; width:22%">{{ __('supplier.table.name_short') }}</th>
+                        <th style="padding:12px 14px; width:130px">{{ __('supplier.table.phone') }}</th>
+                        <th style="padding:12px 14px; width:18%">Email</th>
+                        <th style="padding:12px 14px; width:16%">{{ __('supplier.table.food_types') }}</th>
+                        <th style="padding:12px 14px; width:130px; text-align:center; white-space:nowrap">{{ __('supplier.table.ingredient_count') }}</th>
+                        <th style="padding:12px 14px; width:140px; text-align:center; white-space:nowrap">{{ __('supplier.table.status') }}</th>
+                        <th style="padding:12px 14px; width:110px; text-align:center; white-space:nowrap">{{ __('supplier.table.actions') }}</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($suppliersList as $index => $supplier)
-                        <tr>
-                            <td style="text-align:center" class="sup-muted">{{ ($suppliersList->currentPage() - 1) * $suppliersList->perPage() + $index + 1 }}</td>
-                            <td><span style="font-size:12px;font-weight:600;color:var(--sup-mu)">{{ $supplier->code }}</span></td>
-                            <td class="sup-name">{{ $supplier->name }}</td>
-                            <td>{{ $supplier->phone }}</td>
-                            <td>{{ $supplier->email ?: '--' }}</td>
-                            <td>{{ $supplier->type }}</td>
-                            <td class="sup-link-num">{{ $supplier->ingredients_count }}</td>
-                            <td>
+                        <tr style="border-bottom:1px solid var(--sup-bd2, #f1f5f9)">
+                            <td style="padding:12px 14px; text-align:center; font-weight:600; color:var(--sup-mu, #64748b); font-variant-numeric:tabular-nums">{{ ($suppliersList->currentPage() - 1) * $suppliersList->perPage() + $index + 1 }}</td>
+                            <td style="padding:12px 14px; text-align:center; font-weight:800; color:var(--po-bl, #1267e8); font-variant-numeric:tabular-nums; white-space:nowrap">{{ $supplier->code }}</td>
+                            <td style="padding:12px 14px; font-weight:700; color:var(--sup-tx, #0f172a)">{{ $supplier->name }}</td>
+                            <td style="padding:12px 14px; font-variant-numeric:tabular-nums">{{ $supplier->phone }}</td>
+                            <td style="padding:12px 14px; color:var(--sup-mu, #64748b)">{{ $supplier->email ?: '—' }}</td>
+                            <td style="padding:12px 14px; font-weight:600">{{ $supplier->type ?: '—' }}</td>
+                            <td style="padding:12px 14px; text-align:center; font-weight:800; color:var(--po-bl, #1267e8); font-variant-numeric:tabular-nums">{{ $supplier->ingredients_count }}</td>
+                            <td style="padding:12px 14px; text-align:center">
                                 @if($supplier->status)
                                     <span class="spill s-ok">{{ __('supplier.status.active') }}</span>
                                 @else
                                     <span class="spill s-qt">{{ __('supplier.status.locked') }}</span>
                                 @endif
                             </td>
-                            <td style="text-align:center">
+                            <td style="padding:12px 14px; text-align:center">
                                 <div style="display:inline-flex; gap:6px; justify-content:center">
                                     <a href="{{ \App\Filament\Resources\SupplierResource::getUrl('view', ['record' => $supplier->id]) }}" class="abt" title="{{ __('supplier.actions.view') }}">
                                         <i class="fa-solid fa-eye"></i>

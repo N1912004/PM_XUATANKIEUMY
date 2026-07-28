@@ -231,7 +231,7 @@
         <div style="overflow-x:auto">
             <table class="mn-table">
                 <thead>
-                    <tr>
+                    <tr style="border-bottom:1.5px solid var(--po-bd2, #f1f5f9); color:var(--po-mu, #64748b); font-weight:700; text-transform:uppercase; font-size:11px; background:var(--po-bd2, #f1f5f9)">
                         <th style="width: 40px; text-align: center; vertical-align: middle;">
                             <input type="checkbox" 
                                    class="fi-checkbox-input rounded border-gray-300 text-primary-600 focus:ring-primary-600 dark:border-gray-700 dark:bg-gray-900 dark:checked:bg-primary-500" 
@@ -243,11 +243,18 @@
                                    wire:click="selectPage({{ json_encode($pageIds) }}, {{ $allSelected ? 'false' : 'true' }})"
                             >
                         </th>
-                        {{--
-                        <th style="width: 40px; text-align: center;"></th>
-                        --}}
-                        <th style="width: 50px; text-align: center;">STT</th>
-                        <th>{{ __('recipe.table.code') }}</th><th>{{ __('recipe.table.name') }}</th><th>{{ __('recipe.table.type') }}</th><th>{{ __('recipe.table.selling_price_per_portion') }}</th><th>{{ __('recipe.table.cost_per_portion') }}</th><th>{{ __('recipe.table.ingredients_count') }}</th><th>{{ __('recipe.table.total_weight') }}</th><th>{{ __('recipe.table.total_cost') }}</th><th>{{ __('recipe.table.status') }}</th><th>{{ __('recipe.table.created_at') }}</th><th>{{ __('recipe.table.actions') }}</th>
+                        <th style="padding:12px 14px; width: 60px; text-align: center;">STT</th>
+                        <th style="padding:12px 14px; width: 110px; text-align: center; white-space: nowrap;">{{ __('recipe.table.code') }}</th>
+                        <th style="padding:12px 14px; width: 18%;">{{ __('recipe.table.name') }}</th>
+                        <th style="padding:12px 14px; width: 120px;">{{ __('recipe.table.type') }}</th>
+                        <th style="padding:12px 14px; text-align: right; width: 110px; white-space: nowrap;">{{ __('recipe.table.selling_price_per_portion') }}</th>
+                        <th style="padding:12px 14px; text-align: right; width: 110px; white-space: nowrap;">{{ __('recipe.table.cost_per_portion') }}</th>
+                        <th style="padding:12px 14px; text-align: center; width: 80px; white-space: nowrap;">{{ __('recipe.table.ingredients_count') }}</th>
+                        <th style="padding:12px 14px; text-align: right; width: 110px; white-space: nowrap;">{{ __('recipe.table.total_weight') }}</th>
+                        <th style="padding:12px 14px; text-align: right; width: 120px; white-space: nowrap;">{{ __('recipe.table.total_cost') }}</th>
+                        <th style="padding:12px 14px; text-align: center; width: 130px; white-space: nowrap;">{{ __('recipe.table.status') }}</th>
+                        <th style="padding:12px 14px; width: 140px; white-space: nowrap;">{{ __('recipe.table.created_at') }}</th>
+                        <th style="padding:12px 14px; text-align: center; width: 110px; white-space: nowrap;">{{ __('recipe.table.actions') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -296,22 +303,24 @@
                                 </button>
                             </td>
                             --}}
-                            <td style="text-align: center; font-weight: 600; color: var(--mu); vertical-align: middle;">
+                            <td style="padding:12px 14px; text-align: center; font-weight: 600; color: var(--mu, #64748b); font-variant-numeric: tabular-nums;">
                                 {{ $loop->iteration + ($recipesList->currentPage() - 1) * $recipesList->perPage() }}
                             </td>
-                            <td><span class="mn-code" style="{{ $recipe->trashed() ? 'text-decoration: line-through; color: var(--mu);' : '' }}">{{ $recipe->code }}</span></td>
-                            <td>
-                                <span class="mn-name" style="{{ $recipe->trashed() ? 'text-decoration: line-through; color: var(--mu);' : '' }}">{{ $recipe->name }}</span>
+                            <td style="padding:12px 14px; text-align: center; font-weight: 800; color: var(--po-bl, #1267e8); font-variant-numeric: tabular-nums; white-space: nowrap;">
+                                <span class="mn-code" style="{{ $recipe->trashed() ? 'text-decoration: line-through; color: var(--mu);' : '' }}">{{ $recipe->code }}</span>
+                            </td>
+                            <td style="padding:12px 14px;">
+                                <span class="mn-name" style="font-weight:700; {{ $recipe->trashed() ? 'text-decoration: line-through; color: var(--mu);' : '' }}">{{ $recipe->name }}</span>
                                 @if($recipe->trashed())
                                     <span style="display: inline-block; background: var(--rd-s); color: var(--rd); font-size: 10px; padding: 2px 6px; border-radius: 4px; margin-left: 6px; font-weight: bold; vertical-align: middle;">{{ __('recipe.trash.deleted') }}</span>
                                 @endif
                             </td>
-                            <td><span class="mn-group-pill {{ $typeClass }}">{{ $recipe->type }}</span></td>
-                            <td><span class="mn-price">{{ __('recipe.currency.amount', ['value' => number_format($recipe->selling_price_per_portion, 0, ',', '.')]) }}</span></td>
-                            <td><span class="mn-price">{{ __('recipe.currency.amount', ['value' => number_format($recipe->cost_per_portion, 0, ',', '.')]) }}</span></td>
-                            <td><span class="mn-num">{{ $ingredientsCount }}</span></td>
-                            <td><span class="mn-kg">{{ str_replace('.', ',', round($recipeWeight, 2)) }} kg</span></td>
-                            <td>
+                            <td style="padding:12px 14px;"><span class="mn-group-pill {{ $typeClass }}">{{ $recipe->type }}</span></td>
+                            <td style="padding:12px 14px; text-align: right; font-variant-numeric: tabular-nums;"><span class="mn-price">{{ __('recipe.currency.amount', ['value' => number_format($recipe->selling_price_per_portion, 0, ',', '.')]) }}</span></td>
+                            <td style="padding:12px 14px; text-align: right; font-variant-numeric: tabular-nums;"><span class="mn-price">{{ __('recipe.currency.amount', ['value' => number_format($recipe->cost_per_portion, 0, ',', '.')]) }}</span></td>
+                            <td style="padding:12px 14px; text-align: center; font-weight: 800; color: var(--po-bl, #1267e8); font-variant-numeric: tabular-nums;"><span class="mn-num">{{ $ingredientsCount }}</span></td>
+                            <td style="padding:12px 14px; text-align: right; font-variant-numeric: tabular-nums;"><span class="mn-kg">{{ str_replace('.', ',', round($recipeWeight, 2)) }} kg</span></td>
+                            <td style="padding:12px 14px; text-align: right; font-variant-numeric: tabular-nums;">
                                 <span class="mn-cost" style="{{ $recipe->cost_override !== null ? 'color:var(--or)' : '' }}">
                                     {{ __('recipe.currency.amount', ['value' => number_format($recipeCost, 0, ',', '.')]) }}
                                 </span>
@@ -319,8 +328,8 @@
                                     <span style="display:block;font-size:10px;color:var(--or)">{{ __('recipe.labels.adjusted') }}</span>
                                 @endif
                             </td>
-                            <td><span class="{{ $statusClass }}">{{ $statusText }}</span></td>
-                            <td><span class="mn-date">{{ $recipe->created_at->format('d/m/Y H:i') }}</span></td>
+                            <td style="padding:12px 14px; text-align: center; white-space: nowrap;"><span class="{{ $statusClass }}">{{ $statusText }}</span></td>
+                            <td style="padding:12px 14px; color: var(--mu, #64748b); font-variant-numeric: tabular-nums; white-space: nowrap;"><span class="mn-date">{{ $recipe->created_at->format('d/m/Y H:i') }}</span></td>
                             <td>
                                 <div style="display:flex;gap:4px">
                                     @if($recipe->trashed())

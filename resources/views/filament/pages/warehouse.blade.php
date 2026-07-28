@@ -828,46 +828,46 @@
             <div class="overflow-x-auto">
                 <table class="wh-table">
                     <thead>
-                        <tr>
-                            <th style="width: 36px; text-align: center;">#</th>
-                            <th>{{ __('warehouse.table.ingredient_code_short') }}</th>
-                            <th>{{ __('warehouse.table.ingredient') }}</th>
-                            <th>{{ __('warehouse.table.type') }}</th>
-                            <th>{{ __('warehouse.table.supplier') }}</th>
-                            <th style="text-align: right;">{{ __('warehouse.table.current_stock') }}</th>
-                            <th style="text-align: right;">{{ __('warehouse.table.minimum') }}</th>
-                            <th style="text-align: right;">{{ __('warehouse.table.unit_price') }}</th>
-                            <th style="text-align: right;">{{ __('warehouse.table.value') }}</th>
-                            <th style="text-align: center;">{{ __('warehouse.table.last_updated') }}</th>
-                            <th>{{ __('warehouse.table.status') }}</th>
+                        <tr style="border-bottom:1.5px solid var(--po-bd2, #f1f5f9); color:var(--po-mu, #64748b); font-weight:700; text-transform:uppercase; font-size:11px; background:var(--po-bd2, #f1f5f9)">
+                            <th style="padding:12px 14px; width: 70px; text-align: center;">STT</th>
+                            <th style="padding:12px 14px; width: 120px; text-align: center; white-space: nowrap;">{{ __('warehouse.table.ingredient_code_short') }}</th>
+                            <th style="padding:12px 14px; width: 22%;">{{ __('warehouse.table.ingredient') }}</th>
+                            <th style="padding:12px 14px; width: 14%;">{{ __('warehouse.table.type') }}</th>
+                            <th style="padding:12px 14px; width: 16%;">{{ __('warehouse.table.supplier') }}</th>
+                            <th style="padding:12px 14px; text-align: center; width: 130px; white-space: nowrap;">{{ __('warehouse.table.current_stock') }}</th>
+                            <th style="padding:12px 14px; text-align: center; width: 130px; white-space: nowrap;">{{ __('warehouse.table.minimum') }}</th>
+                            <th style="padding:12px 14px; text-align: right; width: 120px; white-space: nowrap;">{{ __('warehouse.table.unit_price') }}</th>
+                            <th style="padding:12px 14px; text-align: right; width: 130px; white-space: nowrap;">{{ __('warehouse.table.value') }}</th>
+                            <th style="padding:12px 14px; text-align: center; width: 130px; white-space: nowrap;">{{ __('warehouse.table.last_updated') }}</th>
+                            <th style="padding:12px 14px; text-align: center; width: 130px; white-space: nowrap;">{{ __('warehouse.table.status') }}</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($stocksData as $index => $item)
                             @if(empty($item['ingredient'])) @continue @endif
-                            <tr wire:click="openLedger({{ $item['ingredient']['id'] ?? 0 }})" style="cursor: pointer;" title="{{ __('warehouse.tooltips.open_ledger') }}">
-                                <td style="text-align: center;">{{ ($stocksData->currentPage() - 1) * $stocksData->perPage() + $index + 1 }}</td>
-                                <td><span style="font-weight: 700;">{{ $item['ingredient']['code'] ?? '—' }}</span></td>
-                                <td class="wh-ing-name">
-                                    <div style="display: flex; align-items: center; gap: 8px;">
+                            <tr wire:click="openLedger({{ $item['ingredient']['id'] ?? 0 }})" style="cursor: pointer; border-bottom:1px solid var(--po-bd2, #f1f5f9)" title="{{ __('warehouse.tooltips.open_ledger') }}">
+                                <td style="padding:12px 14px; text-align: center; font-weight: 600; color: var(--po-mu, #64748b); font-variant-numeric: tabular-nums;">{{ ($stocksData->currentPage() - 1) * $stocksData->perPage() + $index + 1 }}</td>
+                                <td style="padding:12px 14px; text-align: center; font-weight: 800; color: var(--po-bl, #1267e8); font-variant-numeric: tabular-nums; white-space: nowrap;">{{ $item['ingredient']['code'] ?? '—' }}</td>
+                                <td style="padding:12px 14px;" class="wh-ing-name">
+                                    <div style="display: flex; align-items: center; gap: 8px; font-weight: 700;">
                                         <span>{{ $item['ingredient']['name'] ?? '—' }}</span>
                                         <svg class="w-3.5 h-3.5 text-gray-400 opacity-0 wh-ledger-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="transition: opacity 0.15s; flex-shrink: 0;" title="{{ __('warehouse.tooltips.open_ledger') }}">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
                                         </svg>
                                     </div>
                                 </td>
-                                <td>{{ $item['ingredient']['type'] ?? '—' }}</td>
-                                <td>{{ str_starts_with($item['ingredient']['supplier']['name'] ?? '', 'test_') ? __('warehouse.common.test_supplier') : ($item['ingredient']['supplier']['name'] ?? '—') }}</td>
-                                <td style="text-align: right; font-weight: 700;">
+                                <td style="padding:12px 14px; font-weight: 600;">{{ $item['ingredient']['type'] ?? '—' }}</td>
+                                <td style="padding:12px 14px;">{{ str_starts_with($item['ingredient']['supplier']['name'] ?? '', 'test_') ? __('warehouse.common.test_supplier') : ($item['ingredient']['supplier']['name'] ?? '—') }}</td>
+                                <td style="padding:12px 14px; text-align: center; font-weight: 800; color: var(--po-bl, #1267e8); font-variant-numeric: tabular-nums;">
                                     {{ $this->formatQty($item['quantity']) }} {{ $item['ingredient']['unit'] ?? '' }}
                                 </td>
-                                <td style="text-align: right; color: #64748b;">
+                                <td style="padding:12px 14px; text-align: center; color: #64748b; font-variant-numeric: tabular-nums;">
                                     {{ $this->formatQty($item['min_quantity']) }} {{ $item['ingredient']['unit'] ?? '' }}
                                 </td>
-                                <td style="text-align: right; font-weight: 600;">
+                                <td style="padding:12px 14px; text-align: right; font-weight: 600; font-variant-numeric: tabular-nums;">
                                     {{ number_format($item['unit_price'], 0, ',', '.') }} {{ __('warehouse.common.currency') }}
                                 </td>
-                                <td style="text-align: right; font-weight: 700; color: rgb(var(--primary-600));" class="dark:text-primary-400">
+                                <td style="padding:12px 14px; text-align: right; font-weight: 800; color: var(--po-bl, #1267e8); font-variant-numeric: tabular-nums;">
                                     {{ number_format($item['quantity'] * $item['unit_price'], 0, ',', '.') }} {{ __('warehouse.common.currency') }}
                                 </td>
                                 <td style="text-align: center; font-size: 11px; color: #64748b; font-variant-numeric: tabular-nums;">
