@@ -576,10 +576,137 @@
             background: #1e293b;
             color: #cbd5e1;
         }
+    /* Hộp thoại xác nhận xóa/hủy trong trang (teleport ra body) */
+    .rcf-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 60;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+        background: rgba(15, 23, 42, .55);
+        backdrop-filter: blur(2px);
+        font-family: "Inter", system-ui, sans-serif;
+    }
+    .rcf-box {
+        width: 100%;
+        max-width: 420px;
+        background: var(--po-wh, #fff);
+        border: 1px solid var(--po-bd, #e2e8f0);
+        border-radius: var(--po-r, 12px);
+        box-shadow: 0 20px 45px rgba(15, 23, 42, .25);
+        padding: 20px;
+    }
+    .rcf-head {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+    .rcf-ico {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 34px;
+        height: 34px;
+        border-radius: 9px;
+        font-size: 15px;
+        flex: 0 0 auto;
+    }
+    .rcf-ico-danger {
+        background: var(--po-rd-s, #fef2f2);
+        color: var(--po-rd, #dc2626);
+    }
+    .rcf-ico-info {
+        background: var(--po-bl-s, #e9f2f8);
+        color: var(--po-bl, #1267e8);
+    }
+    .rcf-title {
+        margin: 0;
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--po-tx, #0f172a);
+    }
+    .rcf-msg {
+        margin: 0 0 18px;
+        font-size: 13px;
+        line-height: 1.55;
+        color: var(--po-su, #334155);
+    }
+    .rcf-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+    }
+    .rcf-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        height: 34px;
+        padding: 0 14px;
+        border-radius: 8px;
+        border: 1px solid transparent;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: filter .14s ease, background .14s ease;
+    }
+    .rcf-btn:disabled {
+        opacity: .6;
+        cursor: not-allowed;
+    }
+    .rcf-btn-ghost {
+        background: var(--po-wh, #fff);
+        border-color: var(--po-bd, #e2e8f0);
+        color: var(--po-su, #334155);
+    }
+    .rcf-btn-ghost:hover:not(:disabled) {
+        background: var(--po-bd2, #f1f5f9);
+    }
+    .rcf-btn-danger {
+        background: #dc2626;
+        color: #fff;
+    }
+    .rcf-btn-primary {
+        background: #1267e8;
+        color: #fff;
+    }
+    .rcf-btn-danger:hover:not(:disabled),
+    .rcf-btn-primary:hover:not(:disabled) {
+        filter: brightness(.94);
+    }
 </style>
 @endpush
 
 <x-filament-panels::page>
+    <div x-data="{
+        cf: { open: false, title: '', message: '', confirmLabel: '', danger: true, method: null, arg: null, busy: false },
+        askConfirm(method, arg, title, message, confirmLabel, danger = true) {
+            this.cf = { open: true, title, message, confirmLabel, danger, method, arg, busy: false };
+        },
+        closeConfirm() {
+            if (this.cf.busy) return;
+            this.cf.open = false;
+            this.cf.method = null;
+        },
+        async runConfirm() {
+            if (this.cf.busy || ! this.cf.method) return;
+            this.cf.busy = true;
+            try {
+                if (this.cf.arg === null) {
+                    await $wire.call(this.cf.method);
+                } else {
+                    await $wire.call(this.cf.method, this.cf.arg);
+                }
+            } finally {
+                this.cf.busy = false;
+                this.cf.open = false;
+                this.cf.method = null;
+            }
+        },
+     }"
+     @keydown.escape.window="closeConfirm()">
 
     <!-- Stats Cards -->
     @php $stats = $this->getStats(); @endphp
@@ -1549,12 +1676,10 @@
                                                         {{ __('warehouse.actions.confirm_receive') }}
                                                     </button>
                                                 @elseif($tf->status === \App\Models\StockTransfer::STATUS_IN_TRANSIT && $curKitchenId === $tf->source_kitchen_id)
-                                                    <button type="button" class="wh-action-btn wh-action-btn-danger" style="height:28px; font-size:10px; padding:0 8px; margin:0 auto;"
-                                                            wire:click="cancelTransfer({{ $tf->id }})"
-                                                            wire:confirm="{{ __('warehouse.actions.confirm_cancel_transfer') }}"
-                                                            wire:loading.attr="disabled" wire:target="cancelTransfer">
-                                                        {{ __('warehouse.actions.cancel_transfer') }}
-                                                    </button>
+                                                     <button type="button" class="wh-action-btn wh-action-btn-danger" style="height:28px; font-size:10px; padding:0 8px; margin:0 auto;"
+                                                             @click="askConfirm('cancelTransfer', {{ $tf->id }}, @js(__('warehouse.actions.cancel_transfer')), @js(__('warehouse.actions.confirm_cancel_transfer')), @js(__('warehouse.actions.cancel_transfer')))">
+                                                         {{ __('warehouse.actions.cancel_transfer') }}
+                                                     </button>
                                                 @else
                                                     —
                                                 @endif
@@ -1859,4 +1984,30 @@
             </div>
         </div>
     @endif
+
+    {{-- Hộp thoại xác nhận trong trang (teleport ra body) --}}
+    <template x-teleport="body">
+        <div x-show="cf.open" x-cloak class="rcf-overlay" @click.self="closeConfirm()">
+            <div class="rcf-box" role="dialog" aria-modal="true">
+                <div class="rcf-head">
+                    <span class="rcf-ico" :class="cf.danger ? 'rcf-ico-danger' : 'rcf-ico-info'">
+                        <i class="fa-solid" :class="cf.danger ? 'fa-triangle-exclamation' : 'fa-rotate-left'"></i>
+                    </span>
+                    <h3 class="rcf-title" x-text="cf.title"></h3>
+                </div>
+                <p class="rcf-msg" x-text="cf.message"></p>
+                <div class="rcf-actions">
+                    <button type="button" class="rcf-btn rcf-btn-ghost" @click="closeConfirm()" :disabled="cf.busy">
+                        {{ __('common.actions.cancel') }}
+                    </button>
+                    <button type="button" class="rcf-btn" :class="cf.danger ? 'rcf-btn-danger' : 'rcf-btn-primary'"
+                            @click="runConfirm()" :disabled="cf.busy">
+                        <i class="fa-solid fa-spinner fa-spin" x-show="cf.busy"></i>
+                        <span x-text="cf.confirmLabel"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </template>
+    </div>
 </x-filament-panels::page>
