@@ -2882,6 +2882,7 @@ button.btn-danger-red svg {
     padding: 0.85rem 1.25rem !important;
     color: #64748b !important;
     font-size: 13px !important;
+    font-weight: 400 !important;
     flex-wrap: wrap !important;
     background: #ffffff !important;
     border: 1px solid #e2e8f0 !important;
@@ -2905,8 +2906,8 @@ button.btn-danger-red svg {
 .emp-footer .num-bold,
 .time-footer .num-bold,
 .ot-footer .num-bold {
-    font-weight: 700 !important;
-    color: #0f172a !important;
+    font-weight: 400 !important;
+    color: #475569 !important;
     font-variant-numeric: tabular-nums !important;
 }
 
@@ -2915,7 +2916,7 @@ button.btn-danger-red svg {
 .dark .emp-footer .num-bold,
 .dark .time-footer .num-bold,
 .dark .ot-footer .num-bold {
-    color: #f8fafc !important;
+    color: #cbd5e1 !important;
 }
 
 .po-pagination,
@@ -2937,7 +2938,7 @@ button.btn-danger-red svg {
     background-color: #ffffff !important;
     color: #0f172a !important;
     font-size: 13px !important;
-    font-weight: 600 !important;
+    font-weight: 400 !important;
     font-variant-numeric: tabular-nums !important;
     cursor: pointer !important;
     outline: none !important;
@@ -2976,7 +2977,7 @@ button.btn-danger-red svg {
     border: 1px solid #cbd5e1 !important;
     background: #ffffff !important;
     color: #334155 !important;
-    font-weight: 600 !important;
+    font-weight: 500 !important;
     font-size: 13px !important;
     font-variant-numeric: tabular-nums !important;
     text-decoration: none !important;

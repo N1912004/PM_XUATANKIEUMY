@@ -633,7 +633,7 @@
         border: 1px solid var(--po-bd);
         background: var(--po-wh);
         color: var(--po-mu);
-        font-weight: 800;
+        font-weight: 500;
         font-size: .86rem;
         text-decoration: none;
         padding: 0 .55rem;

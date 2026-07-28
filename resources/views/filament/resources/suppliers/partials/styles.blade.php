@@ -653,7 +653,7 @@
                 border: 1px solid var(--sup-bd);
                 background: var(--sup-wh);
                 color: var(--sup-mu);
-                font-weight: 800;
+                font-weight: 500;
                 text-decoration: none;
                 padding: 0 .55rem;
             }

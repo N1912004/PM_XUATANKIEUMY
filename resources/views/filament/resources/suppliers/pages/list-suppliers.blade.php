@@ -323,7 +323,7 @@
         @if($suppliersList->total() > 0)
             <div class="sup-footer">
                 <div>
-                    Hiển thị <span class="num-bold">{{ $suppliersList->firstItem() ?? 0 }}</span> - <span class="num-bold">{{ $suppliersList->lastItem() ?? 0 }}</span> trong tổng số <span class="num-bold">{{ number_format($suppliersList->total(), 0, ',', '.') }}</span> nhà cung cấp
+                    Hiển thị {{ $suppliersList->firstItem() ?? 0 }} - {{ $suppliersList->lastItem() ?? 0 }} trong tổng số {{ number_format($suppliersList->total(), 0, ',', '.') }} nhà cung cấp
                 </div>
                 <div class="sup-pagination">
                     <select wire:model.live="perPage" class="sup-select">

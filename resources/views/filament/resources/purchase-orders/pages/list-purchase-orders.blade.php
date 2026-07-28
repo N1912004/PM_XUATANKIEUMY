@@ -217,7 +217,7 @@
         @endphp
         <div class="po-footer">
             <div>
-                Hiển thị <span class="num-bold">{{ $ordersList->firstItem() ?? 0 }}</span> - <span class="num-bold">{{ $ordersList->lastItem() ?? 0 }}</span> trong tổng số <span class="num-bold">{{ number_format($ordersList->total(), 0, ',', '.') }}</span> đơn hàng
+                Hiển thị {{ $ordersList->firstItem() ?? 0 }} - {{ $ordersList->lastItem() ?? 0 }} trong tổng số {{ number_format($ordersList->total(), 0, ',', '.') }} đơn hàng
             </div>
             <div class="po-pagination">
                 <select wire:model.live="perPage" class="po-select">
