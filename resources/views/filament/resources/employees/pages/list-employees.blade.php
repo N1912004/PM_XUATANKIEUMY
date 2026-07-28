@@ -272,7 +272,7 @@
         </div>
 
         <!-- Table Footer / Pagination -->
-        @if($employeesList->hasPages())
+        @if($employeesList->total() > 0)
             @php
                 $currentPage = $employeesList->currentPage();
                 $lastPage = $employeesList->lastPage();
@@ -284,52 +284,55 @@
             @endphp
             <div class="po-footer" style="border-top:1px solid var(--po-bd2); padding:14px 18px; display:flex; justify-content:space-between; align-items:center; font-size:12.5px; color:var(--po-mu)">
                 <div>
-                    {{ __('employee.ui.pagination', ['from' => $employeesList->firstItem(), 'to' => $employeesList->lastItem(), 'total' => number_format($employeesList->total(), 0, ',', '.')]) }}
+                    {{ __('employee.ui.pagination', ['from' => $employeesList->firstItem() ?? 0, 'to' => $employeesList->lastItem() ?? 0, 'total' => number_format($employeesList->total(), 0, ',', '.')]) }}
                 </div>
                 <div class="po-pagination" style="display:flex; align-items:center; gap:12px">
                     <select wire:model.live="perPage" class="po-select" style="min-width:7rem;height:2.1rem;padding:0 .5rem;border-radius:.5rem; border:1px solid var(--po-bd); outline:none; background:var(--po-wh); color:var(--po-tx)">
+                        <option value="5">{{ __('employee.ui.rows_per_page', ['count' => 5]) }}</option>
                         <option value="10">{{ __('employee.ui.rows_per_page', ['count' => 10]) }}</option>
                         <option value="20">{{ __('employee.ui.rows_per_page', ['count' => 20]) }}</option>
                         <option value="50">{{ __('employee.ui.rows_per_page', ['count' => 50]) }}</option>
                     </select>
 
-                    <nav role="navigation" aria-label="{{ __('common.pagination.navigation') }}" style="display:flex; align-items:center; gap:4px">
-                        {{-- Previous --}}
-                        @if ($employeesList->onFirstPage())
-                            <span aria-disabled="true" style="width:30px; height:30px; border-radius:6px; border:1px solid var(--po-bd); display:flex; align-items:center; justify-content:center; color:var(--po-fa); cursor:not-allowed">
-                                <i class="fa-solid fa-chevron-left" style="font-size: 10px;"></i>
-                            </span>
-                        @else
-                            <button type="button" wire:click="previousPage" rel="prev" style="width:30px; height:30px; border-radius:6px; border:1px solid var(--po-bd); display:flex; align-items:center; justify-content:center; color:var(--po-su); cursor:pointer; background:var(--po-wh)">
-                                <i class="fa-solid fa-chevron-left" style="font-size: 10px;"></i>
-                            </button>
-                        @endif
-
-                        {{-- Windowed page numbers --}}
-                        @foreach ($pageWindow as $i => $page)
-                            @if ($i > 0 && $page - $pageWindow[$i - 1] > 1)
-                                <span class="po-page-dots" aria-hidden="true" style="padding:0 4px">…</span>
-                            @endif
-                            @if ($page == $currentPage)
-                                <span aria-current="page" style="width:30px; height:30px; border-radius:6px; background:var(--po-bl); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700">
-                                    <span>{{ $page }}</span>
+                    @if($employeesList->hasPages())
+                        <nav role="navigation" aria-label="{{ __('common.pagination.navigation') }}" style="display:flex; align-items:center; gap:4px">
+                            {{-- Previous --}}
+                            @if ($employeesList->onFirstPage())
+                                <span aria-disabled="true" style="width:30px; height:30px; border-radius:6px; border:1px solid var(--po-bd); display:flex; align-items:center; justify-content:center; color:var(--po-fa); cursor:not-allowed">
+                                    <i class="fa-solid fa-chevron-left" style="font-size: 10px;"></i>
                                 </span>
                             @else
-                                <button type="button" wire:click="gotoPage({{ $page }})" style="width:30px; height:30px; border-radius:6px; border:1px solid var(--po-bd); display:flex; align-items:center; justify-content:center; color:var(--po-su); cursor:pointer; background:var(--po-wh); font-weight:500">{{ $page }}</button>
+                                <button type="button" wire:click="previousPage" rel="prev" style="width:30px; height:30px; border-radius:6px; border:1px solid var(--po-bd); display:flex; align-items:center; justify-content:center; color:var(--po-su); cursor:pointer; background:var(--po-wh)">
+                                    <i class="fa-solid fa-chevron-left" style="font-size: 10px;"></i>
+                                </button>
                             @endif
-                        @endforeach
 
-                        {{-- Next --}}
-                        @if ($employeesList->hasMorePages())
-                            <button type="button" wire:click="nextPage" rel="next" style="width:30px; height:30px; border-radius:6px; border:1px solid var(--po-bd); display:flex; align-items:center; justify-content:center; color:var(--po-su); cursor:pointer; background:var(--po-wh)">
-                                <i class="fa-solid fa-chevron-right" style="font-size: 10px;"></i>
-                            </button>
-                        @else
-                            <span aria-disabled="true" style="width:30px; height:30px; border-radius:6px; border:1px solid var(--po-bd); display:flex; align-items:center; justify-content:center; color:var(--po-fa); cursor:not-allowed">
-                                <i class="fa-solid fa-chevron-right" style="font-size: 10px;"></i>
-                            </span>
-                        @endif
-                    </nav>
+                            {{-- Windowed page numbers --}}
+                            @foreach ($pageWindow as $i => $page)
+                                @if ($i > 0 && $page - $pageWindow[$i - 1] > 1)
+                                    <span class="po-page-dots" aria-hidden="true" style="padding:0 4px">…</span>
+                                @endif
+                                @if ($page == $currentPage)
+                                    <span aria-current="page" style="width:30px; height:30px; border-radius:6px; background:var(--po-bl); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700">
+                                        <span>{{ $page }}</span>
+                                    </span>
+                                @else
+                                    <button type="button" wire:click="gotoPage({{ $page }})" style="width:30px; height:30px; border-radius:6px; border:1px solid var(--po-bd); display:flex; align-items:center; justify-content:center; color:var(--po-su); cursor:pointer; background:var(--po-wh); font-weight:500">{{ $page }}</button>
+                                @endif
+                            @endforeach
+
+                            {{-- Next --}}
+                            @if ($employeesList->hasMorePages())
+                                <button type="button" wire:click="nextPage" rel="next" style="width:30px; height:30px; border-radius:6px; border:1px solid var(--po-bd); display:flex; align-items:center; justify-content:center; color:var(--po-su); cursor:pointer; background:var(--po-wh)">
+                                    <i class="fa-solid fa-chevron-right" style="font-size: 10px;"></i>
+                                </button>
+                            @else
+                                <span aria-disabled="true" style="width:30px; height:30px; border-radius:6px; border:1px solid var(--po-bd); display:flex; align-items:center; justify-content:center; color:var(--po-fa); cursor:not-allowed">
+                                    <i class="fa-solid fa-chevron-right" style="font-size: 10px;"></i>
+                                </span>
+                            @endif
+                        </nav>
+                    @endif
                 </div>
             </div>
         @endif

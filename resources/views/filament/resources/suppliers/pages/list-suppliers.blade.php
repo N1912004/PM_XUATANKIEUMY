@@ -302,64 +302,67 @@
             </table>
         </div>
 
-        @if($suppliersList->hasPages())
+        @if($suppliersList->total() > 0)
             <div class="sup-footer">
                 <div>
-                    {{ __('supplier.pagination.summary', ['from' => $suppliersList->firstItem(), 'to' => $suppliersList->lastItem(), 'total' => $suppliersList->total()]) }}
+                    {{ __('supplier.pagination.summary', ['from' => $suppliersList->firstItem() ?? 0, 'to' => $suppliersList->lastItem() ?? 0, 'total' => $suppliersList->total()]) }}
                 </div>
                 <div class="sup-pagination">
                     <select wire:model.live="perPage" class="sup-select" style="min-width:7rem;height:2rem;padding:0 .5rem;border-radius:.5rem">
+                        <option value="5">5 / trang</option>
                         <option value="10">10 / trang</option>
                         <option value="20">20 / trang</option>
                         <option value="50">50 / trang</option>
                     </select>
 
-                    <nav role="navigation" aria-label="Pagination Navigation">
-                        {{-- Previous Page Link --}}
-                        @if ($suppliersList->onFirstPage())
-                            <span aria-disabled="true">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><polyline points="15 18 9 12 15 6"/></svg>
-                            </span>
-                        @else
-                            <button type="button" wire:click="previousPage" class="sup-small-btn" rel="prev">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><polyline points="15 18 9 12 15 6"/></svg>
-                            </button>
-                        @endif
-
-                        {{-- Pagination Elements (dạng cửa sổ: 1 … n-1 n n+1 … cuối) --}}
-                        @php
-                            $supCurrentPage = $suppliersList->currentPage();
-                            $supLastPage = $suppliersList->lastPage();
-                            $supPageWindow = collect([1, $supCurrentPage - 1, $supCurrentPage, $supCurrentPage + 1, $supLastPage])
-                                ->filter(fn ($p) => $p >= 1 && $p <= $supLastPage)
-                                ->unique()
-                                ->sort()
-                                ->values();
-                        @endphp
-                        @foreach ($supPageWindow as $i => $page)
-                            @if ($i > 0 && $page - $supPageWindow[$i - 1] > 1)
-                                <span aria-hidden="true" style="padding:0 4px">…</span>
-                            @endif
-                            @if ($page == $supCurrentPage)
-                                <span aria-current="page">
-                                    <span>{{ $page }}</span>
+                    @if($suppliersList->hasPages())
+                        <nav role="navigation" aria-label="Pagination Navigation">
+                            {{-- Previous Page Link --}}
+                            @if ($suppliersList->onFirstPage())
+                                <span aria-disabled="true">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><polyline points="15 18 9 12 15 6"/></svg>
                                 </span>
                             @else
-                                <button type="button" wire:click="gotoPage({{ $page }})" class="sup-small-btn">{{ $page }}</button>
+                                <button type="button" wire:click="previousPage" class="sup-small-btn" rel="prev">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><polyline points="15 18 9 12 15 6"/></svg>
+                                </button>
                             @endif
-                        @endforeach
 
-                        {{-- Next Page Link --}}
-                        @if ($suppliersList->hasMorePages())
-                            <button type="button" wire:click="nextPage" class="sup-small-btn" rel="next">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><polyline points="9 18 15 12 9 6"/></svg>
-                            </button>
-                        @else
-                            <span aria-disabled="true">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><polyline points="9 18 15 12 9 6"/></svg>
-                            </span>
-                        @endif
-                    </nav>
+                            {{-- Pagination Elements (dạng cửa sổ: 1 … n-1 n n+1 … cuối) --}}
+                            @php
+                                $supCurrentPage = $suppliersList->currentPage();
+                                $supLastPage = $suppliersList->lastPage();
+                                $supPageWindow = collect([1, $supCurrentPage - 1, $supCurrentPage, $supCurrentPage + 1, $supLastPage])
+                                    ->filter(fn ($p) => $p >= 1 && $p <= $supLastPage)
+                                    ->unique()
+                                    ->sort()
+                                    ->values();
+                            @endphp
+                            @foreach ($supPageWindow as $i => $page)
+                                @if ($i > 0 && $page - $supPageWindow[$i - 1] > 1)
+                                    <span aria-hidden="true" style="padding:0 4px">…</span>
+                                @endif
+                                @if ($page == $supCurrentPage)
+                                    <span aria-current="page">
+                                        <span>{{ $page }}</span>
+                                    </span>
+                                @else
+                                    <button type="button" wire:click="gotoPage({{ $page }})" class="sup-small-btn">{{ $page }}</button>
+                                @endif
+                            @endforeach
+
+                            {{-- Next Page Link --}}
+                            @if ($suppliersList->hasMorePages())
+                                <button type="button" wire:click="nextPage" class="sup-small-btn" rel="next">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><polyline points="9 18 15 12 9 6"/></svg>
+                                </button>
+                            @else
+                                <span aria-disabled="true">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><polyline points="9 18 15 12 9 6"/></svg>
+                                </span>
+                            @endif
+                        </nav>
+                    @endif
                 </div>
             </div>
         @endif
