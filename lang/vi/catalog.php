@@ -37,6 +37,7 @@ $translations = [
         'clear_selection' => 'Xóa chọn',
         'area_prefix' => 'Khu vực: :name',
     ],
+    'pagination' => ['summary' => 'Hiển thị :from-:to trên :total :entity', 'per_page' => ':count / trang'],
     'area' => [
         'label' => 'Khu vực',
         'fields' => ['name' => 'Tên khu vực', 'code' => 'Mã khu vực', 'manager' => 'Quản lý phụ trách'],
@@ -70,6 +71,7 @@ $translations = [
         'table' => ['time_range' => 'Khung giờ', 'sort_order' => 'THỨ TỰ ƯU TIÊN'],
         'notifications' => ['deleted' => 'Đã xóa ca làm việc thành công.'],
         'list' => [
+            'pagination_entity' => 'ca làm việc',
             'title' => 'Cấu hình ca làm việc',
             'subtitle' => 'Quản lý các ca sản xuất / phục vụ trong hệ thống',
             'create' => 'Thêm ca làm việc',
@@ -96,6 +98,7 @@ $translations['area']['unified'] = [
 ];
 
 $translations['area']['list'] = [
+    'pagination_entity' => 'khu vực',
     'title' => 'Khu vực',
     'subtitle' => 'Quản lý các khu vực vận hành và các nhà ăn / bếp sản xuất trực thuộc từng khu vực',
     'create' => 'Thêm khu vực',
@@ -112,6 +115,7 @@ $translations['area']['list'] = [
     'columns' => ['code' => 'Mã', 'area' => 'Khu vực', 'manager' => 'Quản lý', 'kitchens' => 'Nhà ăn'],
 ];
 $translations['kitchen']['list'] = [
+    'pagination_entity' => 'nhà ăn / bếp',
     'title' => 'Nhà ăn / bếp',
     'subtitle' => 'Quản lý các nhà ăn / bếp sản xuất trực thuộc từng khu vực vận hành',
     'create' => 'Thêm nhà ăn',

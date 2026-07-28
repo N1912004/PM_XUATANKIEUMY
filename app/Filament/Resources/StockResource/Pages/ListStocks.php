@@ -1513,7 +1513,7 @@ class ListStocks extends ListRecords
 
     public string $logToDate = '';
 
-    public int $logPerPage = 15;
+    public int $logPerPage = 10;
 
     public function updatedLogPerPage(): void
     {

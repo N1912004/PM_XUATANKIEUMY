@@ -420,7 +420,7 @@
         </div>
 
         <!-- Footer Pagination -->
-        @if($recipesList->hasPages())
+        @if($recipesList->total() > 0)
             @php
                 $currentPage = $recipesList->currentPage();
                 $lastPage = $recipesList->lastPage();
@@ -432,50 +432,53 @@
             @endphp
             <div class="tf">
                 <div>
-                    {{ __('recipe.pagination.summary', ['from' => $recipesList->firstItem(), 'to' => $recipesList->lastItem(), 'total' => number_format($recipesList->total(), 0, ',', '.')]) }}
+                    {{ __('recipe.pagination.summary', ['from' => $recipesList->firstItem() ?? 0, 'to' => $recipesList->lastItem() ?? 0, 'total' => number_format($recipesList->total(), 0, ',', '.')]) }}
                 </div>
                 <div class="pgwrap">
                     <span style="font-size:12px;color:var(--mu)">{{ __('recipe.pagination.per_page') }}</span>
                     <select wire:model.live="perPage" class="pgsel">
+                        <option value="5">5</option>
                         <option value="10">10</option>
                         <option value="20">20</option>
                         <option value="50">50</option>
                     </select>
-                    <div class="pgbs">
-                        {{-- Previous --}}
-                        @if ($recipesList->onFirstPage())
-                            <button type="button" class="pgb" disabled style="opacity: 0.5;">
-                                <i class="fa-solid fa-chevron-left"></i>
-                            </button>
-                        @else
-                            <button type="button" wire:click="previousPage" class="pgb">
-                                <i class="fa-solid fa-chevron-left"></i>
-                            </button>
-                        @endif
-
-                        {{-- Windowed page numbers --}}
-                        @foreach ($pageWindow as $i => $page)
-                            @if ($i > 0 && $page - $pageWindow[$i - 1] > 1)
-                                <span class="pgdot">...</span>
-                            @endif
-                            @if ($page == $currentPage)
-                                <button type="button" class="pgb cur">{{ $page }}</button>
+                    @if($recipesList->hasPages())
+                        <div class="pgbs">
+                            {{-- Previous --}}
+                            @if ($recipesList->onFirstPage())
+                                <button type="button" class="pgb" disabled style="opacity: 0.5;">
+                                    <i class="fa-solid fa-chevron-left"></i>
+                                </button>
                             @else
-                                <button type="button" wire:click="gotoPage({{ $page }})" class="pgb">{{ $page }}</button>
+                                <button type="button" wire:click="previousPage" class="pgb">
+                                    <i class="fa-solid fa-chevron-left"></i>
+                                </button>
                             @endif
-                        @endforeach
 
-                        {{-- Next --}}
-                        @if ($recipesList->hasMorePages())
-                            <button type="button" wire:click="nextPage" class="pgb">
-                                <i class="fa-solid fa-chevron-right"></i>
-                            </button>
-                        @else
-                            <button type="button" class="pgb" disabled style="opacity: 0.5;">
-                                <i class="fa-solid fa-chevron-right"></i>
-                            </button>
-                        @endif
-                    </div>
+                            {{-- Windowed page numbers --}}
+                            @foreach ($pageWindow as $i => $page)
+                                @if ($i > 0 && $page - $pageWindow[$i - 1] > 1)
+                                    <span class="pgdot">...</span>
+                                @endif
+                                @if ($page == $currentPage)
+                                    <button type="button" class="pgb cur">{{ $page }}</button>
+                                @else
+                                    <button type="button" wire:click="gotoPage({{ $page }})" class="pgb">{{ $page }}</button>
+                                @endif
+                            @endforeach
+
+                            {{-- Next --}}
+                            @if ($recipesList->hasMorePages())
+                                <button type="button" wire:click="nextPage" class="pgb">
+                                    <i class="fa-solid fa-chevron-right"></i>
+                                </button>
+                            @else
+                                <button type="button" class="pgb" disabled style="opacity: 0.5;">
+                                    <i class="fa-solid fa-chevron-right"></i>
+                                </button>
+                            @endif
+                        </div>
+                    @endif
                 </div>
             </div>
         @endif

@@ -205,7 +205,7 @@
     </div>
 
     <!-- Pagination -->
-    @if($ordersList->hasPages())
+    @if($ordersList->total() > 0)
         @php
             $currentPage = $ordersList->currentPage();
             $lastPage = $ordersList->lastPage();
@@ -217,50 +217,53 @@
         @endphp
         <div class="po-footer">
             <div>
-                {{ __('purchase_order.pagination.summary', ['from' => $ordersList->firstItem(), 'to' => $ordersList->lastItem(), 'total' => number_format($ordersList->total(), 0, ',', '.')]) }}
+                {{ __('purchase_order.pagination.summary', ['from' => $ordersList->firstItem() ?? 0, 'to' => $ordersList->lastItem() ?? 0, 'total' => number_format($ordersList->total(), 0, ',', '.')]) }}
             </div>
             <div class="po-pagination">
                 <select wire:model.live="perPage" class="po-select" style="min-width:7rem;height:2rem;padding:0 .5rem;border-radius:.5rem">
+                    <option value="5">{{ __('purchase_order.pagination.per_page', ['count' => 5]) }}</option>
                     <option value="10">{{ __('purchase_order.pagination.per_page', ['count' => 10]) }}</option>
                     <option value="20">{{ __('purchase_order.pagination.per_page', ['count' => 20]) }}</option>
                     <option value="50">{{ __('purchase_order.pagination.per_page', ['count' => 50]) }}</option>
                 </select>
 
-                <nav role="navigation" aria-label="Pagination Navigation">
-                    {{-- Previous --}}
-                    @if ($ordersList->onFirstPage())
-                        <span aria-disabled="true">
-                            <i class="fa-solid fa-chevron-left" style="font-size: 10px;"></i>
-                        </span>
-                    @else
-                        <button type="button" wire:click="previousPage" rel="prev">
-                            <i class="fa-solid fa-chevron-left" style="font-size: 10px;"></i>
-                        </button>
-                    @endif
-
-                    {{-- Windowed page numbers --}}
-                    @foreach ($pageWindow as $i => $page)
-                        @if ($i > 0 && $page - $pageWindow[$i - 1] > 1)
-                            <span class="po-page-dots" aria-hidden="true">…</span>
-                        @endif
-                        @if ($page == $currentPage)
-                            <span aria-current="page"><span>{{ $page }}</span></span>
+                @if($ordersList->hasPages())
+                    <nav role="navigation" aria-label="Pagination Navigation">
+                        {{-- Previous --}}
+                        @if ($ordersList->onFirstPage())
+                            <span aria-disabled="true">
+                                <i class="fa-solid fa-chevron-left" style="font-size: 10px;"></i>
+                            </span>
                         @else
-                            <button type="button" wire:click="gotoPage({{ $page }})">{{ $page }}</button>
+                            <button type="button" wire:click="previousPage" rel="prev">
+                                <i class="fa-solid fa-chevron-left" style="font-size: 10px;"></i>
+                            </button>
                         @endif
-                    @endforeach
 
-                    {{-- Next --}}
-                    @if ($ordersList->hasMorePages())
-                        <button type="button" wire:click="nextPage" rel="next">
-                            <i class="fa-solid fa-chevron-right" style="font-size: 10px;"></i>
-                        </button>
-                    @else
-                        <span aria-disabled="true">
-                            <i class="fa-solid fa-chevron-right" style="font-size: 10px;"></i>
-                        </span>
-                    @endif
-                </nav>
+                        {{-- Windowed page numbers --}}
+                        @foreach ($pageWindow as $i => $page)
+                            @if ($i > 0 && $page - $pageWindow[$i - 1] > 1)
+                                <span class="po-page-dots" aria-hidden="true">…</span>
+                            @endif
+                            @if ($page == $currentPage)
+                                <span aria-current="page"><span>{{ $page }}</span></span>
+                            @else
+                                <button type="button" wire:click="gotoPage({{ $page }})">{{ $page }}</button>
+                            @endif
+                        @endforeach
+
+                        {{-- Next --}}
+                        @if ($ordersList->hasMorePages())
+                            <button type="button" wire:click="nextPage" rel="next">
+                                <i class="fa-solid fa-chevron-right" style="font-size: 10px;"></i>
+                            </button>
+                        @else
+                            <span aria-disabled="true">
+                                <i class="fa-solid fa-chevron-right" style="font-size: 10px;"></i>
+                            </span>
+                        @endif
+                    </nav>
+                @endif
             </div>
         </div>
     @endif

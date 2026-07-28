@@ -37,6 +37,7 @@ $translations = [
         'clear_selection' => 'Clear selection',
         'area_prefix' => 'Area: :name',
     ],
+    'pagination' => ['summary' => 'Showing :from-:to of :total :entity', 'per_page' => ':count / page'],
     'area' => [
         'label' => 'Areas',
         'fields' => ['name' => 'Area name', 'code' => 'Area code', 'manager' => 'Manager in charge'],
@@ -70,6 +71,7 @@ $translations = [
         'table' => ['time_range' => 'Time range', 'sort_order' => 'SORT ORDER'],
         'notifications' => ['deleted' => 'Shift deleted successfully.'],
         'list' => [
+            'pagination_entity' => 'shifts',
             'title' => 'Shift configuration',
             'subtitle' => 'Manage production / service shifts in the system',
             'create' => 'Add shift',
@@ -96,6 +98,7 @@ $translations['area']['unified'] = [
 ];
 
 $translations['area']['list'] = [
+    'pagination_entity' => 'areas',
     'title' => 'Areas',
     'subtitle' => 'Manage operational areas and cafeterias / production kitchens in each area',
     'create' => 'Add area',
@@ -112,6 +115,7 @@ $translations['area']['list'] = [
     'columns' => ['code' => 'Code', 'area' => 'Area', 'manager' => 'Manager', 'kitchens' => 'Kitchens'],
 ];
 $translations['kitchen']['list'] = [
+    'pagination_entity' => 'cafeterias / kitchens',
     'title' => 'Cafeterias / Kitchens',
     'subtitle' => 'Manage cafeterias and production kitchens associated with each operating area',
     'create' => 'Add kitchen',

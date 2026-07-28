@@ -53,6 +53,11 @@ class ListRecipes extends Page
 
     public int $perPage = 10;
 
+    public function updatedPerPage(): void
+    {
+        $this->resetPage();
+    }
+
     // public ?int $expandedRecipeId = null;
 
     protected $queryString = [
@@ -114,12 +119,6 @@ class ListRecipes extends Page
     }
 
     public function updatedTrashedFilter(): void
-    {
-        $this->resetSelection();
-        $this->resetPage();
-    }
-
-    public function updatedPerPage(): void
     {
         $this->resetSelection();
         $this->resetPage();

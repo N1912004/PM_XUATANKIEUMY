@@ -24,11 +24,17 @@ class ListAreas extends Page
 
     public ?int $canteenAreaFilter = null;
 
+    public int $areaPerPage = 10;
+
+    public int $canteenPerPage = 10;
+
     protected $queryString = [
         'activeTab' => ['except' => 'area'],
         'areaSearch' => ['except' => ''],
         'canteenSearch' => ['except' => ''],
         'canteenAreaFilter' => ['except' => null],
+        'areaPerPage' => ['except' => 10],
+        'canteenPerPage' => ['except' => 10],
     ];
 
     public function setTab(string $tab): void
@@ -48,6 +54,18 @@ class ListAreas extends Page
 
     public function updatedCanteenAreaFilter(): void
     {
+        $this->resetPage('canteensPage');
+    }
+
+    public function updatedAreaPerPage(): void
+    {
+        $this->areaPerPage = $this->resolvePerPage($this->areaPerPage);
+        $this->resetPage('areasPage');
+    }
+
+    public function updatedCanteenPerPage(): void
+    {
+        $this->canteenPerPage = $this->resolvePerPage($this->canteenPerPage);
         $this->resetPage('canteensPage');
     }
 
@@ -95,7 +113,7 @@ class ListAreas extends Page
 
     public function areas()
     {
-        $query = Area::with(['manager', 'kitchens']);
+        $query = Area::query()->with('manager')->withCount('kitchens');
         if ($this->areaSearch) {
             $query->where(function ($q) {
                 $q->where('name', 'like', '%'.$this->areaSearch.'%')
@@ -103,7 +121,7 @@ class ListAreas extends Page
             });
         }
 
-        return $query->paginate(10, ['*'], 'areasPage');
+        return $query->paginate($this->resolvePerPage($this->areaPerPage), ['*'], 'areasPage');
     }
 
     public function kitchens()
@@ -116,7 +134,14 @@ class ListAreas extends Page
             $query->where('area_id', $this->canteenAreaFilter);
         }
 
-        return $query->paginate(10, ['*'], 'canteensPage');
+        return $query->paginate($this->resolvePerPage($this->canteenPerPage), ['*'], 'canteensPage');
+    }
+
+    private function resolvePerPage(int|string $value): int
+    {
+        $value = (int) $value;
+
+        return in_array($value, [5, 10, 20, 50], true) ? $value : 10;
     }
 
     public function getStats(): array
