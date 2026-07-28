@@ -22,6 +22,7 @@ use Filament\Resources\Pages\ListRecords;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator as LengthAwarePaginatorInstance;
 use Illuminate\Support\Facades\DB;
 use Livewire\WithFileUploads;
 
@@ -57,6 +58,8 @@ class ListStocks extends ListRecords
     public string $selectedSort = 'latest';
 
     public int $perPage = 10;
+
+    public int $checkPerPage = 10;
 
     public int|string|null $selectedKitchenId = null;
 
@@ -230,6 +233,7 @@ class ListStocks extends ListRecords
         }
 
         $this->resetPage();
+        $this->resetPage('checkPage');
         $this->resetPage('logPage');
     }
 
@@ -273,6 +277,7 @@ class ListStocks extends ListRecords
         $this->search = '';
         $this->checkStocksCache = null;
         $this->resetPage();
+        $this->resetPage('checkPage');
         $this->resetPage('logPage');
 
         if ($tab === 'check' && $this->actualQuantities === []) {
@@ -299,6 +304,7 @@ class ListStocks extends ListRecords
         $this->systemQtyCache = [];
         $this->actualQuantities = [];
         $this->checkNotes = [];
+        $this->resetPage('checkPage');
         $this->initEndDayCheck();
     }
 
@@ -399,6 +405,20 @@ class ListStocks extends ListRecords
                 });
             })
             ->get();
+    }
+
+    public function getCheckStocksPaginator(): LengthAwarePaginator
+    {
+        $stocks = $this->getCheckStocks();
+        $currentPage = max(1, (int) $this->getPage('checkPage'));
+
+        return new LengthAwarePaginatorInstance(
+            $stocks->forPage($currentPage, $this->checkPerPage)->values(),
+            $stocks->count(),
+            $this->checkPerPage,
+            $currentPage,
+            ['pageName' => 'checkPage'],
+        );
     }
 
     /** @var Collection|null Memo 1 render */
@@ -1446,6 +1466,7 @@ class ListStocks extends ListRecords
     public function updatedSearch(): void
     {
         $this->resetPage();
+        $this->resetPage('checkPage');
         $this->checkStocksCache = null;
         if ($this->warehouseTab === 'out' && $this->outMode === 'production') {
             $this->loadProductionItems();
@@ -1455,11 +1476,17 @@ class ListStocks extends ListRecords
     public function updatedSelectedType(): void
     {
         $this->resetPage();
+        $this->resetPage('checkPage');
     }
 
     public function updatedPerPage(): void
     {
         $this->resetPage();
+    }
+
+    public function updatedCheckPerPage(): void
+    {
+        $this->resetPage('checkPage');
     }
 
     public function getWarehouseData(): LengthAwarePaginator

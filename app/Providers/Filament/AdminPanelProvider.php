@@ -650,12 +650,12 @@ class AdminPanelProvider extends PanelProvider
                             position: relative !important;
                             z-index: 61 !important;
                         }
-                        .fi-resource-recipes .recipe-cost-section .choices__list--dropdown,
-                        .fi-resource-ingredients .fi-fo-select .choices__list--dropdown {
+                        .fi-fo-select .choices__list--dropdown {
                             left: 0 !important;
                             width: 100% !important;
                             min-width: 100% !important;
                             max-width: none !important;
+                            box-sizing: border-box !important;
                             margin-top: 4px !important;
                             border: 1px solid #dbe3ee !important;
                             border-radius: 7px !important;
@@ -663,10 +663,10 @@ class AdminPanelProvider extends PanelProvider
                             box-shadow: 0 8px 20px rgba(15, 23, 42, 0.12) !important;
                             overflow: hidden !important;
                         }
-                        .fi-resource-recipes .recipe-cost-section .choices__list--dropdown .choices__input--cloned,
-                        .fi-resource-ingredients .fi-fo-select .choices__list--dropdown .choices__input--cloned {
+                        .fi-fo-select .choices__list--dropdown .choices__input--cloned {
                             display: block !important;
                             width: 100% !important;
+                            box-sizing: border-box !important;
                             height: 34px !important;
                             min-height: 34px !important;
                             margin: 0 !important;
@@ -680,36 +680,32 @@ class AdminPanelProvider extends PanelProvider
                             line-height: 34px !important;
                             outline: 0 !important;
                         }
-                        .fi-resource-recipes .recipe-cost-section .choices__list--dropdown > .choices__list,
-                        .fi-resource-ingredients .fi-fo-select .choices__list--dropdown > .choices__list {
+                        .fi-fo-select .choices__list--dropdown > .choices__list {
+                            width: 100% !important;
                             max-height: 190px !important;
                             overflow-y: auto !important;
                         }
-                        .fi-resource-recipes .recipe-cost-section .choices__list--dropdown .choices__item--choice,
-                        .fi-resource-ingredients .fi-fo-select .choices__list--dropdown .choices__item--choice {
+                        .fi-fo-select .choices__list--dropdown .choices__item--choice {
+                            width: 100% !important;
+                            box-sizing: border-box !important;
                             padding: 9px 12px !important;
                             color: #334155 !important;
                             font-size: 12.5px !important;
                         }
-                        .fi-resource-recipes .recipe-cost-section .choices__list--dropdown .choices__item--choice.is-highlighted,
-                        .fi-resource-ingredients .fi-fo-select .choices__list--dropdown .choices__item--choice.is-highlighted {
+                        .fi-fo-select .choices__list--dropdown .choices__item--choice.is-highlighted {
                             background: #f8fafc !important;
                             color: #0f172a !important;
                         }
-                        .dark .fi-resource-recipes .recipe-cost-section .choices__list--dropdown,
-                        .dark .fi-resource-recipes .recipe-cost-section .choices__list--dropdown .choices__input--cloned,
-                        .dark .fi-resource-ingredients .fi-fo-select .choices__list--dropdown,
-                        .dark .fi-resource-ingredients .fi-fo-select .choices__list--dropdown .choices__input--cloned {
+                        .dark .fi-fo-select .choices__list--dropdown,
+                        .dark .fi-fo-select .choices__list--dropdown .choices__input--cloned {
                             border-color: #374151 !important;
                             background: #111827 !important;
                             color: #e5e7eb !important;
                         }
-                        .dark .fi-resource-recipes .recipe-cost-section .choices__list--dropdown .choices__item--choice,
-                        .dark .fi-resource-ingredients .fi-fo-select .choices__list--dropdown .choices__item--choice {
+                        .dark .fi-fo-select .choices__list--dropdown .choices__item--choice {
                             color: #cbd5e1 !important;
                         }
-                        .dark .fi-resource-recipes .recipe-cost-section .choices__list--dropdown .choices__item--choice.is-highlighted,
-                        .dark .fi-resource-ingredients .fi-fo-select .choices__list--dropdown .choices__item--choice.is-highlighted {
+                        .dark .fi-fo-select .choices__list--dropdown .choices__item--choice.is-highlighted {
                             background: #1f2937 !important;
                             color: #ffffff !important;
                         }

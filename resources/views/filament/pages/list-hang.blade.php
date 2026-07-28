@@ -1007,7 +1007,18 @@
             </div>
 
             <!-- Main Grouped List per Shift -->
-            @php $groupedData = $this->getGroupedData(); @endphp
+            @php
+                $listPaginator = $this->getGroupedDataPaginator();
+                $groupedData = $listPaginator->getCollection()
+                    ->groupBy(fn (array $row): int => $row['shift']['id'])
+                    ->map(function ($rows): array {
+                        $shift = $rows->first()['shift'];
+                        $shift['dishes'] = $rows->pluck('dish')->all();
+
+                        return $shift;
+                    })
+                    ->values();
+            @endphp
             @forelse($groupedData as $shiftData)
                 <div class="lhn-ca-card" x-data="{ open: true }">
                     <div class="lhn-ca-head" @click="open = !open">
@@ -1087,6 +1098,70 @@
                     <p>{{ __('list_hang.empty.no_menu_description') }}</p>
                 </div>
             @endforelse
+
+            @if($listPaginator->total() > 0)
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-top:14px; padding:14px 16px; border-top:1px solid var(--bd); font-size:12px; color:var(--mu);">
+                    <div>
+                        {{ __('list_hang.pagination.summary', [
+                            'from' => $listPaginator->firstItem() ?? 0,
+                            'to' => $listPaginator->lastItem() ?? 0,
+                            'total' => $listPaginator->total(),
+                        ]) }}
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <select wire:model.live="listPerPage" style="height:30px; border:1px solid var(--bd); border-radius:6px; padding:0 8px; font-size:12px; background:var(--wh); color:var(--tx);">
+                            <option value="5">{{ __('list_hang.pagination.per_page', ['count' => 5]) }}</option>
+                            <option value="10">{{ __('list_hang.pagination.per_page', ['count' => 10]) }}</option>
+                            <option value="20">{{ __('list_hang.pagination.per_page', ['count' => 20]) }}</option>
+                            <option value="50">{{ __('list_hang.pagination.per_page', ['count' => 50]) }}</option>
+                        </select>
+
+                        @if($listPaginator->hasPages())
+                            <nav role="navigation" aria-label="{{ __('list_hang.pagination.navigation') }}" style="display:flex; align-items:center; gap:4px;">
+                                @if ($listPaginator->onFirstPage())
+                                    <span aria-disabled="true" style="opacity:.4; padding:4px;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><polyline points="15 18 9 12 15 6"/></svg>
+                                    </span>
+                                @else
+                                    <button type="button" wire:click="previousPage('listPage')" rel="prev" style="display:inline-flex; align-items:center; justify-content:center; min-width:28px; height:28px; border:1px solid var(--bd); border-radius:6px; background:transparent; cursor:pointer;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><polyline points="15 18 9 12 15 6"/></svg>
+                                    </button>
+                                @endif
+
+                                @php
+                                    $listCurrentPage = $listPaginator->currentPage();
+                                    $listLastPage = $listPaginator->lastPage();
+                                    $listPageWindow = collect([1, $listCurrentPage - 1, $listCurrentPage, $listCurrentPage + 1, $listLastPage])
+                                        ->filter(fn ($page) => $page >= 1 && $page <= $listLastPage)
+                                        ->unique()
+                                        ->sort()
+                                        ->values();
+                                @endphp
+                                @foreach ($listPageWindow as $index => $page)
+                                    @if ($index > 0 && $page - $listPageWindow[$index - 1] > 1)
+                                        <span aria-hidden="true" style="padding:0 4px">…</span>
+                                    @endif
+                                    @if ($page === $listCurrentPage)
+                                        <span aria-current="page" style="display:inline-flex; align-items:center; justify-content:center; min-width:28px; height:28px; border-radius:6px; background:var(--bl); color:#fff; font-weight:700;">{{ $page }}</span>
+                                    @else
+                                        <button type="button" wire:click="gotoPage({{ $page }}, 'listPage')" style="display:inline-flex; align-items:center; justify-content:center; min-width:28px; height:28px; border:1px solid var(--bd); border-radius:6px; background:transparent; color:var(--tx); cursor:pointer;">{{ $page }}</button>
+                                    @endif
+                                @endforeach
+
+                                @if($listPaginator->hasMorePages())
+                                    <button type="button" wire:click="nextPage('listPage')" rel="next" style="display:inline-flex; align-items:center; justify-content:center; min-width:28px; height:28px; border:1px solid var(--bd); border-radius:6px; background:transparent; cursor:pointer;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><polyline points="9 18 15 12 9 6"/></svg>
+                                    </button>
+                                @else
+                                    <span aria-disabled="true" style="opacity:.4; padding:4px;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><polyline points="9 18 15 12 9 6"/></svg>
+                                    </span>
+                                @endif
+                            </nav>
+                        @endif
+                    </div>
+                </div>
+            @endif
         </div>
     @elseif($mode === 'create_po')
         <!-- TẠO ĐƠN ĐẶT HÀNG WIZARD (MẪU ẢNH 3) -->
