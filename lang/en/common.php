@@ -18,7 +18,7 @@ return [
     ],
     'pagination' => [
         'navigation' => 'Pagination navigation',
-        'summary' => 'Showing :first to :last of :total items',
+        'summary' => 'Showing :first - :last of :total results',
     ],
     'select' => [
         'placeholder' => '— Select —',

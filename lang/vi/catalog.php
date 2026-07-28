@@ -37,7 +37,7 @@ $translations = [
         'clear_selection' => 'Xóa chọn',
         'area_prefix' => 'Khu vực: :name',
     ],
-    'pagination' => ['summary' => 'Hiển thị :from-:to trên :total :entity', 'per_page' => ':count / trang'],
+    'pagination' => ['summary' => 'Hiển thị :from - :to trong tổng số :total :entity', 'per_page' => ':count / trang'],
     'area' => [
         'label' => 'Khu vực',
         'plural_label' => 'Khu vực',

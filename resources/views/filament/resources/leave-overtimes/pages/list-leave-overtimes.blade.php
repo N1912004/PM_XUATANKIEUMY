@@ -312,13 +312,13 @@
             @endphp
             <div class="po-footer" style="border-top:1px solid var(--po-bd2); padding:14px 18px; display:flex; justify-content:space-between; align-items:center; font-size:12.5px; color:var(--po-mu)">
                 <div>
-                    {!! __('leave_overtime.ui.pagination', ['from' => '<strong>'.$itemsList->firstItem().'</strong>', 'to' => '<strong>'.$itemsList->lastItem().'</strong>', 'total' => '<strong>'.number_format($itemsList->total(), 0, ',', '.').'</strong>']) !!}
+                    {{ __('leave_overtime.ui.pagination', ['from' => $itemsList->firstItem() ?? 0, 'to' => $itemsList->lastItem() ?? 0, 'total' => number_format($itemsList->total(), 0, ',', '.')]) }}
                 </div>
                 <div class="po-pagination" style="display:flex; align-items:center; gap:12px">
                     <select wire:model.live="perPage" class="po-select" style="min-width:7rem;height:2.1rem;padding:0 .5rem;border-radius:.5rem; border:1px solid var(--po-bd); outline:none; background:var(--po-wh); color:var(--po-tx)">
-                        <option value="10">{{ __('leave_overtime.ui.rows_per_page', ['count' => 10]) }}</option>
-                        <option value="20">{{ __('leave_overtime.ui.rows_per_page', ['count' => 20]) }}</option>
-                        <option value="50">{{ __('leave_overtime.ui.rows_per_page', ['count' => 50]) }}</option>
+                        @foreach([10, 20, 50] as $count)
+                            <option value="{{ $count }}">{{ __('leave_overtime.ui.rows_per_page', ['count' => $count]) }}</option>
+                        @endforeach
                     </select>
 
                     @if($itemsList->total() > 0)

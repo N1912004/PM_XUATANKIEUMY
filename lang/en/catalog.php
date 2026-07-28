@@ -37,7 +37,7 @@ $translations = [
         'clear_selection' => 'Clear selection',
         'area_prefix' => 'Area: :name',
     ],
-    'pagination' => ['summary' => 'Showing :from-:to of :total :entity', 'per_page' => ':count / page'],
+    'pagination' => ['summary' => 'Showing :from - :to of :total :entity', 'per_page' => ':count / page'],
     'area' => [
         'label' => 'Area',
         'plural_label' => 'Areas',

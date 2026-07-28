@@ -26,7 +26,7 @@ return [
     'labels' => ['applies_on' => 'Áp dụng: :date', 'portions' => 'suất', 'date_kitchen' => 'Ngày :date · :kitchen', 'dish_index' => 'Món :index', 'shift_portions' => 'Số suất', 'date_from' => 'Từ ngày', 'date_to' => 'Đến ngày', 'week_prefix' => 'Tuần', 'shift' => 'Ca', 'select_dish_hint' => 'Chọn món ăn cho từng ca & ngày làm việc'],
     'default_dish_labels' => ['Món 1', 'Món 2', 'Rau xào / luộc', 'Canh', 'Cơm', 'Tráng miệng', 'Món chay 1', 'Món chay 2', 'Canh chay'],
     'export' => ['filtered_list' => 'Danh sách thực đơn theo bộ lọc'],
-    'pagination' => ['summary' => 'Hiển thị :from-:to trên :total thực đơn', 'per_page' => ':count / trang'],
+    'pagination' => ['summary' => 'Hiển thị :from - :to trong tổng số :total thực đơn', 'per_page' => ':count / trang'],
     'week_form' => ['title' => 'Lập thực đơn tuần mới', 'edit_title' => 'Chỉnh sửa thực đơn tuần', 'subtitle' => 'Thiết lập món ăn và công suất suất ăn cho từng thứ trong tuần', 'shift_day' => 'CA / MÓN', 'duplicate_warning' => 'Món đã xuất hiện trong 3 tuần gần nhất (:count món)'],
     'day_form' => ['title' => 'Lập thực đơn ngày mới', 'edit_title' => 'Chỉnh sửa thực đơn ngày', 'subtitle' => 'Khai báo chi tiết thực đơn và số lượng suất ăn cụ thể theo từng ca ăn trong ngày', 'date' => 'Ngày lập thực đơn'],
     'days' => ['sunday' => 'Chủ Nhật', 'monday' => 'Thứ 2', 'tuesday' => 'Thứ 3', 'wednesday' => 'Thứ 4', 'thursday' => 'Thứ 5', 'friday' => 'Thứ 6', 'saturday' => 'Thứ 7'],

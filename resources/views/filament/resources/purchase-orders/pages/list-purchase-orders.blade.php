@@ -217,14 +217,13 @@
         @endphp
         <div class="po-footer">
             <div>
-                Hiển thị {{ $ordersList->firstItem() ?? 0 }} - {{ $ordersList->lastItem() ?? 0 }} trong tổng số {{ number_format($ordersList->total(), 0, ',', '.') }} đơn hàng
+                {{ __('purchase_order.pagination.summary', ['from' => $ordersList->firstItem() ?? 0, 'to' => $ordersList->lastItem() ?? 0, 'total' => number_format($ordersList->total(), 0, ',', '.')]) }}
             </div>
             <div class="po-pagination">
                 <select wire:model.live="perPage" class="po-select">
-                    <option value="5">5 / trang</option>
-                    <option value="10">10 / trang</option>
-                    <option value="20">20 / trang</option>
-                    <option value="50">50 / trang</option>
+                    @foreach([5, 10, 20, 50] as $count)
+                        <option value="{{ $count }}">{{ __('purchase_order.pagination.per_page', ['count' => $count]) }}</option>
+                    @endforeach
                 </select>
 
                 @if($ordersList->total() > 0)

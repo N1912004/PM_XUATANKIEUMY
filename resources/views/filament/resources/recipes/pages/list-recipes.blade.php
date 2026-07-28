@@ -444,12 +444,10 @@
                     {{ __('recipe.pagination.summary', ['from' => $recipesList->firstItem() ?? 0, 'to' => $recipesList->lastItem() ?? 0, 'total' => number_format($recipesList->total(), 0, ',', '.')]) }}
                 </div>
                 <div class="pgwrap">
-                    <span style="font-size:12px;color:var(--mu)">{{ __('recipe.pagination.per_page') }}</span>
                     <select wire:model.live="perPage" class="pgsel">
-                        <option value="5">5</option>
-                        <option value="10">10</option>
-                        <option value="20">20</option>
-                        <option value="50">50</option>
+                        @foreach([5, 10, 20, 50] as $count)
+                            <option value="{{ $count }}">{{ __('recipe.pagination.per_page', ['count' => $count]) }}</option>
+                        @endforeach
                     </select>
                     @if($recipesList->total() > 0)
                         <div class="pgbs">

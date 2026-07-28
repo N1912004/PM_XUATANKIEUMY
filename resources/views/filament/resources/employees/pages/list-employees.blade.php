@@ -315,10 +315,9 @@
                 </div>
                 <div class="po-pagination" style="display:flex; align-items:center; gap:12px">
                     <select wire:model.live="perPage" class="po-select" style="min-width:7rem;height:2.1rem;padding:0 .5rem;border-radius:.5rem; border:1px solid var(--po-bd); outline:none; background:var(--po-wh); color:var(--po-tx)">
-                        <option value="5">{{ __('employee.ui.rows_per_page', ['count' => 5]) }}</option>
-                        <option value="10">{{ __('employee.ui.rows_per_page', ['count' => 10]) }}</option>
-                        <option value="20">{{ __('employee.ui.rows_per_page', ['count' => 20]) }}</option>
-                        <option value="50">{{ __('employee.ui.rows_per_page', ['count' => 50]) }}</option>
+                        @foreach([5, 10, 20, 50] as $count)
+                            <option value="{{ $count }}">{{ __('employee.ui.rows_per_page', ['count' => $count]) }}</option>
+                        @endforeach
                     </select>
 
                     @if($employeesList->total() > 0)

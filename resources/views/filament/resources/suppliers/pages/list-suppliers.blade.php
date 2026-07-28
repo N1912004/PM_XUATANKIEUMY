@@ -323,14 +323,13 @@
         @if($suppliersList->total() > 0)
             <div class="sup-footer">
                 <div>
-                    Hiển thị {{ $suppliersList->firstItem() ?? 0 }} - {{ $suppliersList->lastItem() ?? 0 }} trong tổng số {{ number_format($suppliersList->total(), 0, ',', '.') }} nhà cung cấp
+                    {{ __('supplier.pagination.summary', ['from' => $suppliersList->firstItem() ?? 0, 'to' => $suppliersList->lastItem() ?? 0, 'total' => number_format($suppliersList->total(), 0, ',', '.')]) }}
                 </div>
                 <div class="sup-pagination">
                     <select wire:model.live="perPage" class="sup-select">
-                        <option value="5">5 / trang</option>
-                        <option value="10">10 / trang</option>
-                        <option value="20">20 / trang</option>
-                        <option value="50">50 / trang</option>
+                        @foreach([5, 10, 20, 50] as $count)
+                            <option value="{{ $count }}">{{ __('supplier.pagination.per_page', ['count' => $count]) }}</option>
+                        @endforeach
                     </select>
 
                     @if($suppliersList->total() > 0)
