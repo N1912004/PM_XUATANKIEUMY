@@ -18,12 +18,16 @@ use Carbon\Carbon;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
+use Livewire\WithPagination;
 use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class ListHang extends Page
 {
+    use WithPagination;
+
     protected static ?string $navigationIcon = 'fa-list-check';
 
     protected static ?int $navigationSort = 3;
@@ -35,6 +39,8 @@ class ListHang extends Page
     public ?string $date = null;
 
     public array $selectedShifts = [];
+
+    public int $listPerPage = 10;
 
     public ?string $weekFrom = null;
 
@@ -112,6 +118,17 @@ class ListHang extends Page
         $dt = Carbon::parse($this->date);
         $this->weekFrom = $dt->copy()->startOfWeek()->toDateString();
         $this->weekTo = $dt->copy()->endOfWeek()->toDateString();
+        $this->resetPage('listPage');
+    }
+
+    public function updatedSelectedShifts(): void
+    {
+        $this->resetPage('listPage');
+    }
+
+    public function updatedListPerPage(): void
+    {
+        $this->resetPage('listPage');
     }
 
     public function updatedPoSourceFrom(): void
@@ -599,6 +616,35 @@ class ListHang extends Page
             'dishes' => $dishes,
             'ingredients' => count($ingCodes),
         ];
+    }
+
+    /**
+     * Phân trang phần hiển thị theo món ăn, vẫn giữ getGroupedData() đầy đủ cho KPI và Excel.
+     * Mỗi dòng giữ metadata ca để Blade gom lại thành các card như giao diện hiện tại.
+     */
+    public function getGroupedDataPaginator(): LengthAwarePaginator
+    {
+        $rows = collect($this->getGroupedData())
+            ->flatMap(function (array $shift): array {
+                $shiftMeta = $shift;
+                unset($shiftMeta['dishes']);
+
+                return collect($shift['dishes'])->map(fn (array $dish): array => [
+                    'shift' => $shiftMeta,
+                    'dish' => $dish,
+                ])->all();
+            })
+            ->values();
+
+        $currentPage = max(1, (int) $this->getPage('listPage'));
+
+        return new LengthAwarePaginator(
+            $rows->forPage($currentPage, $this->listPerPage)->values(),
+            $rows->count(),
+            $this->listPerPage,
+            $currentPage,
+            ['pageName' => 'listPage'],
+        );
     }
 
     public function generatePurchaseOrders(): void

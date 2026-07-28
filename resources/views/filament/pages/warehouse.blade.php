@@ -898,7 +898,7 @@
                         </thead>
                         <tbody>
                             @php
-                                $stocksData = $this->getCheckStocks();
+                                $stocksData = $this->getCheckStocksPaginator();
                                 $systemQty = $this->getSystemQuantities($checkDate);
                                 $openingQty = $this->getOpeningQuantities();
                             @endphp
@@ -909,7 +909,7 @@
                                     $diff = ($actualVal === null || $actualVal === '' ? $sysQty : (float) $actualVal) - $sysQty;
                                 @endphp
                                 <tr>
-                                    <td style="text-align: center;">{{ $index + 1 }}</td>
+                                    <td style="text-align: center;">{{ ($stocksData->currentPage() - 1) * $stocksData->perPage() + $index + 1 }}</td>
                                     <td>
                                         <div style="font-weight: 700;">{{ $item->ingredient?->name ?? '—' }}</div>
                                         <div style="font-size:10px; color:#64748b;">{{ $item->ingredient?->code ?? '—' }} · {{ $item->ingredient?->type ?? '—' }}</div>
@@ -982,6 +982,70 @@
                         </tbody>
                     </table>
                 </div>
+
+                @if($stocksData->total() > 0)
+                    <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-top:14px; padding:14px 16px; border-top:1px solid #e2e8f0; font-size:12px; color:#64748b;" class="dark:text-gray-400 dark:border-gray-700">
+                        <div>
+                            {{ __('warehouse.pagination.showing', [
+                                'from' => $stocksData->firstItem() ?? 0,
+                                'to' => $stocksData->lastItem() ?? 0,
+                                'total' => $stocksData->total(),
+                            ]) }}
+                        </div>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <select wire:model.live="checkPerPage" style="height:30px; border:1px solid #cbd5e1; border-radius:6px; padding:0 8px; font-size:12px; background:transparent;" class="dark:border-gray-700 dark:bg-gray-800">
+                                <option value="5">{{ __('warehouse.pagination.per_page', ['count' => 5]) }}</option>
+                                <option value="10">{{ __('warehouse.pagination.per_page', ['count' => 10]) }}</option>
+                                <option value="20">{{ __('warehouse.pagination.per_page', ['count' => 20]) }}</option>
+                                <option value="50">{{ __('warehouse.pagination.per_page', ['count' => 50]) }}</option>
+                            </select>
+
+                            @if($stocksData->hasPages())
+                                <nav role="navigation" aria-label="{{ __('warehouse.pagination.navigation') }}" style="display:flex; align-items:center; gap:4px;">
+                                    @if ($stocksData->onFirstPage())
+                                        <span aria-disabled="true" style="opacity:.4; padding:4px;">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><polyline points="15 18 9 12 15 6"/></svg>
+                                        </span>
+                                    @else
+                                        <button type="button" wire:click="previousPage('checkPage')" rel="prev" style="display:inline-flex; align-items:center; justify-content:center; min-width:28px; height:28px; border:1px solid #cbd5e1; border-radius:6px; background:transparent; cursor:pointer;" class="dark:border-gray-700">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><polyline points="15 18 9 12 15 6"/></svg>
+                                        </button>
+                                    @endif
+
+                                    @php
+                                        $checkCurrentPage = $stocksData->currentPage();
+                                        $checkLastPage = $stocksData->lastPage();
+                                        $checkPageWindow = collect([1, $checkCurrentPage - 1, $checkCurrentPage, $checkCurrentPage + 1, $checkLastPage])
+                                            ->filter(fn ($page) => $page >= 1 && $page <= $checkLastPage)
+                                            ->unique()
+                                            ->sort()
+                                            ->values();
+                                    @endphp
+                                    @foreach ($checkPageWindow as $index => $page)
+                                        @if ($index > 0 && $page - $checkPageWindow[$index - 1] > 1)
+                                            <span aria-hidden="true" style="padding:0 4px">…</span>
+                                        @endif
+                                        @if ($page === $checkCurrentPage)
+                                            <span aria-current="page" style="display:inline-flex; align-items:center; justify-content:center; min-width:28px; height:28px; border-radius:6px; background:rgb(var(--primary-600)); color:#fff; font-weight:700;">{{ $page }}</span>
+                                        @else
+                                            <button type="button" wire:click="gotoPage({{ $page }}, 'checkPage')" style="display:inline-flex; align-items:center; justify-content:center; min-width:28px; height:28px; border:1px solid #cbd5e1; border-radius:6px; background:transparent; cursor:pointer;" class="dark:border-gray-700">{{ $page }}</button>
+                                        @endif
+                                    @endforeach
+
+                                    @if($stocksData->hasMorePages())
+                                        <button type="button" wire:click="nextPage('checkPage')" rel="next" style="display:inline-flex; align-items:center; justify-content:center; min-width:28px; height:28px; border:1px solid #cbd5e1; border-radius:6px; background:transparent; cursor:pointer;" class="dark:border-gray-700">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><polyline points="9 18 15 12 9 6"/></svg>
+                                        </button>
+                                    @else
+                                        <span aria-disabled="true" style="opacity:.4; padding:4px;">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><polyline points="9 18 15 12 9 6"/></svg>
+                                        </span>
+                                    @endif
+                                </nav>
+                            @endif
+                        </div>
+                    </div>
+                @endif
             </div>
 
         @elseif($warehouseTab === 'in')
