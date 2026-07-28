@@ -151,6 +151,11 @@ class RecipeResource extends Resource
                 Forms\Components\Section::make(__('recipe.sections.ingredients_cost'))
                     ->extraAttributes(['class' => 'recipe-cost-section'])
                     ->schema([
+                        Forms\Components\ViewField::make('ingredient_table_header')
+                            ->view('filament.resources.recipes.partials.ingredient-table-header')
+                            ->dehydrated(false)
+                            ->extraAttributes(['class' => 'recipe-ingredient-table-header-field'])
+                            ->hiddenLabel(),
                         Forms\Components\Repeater::make('recipeIngredients')
                             ->hiddenLabel()
                             ->relationship()
@@ -158,38 +163,23 @@ class RecipeResource extends Resource
                             ->schema([
                                 Forms\Components\Select::make('ingredient_id')
                                     ->label(__('recipe.fields.ingredient'))
+                                    ->hiddenLabel()
+                                    ->extraFieldWrapperAttributes(['class' => 'recipe-ingredient-cell recipe-ingredient-cell-name'])
                                     ->relationship('ingredient', 'name')
                                     ->required()
                                     ->searchable()
                                     ->preload()
+                                    ->optionsLimit(50)
                                     ->live()
                                     ->disableOptionsWhenSelectedInSiblingRepeaterItems()
                                     ->afterStateHydrated(fn (Set $set, ?int $state): mixed => $set('ingredient_price', self::ingredientPrice($state)))
                                     ->afterStateUpdated(fn (Set $set, ?int $state): mixed => $set('ingredient_price', self::ingredientPrice($state)))
                                     ->placeholder(__('recipe.placeholders.ingredient'))
                                     ->columnSpan(3),
-                                Forms\Components\TextInput::make('quantity_gram')
-                                    ->label(__('recipe.fields.quantity_gram'))
-                                    ->numeric()
-                                    ->placeholder('gram')
-                                    ->suffix('g')
-                                    ->dehydrated(false)
-                                    ->live(onBlur: true)
-                                    ->afterStateHydrated(function (Set $set, $state, Get $get) {
-                                        $kg = (float) $get('quantity_per_portion');
-                                        if ($kg > 0) {
-                                            $set('quantity_gram', $kg * 1000);
-                                        }
-                                    })
-                                    ->afterStateUpdated(function (Set $set, $state) {
-                                        $gram = (float) $state;
-                                        if ($gram > 0) {
-                                            $set('quantity_per_portion', $gram / 1000);
-                                        }
-                                    })
-                                    ->columnSpan(2),
                                 Forms\Components\TextInput::make('quantity_per_portion')
                                     ->label(__('recipe.fields.quantity_kg'))
+                                    ->hiddenLabel()
+                                    ->extraFieldWrapperAttributes(['class' => 'recipe-ingredient-cell recipe-ingredient-cell-quantity'])
                                     ->numeric()
                                     ->required()
                                     ->default(0.1)
@@ -197,45 +187,47 @@ class RecipeResource extends Resource
                                     ->step(0.001)
                                     ->suffix('kg')
                                     ->live(onBlur: true)
-                                    ->afterStateHydrated(function (Set $set, $state) {
-                                        $kg = (float) $state;
-                                        if ($kg > 0) {
-                                            $set('quantity_gram', $kg * 1000);
-                                        }
-                                    })
-                                    ->afterStateUpdated(function (Set $set, $state) {
-                                        $kg = (float) $state;
-                                        if ($kg > 0) {
-                                            $set('quantity_gram', $kg * 1000);
-                                        }
-                                    })
-                                    ->columnSpan(2),
+                                    ->columnSpan(3),
                                 Forms\Components\TextInput::make('ingredient_price')
                                     ->label(__('recipe.fields.ingredient_price'))
+                                    ->hiddenLabel()
+                                    ->extraFieldWrapperAttributes(['class' => 'recipe-ingredient-cell recipe-ingredient-cell-price'])
                                     ->disabled()
                                     ->dehydrated(false)
                                     ->prefixIcon('heroicon-m-lock-closed')
                                     ->formatStateUsing(fn (mixed $state): string => self::formatCurrency((float) $state))
-                                    ->columnSpan(2),
+                                    ->columnSpan(5),
                                 Forms\Components\Placeholder::make('line_total')
                                     ->label(__('recipe.fields.line_total'))
+                                    ->hiddenLabel()
                                     ->content(fn (Get $get): string => self::formatCurrency(
                                         (float) ($get('quantity_per_portion') ?? 0) * self::ingredientPrice($get('ingredient_id'))
                                     ))
                                     ->extraAttributes(['class' => 'recipe-line-total'])
-                                    ->columnSpan(1),
-                                Forms\Components\Textarea::make('note')
-                                    ->label(__('recipe.fields.note'))
-                                    ->placeholder(__('recipe.placeholders.note'))
-                                    ->rows(2)
-                                    ->maxLength(255)
                                     ->columnSpan(2),
+                                Forms\Components\TextInput::make('note')
+                                    ->label(__('recipe.fields.note'))
+                                    ->hiddenLabel()
+                                    ->extraFieldWrapperAttributes(['class' => 'recipe-ingredient-cell recipe-ingredient-cell-note'])
+                                    ->placeholder(__('recipe.placeholders.note'))
+                                    ->maxLength(255)
+                                    ->columnSpan(3),
                             ])
-                            ->columns(12)
+                            ->columns(16)
                             ->itemNumbers()
-                            ->addAction(fn (Action $action): Action => $action->label(__('recipe.actions.add_ingredient'))->icon('heroicon-m-plus'))
+                            ->addAction(fn (Action $action): Action => $action
+                                ->label(__('recipe.actions.add_ingredient'))
+                                ->icon('heroicon-m-plus')
+                                ->extraAttributes(['class' => 'recipe-add-ingredient-action']))
                             ->addActionAlignment(Alignment::End)
-                            ->deletable(false)
+                            ->deleteAction(fn (Action $action): Action => $action
+                                ->icon('heroicon-m-trash')
+                                ->label(__('recipe.actions.delete'))
+                                ->tooltip(__('recipe.actions.delete'))
+                                ->extraAttributes([
+                                    'class' => 'recipe-delete-ingredient-action',
+                                    'data-column-label' => __('recipe.fields.actions'),
+                                ]))
                             ->reorderable(false)
                             ->collapsible(false)
                             ->itemLabel(fn (): HtmlString => new HtmlString(
@@ -243,7 +235,9 @@ class RecipeResource extends Resource
                             )),
                         Forms\Components\Placeholder::make('total_cost')
                             ->hiddenLabel()
-                            ->content(fn (Get $get): string => __('recipe.messages.total_cost', ['cost' => self::formatCurrency(self::recipeIngredientsTotal($get('recipeIngredients') ?? []))]))
+                            ->content(fn (Get $get) => view('filament.resources.recipes.partials.total-cost', [
+                                'cost' => self::formatCurrency(self::recipeIngredientsTotal($get('recipeIngredients') ?? [])),
+                            ]))
                             ->extraAttributes(['class' => 'recipe-total-cost'])
                             ->columnSpanFull(),
                         /* Tạm ẩn cảnh báo lãi/lỗ trên form món ăn.
@@ -272,7 +266,7 @@ class RecipeResource extends Resource
                         */
                         Forms\Components\Placeholder::make('cost_note')
                             ->hiddenLabel()
-                            ->content(fn (): HtmlString => new HtmlString('<div style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--mu);margin-top:6px"><i class="fa-solid fa-circle-info" style="color:var(--bl)"></i> '.e(__('recipe.messages.ingredient_price_source')).'</div>'))
+                            ->content(fn () => view('filament.resources.recipes.partials.cost-note'))
                             ->extraAttributes(['class' => 'recipe-cost-note'])
                             ->columnSpanFull(),
                     ])

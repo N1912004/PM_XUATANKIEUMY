@@ -10,8 +10,8 @@ return [
         'cost_per_portion' => 'Đơn giá suất ăn', 'cost_override' => 'Cost điều chỉnh (override)',
         'cost_override_reason' => 'Lý do điều chỉnh cost', 'price_option' => 'Tùy chọn đơn giá',
         'status' => 'Trạng thái', 'description' => 'Mô tả', 'ingredient' => 'Nguyên liệu',
-        'quantity_gram' => 'Định lượng (g)', 'quantity_kg' => 'Định lượng (kg)', 'ingredient_price' => 'Đơn giá NL',
-        'line_total' => 'Thành tiền', 'note' => 'Ghi chú', 'row_number' => 'STT',
+        'quantity_gram' => 'Định lượng (g)', 'quantity_kg' => 'Định lượng (kg)', 'quantity_per_portion' => 'Định lượng (KG) / 1 phần', 'ingredient_price' => 'Đơn giá nguyên liệu',
+        'line_total' => 'Thành tiền', 'note' => 'Ghi chú', 'row_number' => 'STT', 'actions' => 'THAO TÁC',
     ],
     'placeholders' => ['name' => 'Nhập tên món ăn', 'code' => 'Nhập mã món', 'description' => 'Mô tả ngắn về món ăn', 'ingredient' => 'Tên nguyên liệu', 'note' => 'Ghi chú', 'search' => 'Tìm kiếm theo tên món ăn...', 'search_name_code' => 'Tìm kiếm theo tên món ăn hoặc mã món...', 'search_short' => 'Tìm kiếm...'],
     'helpers' => [
@@ -22,9 +22,9 @@ return [
     'currency' => ['unit' => 'đ', 'amount' => ':value đ'],
     'status' => ['active' => 'Đang hoạt động', 'pending' => 'Chờ rà soát', 'inactive' => 'Ngừng hoạt động', 'active_applied' => 'Đang áp dụng', 'inactive_applied' => 'Ngưng áp dụng'],
     'messages' => [
-        'total_cost' => 'Tổng cost đơn giá trên 1 phần:  :cost', 'select_sale_price' => 'Chọn đơn giá bán suất ăn để kiểm tra lãi/lỗ.',
+        'total_cost' => 'Tổng cost đơn giá trên 1 phần:  :cost', 'total_cost_label' => 'Tổng cost đơn giá trên 1 phần:', 'select_sale_price' => 'Chọn đơn giá bán suất ăn để kiểm tra lãi/lỗ.',
         'loss' => '⚠ LỖ :margin/suất — cost đang cao hơn giá bán (:price).', 'gross_margin' => 'Lãi gộp :margin/suất (:rate% giá bán).',
-        'thin_margin' => 'Biên lãi mỏng — cân nhắc lại định mức.', 'ingredient_price_source' => 'Đơn giá nguyên liệu được lấy tự động từ module Nguyên liệu & NCC.',
+        'thin_margin' => 'Biên lãi mỏng — cân nhắc lại định mức.', 'ingredient_price_source' => 'Đơn giá nguyên liệu được lấy tự động từ module Nguyên liệu & NCC.', 'ingredient_price_source_short' => 'Tự động từ nguyên vật liệu / NCC',
     ],
     'table' => ['code' => 'MÃ MÓN', 'name' => 'TÊN MÓN ĂN', 'type' => 'NHÓM MÓN', 'selling_price_per_portion' => 'MỨC GIÁ SUẤT ĂN', 'cost_per_portion' => 'ĐƠN GIÁ SUẤT ĂN', 'ingredients_count' => 'SỐ NGUYÊN LIỆU', 'total_weight' => 'TỔNG ĐỊNH LƯỢNG / PHẦN', 'total_cost' => 'TỔNG COST NGUYÊN LIỆU / PHẦN', 'status' => 'TRẠNG THÁI', 'created_at' => 'NGÀY TẠO', 'actions' => 'HOẠT ĐỘNG'],
     'filters' => ['selling_price' => 'Giá bán', 'cost_price' => 'Cost chuẩn', 'selling_price_from' => 'Giá bán từ', 'selling_price_to' => 'Giá bán đến', 'cost_price_from' => 'Cost chuẩn từ', 'cost_price_to' => 'Cost chuẩn đến', 'from' => 'Từ', 'to' => 'Đến', 'price' => 'Mức giá / Đơn giá suất ăn', 'all_prices' => 'Tất cả mức giá', 'all_groups' => 'Tất cả nhóm món', 'title' => 'Bộ lọc'],

@@ -341,7 +341,7 @@ body, .fi-body, .fi-main {
 }
 
 .fi-page {
-  padding: 22px 28px 36px !important;
+  padding: 20px 26px 36px !important;
   margin: 0 !important;
   max-width: 100% !important;
   width: 100% !important;
@@ -387,12 +387,12 @@ main > .bf-list-page {
 .fi-page > section {
   padding-top: 0 !important;
   padding-bottom: 12px !important;
-  gap: 16px !important;
+  gap: 18px !important;
 }
 
 /* Page Header Title & Subtitle */
 .fi-header {
-  margin-bottom: 10px !important;
+  margin-bottom: 0 !important;
 }
 
 h1.fi-header-heading,
@@ -1898,7 +1898,15 @@ svg.animate-spin,
 .fi-section-content-ctn,
 .fi-section-content {
   margin: 0 !important;
-  padding: 21.6px 24px !important;
+}
+
+.fi-section-content-ctn {
+  padding: 0 !important;
+  border-top: 0 !important;
+}
+
+.fi-section-content {
+  padding: 16px 22px 20px !important;
 }
 
 /* ── Form Section Header (.fch) ── */
@@ -1906,13 +1914,13 @@ svg.animate-spin,
   display: flex !important;
   align-items: center !important;
   gap: 9px !important;
-  padding: 22px 24px !important;
-  border-bottom: 1px solid var(--bd2) !important;
+  padding: 20px 22px 0 !important;
+  border-bottom: 0 !important;
   background: transparent !important;
 }
 
 .fi-section-header-heading {
-  font-size: 14.5px !important;
+  font-size: 15px !important;
   font-weight: 700 !important;
   color: var(--tx) !important;
 }
@@ -1952,8 +1960,8 @@ svg.animate-spin,
 .fi-section .fi-input-wrp:not(.fi-fo-textarea),
 .fi-form-component-container .fi-input-wrp:not(.fi-fo-textarea),
 .fi-fo-field-wrp:not(.fi-ta-filters-above-content-ctn *) .fi-input-wrp:not(.fi-fo-textarea) {
-  min-height: 36px !important;
-  height: 36px !important;
+  min-height: 40px !important;
+  height: 40px !important;
   border: 1px solid var(--bd) !important;
   border-radius: 8px !important;
   background: var(--wh) !important;
@@ -1971,8 +1979,8 @@ svg.animate-spin,
 /* Ensure Select (Choices.js) matches TextInput height and sizing 100% */
 .fi-fo-select .choices,
 .fi-fo-select .choices__inner {
-  min-height: 34px !important;
-  height: 34px !important;
+  min-height: 38px !important;
+  height: 38px !important;
   padding: 0 12px !important;
   margin: 0 !important;
   border: none !important;
@@ -1987,7 +1995,7 @@ svg.animate-spin,
 .fi-fo-select .choices__list--single .choices__item,
 .fi-fo-select .choices__placeholder {
   font-size: 13px !important;
-  line-height: 34px !important;
+  line-height: 38px !important;
   padding: 0 !important;
   margin: 0 !important;
   color: var(--tx) !important;
@@ -1995,6 +2003,94 @@ svg.animate-spin,
 
 .fi-fo-select .choices__placeholder {
   color: var(--fa) !important;
+}
+
+/* Match searchable Ingredient table filters to the native Deleted records filter. */
+.fi-resource-ingredients .fi-ta .fi-ta-header-ctn,
+.fi-resource-ingredients .fi-ta .fi-ta-header-toolbar,
+.fi-resource-ingredients .fi-ta .fi-ta-filters-above-content-ctn,
+.fi-resource-ingredients .fi-ta .fi-ta-filters-above-content-ctn form,
+.fi-resource-ingredients .fi-ta .fi-ta-filters-above-content-ctn .fi-ta-filters {
+  justify-content: flex-start !important;
+}
+
+@media (min-width: 1280px) {
+  .fi-resource-ingredients .fi-ta .fi-ta-header-toolbar {
+    flex: 0 0 auto !important;
+    width: auto !important;
+  }
+
+  .fi-resource-ingredients .fi-ta .fi-ta-filters-above-content-ctn {
+    flex: 0 1 auto !important;
+    width: auto !important;
+  }
+}
+
+.fi-resource-ingredients .fi-ta-filters-above-content-ctn .fi-fo-field-wrp-label,
+.fi-resource-ingredients .fi-ta-filters-above-content-ctn .fi-fo-field-wrp-label > span {
+  color: #334155 !important;
+  font-size: 12.5px !important;
+  font-weight: 500 !important;
+  line-height: 15px !important;
+  opacity: 1 !important;
+}
+
+.fi-resource-ingredients .fi-ta-filters-above-content-ctn .fi-fo-select .choices,
+.fi-resource-ingredients .fi-ta-filters-above-content-ctn .fi-fo-select .choices__inner {
+  width: 100% !important;
+  min-width: 150px !important;
+  max-width: 240px !important;
+  height: 38px !important;
+  min-height: 38px !important;
+  box-sizing: border-box !important;
+}
+
+.fi-resource-ingredients .fi-ta-filters-above-content-ctn .fi-fo-select .choices {
+  padding: 0 !important;
+}
+
+.fi-resource-ingredients .fi-ta-filters-above-content-ctn .fi-fo-select .choices__inner {
+  padding: 0 56px 0 12px !important;
+  border: 1px solid #CBD5E1 !important;
+  border-radius: 8px !important;
+  background-color: #FFFFFF !important;
+  color: #0F172A !important;
+  box-shadow: none !important;
+}
+
+.fi-resource-ingredients .fi-ta-filters-above-content-ctn .fi-fo-select .choices__list--single,
+.fi-resource-ingredients .fi-ta-filters-above-content-ctn .fi-fo-select .choices__list--single > .choices__item,
+.fi-resource-ingredients .fi-ta-filters-above-content-ctn .fi-fo-select .choices__placeholder {
+  color: #0F172A !important;
+  font-size: 13px !important;
+  font-weight: 400 !important;
+  line-height: 36px !important;
+  text-align: left !important;
+  opacity: 1 !important;
+}
+
+/* Keep the selected ingredient inside the fixed-height Select on narrow Recipe tables. */
+.fi-resource-recipes .recipe-cost-section .recipe-ingredient-cell-name .choices,
+.fi-resource-recipes .recipe-cost-section .recipe-ingredient-cell-name .choices__inner,
+.fi-resource-recipes .recipe-cost-section .recipe-ingredient-cell-name .choices__list--single {
+  width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.fi-resource-recipes .recipe-cost-section .recipe-ingredient-cell-name .choices__list--single {
+  overflow: hidden !important;
+  padding-right: 20px !important;
+}
+
+.fi-resource-recipes .recipe-cost-section .recipe-ingredient-cell-name .choices__list--single > .choices__item {
+  display: block !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
 }
 
 .choices__list--dropdown,
@@ -2245,7 +2341,15 @@ textarea.fi-textarea-input {
 
 /* ── Form Grid Layout ── */
 .fi-fo-component-ctn {
-  gap: 13px 18px !important;
+  gap: 13px 16px !important;
+}
+
+.fi-fo-field-wrp:not(.fi-ta-filters-above-content-ctn *) > .grid {
+  row-gap: 5px !important;
+}
+
+.fi-fo-field-wrp:not(.fi-ta-filters-above-content-ctn *) .fi-fo-field-wrp-label > span {
+  line-height: 15px !important;
 }
 
 /* ── Fieldset / Grouped Fields ── */
@@ -2292,30 +2396,14 @@ input[type="date"].fi-input,
   box-shadow: var(--sh2) !important;
 }
 
-/* ── Form Responsive ── */
-@media (max-width: 960px) {
-  .fi-section-content-ctn {
-    padding: 16px !important;
-  }
-
-  .fi-section-header {
-    padding: 12px 16px !important;
-  }
-
-  .fi-form-actions {
-    flex-wrap: wrap !important;
-    justify-content: flex-end !important;
-  }
-}
-
 /* ── Section Header Alignment (Left-aligned & Vertically Aligned with Form Fields) ── */
 .fi-section-header,
 header.fi-section-header {
   display: flex !important;
   align-items: center !important;
   justify-content: flex-start !important;
-  padding: 22px 24px !important;
-  border-bottom: 1px solid var(--bd2) !important;
+  padding: 20px 22px 0 !important;
+  border-bottom: 0 !important;
   background: transparent !important;
   margin: 0 !important;
 }
@@ -2330,22 +2418,26 @@ header.fi-section-header div {
   margin: 0 !important;
   padding: 0 !important;
   width: 100% !important;
-  font-size: 14.5px !important;
+  font-size: 15px !important;
   font-weight: 700 !important;
   color: var(--tx) !important;
 }
 
-.fi-section-content-ctn,
-.fi-section-content {
+.fi-section-content-ctn {
   margin: 0 !important;
-  padding: 21.6px 24px !important;
+  padding: 0 !important;
+  border-top: 0 !important;
 }
 
-.fi-section-content > div:first-child,
-.fi-section-content .grid {
+.fi-section-content {
+  margin: 0 !important;
+  padding: 16px 22px 20px !important;
+}
+
+.fi-section-content > .fi-fo-component-ctn {
   margin-left: 0 !important;
   padding-left: 0 !important;
-  gap: 14px !important;
+  gap: 13px 16px !important;
 }
 
 .fi-section-header-text {
@@ -2353,6 +2445,31 @@ header.fi-section-header div {
   margin: 0 !important;
   padding: 0 !important;
   width: 100% !important;
+}
+
+/* ── Form Responsive ── */
+@media (max-width: 960px) {
+  .fi-page {
+    padding: 16px !important;
+  }
+
+  .fi-section-content-ctn {
+    padding: 0 !important;
+  }
+
+  .fi-section-content {
+    padding: 16px !important;
+  }
+
+  .fi-section-header,
+  header.fi-section-header {
+    padding: 16px 16px 0 !important;
+  }
+
+  .fi-form-actions {
+    flex-wrap: wrap !important;
+    justify-content: flex-end !important;
+  }
 }
 
 /* ── Recipe Resource Create/Edit Section & Repeater Pixel-Perfect Styling ── */
@@ -2388,19 +2505,18 @@ header.fi-section-header div {
   position: relative !important;
 }
 
-.recipe-cost-section button[wire\:click*="recipeIngredients"],
-.recipe-cost-section button[wire\:click*="mountFormComponentAction('data.recipeIngredients'"] {
+.recipe-cost-section .recipe-add-ingredient-action {
   position: absolute !important;
   top: 18px !important;
-  right: 24px !important;
+  right: 22px !important;
   z-index: 15 !important;
-  height: 32px !important;
-  padding: 0 14px !important;
+  height: 34px !important;
+  padding: 0 12px !important;
   border-radius: 8px !important;
   border: 1px solid var(--bd) !important;
   background: var(--wh) !important;
   color: var(--tx) !important;
-  font-size: 13px !important;
+  font-size: 12px !important;
   font-weight: 600 !important;
   box-shadow: var(--sh2) !important;
   display: inline-flex !important;
@@ -2409,8 +2525,7 @@ header.fi-section-header div {
   transition: all 0.13s ease !important;
 }
 
-.recipe-cost-section button[wire\:click*="recipeIngredients"]:hover,
-.recipe-cost-section button[wire\:click*="mountFormComponentAction('data.recipeIngredients'"]:hover {
+.recipe-cost-section .recipe-add-ingredient-action:hover {
   background: var(--bl-s) !important;
   color: var(--bl) !important;
   border-color: var(--bl-m) !important;
@@ -2418,10 +2533,128 @@ header.fi-section-header div {
 
 /* Remove bottom empty space left by the add button container inside the repeater */
 .recipe-cost-section .fi-fo-repeater > div.flex.justify-end,
-.recipe-cost-section .fi-fo-repeater > div:has(button[wire\:click*="recipeIngredients"]) {
+.recipe-cost-section .fi-fo-repeater > div:has(.recipe-add-ingredient-action) {
   margin: 0 !important;
   padding: 0 !important;
   height: 0 !important;
   min-height: 0 !important;
   overflow: visible !important;
+}
+
+@media (min-width: 641px) and (max-width: 1023.98px) {
+  .fi-resource-recipes .recipe-cost-section .fi-section-content {
+    overflow-x: auto !important;
+    overscroll-behavior-x: contain !important;
+    scrollbar-width: thin !important;
+  }
+
+  .fi-resource-recipes .recipe-cost-section .recipe-ingredient-table-header,
+  .fi-resource-recipes .recipe-cost-section .fi-fo-repeater {
+    min-width: 860px !important;
+  }
+
+  .fi-main .fi-resource-recipes .recipe-cost-section .fi-fo-repeater-item-content > .fi-fo-component-ctn {
+    grid-template-columns: repeat(16, minmax(0, 1fr)) !important;
+  }
+
+  .fi-main .fi-resource-recipes .recipe-cost-section .fi-fo-component-ctn > :has(> .recipe-ingredient-cell-name),
+  .fi-main .fi-resource-recipes .recipe-cost-section .fi-fo-component-ctn > :has(> .recipe-ingredient-cell-quantity) {
+    grid-column: span 3 / span 3 !important;
+  }
+
+  .fi-main .fi-resource-recipes .recipe-cost-section .fi-fo-component-ctn > :has(> .recipe-ingredient-cell-price) {
+    grid-column: span 5 / span 5 !important;
+  }
+
+  .fi-main .fi-resource-recipes .recipe-cost-section .fi-fo-component-ctn > :has(.recipe-line-total) {
+    grid-column: span 2 / span 2 !important;
+  }
+
+  .fi-main .fi-resource-recipes .recipe-cost-section .fi-fo-component-ctn > :has(> .recipe-ingredient-cell-note) {
+    grid-column: span 3 / span 3 !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .fi-resource-recipes .recipe-cost-section .fi-section-header {
+    padding: 16px 16px 52px !important;
+  }
+
+  .fi-resource-recipes .recipe-cost-section .recipe-add-ingredient-action {
+    top: 52px !important;
+    right: 16px !important;
+  }
+
+  .fi-main .fi-resource-recipes .recipe-cost-section .recipe-ingredient-table-header {
+    display: none !important;
+  }
+
+  .fi-main .fi-resource-recipes .recipe-cost-section .fi-fo-repeater > ul {
+    border-top: 1px solid var(--bd) !important;
+    border-radius: 9px !important;
+  }
+
+  .fi-main .fi-resource-recipes .recipe-cost-section .fi-fo-repeater-item {
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    padding: 0 !important;
+  }
+
+  .fi-main .fi-resource-recipes .recipe-cost-section .fi-fo-repeater-item-header > h4 {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    justify-self: start !important;
+    padding: 12px 0 0 12px !important;
+    line-height: 2rem !important;
+  }
+
+  .fi-main .fi-resource-recipes .recipe-cost-section .fi-fo-repeater-item-header > h4 .recipe-stt-label {
+    display: inline !important;
+  }
+
+  .fi-main .fi-resource-recipes .recipe-cost-section .fi-fo-repeater-item-header > ul {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    padding: 12px 12px 0 0 !important;
+  }
+
+  .fi-main .fi-resource-recipes .recipe-cost-section .fi-fo-repeater-item-content {
+    grid-column: 1 / -1 !important;
+    grid-row: 2 !important;
+    padding: 12px !important;
+  }
+
+  .fi-main .fi-resource-recipes .recipe-cost-section .fi-fo-repeater-item-content > .fi-fo-component-ctn {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 12px !important;
+  }
+
+  .fi-main .fi-resource-recipes .recipe-cost-section .fi-fo-component-ctn > :has(> .recipe-ingredient-cell),
+  .fi-main .fi-resource-recipes .recipe-cost-section .fi-fo-component-ctn > :has(.recipe-line-total) {
+    grid-column: 1 / -1 !important;
+    padding: 0 !important;
+    border-right: 0 !important;
+  }
+
+  .fi-resource-recipes .recipe-cost-section .recipe-ingredient-cell > .sr-only,
+  .fi-resource-recipes .recipe-cost-section .fi-fo-field-wrp:has(.recipe-line-total) > .sr-only {
+    position: static !important;
+    display: block !important;
+    width: auto !important;
+    height: auto !important;
+    margin: 0 0 5px !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    clip: auto !important;
+    white-space: normal !important;
+    color: var(--su) !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    line-height: 15px !important;
+  }
+
+  .fi-resource-recipes .recipe-cost-section .recipe-total-cost {
+    justify-content: space-between !important;
+    gap: 12px !important;
+    padding: 12px 16px !important;
+  }
 }
