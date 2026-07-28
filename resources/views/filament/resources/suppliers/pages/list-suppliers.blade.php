@@ -323,10 +323,10 @@
         @if($suppliersList->total() > 0)
             <div class="sup-footer">
                 <div>
-                    {{ __('supplier.pagination.summary', ['from' => $suppliersList->firstItem() ?? 0, 'to' => $suppliersList->lastItem() ?? 0, 'total' => $suppliersList->total()]) }}
+                    Hiển thị <span class="num-bold">{{ $suppliersList->firstItem() ?? 0 }}</span> - <span class="num-bold">{{ $suppliersList->lastItem() ?? 0 }}</span> trong tổng số <span class="num-bold">{{ number_format($suppliersList->total(), 0, ',', '.') }}</span> nhà cung cấp
                 </div>
                 <div class="sup-pagination">
-                    <select wire:model.live="perPage" class="sup-select" style="min-width:7rem;height:2rem;padding:0 .5rem;border-radius:.5rem">
+                    <select wire:model.live="perPage" class="sup-select">
                         <option value="5">5 / trang</option>
                         <option value="10">10 / trang</option>
                         <option value="20">20 / trang</option>
@@ -346,7 +346,7 @@
                                 </button>
                             @endif
 
-                            {{-- Pagination Elements (dạng cửa sổ: 1 … n-1 n n+1 … cuối) --}}
+                            {{-- Pagination Elements --}}
                             @php
                                 $supCurrentPage = $suppliersList->currentPage();
                                 $supLastPage = $suppliersList->lastPage();
@@ -361,9 +361,7 @@
                                     <span aria-hidden="true" style="padding:0 4px">…</span>
                                 @endif
                                 @if ($page == $supCurrentPage)
-                                    <span aria-current="page">
-                                        <span>{{ $page }}</span>
-                                    </span>
+                                    <span aria-current="page">{{ $page }}</span>
                                 @else
                                     <button type="button" wire:click="gotoPage({{ $page }})" class="sup-small-btn">{{ $page }}</button>
                                 @endif

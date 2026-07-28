@@ -217,14 +217,14 @@
         @endphp
         <div class="po-footer">
             <div>
-                {{ __('purchase_order.pagination.summary', ['from' => $ordersList->firstItem() ?? 0, 'to' => $ordersList->lastItem() ?? 0, 'total' => number_format($ordersList->total(), 0, ',', '.')]) }}
+                Hiển thị <span class="num-bold">{{ $ordersList->firstItem() ?? 0 }}</span> - <span class="num-bold">{{ $ordersList->lastItem() ?? 0 }}</span> trong tổng số <span class="num-bold">{{ number_format($ordersList->total(), 0, ',', '.') }}</span> đơn hàng
             </div>
             <div class="po-pagination">
-                <select wire:model.live="perPage" class="po-select" style="min-width:7rem;height:2rem;padding:0 .5rem;border-radius:.5rem">
-                    <option value="5">{{ __('purchase_order.pagination.per_page', ['count' => 5]) }}</option>
-                    <option value="10">{{ __('purchase_order.pagination.per_page', ['count' => 10]) }}</option>
-                    <option value="20">{{ __('purchase_order.pagination.per_page', ['count' => 20]) }}</option>
-                    <option value="50">{{ __('purchase_order.pagination.per_page', ['count' => 50]) }}</option>
+                <select wire:model.live="perPage" class="po-select">
+                    <option value="5">5 / trang</option>
+                    <option value="10">10 / trang</option>
+                    <option value="20">20 / trang</option>
+                    <option value="50">50 / trang</option>
                 </select>
 
                 @if($ordersList->total() > 0)
@@ -246,7 +246,7 @@
                                 <span class="po-page-dots" aria-hidden="true">…</span>
                             @endif
                             @if ($page == $currentPage)
-                                <span aria-current="page"><span>{{ $page }}</span></span>
+                                <span aria-current="page">{{ $page }}</span>
                             @else
                                 <button type="button" wire:click="gotoPage({{ $page }})">{{ $page }}</button>
                             @endif

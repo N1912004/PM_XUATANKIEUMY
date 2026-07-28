@@ -2867,3 +2867,187 @@ button.btn-danger-red svg {
     height: 15px !important;
 }
 
+/* ==========================================================================
+   UNIFIED PAGINATION FOOTER (Matches /admin/ingredients Filament standard 100%)
+   ========================================================================== */
+.po-footer,
+.sup-footer,
+.emp-footer,
+.time-footer,
+.ot-footer {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    gap: 1rem !important;
+    padding: 0.85rem 1.25rem !important;
+    color: #64748b !important;
+    font-size: 13px !important;
+    flex-wrap: wrap !important;
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 0.75rem !important;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05) !important;
+    margin-top: 1rem !important;
+}
+
+.dark .po-footer,
+.dark .sup-footer,
+.dark .emp-footer,
+.dark .time-footer,
+.dark .ot-footer {
+    background: #0f172a !important;
+    border-color: #1e293b !important;
+    color: #94a3b8 !important;
+}
+
+.po-footer .num-bold,
+.sup-footer .num-bold,
+.emp-footer .num-bold,
+.time-footer .num-bold,
+.ot-footer .num-bold {
+    font-weight: 700 !important;
+    color: #0f172a !important;
+    font-variant-numeric: tabular-nums !important;
+}
+
+.dark .po-footer .num-bold,
+.dark .sup-footer .num-bold,
+.dark .emp-footer .num-bold,
+.dark .time-footer .num-bold,
+.dark .ot-footer .num-bold {
+    color: #f8fafc !important;
+}
+
+.po-pagination,
+.sup-pagination,
+.emp-pagination {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+}
+
+.po-pagination select,
+.sup-pagination select,
+.po-select,
+.sup-select {
+    height: 32px !important;
+    padding: 0 0.6rem !important;
+    border-radius: 6px !important;
+    border: 1px solid #cbd5e1 !important;
+    background-color: #ffffff !important;
+    color: #0f172a !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    font-variant-numeric: tabular-nums !important;
+    cursor: pointer !important;
+    outline: none !important;
+}
+
+.dark .po-pagination select,
+.dark .sup-pagination select,
+.dark .po-select,
+.dark .sup-select {
+    background-color: #1e293b !important;
+    border-color: #334155 !important;
+    color: #f8fafc !important;
+}
+
+.po-pagination nav,
+.sup-pagination nav,
+.emp-pagination nav {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.25rem !important;
+}
+
+.po-pagination nav span,
+.po-pagination nav a,
+.po-pagination nav button,
+.sup-pagination nav span,
+.sup-pagination nav a,
+.sup-pagination nav button,
+.sup-small-btn {
+    min-width: 32px !important;
+    height: 32px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 6px !important;
+    border: 1px solid #cbd5e1 !important;
+    background: #ffffff !important;
+    color: #334155 !important;
+    font-weight: 600 !important;
+    font-size: 13px !important;
+    font-variant-numeric: tabular-nums !important;
+    text-decoration: none !important;
+    padding: 0 0.4rem !important;
+    cursor: pointer !important;
+    transition: all 0.15s ease !important;
+    box-sizing: border-box !important;
+}
+
+.dark .po-pagination nav span,
+.dark .po-pagination nav a,
+.dark .po-pagination nav button,
+.dark .sup-pagination nav span,
+.dark .sup-pagination nav a,
+.dark .sup-pagination nav button,
+.dark .sup-small-btn {
+    background: #1e293b !important;
+    border-color: #334155 !important;
+    color: #cbd5e1 !important;
+}
+
+.po-pagination nav button:hover:not([disabled]),
+.sup-pagination nav button:hover:not([disabled]),
+.sup-small-btn:hover:not([disabled]) {
+    background: #f1f5f9 !important;
+    border-color: #94a3b8 !important;
+    color: #0f172a !important;
+}
+
+.dark .po-pagination nav button:hover:not([disabled]),
+.dark .sup-pagination nav button:hover:not([disabled]),
+.dark .sup-small-btn:hover:not([disabled]) {
+    background: #334155 !important;
+    color: #ffffff !important;
+}
+
+/* Active Page Button (Solid Blue Gradient matching /admin/ingredients) */
+.po-pagination nav span[aria-current="page"],
+.sup-pagination nav span[aria-current="page"],
+.po-pagination nav [aria-current="page"] span,
+.sup-pagination nav [aria-current="page"] span {
+    background: linear-gradient(135deg, #1474FF, #0059DD) !important;
+    color: #ffffff !important;
+    border-color: transparent !important;
+    font-weight: 700 !important;
+    box-shadow: 0 4px 12px rgba(18, 103, 232, 0.3) !important;
+}
+
+/* Disabled prev/next buttons */
+.po-pagination nav span[aria-disabled="true"],
+.sup-pagination nav span[aria-disabled="true"] {
+    opacity: 0.4 !important;
+    cursor: not-allowed !important;
+    background: #ffffff !important;
+    border-color: #e2e8f0 !important;
+}
+
+.dark .po-pagination nav span[aria-disabled="true"],
+.dark .sup-pagination nav span[aria-disabled="true"] {
+    background: #1e293b !important;
+    border-color: #334155 !important;
+}
+
+/* Dots (...) */
+.po-pagination nav span.po-page-dots,
+.sup-pagination nav span[aria-hidden="true"] {
+    border: none !important;
+    background: transparent !important;
+    min-width: auto !important;
+    padding: 0 4px !important;
+    color: #94a3b8 !important;
+    box-shadow: none !important;
+}
+
