@@ -313,10 +313,11 @@
                 <div>
                     {{ __('employee.ui.pagination', ['from' => $employeesList->firstItem() ?? 0, 'to' => $employeesList->lastItem() ?? 0, 'total' => number_format($employeesList->total(), 0, ',', '.')]) }}
                 </div>
-                <div class="po-pagination" style="display:flex; align-items:center; gap:12px">
-                    <select wire:model.live="perPage" class="po-select" style="min-width:7rem;height:2.1rem;padding:0 .5rem;border-radius:.5rem; border:1px solid var(--po-bd); outline:none; background:var(--po-wh); color:var(--po-tx)">
+                <div class="po-pagination" style="display:flex; align-items:center; gap:8px">
+                    <span style="font-size:12.5px; color:var(--po-mu)">{{ __('common.pagination.per_page_label') }}</span>
+                    <select wire:model.live="perPage" class="po-select" style="height:2.1rem;padding:0 .5rem;border-radius:.5rem; border:1px solid var(--po-bd); outline:none; background:var(--po-wh); color:var(--po-tx)">
                         @foreach([5, 10, 20, 50] as $count)
-                            <option value="{{ $count }}">{{ __('employee.ui.rows_per_page', ['count' => $count]) }}</option>
+                            <option value="{{ $count }}">{{ $count }}</option>
                         @endforeach
                     </select>
 
