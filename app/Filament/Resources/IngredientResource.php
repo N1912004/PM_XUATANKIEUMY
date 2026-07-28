@@ -304,22 +304,27 @@ class IngredientResource extends Resource
                 Tables\Actions\ViewAction::make()
                     ->icon('heroicon-m-eye')
                     ->color('gray')
+                    ->extraAttributes(['class' => 'abt'])
                     ->iconButton(),
                 Tables\Actions\EditAction::make()
                     ->icon('heroicon-m-pencil')
                     ->color('gray')
+                    ->extraAttributes(['class' => 'abt'])
                     ->iconButton(),
                 Tables\Actions\DeleteAction::make()
                     ->icon('heroicon-m-trash')
                     ->color('danger')
+                    ->extraAttributes(['class' => 'abt btn-danger-red', 'style' => 'color: #dc2626 !important;'])
                     ->iconButton(),
                 Tables\Actions\RestoreAction::make()
                     ->icon('heroicon-m-arrow-path')
                     ->color('info')
+                    ->extraAttributes(['class' => 'abt'])
                     ->iconButton(),
                 Tables\Actions\ForceDeleteAction::make()
                     ->icon('heroicon-m-trash')
                     ->color('danger')
+                    ->extraAttributes(['class' => 'abt btn-danger-red', 'style' => 'color: #dc2626 !important;'])
                     ->iconButton(),
             ])
             ->actionsColumnLabel(__('ingredient.table.action'))

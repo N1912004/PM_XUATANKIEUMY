@@ -2844,9 +2844,15 @@ header.fi-section-header div {
 
 .fi-ta-actions .fi-icon-btn.fi-color-danger svg,
 .fi-ta-actions .fi-icon-btn[data-action="delete"] svg,
-.fi-ta-actions .fi-icon-btn[data-action="forceDelete"] svg {
+.fi-ta-actions .fi-icon-btn[data-action="forceDelete"] svg,
+.btn-danger-red,
+.btn-danger-red svg,
+.btn-danger-red path,
+button.btn-danger-red,
+button.btn-danger-red svg {
     color: #dc2626 !important;
-    fill: currentColor !important;
+    fill: #dc2626 !important;
+    stroke: #dc2626 !important;
 }
 
 .fi-ta-actions .fi-icon-btn.fi-color-gray,
@@ -2855,7 +2861,8 @@ header.fi-section-header div {
     fill: currentColor !important;
 }
 
-.fi-ta-actions .fi-icon-btn svg {
+.fi-ta-actions .fi-icon-btn svg,
+.abt svg {
     width: 15px !important;
     height: 15px !important;
 }
