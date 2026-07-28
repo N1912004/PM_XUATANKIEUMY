@@ -1219,11 +1219,30 @@ td.fi-ta-cell-checkbox,
   box-shadow: 0 0 0 3px rgba(18, 103, 232, 0.07) !important;
 }
 
-/* Fix filter dropdown popup list menu width so text is never squished/compressed vertically */
+/* Keep every Choices popup aligned to the full width of its Select trigger. */
 .choices__list--dropdown,
 .choices[data-type*="select-one"] .choices__list--dropdown,
 .fi-ta-filters-above-content-ctn .choices__list--dropdown,
-.fi-ta-filters-above-content-ctn [class*="choices__list--dropdown"],
+.fi-ta-filters-above-content-ctn [class*="choices__list--dropdown"] {
+  left: 0 !important;
+  width: 100% !important;
+  min-width: 100% !important;
+  max-width: none !important;
+  box-sizing: border-box !important;
+  z-index: 99999 !important;
+}
+
+.choices__list--dropdown .choices__item,
+.choices__list--dropdown .choices__item--choice {
+  width: 100% !important;
+  box-sizing: border-box !important;
+  white-space: normal !important;
+  padding: 8px 14px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  color: #0F172A !important;
+}
+
 .fi-dropdown-panel {
   min-width: 240px !important;
   width: max-content !important;
@@ -1231,8 +1250,6 @@ td.fi-ta-cell-checkbox,
   z-index: 99999 !important;
 }
 
-.choices__list--dropdown .choices__item,
-.choices__list--dropdown .choices__item--choice,
 .fi-dropdown-list-item,
 .fi-dropdown-list-item span {
   white-space: nowrap !important;
@@ -1244,8 +1261,16 @@ td.fi-ta-cell-checkbox,
 
 .choices__list--dropdown .choices__input,
 .choices__list--dropdown input[type="search"] {
-  min-width: 180px !important;
+  display: block !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
   padding: 6px 10px !important;
+  border-right: 0 !important;
+  border-left: 0 !important;
+  border-top: 0 !important;
+  border-bottom: 1px solid #E2E8F0 !important;
+  border-radius: 0 !important;
   font-size: 13px !important;
 }
 
@@ -1991,6 +2016,22 @@ svg.animate-spin,
   overflow: visible !important;
 }
 
+.fi-fo-select .choices {
+  padding: 0 !important;
+}
+
+.fi-fo-select .choices[data-type*="select-one"] .choices__inner {
+  padding-right: 32px !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='m6 8 4 4 4-4' stroke='%2364748B' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 10px center !important;
+  background-size: 16px 16px !important;
+}
+
+.fi-fo-select .choices[data-type*="select-one"] .choices__inner:has(.choices__button) {
+  padding-right: 56px !important;
+}
+
 .fi-fo-select .choices__list--single,
 .fi-fo-select .choices__list--single .choices__item,
 .fi-fo-select .choices__placeholder {
@@ -2058,6 +2099,44 @@ svg.animate-spin,
   box-shadow: none !important;
 }
 
+.fi-resource-ingredients .fi-fo-select .choices {
+  padding: 0 !important;
+}
+
+.fi-resource-ingredients .fi-fo-select .choices__inner {
+  width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  padding-right: 32px !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='m6 8 4 4 4-4' stroke='%2364748B' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 10px center !important;
+  background-size: 16px 16px !important;
+}
+
+/* Restore the chevron removed by the global Choices background reset on catalog forms. */
+.fi-resource-areas .fi-fo-select .choices,
+.fi-resource-kitchens .fi-fo-select .choices {
+  padding: 0 !important;
+}
+
+.fi-resource-areas .fi-fo-select .choices__inner,
+.fi-resource-kitchens .fi-fo-select .choices__inner {
+  width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  padding-right: 32px !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='m6 8 4 4 4-4' stroke='%2364748B' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 10px center !important;
+  background-size: 16px 16px !important;
+}
+
+.fi-resource-areas .fi-fo-select .choices__inner:has(.choices__button),
+.fi-resource-kitchens .fi-fo-select .choices__inner:has(.choices__button) {
+  padding-right: 56px !important;
+}
+
 .fi-resource-ingredients .fi-ta-filters-above-content-ctn .fi-fo-select .choices__list--single,
 .fi-resource-ingredients .fi-ta-filters-above-content-ctn .fi-fo-select .choices__list--single > .choices__item,
 .fi-resource-ingredients .fi-ta-filters-above-content-ctn .fi-fo-select .choices__placeholder {
@@ -2075,6 +2154,39 @@ svg.animate-spin,
 .fi-resource-recipes .recipe-cost-section .recipe-ingredient-cell-name .choices__list--single {
   width: 100% !important;
   min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.fi-resource-recipes .recipe-cost-section .recipe-ingredient-cell-name .choices {
+  padding: 0 !important;
+}
+
+/* Keep the existing Choices clear/search behavior while giving every Recipe Select one chevron. */
+.fi-resource-recipes .recipe-select-chevron .choices {
+  padding: 0 !important;
+}
+
+.fi-resource-recipes .recipe-select-chevron .choices__inner {
+  width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  padding-right: 32px !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='m6 8 4 4 4-4' stroke='%2364748B' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 10px center !important;
+  background-size: 16px 16px !important;
+}
+
+.fi-resource-recipes .recipe-cost-section .recipe-ingredient-cell-name .choices__list--dropdown {
+  left: -1px !important;
+  right: auto !important;
+  width: calc(100% + 2px) !important;
+  min-width: calc(100% + 2px) !important;
+  max-width: calc(100% + 2px) !important;
+  box-sizing: border-box !important;
+}
+
+.fi-resource-recipes .recipe-cost-section .recipe-ingredient-cell-name .choices__list--dropdown .choices__input--cloned {
   box-sizing: border-box !important;
 }
 
@@ -2148,13 +2260,40 @@ svg.animate-spin,
   height: 100% !important;
 }
 
-/* Select Dropdown Arrow */
-.fi-select .fi-select-input {
+/* Select Dropdown Arrow (Filament form Select and SelectFilter) */
+.fi-fo-select .fi-select-input {
   padding-right: 32px !important;
   appearance: none !important;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 11 11'%3E%3Cpath d='M2 4l3.5 3.5L9 4' stroke='%2364748B' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") !important;
   background-repeat: no-repeat !important;
   background-position: right 11px center !important;
+}
+
+/* Food-safety searchable Selects use Choices and need the same arrow as native Selects. */
+.fi-resource-food-safety-audits .fi-fo-select .choices {
+  padding: 0 !important;
+}
+
+.fi-resource-food-safety-audits .fi-fo-select .choices__inner {
+  width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  padding-right: 32px !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='m6 8 4 4 4-4' stroke='%2364748B' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 10px center !important;
+  background-size: 16px 16px !important;
+}
+
+/* The custom index filter should not depend on the panel-wide catch-all Select rule. */
+.fi-resource-food-safety-audits .bf-list-page select.ctrl {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  padding-right: 34px !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='m6 8 4 4 4-4' stroke='%2364748B' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 10px center !important;
+  background-size: 16px 16px !important;
 }
 
 /* Select Create Button (+) */

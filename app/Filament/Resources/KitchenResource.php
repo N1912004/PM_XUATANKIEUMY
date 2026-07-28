@@ -85,6 +85,8 @@ class KitchenResource extends Resource
                                         'paused' => __('catalog.kitchen_status.paused'),
                                         'maintenance' => __('catalog.kitchen_status.maintenance'),
                                     ])
+                                    ->searchable()
+                                    ->native(false)
                                     ->default('active')
                                     ->required(),
                             ]),

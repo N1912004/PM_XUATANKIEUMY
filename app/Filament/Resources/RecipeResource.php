@@ -77,6 +77,7 @@ class RecipeResource extends Resource
                             ->default('Món mặn')
                             ->searchable()
                             ->preload()
+                            ->extraAttributes(['class' => 'recipe-select-chevron'])
                             ->native(false),
                         Forms\Components\TextInput::make('selling_price_per_portion')
                             ->label(__('recipe.fields.selling_price_per_portion'))
@@ -130,6 +131,7 @@ class RecipeResource extends Resource
                             ])
                             ->rules([Rule::in(Recipe::PRICE_OPTIONS)])
                             ->default(Recipe::PRICE_OPTION_NONE)
+                            ->extraAttributes(['class' => 'recipe-select-chevron'])
                             ->native(false),
                         Forms\Components\Select::make('status')
                             ->label(__('recipe.fields.status'))
@@ -140,6 +142,8 @@ class RecipeResource extends Resource
                                 'inactive' => __('recipe.status.inactive'),
                             ])
                             ->default('active')
+                            ->selectablePlaceholder(false)
+                            ->extraAttributes(['class' => 'recipe-select-chevron'])
                             ->native(false),
                         Forms\Components\TextInput::make('description')
                             ->label(__('recipe.fields.description'))
@@ -172,6 +176,7 @@ class RecipeResource extends Resource
                                     ->optionsLimit(50)
                                     ->live()
                                     ->disableOptionsWhenSelectedInSiblingRepeaterItems()
+                                    ->extraAttributes(['class' => 'recipe-select-chevron'])
                                     ->afterStateHydrated(fn (Set $set, ?int $state): mixed => $set('ingredient_price', self::ingredientPrice($state)))
                                     ->afterStateUpdated(fn (Set $set, ?int $state): mixed => $set('ingredient_price', self::ingredientPrice($state)))
                                     ->placeholder(__('recipe.placeholders.ingredient'))
