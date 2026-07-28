@@ -698,28 +698,23 @@
     }
     
     .abt {
-        width: 26px;
-        height: 26px;
+        width: 28px;
+        height: 28px;
         border-radius: 6px;
         border: 1px solid var(--bd);
         background: var(--wh);
         cursor: pointer;
-        display: inline-grid;
-        place-items: center;
-        font-size: 11px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
         color: var(--mu);
-        transition: .11s;
+        transition: all .15s ease;
         text-decoration: none;
     }
     .abt:hover {
-        background: var(--bl-s);
-        color: var(--bl);
-        border-color: var(--bl-m);
-    }
-    .abt-danger:hover {
-        background: var(--rd-s);
-        color: var(--rd);
-        border-color: #fecaca;
+        background: var(--bd2, #f1f5f9);
+        border-color: #cbd5e1;
     }
 
     /* Custom Searchable Dropdown for List Recipes Page */

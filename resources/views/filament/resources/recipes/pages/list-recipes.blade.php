@@ -339,11 +339,11 @@
                                         </a>
                                         <!-- Chỉnh sửa -->
                                         <a href="{{ \App\Filament\Resources\RecipeResource::getUrl('edit', ['record' => $recipe]) }}" class="abt" title="{{ __('recipe.actions.edit') }}">
-                                            <i class="fa-solid fa-pen"></i>
+                                            <i class="fa-solid fa-pencil"></i>
                                         </a>
                                         <!-- Xóa món -->
-                                        <button type="button" @click="askConfirm('deleteRecipe', {{ $recipe->id }}, @js(__('recipe.actions.delete')), @js(__('recipe.confirm.delete')), @js(__('recipe.actions.delete')))" class="abt abt-danger" title="{{ __('recipe.actions.delete') }}">
-                                            <i class="fa-solid fa-trash"></i>
+                                        <button type="button" @click="askConfirm('deleteRecipe', {{ $recipe->id }}, @js(__('recipe.actions.delete')), @js(__('recipe.confirm.delete')), @js(__('recipe.actions.delete')))" class="abt" title="{{ __('recipe.actions.delete') }}">
+                                            <i class="fa-solid fa-trash" style="color:#dc2626"></i>
                                         </button>
                                     @endif
                                 </div>

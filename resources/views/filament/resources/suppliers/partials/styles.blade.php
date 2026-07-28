@@ -1106,6 +1106,25 @@
     .rcf-btn-primary:hover:not(:disabled) {
         filter: brightness(.94);
     }
+    .abt {
+        width: 28px;
+        height: 28px;
+        border-radius: 6px;
+        border: 1px solid var(--sup-bd, #e2e8f0);
+        background: var(--sup-wh, #fff);
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        color: var(--sup-mu, #64748b);
+        transition: all .15s ease;
+        text-decoration: none;
+    }
+    .abt:hover {
+        background: var(--sup-bd2, #f1f5f9);
+        border-color: var(--sup-mu, #cbd5e1);
+    }
 </style>
 
 @endpush
