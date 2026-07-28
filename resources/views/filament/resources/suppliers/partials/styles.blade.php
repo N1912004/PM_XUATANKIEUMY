@@ -334,7 +334,7 @@
             }
 
             .sup-combo-placeholder {
-                color: var(--sup-fa);
+                color: var(--sup-su);
             }
 
             .sup-combo-caret {

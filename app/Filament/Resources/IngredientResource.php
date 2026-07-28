@@ -79,6 +79,7 @@ class IngredientResource extends Resource
                                             ->relationship('supplier', 'name')
                                             ->searchable()
                                             ->preload()
+                                            ->optionsLimit(50)
                                             ->live()
                                             ->placeholder(__('ingredient.form.supplier_placeholder')),
                                         Forms\Components\Select::make('unit_id')
@@ -87,6 +88,7 @@ class IngredientResource extends Resource
                                             ->required()
                                             ->searchable()
                                             ->preload()
+                                            ->optionsLimit(50)
                                             ->live()
                                             ->placeholder(__('ingredient.form.unit_placeholder')),
                                         Forms\Components\Select::make('ingredient_type_id')
@@ -95,6 +97,7 @@ class IngredientResource extends Resource
                                             ->required()
                                             ->searchable()
                                             ->preload()
+                                            ->optionsLimit(50)
                                             ->live()
                                             ->columnSpanFull()
                                             ->placeholder(__('ingredient.form.type_placeholder')),

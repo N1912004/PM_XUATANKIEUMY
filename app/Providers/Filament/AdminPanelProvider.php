@@ -559,40 +559,207 @@ class AdminPanelProvider extends PanelProvider
                         .dark .fi-resource-recipes .recipe-cost-section {
                             border-color: #374151 !important;
                         }
+                        .fi-resource-recipes .recipe-cost-section .fi-section-content > .fi-fo-component-ctn {
+                            row-gap: 0 !important;
+                        }
+                        .fi-resource-recipes .recipe-cost-section .recipe-ingredient-table-header-field,
+                        .fi-resource-recipes .recipe-cost-section .recipe-ingredient-table-header-field > div {
+                            width: 100% !important;
+                        }
+                        .fi-resource-recipes .recipe-cost-section .recipe-ingredient-table-header {
+                            display: grid !important;
+                            grid-template-columns: 3.5rem minmax(0, 1fr) 4rem !important;
+                            align-items: stretch !important;
+                            min-height: 45px !important;
+                            border: 1px solid #dbe3ee !important;
+                            border-bottom: 0 !important;
+                            border-radius: 9px 9px 0 0 !important;
+                            background: #f8fafc !important;
+                            color: #64748b !important;
+                        }
+                        .dark .fi-resource-recipes .recipe-cost-section .recipe-ingredient-table-header {
+                            border-color: #374151 !important;
+                            background: #111827 !important;
+                            color: #94a3b8 !important;
+                        }
+                        .fi-resource-recipes .recipe-cost-section .recipe-ingredient-heading-columns {
+                            display: grid !important;
+                            grid-template-columns: repeat(16, minmax(0, 1fr)) !important;
+                            min-width: 0 !important;
+                        }
+                        .fi-resource-recipes .recipe-cost-section .recipe-ingredient-heading {
+                            display: flex !important;
+                            align-items: center !important;
+                            min-width: 0 !important;
+                            padding: 8px 11px !important;
+                            font-size: 11px !important;
+                            font-weight: 700 !important;
+                            line-height: 1.25 !important;
+                            letter-spacing: .04em !important;
+                            text-transform: uppercase !important;
+                        }
+                        .fi-resource-recipes .recipe-cost-section .recipe-ingredient-heading-stt,
+                        .fi-resource-recipes .recipe-cost-section .recipe-ingredient-heading-actions {
+                            justify-content: center !important;
+                            text-align: center !important;
+                        }
+                        .fi-resource-recipes .recipe-cost-section .recipe-ingredient-heading-name { grid-column: span 3 !important; }
+                        .fi-resource-recipes .recipe-cost-section .recipe-ingredient-heading-quantity { grid-column: span 3 !important; }
+                        .fi-resource-recipes .recipe-cost-section .recipe-ingredient-heading-price { grid-column: span 5 !important; display: block !important; }
+                        .fi-resource-recipes .recipe-cost-section .recipe-ingredient-heading-price small {
+                            display: block !important;
+                            margin-top: 2px !important;
+                            color: #1267e8 !important;
+                            font-size: 9px !important;
+                            font-weight: 400 !important;
+                            letter-spacing: 0 !important;
+                            line-height: 1.2 !important;
+                            text-transform: none !important;
+                        }
+                        .fi-resource-recipes .recipe-cost-section .recipe-ingredient-heading-total { grid-column: span 2 !important; }
+                        .fi-resource-recipes .recipe-cost-section .recipe-ingredient-heading-note { grid-column: span 3 !important; }
+                        .fi-resource-recipes .recipe-cost-section .fi-fo-repeater > ul {
+                            border: 1px solid #dbe3ee !important;
+                            border-top: 0 !important;
+                            border-radius: 0 0 9px 9px !important;
+                            overflow: visible !important;
+                        }
+                        .fi-resource-recipes .recipe-cost-section .fi-fo-repeater > ul > .grid { overflow: visible !important; }
+                        .dark .fi-resource-recipes .recipe-cost-section .fi-fo-repeater > ul { border-color: #374151 !important; }
                         .fi-resource-recipes .recipe-cost-section .fi-fo-repeater-item {
                             border: 0 !important;
+                            border-radius: 0 !important;
+                            border-bottom: 1px solid #e2e8f0 !important;
                             box-shadow: none !important;
                             background: transparent !important;
                             display: grid !important;
-                            grid-template-columns: 3.5rem minmax(0, 1fr) 2.5rem !important;
-                            gap: 1rem !important;
+                            grid-template-columns: 3.5rem minmax(0, 1fr) 4rem !important;
+                            gap: 0 !important;
                             align-items: center !important;
-                            padding: 1rem !important;
+                            padding: 0 !important;
+                            position: relative !important;
+                            overflow: visible !important;
                         }
+                        .fi-resource-recipes .recipe-cost-section .fi-fo-repeater-item:last-child {
+                            border-bottom: 0 !important;
+                            border-radius: 0 0 9px 9px !important;
+                        }
+                        .fi-resource-recipes .recipe-cost-section .fi-fo-repeater-item:has(.choices.is-open) { z-index: 60 !important; }
+                        .fi-resource-recipes .recipe-cost-section .fi-fo-repeater-item .fi-fo-select:has(.choices.is-open),
+                        .fi-resource-recipes .recipe-cost-section .fi-fo-repeater-item .fi-fo-field-wrp:has(.choices.is-open) {
+                            position: relative !important;
+                            z-index: 61 !important;
+                        }
+                        .fi-resource-recipes .recipe-cost-section .choices__list--dropdown,
+                        .fi-resource-ingredients .fi-fo-select .choices__list--dropdown {
+                            left: 0 !important;
+                            width: 100% !important;
+                            min-width: 100% !important;
+                            max-width: none !important;
+                            margin-top: 4px !important;
+                            border: 1px solid #dbe3ee !important;
+                            border-radius: 7px !important;
+                            background: #ffffff !important;
+                            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.12) !important;
+                            overflow: hidden !important;
+                        }
+                        .fi-resource-recipes .recipe-cost-section .choices__list--dropdown .choices__input--cloned,
+                        .fi-resource-ingredients .fi-fo-select .choices__list--dropdown .choices__input--cloned {
+                            display: block !important;
+                            width: 100% !important;
+                            height: 34px !important;
+                            min-height: 34px !important;
+                            margin: 0 !important;
+                            padding: 0 10px !important;
+                            border: 0 !important;
+                            border-bottom: 1px solid #e2e8f0 !important;
+                            border-radius: 0 !important;
+                            background: #ffffff !important;
+                            color: #0f172a !important;
+                            font-size: 12.5px !important;
+                            line-height: 34px !important;
+                            outline: 0 !important;
+                        }
+                        .fi-resource-recipes .recipe-cost-section .choices__list--dropdown > .choices__list,
+                        .fi-resource-ingredients .fi-fo-select .choices__list--dropdown > .choices__list {
+                            max-height: 190px !important;
+                            overflow-y: auto !important;
+                        }
+                        .fi-resource-recipes .recipe-cost-section .choices__list--dropdown .choices__item--choice,
+                        .fi-resource-ingredients .fi-fo-select .choices__list--dropdown .choices__item--choice {
+                            padding: 9px 12px !important;
+                            color: #334155 !important;
+                            font-size: 12.5px !important;
+                        }
+                        .fi-resource-recipes .recipe-cost-section .choices__list--dropdown .choices__item--choice.is-highlighted,
+                        .fi-resource-ingredients .fi-fo-select .choices__list--dropdown .choices__item--choice.is-highlighted {
+                            background: #f8fafc !important;
+                            color: #0f172a !important;
+                        }
+                        .dark .fi-resource-recipes .recipe-cost-section .choices__list--dropdown,
+                        .dark .fi-resource-recipes .recipe-cost-section .choices__list--dropdown .choices__input--cloned,
+                        .dark .fi-resource-ingredients .fi-fo-select .choices__list--dropdown,
+                        .dark .fi-resource-ingredients .fi-fo-select .choices__list--dropdown .choices__input--cloned {
+                            border-color: #374151 !important;
+                            background: #111827 !important;
+                            color: #e5e7eb !important;
+                        }
+                        .dark .fi-resource-recipes .recipe-cost-section .choices__list--dropdown .choices__item--choice,
+                        .dark .fi-resource-ingredients .fi-fo-select .choices__list--dropdown .choices__item--choice {
+                            color: #cbd5e1 !important;
+                        }
+                        .dark .fi-resource-recipes .recipe-cost-section .choices__list--dropdown .choices__item--choice.is-highlighted,
+                        .dark .fi-resource-ingredients .fi-fo-select .choices__list--dropdown .choices__item--choice.is-highlighted {
+                            background: #1f2937 !important;
+                            color: #ffffff !important;
+                        }
+                        .dark .fi-resource-recipes .recipe-cost-section .fi-fo-repeater-item { border-color: #374151 !important; }
                         .fi-resource-recipes .recipe-cost-section .fi-fo-repeater-item-header {
                             display: contents !important;
                         }
                         .fi-resource-recipes .recipe-cost-section .fi-fo-repeater-item-header > h4 {
                             grid-column: 1 !important;
                             grid-row: 1 !important;
-                            align-self: start !important;
+                            align-self: center !important;
                             text-align: center !important;
-                            line-height: 2.625rem !important;
+                            line-height: 2.125rem !important;
                             white-space: nowrap !important;
                         }
                         .fi-resource-recipes .recipe-cost-section .recipe-stt-label {
-                            display: block !important;
-                            margin-bottom: 0.5rem !important;
-                            line-height: 1.5rem !important;
+                            display: inline !important;
+                            margin: 0 !important;
+                            line-height: 2.125rem !important;
                             font-weight: 600 !important;
                         }
+                        .fi-resource-recipes .recipe-cost-section .fi-fo-repeater-item-header > h4 .recipe-stt-label { display: none !important; }
                         .fi-resource-recipes .recipe-cost-section .fi-fo-repeater-item-header > ul {
                             grid-column: 3 !important;
                             grid-row: 1 !important;
-                            align-self: start !important;
+                            align-self: center !important;
                             justify-self: center !important;
                             margin-inline-start: 0 !important;
-                            margin-top: 2rem !important;
+                            margin-top: 0 !important;
+                        }
+                        .fi-resource-recipes .recipe-cost-section .recipe-delete-ingredient-action {
+                            position: relative !important;
+                            margin: 0 !important;
+                            width: 2rem !important;
+                            height: 2rem !important;
+                            border: 1px solid #dbe3ee !important;
+                            border-radius: 0.4375rem !important;
+                            background: #ffffff !important;
+                            color: #64748b !important;
+                            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04) !important;
+                        }
+                        .fi-resource-recipes .recipe-cost-section .recipe-delete-ingredient-action:hover {
+                            border-color: #fca5a5 !important;
+                            background: #fef2f2 !important;
+                            color: #dc2626 !important;
+                        }
+                        .dark .fi-resource-recipes .recipe-cost-section .recipe-delete-ingredient-action {
+                            border-color: #4b5563 !important;
+                            background: #111827 !important;
+                            color: #94a3b8 !important;
                         }
                         .fi-resource-recipes .recipe-cost-section .fi-fo-repeater-item-content {
                             grid-column: 2 !important;
@@ -600,17 +767,29 @@ class AdminPanelProvider extends PanelProvider
                             padding: 0 !important;
                             min-width: 0 !important;
                         }
-                        @media (max-width: 640px) {
-                            .fi-resource-recipes .recipe-cost-section .fi-fo-repeater-item {
-                                grid-template-columns: 2.75rem minmax(0, 1fr) 2.5rem !important;
-                                gap: 0.5rem !important;
-                                padding: 0.75rem !important;
-                            }
+                        .fi-resource-recipes .recipe-cost-section .fi-fo-repeater-item-content > .fi-fo-component-ctn {
+                            gap: 0 !important;
+                            grid-template-columns: repeat(16, minmax(0, 1fr)) !important;
                         }
+                        .fi-resource-recipes .recipe-cost-section .fi-fo-repeater-item-content .fi-fo-field-wrp {
+                            min-width: 0 !important;
+                            padding: 9px 11px !important;
+                            border-right: 1px solid #e2e8f0 !important;
+                        }
+                        .dark .fi-resource-recipes .recipe-cost-section .fi-fo-repeater-item-content .fi-fo-field-wrp { border-color: #374151 !important; }
+                        .fi-resource-recipes .recipe-cost-section .fi-fo-repeater-item-content .fi-fo-field-wrp:last-child { border-right: 0 !important; }
+                        .fi-resource-recipes .recipe-cost-section .fi-fo-repeater-item-content .fi-input-wrp,
+                        .fi-resource-recipes .recipe-cost-section .fi-fo-repeater-item-content .fi-fo-textarea {
+                            min-height: 34px !important;
+                            height: 34px !important;
+                        }
+                        .fi-resource-recipes .recipe-cost-section .fi-fo-repeater-item-content .fi-fo-field-wrp-label { display: none !important; }
+                        .fi-resource-recipes .recipe-cost-section .fi-fo-repeater-item-content .fi-fo-field-wrp-content { min-height: 34px !important; }
+                        .fi-resource-recipes .recipe-cost-section .recipe-line-total { min-height: 34px !important; }
                         .fi-resource-recipes .recipe-line-total {
                             display: flex !important;
                             align-items: center !important;
-                            min-height: 2.625rem !important;
+                            min-height: 34px !important;
                             color: #ea580c !important;
                             font-weight: 800 !important;
                             padding-top: 0 !important;
@@ -623,7 +802,9 @@ class AdminPanelProvider extends PanelProvider
                             display: flex !important;
                             align-items: center !important;
                             justify-content: center !important;
-                            min-height: 4rem !important;
+                            gap: 16px !important;
+                            margin-top: 10px !important;
+                            min-height: 3.5rem !important;
                             border: 1px solid #fdba74 !important;
                             border-radius: 0.75rem !important;
                             background: linear-gradient(90deg, #fff7ed, #fef3c7) !important;
@@ -631,6 +812,8 @@ class AdminPanelProvider extends PanelProvider
                             font-size: 1.125rem !important;
                             font-weight: 800 !important;
                         }
+                        .fi-resource-recipes .recipe-total-cost-label { color: #92400e !important; font-size: 14px !important; font-weight: 600 !important; }
+                        .fi-resource-recipes .recipe-total-cost-value { color: #ea580c !important; font-size: 20px !important; font-weight: 800 !important; }
                         .dark .fi-resource-recipes .recipe-total-cost {
                             background: linear-gradient(90deg, rgba(120, 53, 4, 0.25), rgba(146, 64, 14, 0.25)) !important;
                             border-color: #7c2d12 !important;
@@ -640,6 +823,16 @@ class AdminPanelProvider extends PanelProvider
                             color: #64748b !important;
                             font-weight: 500 !important;
                         }
+                        .fi-resource-recipes .recipe-cost-note-content {
+                            display: flex !important;
+                            align-items: flex-start !important;
+                            gap: 7px !important;
+                            margin-top: 10px !important;
+                            color: #64748b !important;
+                            font-size: 11.5px !important;
+                            line-height: 1.5 !important;
+                        }
+                        .fi-resource-recipes .recipe-cost-note-content svg { width: 14px !important; height: 14px !important; color: #1267e8 !important; flex-shrink: 0 !important; }
                     </style>
                 ')
             )
