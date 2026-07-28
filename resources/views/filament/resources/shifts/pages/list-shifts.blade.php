@@ -85,7 +85,7 @@
                     @forelse($shifts as $index => $row)
                         <tr style="border-bottom:1px solid var(--po-bd2); color:var(--po-tx)" class="emp-row">
                             <td style="padding:12px 14px; text-align:center; font-weight:600; color:var(--po-mu)">
-                                {{ $shifts->firstItem() + $index }}
+                                {{ ($shifts->firstItem() ?? 1) + $index }}
                             </td>
                             <td style="padding:12px 14px; text-align:center; font-weight:800; color:var(--po-bl); font-variant-numeric:tabular-nums">
                                 {{ $row->sort_order }}
@@ -120,10 +120,20 @@
                 </tbody>
             </table>
         </div>
-        @if($shifts->hasPages())
-            <div style="padding: 10px 16px; border-top: 1px solid var(--po-bd2); background: var(--po-bd2);">
-                {{ $shifts->links() }}
-            </div>
+        @if($shifts->total() > 0)
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:14px;padding:14px 16px;border-top:1px solid var(--po-bd2);font-size:12px;color:var(--po-mu)">
+                <div>{{ __('catalog.pagination.summary', ['from'=>$shifts->firstItem()??0,'to'=>$shifts->lastItem()??0,'total'=>$shifts->total(),'entity'=>__('catalog.shift.list.pagination_entity')]) }}</div>
+                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><select wire:model.live="shiftPerPage" style="height:30px;border:1px solid var(--po-bd);border-radius:6px;padding:0 8px;font-size:12px;background:transparent">@foreach([5,10,20,50] as $count)<option value="{{ $count }}">{{ __('catalog.pagination.per_page', ['count'=>$count]) }}</option>@endforeach</select>
+                @if($shifts->hasPages())<nav style="display:flex;align-items:center;gap:4px">@if($shifts->onFirstPage())<span style="opacity:.4;padding:4px"><i class="fa-solid fa-chevron-left"></i></span>@else<button type="button" wire:click="previousPage('shiftsPage')" style="display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border:1px solid var(--po-bd);border-radius:6px;background:transparent"><i class="fa-solid fa-chevron-left"></i></button>@endif
+                @php
+                    $pageWindow = collect([1, $shifts->currentPage() - 1, $shifts->currentPage(), $shifts->currentPage() + 1, $shifts->lastPage()])
+                        ->filter(fn ($page) => $page >= 1 && $page <= $shifts->lastPage())
+                        ->unique()
+                        ->sort()
+                        ->values();
+                @endphp
+                @foreach($pageWindow as $i=>$page) @if($i>0&&$page-$pageWindow[$i-1]>1)<span style="padding:0 4px">…</span>@endif @if($page==$shifts->currentPage())<span style="display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border-radius:6px;background:var(--po-bl);color:#fff;font-weight:700">{{ $page }}</span>@else<button type="button" wire:click="gotoPage({{ $page }}, 'shiftsPage')" style="display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border:1px solid var(--po-bd);border-radius:6px;background:transparent">{{ $page }}</button>@endif @endforeach
+                @if($shifts->hasMorePages())<button type="button" wire:click="nextPage('shiftsPage')" style="display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border:1px solid var(--po-bd);border-radius:6px;background:transparent"><i class="fa-solid fa-chevron-right"></i></button>@else<span style="opacity:.4;padding:4px"><i class="fa-solid fa-chevron-right"></i></span>@endif</nav>@endif</div></div>
         @endif
     </div>
 </div>

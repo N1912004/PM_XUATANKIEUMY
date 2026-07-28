@@ -18,8 +18,11 @@ class ListShifts extends Page
 
     public string $shiftSearch = '';
 
+    public int $shiftPerPage = 10;
+
     protected $queryString = [
         'shiftSearch' => ['except' => ''],
+        'shiftPerPage' => ['except' => 10],
     ];
 
     public function getTitle(): string
@@ -29,6 +32,12 @@ class ListShifts extends Page
 
     public function updatedShiftSearch(): void
     {
+        $this->resetPage('shiftsPage');
+    }
+
+    public function updatedShiftPerPage(): void
+    {
+        $this->shiftPerPage = $this->resolvePerPage($this->shiftPerPage);
         $this->resetPage('shiftsPage');
     }
 
@@ -50,7 +59,14 @@ class ListShifts extends Page
             });
         }
 
-        return $query->orderBy('sort_order', 'asc')->paginate(10, ['*'], 'shiftsPage');
+        return $query->orderBy('sort_order', 'asc')->paginate($this->resolvePerPage($this->shiftPerPage), ['*'], 'shiftsPage');
+    }
+
+    private function resolvePerPage(int|string $value): int
+    {
+        $value = (int) $value;
+
+        return in_array($value, [5, 10, 20, 50], true) ? $value : 10;
     }
 
     public function deleteShift($id): void

@@ -3,9 +3,6 @@
 
     @php
         $stats = $this->getStats();
-        $areas = $this->areas();
-        $kitchens = $this->kitchens();
-        $allAreas = \App\Models\Area::orderBy('name')->pluck('name', 'id')->toArray();
         $createAreaUrl = \App\Filament\Resources\AreaResource::getUrl('create');
         $createKitchenUrl = \App\Filament\Resources\KitchenResource::getUrl('create');
     @endphp
@@ -87,6 +84,9 @@
          TAB 1: KHU VỰC (FULL WIDTH TABLE)
          ========================================== -->
     @if($activeTab === 'area')
+        @php
+            $areas = $this->areas();
+        @endphp
         <div class="tcard">
             <div class="tbar">
                 <div class="tsbox" style="height:38px; min-width:260px; max-width:360px">
@@ -120,7 +120,7 @@
                                 </td>
                                 <td style="padding:12px 14px; font-weight:600">{{ $row->manager?->name ?: '—' }}</td>
                                 <td style="padding:12px 14px; text-align:center; font-weight:800; font-size:15px; color:var(--po-bl)">
-                                    {{ $row->kitchens->count() }}
+                                    {{ $row->kitchens_count }}
                                 </td>
                                 <td style="padding:12px 14px; text-align:center">
                                     @if($row->status)
@@ -150,10 +150,21 @@
                     </tbody>
                 </table>
             </div>
-            @if($areas->hasPages())
-                <div style="padding: 10px 16px; border-top: 1px solid var(--po-bd2); background: var(--po-bd2);">
-                    {{ $areas->links() }}
-                </div>
+            @if($areas->total() > 0)
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-top:14px; padding:14px 16px; border-top:1px solid var(--po-bd2); font-size:12px; color:var(--po-mu)">
+                    <div>{{ __('catalog.pagination.summary', ['from' => $areas->firstItem() ?? 0, 'to' => $areas->lastItem() ?? 0, 'total' => $areas->total(), 'entity' => __('catalog.area.list.pagination_entity')]) }}</div>
+                    <div style="display:flex; align-items:center; gap:8px;"><select wire:model.live="areaPerPage" style="height:30px; border:1px solid var(--po-bd); border-radius:6px; padding:0 8px; font-size:12px; background:transparent;"><option value="5">{{ __('catalog.pagination.per_page', ['count' => 5]) }}</option><option value="10">{{ __('catalog.pagination.per_page', ['count' => 10]) }}</option><option value="20">{{ __('catalog.pagination.per_page', ['count' => 20]) }}</option><option value="50">{{ __('catalog.pagination.per_page', ['count' => 50]) }}</option></select>
+                    @if($areas->hasPages())
+                        <nav style="display:flex; align-items:center; gap:4px;">@if($areas->onFirstPage())<span style="opacity:.4; padding:4px"><i class="fa-solid fa-chevron-left" style="font-size:11px"></i></span>@else<button type="button" wire:click="previousPage('areasPage')" style="display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border:1px solid var(--po-bd);border-radius:6px;background:transparent"><i class="fa-solid fa-chevron-left" style="font-size:11px"></i></button>@endif
+                        @php
+                            $pageWindow = collect([1, $areas->currentPage() - 1, $areas->currentPage(), $areas->currentPage() + 1, $areas->lastPage()])
+                                ->filter(fn ($page) => $page >= 1 && $page <= $areas->lastPage())
+                                ->unique()
+                                ->sort()
+                                ->values();
+                        @endphp
+                        @foreach($pageWindow as $i => $page) @if($i > 0 && $page - $pageWindow[$i-1] > 1)<span style="padding:0 4px">…</span>@endif @if($page == $areas->currentPage())<span style="display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border-radius:6px;background:var(--po-bl);color:#fff;font-weight:700">{{ $page }}</span>@else<button type="button" wire:click="gotoPage({{ $page }}, 'areasPage')" style="display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border:1px solid var(--po-bd);border-radius:6px;background:transparent">{{ $page }}</button>@endif @endforeach
+                        @if($areas->hasMorePages())<button type="button" wire:click="nextPage('areasPage')" style="display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border:1px solid var(--po-bd);border-radius:6px;background:transparent"><i class="fa-solid fa-chevron-right" style="font-size:11px"></i></button>@else<span style="opacity:.4;padding:4px"><i class="fa-solid fa-chevron-right" style="font-size:11px"></i></span>@endif</nav>@endif</div></div>
             @endif
         </div>
     @endif
@@ -162,6 +173,10 @@
          TAB 2: NHÀ ĂN / BẾP (FULL WIDTH TABLE)
          ========================================== -->
     @if($activeTab === 'canteen')
+        @php
+            $kitchens = $this->kitchens();
+            $allAreas = \App\Models\Area::orderBy('name')->pluck('name', 'id')->toArray();
+        @endphp
         <div class="tcard">
             <div class="tbar">
                 <div class="tsbox" style="height:38px; min-width:260px; max-width:360px">
@@ -197,7 +212,7 @@
                     <tbody>
                         @forelse($kitchens as $index => $kRow)
                             <tr style="border-bottom:1px solid var(--po-bd2); color:var(--po-tx)" class="emp-row">
-                                <td style="padding:12px 14px; text-align:center; font-weight:700; color:var(--po-mu)">{{ $index + 1 }}</td>
+                                <td style="padding:12px 14px; text-align:center; font-weight:700; color:var(--po-mu)">{{ ($kitchens->firstItem() ?? 1) + $index }}</td>
                                 <td style="padding:12px 14px;">
                                     <div style="font-weight:700; color:var(--po-tx)">{{ $kRow->name }}</div>
                                     <div style="font-size:11px; color:var(--po-mu); margin-top:2px">{{ __('catalog.common.area_prefix', ['name' => $kRow->area?->name ?: '—']) }}</div>
@@ -237,10 +252,15 @@
                     </tbody>
                 </table>
             </div>
-            @if($kitchens->hasPages())
-                <div style="padding: 10px 16px; border-top: 1px solid var(--po-bd2); background: var(--po-bd2);">
-                    {{ $kitchens->links() }}
-                </div>
+            @if($kitchens->total() > 0)
+                @php
+                    $pageWindow = collect([1, $kitchens->currentPage() - 1, $kitchens->currentPage(), $kitchens->currentPage() + 1, $kitchens->lastPage()])
+                        ->filter(fn ($page) => $page >= 1 && $page <= $kitchens->lastPage())
+                        ->unique()
+                        ->sort()
+                        ->values();
+                @endphp
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:14px;padding:14px 16px;border-top:1px solid var(--po-bd2);font-size:12px;color:var(--po-mu)"><div>{{ __('catalog.pagination.summary', ['from'=>$kitchens->firstItem()??0,'to'=>$kitchens->lastItem()??0,'total'=>$kitchens->total(),'entity'=>__('catalog.kitchen.list.pagination_entity')]) }}</div><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><select wire:model.live="canteenPerPage" style="height:30px;border:1px solid var(--po-bd);border-radius:6px;padding:0 8px;font-size:12px;background:transparent">@foreach([5,10,20,50] as $count)<option value="{{ $count }}">{{ __('catalog.pagination.per_page', ['count'=>$count]) }}</option>@endforeach</select>@if($kitchens->hasPages())<nav style="display:flex;align-items:center;gap:4px">@if($kitchens->onFirstPage())<span style="opacity:.4;padding:4px"><i class="fa-solid fa-chevron-left"></i></span>@else<button type="button" wire:click="previousPage('canteensPage')" style="display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border:1px solid var(--po-bd);border-radius:6px;background:transparent"><i class="fa-solid fa-chevron-left"></i></button>@endif @foreach($pageWindow as $i=>$page) @if($i>0&&$page-$pageWindow[$i-1]>1)<span style="padding:0 4px">…</span>@endif @if($page==$kitchens->currentPage())<span style="display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border-radius:6px;background:var(--po-bl);color:#fff;font-weight:700">{{ $page }}</span>@else<button type="button" wire:click="gotoPage({{$page}}, 'canteensPage')" style="display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border:1px solid var(--po-bd);border-radius:6px;background:transparent">{{ $page }}</button>@endif @endforeach @if($kitchens->hasMorePages())<button type="button" wire:click="nextPage('canteensPage')" style="display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border:1px solid var(--po-bd);border-radius:6px;background:transparent"><i class="fa-solid fa-chevron-right"></i></button>@else<span style="opacity:.4;padding:4px"><i class="fa-solid fa-chevron-right"></i></span>@endif</nav>@endif</div></div>
             @endif
         </div>
     @endif

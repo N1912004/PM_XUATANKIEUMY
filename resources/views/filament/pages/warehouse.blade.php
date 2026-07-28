@@ -793,8 +793,8 @@
                 </table>
             </div>
 
-            @if($stocksData->hasPages() || $stocksData->total() > 10)
-                <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; padding:12px 4px 2px; font-size:12px; color:#64748b;" class="dark:text-gray-400">
+            @if($stocksData->total() > 0)
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-top:14px; padding:14px 16px; border-top:1px solid #e2e8f0; font-size:12px; color:#64748b;" class="dark:text-gray-400 dark:border-gray-700">
                     <div>
                         {{ __('warehouse.pagination.showing', [
                             'from' => $stocksData->firstItem() ?? 0,
@@ -804,6 +804,7 @@
                     </div>
                     <div style="display:flex; align-items:center; gap:8px;">
                         <select wire:model.live="perPage" style="height:30px; border:1px solid #cbd5e1; border-radius:6px; padding:0 8px; font-size:12px; background:transparent;" class="dark:border-gray-700 dark:bg-gray-800">
+                            <option value="5">{{ __('warehouse.pagination.per_page', ['count' => 5]) }}</option>
                             <option value="10">{{ __('warehouse.pagination.per_page', ['count' => 10]) }}</option>
                             <option value="20">{{ __('warehouse.pagination.per_page', ['count' => 20]) }}</option>
                             <option value="50">{{ __('warehouse.pagination.per_page', ['count' => 50]) }}</option>
@@ -1575,24 +1576,22 @@
             </div>
 
             <!-- PHÂN TRANG NHẬT KÝ KHO CHUẨN DỰ ÁN -->
-            <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-top:16px; font-size:12.5px; color:#64748b;">
+            @if($logPaginator->total() > 0)
+            <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-top:14px; padding:14px 16px; border-top:1px solid #e2e8f0; font-size:12.5px; color:#64748b;" class="dark:border-gray-700">
                 <div>
-                    @if($logPaginator->total() > 0)
-                        {{ __('warehouse.pagination.showing_results', [
-                            'first' => number_format($logPaginator->firstItem()),
-                            'last' => number_format($logPaginator->lastItem()),
-                            'total' => number_format($logPaginator->total())
-                        ]) }}
-                    @endif
+                    {{ __('warehouse.pagination.showing_results', [
+                        'first' => number_format($logPaginator->firstItem()),
+                        'last' => number_format($logPaginator->lastItem()),
+                        'total' => number_format($logPaginator->total())
+                    ]) }}
                 </div>
                 <div style="display:flex; align-items:center; gap:12px;">
                     <div style="display:flex; align-items:center; gap:6px;">
-                        <span style="font-weight: 500;">Hiển thị:</span>
                         <select wire:model.live="logPerPage" style="height: 30px; font-size: 12px; padding: 2px 24px 2px 8px; border-radius: 6px; border: 1px solid #cbd5e1; background-color: #fff; cursor: pointer;" class="dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200">
-                            <option value="15">15</option>
-                            <option value="30">30</option>
-                            <option value="50">50</option>
-                            <option value="100">100</option>
+                            <option value="5">{{ __('warehouse.pagination.per_page', ['count' => 5]) }}</option>
+                            <option value="10">{{ __('warehouse.pagination.per_page', ['count' => 10]) }}</option>
+                            <option value="20">{{ __('warehouse.pagination.per_page', ['count' => 20]) }}</option>
+                            <option value="50">{{ __('warehouse.pagination.per_page', ['count' => 50]) }}</option>
                         </select>
                     </div>
 
@@ -1644,6 +1643,7 @@
                     @endif
                 </div>
             </div>
+            @endif
         @endif
     </div>
 
