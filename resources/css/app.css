@@ -419,7 +419,7 @@ h1.fi-header-heading,
 
 /* Action Buttons (Primary with Bluefire Gradient) */
 .fi-btn.fi-btn-color-primary,
-button[type="submit"]:not(.fi-btn-color-gray),
+button[type="submit"]:not(.fi-btn-color-gray):not(.fi-btn-color-danger):not(.rcf-btn-danger),
 .btn-p {
   background: linear-gradient(135deg, #1474FF, #0059DD) !important;
   color: #ffffff !important;
@@ -432,7 +432,7 @@ button[type="submit"]:not(.fi-btn-color-gray),
 }
 
 .fi-btn.fi-btn-color-primary:hover,
-button[type="submit"]:not(.fi-btn-color-gray):hover,
+button[type="submit"]:not(.fi-btn-color-gray):not(.fi-btn-color-danger):not(.rcf-btn-danger):hover,
 .btn-p:hover {
   background: linear-gradient(135deg, #105FCC, #004FC4) !important;
   box-shadow: 0 10px 20px rgba(18, 103, 232, 0.35) !important;
@@ -3111,21 +3111,21 @@ button.btn-danger-red svg {
 }
 
 /* ==========================================================================
-   UNIFIED DELETE CONFIRMATION MODAL & BUTTON STYLING (RECIPES MODEL)
+   UNIFIED DELETE CONFIRMATION MODAL & BUTTON STYLING (MATCHING IMAGE 2 SPEC)
    ========================================================================== */
 
-/* Hide the top-right close X button in Filament modals to match Image 2 */
+/* Hide top-right close X button in Filament modals */
 .fi-modal-close-btn {
   display: none !important;
 }
 
 /* Modal Window Container */
 .fi-modal-window {
-  border-radius: 12px !important;
+  border-radius: 16px !important;
   box-shadow: 0 20px 45px rgba(15, 23, 42, .25) !important;
-  border: 1px solid var(--bd, #cbd5e1) !important;
+  border: 1px solid var(--bd, #e2e8f0) !important;
   max-width: 420px !important;
-  padding: 20px !important;
+  padding: 24px !important;
   background-color: var(--wh, #ffffff) !important;
   text-align: left !important;
 }
@@ -3141,39 +3141,40 @@ button.btn-danger-red svg {
   flex-direction: row !important;
   align-items: center !important;
   justify-content: flex-start !important;
-  gap: 10px !important;
-  margin-bottom: 10px !important;
+  gap: 12px !important;
+  margin-bottom: 12px !important;
   padding: 0 !important;
   text-align: left !important;
 }
 
-/* Modal Icon Box (Warning Icon ⚠️) */
+/* Modal Warning Icon ⚠️ Badge (Rounded Square, Soft Pink Background) */
 .fi-modal-header div:has(.fi-modal-icon),
 .fi-modal-icon-ctn,
 .fi-modal-icon {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-  width: 34px !important;
-  height: 34px !important;
-  min-width: 34px !important;
-  border-radius: 9px !important;
-  font-size: 15px !important;
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  border-radius: 12px !important;
+  font-size: 16px !important;
   flex: 0 0 auto !important;
   margin: 0 !important;
   padding: 0 !important;
+  background-color: #fef2f2 !important;
 }
 
 .fi-modal-header div:has(.fi-modal-icon) > div,
 .fi-modal-icon {
   background-color: #fef2f2 !important;
   color: #dc2626 !important;
-  border-radius: 9px !important;
+  border-radius: 12px !important;
 }
 
 .fi-modal-icon svg {
-  width: 18px !important;
-  height: 18px !important;
+  width: 20px !important;
+  height: 20px !important;
   color: #dc2626 !important;
 }
 
@@ -3186,7 +3187,7 @@ button.btn-danger-red svg {
 /* Title / Heading */
 .fi-modal-heading {
   margin: 0 !important;
-  font-size: 15px !important;
+  font-size: 16px !important;
   font-weight: 700 !important;
   color: var(--tx, #0f172a) !important;
   text-align: left !important;
@@ -3198,8 +3199,8 @@ button.btn-danger-red svg {
 
 /* Description Message */
 .fi-modal-description {
-  margin: 0 0 18px 0 !important;
-  font-size: 13px !important;
+  margin: 0 0 20px 0 !important;
+  font-size: 13.5px !important;
   line-height: 1.55 !important;
   color: var(--su, #475569) !important;
   padding: 0 !important;
@@ -3210,14 +3211,14 @@ button.btn-danger-red svg {
   color: #94a3b8 !important;
 }
 
-/* Footer Action Buttons Layout (Bottom-Right) */
+/* Footer Action Buttons Layout (Pushed to Bottom-Right) */
 .fi-modal-footer-actions {
   display: flex !important;
   flex-direction: row !important;
   justify-content: flex-end !important;
   align-items: center !important;
-  gap: 8px !important;
-  margin-top: 18px !important;
+  gap: 10px !important;
+  margin-top: 20px !important;
   padding: 0 !important;
   width: 100% !important;
 }
@@ -3229,44 +3230,55 @@ button.btn-danger-red svg {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-  height: 34px !important;
-  padding: 0 14px !important;
+  height: 36px !important;
+  padding: 0 16px !important;
   border-radius: 8px !important;
-  font-size: 13px !important;
+  font-size: 13.5px !important;
   font-weight: 600 !important;
   cursor: pointer !important;
+  transition: all 0.14s ease !important;
 }
 
 /* Secondary / Cancel (Hủy) Button Style */
 .fi-modal-footer-actions .fi-btn-color-gray,
 .fi-modal-footer-actions button:not(.fi-btn-color-danger) {
+  background: #ffffff !important;
   background-color: #ffffff !important;
   border: 1px solid #cbd5e1 !important;
   color: #1e293b !important;
-  box-shadow: none !important;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+  transform: none !important;
 }
 
 .fi-modal-footer-actions .fi-btn-color-gray:hover:not(:disabled),
 .fi-modal-footer-actions button:not(.fi-btn-color-danger):hover:not(:disabled) {
+  background: #f8fafc !important;
   background-color: #f8fafc !important;
   border-color: #94a3b8 !important;
   color: #0f172a !important;
+  transform: none !important;
 }
 
 /* Primary / Delete (Xóa) Button Style */
 .fi-modal-footer-actions .fi-btn-color-danger,
-.fi-modal-footer-actions button.fi-btn-color-danger {
+.fi-modal-footer-actions button.fi-btn-color-danger,
+.fi-modal-footer-actions button[type="submit"].fi-btn-color-danger {
+  background: #dc2626 !important;
   background-color: #dc2626 !important;
   border: 1px solid #dc2626 !important;
   color: #ffffff !important;
-  box-shadow: none !important;
+  box-shadow: 0 1px 2px 0 rgba(220, 38, 38, 0.2) !important;
+  transform: none !important;
 }
 
 .fi-modal-footer-actions .fi-btn-color-danger:hover:not(:disabled),
-.fi-modal-footer-actions button.fi-btn-color-danger:hover:not(:disabled) {
+.fi-modal-footer-actions button.fi-btn-color-danger:hover:not(:disabled),
+.fi-modal-footer-actions button[type="submit"].fi-btn-color-danger:hover:not(:disabled) {
+  background: #b91c1c !important;
   background-color: #b91c1c !important;
   border-color: #b91c1c !important;
   color: #ffffff !important;
+  transform: none !important;
 }
 
 
