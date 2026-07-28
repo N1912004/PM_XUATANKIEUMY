@@ -18,6 +18,7 @@ return [
     ],
     'pagination' => [
         'navigation' => 'Điều hướng phân trang',
+        'summary' => 'Hiển thị :first đến :last trong :total mục',
     ],
     'select' => [
         'placeholder' => '— Chọn —',

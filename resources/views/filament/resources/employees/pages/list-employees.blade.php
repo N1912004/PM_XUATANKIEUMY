@@ -294,7 +294,7 @@
                         <option value="50">{{ __('employee.ui.rows_per_page', ['count' => 50]) }}</option>
                     </select>
 
-                    @if($employeesList->hasPages())
+                    @if($employeesList->total() > 0)
                         <nav role="navigation" aria-label="{{ __('common.pagination.navigation') }}" style="display:flex; align-items:center; gap:4px">
                             {{-- Previous --}}
                             @if ($employeesList->onFirstPage())

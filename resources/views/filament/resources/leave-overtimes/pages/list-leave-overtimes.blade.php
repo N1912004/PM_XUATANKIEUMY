@@ -294,7 +294,7 @@
                         <option value="50">{{ __('leave_overtime.ui.rows_per_page', ['count' => 50]) }}</option>
                     </select>
 
-                    @if($itemsList->hasPages())
+                    @if($itemsList->total() > 0)
                     <nav role="navigation" aria-label="{{ __('leave_overtime.ui.pagination_navigation') }}" style="display:flex; align-items:center; gap:4px">
                         {{-- Previous --}}
                         @if ($itemsList->onFirstPage())

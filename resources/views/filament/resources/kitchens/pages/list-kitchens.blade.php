@@ -160,9 +160,9 @@
                 </tbody>
             </table>
         </div>
-        @if($kitchens->hasPages())
+        @if($kitchens->total() > 0)
             <div style="padding: 10px 16px; border-top: 1px solid var(--po-bd2); background: var(--po-bd2);">
-                {{ $kitchens->links() }}
+                @include('filament.components.pagination-page-numbers', ['paginator' => $kitchens, 'pageName' => 'kitchensPage'])
             </div>
         @endif
     </div>

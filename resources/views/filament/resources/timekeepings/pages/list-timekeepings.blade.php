@@ -435,7 +435,7 @@
                         <option value="50">{{ __('timekeeping.ui.rows_per_page', ['count' => 50]) }}</option>
                     </select>
 
-                    @if($timekeepingsList->hasPages())
+                    @if($timekeepingsList->total() > 0)
                         <nav role="navigation" aria-label="{{ __('common.pagination.navigation') }}" style="display:flex; align-items:center; gap:4px">
                             {{-- Previous --}}
                             @if ($timekeepingsList->onFirstPage())

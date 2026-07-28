@@ -2,6 +2,10 @@
 
 return [
     'cost_source_notice' => 'Đơn giá nguyên liệu được lấy từ module Nguyên liệu / Nhà cung cấp và dùng để tự động tính cost nguyên liệu trên 1 phần.',
+    'model' => [
+        'singular' => 'nguyên liệu',
+        'plural' => 'nguyên liệu',
+    ],
     'breadcrumb' => [
         'home' => 'Xuất ăn',
         'list' => 'Danh sách nguyên liệu',

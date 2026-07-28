@@ -810,7 +810,7 @@
                             <option value="50">{{ __('warehouse.pagination.per_page', ['count' => 50]) }}</option>
                         </select>
 
-                        @if($stocksData->hasPages())
+                        @if($stocksData->total() > 0)
                             <nav role="navigation" aria-label="{{ __('warehouse.pagination.navigation') }}" style="display:flex; align-items:center; gap:4px;">
                                 {{-- Trang trước --}}
                                 @if ($stocksData->onFirstPage())
@@ -1000,7 +1000,7 @@
                                 <option value="50">{{ __('warehouse.pagination.per_page', ['count' => 50]) }}</option>
                             </select>
 
-                            @if($stocksData->hasPages())
+                            @if($stocksData->total() > 0)
                                 <nav role="navigation" aria-label="{{ __('warehouse.pagination.navigation') }}" style="display:flex; align-items:center; gap:4px;">
                                     @if ($stocksData->onFirstPage())
                                         <span aria-disabled="true" style="opacity:.4; padding:4px;">
@@ -1659,7 +1659,7 @@
                         </select>
                     </div>
 
-                    @if($logPaginator->hasPages())
+                    @if($logPaginator->total() > 0)
                         <nav role="navigation" aria-label="{{ __('warehouse.pagination.navigation') }}" style="display:flex; align-items:center; gap:4px;">
                             {{-- Trang trước --}}
                             @if ($logPaginator->onFirstPage())

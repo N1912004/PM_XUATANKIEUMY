@@ -227,7 +227,7 @@
                     <option value="50">{{ __('purchase_order.pagination.per_page', ['count' => 50]) }}</option>
                 </select>
 
-                @if($ordersList->hasPages())
+                @if($ordersList->total() > 0)
                     <nav role="navigation" aria-label="Pagination Navigation">
                         {{-- Previous --}}
                         @if ($ordersList->onFirstPage())

@@ -212,7 +212,7 @@
                         <option value="50">{{ __('menu.pagination.per_page', ['count' => 50]) }}</option>
                     </select>
 
-                    @if($menusList->hasPages())
+                    @if($menusList->total() > 0)
                         <nav role="navigation" aria-label="Pagination Navigation" style="display:flex; align-items:center; gap:4px;">
                             {{-- Trang trước --}}
                             @if ($menusList->onFirstPage())

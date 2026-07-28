@@ -315,7 +315,7 @@
                         <option value="50">50 / trang</option>
                     </select>
 
-                    @if($suppliersList->hasPages())
+                    @if($suppliersList->total() > 0)
                         <nav role="navigation" aria-label="Pagination Navigation">
                             {{-- Previous Page Link --}}
                             @if ($suppliersList->onFirstPage())

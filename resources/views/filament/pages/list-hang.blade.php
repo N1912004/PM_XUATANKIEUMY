@@ -1116,7 +1116,7 @@
                             <option value="50">{{ __('list_hang.pagination.per_page', ['count' => 50]) }}</option>
                         </select>
 
-                        @if($listPaginator->hasPages())
+                        @if($listPaginator->total() > 0)
                             <nav role="navigation" aria-label="{{ __('list_hang.pagination.navigation') }}" style="display:flex; align-items:center; gap:4px;">
                                 @if ($listPaginator->onFirstPage())
                                     <span aria-disabled="true" style="opacity:.4; padding:4px;">

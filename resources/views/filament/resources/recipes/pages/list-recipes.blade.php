@@ -442,7 +442,7 @@
                         <option value="20">20</option>
                         <option value="50">50</option>
                     </select>
-                    @if($recipesList->hasPages())
+                    @if($recipesList->total() > 0)
                         <div class="pgbs">
                             {{-- Previous --}}
                             @if ($recipesList->onFirstPage())

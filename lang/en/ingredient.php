@@ -2,6 +2,10 @@
 
 return [
     'cost_source_notice' => 'Ingredient prices come from the Ingredients / Suppliers module and are used to calculate the ingredient cost per portion automatically.',
+    'model' => [
+        'singular' => 'ingredient',
+        'plural' => 'ingredients',
+    ],
     'breadcrumb' => [
         'home' => 'Catering',
         'list' => 'Ingredient List',
