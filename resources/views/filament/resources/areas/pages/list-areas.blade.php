@@ -129,24 +129,26 @@
                 <table style="width:100%; border-collapse:collapse; text-align:left; font-size:13px">
                     <thead>
                         <tr style="border-bottom:1.5px solid var(--po-bd2); color:var(--po-mu); font-weight:700; text-transform:uppercase; font-size:11px; background:var(--po-bd2)">
-                            <th style="padding:12px 14px; width:120px; white-space:nowrap">{{ __('catalog.area.table.code') }}</th>
-                            <th style="padding:12px 14px; width:30%">{{ __('catalog.area.table.name') }}</th>
-                            <th style="padding:12px 14px; width:28%">{{ __('catalog.area.table.manager') }}</th>
-                            <th style="padding:12px 14px; text-align:center; width:110px; white-space:nowrap">{{ __('catalog.area.table.kitchens_count') }}</th>
-                            <th style="padding:12px 14px; text-align:center; width:160px; white-space:nowrap">{{ __('catalog.common.status') }}</th>
+                            <th style="padding:12px 14px; width:70px; text-align:center">{{ __('catalog.common.index') }}</th>
+                            <th style="padding:12px 14px; width:130px; text-align:center; white-space:nowrap">{{ __('catalog.area.table.code') }}</th>
+                            <th style="padding:12px 14px; width:28%">{{ __('catalog.area.table.name') }}</th>
+                            <th style="padding:12px 14px; width:22%">{{ __('catalog.area.table.manager') }}</th>
+                            <th style="padding:12px 14px; text-align:center; width:130px; white-space:nowrap">{{ __('catalog.area.table.kitchens_count') }}</th>
+                            <th style="padding:12px 14px; text-align:center; width:140px; white-space:nowrap">{{ __('catalog.common.status') }}</th>
                             <th style="padding:12px 14px; text-align:center; width:110px; white-space:nowrap">{{ __('catalog.common.actions_upper') }}</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($areas as $row)
+                        @forelse($areas as $index => $row)
                             <tr style="border-bottom:1px solid var(--po-bd2); color:var(--po-tx)" class="emp-row">
-                                <td style="padding:12px 14px; font-weight:700; color:var(--po-mu); white-space:nowrap">{{ $row->code ?: ('KV-'.$row->id) }}</td>
+                                <td style="padding:12px 14px; text-align:center; font-weight:600; color:var(--po-mu); font-variant-numeric:tabular-nums">{{ ($areas->firstItem() ?? 1) + $index }}</td>
+                                <td style="padding:12px 14px; text-align:center; font-weight:800; color:var(--po-bl); font-variant-numeric:tabular-nums; white-space:nowrap">{{ $row->code ?: ('KV-'.$row->id) }}</td>
                                 <td style="padding:12px 14px;">
                                     <div style="font-weight:700; color:var(--po-tx)">{{ $row->name }}</div>
                                     <div style="font-size:11px; color:var(--po-mu); margin-top:2px">{{ $row->notes ?: __('catalog.area.list.no_notes') }}</div>
                                 </td>
                                 <td style="padding:12px 14px; font-weight:600">{{ $row->manager?->name ?: '—' }}</td>
-                                <td style="padding:12px 14px; text-align:center; font-weight:800; font-size:15px; color:var(--po-bl)">
+                                <td style="padding:12px 14px; text-align:center; font-weight:800; font-size:14px; color:var(--po-bl); font-variant-numeric:tabular-nums">
                                     {{ $row->kitchens_count }}
                                 </td>
                                 <td style="padding:12px 14px; text-align:center">
@@ -227,11 +229,11 @@
                 <table style="width:100%; border-collapse:collapse; text-align:left; font-size:13px">
                     <thead>
                         <tr style="border-bottom:1.5px solid var(--po-bd2); color:var(--po-mu); font-weight:700; text-transform:uppercase; font-size:11px; background:var(--po-bd2)">
-                            <th style="padding:12px 14px; width:60px; text-align:center">#</th>
-                            <th style="padding:12px 14px; width:28%">{{ __('catalog.kitchen.table.name') }}</th>
+                            <th style="padding:12px 14px; width:70px; text-align:center">STT</th>
+                            <th style="padding:12px 14px; width:26%">{{ __('catalog.kitchen.table.name') }}</th>
                             <th style="padding:12px 14px; width:18%">{{ __('catalog.kitchen.table.type') }}</th>
-                            <th style="padding:12px 14px; text-align:right; width:140px; white-space:nowrap">{{ __('catalog.kitchen.table.capacity') }}</th>
-                            <th style="padding:12px 14px; width:22%">{{ __('catalog.kitchen.table.manager') }}</th>
+                            <th style="padding:12px 14px; text-align:center; width:160px; white-space:nowrap">{{ __('catalog.kitchen.table.capacity') }}</th>
+                            <th style="padding:12px 14px; width:20%">{{ __('catalog.kitchen.table.manager') }}</th>
                             <th style="padding:12px 14px; text-align:center; width:140px; white-space:nowrap">{{ __('catalog.common.status') }}</th>
                             <th style="padding:12px 14px; text-align:center; width:110px; white-space:nowrap">{{ __('catalog.common.actions_upper') }}</th>
                         </tr>
@@ -239,13 +241,13 @@
                     <tbody>
                         @forelse($kitchens as $index => $kRow)
                             <tr style="border-bottom:1px solid var(--po-bd2); color:var(--po-tx)" class="emp-row">
-                                <td style="padding:12px 14px; text-align:center; font-weight:700; color:var(--po-mu)">{{ ($kitchens->firstItem() ?? 1) + $index }}</td>
+                                <td style="padding:12px 14px; text-align:center; font-weight:600; color:var(--po-mu); font-variant-numeric:tabular-nums">{{ ($kitchens->firstItem() ?? 1) + $index }}</td>
                                 <td style="padding:12px 14px;">
                                     <div style="font-weight:700; color:var(--po-tx)">{{ $kRow->name }}</div>
                                     <div style="font-size:11px; color:var(--po-mu); margin-top:2px">{{ __('catalog.common.area_prefix', ['name' => $kRow->area?->name ?: '—']) }}</div>
                                 </td>
-                                <td style="padding:12px 14px;">{{ $kRow->kitchenType?->name ?: ($kRow->type ?: '—') }}</td>
-                                <td style="padding:12px 14px; text-align:right; font-weight:800; color:var(--po-bl)">
+                                <td style="padding:12px 14px; font-weight:600">{{ $kRow->kitchenType?->name ?: ($kRow->type ?: '—') }}</td>
+                                <td style="padding:12px 14px; text-align:center; font-weight:800; color:var(--po-bl); font-variant-numeric:tabular-nums">
                                     {{ __('catalog.kitchen.list.capacity_value', ['count' => number_format((float)$kRow->capacity, 0, ',', '.')]) }}
                                 </td>
                                 <td style="padding:12px 14px; font-weight:600">{{ $kRow->manager?->name ?: '—' }}</td>

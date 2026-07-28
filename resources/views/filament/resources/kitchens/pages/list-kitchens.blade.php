@@ -136,28 +136,28 @@
             <table style="width:100%; border-collapse:collapse; text-align:left; font-size:13px">
                 <thead>
                     <tr style="border-bottom:1.5px solid var(--po-bd2); color:var(--po-mu); font-weight:700; text-transform:uppercase; font-size:11px; background:var(--po-bd2)">
-                        <th style="padding:12px 14px; width:60px">#</th>
-                        <th style="padding:12px 14px">{{ __('catalog.kitchen.list.columns.kitchen') }}</th>
-                        <th style="padding:12px 14px">{{ __('catalog.kitchen.list.columns.area') }}</th>
-                        <th style="padding:12px 14px">{{ __('catalog.kitchen.list.columns.type') }}</th>
-                        <th style="padding:12px 14px; text-align:right">{{ __('catalog.kitchen.list.columns.capacity') }}</th>
-                        <th style="padding:12px 14px">{{ __('catalog.kitchen.list.columns.manager') }}</th>
-                        <th style="padding:12px 14px; width:140px">{{ __('catalog.common.status') }}</th>
-                        <th style="padding:12px 14px; text-align:center; width:100px">{{ __('catalog.common.actions') }}</th>
+                        <th style="padding:12px 14px; width:70px; text-align:center">STT</th>
+                        <th style="padding:12px 14px; width:24%">{{ __('catalog.kitchen.list.columns.kitchen') }}</th>
+                        <th style="padding:12px 14px; width:18%">{{ __('catalog.kitchen.list.columns.area') }}</th>
+                        <th style="padding:12px 14px; width:16%">{{ __('catalog.kitchen.list.columns.type') }}</th>
+                        <th style="padding:12px 14px; text-align:center; width:160px; white-space:nowrap">{{ __('catalog.kitchen.list.columns.capacity') }}</th>
+                        <th style="padding:12px 14px; width:18%">{{ __('catalog.kitchen.list.columns.manager') }}</th>
+                        <th style="padding:12px 14px; text-align:center; width:140px; white-space:nowrap">{{ __('catalog.common.status') }}</th>
+                        <th style="padding:12px 14px; text-align:center; width:110px; white-space:nowrap">{{ __('catalog.common.actions_upper') }}</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($kitchens as $index => $row)
                         <tr style="border-bottom:1px solid var(--po-bd2); color:var(--po-tx)" class="emp-row">
-                            <td style="padding:12px 14px; font-weight:600; color:var(--po-mu)">{{ ($kitchens->currentPage() - 1) * $kitchens->perPage() + $index + 1 }}</td>
+                            <td style="padding:12px 14px; text-align:center; font-weight:600; color:var(--po-mu); font-variant-numeric:tabular-nums">{{ ($kitchens->currentPage() - 1) * $kitchens->perPage() + $index + 1 }}</td>
                             <td style="padding:12px 14px; font-weight:700">{{ $row->name }}</td>
-                            <td style="padding:12px 14px; font-weight:600; color:var(--po-mu)">{{ $row->area?->name }}</td>
-                            <td style="padding:12px 14px;">{{ $row->kitchenType?->name }}</td>
-                            <td style="padding:12px 14px; text-align:right; font-weight:700; color:var(--po-bl)">
-                                {{ __('catalog.kitchen.list.capacity_value', ['count' => number_format($row->capacity, 0, ',', '.')]) }}
+                            <td style="padding:12px 14px; font-weight:600">{{ $row->area?->name ?: '—' }}</td>
+                            <td style="padding:12px 14px; font-weight:600">{{ $row->kitchenType?->name ?: ($row->type ?: '—') }}</td>
+                            <td style="padding:12px 14px; text-align:center; font-weight:800; color:var(--po-bl); font-variant-numeric:tabular-nums">
+                                {{ __('catalog.kitchen.list.capacity_value', ['count' => number_format((float)$row->capacity, 0, ',', '.')]) }}
                             </td>
-                            <td style="padding:12px 14px; font-weight:600">{{ $row->manager?->name }}</td>
-                            <td style="padding:12px 14px;">
+                            <td style="padding:12px 14px; font-weight:600">{{ $row->manager?->name ?: '—' }}</td>
+                            <td style="padding:12px 14px; text-align:center">
                                 @if($row->status === 'active')
                                     <span class="st-pill st-ok">{{ __('catalog.kitchen_status.active') }}</span>
                                 @elseif($row->status === 'paused')
