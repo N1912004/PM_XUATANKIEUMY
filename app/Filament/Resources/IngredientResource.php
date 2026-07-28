@@ -29,12 +29,12 @@ class IngredientResource extends Resource
 
     public static function getModelLabel(): string
     {
-        return __('ingredient.model.singular');
+        return __('ingredient.navigation.ingredient');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('ingredient.model.plural');
+        return __('ingredient.navigation.ingredient_plural');
     }
 
     public static function getNavigationGroup(): ?string
