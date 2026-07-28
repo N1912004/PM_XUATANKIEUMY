@@ -204,9 +204,9 @@
                 <div>
                     {{ __('menu.pagination.summary', ['from' => $menusList->firstItem() ?? 0, 'to' => $menusList->lastItem() ?? 0, 'total' => $menusList->total()]) }}
                 </div>
-                <div style="display:flex; align-items:center; gap:8px;">
-                    <span style="font-size:12px; color:var(--po-mu)">{{ __('common.pagination.per_page_label') }}</span>
-                    <select wire:model.live="perPage" style="height:30px; border:1px solid var(--po-bd); border-radius:6px; padding:0 8px; font-size:12px; background:transparent;">
+                <div style="display:flex; align-items:center; gap:8px; white-space:nowrap">
+                    <span style="font-size:12px; color:var(--po-mu); white-space:nowrap">{{ __('common.pagination.per_page_label') }}</span>
+                    <select wire:model.live="perPage" style="height:30px; min-width:auto; width:auto; border:1px solid var(--po-bd); border-radius:6px; padding:0 24px 0 8px; font-size:12px; background:transparent;">
                         @foreach([5, 10, 20, 50] as $count)
                             <option value="{{ $count }}">{{ $count }}</option>
                         @endforeach

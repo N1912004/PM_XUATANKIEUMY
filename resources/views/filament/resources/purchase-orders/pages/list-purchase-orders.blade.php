@@ -219,9 +219,9 @@
             <div>
                 {{ __('purchase_order.pagination.summary', ['from' => $ordersList->firstItem() ?? 0, 'to' => $ordersList->lastItem() ?? 0, 'total' => number_format($ordersList->total(), 0, ',', '.')]) }}
             </div>
-            <div class="po-pagination" style="display:flex; align-items:center; gap:8px">
-                <span style="font-size:12px; color:var(--po-mu)">{{ __('common.pagination.per_page_label') }}</span>
-                <select wire:model.live="perPage" class="po-select">
+            <div class="po-pagination" style="display:flex; align-items:center; gap:8px; white-space:nowrap">
+                <span style="font-size:12px; color:var(--po-mu); white-space:nowrap">{{ __('common.pagination.per_page_label') }}</span>
+                <select wire:model.live="perPage" class="po-select" style="min-width:auto; width:auto; height:30px; padding:0 24px 0 8px">
                     @foreach([5, 10, 20, 50] as $count)
                         <option value="{{ $count }}">{{ $count }}</option>
                     @endforeach

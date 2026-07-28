@@ -1611,6 +1611,21 @@ td.fi-ta-cell-checkbox,
   color: var(--mu) !important;
 }
 
+.fi-ta-pagination-records-per-page-select,
+.fi-pagination-records-per-page-select {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 8px !important;
+  white-space: nowrap !important;
+}
+
+.fi-ta-pagination-records-per-page-select span,
+.fi-pagination-records-per-page-select span {
+  white-space: nowrap !important;
+  display: inline-block !important;
+}
+
 /* Hide overlapping "Per page" / "Mỗi trang" prefix badge inside pagination select */
 .fi-ta-pagination-records-per-page-select .fi-input-wrp-prefix,
 .fi-pagination-records-per-page-select .fi-input-wrp-prefix,

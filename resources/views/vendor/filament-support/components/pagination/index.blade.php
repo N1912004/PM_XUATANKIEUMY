@@ -41,8 +41,8 @@
 
     <div class="flex items-center gap-3">
         @if (count($pageOptions) > 1)
-            <label class="fi-pagination-records-per-page-select flex items-center gap-x-2">
-                <span class="text-xs font-normal text-gray-500 dark:text-gray-400">{{ __('common.pagination.per_page_label') }}</span>
+            <label class="fi-pagination-records-per-page-select" style="display: flex !important; flex-direction: row !important; align-items: center !important; gap: 8px !important; white-space: nowrap !important;">
+                <span class="text-xs font-normal text-gray-500 dark:text-gray-400" style="white-space: nowrap !important;">{{ __('common.pagination.per_page_label') }}</span>
                 <x-filament::input.select
                     :wire:model.live="$currentPageOptionProperty"
                     style="height:30px; padding:0 24px 0 9px; border-radius:7px; border:1px solid var(--bd); font-size:12px; color:var(--su); background:var(--wh);"
