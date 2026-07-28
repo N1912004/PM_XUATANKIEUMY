@@ -165,7 +165,7 @@ class SupplierResource extends Resource
                     ->modalDescription('Bạn có chắc chắn muốn xóa nhà cung cấp này không?')
                     ->modalSubmitActionLabel('Xóa')
                     ->modalCancelActionLabel('Hủy')
-                    ->modalIcon('heroicon-o-exclamation-triangle')
+                    ->modalIcon('heroicon-s-exclamation-triangle')
                     ->modalIconColor('danger'),
             ])
             ->bulkActions([

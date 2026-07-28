@@ -46,7 +46,7 @@ class AppServiceProvider extends ServiceProvider
 
                     return match (true) {
                         str_contains($class, 'Ingredient') => 'Bạn có chắc chắn muốn xóa nguyên liệu này?',
-                        str_contains($class, 'Supplier') => 'Bạn có chắc chắn muốn xóa nhà cung cấp này?',
+                        str_contains($class, 'Supplier') => 'Bạn có chắc chắn muốn xóa nhà cung cấp này không?',
                         str_contains($class, 'Recipe') => 'Bạn có chắc chắn muốn xóa món ăn này?',
                         str_contains($class, 'Employee') => 'Bạn có chắc chắn muốn xóa nhân viên này?',
                         default => 'Bạn có chắc chắn muốn xóa mục này?',
@@ -54,7 +54,7 @@ class AppServiceProvider extends ServiceProvider
                 })
                 ->modalSubmitActionLabel('Xóa')
                 ->modalCancelActionLabel('Hủy')
-                ->modalIcon('heroicon-o-exclamation-triangle')
+                ->modalIcon('heroicon-s-exclamation-triangle')
                 ->modalIconColor('danger');
         };
 
