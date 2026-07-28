@@ -302,14 +302,24 @@ class IngredientResource extends Resource
             ->emptyStateDescription(__('ingredient.table.empty_description'))
             ->actions([
                 Tables\Actions\ViewAction::make()
+                    ->icon('heroicon-m-eye')
+                    ->color('gray')
                     ->iconButton(),
                 Tables\Actions\EditAction::make()
+                    ->icon('heroicon-m-pencil')
+                    ->color('gray')
                     ->iconButton(),
                 Tables\Actions\DeleteAction::make()
+                    ->icon('heroicon-m-trash')
+                    ->color('danger')
                     ->iconButton(),
                 Tables\Actions\RestoreAction::make()
+                    ->icon('heroicon-m-arrow-path')
+                    ->color('info')
                     ->iconButton(),
                 Tables\Actions\ForceDeleteAction::make()
+                    ->icon('heroicon-m-trash')
+                    ->color('danger')
                     ->iconButton(),
             ])
             ->actionsColumnLabel(__('ingredient.table.action'))

@@ -2846,5 +2846,17 @@ header.fi-section-header div {
 .fi-ta-actions .fi-icon-btn[data-action="delete"] svg,
 .fi-ta-actions .fi-icon-btn[data-action="forceDelete"] svg {
     color: #dc2626 !important;
+    fill: currentColor !important;
+}
+
+.fi-ta-actions .fi-icon-btn.fi-color-gray,
+.fi-ta-actions .fi-icon-btn.fi-color-gray svg {
+    color: #64748b !important;
+    fill: currentColor !important;
+}
+
+.fi-ta-actions .fi-icon-btn svg {
+    width: 15px !important;
+    height: 15px !important;
 }
 
