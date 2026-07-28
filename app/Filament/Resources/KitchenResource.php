@@ -26,9 +26,14 @@ class KitchenResource extends Resource
         return __('catalog.kitchen.label');
     }
 
-    public static function getPluralModelLabel(): string
+    public static function getModelLabel(): string
     {
         return __('catalog.kitchen.label');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('catalog.kitchen.plural_label');
     }
 
     public static function getNavigationGroup(): ?string

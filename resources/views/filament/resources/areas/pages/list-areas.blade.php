@@ -161,7 +161,7 @@
                                         <a href="{{ \App\Filament\Resources\AreaResource::getUrl('edit', ['record' => $row->id]) }}" wire:navigate class="abt" title="{{ __('catalog.common.edit') }}">
                                             <i class="fa-solid fa-pencil"></i>
                                         </a>
-                                        <button type="button" @click="askConfirm('deleteArea', {{ $row->id }}, @js(__('catalog.common.delete')), @js(__('catalog.area.list.confirm_delete')), @js(__('catalog.common.delete')))" class="abt" title="{{ __('catalog.common.delete') }}">
+                                        <button type="button" @click="askConfirm('deleteArea', {{ $row->id }}, @js(__('catalog.area.delete_title')), @js(__('catalog.area.list.confirm_delete')), @js(__('catalog.common.delete')))" class="abt" title="{{ __('catalog.common.delete') }}">
                                             <i class="fa-solid fa-trash" style="color:var(--po-rd)"></i>
                                         </button>
                                     </div>
@@ -263,7 +263,7 @@
                                         <a href="{{ \App\Filament\Resources\KitchenResource::getUrl('edit', ['record' => $kRow->id]) }}" wire:navigate class="abt" title="{{ __('catalog.common.edit') }}">
                                             <i class="fa-solid fa-pencil"></i>
                                         </a>
-                                        <button type="button" @click="askConfirm('deleteCanteen', {{ $kRow->id }}, @js(__('catalog.common.delete')), @js(__('catalog.kitchen.list.confirm_delete')), @js(__('catalog.common.delete')))" class="abt" title="{{ __('catalog.common.delete') }}">
+                                        <button type="button" @click="askConfirm('deleteCanteen', {{ $kRow->id }}, @js(__('catalog.kitchen.delete_title')), @js(__('catalog.kitchen.list.confirm_delete')), @js(__('catalog.common.delete')))" class="abt" title="{{ __('catalog.common.delete') }}">
                                             <i class="fa-solid fa-trash" style="color:var(--po-rd)"></i>
                                         </button>
                                     </div>

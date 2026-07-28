@@ -39,7 +39,9 @@ $translations = [
     ],
     'pagination' => ['summary' => 'Showing :from-:to of :total :entity', 'per_page' => ':count / page'],
     'area' => [
-        'label' => 'Areas',
+        'label' => 'Area',
+        'plural_label' => 'Areas',
+        'delete_title' => 'Delete Area',
         'fields' => ['name' => 'Area name', 'code' => 'Area code', 'manager' => 'Manager in charge'],
         'placeholders' => ['name' => 'E.g. Dong Nai / Ho Chi Minh', 'code' => 'E.g. KV-DN', 'notes' => 'Operating scope, production shifts, main clients...'],
         'table' => ['code' => 'CODE', 'name' => 'AREA', 'manager' => 'MANAGER', 'kitchens_count' => 'KITCHENS'],
@@ -47,7 +49,9 @@ $translations = [
         'notifications' => ['deleted' => 'Area deleted successfully.'],
     ],
     'kitchen' => [
-        'label' => 'Cafeterias / Kitchens',
+        'label' => 'Kitchen',
+        'plural_label' => 'Kitchens',
+        'delete_title' => 'Delete Kitchen',
         'fields' => ['name' => 'Kitchen name', 'area' => 'Belongs to area', 'type' => 'Classification', 'capacity' => 'Serving capacity (portions/day)', 'manager' => 'Kitchen manager'],
         'placeholders' => ['name' => 'E.g. Main Kitchen Nhon Trach'],
         'table' => ['name' => 'CAFETERIA / KITCHEN', 'area' => 'AREA', 'type' => 'TYPE', 'capacity' => 'CAPACITY', 'manager' => 'MANAGER IN CHARGE'],
@@ -58,7 +62,9 @@ $translations = [
     'position' => ['label' => 'Positions', 'fields' => ['name' => 'Position name'], 'placeholders' => ['name' => 'Enter a position name'], 'helpers' => ['active' => 'Disable to hide this position from selection forms while preserving existing data.'], 'table' => ['name' => 'POSITION', 'count' => 'EMPLOYEES'], 'errors' => ['in_use' => 'This position cannot be deleted because it has :count employees.', 'bulk_in_use' => 'Bulk deletion is unavailable. These positions have employees: :names']],
     'shift' => [
         'navigation' => 'Shift configuration',
-        'label' => 'Shifts',
+        'label' => 'Shift',
+        'plural_label' => 'Shifts',
+        'delete_title' => 'Delete Shift',
         'section' => 'Shift information',
         'fields' => ['name' => 'Shift name', 'time_from' => 'Start time', 'time_to' => 'End time', 'sort_order' => 'Sort order'],
         'placeholders' => ['name' => 'E.g. Shift 1'],

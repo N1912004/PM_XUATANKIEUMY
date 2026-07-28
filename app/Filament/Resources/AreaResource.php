@@ -23,7 +23,7 @@ class AreaResource extends Resource
 
     public static function getPluralModelLabel(): string
     {
-        return __('catalog.area.label');
+        return __('catalog.area.plural_label');
     }
 
     public static function getNavigationGroup(): ?string

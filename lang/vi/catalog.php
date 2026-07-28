@@ -40,14 +40,18 @@ $translations = [
     'pagination' => ['summary' => 'Hiển thị :from-:to trên :total :entity', 'per_page' => ':count / trang'],
     'area' => [
         'label' => 'Khu vực',
+        'plural_label' => 'Khu vực',
+        'delete_title' => 'Xóa khu vực',
         'fields' => ['name' => 'Tên khu vực', 'code' => 'Mã khu vực', 'manager' => 'Quản lý phụ trách'],
-        'placeholders' => ['name' => 'VD: Đông Nai / Hồ Chí Minh', 'code' => 'VD: KV-DN', 'notes' => 'Phạm vi vận hành, ca sản xuất, khách hàng chính...'],
+        'placeholders' => ['name' => 'VD: Đồng Nai / Hồ Chí Minh', 'code' => 'VD: KV-DN', 'notes' => 'Phạm vi vận hành, ca sản xuất, khách hàng chính...'],
         'table' => ['code' => 'MÃ', 'name' => 'KHU VỰC', 'manager' => 'QUẢN LÝ PHỤ TRÁCH', 'kitchens_count' => 'NHÀ ĂN'],
         'errors' => ['in_use' => 'Không thể xóa khu vực này vì vẫn còn nhà ăn/bếp trực thuộc.'],
         'notifications' => ['deleted' => 'Xóa khu vực thành công.'],
     ],
     'kitchen' => [
         'label' => 'Nhà ăn / bếp',
+        'plural_label' => 'Nhà ăn / bếp',
+        'delete_title' => 'Xóa nhà ăn / bếp',
         'fields' => ['name' => 'Tên nhà ăn / bếp', 'area' => 'Thuộc khu vực', 'type' => 'Phân loại', 'capacity' => 'Công suất phục vụ (suất/ngày)', 'manager' => 'Quản lý nhà bếp'],
         'placeholders' => ['name' => 'VD: Bếp chính Nhơn Trạch'],
         'table' => ['name' => 'NHÀ ĂN / BẾP', 'area' => 'KHU VỰC', 'type' => 'LOẠI', 'capacity' => 'CÔNG SUẤT', 'manager' => 'PHỤ TRÁCH'],
@@ -59,6 +63,8 @@ $translations = [
     'shift' => [
         'navigation' => 'Cấu hình ca làm việc',
         'label' => 'Ca làm việc',
+        'plural_label' => 'Ca làm việc',
+        'delete_title' => 'Xóa ca làm việc',
         'section' => 'Thông tin ca làm việc',
         'fields' => ['name' => 'Tên ca', 'time_from' => 'Giờ bắt đầu', 'time_to' => 'Giờ kết thúc', 'sort_order' => 'Thứ tự ưu tiên'],
         'placeholders' => ['name' => 'Ví dụ: Ca 1'],

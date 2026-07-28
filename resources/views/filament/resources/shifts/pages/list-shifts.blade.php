@@ -131,7 +131,7 @@
                                     <a href="{{ \App\Filament\Resources\ShiftResource::getUrl('edit', ['record' => $row->id]) }}" wire:navigate class="abt" title="{{ __('catalog.common.edit') }}">
                                         <i class="fa-solid fa-pencil"></i>
                                     </a>
-                                    <button type="button" @click="askConfirm('deleteShift', {{ $row->id }}, @js(__('catalog.common.delete')), @js(__('catalog.shift.list.confirm_delete')), @js(__('catalog.common.delete')))" class="abt" title="{{ __('catalog.common.delete') }}">
+                                    <button type="button" @click="askConfirm('deleteShift', {{ $row->id }}, @js(__('catalog.shift.delete_title')), @js(__('catalog.shift.list.confirm_delete')), @js(__('catalog.common.delete')))" class="abt" title="{{ __('catalog.common.delete') }}">
                                         <i class="fa-solid fa-trash" style="color:var(--po-rd)"></i>
                                     </button>
                                 </div>
