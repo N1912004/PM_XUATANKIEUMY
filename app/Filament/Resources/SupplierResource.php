@@ -160,7 +160,13 @@ class SupplierResource extends Resource
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\DeleteAction::make()
+                    ->modalHeading('Xóa')
+                    ->modalDescription('Bạn có chắc chắn muốn xóa nhà cung cấp này không?')
+                    ->modalSubmitActionLabel('Xóa')
+                    ->modalCancelActionLabel('Hủy')
+                    ->modalIcon('heroicon-o-exclamation-triangle')
+                    ->modalIconColor('danger'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
