@@ -313,9 +313,9 @@
                 <div>
                     {{ __('employee.ui.pagination', ['from' => $employeesList->firstItem() ?? 0, 'to' => $employeesList->lastItem() ?? 0, 'total' => number_format($employeesList->total(), 0, ',', '.')]) }}
                 </div>
-                <div class="po-pagination" style="display:flex; align-items:center; gap:8px; white-space:nowrap">
-                    <span style="font-size:12.5px; color:var(--po-mu); white-space:nowrap">{{ __('common.pagination.per_page_label') }}</span>
-                    <select wire:model.live="perPage" class="po-select" style="min-width:auto; width:auto; height:2.1rem; padding:0 24px 0 8px; border-radius:.5rem; border:1px solid var(--po-bd); outline:none; background:var(--po-wh); color:var(--po-tx)">
+                <div class="po-pagination">
+                    <span>{{ __('common.pagination.per_page_label') }}</span>
+                    <select wire:model.live="perPage" class="lv-per-page-select">
                         @foreach([5, 10, 20, 50] as $count)
                             <option value="{{ $count }}">{{ $count }}</option>
                         @endforeach

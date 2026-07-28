@@ -1108,9 +1108,9 @@
                             'total' => $listPaginator->total(),
                         ]) }}
                     </div>
-                    <div style="display:flex; align-items:center; gap:8px;">
-                        <span style="font-size:12px; color:var(--mu);">{{ __('common.pagination.per_page_label') }}</span>
-                        <select wire:model.live="listPerPage" style="height:30px; border:1px solid var(--bd); border-radius:6px; padding:0 8px; font-size:12px; background:var(--wh); color:var(--tx);">
+                    <div class="pgwrap">
+                        <span>{{ __('common.pagination.per_page_label') }}</span>
+                        <select wire:model.live="listPerPage" class="lv-per-page-select">
                             @foreach([5, 10, 20, 50] as $count)
                                 <option value="{{ $count }}">{{ $count }}</option>
                             @endforeach

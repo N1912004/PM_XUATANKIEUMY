@@ -1612,25 +1612,41 @@ td.fi-ta-cell-checkbox,
 }
 
 .fi-ta-pagination-records-per-page-select,
-.fi-pagination-records-per-page-select {
-  display: flex !important;
+.fi-pagination-records-per-page-select,
+.po-pagination,
+.sup-pagination,
+.pgwrap {
+  display: inline-flex !important;
   flex-direction: row !important;
   align-items: center !important;
   gap: 8px !important;
   white-space: nowrap !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
-.fi-ta-pagination-records-per-page-select span,
-.fi-pagination-records-per-page-select span {
+.fi-ta-pagination-records-per-page-select > span,
+.fi-pagination-records-per-page-select > span,
+.po-pagination > span,
+.sup-pagination > span,
+.pgwrap > span {
+  font-size: 13px !important;
+  font-weight: 400 !important;
+  color: var(--mu, #64748b) !important;
   white-space: nowrap !important;
   display: inline-block !important;
+  line-height: 1.25rem !important;
 }
 
-/* Hide overlapping "Per page" / "Mỗi trang" prefix badge inside pagination select */
+/* Hide overlapping prefix/suffix elements inside pagination select */
 .fi-ta-pagination-records-per-page-select .fi-input-wrp-prefix,
 .fi-pagination-records-per-page-select .fi-input-wrp-prefix,
 .fi-ta-pagination .fi-input-wrp-prefix,
-.fi-pagination .fi-input-wrp-prefix {
+.fi-pagination .fi-input-wrp-prefix,
+.fi-ta-pagination-records-per-page-select .fi-input-wrp-suffix,
+.fi-pagination-records-per-page-select .fi-input-wrp-suffix,
+.fi-ta-pagination .fi-input-wrp-suffix,
+.fi-pagination .fi-input-wrp-suffix {
   display: none !important;
 }
 
@@ -1643,20 +1659,47 @@ td.fi-ta-cell-checkbox,
   box-shadow: none !important;
   padding: 0 !important;
   margin: 0 !important;
+  width: auto !important;
+  min-width: auto !important;
+  display: inline-flex !important;
 }
 
 .fi-ta-pagination-records-per-page-select select,
 .fi-pagination-records-per-page-select select,
 .fi-ta-pagination select,
-.fi-pagination select {
-  height: 30px !important;
-  padding: 0 24px 0 9px !important;
-  background: var(--wh) !important;
-  border: 1px solid var(--bd) !important;
-  border-radius: 7px !important;
-  font-size: 12px !important;
-  color: var(--su) !important;
-  box-shadow: none !important;
+.fi-pagination select,
+.lv-per-page-select {
+  min-width: 68px !important;
+  width: 68px !important;
+  height: 32px !important;
+  padding: 0 26px 0 10px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  color: var(--tx, #334155) !important;
+  background-color: var(--wh, #ffffff) !important;
+  border: 1px solid var(--bd, #cbd5e1) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+  outline: none !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e") !important;
+  background-position: right 8px center !important;
+  background-repeat: no-repeat !important;
+  background-size: 16px 16px !important;
+  cursor: pointer !important;
+}
+
+.dark .fi-ta-pagination-records-per-page-select select,
+.dark .fi-pagination-records-per-page-select select,
+.dark .fi-ta-pagination select,
+.dark .fi-pagination select,
+.dark .lv-per-page-select {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+  color: #f1f5f9 !important;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2394a3b8' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e") !important;
 }
 
 /* Pagination item buttons (.pgb style) */

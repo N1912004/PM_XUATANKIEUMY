@@ -929,9 +929,9 @@
                             'total' => $stocksData->total(),
                         ]) }}
                     </div>
-                    <div style="display:flex; align-items:center; gap:8px;">
-                        <span style="font-size:12px;" class="text-gray-500 dark:text-gray-400">{{ __('common.pagination.per_page_label') }}</span>
-                        <select wire:model.live="perPage" style="height:30px; border:1px solid #cbd5e1; border-radius:6px; padding:0 8px; font-size:12px; background:transparent;" class="dark:border-gray-700 dark:bg-gray-800">
+                    <div class="pgwrap">
+                        <span>{{ __('common.pagination.per_page_label') }}</span>
+                        <select wire:model.live="perPage" class="lv-per-page-select">
                             @foreach([5, 10, 20, 50] as $count)
                                 <option value="{{ $count }}">{{ $count }}</option>
                             @endforeach
@@ -1119,9 +1119,9 @@
                                 'total' => $stocksData->total(),
                             ]) }}
                         </div>
-                        <div style="display:flex; align-items:center; gap:8px;">
-                            <span style="font-size:12px;" class="text-gray-500 dark:text-gray-400">{{ __('common.pagination.per_page_label') }}</span>
-                            <select wire:model.live="checkPerPage" style="height:30px; border:1px solid #cbd5e1; border-radius:6px; padding:0 8px; font-size:12px; background:transparent;" class="dark:border-gray-700 dark:bg-gray-800">
+                        <div class="pgwrap">
+                            <span>{{ __('common.pagination.per_page_label') }}</span>
+                            <select wire:model.live="checkPerPage" class="lv-per-page-select">
                                 @foreach([5, 10, 20, 50] as $count)
                                     <option value="{{ $count }}">{{ $count }}</option>
                                 @endforeach
@@ -1775,9 +1775,9 @@
                     ]) }}
                 </div>
                 <div style="display:flex; align-items:center; gap:12px;">
-                    <div style="display:flex; align-items:center; gap:6px;">
-                        <span style="font-size:12px;" class="text-gray-500 dark:text-gray-400">{{ __('common.pagination.per_page_label') }}</span>
-                        <select wire:model.live="logPerPage" style="height: 30px; font-size: 12px; padding: 2px 24px 2px 8px; border-radius: 6px; border: 1px solid #cbd5e1; background-color: #fff; cursor: pointer;" class="dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200">
+                    <div class="pgwrap">
+                        <span>{{ __('common.pagination.per_page_label') }}</span>
+                        <select wire:model.live="logPerPage" class="lv-per-page-select">
                             @foreach([5, 10, 20, 50] as $count)
                                 <option value="{{ $count }}">{{ $count }}</option>
                             @endforeach

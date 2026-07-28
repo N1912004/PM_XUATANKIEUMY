@@ -325,9 +325,9 @@
                 <div>
                     {{ __('supplier.pagination.summary', ['from' => $suppliersList->firstItem() ?? 0, 'to' => $suppliersList->lastItem() ?? 0, 'total' => number_format($suppliersList->total(), 0, ',', '.')]) }}
                 </div>
-                <div class="sup-pagination" style="display:flex; align-items:center; gap:8px; white-space:nowrap">
-                    <span style="font-size:12px; color:var(--sup-mu, #64748b); white-space:nowrap">{{ __('common.pagination.per_page_label') }}</span>
-                    <select wire:model.live="perPage" class="sup-select" style="min-width:auto; width:auto; height:30px; padding:0 24px 0 8px">
+                <div class="sup-pagination">
+                    <span>{{ __('common.pagination.per_page_label') }}</span>
+                    <select wire:model.live="perPage" class="lv-per-page-select">
                         @foreach([5, 10, 20, 50] as $count)
                             <option value="{{ $count }}">{{ $count }}</option>
                         @endforeach

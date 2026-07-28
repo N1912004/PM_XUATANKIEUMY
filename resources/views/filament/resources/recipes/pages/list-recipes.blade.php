@@ -443,9 +443,9 @@
                 <div>
                     {{ __('recipe.pagination.summary', ['from' => $recipesList->firstItem() ?? 0, 'to' => $recipesList->lastItem() ?? 0, 'total' => number_format($recipesList->total(), 0, ',', '.')]) }}
                 </div>
-                <div class="pgwrap" style="display:flex; align-items:center; gap:8px; white-space:nowrap">
-                    <span style="font-size:12px; color:var(--mu); white-space:nowrap">{{ __('common.pagination.per_page_label') }}</span>
-                    <select wire:model.live="perPage" class="pgsel" style="min-width:auto; width:auto; height:30px; padding:0 24px 0 8px">
+                <div class="pgwrap">
+                    <span>{{ __('common.pagination.per_page_label') }}</span>
+                    <select wire:model.live="perPage" class="lv-per-page-select">
                         @foreach([5, 10, 20, 50] as $count)
                             <option value="{{ $count }}">{{ $count }}</option>
                         @endforeach
