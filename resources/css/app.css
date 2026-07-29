@@ -3114,8 +3114,11 @@ button.btn-danger-red svg {
    UNIFIED DELETE CONFIRMATION MODAL & BUTTON STYLING (MATCHING IMAGE 2 SPEC)
    ========================================================================== */
 
-/* Hide top-right close X button in Filament modals */
-.fi-modal-close-btn {
+/* Hide top-right close X button wrapper in Filament modals */
+.fi-modal-window > div.absolute.end-4.top-4,
+.fi-modal-window > div.absolute.end-6.top-6,
+.fi-modal-close-btn,
+.fi-modal-close-btn * {
   display: none !important;
 }
 
@@ -3147,10 +3150,20 @@ button.btn-danger-red svg {
   text-align: left !important;
 }
 
-/* Modal Warning Icon ⚠️ Badge (Rounded Square, Soft Pink Background) */
+/* Fix Filament's double-shape icon glitch (outer rounded-full circle + inner square) */
+.fi-modal-header .rounded-full {
+  border-radius: 9px !important;
+  background-color: transparent !important;
+  background: transparent !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Modal Warning Icon ⚠️ Badge (Single Clean Rounded Square, Soft Pink Background) */
 .fi-modal-header > div:first-child,
-.fi-modal-icon-ctn,
-.fi-modal-icon {
+.fi-modal-header div:has(> .fi-modal-icon),
+.fi-modal-icon-ctn {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -3163,25 +3176,32 @@ button.btn-danger-red svg {
   margin: 0 !important;
   padding: 0 !important;
   background-color: #fef2f2 !important;
+  background: #fef2f2 !important;
 }
 
-.fi-modal-header > div:first-child > div,
 .fi-modal-icon {
-  background-color: #fef2f2 !important;
+  width: 18px !important;
+  height: 18px !important;
   color: #dc2626 !important;
-  border-radius: 9px !important;
+  fill: #dc2626 !important;
+  background: transparent !important;
+  background-color: transparent !important;
 }
 
 .fi-modal-icon svg {
-  width: 20px !important;
-  height: 20px !important;
+  width: 18px !important;
+  height: 18px !important;
   color: #dc2626 !important;
   fill: #dc2626 !important;
 }
 
-.dark .fi-modal-header > div:first-child > div,
-.dark .fi-modal-icon {
+.dark .fi-modal-header > div:first-child,
+.dark .fi-modal-header div:has(> .fi-modal-icon) {
   background-color: rgba(220, 38, 38, 0.2) !important;
+  background: rgba(220, 38, 38, 0.2) !important;
+}
+
+.dark .fi-modal-icon {
   color: #f87171 !important;
 }
 
