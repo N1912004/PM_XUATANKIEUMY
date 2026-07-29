@@ -122,8 +122,8 @@ return [
     ],
     'pagination' => [
         'navigation' => 'Điều hướng phân trang kho',
-        'showing' => 'Hiển thị :from-:to trên :total mặt hàng tồn kho',
-        'showing_results' => 'Hiển thị :first đến :last trong tổng số :total bản ghi',
+        'showing' => 'Hiển thị :from - :to trong tổng số :total mặt hàng tồn kho',
+        'showing_results' => 'Hiển thị :first - :last trong tổng số :total bản ghi',
         'per_page' => ':count / trang',
     ],
     'form' => [

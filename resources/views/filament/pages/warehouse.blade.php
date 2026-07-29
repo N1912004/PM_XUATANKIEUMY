@@ -576,10 +576,137 @@
             background: #1e293b;
             color: #cbd5e1;
         }
+    /* Hộp thoại xác nhận xóa/hủy trong trang (teleport ra body) */
+    .rcf-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 60;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+        background: rgba(15, 23, 42, .55);
+        backdrop-filter: blur(2px);
+        font-family: "Inter", system-ui, sans-serif;
+    }
+    .rcf-box {
+        width: 100%;
+        max-width: 420px;
+        background: var(--po-wh, #fff);
+        border: 1px solid var(--po-bd, #e2e8f0);
+        border-radius: var(--po-r, 12px);
+        box-shadow: 0 20px 45px rgba(15, 23, 42, .25);
+        padding: 20px;
+    }
+    .rcf-head {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+    .rcf-ico {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 34px;
+        height: 34px;
+        border-radius: 9px;
+        font-size: 15px;
+        flex: 0 0 auto;
+    }
+    .rcf-ico-danger {
+        background: var(--po-rd-s, #fef2f2);
+        color: var(--po-rd, #dc2626);
+    }
+    .rcf-ico-info {
+        background: var(--po-bl-s, #e9f2f8);
+        color: var(--po-bl, #1267e8);
+    }
+    .rcf-title {
+        margin: 0;
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--po-tx, #0f172a);
+    }
+    .rcf-msg {
+        margin: 0 0 18px;
+        font-size: 13px;
+        line-height: 1.55;
+        color: var(--po-su, #334155);
+    }
+    .rcf-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+    }
+    .rcf-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        height: 34px;
+        padding: 0 14px;
+        border-radius: 8px;
+        border: 1px solid transparent;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: filter .14s ease, background .14s ease;
+    }
+    .rcf-btn:disabled {
+        opacity: .6;
+        cursor: not-allowed;
+    }
+    .rcf-btn-ghost {
+        background: var(--po-wh, #fff);
+        border-color: var(--po-bd, #e2e8f0);
+        color: var(--po-su, #334155);
+    }
+    .rcf-btn-ghost:hover:not(:disabled) {
+        background: var(--po-bd2, #f1f5f9);
+    }
+    .rcf-btn-danger {
+        background: #dc2626;
+        color: #fff;
+    }
+    .rcf-btn-primary {
+        background: #1267e8;
+        color: #fff;
+    }
+    .rcf-btn-danger:hover:not(:disabled),
+    .rcf-btn-primary:hover:not(:disabled) {
+        filter: brightness(.94);
+    }
 </style>
 @endpush
 
 <x-filament-panels::page>
+    <div x-data="{
+        cf: { open: false, title: '', message: '', confirmLabel: '', danger: true, method: null, arg: null, busy: false },
+        askConfirm(method, arg, title, message, confirmLabel, danger = true) {
+            this.cf = { open: true, title, message, confirmLabel, danger, method, arg, busy: false };
+        },
+        closeConfirm() {
+            if (this.cf.busy) return;
+            this.cf.open = false;
+            this.cf.method = null;
+        },
+        async runConfirm() {
+            if (this.cf.busy || ! this.cf.method) return;
+            this.cf.busy = true;
+            try {
+                if (this.cf.arg === null) {
+                    await $wire.call(this.cf.method);
+                } else {
+                    await $wire.call(this.cf.method, this.cf.arg);
+                }
+            } finally {
+                this.cf.busy = false;
+                this.cf.open = false;
+                this.cf.method = null;
+            }
+        },
+     }"
+     @keydown.escape.window="closeConfirm()">
 
     <!-- Stats Cards -->
     @php $stats = $this->getStats(); @endphp
@@ -676,13 +803,15 @@
                     <i class="fa-solid fa-magnifying-glass" style="font-size:12px; color:#94a3b8; margin-right:4px;"></i>
                     <input type="text" wire:model.live.debounce.300ms="search" placeholder="{{ __('warehouse.placeholders.search_ingredient') }}">
                 </div>
-                <div>
-                    <select wire:model.live="selectedType" class="type-select">
-                        <option value="">{{ __('warehouse.filters.all_types') }}</option>
-                        @foreach($this->getIngredientTypeOptions() as $t)
-                            <option value="{{ $t }}">{{ $t }}</option>
-                        @endforeach
-                    </select>
+                <div style="min-width: 170px;">
+                    @include('filament.components.search-select', [
+                        'name' => 'selectedType',
+                        'live' => true,
+                        'placeholder' => __('warehouse.filters.all_types'),
+                        'nullable' => true,
+                        'emptyLabel' => __('warehouse.filters.all_types'),
+                        'options' => array_map(fn($t) => ['value' => $t, 'label' => $t], $this->getIngredientTypeOptions()),
+                    ])
                 </div>
                 <div>
                     <select wire:model.live="selectedSort" class="type-select">
@@ -701,46 +830,46 @@
             <div class="overflow-x-auto">
                 <table class="wh-table">
                     <thead>
-                        <tr>
-                            <th style="width: 36px; text-align: center;">#</th>
-                            <th>{{ __('warehouse.table.ingredient_code_short') }}</th>
-                            <th>{{ __('warehouse.table.ingredient') }}</th>
-                            <th>{{ __('warehouse.table.type') }}</th>
-                            <th>{{ __('warehouse.table.supplier') }}</th>
-                            <th style="text-align: right;">{{ __('warehouse.table.current_stock') }}</th>
-                            <th style="text-align: right;">{{ __('warehouse.table.minimum') }}</th>
-                            <th style="text-align: right;">{{ __('warehouse.table.unit_price') }}</th>
-                            <th style="text-align: right;">{{ __('warehouse.table.value') }}</th>
-                            <th style="text-align: center;">{{ __('warehouse.table.last_updated') }}</th>
-                            <th>{{ __('warehouse.table.status') }}</th>
+                        <tr style="border-bottom:1.5px solid var(--po-bd2, #f1f5f9); color:var(--po-mu, #64748b); font-weight:700; text-transform:uppercase; font-size:11px; background:var(--po-bd2, #f1f5f9)">
+                            <th style="padding:12px 14px; width: 70px; text-align: center;">STT</th>
+                            <th style="padding:12px 14px; width: 120px; text-align: center; white-space: nowrap;">{{ __('warehouse.table.ingredient_code_short') }}</th>
+                            <th style="padding:12px 14px; width: 22%;">{{ __('warehouse.table.ingredient') }}</th>
+                            <th style="padding:12px 14px; width: 14%;">{{ __('warehouse.table.type') }}</th>
+                            <th style="padding:12px 14px; width: 16%;">{{ __('warehouse.table.supplier') }}</th>
+                            <th style="padding:12px 14px; text-align: center; width: 130px; white-space: nowrap;">{{ __('warehouse.table.current_stock') }}</th>
+                            <th style="padding:12px 14px; text-align: center; width: 130px; white-space: nowrap;">{{ __('warehouse.table.minimum') }}</th>
+                            <th style="padding:12px 14px; text-align: right; width: 120px; white-space: nowrap;">{{ __('warehouse.table.unit_price') }}</th>
+                            <th style="padding:12px 14px; text-align: right; width: 130px; white-space: nowrap;">{{ __('warehouse.table.value') }}</th>
+                            <th style="padding:12px 14px; text-align: center; width: 130px; white-space: nowrap;">{{ __('warehouse.table.last_updated') }}</th>
+                            <th style="padding:12px 14px; text-align: center; width: 130px; white-space: nowrap;">{{ __('warehouse.table.status') }}</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($stocksData as $index => $item)
                             @if(empty($item['ingredient'])) @continue @endif
-                            <tr wire:click="openLedger({{ $item['ingredient']['id'] ?? 0 }})" style="cursor: pointer;" title="{{ __('warehouse.tooltips.open_ledger') }}">
-                                <td style="text-align: center;">{{ ($stocksData->currentPage() - 1) * $stocksData->perPage() + $index + 1 }}</td>
-                                <td><span style="font-weight: 700;">{{ $item['ingredient']['code'] ?? '—' }}</span></td>
-                                <td class="wh-ing-name">
-                                    <div style="display: flex; align-items: center; gap: 8px;">
+                            <tr wire:click="openLedger({{ $item['ingredient']['id'] ?? 0 }})" style="cursor: pointer; border-bottom:1px solid var(--po-bd2, #f1f5f9)" title="{{ __('warehouse.tooltips.open_ledger') }}">
+                                <td style="padding:12px 14px; text-align: center; font-weight: 600; color: var(--po-mu, #64748b); font-variant-numeric: tabular-nums;">{{ ($stocksData->currentPage() - 1) * $stocksData->perPage() + $index + 1 }}</td>
+                                <td style="padding:12px 14px; text-align: center; font-weight: 800; color: var(--po-bl, #1267e8); font-variant-numeric: tabular-nums; white-space: nowrap;">{{ $item['ingredient']['code'] ?? '—' }}</td>
+                                <td style="padding:12px 14px;" class="wh-ing-name">
+                                    <div style="display: flex; align-items: center; gap: 8px; font-weight: 700;">
                                         <span>{{ $item['ingredient']['name'] ?? '—' }}</span>
                                         <svg class="w-3.5 h-3.5 text-gray-400 opacity-0 wh-ledger-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="transition: opacity 0.15s; flex-shrink: 0;" title="{{ __('warehouse.tooltips.open_ledger') }}">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
                                         </svg>
                                     </div>
                                 </td>
-                                <td>{{ $item['ingredient']['type'] ?? '—' }}</td>
-                                <td>{{ str_starts_with($item['ingredient']['supplier']['name'] ?? '', 'test_') ? __('warehouse.common.test_supplier') : ($item['ingredient']['supplier']['name'] ?? '—') }}</td>
-                                <td style="text-align: right; font-weight: 700;">
+                                <td style="padding:12px 14px; font-weight: 600;">{{ $item['ingredient']['type'] ?? '—' }}</td>
+                                <td style="padding:12px 14px;">{{ str_starts_with($item['ingredient']['supplier']['name'] ?? '', 'test_') ? __('warehouse.common.test_supplier') : ($item['ingredient']['supplier']['name'] ?? '—') }}</td>
+                                <td style="padding:12px 14px; text-align: center; font-weight: 800; color: var(--po-bl, #1267e8); font-variant-numeric: tabular-nums;">
                                     {{ $this->formatQty($item['quantity']) }} {{ $item['ingredient']['unit'] ?? '' }}
                                 </td>
-                                <td style="text-align: right; color: #64748b;">
+                                <td style="padding:12px 14px; text-align: center; color: #64748b; font-variant-numeric: tabular-nums;">
                                     {{ $this->formatQty($item['min_quantity']) }} {{ $item['ingredient']['unit'] ?? '' }}
                                 </td>
-                                <td style="text-align: right; font-weight: 600;">
+                                <td style="padding:12px 14px; text-align: right; font-weight: 600; font-variant-numeric: tabular-nums;">
                                     {{ number_format($item['unit_price'], 0, ',', '.') }} {{ __('warehouse.common.currency') }}
                                 </td>
-                                <td style="text-align: right; font-weight: 700; color: rgb(var(--primary-600));" class="dark:text-primary-400">
+                                <td style="padding:12px 14px; text-align: right; font-weight: 800; color: var(--po-bl, #1267e8); font-variant-numeric: tabular-nums;">
                                     {{ number_format($item['quantity'] * $item['unit_price'], 0, ',', '.') }} {{ __('warehouse.common.currency') }}
                                 </td>
                                 <td style="text-align: center; font-size: 11px; color: #64748b; font-variant-numeric: tabular-nums;">
@@ -802,15 +931,15 @@
                             'total' => $stocksData->total(),
                         ]) }}
                     </div>
-                    <div style="display:flex; align-items:center; gap:8px;">
-                        <select wire:model.live="perPage" style="height:30px; border:1px solid #cbd5e1; border-radius:6px; padding:0 8px; font-size:12px; background:transparent;" class="dark:border-gray-700 dark:bg-gray-800">
-                            <option value="5">{{ __('warehouse.pagination.per_page', ['count' => 5]) }}</option>
-                            <option value="10">{{ __('warehouse.pagination.per_page', ['count' => 10]) }}</option>
-                            <option value="20">{{ __('warehouse.pagination.per_page', ['count' => 20]) }}</option>
-                            <option value="50">{{ __('warehouse.pagination.per_page', ['count' => 50]) }}</option>
+                    <div class="pgwrap">
+                        <span>{{ __('common.pagination.per_page_label') }}</span>
+                        <select wire:model.live="perPage" class="lv-per-page-select">
+                            @foreach([5, 10, 20, 50] as $count)
+                                <option value="{{ $count }}">{{ $count }}</option>
+                            @endforeach
                         </select>
 
-                        @if($stocksData->hasPages())
+                        @if($stocksData->total() > 0)
                             <nav role="navigation" aria-label="{{ __('warehouse.pagination.navigation') }}" style="display:flex; align-items:center; gap:4px;">
                                 {{-- Trang trước --}}
                                 @if ($stocksData->onFirstPage())
@@ -992,15 +1121,15 @@
                                 'total' => $stocksData->total(),
                             ]) }}
                         </div>
-                        <div style="display:flex; align-items:center; gap:8px;">
-                            <select wire:model.live="checkPerPage" style="height:30px; border:1px solid #cbd5e1; border-radius:6px; padding:0 8px; font-size:12px; background:transparent;" class="dark:border-gray-700 dark:bg-gray-800">
-                                <option value="5">{{ __('warehouse.pagination.per_page', ['count' => 5]) }}</option>
-                                <option value="10">{{ __('warehouse.pagination.per_page', ['count' => 10]) }}</option>
-                                <option value="20">{{ __('warehouse.pagination.per_page', ['count' => 20]) }}</option>
-                                <option value="50">{{ __('warehouse.pagination.per_page', ['count' => 50]) }}</option>
+                        <div class="pgwrap">
+                            <span>{{ __('common.pagination.per_page_label') }}</span>
+                            <select wire:model.live="checkPerPage" class="lv-per-page-select">
+                                @foreach([5, 10, 20, 50] as $count)
+                                    <option value="{{ $count }}">{{ $count }}</option>
+                                @endforeach
                             </select>
 
-                            @if($stocksData->hasPages())
+                            @if($stocksData->total() > 0)
                                 <nav role="navigation" aria-label="{{ __('warehouse.pagination.navigation') }}" style="display:flex; align-items:center; gap:4px;">
                                     @if ($stocksData->onFirstPage())
                                         <span aria-disabled="true" style="opacity:.4; padding:4px;">
@@ -1549,12 +1678,10 @@
                                                         {{ __('warehouse.actions.confirm_receive') }}
                                                     </button>
                                                 @elseif($tf->status === \App\Models\StockTransfer::STATUS_IN_TRANSIT && $curKitchenId === $tf->source_kitchen_id)
-                                                    <button type="button" class="wh-action-btn wh-action-btn-danger" style="height:28px; font-size:10px; padding:0 8px; margin:0 auto;"
-                                                            wire:click="cancelTransfer({{ $tf->id }})"
-                                                            wire:confirm="{{ __('warehouse.actions.confirm_cancel_transfer') }}"
-                                                            wire:loading.attr="disabled" wire:target="cancelTransfer">
-                                                        {{ __('warehouse.actions.cancel_transfer') }}
-                                                    </button>
+                                                     <button type="button" class="wh-action-btn wh-action-btn-danger" style="height:28px; font-size:10px; padding:0 8px; margin:0 auto;"
+                                                             @click="askConfirm('cancelTransfer', {{ $tf->id }}, @js(__('warehouse.actions.cancel_transfer')), @js(__('warehouse.actions.confirm_cancel_transfer')), @js(__('warehouse.actions.cancel_transfer')))">
+                                                         {{ __('warehouse.actions.cancel_transfer') }}
+                                                     </button>
                                                 @else
                                                     —
                                                 @endif
@@ -1650,16 +1777,16 @@
                     ]) }}
                 </div>
                 <div style="display:flex; align-items:center; gap:12px;">
-                    <div style="display:flex; align-items:center; gap:6px;">
-                        <select wire:model.live="logPerPage" style="height: 30px; font-size: 12px; padding: 2px 24px 2px 8px; border-radius: 6px; border: 1px solid #cbd5e1; background-color: #fff; cursor: pointer;" class="dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200">
-                            <option value="5">{{ __('warehouse.pagination.per_page', ['count' => 5]) }}</option>
-                            <option value="10">{{ __('warehouse.pagination.per_page', ['count' => 10]) }}</option>
-                            <option value="20">{{ __('warehouse.pagination.per_page', ['count' => 20]) }}</option>
-                            <option value="50">{{ __('warehouse.pagination.per_page', ['count' => 50]) }}</option>
+                    <div class="pgwrap">
+                        <span>{{ __('common.pagination.per_page_label') }}</span>
+                        <select wire:model.live="logPerPage" class="lv-per-page-select">
+                            @foreach([5, 10, 20, 50] as $count)
+                                <option value="{{ $count }}">{{ $count }}</option>
+                            @endforeach
                         </select>
                     </div>
 
-                    @if($logPaginator->hasPages())
+                    @if($logPaginator->total() > 0)
                         <nav role="navigation" aria-label="{{ __('warehouse.pagination.navigation') }}" style="display:flex; align-items:center; gap:4px;">
                             {{-- Trang trước --}}
                             @if ($logPaginator->onFirstPage())
@@ -1859,4 +1986,30 @@
             </div>
         </div>
     @endif
+
+    {{-- Hộp thoại xác nhận trong trang (teleport ra body) --}}
+    <template x-teleport="body">
+        <div x-show="cf.open" x-cloak class="rcf-overlay" @click.self="closeConfirm()">
+            <div class="rcf-box" role="dialog" aria-modal="true">
+                <div class="rcf-head">
+                    <span class="rcf-ico" :class="cf.danger ? 'rcf-ico-danger' : 'rcf-ico-info'">
+                        <i class="fa-solid" :class="cf.danger ? 'fa-triangle-exclamation' : 'fa-rotate-left'"></i>
+                    </span>
+                    <h3 class="rcf-title" x-text="cf.title"></h3>
+                </div>
+                <p class="rcf-msg" x-text="cf.message"></p>
+                <div class="rcf-actions">
+                    <button type="button" class="rcf-btn rcf-btn-ghost" @click="closeConfirm()" :disabled="cf.busy">
+                        {{ __('common.actions.cancel') }}
+                    </button>
+                    <button type="button" class="rcf-btn" :class="cf.danger ? 'rcf-btn-danger' : 'rcf-btn-primary'"
+                            @click="runConfirm()" :disabled="cf.busy">
+                        <i class="fa-solid fa-spinner fa-spin" x-show="cf.busy"></i>
+                        <span x-text="cf.confirmLabel"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </template>
+    </div>
 </x-filament-panels::page>

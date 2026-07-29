@@ -1,4 +1,31 @@
-<div class="emp-page bf-list-page w-full">
+<div class="emp-page bf-list-page w-full"
+     x-data="{
+        cf: { open: false, title: '', message: '', confirmLabel: '', danger: true, method: null, arg: null, busy: false },
+        askConfirm(method, arg, title, message, confirmLabel, danger = true) {
+            this.cf = { open: true, title, message, confirmLabel, danger, method, arg, busy: false };
+        },
+        closeConfirm() {
+            if (this.cf.busy) return;
+            this.cf.open = false;
+            this.cf.method = null;
+        },
+        async runConfirm() {
+            if (this.cf.busy || ! this.cf.method) return;
+            this.cf.busy = true;
+            try {
+                if (this.cf.arg === null) {
+                    await $wire.call(this.cf.method);
+                } else {
+                    await $wire.call(this.cf.method, this.cf.arg);
+                }
+            } finally {
+                this.cf.busy = false;
+                this.cf.open = false;
+                this.cf.method = null;
+            }
+        },
+     }"
+     @keydown.escape.window="closeConfirm()">
     @include('filament.resources.employees.partials.styles')
 
     @php
@@ -250,8 +277,8 @@
                                     </a>
 
                                     <!-- Xóa nhân viên -->
-                                    <button wire:click="deleteEmployee({{ $emp->id }})" wire:confirm="{{ __('employee.ui.confirm_delete') }}" class="abt" title="{{ __('employee.ui.delete') }}">
-                                        <i class="fa-solid fa-ellipsis-vertical"></i>
+                                    <button type="button" @click="askConfirm('deleteEmployee', {{ $emp->id }}, @js(__('employee.ui.delete')), @js(__('employee.ui.confirm_delete')), @js(__('employee.ui.delete')))" class="abt" title="{{ __('employee.ui.delete') }}">
+                                        <i class="fa-solid fa-trash" style="color:var(--po-rd)"></i>
                                     </button>
                                 </div>
                             </td>
@@ -286,15 +313,15 @@
                 <div>
                     {{ __('employee.ui.pagination', ['from' => $employeesList->firstItem() ?? 0, 'to' => $employeesList->lastItem() ?? 0, 'total' => number_format($employeesList->total(), 0, ',', '.')]) }}
                 </div>
-                <div class="po-pagination" style="display:flex; align-items:center; gap:12px">
-                    <select wire:model.live="perPage" class="po-select" style="min-width:7rem;height:2.1rem;padding:0 .5rem;border-radius:.5rem; border:1px solid var(--po-bd); outline:none; background:var(--po-wh); color:var(--po-tx)">
-                        <option value="5">{{ __('employee.ui.rows_per_page', ['count' => 5]) }}</option>
-                        <option value="10">{{ __('employee.ui.rows_per_page', ['count' => 10]) }}</option>
-                        <option value="20">{{ __('employee.ui.rows_per_page', ['count' => 20]) }}</option>
-                        <option value="50">{{ __('employee.ui.rows_per_page', ['count' => 50]) }}</option>
+                <div class="po-pagination">
+                    <span>{{ __('common.pagination.per_page_label') }}</span>
+                    <select wire:model.live="perPage" class="lv-per-page-select">
+                        @foreach([5, 10, 20, 50] as $count)
+                            <option value="{{ $count }}">{{ $count }}</option>
+                        @endforeach
                     </select>
 
-                    @if($employeesList->hasPages())
+                    @if($employeesList->total() > 0)
                         <nav role="navigation" aria-label="{{ __('common.pagination.navigation') }}" style="display:flex; align-items:center; gap:4px">
                             {{-- Previous --}}
                             @if ($employeesList->onFirstPage())
@@ -337,4 +364,29 @@
             </div>
         @endif
     </div>
+
+    {{-- Hộp thoại xác nhận trong trang (teleport ra body) --}}
+    <template x-teleport="body">
+        <div x-show="cf.open" x-cloak class="rcf-overlay" @click.self="closeConfirm()">
+            <div class="rcf-box" role="dialog" aria-modal="true">
+                <div class="rcf-head">
+                    <span class="rcf-ico" :class="cf.danger ? 'rcf-ico-danger' : 'rcf-ico-info'">
+                        <i class="fa-solid" :class="cf.danger ? 'fa-triangle-exclamation' : 'fa-rotate-left'"></i>
+                    </span>
+                    <h3 class="rcf-title" x-text="cf.title"></h3>
+                </div>
+                <p class="rcf-msg" x-text="cf.message"></p>
+                <div class="rcf-actions">
+                    <button type="button" class="rcf-btn rcf-btn-ghost" @click="closeConfirm()" :disabled="cf.busy">
+                        {{ __('common.actions.cancel') }}
+                    </button>
+                    <button type="button" class="rcf-btn" :class="cf.danger ? 'rcf-btn-danger' : 'rcf-btn-primary'"
+                            @click="runConfirm()" :disabled="cf.busy">
+                        <i class="fa-solid fa-spinner fa-spin" x-show="cf.busy"></i>
+                        <span x-text="cf.confirmLabel"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </template>
 </div>

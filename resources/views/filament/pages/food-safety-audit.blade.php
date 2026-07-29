@@ -79,31 +79,31 @@
                     return this.options.filter(name => name.toLowerCase().includes(keyword));
                 }
             }" class="relative w-full">
-                <div @click="open = !open" class="ctrl flex items-center justify-between cursor-pointer" role="combobox" tabindex="0" :aria-expanded="open" aria-label="{{ __('food_safety.accessibility.inspector_picker') }}" style="background:var(--po-wh); min-height:38px; border:1.5px solid var(--po-line); padding:6px 12px; border-radius:8px">
-                    <span x-text="selected ? selected : @js(__('food_safety.placeholders.select_employee'))" style="font-weight:600; color:var(--po-tx)"></span>
+                <div @click="open = !open" class="ctrl flex items-center justify-between cursor-pointer" role="combobox" tabindex="0" :aria-expanded="open" aria-label="{{ __('food_safety.accessibility.inspector_picker') }}" style="background:var(--po-wh); min-height:38px; border:1px solid var(--po-bd); padding:6px 12px; border-radius:7px">
+                    <span x-text="selected ? selected : @js(__('food_safety.placeholders.select_employee'))" style="font-weight:400; color:var(--po-tx)"></span>
                     <i class="fa-solid fa-chevron-down" style="font-size:11px; color:var(--po-mu)"></i>
                 </div>
                 <div x-show="open" @click.away="open = false" class="absolute left-0 mt-1 w-full rounded-lg shadow-lg z-50 p-2" style="display:none; max-height:280px; overflow-y:auto; border:1px solid var(--po-line); box-shadow:0 10px 25px rgba(15,35,70,.15); background:var(--po-wh);">
                     <input type="text" x-model="search" placeholder="{{ __('food_safety.placeholders.search_employee') }}" class="ctrl w-full mb-2" style="height:32px; padding:4px 8px; font-size:13px; border:1px solid var(--po-line); border-radius:6px; outline:none">
                     <div class="flex flex-col gap-1">
-                        <div @click="selected = ''; open = false; search = ''" class="fsa-dropdown-item px-3 py-1.5 rounded cursor-pointer text-sm font-semibold transition italic" style="color:var(--po-mu)">
+                        <div @click="selected = ''; open = false; search = ''" class="fsa-dropdown-item px-3 py-1.5 rounded cursor-pointer text-sm font-normal transition" style="color:var(--po-mu)">
                             {{ __('food_safety.actions.clear_selection') }}
                         </div>
                         <template x-for="name in filteredOptions" :key="name">
                             <div @click="selected = name; open = false; search = ''"
-                                class="fsa-dropdown-item px-3 py-1.5 rounded cursor-pointer text-sm font-semibold transition"
-                                :style="selected === name ? 'background:rgba(18,86,196,.15); color:var(--po-bl);' : ''"
+                                class="fsa-dropdown-item px-3 py-1.5 rounded cursor-pointer text-sm font-normal transition"
+                                :style="selected === name ? 'background:rgba(18,86,196,.15); color:var(--po-bl); font-weight:500;' : ''"
                                 x-text="name">
                             </div>
                         </template>
-                        <div x-show="filteredOptions.length === 0" class="text-center py-3 text-xs font-semibold" style="color:var(--po-mu)">
+                        <div x-show="filteredOptions.length === 0" class="text-center py-3 text-xs font-normal" style="color:var(--po-mu)">
                             {{ __('food_safety.empty.no_employee_results') }}
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div style="font-size:12.5px; color:var(--po-mu); padding-bottom:9px; font-weight:600">
+        <div style="font-size:12.5px; color:var(--po-mu); padding-bottom:9px; font-weight:400">
             {{ __('food_safety.labels.filter_summary', ['date' => $sheet['dateText'], 'dishes' => $stats['dishes'], 'ingredients' => $stats['ingredients']]) }}
         </div>
     </div>

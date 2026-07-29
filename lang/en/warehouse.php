@@ -122,8 +122,8 @@ return [
     ],
     'pagination' => [
         'navigation' => 'Warehouse pagination navigation',
-        'showing' => 'Showing :from-:to of :total stock items',
-        'showing_results' => 'Showing :first to :last of :total records',
+        'showing' => 'Showing :from - :to of :total stock items',
+        'showing_results' => 'Showing :first - :last of :total records',
         'per_page' => ':count / page',
     ],
     'form' => [

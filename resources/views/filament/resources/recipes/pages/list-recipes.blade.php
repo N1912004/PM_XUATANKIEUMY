@@ -191,11 +191,13 @@
             ])
         </div>
 
-        <button wire:click="resetFilters" class="mn-fbtn" title="{{ __('recipe.actions.reset_filters') }}">
-            <i class="fa-solid fa-sliders"></i>
-            {{ __('recipe.filters.title') }}
+        <button type="button" wire:click="resetFilters" wire:loading.attr="disabled" wire:target="resetFilters" class="fbtn" style="align-self: flex-end; margin-bottom: 1px;">
+            <span style="width:16px; height:16px; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;">
+                <i wire:loading.remove="" wire:target="resetFilters" class="fa-solid fa-filter-circle-xmark" style="font-size:14px; color:var(--su,#334155)"></i>
+                <i wire:loading="" wire:target="resetFilters" class="fa-solid fa-spinner fa-spin" style="font-size:14px"></i>
+            </span>
+            <span>{{ __('recipe.actions.clear_filters') }}</span>
         </button>
-        <span wire:click="resetFilters" class="mn-clr">{{ __('recipe.actions.clear_filters') }}</span>
     </div>
 
     <!-- Info Banner -->
@@ -208,18 +210,19 @@
     @if(count($selectedRecipes) > 0)
         <div class="mn-bulk-actions" style="display:flex;align-items:center;justify-content:space-between;background:var(--bl-s);border:1px solid var(--bl-m);padding:10px 16px;border-radius:8px;margin-bottom:12px;gap:12px; animation: fadeIn 0.2s ease;">
             <div style="display:flex;align-items:center;gap:8px">
-                <span style="font-weight:600;color:var(--bl);font-size:13px"><i class="fa-solid fa-square-check"></i> {{ __('recipe.bulk.selected', ['count' => count($selectedRecipes)]) }}</span>
+                <span style="font-weight:400;color:var(--bl);font-size:13px"><i class="fa-solid fa-square-check"></i> {{ __('recipe.bulk.selected', ['count' => count($selectedRecipes)]) }}</span>
+                <button type="button" wire:click="clearSelectedRecipes" class="mn-clr" style="font-size:12px;font-weight:400">{{ __('recipe.bulk.deselect') }}</button>
             </div>
-            <div style="display:flex;gap:8px">
+            <div style="display:flex;gap:8px;align-items:center">
                 @if($trashedFilter === 'only')
-                    <button type="button" @click="askConfirm('bulkRestore', null, @js(__('recipe.bulk.restore')), @js(__('recipe.confirm.bulk_restore')), @js(__('recipe.bulk.restore')), false)" class="mn-fbtn" style="background:#fff;border-color:var(--bl);color:var(--bl);height:30px;font-size:12px">
+                    <button type="button" @click="askConfirm('bulkRestore', null, @js(__('recipe.bulk.restore')), @js(__('recipe.confirm.bulk_restore')), @js(__('recipe.bulk.restore')))" class="mn-fbtn" style="background:var(--bl-s);border-color:#bfdbfe;color:var(--bl);height:30px;font-size:12px;font-weight:400">
                         <i class="fa-solid fa-rotate-left"></i> {{ __('recipe.bulk.restore') }}
                     </button>
-                    <button type="button" @click="askConfirm('bulkForceDelete', null, @js(__('recipe.bulk.force_delete')), @js(__('recipe.confirm.bulk_force_delete')), @js(__('recipe.bulk.force_delete')))" class="mn-fbtn" style="background:var(--rd-s);border-color:#fecaca;color:var(--rd);height:30px;font-size:12px">
+                    <button type="button" @click="askConfirm('bulkForceDelete', null, @js(__('recipe.bulk.force_delete')), @js(__('recipe.confirm.bulk_force_delete')), @js(__('recipe.bulk.force_delete')))" class="mn-fbtn" style="background:var(--rd-s);border-color:#fecaca;color:var(--rd);height:30px;font-size:12px;font-weight:400">
                         <i class="fa-solid fa-trash-can"></i> {{ __('recipe.bulk.force_delete') }}
                     </button>
                 @else
-                    <button type="button" @click="askConfirm('bulkDelete', null, @js(__('recipe.bulk.delete')), @js(__('recipe.confirm.bulk_delete')), @js(__('recipe.bulk.delete')))" class="mn-fbtn" style="background:var(--rd-s);border-color:#fecaca;color:var(--rd);height:30px;font-size:12px">
+                    <button type="button" @click="askConfirm('bulkDelete', null, @js(__('recipe.bulk.delete')), @js(__('recipe.confirm.bulk_delete')), @js(__('recipe.bulk.delete')))" class="mn-fbtn" style="background:var(--rd-s);border-color:#fecaca;color:var(--rd);height:30px;font-size:12px;font-weight:400">
                         <i class="fa-solid fa-trash"></i> {{ __('recipe.bulk.delete') }}
                     </button>
                 @endif
@@ -231,7 +234,7 @@
         <div style="overflow-x:auto">
             <table class="mn-table">
                 <thead>
-                    <tr>
+                    <tr style="border-bottom:1.5px solid var(--po-bd2, #f1f5f9); color:var(--po-mu, #64748b); font-weight:400; text-transform:uppercase; font-size:11px; background:var(--po-bd2, #f1f5f9)">
                         <th style="width: 40px; text-align: center; vertical-align: middle;">
                             <input type="checkbox" 
                                    class="fi-checkbox-input rounded border-gray-300 text-primary-600 focus:ring-primary-600 dark:border-gray-700 dark:bg-gray-900 dark:checked:bg-primary-500" 
@@ -243,11 +246,18 @@
                                    wire:click="selectPage({{ json_encode($pageIds) }}, {{ $allSelected ? 'false' : 'true' }})"
                             >
                         </th>
-                        {{--
-                        <th style="width: 40px; text-align: center;"></th>
-                        --}}
-                        <th style="width: 50px; text-align: center;">STT</th>
-                        <th>{{ __('recipe.table.code') }}</th><th>{{ __('recipe.table.name') }}</th><th>{{ __('recipe.table.type') }}</th><th>{{ __('recipe.table.selling_price_per_portion') }}</th><th>{{ __('recipe.table.cost_per_portion') }}</th><th>{{ __('recipe.table.ingredients_count') }}</th><th>{{ __('recipe.table.total_weight') }}</th><th>{{ __('recipe.table.total_cost') }}</th><th>{{ __('recipe.table.status') }}</th><th>{{ __('recipe.table.created_at') }}</th><th>{{ __('recipe.table.actions') }}</th>
+                        <th style="padding:12px 14px; width: 60px; text-align: center;">STT</th>
+                        <th style="padding:12px 14px; width: 110px; text-align: center; white-space: nowrap;">{{ __('recipe.table.code') }}</th>
+                        <th style="padding:12px 14px; width: 18%;">{{ __('recipe.table.name') }}</th>
+                        <th style="padding:12px 14px; width: 120px;">{{ __('recipe.table.type') }}</th>
+                        <th style="padding:12px 14px; text-align: right; width: 110px; white-space: nowrap;">{{ __('recipe.table.selling_price_per_portion') }}</th>
+                        <th style="padding:12px 14px; text-align: right; width: 110px; white-space: nowrap;">{{ __('recipe.table.cost_per_portion') }}</th>
+                        <th style="padding:12px 14px; text-align: center; width: 80px; white-space: nowrap;">{{ __('recipe.table.ingredients_count') }}</th>
+                        <th style="padding:12px 14px; text-align: right; width: 110px; white-space: nowrap;">{{ __('recipe.table.total_weight') }}</th>
+                        <th style="padding:12px 14px; text-align: right; width: 120px; white-space: nowrap;">{{ __('recipe.table.total_cost') }}</th>
+                        <th style="padding:12px 14px; text-align: center; width: 130px; white-space: nowrap;">{{ __('recipe.table.status') }}</th>
+                        <th style="padding:12px 14px; width: 140px; white-space: nowrap;">{{ __('recipe.table.created_at') }}</th>
+                        <th style="padding:12px 14px; text-align: center; width: 110px; white-space: nowrap;">{{ __('recipe.table.actions') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -268,10 +278,10 @@
                             
                             // Chọn class cho trạng thái
                             $statusClass = match ($recipe->status) {
-                                'active' => 'ms-active',
-                                'pending' => 'ms-review',
-                                'inactive' => 'ms-inactive',
-                                default => 'ms-inactive',
+                                'active' => 'spill s-ok',
+                                'pending' => 'spill s-wait',
+                                'inactive' => 'spill s-qt',
+                                default => 'spill s-qt',
                             };
                             $statusText = match ($recipe->status) {
                                 'active' => __('recipe.status.active'),
@@ -296,22 +306,24 @@
                                 </button>
                             </td>
                             --}}
-                            <td style="text-align: center; font-weight: 600; color: var(--mu); vertical-align: middle;">
+                            <td style="padding:12px 14px; text-align: center; font-weight: 400; color: var(--tx); font-variant-numeric: tabular-nums;">
                                 {{ $loop->iteration + ($recipesList->currentPage() - 1) * $recipesList->perPage() }}
                             </td>
-                            <td><span class="mn-code" style="{{ $recipe->trashed() ? 'text-decoration: line-through; color: var(--mu);' : '' }}">{{ $recipe->code }}</span></td>
-                            <td>
-                                <span class="mn-name" style="{{ $recipe->trashed() ? 'text-decoration: line-through; color: var(--mu);' : '' }}">{{ $recipe->name }}</span>
+                            <td style="padding:12px 14px; text-align: center; font-weight: 400; color: var(--tx); font-variant-numeric: tabular-nums; white-space: nowrap;">
+                                <span class="mn-code" style="{{ $recipe->trashed() ? 'text-decoration: line-through; color: var(--mu);' : '' }}">{{ $recipe->code }}</span>
+                            </td>
+                            <td style="padding:12px 14px;">
+                                <span class="mn-name" style="font-weight:400; {{ $recipe->trashed() ? 'text-decoration: line-through; color: var(--mu);' : '' }}">{{ $recipe->name }}</span>
                                 @if($recipe->trashed())
-                                    <span style="display: inline-block; background: var(--rd-s); color: var(--rd); font-size: 10px; padding: 2px 6px; border-radius: 4px; margin-left: 6px; font-weight: bold; vertical-align: middle;">{{ __('recipe.trash.deleted') }}</span>
+                                    <span style="display: inline-block; background: var(--rd-s); color: var(--rd); font-size: 10px; padding: 2px 6px; border-radius: 4px; margin-left: 6px; font-weight: 400; vertical-align: middle;">{{ __('recipe.trash.deleted') }}</span>
                                 @endif
                             </td>
-                            <td><span class="mn-group-pill {{ $typeClass }}">{{ $recipe->type }}</span></td>
-                            <td><span class="mn-price">{{ __('recipe.currency.amount', ['value' => number_format($recipe->selling_price_per_portion, 0, ',', '.')]) }}</span></td>
-                            <td><span class="mn-price">{{ __('recipe.currency.amount', ['value' => number_format($recipe->cost_per_portion, 0, ',', '.')]) }}</span></td>
-                            <td><span class="mn-num">{{ $ingredientsCount }}</span></td>
-                            <td><span class="mn-kg">{{ str_replace('.', ',', round($recipeWeight, 2)) }} kg</span></td>
-                            <td>
+                            <td style="padding:12px 14px;"><span class="mn-group-pill {{ $typeClass }}">{{ $recipe->type }}</span></td>
+                            <td style="padding:12px 14px; text-align: right; font-variant-numeric: tabular-nums;"><span class="mn-price">{{ __('recipe.currency.amount', ['value' => number_format($recipe->selling_price_per_portion, 0, ',', '.')]) }}</span></td>
+                            <td style="padding:12px 14px; text-align: right; font-variant-numeric: tabular-nums;"><span class="mn-price">{{ __('recipe.currency.amount', ['value' => number_format($recipe->cost_per_portion, 0, ',', '.')]) }}</span></td>
+                            <td style="padding:12px 14px; text-align: center; font-weight: 400; color: var(--tx); font-variant-numeric: tabular-nums;"><span class="mn-num">{{ $ingredientsCount }}</span></td>
+                            <td style="padding:12px 14px; text-align: right; font-variant-numeric: tabular-nums;"><span class="mn-kg">{{ str_replace('.', ',', round($recipeWeight, 2)) }} kg</span></td>
+                            <td style="padding:12px 14px; text-align: right; font-variant-numeric: tabular-nums;">
                                 <span class="mn-cost" style="{{ $recipe->cost_override !== null ? 'color:var(--or)' : '' }}">
                                     {{ __('recipe.currency.amount', ['value' => number_format($recipeCost, 0, ',', '.')]) }}
                                 </span>
@@ -319,8 +331,8 @@
                                     <span style="display:block;font-size:10px;color:var(--or)">{{ __('recipe.labels.adjusted') }}</span>
                                 @endif
                             </td>
-                            <td><span class="{{ $statusClass }}">{{ $statusText }}</span></td>
-                            <td><span class="mn-date">{{ $recipe->created_at->format('d/m/Y H:i') }}</span></td>
+                            <td style="padding:12px 14px; text-align: center; white-space: nowrap;"><span class="{{ $statusClass }}">{{ $statusText }}</span></td>
+                            <td style="padding:12px 14px; color: var(--tx); font-variant-numeric: tabular-nums; white-space: nowrap;"><span class="mn-date">{{ $recipe->created_at->format('d/m/Y H:i') }}</span></td>
                             <td>
                                 <div style="display:flex;gap:4px">
                                     @if($recipe->trashed())
@@ -339,11 +351,11 @@
                                         </a>
                                         <!-- Chỉnh sửa -->
                                         <a href="{{ \App\Filament\Resources\RecipeResource::getUrl('edit', ['record' => $recipe]) }}" class="abt" title="{{ __('recipe.actions.edit') }}">
-                                            <i class="fa-solid fa-pen"></i>
+                                            <i class="fa-solid fa-pencil"></i>
                                         </a>
                                         <!-- Xóa món -->
-                                        <button type="button" @click="askConfirm('deleteRecipe', {{ $recipe->id }}, @js(__('recipe.actions.delete')), @js(__('recipe.confirm.delete')), @js(__('recipe.actions.delete')))" class="abt abt-danger" title="{{ __('recipe.actions.delete') }}">
-                                            <i class="fa-solid fa-trash"></i>
+                                        <button type="button" @click="askConfirm('deleteRecipe', {{ $recipe->id }}, @js(__('recipe.actions.delete')), @js(__('recipe.confirm.delete')), @js(__('recipe.actions.delete')))" class="abt" title="{{ __('recipe.actions.delete') }}">
+                                            <i class="fa-solid fa-trash" style="color:#dc2626"></i>
                                         </button>
                                     @endif
                                 </div>
@@ -435,14 +447,13 @@
                     {{ __('recipe.pagination.summary', ['from' => $recipesList->firstItem() ?? 0, 'to' => $recipesList->lastItem() ?? 0, 'total' => number_format($recipesList->total(), 0, ',', '.')]) }}
                 </div>
                 <div class="pgwrap">
-                    <span style="font-size:12px;color:var(--mu)">{{ __('recipe.pagination.per_page') }}</span>
-                    <select wire:model.live="perPage" class="pgsel">
-                        <option value="5">5</option>
-                        <option value="10">10</option>
-                        <option value="20">20</option>
-                        <option value="50">50</option>
+                    <span>{{ __('common.pagination.per_page_label') }}</span>
+                    <select wire:model.live="perPage" class="lv-per-page-select">
+                        @foreach([5, 10, 20, 50] as $count)
+                            <option value="{{ $count }}">{{ $count }}</option>
+                        @endforeach
                     </select>
-                    @if($recipesList->hasPages())
+                    @if($recipesList->total() > 0)
                         <div class="pgbs">
                             {{-- Previous --}}
                             @if ($recipesList->onFirstPage())

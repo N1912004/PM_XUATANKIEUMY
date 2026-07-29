@@ -351,7 +351,7 @@
                             @endforeach
                         </div>
                         <div class="mt-4">
-                            {{ $todayMenus->links() }}
+                            @include('filament.components.pagination-page-numbers', ['paginator' => $todayMenus, 'pageName' => 'menusPage'])
                         </div>
                     @else
                         <div class="flex flex-col items-center justify-center py-12 text-center">
@@ -537,7 +537,7 @@
                             @endforeach
                         </div>
                         <div class="mt-4">
-                            {{ $todayAudits->links() }}
+                            @include('filament.components.pagination-page-numbers', ['paginator' => $todayAudits, 'pageName' => 'auditsPage'])
                         </div>
                     @else
                         <div class="flex flex-col items-center justify-center py-12 text-center">

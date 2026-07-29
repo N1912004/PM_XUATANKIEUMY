@@ -51,10 +51,51 @@
         --sh: 0 1px 2px rgba(0, 0, 0, .4);
     }
 
+    .fbtn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        height: 34px;
+        padding: 0 13px;
+        background: var(--wh, #ffffff);
+        border: 1px solid var(--bd, #e2e8f0);
+        border-radius: 8px;
+        font-size: 12.5px;
+        font-weight: 400;
+        color: var(--su, #334155);
+        cursor: pointer;
+        transition: background 0.13s ease, border-color 0.13s ease, color 0.13s ease;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+        user-select: none;
+        -webkit-user-select: none;
+        outline: none !important;
+    }
+    .fbtn:hover {
+        background: var(--bg, #f8fafc);
+        border-color: #cbd5e1;
+        color: var(--tx, #0f172a);
+    }
+    .fbtn:focus,
+    .fbtn:active {
+        outline: none !important;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04) !important;
+    }
+    .dark .fbtn {
+        background: #1e293b !important;
+        border-color: #334155 !important;
+        color: #cbd5e1 !important;
+    }
+    .dark .fbtn:hover {
+        background: #0f172a !important;
+        border-color: #475569 !important;
+        color: #f8fafc !important;
+    }
+
     .recipe-page,
     .recipe-page * {
         box-sizing: border-box;
-        font-family: "Inter", system-ui, sans-serif;
+        font-family: "Inter", system-ui, -apple-system, sans-serif;
     }
 
     .recipe-page .fa,
@@ -294,6 +335,8 @@
         white-space: nowrap;
         border-bottom: 1px solid var(--bd2);
         color: var(--tx);
+        font-size: 13px;
+        font-weight: 400;
     }
     .mn-table td:first-child {
         padding-left: 16px;
@@ -312,16 +355,16 @@
     .mn-expand-btn {
         width: 22px;
         height: 22px;
-        border-radius: 6px;
+        border-radius: 5px;
         border: 1px solid var(--bd);
         background: var(--wh);
-        cursor: pointer;
-        display: grid;
-        place-items: center;
-        font-size: 10px;
         color: var(--mu);
-        transition: .13s;
-        flex-shrink: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        cursor: pointer;
+        transition: all .15s ease;
     }
     .mn-expand-btn:hover {
         background: var(--bl-s);
@@ -336,19 +379,19 @@
     }
     */
     .mn-code {
-        font-size: 11.5px;
-        font-weight: 600;
-        color: var(--mu);
+        font-size: 13px;
+        font-weight: 400;
+        color: var(--tx);
         font-variant-numeric: tabular-nums;
     }
     .mn-name {
         font-size: 13px;
-        font-weight: 600;
+        font-weight: 400;
         color: var(--tx);
     }
     .mn-group-pill {
         font-size: 11px;
-        font-weight: 600;
+        font-weight: 400;
         padding: 2px 9px;
         border-radius: 20px;
         display: inline-block;
@@ -388,73 +431,163 @@
     
     .mn-price {
         font-size: 13px;
-        font-weight: 600;
+        font-weight: 400;
         color: var(--tx);
     }
     .mn-cost {
         font-size: 13px;
-        font-weight: 700;
-        color: var(--bl);
+        font-weight: 400;
+        color: var(--tx);
     }
     .mn-kg {
-        font-size: 12.5px;
-        color: var(--su);
+        font-size: 13px;
+        font-weight: 400;
+        color: var(--tx);
     }
     .mn-num {
-        font-size: 12.5px;
-        font-weight: 600;
+        font-size: 13px;
+        font-weight: 400;
         color: var(--tx);
     }
     .mn-date {
-        font-size: 11.5px;
-        color: var(--mu);
+        font-size: 13px;
+        font-weight: 400;
+        color: var(--tx);
     }
 
-    /* status pills menu */
+    /* status pills menu matching ingredients 100% */
+    .spill {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 5px !important;
+        padding: 3px 10px !important;
+        border-radius: 20px !important;
+        font-size: 11.5px !important;
+        font-weight: 500 !important;
+        white-space: nowrap !important;
+        line-height: 1.2 !important;
+        height: 22px !important;
+        border: none !important;
+    }
+
+    .spill::before {
+        content: "" !important;
+        width: 6px !important;
+        height: 6px !important;
+        border-radius: 50% !important;
+        flex-shrink: 0 !important;
+    }
+
+    .s-ok,
     .ms-active {
-        background: #ECFDF5;
-        color: #065F46;
-        border: 1px solid #A7F3D0;
-        border-radius: 20px;
-        padding: 3px 10px;
-        font-size: 11.5px;
-        font-weight: 700;
-        display: inline-block;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 5px !important;
+        padding: 3px 10px !important;
+        border-radius: 20px !important;
+        font-size: 11.5px !important;
+        font-weight: 600 !important;
+        white-space: nowrap !important;
+        line-height: 1.2 !important;
+        height: 22px !important;
+        border: none !important;
+        background: #ECFDF5 !important;
+        color: #065F46 !important;
     }
-    .dark .ms-active {
-        background: rgba(6, 95, 70, 0.2);
-        color: #34d399;
-        border-color: rgba(52, 211, 153, 0.4);
+    .s-ok::before,
+    .ms-active::before {
+        content: "" !important;
+        width: 6px !important;
+        height: 6px !important;
+        border-radius: 50% !important;
+        flex-shrink: 0 !important;
+        background: #059669 !important;
     }
+
+    .s-wait,
     .ms-review {
-        background: #FFF7ED;
-        color: #92400E;
-        border: 1px solid #FED7AA;
-        border-radius: 20px;
-        padding: 3px 10px;
-        font-size: 11.5px;
-        font-weight: 700;
-        display: inline-block;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 5px !important;
+        padding: 3px 10px !important;
+        border-radius: 20px !important;
+        font-size: 11.5px !important;
+        font-weight: 600 !important;
+        white-space: nowrap !important;
+        line-height: 1.2 !important;
+        height: 22px !important;
+        border: none !important;
+        background: #FFF7ED !important;
+        color: #9A3412 !important;
     }
-    .dark .ms-review {
-        background: rgba(146, 64, 14, 0.2);
-        color: #fb923c;
-        border-color: rgba(251, 146, 60, 0.4);
+    .s-wait::before,
+    .ms-review::before {
+        content: "" !important;
+        width: 6px !important;
+        height: 6px !important;
+        border-radius: 50% !important;
+        flex-shrink: 0 !important;
+        background: #EA580C !important;
     }
+
+    .s-qt,
     .ms-inactive {
-        background: #F1F5F9;
-        color: #475569;
-        border: 1px solid var(--bd);
-        border-radius: 20px;
-        padding: 3px 10px;
-        font-size: 11.5px;
-        font-weight: 700;
-        display: inline-block;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 5px !important;
+        padding: 3px 10px !important;
+        border-radius: 20px !important;
+        font-size: 11.5px !important;
+        font-weight: 600 !important;
+        white-space: nowrap !important;
+        line-height: 1.2 !important;
+        height: 22px !important;
+        border: none !important;
+        background: #FEF2F2 !important;
+        color: #DC2626 !important;
     }
+    .s-qt::before,
+    .ms-inactive::before {
+        content: "" !important;
+        width: 6px !important;
+        height: 6px !important;
+        border-radius: 50% !important;
+        flex-shrink: 0 !important;
+        background: #DC2626 !important;
+    }
+
+    .dark .s-ok,
+    .dark .ms-active {
+        background: rgba(6, 95, 70, 0.25) !important;
+        color: #34d399 !important;
+    }
+    .dark .s-ok::before,
+    .dark .ms-active::before {
+        background: #34d399 !important;
+    }
+
+    .dark .s-wait,
+    .dark .ms-review {
+        background: rgba(154, 52, 18, 0.25) !important;
+        color: #fb923c !important;
+    }
+    .dark .s-wait::before,
+    .dark .ms-review::before {
+        background: #fb923c !important;
+    }
+
+    .dark .s-qt,
     .dark .ms-inactive {
-        background: rgba(71, 85, 105, 0.2);
-        color: #94a3b8;
-        border-color: rgba(148, 163, 184, 0.4);
+        background: rgba(220, 38, 38, 0.25) !important;
+        color: #f87171 !important;
+    }
+    .dark .s-qt::before,
+    .dark .ms-inactive::before {
+        background: #f87171 !important;
     }
 
     /* expanded ingredient sub-table */
@@ -698,28 +831,23 @@
     }
     
     .abt {
-        width: 26px;
-        height: 26px;
+        width: 28px;
+        height: 28px;
         border-radius: 6px;
         border: 1px solid var(--bd);
         background: var(--wh);
         cursor: pointer;
-        display: inline-grid;
-        place-items: center;
-        font-size: 11px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
         color: var(--mu);
-        transition: .11s;
+        transition: all .15s ease;
         text-decoration: none;
     }
     .abt:hover {
-        background: var(--bl-s);
-        color: var(--bl);
-        border-color: var(--bl-m);
-    }
-    .abt-danger:hover {
-        background: var(--rd-s);
-        color: var(--rd);
-        border-color: #fecaca;
+        background: var(--bd2, #f1f5f9);
+        border-color: #cbd5e1;
     }
 
     /* Custom Searchable Dropdown for List Recipes Page */

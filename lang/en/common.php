@@ -18,10 +18,13 @@ return [
     ],
     'pagination' => [
         'navigation' => 'Pagination navigation',
+        'summary' => 'Showing :first - :last of :total results',
+        'per_page_label' => 'Show',
     ],
     'select' => [
         'placeholder' => '— Select —',
         'search_placeholder' => 'Type to search...',
         'no_results' => 'No results found',
+        'all' => 'All',
     ],
 ];

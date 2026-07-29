@@ -667,4 +667,105 @@
             justify-content: flex-end;
         }
     }
+    /* Hộp thoại xác nhận xóa trong trang (teleport ra body) */
+    .rcf-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 60;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+        background: rgba(15, 23, 42, .55);
+        backdrop-filter: blur(2px);
+        font-family: "Inter", system-ui, sans-serif;
+    }
+    .rcf-box {
+        width: 100%;
+        max-width: 420px;
+        background: var(--po-wh, #fff);
+        border: 1px solid var(--po-bd, #e2e8f0);
+        border-radius: var(--po-r, 12px);
+        box-shadow: 0 20px 45px rgba(15, 23, 42, .25);
+        padding: 20px;
+    }
+    .rcf-head {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+    .rcf-ico {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 34px;
+        height: 34px;
+        border-radius: 9px;
+        font-size: 15px;
+        flex: 0 0 auto;
+    }
+    .rcf-ico-danger {
+        background: var(--po-rd-s, #fef2f2);
+        color: var(--po-rd, #dc2626);
+    }
+    .rcf-ico-info {
+        background: var(--po-bl-s, #e9f2f8);
+        color: var(--po-bl, #1267e8);
+    }
+    .rcf-title {
+        margin: 0;
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--po-tx, #0f172a);
+    }
+    .rcf-msg {
+        margin: 0 0 18px;
+        font-size: 13px;
+        line-height: 1.55;
+        color: var(--po-su, #334155);
+    }
+    .rcf-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+    }
+    .rcf-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        height: 34px;
+        padding: 0 14px;
+        border-radius: 8px;
+        border: 1px solid transparent;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: filter .14s ease, background .14s ease;
+    }
+    .rcf-btn:disabled {
+        opacity: .6;
+        cursor: not-allowed;
+    }
+    .rcf-btn-ghost {
+        background: var(--po-wh, #fff);
+        border-color: var(--po-bd, #e2e8f0);
+        color: var(--po-su, #334155);
+    }
+    .rcf-btn-ghost:hover:not(:disabled) {
+        background: var(--po-bd2, #f1f5f9);
+    }
+    .rcf-btn-danger {
+        background: var(--po-rd, #dc2626);
+        color: #fff;
+    }
+    .rcf-btn-primary {
+        background: var(--po-bl, #1267e8);
+        color: #fff;
+    }
+    .rcf-btn-danger:hover:not(:disabled),
+    .rcf-btn-primary:hover:not(:disabled) {
+        filter: brightness(.94);
+    }
 </style>
+

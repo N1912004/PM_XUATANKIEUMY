@@ -28,7 +28,7 @@ class ShiftResource extends Resource
 
     public static function getPluralModelLabel(): string
     {
-        return __('catalog.shift.label');
+        return __('catalog.shift.plural_label');
     }
 
     public static function getNavigationGroup(): ?string

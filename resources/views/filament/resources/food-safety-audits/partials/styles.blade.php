@@ -230,9 +230,9 @@
     }
 
     .field label {
-        font-size: 11.5px;
-        font-weight: 700;
-        color: var(--po-su);
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--po-mu);
     }
 
     .ctrl {

@@ -1,4 +1,31 @@
-<div class="emp-page bf-list-page w-full">
+<div class="emp-page bf-list-page w-full"
+     x-data="{
+        cf: { open: false, title: '', message: '', confirmLabel: '', danger: true, method: null, arg: null, busy: false },
+        askConfirm(method, arg, title, message, confirmLabel, danger = true) {
+            this.cf = { open: true, title, message, confirmLabel, danger, method, arg, busy: false };
+        },
+        closeConfirm() {
+            if (this.cf.busy) return;
+            this.cf.open = false;
+            this.cf.method = null;
+        },
+        async runConfirm() {
+            if (this.cf.busy || ! this.cf.method) return;
+            this.cf.busy = true;
+            try {
+                if (this.cf.arg === null) {
+                    await $wire.call(this.cf.method);
+                } else {
+                    await $wire.call(this.cf.method, this.cf.arg);
+                }
+            } finally {
+                this.cf.busy = false;
+                this.cf.open = false;
+                this.cf.method = null;
+            }
+        },
+     }"
+     @keydown.escape.window="closeConfirm()">
     @include('filament.resources.areas.partials.styles')
 
     @php
@@ -66,7 +93,7 @@
             </div>
             <div class="tsp"></div>
             <button type="button" wire:click="resetFilters" class="fbtn">
-                <i class="fa-solid fa-filter-circle-xmark"></i> {{ __('catalog.common.clear_selection') }}
+                <i class="fa-solid fa-filter-circle-xmark"></i> {{ __('catalog.common.reset_filters') }}
             </button>
         </div>
         <div class="tw">
@@ -84,19 +111,19 @@
                 <tbody>
                     @forelse($shifts as $index => $row)
                         <tr style="border-bottom:1px solid var(--po-bd2); color:var(--po-tx)" class="emp-row">
-                            <td style="padding:12px 14px; text-align:center; font-weight:600; color:var(--po-mu)">
+                            <td style="padding:12px 14px; text-align:center; font-weight:400; color:var(--po-mu)">
                                 {{ ($shifts->firstItem() ?? 1) + $index }}
                             </td>
-                            <td style="padding:12px 14px; text-align:center; font-weight:800; color:var(--po-bl); font-variant-numeric:tabular-nums">
+                            <td style="padding:12px 14px; text-align:center; font-weight:400; color:var(--po-tx); font-variant-numeric:tabular-nums">
                                 {{ $row->sort_order }}
                             </td>
-                            <td style="padding:12px 14px; font-weight:700; color:var(--po-tx)">
+                            <td style="padding:12px 14px; font-weight:400; color:var(--po-tx)">
                                 {{ $row->name }}
                             </td>
-                            <td style="padding:12px 14px; font-variant-numeric:tabular-nums; font-weight:600">
+                            <td style="padding:12px 14px; font-variant-numeric:tabular-nums; font-weight:400">
                                 {{ $row->time_range }}
                             </td>
-                            <td style="padding:12px 14px; color:var(--po-mu); font-variant-numeric:tabular-nums; white-space:nowrap">
+                            <td style="padding:12px 14px; font-weight:400; color:var(--po-mu); font-variant-numeric:tabular-nums; white-space:nowrap">
                                 {{ $row->created_at?->format('d/m/Y H:i') ?? '—' }}
                             </td>
                             <td style="padding:12px 14px; text-align:center">
@@ -104,7 +131,7 @@
                                     <a href="{{ \App\Filament\Resources\ShiftResource::getUrl('edit', ['record' => $row->id]) }}" wire:navigate class="abt" title="{{ __('catalog.common.edit') }}">
                                         <i class="fa-solid fa-pencil"></i>
                                     </a>
-                                    <button type="button" wire:click="deleteShift({{ $row->id }})" wire:confirm="{{ __('catalog.shift.list.confirm_delete') }}" class="abt" title="{{ __('catalog.common.delete') }}">
+                                    <button type="button" @click="askConfirm('deleteShift', {{ $row->id }}, @js(__('catalog.shift.delete_title')), @js(__('catalog.shift.list.confirm_delete')), @js(__('catalog.common.delete')))" class="abt" title="{{ __('catalog.common.delete') }}">
                                         <i class="fa-solid fa-trash" style="color:var(--po-rd)"></i>
                                     </button>
                                 </div>
@@ -123,8 +150,8 @@
         @if($shifts->total() > 0)
             <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:14px;padding:14px 16px;border-top:1px solid var(--po-bd2);font-size:12px;color:var(--po-mu)">
                 <div>{{ __('catalog.pagination.summary', ['from'=>$shifts->firstItem()??0,'to'=>$shifts->lastItem()??0,'total'=>$shifts->total(),'entity'=>__('catalog.shift.list.pagination_entity')]) }}</div>
-                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><select wire:model.live="shiftPerPage" style="height:30px;border:1px solid var(--po-bd);border-radius:6px;padding:0 8px;font-size:12px;background:transparent">@foreach([5,10,20,50] as $count)<option value="{{ $count }}">{{ __('catalog.pagination.per_page', ['count'=>$count]) }}</option>@endforeach</select>
-                @if($shifts->hasPages())<nav style="display:flex;align-items:center;gap:4px">@if($shifts->onFirstPage())<span style="opacity:.4;padding:4px"><i class="fa-solid fa-chevron-left"></i></span>@else<button type="button" wire:click="previousPage('shiftsPage')" style="display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border:1px solid var(--po-bd);border-radius:6px;background:transparent"><i class="fa-solid fa-chevron-left"></i></button>@endif
+                <div class="pgwrap"><span>{{ __('common.pagination.per_page_label') }}</span><select wire:model.live="shiftPerPage" class="lv-per-page-select">@foreach([5,10,20,50] as $count)<option value="{{ $count }}">{{ $count }}</option>@endforeach</select>
+                @if($shifts->total() > 0)<nav style="display:flex;align-items:center;gap:4px">@if($shifts->onFirstPage())<span style="opacity:.4;padding:4px"><i class="fa-solid fa-chevron-left"></i></span>@else<button type="button" wire:click="previousPage('shiftsPage')" style="display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border:1px solid var(--po-bd);border-radius:6px;background:transparent"><i class="fa-solid fa-chevron-left"></i></button>@endif
                 @php
                     $pageWindow = collect([1, $shifts->currentPage() - 1, $shifts->currentPage(), $shifts->currentPage() + 1, $shifts->lastPage()])
                         ->filter(fn ($page) => $page >= 1 && $page <= $shifts->lastPage())
@@ -136,4 +163,29 @@
                 @if($shifts->hasMorePages())<button type="button" wire:click="nextPage('shiftsPage')" style="display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border:1px solid var(--po-bd);border-radius:6px;background:transparent"><i class="fa-solid fa-chevron-right"></i></button>@else<span style="opacity:.4;padding:4px"><i class="fa-solid fa-chevron-right"></i></span>@endif</nav>@endif</div></div>
         @endif
     </div>
+
+    {{-- Hộp thoại xác nhận trong trang (teleport ra body) --}}
+    <template x-teleport="body">
+        <div x-show="cf.open" x-cloak class="rcf-overlay" @click.self="closeConfirm()">
+            <div class="rcf-box" role="dialog" aria-modal="true">
+                <div class="rcf-head">
+                    <span class="rcf-ico" :class="cf.danger ? 'rcf-ico-danger' : 'rcf-ico-info'">
+                        <i class="fa-solid" :class="cf.danger ? 'fa-triangle-exclamation' : 'fa-rotate-left'"></i>
+                    </span>
+                    <h3 class="rcf-title" x-text="cf.title"></h3>
+                </div>
+                <p class="rcf-msg" x-text="cf.message"></p>
+                <div class="rcf-actions">
+                    <button type="button" class="rcf-btn rcf-btn-ghost" @click="closeConfirm()" :disabled="cf.busy">
+                        {{ __('common.actions.cancel') }}
+                    </button>
+                    <button type="button" class="rcf-btn" :class="cf.danger ? 'rcf-btn-danger' : 'rcf-btn-primary'"
+                            @click="runConfirm()" :disabled="cf.busy">
+                        <i class="fa-solid fa-spinner fa-spin" x-show="cf.busy"></i>
+                        <span x-text="cf.confirmLabel"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </template>
 </div>

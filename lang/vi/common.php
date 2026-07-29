@@ -18,10 +18,13 @@ return [
     ],
     'pagination' => [
         'navigation' => 'Điều hướng phân trang',
+        'summary' => 'Hiển thị :first - :last trong tổng số :total kết quả',
+        'per_page_label' => 'Hiển thị',
     ],
     'select' => [
         'placeholder' => '— Chọn —',
         'search_placeholder' => 'Gõ để tìm...',
         'no_results' => 'Không tìm thấy kết quả',
+        'all' => 'Tất cả',
     ],
 ];

@@ -1,4 +1,31 @@
-<div class="emp-page bf-list-page w-full">
+<div class="emp-page bf-list-page w-full"
+     x-data="{
+        cf: { open: false, title: '', message: '', confirmLabel: '', danger: true, method: null, arg: null, busy: false },
+        askConfirm(method, arg, title, message, confirmLabel, danger = true) {
+            this.cf = { open: true, title, message, confirmLabel, danger, method, arg, busy: false };
+        },
+        closeConfirm() {
+            if (this.cf.busy) return;
+            this.cf.open = false;
+            this.cf.method = null;
+        },
+        async runConfirm() {
+            if (this.cf.busy || ! this.cf.method) return;
+            this.cf.busy = true;
+            try {
+                if (this.cf.arg === null) {
+                    await $wire.call(this.cf.method);
+                } else {
+                    await $wire.call(this.cf.method, this.cf.arg);
+                }
+            } finally {
+                this.cf.busy = false;
+                this.cf.open = false;
+                this.cf.method = null;
+            }
+        },
+     }"
+     @keydown.escape.window="closeConfirm()">
     @include('filament.resources.areas.partials.styles')
 
     @php
@@ -109,28 +136,28 @@
             <table style="width:100%; border-collapse:collapse; text-align:left; font-size:13px">
                 <thead>
                     <tr style="border-bottom:1.5px solid var(--po-bd2); color:var(--po-mu); font-weight:700; text-transform:uppercase; font-size:11px; background:var(--po-bd2)">
-                        <th style="padding:12px 14px; width:60px">#</th>
-                        <th style="padding:12px 14px">{{ __('catalog.kitchen.list.columns.kitchen') }}</th>
-                        <th style="padding:12px 14px">{{ __('catalog.kitchen.list.columns.area') }}</th>
-                        <th style="padding:12px 14px">{{ __('catalog.kitchen.list.columns.type') }}</th>
-                        <th style="padding:12px 14px; text-align:right">{{ __('catalog.kitchen.list.columns.capacity') }}</th>
-                        <th style="padding:12px 14px">{{ __('catalog.kitchen.list.columns.manager') }}</th>
-                        <th style="padding:12px 14px; width:140px">{{ __('catalog.common.status') }}</th>
-                        <th style="padding:12px 14px; text-align:center; width:100px">{{ __('catalog.common.actions') }}</th>
+                        <th style="padding:12px 14px; width:70px; text-align:center">STT</th>
+                        <th style="padding:12px 14px; width:24%">{{ __('catalog.kitchen.list.columns.kitchen') }}</th>
+                        <th style="padding:12px 14px; width:18%">{{ __('catalog.kitchen.list.columns.area') }}</th>
+                        <th style="padding:12px 14px; width:16%">{{ __('catalog.kitchen.list.columns.type') }}</th>
+                        <th style="padding:12px 14px; text-align:center; width:160px; white-space:nowrap">{{ __('catalog.kitchen.list.columns.capacity') }}</th>
+                        <th style="padding:12px 14px; width:18%">{{ __('catalog.kitchen.list.columns.manager') }}</th>
+                        <th style="padding:12px 14px; text-align:center; width:140px; white-space:nowrap">{{ __('catalog.common.status') }}</th>
+                        <th style="padding:12px 14px; text-align:center; width:110px; white-space:nowrap">{{ __('catalog.common.actions_upper') }}</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($kitchens as $index => $row)
                         <tr style="border-bottom:1px solid var(--po-bd2); color:var(--po-tx)" class="emp-row">
-                            <td style="padding:12px 14px; font-weight:600; color:var(--po-mu)">{{ ($kitchens->currentPage() - 1) * $kitchens->perPage() + $index + 1 }}</td>
+                            <td style="padding:12px 14px; text-align:center; font-weight:600; color:var(--po-mu); font-variant-numeric:tabular-nums">{{ ($kitchens->currentPage() - 1) * $kitchens->perPage() + $index + 1 }}</td>
                             <td style="padding:12px 14px; font-weight:700">{{ $row->name }}</td>
-                            <td style="padding:12px 14px; font-weight:600; color:var(--po-mu)">{{ $row->area?->name }}</td>
-                            <td style="padding:12px 14px;">{{ $row->kitchenType?->name }}</td>
-                            <td style="padding:12px 14px; text-align:right; font-weight:700; color:var(--po-bl)">
-                                {{ __('catalog.kitchen.list.capacity_value', ['count' => number_format($row->capacity, 0, ',', '.')]) }}
+                            <td style="padding:12px 14px; font-weight:600">{{ $row->area?->name ?: '—' }}</td>
+                            <td style="padding:12px 14px; font-weight:600">{{ $row->kitchenType?->name ?: ($row->type ?: '—') }}</td>
+                            <td style="padding:12px 14px; text-align:center; font-weight:800; color:var(--po-bl); font-variant-numeric:tabular-nums">
+                                {{ __('catalog.kitchen.list.capacity_value', ['count' => number_format((float)$row->capacity, 0, ',', '.')]) }}
                             </td>
-                            <td style="padding:12px 14px; font-weight:600">{{ $row->manager?->name }}</td>
-                            <td style="padding:12px 14px;">
+                            <td style="padding:12px 14px; font-weight:600">{{ $row->manager?->name ?: '—' }}</td>
+                            <td style="padding:12px 14px; text-align:center">
                                 @if($row->status === 'active')
                                     <span class="st-pill st-ok">{{ __('catalog.kitchen_status.active') }}</span>
                                 @elseif($row->status === 'paused')
@@ -144,8 +171,8 @@
                                     <a href="{{ \App\Filament\Resources\KitchenResource::getUrl('edit', ['record' => $row->id]) }}" wire:navigate class="abt" title="{{ __('catalog.common.edit') }}">
                                         <i class="fa-solid fa-pencil"></i>
                                     </a>
-                                    <button wire:click="deleteKitchen({{ $row->id }})" wire:confirm="{{ __('catalog.kitchen.list.confirm_delete') }}" class="abt" title="{{ __('catalog.common.delete') }}">
-                                        <i class="fa-solid fa-trash"></i>
+                                    <button type="button" @click="askConfirm('deleteKitchen', {{ $row->id }}, @js(__('catalog.kitchen.delete_title')), @js(__('catalog.kitchen.list.confirm_delete')), @js(__('catalog.common.delete')))" class="abt" title="{{ __('catalog.common.delete') }}">
+                                        <i class="fa-solid fa-trash" style="color:var(--po-rd)"></i>
                                     </button>
                                 </div>
                             </td>
@@ -160,10 +187,35 @@
                 </tbody>
             </table>
         </div>
-        @if($kitchens->hasPages())
+        @if($kitchens->total() > 0)
             <div style="padding: 10px 16px; border-top: 1px solid var(--po-bd2); background: var(--po-bd2);">
-                {{ $kitchens->links() }}
+                @include('filament.components.pagination-page-numbers', ['paginator' => $kitchens, 'pageName' => 'kitchensPage'])
             </div>
         @endif
     </div>
+
+    {{-- Hộp thoại xác nhận trong trang (teleport ra body) --}}
+    <template x-teleport="body">
+        <div x-show="cf.open" x-cloak class="rcf-overlay" @click.self="closeConfirm()">
+            <div class="rcf-box" role="dialog" aria-modal="true">
+                <div class="rcf-head">
+                    <span class="rcf-ico" :class="cf.danger ? 'rcf-ico-danger' : 'rcf-ico-info'">
+                        <i class="fa-solid" :class="cf.danger ? 'fa-triangle-exclamation' : 'fa-rotate-left'"></i>
+                    </span>
+                    <h3 class="rcf-title" x-text="cf.title"></h3>
+                </div>
+                <p class="rcf-msg" x-text="cf.message"></p>
+                <div class="rcf-actions">
+                    <button type="button" class="rcf-btn rcf-btn-ghost" @click="closeConfirm()" :disabled="cf.busy">
+                        {{ __('common.actions.cancel') }}
+                    </button>
+                    <button type="button" class="rcf-btn" :class="cf.danger ? 'rcf-btn-danger' : 'rcf-btn-primary'"
+                            @click="runConfirm()" :disabled="cf.busy">
+                        <i class="fa-solid fa-spinner fa-spin" x-show="cf.busy"></i>
+                        <span x-text="cf.confirmLabel"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </template>
 </div>

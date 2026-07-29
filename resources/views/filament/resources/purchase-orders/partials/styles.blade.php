@@ -633,7 +633,7 @@
         border: 1px solid var(--po-bd);
         background: var(--po-wh);
         color: var(--po-mu);
-        font-weight: 800;
+        font-weight: 500;
         font-size: .86rem;
         text-decoration: none;
         padding: 0 .55rem;
@@ -891,7 +891,7 @@
 
     .mp-date-box input[type="date"] {
         font-size: 12.5px;
-        font-weight: 600;
+        font-weight: 400;
         color: var(--po-tx);
         border: none;
         outline: none;
@@ -916,6 +916,7 @@
         border: 1px solid var(--po-bd) !important;
         border-radius: 9px !important;
         font-size: 13px !important;
+        font-weight: 400 !important;
         color: var(--po-su) !important;
         cursor: pointer !important;
         outline: none !important;

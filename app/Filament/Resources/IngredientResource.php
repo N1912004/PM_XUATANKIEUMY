@@ -13,6 +13,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\HtmlString;
 
 class IngredientResource extends Resource
 {
@@ -29,12 +30,12 @@ class IngredientResource extends Resource
 
     public static function getModelLabel(): string
     {
-        return __('ingredient.model.singular');
+        return __('ingredient.navigation.ingredient');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('ingredient.model.plural');
+        return __('ingredient.navigation.ingredient_plural');
     }
 
     public static function getNavigationGroup(): ?string
@@ -213,31 +214,31 @@ class IngredientResource extends Resource
                     ->extraAttributes([
                         'style' => 'font-variant-numeric: tabular-nums; font-weight: 600; color: #64748b;',
                     ])
-                    ->width('56px'),
+                    ->width('70px'),
                 Tables\Columns\TextColumn::make('code')
                     ->label(__('ingredient.table.code'))
                     ->searchable()
                     ->sortable()
-                    ->alignStart()
+                    ->alignCenter()
                     ->color('primary')
-                    ->weight('semibold')
+                    ->weight('bold')
                     ->size('sm')
-                    // Mã thật dài ~13 ký tự (p90 = 14, max thường 14); chỉ rút gọn những mã bất
-                    // thường dài hơn 18 ký tự để một dòng xấu không kéo rộng cả cột.
+                    ->extraAttributes([
+                        'style' => 'font-variant-numeric: tabular-nums; font-weight: 800; color: #1267e8;',
+                    ])
                     ->limit(18)
                     ->tooltip(fn ($state): ?string => is_string($state) && mb_strlen($state) > 18 ? $state : null)
-                    ->width('180px'),
+                    ->width('130px'),
                 Tables\Columns\TextColumn::make('name')
                     ->label(__('ingredient.table.name'))
                     ->searchable()
                     ->sortable()
                     ->alignStart()
                     ->weight('bold')
-                    ->wrap(),
+                    ->wrap()
+                    ->width('24%'),
                 Tables\Columns\TextColumn::make('suppliers_display')
                     ->label(__('ingredient.table.supplier'))
-                    // Chữ thường, không dùng ->badge(): padding ngang của badge đẩy chữ thụt vào
-                    // 8px so với tiêu đề cột, làm cột này lệch hẳn so với các cột còn lại.
                     ->state(function ($record) {
                         $names = $record->suppliers->pluck('name')->toArray();
                         $total = count($names);
@@ -247,22 +248,21 @@ class IngredientResource extends Resource
 
                         return implode(', ', $names);
                     })
-                    // Cột ảo (state) không map cột DB → phải tự viết query tìm qua quan hệ n-n suppliers.
-                    // Filament tự OR khối này với search của code/name trong ô tìm kiếm chung.
                     ->searchable(query: fn (Builder $query, string $search): Builder => $query->whereHas('suppliers', fn (Builder $q) => $q->where('name', 'like', "%{$search}%")))
                     ->alignStart()
                     ->size('sm')
-                    ->wrap(),
+                    ->wrap()
+                    ->width('20%'),
                 Tables\Columns\TextColumn::make('unitRelation.name')
                     ->label(__('ingredient.table.unit'))
-                    ->alignStart()
+                    ->alignCenter()
                     ->size('sm')
-                    ->width('110px'),
+                    ->width('100px'),
                 Tables\Columns\TextColumn::make('typeRelation.name')
                     ->label(__('ingredient.table.type'))
                     ->alignStart()
                     ->size('sm')
-                    ->width('140px'),
+                    ->width('130px'),
 
                 Tables\Columns\TextColumn::make('status')
                     ->label(__('ingredient.table.status'))
@@ -270,8 +270,8 @@ class IngredientResource extends Resource
                     ->formatStateUsing(fn ($state) => $state ? __('ingredient.status.active') : __('ingredient.status.inactive'))
                     ->icon(fn ($state) => $state ? 'heroicon-o-check-circle' : 'heroicon-o-x-circle')
                     ->color(fn ($state) => $state ? 'success' : 'danger')
-                    ->alignStart()
-                    ->width('160px'),
+                    ->alignCenter()
+                    ->width('140px'),
             ])
             ->defaultSort('id', 'desc')
             ->searchPlaceholder(__('ingredient.table.search_placeholder'))
@@ -302,14 +302,41 @@ class IngredientResource extends Resource
             ->emptyStateDescription(__('ingredient.table.empty_description'))
             ->actions([
                 Tables\Actions\ViewAction::make()
+                    ->icon('heroicon-m-eye')
+                    ->color('gray')
+                    ->extraAttributes(['class' => 'abt'])
                     ->iconButton(),
                 Tables\Actions\EditAction::make()
+                    ->icon('heroicon-m-pencil')
+                    ->color('gray')
+                    ->extraAttributes(['class' => 'abt'])
                     ->iconButton(),
                 Tables\Actions\DeleteAction::make()
+                    ->modalHeading('Xóa')
+                    ->modalDescription('Bạn có chắc chắn muốn xóa nguyên liệu này?')
+                    ->modalSubmitActionLabel('Xóa')
+                    ->modalCancelActionLabel('Hủy')
+                    ->modalIcon('heroicon-s-exclamation-triangle')
+                    ->modalIconColor('danger')
+                    ->icon(new HtmlString('<i class="fa-solid fa-trash" style="color:#dc2626;font-size:14px"></i>'))
+                    ->color('danger')
+                    ->extraAttributes(['class' => 'abt btn-danger-red', 'style' => 'color: #dc2626 !important;'])
                     ->iconButton(),
                 Tables\Actions\RestoreAction::make()
+                    ->icon('heroicon-m-arrow-path')
+                    ->color('info')
+                    ->extraAttributes(['class' => 'abt'])
                     ->iconButton(),
                 Tables\Actions\ForceDeleteAction::make()
+                    ->modalHeading('Xóa vĩnh viễn')
+                    ->modalDescription('Bạn có chắc chắn muốn xóa vĩnh viễn nguyên liệu này?')
+                    ->modalSubmitActionLabel('Xóa vĩnh viễn')
+                    ->modalCancelActionLabel('Hủy')
+                    ->modalIcon('heroicon-s-exclamation-triangle')
+                    ->modalIconColor('danger')
+                    ->icon(new HtmlString('<i class="fa-solid fa-trash" style="color:#dc2626;font-size:14px"></i>'))
+                    ->color('danger')
+                    ->extraAttributes(['class' => 'abt btn-danger-red', 'style' => 'color: #dc2626 !important;'])
                     ->iconButton(),
             ])
             ->actionsColumnLabel(__('ingredient.table.action'))

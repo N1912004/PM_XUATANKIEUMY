@@ -23,7 +23,7 @@ class AreaResource extends Resource
 
     public static function getPluralModelLabel(): string
     {
-        return __('catalog.area.label');
+        return __('catalog.area.plural_label');
     }
 
     public static function getNavigationGroup(): ?string
@@ -56,12 +56,11 @@ class AreaResource extends Resource
                                     ->relationship('manager', 'name')
                                     ->searchable()
                                     ->preload(),
+                                Forms\Components\TextInput::make('notes')
+                                    ->label(__('catalog.common.notes'))
+                                    ->placeholder(__('catalog.area.placeholders.notes'))
+                                    ->maxLength(500),
                             ]),
-                        Forms\Components\Textarea::make('notes')
-                            ->label(__('catalog.common.notes'))
-                            ->placeholder(__('catalog.area.placeholders.notes'))
-                            ->rows(3)
-                            ->columnSpanFull(),
                         Forms\Components\Toggle::make('status')
                             ->label(__('catalog.common.active_status'))
                             ->default(true)

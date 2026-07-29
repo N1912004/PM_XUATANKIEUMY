@@ -4,7 +4,6 @@ namespace App\Filament\Resources\KitchenResource\Pages;
 
 use App\Filament\Resources\AreaResource;
 use App\Filament\Resources\KitchenResource;
-use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Contracts\Support\Htmlable;
 
@@ -28,10 +27,7 @@ class EditKitchen extends EditRecord
 
     protected function getHeaderActions(): array
     {
-        return [
-            Actions\DeleteAction::make()
-                ->after(fn () => redirect()->to(AreaResource::getUrl('index').'?activeTab=canteen')),
-        ];
+        return [];
     }
 
     protected function getRedirectUrl(): string

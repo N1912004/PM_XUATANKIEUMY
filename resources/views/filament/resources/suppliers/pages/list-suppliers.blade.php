@@ -1,4 +1,31 @@
-<div class="sup-page bf-list-page w-full">
+<div class="sup-page bf-list-page w-full"
+     x-data="{
+        cf: { open: false, title: '', message: '', confirmLabel: '', danger: true, method: null, arg: null, busy: false },
+        askConfirm(method, arg, title, message, confirmLabel, danger = true) {
+            this.cf = { open: true, title, message, confirmLabel, danger, method, arg, busy: false };
+        },
+        closeConfirm() {
+            if (this.cf.busy) return;
+            this.cf.open = false;
+            this.cf.method = null;
+        },
+        async runConfirm() {
+            if (this.cf.busy || ! this.cf.method) return;
+            this.cf.busy = true;
+            try {
+                if (this.cf.arg === null) {
+                    await $wire.call(this.cf.method);
+                } else {
+                    await $wire.call(this.cf.method, this.cf.arg);
+                }
+            } finally {
+                this.cf.busy = false;
+                this.cf.open = false;
+                this.cf.method = null;
+            }
+        },
+     }"
+     @keydown.escape.window="closeConfirm()">
     @include('filament.resources.suppliers.partials.styles')
     @php
         $statsData = $this->stats();
@@ -239,54 +266,45 @@
         <div class="sup-table-wrap">
             <table class="sup-table">
                 <thead>
-                    <tr>
-                        <th style="width:56px;text-align:center">STT</th>
-                        <th style="width:110px">{{ __('supplier.table.code') }}</th>
-                        <th>{{ __('supplier.table.name_short') }}</th>
-                        <th style="width:130px">{{ __('supplier.table.phone') }}</th>
-                        <th>Email</th>
-                        <th style="width:180px">{{ __('supplier.table.food_types') }}</th>
-                        <th style="width:130px;text-align:center">{{ __('supplier.table.ingredient_count') }}</th>
-                        <th style="width:140px">{{ __('supplier.table.status') }}</th>
-                        <th style="text-align:center;width:120px">{{ __('supplier.table.actions') }}</th>
+                    <tr style="border-bottom:1.5px solid var(--sup-bd2, #f1f5f9); color:var(--sup-mu, #64748b); font-weight:700; text-transform:uppercase; font-size:11px; background:var(--sup-bd2, #f1f5f9)">
+                        <th style="padding:12px 14px; width:70px; text-align:center">STT</th>
+                        <th style="padding:12px 14px; width:130px; text-align:center; white-space:nowrap">{{ __('supplier.table.code') }}</th>
+                        <th style="padding:12px 14px; width:22%">{{ __('supplier.table.name_short') }}</th>
+                        <th style="padding:12px 14px; width:130px">{{ __('supplier.table.phone') }}</th>
+                        <th style="padding:12px 14px; width:18%">Email</th>
+                        <th style="padding:12px 14px; width:16%">{{ __('supplier.table.food_types') }}</th>
+                        <th style="padding:12px 14px; width:130px; text-align:center; white-space:nowrap">{{ __('supplier.table.ingredient_count') }}</th>
+                        <th style="padding:12px 14px; width:140px; text-align:center; white-space:nowrap">{{ __('supplier.table.status') }}</th>
+                        <th style="padding:12px 14px; width:110px; text-align:center; white-space:nowrap">{{ __('supplier.table.actions') }}</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($suppliersList as $index => $supplier)
-                        <tr>
-                            <td style="text-align:center" class="sup-muted">{{ ($suppliersList->currentPage() - 1) * $suppliersList->perPage() + $index + 1 }}</td>
-                            <td><span style="font-size:12px;font-weight:600;color:var(--sup-mu)">{{ $supplier->code }}</span></td>
-                            <td class="sup-name">{{ $supplier->name }}</td>
-                            <td>{{ $supplier->phone }}</td>
-                            <td>{{ $supplier->email ?: '--' }}</td>
-                            <td>{{ $supplier->type }}</td>
-                            <td class="sup-link-num">{{ $supplier->ingredients_count }}</td>
-                            <td>
+                        <tr style="border-bottom:1px solid var(--sup-bd2, #f1f5f9)">
+                            <td style="padding:12px 14px; text-align:center; font-weight:400; color:var(--sup-mu, #64748b); font-variant-numeric:tabular-nums">{{ ($suppliersList->currentPage() - 1) * $suppliersList->perPage() + $index + 1 }}</td>
+                            <td style="padding:12px 14px; text-align:center; font-weight:400; color:var(--po-bl, #1267e8); font-variant-numeric:tabular-nums; white-space:nowrap">{{ $supplier->code }}</td>
+                            <td style="padding:12px 14px; font-weight:700; color:var(--sup-tx, #0f172a)">{{ $supplier->name }}</td>
+                            <td style="padding:12px 14px; font-variant-numeric:tabular-nums">{{ $supplier->phone }}</td>
+                            <td style="padding:12px 14px; color:var(--sup-mu, #64748b)">{{ $supplier->email ?: '—' }}</td>
+                            <td style="padding:12px 14px; font-weight:400">{{ $supplier->type ?: '—' }}</td>
+                            <td style="padding:12px 14px; text-align:center; font-weight:700; color:var(--sup-tx, #0f172a); font-variant-numeric:tabular-nums">{{ $supplier->ingredients_count }}</td>
+                            <td style="padding:12px 14px; text-align:center">
                                 @if($supplier->status)
                                     <span class="spill s-ok">{{ __('supplier.status.active') }}</span>
                                 @else
                                     <span class="spill s-qt">{{ __('supplier.status.locked') }}</span>
                                 @endif
                             </td>
-                            <td style="text-align:center">
-                                <div class="sup-row-actions" style="justify-content:center">
-                                    <a href="{{ \App\Filament\Resources\SupplierResource::getUrl('view', ['record' => $supplier->id]) }}" class="sup-row-action" title="Xem" style="color: var(--sup-mu)">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                                            <circle cx="12" cy="12" r="3"/>
-                                        </svg>
+                            <td style="padding:12px 14px; text-align:center">
+                                <div style="display:inline-flex; gap:6px; justify-content:center">
+                                    <a href="{{ \App\Filament\Resources\SupplierResource::getUrl('view', ['record' => $supplier->id]) }}" class="abt" title="{{ __('supplier.actions.view') }}">
+                                        <i class="fa-solid fa-eye"></i>
                                     </a>
-                                    <a href="{{ \App\Filament\Resources\SupplierResource::getUrl('edit', ['record' => $supplier->id]) }}" class="sup-row-action" title="{{ __('supplier.actions.edit') }}" style="color: var(--sup-mu)">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                                        </svg>
+                                    <a href="{{ \App\Filament\Resources\SupplierResource::getUrl('edit', ['record' => $supplier->id]) }}" class="abt" title="{{ __('supplier.actions.edit') }}">
+                                        <i class="fa-solid fa-pencil"></i>
                                     </a>
-                                    <button wire:click="deleteSupplier({{ $supplier->id }})" wire:confirm="{{ __('supplier.confirm.delete') }}" class="sup-row-action sup-row-danger" title="{{ __('supplier.actions.delete') }}">
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <polyline points="3 6 5 6 21 6"/>
-                                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                                        </svg>
+                                    <button type="button" @click="askConfirm('deleteSupplier', {{ $supplier->id }}, @js(__('supplier.actions.delete')), @js(__('supplier.confirm.delete')), @js(__('supplier.actions.delete')))" class="abt" title="{{ __('supplier.actions.delete') }}">
+                                        <i class="fa-solid fa-trash" style="color:#dc2626"></i>
                                     </button>
                                 </div>
                             </td>
@@ -305,17 +323,17 @@
         @if($suppliersList->total() > 0)
             <div class="sup-footer">
                 <div>
-                    {{ __('supplier.pagination.summary', ['from' => $suppliersList->firstItem() ?? 0, 'to' => $suppliersList->lastItem() ?? 0, 'total' => $suppliersList->total()]) }}
+                    {{ __('supplier.pagination.summary', ['from' => $suppliersList->firstItem() ?? 0, 'to' => $suppliersList->lastItem() ?? 0, 'total' => number_format($suppliersList->total(), 0, ',', '.')]) }}
                 </div>
                 <div class="sup-pagination">
-                    <select wire:model.live="perPage" class="sup-select" style="min-width:7rem;height:2rem;padding:0 .5rem;border-radius:.5rem">
-                        <option value="5">5 / trang</option>
-                        <option value="10">10 / trang</option>
-                        <option value="20">20 / trang</option>
-                        <option value="50">50 / trang</option>
+                    <span>{{ __('common.pagination.per_page_label') }}</span>
+                    <select wire:model.live="perPage" class="lv-per-page-select">
+                        @foreach([5, 10, 20, 50] as $count)
+                            <option value="{{ $count }}">{{ $count }}</option>
+                        @endforeach
                     </select>
 
-                    @if($suppliersList->hasPages())
+                    @if($suppliersList->total() > 0)
                         <nav role="navigation" aria-label="Pagination Navigation">
                             {{-- Previous Page Link --}}
                             @if ($suppliersList->onFirstPage())
@@ -328,7 +346,7 @@
                                 </button>
                             @endif
 
-                            {{-- Pagination Elements (dạng cửa sổ: 1 … n-1 n n+1 … cuối) --}}
+                            {{-- Pagination Elements --}}
                             @php
                                 $supCurrentPage = $suppliersList->currentPage();
                                 $supLastPage = $suppliersList->lastPage();
@@ -343,9 +361,7 @@
                                     <span aria-hidden="true" style="padding:0 4px">…</span>
                                 @endif
                                 @if ($page == $supCurrentPage)
-                                    <span aria-current="page">
-                                        <span>{{ $page }}</span>
-                                    </span>
+                                    <span aria-current="page">{{ $page }}</span>
                                 @else
                                     <button type="button" wire:click="gotoPage({{ $page }})" class="sup-small-btn">{{ $page }}</button>
                                 @endif
@@ -367,4 +383,29 @@
             </div>
         @endif
     </div>
+
+    {{-- Hộp thoại xác nhận trong trang (teleport ra body) --}}
+    <template x-teleport="body">
+        <div x-show="cf.open" x-cloak class="rcf-overlay" @click.self="closeConfirm()">
+            <div class="rcf-box" role="dialog" aria-modal="true">
+                <div class="rcf-head">
+                    <span class="rcf-ico" :class="cf.danger ? 'rcf-ico-danger' : 'rcf-ico-info'">
+                        <i class="fa-solid" :class="cf.danger ? 'fa-triangle-exclamation' : 'fa-rotate-left'"></i>
+                    </span>
+                    <h3 class="rcf-title" x-text="cf.title"></h3>
+                </div>
+                <p class="rcf-msg" x-text="cf.message"></p>
+                <div class="rcf-actions">
+                    <button type="button" class="rcf-btn rcf-btn-ghost" @click="closeConfirm()" :disabled="cf.busy">
+                        {{ __('common.actions.cancel') }}
+                    </button>
+                    <button type="button" class="rcf-btn" :class="cf.danger ? 'rcf-btn-danger' : 'rcf-btn-primary'"
+                            @click="runConfirm()" :disabled="cf.busy">
+                        <i class="fa-solid fa-spinner fa-spin" x-show="cf.busy"></i>
+                        <span x-text="cf.confirmLabel"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </template>
 </div>

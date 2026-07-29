@@ -1108,15 +1108,15 @@
                             'total' => $listPaginator->total(),
                         ]) }}
                     </div>
-                    <div style="display:flex; align-items:center; gap:8px;">
-                        <select wire:model.live="listPerPage" style="height:30px; border:1px solid var(--bd); border-radius:6px; padding:0 8px; font-size:12px; background:var(--wh); color:var(--tx);">
-                            <option value="5">{{ __('list_hang.pagination.per_page', ['count' => 5]) }}</option>
-                            <option value="10">{{ __('list_hang.pagination.per_page', ['count' => 10]) }}</option>
-                            <option value="20">{{ __('list_hang.pagination.per_page', ['count' => 20]) }}</option>
-                            <option value="50">{{ __('list_hang.pagination.per_page', ['count' => 50]) }}</option>
+                    <div class="pgwrap">
+                        <span>{{ __('common.pagination.per_page_label') }}</span>
+                        <select wire:model.live="listPerPage" class="lv-per-page-select">
+                            @foreach([5, 10, 20, 50] as $count)
+                                <option value="{{ $count }}">{{ $count }}</option>
+                            @endforeach
                         </select>
 
-                        @if($listPaginator->hasPages())
+                        @if($listPaginator->total() > 0)
                             <nav role="navigation" aria-label="{{ __('list_hang.pagination.navigation') }}" style="display:flex; align-items:center; gap:4px;">
                                 @if ($listPaginator->onFirstPage())
                                     <span aria-disabled="true" style="opacity:.4; padding:4px;">

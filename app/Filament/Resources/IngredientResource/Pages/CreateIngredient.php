@@ -19,9 +19,6 @@ class CreateIngredient extends CreateRecord
     {
         return [
             $this->getCancelFormAction(),
-            $this->getCreateAnotherFormAction()
-                ->label(__('ingredient.actions.save_draft'))
-                ->icon('heroicon-o-document-text'),
             $this->getCreateFormAction(),
         ];
     }

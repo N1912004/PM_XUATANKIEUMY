@@ -9,26 +9,26 @@
 @source '../**/*.js';
 
 @theme {
-    --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
-        
-    --text-2xs: 0.6875rem;
-    --text-xs: 0.75rem;
-    --text-sm: 0.8125rem;
-    --text-base: 0.875rem;
-    --text-lg: 1rem;
-    --text-xl: 1.125rem;
-    --text-2xl: 1.25rem;
-    --text-3xl: 1.5rem;
-    --text-4xl: 1.875rem;
-    --text-5xl: 2.25rem;
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+    'Segoe UI Symbol', 'Noto Color Emoji';
 
-    --font-weight-light: 300;
-    --font-weight-normal: 400;
-    --font-weight-medium: 500;
-    --font-weight-semibold: 600;
-    --font-weight-bold: 700;
-    --font-weight-extrabold: 800;
+  --text-2xs: 0.6875rem;
+  --text-xs: 0.75rem;
+  --text-sm: 0.8125rem;
+  --text-base: 0.875rem;
+  --text-lg: 1rem;
+  --text-xl: 1.125rem;
+  --text-2xl: 1.25rem;
+  --text-3xl: 1.5rem;
+  --text-4xl: 1.875rem;
+  --text-5xl: 2.25rem;
+
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
 }
 
 /* Fix xung đột dịch chuyển (translate) giữa Tailwind v3 của Filament và Tailwind v4 của dự án
@@ -43,27 +43,27 @@
    còn bản v3 mà Filament build ra lại đặt `transform`. Cả hai cùng khớp phần tử này nên hai
    phép dịch CỘNG DỒN thành 40px và núm văng ra ngoài khung. Phải vô hiệu hoá `translate`
    rồi mới đặt một `transform` duy nhất. */
-.fi-fo-toggle > span,
-button.fi-fo-toggle > span {
-    /* v4 builds `translate: var(--tw-translate-x) var(--tw-translate-y)`; zeroing the variable
+.fi-fo-toggle>span,
+button.fi-fo-toggle>span {
+  /* v4 builds `translate: var(--tw-translate-x) var(--tw-translate-y)`; zeroing the variable
        neutralises that layer no matter which sheet declared it, leaving `transform` in charge. */
-    --tw-translate-x: 0px !important;
-    --tw-translate-y: 0px !important;
-    translate: 0 0 !important;
+  --tw-translate-x: 0px !important;
+  --tw-translate-y: 0px !important;
+  translate: 0 0 !important;
 }
 
-.fi-fo-toggle[aria-checked="true"] > span,
-button.fi-fo-toggle[aria-checked="true"] > span {
-    transform: translateX(20px) !important;
+.fi-fo-toggle[aria-checked="true"]>span,
+button.fi-fo-toggle[aria-checked="true"]>span {
+  transform: translateX(20px) !important;
 }
 
-.fi-fo-toggle[aria-checked="false"] > span,
-button.fi-fo-toggle[aria-checked="false"] > span {
-    transform: translateX(0) !important;
+.fi-fo-toggle[aria-checked="false"]>span,
+button.fi-fo-toggle[aria-checked="false"]>span {
+  transform: translateX(0) !important;
 }
 
-.fi-fo-toggle > span {
-    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+.fi-fo-toggle>span {
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
 /* Cùng họ xung đột trên: Tailwind v4 đè utilities lưới responsive của Filament v3
@@ -72,38 +72,38 @@ button.fi-fo-toggle[aria-checked="false"] > span {
    Khôi phục đúng hành vi gốc của Filament: grid chỉ khai báo cột cho lg (không có sm/md
    riêng) phải xếp 1 cột dưới 1024px, mỗi field chiếm trọn một hàng. */
 @media (max-width: 1023.98px) {
-    .fi-main .grid[style*='--cols-lg']:not([style*='--cols-sm']):not([style*='--cols-md']) {
-        grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
-    }
+  .fi-main .grid[style*='--cols-lg']:not([style*='--cols-sm']):not([style*='--cols-md']) {
+    grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+  }
 
-    .fi-main .grid[style*='--cols-lg']:not([style*='--cols-sm']):not([style*='--cols-md']) > * {
-        grid-column: span 1 / span 1 !important;
-    }
+  .fi-main .grid[style*='--cols-lg']:not([style*='--cols-sm']):not([style*='--cols-md'])>* {
+    grid-column: span 1 / span 1 !important;
+  }
 }
 
 /* Alpine: ẩn phần tử [x-cloak] trước khi Alpine khởi động (panel của ô "vừa tìm vừa chọn"). */
 [x-cloak] {
-    display: none !important;
+  display: none !important;
 }
 
 /* Sidebar Header Logo centering */
-.fi-sidebar-header > div[x-show*="sidebar.isOpen"] {
-    flex: 1 1 0% !important;
-    display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
+.fi-sidebar-header>div[x-show*="sidebar.isOpen"] {
+  flex: 1 1 0% !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
 }
 
-.fi-sidebar-header > div[x-show*="sidebar.isOpen"] a {
-    display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
-    width: 100% !important;
+.fi-sidebar-header>div[x-show*="sidebar.isOpen"] a {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  width: 100% !important;
 }
 
-.fi-sidebar-header > div[x-show*="sidebar.isOpen"] .fi-logo {
-    justify-content: center !important;
-    width: 100% !important;
+.fi-sidebar-header>div[x-show*="sidebar.isOpen"] .fi-logo {
+  justify-content: center !important;
+  width: 100% !important;
 }
 
 /* ==========================================================================
@@ -111,20 +111,41 @@ button.fi-fo-toggle[aria-checked="false"] > span {
    ========================================================================== */
 
 :root {
-  --bl:#1267E8;--bl-d:#0C50BB;--bl-s:#EBF3FF;--bl-m:#BFDBFE;
-  --gn:#059669;--gn-s:#ECFDF5;--gn-t:#065F46;
-  --or:#EA580C;--or-s:#FFF7ED;--or-t:#9A3412;
-  --pu:#7C3AED;--pu-s:#F5F3FF;
-  --rd:#DC2626;--rd-s:#FEF2F2;--rd-t:#991B1B;
-  --am:#D97706;--am-s:#FFFBEB;
-  --sk:#0284C7;--sk-s:#F0F9FF;
-  --pk:#E11D48;--pk-s:#FFF1F2;
-  --bg:#F4F7FB;--wh:#fff;
-  --tx:#0F172A;--su:#334155;--mu:#64748B;--fa:#94A3B8;
-  --bd:#E2E8F0;--bd2:#F1F5F9;
-  --sh:0 1px 3px rgba(15,23,42,.05),0 4px 16px rgba(15,23,42,.05);
-  --sh2:0 1px 2px rgba(15,23,42,.04);
-  --r:14px;--sb:220px;--tb:62px;--fb:64px;
+  --bl: #1267E8;
+  --bl-d: #0C50BB;
+  --bl-s: #EBF3FF;
+  --bl-m: #BFDBFE;
+  --gn: #059669;
+  --gn-s: #ECFDF5;
+  --gn-t: #065F46;
+  --or: #EA580C;
+  --or-s: #FFF7ED;
+  --or-t: #9A3412;
+  --pu: #7C3AED;
+  --pu-s: #F5F3FF;
+  --rd: #DC2626;
+  --rd-s: #FEF2F2;
+  --rd-t: #991B1B;
+  --am: #D97706;
+  --am-s: #FFFBEB;
+  --sk: #0284C7;
+  --sk-s: #F0F9FF;
+  --pk: #E11D48;
+  --pk-s: #FFF1F2;
+  --bg: #F4F7FB;
+  --wh: #fff;
+  --tx: #0F172A;
+  --su: #334155;
+  --mu: #64748B;
+  --fa: #94A3B8;
+  --bd: #E2E8F0;
+  --bd2: #F1F5F9;
+  --sh: 0 1px 3px rgba(15, 23, 42, .05), 0 4px 16px rgba(15, 23, 42, .05);
+  --sh2: 0 1px 2px rgba(15, 23, 42, .04);
+  --r: 14px;
+  --sb: 220px;
+  --tb: 62px;
+  --fb: 64px;
 }
 
 /* Sidebar follows the compact geometry used by bluefire_demo.html. */
@@ -227,7 +248,7 @@ button.fi-fo-toggle[aria-checked="false"] > span {
   font-weight: 500 !important;
 }
 
-.fi-sidebar-item:not(.fi-active):not(.fi-sidebar-item-active) > .fi-sidebar-item-button:hover {
+.fi-sidebar-item:not(.fi-active):not(.fi-sidebar-item-active)>.fi-sidebar-item-button:hover {
   background: var(--bd2) !important;
   color: var(--tx) !important;
 }
@@ -239,9 +260,9 @@ button.fi-fo-toggle[aria-checked="false"] > span {
   border-radius: 6px !important;
 }
 
-.fi-sidebar-item.fi-active > .fi-sidebar-item-button,
-.fi-sidebar-item-active > .fi-sidebar-item-button,
-.fi-sidebar-item-active > a,
+.fi-sidebar-item.fi-active>.fi-sidebar-item-button,
+.fi-sidebar-item-active>.fi-sidebar-item-button,
+.fi-sidebar-item-active>a,
 .fi-sidebar-item-button[aria-current='page'] {
   background: linear-gradient(135deg, #1474FF, #0059DD) !important;
   color: #fff !important;
@@ -249,9 +270,9 @@ button.fi-fo-toggle[aria-checked="false"] > span {
   box-shadow: 0 6px 16px rgba(18, 103, 232, 0.22) !important;
 }
 
-.fi-sidebar-item.fi-active > .fi-sidebar-item-button:hover,
-.fi-sidebar-item-active > .fi-sidebar-item-button:hover,
-.fi-sidebar-item-active > a:hover {
+.fi-sidebar-item.fi-active>.fi-sidebar-item-button:hover,
+.fi-sidebar-item-active>.fi-sidebar-item-button:hover,
+.fi-sidebar-item-active>a:hover {
   background: linear-gradient(135deg, #105FCC, #004FC4) !important;
 }
 
@@ -262,7 +283,7 @@ button.fi-fo-toggle[aria-checked="false"] > span {
   color: #fff !important;
 }
 
-.fi-sidebar > .border-t {
+.fi-sidebar>.border-t {
   padding: 8px !important;
   border-color: var(--bd) !important;
   background: var(--wh) !important;
@@ -312,7 +333,9 @@ button.fi-fo-toggle[aria-checked="false"] > span {
 }
 
 /* Base Body Background & Typography */
-body, .fi-body, .fi-main {
+body,
+.fi-body,
+.fi-main {
   font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
   background-color: var(--bg) !important;
   color: var(--tx) !important;
@@ -335,7 +358,7 @@ body, .fi-body, .fi-main {
 .fi-page .px-4:not(.fi-pagination),
 .fi-page .sm\:px-6:not(.fi-pagination),
 .fi-page .lg\:px-8:not(.fi-pagination),
-.fi-page > div {
+.fi-page>div {
   padding-left: 0 !important;
   padding-right: 0 !important;
 }
@@ -353,16 +376,16 @@ body, .fi-body, .fi-main {
    ListRecords pages render as .fi-page. Both structures use the same inset so
    titles and cards never sit against the sidebar or viewport edge. */
 .fi-page.fi-resource-list-records-page,
-main > .bf-list-page {
+main>.bf-list-page {
   padding: 22px 28px 36px !important;
   box-sizing: border-box !important;
 }
 
-.fi-resource-list-records-page > section > .fi-header {
+.fi-resource-list-records-page>section>.fi-header {
   margin-bottom: 18px !important;
 }
 
-.fi-resource-list-records-page > section > .fi-header .fi-header-heading,
+.fi-resource-list-records-page>section>.fi-header .fi-header-heading,
 .bf-list-page .emp-title,
 .bf-list-page .po-title,
 .bf-list-page .sup-title,
@@ -375,8 +398,9 @@ main > .bf-list-page {
 }
 
 @media (max-width: 767.98px) {
+
   .fi-page.fi-resource-list-records-page,
-  main > .bf-list-page {
+  main>.bf-list-page {
     padding: 16px !important;
   }
 }
@@ -384,7 +408,7 @@ main > .bf-list-page {
 /* Filament wraps every page body in `<section class="flex flex-col gap-y-8 py-8">` — that py-8
    (32px top + bottom) sits on top of .fi-page's own padding and leaves a large empty band above
    the page title. Trim it and tighten the 32px inter-block gap to something closer to the cards. */
-.fi-page > section {
+.fi-page>section {
   padding-top: 0 !important;
   padding-bottom: 12px !important;
   gap: 18px !important;
@@ -419,7 +443,7 @@ h1.fi-header-heading,
 
 /* Action Buttons (Primary with Bluefire Gradient) */
 .fi-btn.fi-btn-color-primary,
-button[type="submit"]:not(.fi-btn-color-gray),
+button[type="submit"]:not(.fi-btn-color-gray):not(.fi-btn-color-danger):not(.rcf-btn-danger),
 .btn-p {
   background: linear-gradient(135deg, #1474FF, #0059DD) !important;
   color: #ffffff !important;
@@ -432,7 +456,7 @@ button[type="submit"]:not(.fi-btn-color-gray),
 }
 
 .fi-btn.fi-btn-color-primary:hover,
-button[type="submit"]:not(.fi-btn-color-gray):hover,
+button[type="submit"]:not(.fi-btn-color-gray):not(.fi-btn-color-danger):not(.rcf-btn-danger):hover,
 .btn-p:hover {
   background: linear-gradient(135deg, #105FCC, #004FC4) !important;
   box-shadow: 0 10px 20px rgba(18, 103, 232, 0.35) !important;
@@ -453,15 +477,15 @@ button[type="submit"]:not(.fi-btn-color-gray):hover,
 
 .fi-btn.fi-btn-color-gray:hover {
   background: #F8FAFC !important;
-  box-shadow: 0 2px 8px rgba(15,23,42,.07) !important;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, .07) !important;
   transform: translateY(-1px) !important;
 }
 
 /* Stats Overview Grid (KPI Cards - krow / kcard) */
 .fi-page-header-widgets-ctn,
-.fi-page-header-widgets-ctn > *,
-.fi-header + div,
-.fi-header + div > *,
+.fi-page-header-widgets-ctn>*,
+.fi-header+div,
+.fi-header+div>*,
 div:has(> .krow) {
   display: block !important;
   grid-template-columns: 1fr !important;
@@ -526,10 +550,25 @@ div:has(> .krow) {
   font-size: 16px !important;
 }
 
-.ki-b { background: var(--bl-s) !important; color: var(--bl) !important; }
-.ki-g { background: var(--gn-s) !important; color: var(--gn) !important; }
-.ki-o { background: var(--or-s) !important; color: var(--or) !important; }
-.ki-p { background: var(--pu-s) !important; color: var(--pu) !important; }
+.ki-b {
+  background: var(--bl-s) !important;
+  color: var(--bl) !important;
+}
+
+.ki-g {
+  background: var(--gn-s) !important;
+  color: var(--gn) !important;
+}
+
+.ki-o {
+  background: var(--or-s) !important;
+  color: var(--or) !important;
+}
+
+.ki-p {
+  background: var(--pu-s) !important;
+  color: var(--pu) !important;
+}
 
 .kval {
   font-size: 28px !important;
@@ -576,13 +615,13 @@ div:has(> .krow) {
   flex-wrap: wrap !important;
 }
 
-.fi-ta-header-toolbar > div {
+.fi-ta-header-toolbar>div {
   display: flex !important;
   align-items: center !important;
   gap: 10px !important;
 }
 
-.fi-ta-header-toolbar > div:first-child,
+.fi-ta-header-toolbar>div:first-child,
 .fi-ta-bulk-actions,
 .fi-ta-bulk-actions-ctn {
   flex-shrink: 0 !important;
@@ -603,8 +642,8 @@ div.fi-ta-bulk-actions {
 
 .fi-ta-bulk-actions button,
 .fi-ta-bulk-actions .fi-btn,
-.fi-ta-header-toolbar > button,
-.fi-ta-header-toolbar > div > button {
+.fi-ta-header-toolbar>button,
+.fi-ta-header-toolbar>div>button {
   white-space: nowrap !important;
   width: auto !important;
   min-width: max-content !important;
@@ -766,7 +805,7 @@ div[wire\:key*="selection-indicator"] {
 .fi-ta-search-input-wrp:focus-within {
   border-color: #93C5FD !important;
   background: #fff !important;
-  box-shadow: 0 0 0 3px rgba(18,103,232,.08) !important;
+  box-shadow: 0 0 0 3px rgba(18, 103, 232, .08) !important;
 }
 
 .fi-ta-search-field .fi-input-wrp,
@@ -879,7 +918,7 @@ div[wire\:key*="selection-indicator"] {
 .fi-topbar,
 header.fi-topbar,
 .fi-topbar nav,
-.fi-topbar > nav {
+.fi-topbar>nav {
   width: 100% !important;
   max-width: 100% !important;
   height: var(--tb) !important;
@@ -888,7 +927,7 @@ header.fi-topbar,
 
 div[x-persist*="topbar.end"],
 .fi-topbar .ms-auto,
-.fi-topbar nav > div.ms-auto {
+.fi-topbar nav>div.ms-auto {
   margin-right: 20px !important;
 }
 
@@ -901,7 +940,7 @@ td.fi-ta-cell-checkbox,
 }
 
 /* Filter Above Content Section & Single Row Toolbar (.tbar style - Image 1 placement) */
-.fi-ta-ctn > div:has(.fi-ta-filters-above-content-ctn) {
+.fi-ta-ctn>div:has(.fi-ta-filters-above-content-ctn) {
   display: flex !important;
   flex-direction: row !important;
   align-items: flex-end !important;
@@ -956,7 +995,7 @@ td.fi-ta-cell-checkbox,
 }
 
 .fi-ta-filters-above-content-ctn .fi-fo-field-wrp,
-.fi-ta-filters-above-content-ctn .fi-fo-field-wrp > div,
+.fi-ta-filters-above-content-ctn .fi-fo-field-wrp>div,
 .fi-ta-filters-above-content-ctn .fi-fo-field-wrp-ctn {
   display: flex !important;
   flex-direction: column !important;
@@ -1015,8 +1054,8 @@ td.fi-ta-cell-checkbox,
 .fi-ta-filters-above-content-ctn .fi-section-header-heading,
 .fi-ta-filters-above-content-ctn .fi-section-header-text,
 .fi-ta-filters-above-content-ctn .fi-section-header-actions,
-.fi-ta-filters-above-content-ctn section > div:first-child,
-.fi-ta-filters-above-content-ctn form > div > div:first-child:has(h2, h3, h4, header, span) {
+.fi-ta-filters-above-content-ctn section>div:first-child,
+.fi-ta-filters-above-content-ctn form>div>div:first-child:has(h2, h3, h4, header, span) {
   display: none !important;
 }
 
@@ -1030,7 +1069,7 @@ td.fi-ta-cell-checkbox,
 
 /* Remove ghost white background, ring, and double nested borders on outer filter wrappers */
 .fi-ta-filters-above-content-ctn .fi-fo-field-wrp,
-.fi-ta-filters-above-content-ctn .fi-fo-field-wrp > div,
+.fi-ta-filters-above-content-ctn .fi-fo-field-wrp>div,
 .fi-ta-filters-above-content-ctn .fi-input-wrp,
 .fi-ta-filters-above-content-ctn .fi-select,
 .fi-ta-filters-above-content-ctn [class*="fi-input-wrp"],
@@ -1053,7 +1092,8 @@ td.fi-ta-cell-checkbox,
   display: block !important;
   font-size: 12.5px !important;
   font-weight: 500 !important;
-  color: #334155 !important; /* Slate-700 readable label */
+  color: #334155 !important;
+  /* Slate-700 readable label */
   text-transform: none !important;
   letter-spacing: normal !important;
   padding: 0 !important;
@@ -1068,7 +1108,7 @@ td.fi-ta-cell-checkbox,
 
 /* Kill the row gaps Filament stacks between the label row and the input row */
 .fi-ta-filters-above-content-ctn .fi-fo-field-wrp,
-.fi-ta-filters-above-content-ctn .fi-fo-field-wrp > .grid,
+.fi-ta-filters-above-content-ctn .fi-fo-field-wrp>.grid,
 .fi-ta-filters-above-content-ctn .fi-fo-field-wrp .grid.gap-y-2,
 .fi-ta-filters-above-content-ctn .fi-fo-field-wrp .gap-y-2 {
   row-gap: 5px !important;
@@ -1096,7 +1136,8 @@ td.fi-ta-cell-checkbox,
   border-radius: 8px !important;
   font-size: 13px !important;
   font-weight: 400 !important;
-  color: #0F172A !important; /* Deepest High-Contrast Slate-900 */
+  color: #0F172A !important;
+  /* Deepest High-Contrast Slate-900 */
   box-shadow: none !important;
   outline: none !important;
   opacity: 1 !important;
@@ -1282,7 +1323,7 @@ td.fi-ta-cell-checkbox,
 .fi-ta-filters-above-content-ctn select:focus,
 .fi-ta-filters-above-content-ctn .fi-select-input:focus {
   border-color: #93C5FD !important;
-  box-shadow: 0 0 0 3px rgba(18,103,232,.07) !important;
+  box-shadow: 0 0 0 3px rgba(18, 103, 232, .07) !important;
 }
 
 /* Filter Reset Button ("Đặt lại" - .fbtn style).
@@ -1359,8 +1400,8 @@ td.fi-ta-cell-checkbox,
 
 /* Filament wraps the reset button in `div.flex.items-center.justify-between`, the FIRST child of
    .fi-ta-filters — so it renders before the selects. Push that wrapper to the end of the row. */
-.fi-ta-filters-above-content-ctn .fi-ta-filters > div:has(.fi-link),
-.fi-ta-filters-above-content-ctn .fi-ta-filters > div:has(button[wire\:click*="resetTableFilters"]) {
+.fi-ta-filters-above-content-ctn .fi-ta-filters>div:has(.fi-link),
+.fi-ta-filters-above-content-ctn .fi-ta-filters>div:has(button[wire\:click*="resetTableFilters"]) {
   order: 99 !important;
   flex: 0 0 auto !important;
   width: auto !important;
@@ -1371,7 +1412,7 @@ td.fi-ta-cell-checkbox,
    Desktop keeps everything on one row; below 1280px the bar wraps (flex-wrap above), and below
    640px each control goes full-width so nothing is squeezed into an unreadable sliver. */
 @media (max-width: 1279.98px) {
-  .fi-ta-ctn > div:has(.fi-ta-filters-above-content-ctn) {
+  .fi-ta-ctn>div:has(.fi-ta-filters-above-content-ctn) {
     padding: 12px 14px !important;
   }
 
@@ -1385,7 +1426,7 @@ td.fi-ta-cell-checkbox,
 }
 
 @media (max-width: 639.98px) {
-  .fi-ta-ctn > div:has(.fi-ta-filters-above-content-ctn) {
+  .fi-ta-ctn>div:has(.fi-ta-filters-above-content-ctn) {
     flex-direction: column !important;
     align-items: stretch !important;
     gap: 10px !important;
@@ -1403,7 +1444,7 @@ td.fi-ta-cell-checkbox,
   }
 
   /* the toolbar right-aligns its children by default, which leaves the search box floating */
-  .fi-ta-header-toolbar > *,
+  .fi-ta-header-toolbar>*,
   .fi-ta-header-toolbar .fi-ta-search-field {
     flex: 1 1 100% !important;
     width: 100% !important;
@@ -1470,10 +1511,10 @@ td.fi-ta-cell-checkbox,
 /* Filament lays the header label out with an inner flex span (`justify-start` / `justify-end`),
    so text-align on the <th> alone does not move it — the span needs centring too.
    Centred columns: STT (row index) and the actions column. */
-.fi-ta-table th.fi-ta-header-cell-actions > span,
+.fi-ta-table th.fi-ta-header-cell-actions>span,
 .fi-ta-table th.fi-ta-header-cell-actions .fi-ta-header-cell-label,
-.fi-ta-table thead th:last-child > span,
-.fi-ta-table th.fi-table-header-cell-index > span {
+.fi-ta-table thead th:last-child>span,
+.fi-ta-table th.fi-table-header-cell-index>span {
   justify-content: center !important;
   width: 100% !important;
   text-align: center !important;
@@ -1489,7 +1530,7 @@ td.fi-ta-cell-checkbox,
 }
 
 /* every other header label stays flush left, in line with its cell content */
-.fi-ta-table thead th:not(:last-child):not(.fi-ta-header-cell-actions):not(.fi-table-header-cell-index) > span {
+.fi-ta-table thead th:not(:last-child):not(.fi-ta-header-cell-actions):not(.fi-table-header-cell-index)>span {
   justify-content: flex-start !important;
   text-align: left !important;
 }
@@ -1511,15 +1552,15 @@ td.fi-ta-cell-checkbox,
 /* Filament nests the value in `.fi-ta-text > div.flex > div.flex.max-w-max`; the inner
    `max-w-max` is what overflows, so the clamp has to land on every level of that chain. */
 .fi-ta-table td.fi-table-cell-code .fi-ta-text,
-.fi-ta-table td.fi-table-cell-code .fi-ta-text > div,
-.fi-ta-table td.fi-table-cell-code .fi-ta-text > div > div {
+.fi-ta-table td.fi-table-cell-code .fi-ta-text>div,
+.fi-ta-table td.fi-table-cell-code .fi-ta-text>div>div {
   min-width: 0 !important;
   max-width: 100% !important;
   overflow: hidden !important;
 }
 
 .fi-ta-table td.fi-table-cell-code .fi-ta-text-item,
-.fi-ta-table td.fi-table-cell-code .fi-ta-text > div > div > * {
+.fi-ta-table td.fi-table-cell-code .fi-ta-text>div>div>* {
   display: block !important;
   min-width: 0 !important;
   max-width: 100% !important;
@@ -1611,11 +1652,42 @@ td.fi-ta-cell-checkbox,
   color: var(--mu) !important;
 }
 
-/* Hide overlapping "Per page" / "Mỗi trang" prefix badge inside pagination select */
+.fi-ta-pagination-records-per-page-select,
+.fi-pagination-records-per-page-select,
+.po-pagination,
+.sup-pagination,
+.pgwrap {
+  display: inline-flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 8px !important;
+  white-space: nowrap !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.fi-ta-pagination-records-per-page-select>span,
+.fi-pagination-records-per-page-select>span,
+.po-pagination>span,
+.sup-pagination>span,
+.pgwrap>span {
+  font-size: 13px !important;
+  font-weight: 400 !important;
+  color: var(--mu, #64748b) !important;
+  white-space: nowrap !important;
+  display: inline-block !important;
+  line-height: 1.25rem !important;
+}
+
+/* Hide overlapping prefix/suffix elements inside pagination select */
 .fi-ta-pagination-records-per-page-select .fi-input-wrp-prefix,
 .fi-pagination-records-per-page-select .fi-input-wrp-prefix,
 .fi-ta-pagination .fi-input-wrp-prefix,
-.fi-pagination .fi-input-wrp-prefix {
+.fi-pagination .fi-input-wrp-prefix,
+.fi-ta-pagination-records-per-page-select .fi-input-wrp-suffix,
+.fi-pagination-records-per-page-select .fi-input-wrp-suffix,
+.fi-ta-pagination .fi-input-wrp-suffix,
+.fi-pagination .fi-input-wrp-suffix {
   display: none !important;
 }
 
@@ -1628,20 +1700,47 @@ td.fi-ta-cell-checkbox,
   box-shadow: none !important;
   padding: 0 !important;
   margin: 0 !important;
+  width: auto !important;
+  min-width: auto !important;
+  display: inline-flex !important;
 }
 
 .fi-ta-pagination-records-per-page-select select,
 .fi-pagination-records-per-page-select select,
 .fi-ta-pagination select,
-.fi-pagination select {
-  height: 30px !important;
-  padding: 0 24px 0 9px !important;
-  background: var(--wh) !important;
-  border: 1px solid var(--bd) !important;
-  border-radius: 7px !important;
-  font-size: 12px !important;
-  color: var(--su) !important;
-  box-shadow: none !important;
+.fi-pagination select,
+.lv-per-page-select {
+  min-width: 68px !important;
+  width: 68px !important;
+  height: 32px !important;
+  padding: 0 26px 0 10px !important;
+  font-size: 13px !important;
+  font-weight: 400 !important;
+  color: var(--tx, #334155) !important;
+  background-color: var(--wh, #ffffff) !important;
+  border: 1px solid var(--bd, #cbd5e1) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+  outline: none !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e") !important;
+  background-position: right 8px center !important;
+  background-repeat: no-repeat !important;
+  background-size: 16px 16px !important;
+  cursor: pointer !important;
+}
+
+.dark .fi-ta-pagination-records-per-page-select select,
+.dark .fi-pagination-records-per-page-select select,
+.dark .fi-ta-pagination select,
+.dark .fi-pagination select,
+.dark .lv-per-page-select {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+  color: #f1f5f9 !important;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2394a3b8' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e") !important;
 }
 
 /* Pagination item buttons (.pgb style) */
@@ -1831,7 +1930,7 @@ a.fi-dropdown-list-item {
 }
 
 .fi-dropdown-list-item-icon,
-.fi-dropdown-list-item > svg:not(.animate-spin) {
+.fi-dropdown-list-item>svg:not(.animate-spin) {
   width: 16px !important;
   height: 16px !important;
   font-size: 16px !important;
@@ -1844,7 +1943,7 @@ a.fi-dropdown-list-item {
 .fi-dropdown-list-item.fi-color-danger,
 .fi-dropdown-list-item.fi-color-danger .fi-dropdown-list-item-label,
 .fi-dropdown-list-item.fi-color-danger .fi-dropdown-list-item-icon,
-.fi-dropdown-list-item.fi-color-danger > svg {
+.fi-dropdown-list-item.fi-color-danger>svg {
   color: #DC2626 !important;
 }
 
@@ -2068,7 +2167,7 @@ svg.animate-spin,
 }
 
 .fi-resource-ingredients .fi-ta-filters-above-content-ctn .fi-fo-field-wrp-label,
-.fi-resource-ingredients .fi-ta-filters-above-content-ctn .fi-fo-field-wrp-label > span {
+.fi-resource-ingredients .fi-ta-filters-above-content-ctn .fi-fo-field-wrp-label>span {
   color: #334155 !important;
   font-size: 12.5px !important;
   font-weight: 500 !important;
@@ -2138,7 +2237,7 @@ svg.animate-spin,
 }
 
 .fi-resource-ingredients .fi-ta-filters-above-content-ctn .fi-fo-select .choices__list--single,
-.fi-resource-ingredients .fi-ta-filters-above-content-ctn .fi-fo-select .choices__list--single > .choices__item,
+.fi-resource-ingredients .fi-ta-filters-above-content-ctn .fi-fo-select .choices__list--single>.choices__item,
 .fi-resource-ingredients .fi-ta-filters-above-content-ctn .fi-fo-select .choices__placeholder {
   color: #0F172A !important;
   font-size: 13px !important;
@@ -2195,7 +2294,7 @@ svg.animate-spin,
   padding-right: 20px !important;
 }
 
-.fi-resource-recipes .recipe-cost-section .recipe-ingredient-cell-name .choices__list--single > .choices__item {
+.fi-resource-recipes .recipe-cost-section .recipe-ingredient-cell-name .choices__list--single>.choices__item {
   display: block !important;
   width: 100% !important;
   min-width: 0 !important;
@@ -2408,12 +2507,13 @@ textarea.fi-textarea-input {
 }
 
 /* chừa chỗ cho thanh cố định để nội dung cuối trang không bị che */
-.fi-resource-create-record-page .fi-page > section,
-.fi-resource-edit-record-page .fi-page > section {
+.fi-resource-create-record-page .fi-page>section,
+.fi-resource-edit-record-page .fi-page>section {
   padding-bottom: 76px !important;
 }
 
 @media (max-width: 1023.98px) {
+
   .fi-resource-create-record-page .fi-form-actions,
   .fi-resource-edit-record-page .fi-form-actions {
     left: 0 !important;
@@ -2483,11 +2583,11 @@ textarea.fi-textarea-input {
   gap: 13px 16px !important;
 }
 
-.fi-fo-field-wrp:not(.fi-ta-filters-above-content-ctn *) > .grid {
+.fi-fo-field-wrp:not(.fi-ta-filters-above-content-ctn *)>.grid {
   row-gap: 5px !important;
 }
 
-.fi-fo-field-wrp:not(.fi-ta-filters-above-content-ctn *) .fi-fo-field-wrp-label > span {
+.fi-fo-field-wrp:not(.fi-ta-filters-above-content-ctn *) .fi-fo-field-wrp-label>span {
   line-height: 15px !important;
 }
 
@@ -2547,7 +2647,7 @@ header.fi-section-header {
   margin: 0 !important;
 }
 
-.fi-section-header > div,
+.fi-section-header>div,
 .fi-section-header-heading,
 header.fi-section-header h3,
 header.fi-section-header div {
@@ -2573,7 +2673,7 @@ header.fi-section-header div {
   padding: 16px 22px 20px !important;
 }
 
-.fi-section-content > .fi-fo-component-ctn {
+.fi-section-content>.fi-fo-component-ctn {
   margin-left: 0 !important;
   padding-left: 0 !important;
   gap: 13px 16px !important;
@@ -2671,8 +2771,8 @@ header.fi-section-header div {
 }
 
 /* Remove bottom empty space left by the add button container inside the repeater */
-.recipe-cost-section .fi-fo-repeater > div.flex.justify-end,
-.recipe-cost-section .fi-fo-repeater > div:has(.recipe-add-ingredient-action) {
+.recipe-cost-section .fi-fo-repeater>div.flex.justify-end,
+.recipe-cost-section .fi-fo-repeater>div:has(.recipe-add-ingredient-action) {
   margin: 0 !important;
   padding: 0 !important;
   height: 0 !important;
@@ -2692,24 +2792,24 @@ header.fi-section-header div {
     min-width: 860px !important;
   }
 
-  .fi-main .fi-resource-recipes .recipe-cost-section .fi-fo-repeater-item-content > .fi-fo-component-ctn {
+  .fi-main .fi-resource-recipes .recipe-cost-section .fi-fo-repeater-item-content>.fi-fo-component-ctn {
     grid-template-columns: repeat(16, minmax(0, 1fr)) !important;
   }
 
-  .fi-main .fi-resource-recipes .recipe-cost-section .fi-fo-component-ctn > :has(> .recipe-ingredient-cell-name),
-  .fi-main .fi-resource-recipes .recipe-cost-section .fi-fo-component-ctn > :has(> .recipe-ingredient-cell-quantity) {
+  .fi-main .fi-resource-recipes .recipe-cost-section .fi-fo-component-ctn> :has(> .recipe-ingredient-cell-name),
+  .fi-main .fi-resource-recipes .recipe-cost-section .fi-fo-component-ctn> :has(> .recipe-ingredient-cell-quantity) {
     grid-column: span 3 / span 3 !important;
   }
 
-  .fi-main .fi-resource-recipes .recipe-cost-section .fi-fo-component-ctn > :has(> .recipe-ingredient-cell-price) {
+  .fi-main .fi-resource-recipes .recipe-cost-section .fi-fo-component-ctn> :has(> .recipe-ingredient-cell-price) {
     grid-column: span 5 / span 5 !important;
   }
 
-  .fi-main .fi-resource-recipes .recipe-cost-section .fi-fo-component-ctn > :has(.recipe-line-total) {
+  .fi-main .fi-resource-recipes .recipe-cost-section .fi-fo-component-ctn> :has(.recipe-line-total) {
     grid-column: span 2 / span 2 !important;
   }
 
-  .fi-main .fi-resource-recipes .recipe-cost-section .fi-fo-component-ctn > :has(> .recipe-ingredient-cell-note) {
+  .fi-main .fi-resource-recipes .recipe-cost-section .fi-fo-component-ctn> :has(> .recipe-ingredient-cell-note) {
     grid-column: span 3 / span 3 !important;
   }
 }
@@ -2728,7 +2828,7 @@ header.fi-section-header div {
     display: none !important;
   }
 
-  .fi-main .fi-resource-recipes .recipe-cost-section .fi-fo-repeater > ul {
+  .fi-main .fi-resource-recipes .recipe-cost-section .fi-fo-repeater>ul {
     border-top: 1px solid var(--bd) !important;
     border-radius: 9px !important;
   }
@@ -2738,7 +2838,7 @@ header.fi-section-header div {
     padding: 0 !important;
   }
 
-  .fi-main .fi-resource-recipes .recipe-cost-section .fi-fo-repeater-item-header > h4 {
+  .fi-main .fi-resource-recipes .recipe-cost-section .fi-fo-repeater-item-header>h4 {
     grid-column: 1 !important;
     grid-row: 1 !important;
     justify-self: start !important;
@@ -2746,11 +2846,11 @@ header.fi-section-header div {
     line-height: 2rem !important;
   }
 
-  .fi-main .fi-resource-recipes .recipe-cost-section .fi-fo-repeater-item-header > h4 .recipe-stt-label {
+  .fi-main .fi-resource-recipes .recipe-cost-section .fi-fo-repeater-item-header>h4 .recipe-stt-label {
     display: inline !important;
   }
 
-  .fi-main .fi-resource-recipes .recipe-cost-section .fi-fo-repeater-item-header > ul {
+  .fi-main .fi-resource-recipes .recipe-cost-section .fi-fo-repeater-item-header>ul {
     grid-column: 2 !important;
     grid-row: 1 !important;
     padding: 12px 12px 0 0 !important;
@@ -2762,20 +2862,20 @@ header.fi-section-header div {
     padding: 12px !important;
   }
 
-  .fi-main .fi-resource-recipes .recipe-cost-section .fi-fo-repeater-item-content > .fi-fo-component-ctn {
+  .fi-main .fi-resource-recipes .recipe-cost-section .fi-fo-repeater-item-content>.fi-fo-component-ctn {
     grid-template-columns: minmax(0, 1fr) !important;
     gap: 12px !important;
   }
 
-  .fi-main .fi-resource-recipes .recipe-cost-section .fi-fo-component-ctn > :has(> .recipe-ingredient-cell),
-  .fi-main .fi-resource-recipes .recipe-cost-section .fi-fo-component-ctn > :has(.recipe-line-total) {
+  .fi-main .fi-resource-recipes .recipe-cost-section .fi-fo-component-ctn> :has(> .recipe-ingredient-cell),
+  .fi-main .fi-resource-recipes .recipe-cost-section .fi-fo-component-ctn> :has(.recipe-line-total) {
     grid-column: 1 / -1 !important;
     padding: 0 !important;
     border-right: 0 !important;
   }
 
-  .fi-resource-recipes .recipe-cost-section .recipe-ingredient-cell > .sr-only,
-  .fi-resource-recipes .recipe-cost-section .fi-fo-field-wrp:has(.recipe-line-total) > .sr-only {
+  .fi-resource-recipes .recipe-cost-section .recipe-ingredient-cell>.sr-only,
+  .fi-resource-recipes .recipe-cost-section .fi-fo-field-wrp:has(.recipe-line-total)>.sr-only {
     position: static !important;
     display: block !important;
     width: auto !important;
@@ -2796,4 +2896,441 @@ header.fi-section-header div {
     gap: 12px !important;
     padding: 12px 16px !important;
   }
+}
+
+/* ==========================================================================
+   UNIFIED TABLE ACTION BUTTONS (Match Image 1 reference style & red delete icon)
+   ========================================================================== */
+.fi-ta-actions .fi-icon-btn,
+.fi-ta-actions button.fi-icon-btn,
+.fi-ta-actions a.fi-icon-btn {
+  width: 28px !important;
+  height: 28px !important;
+  min-width: 28px !important;
+  min-height: 28px !important;
+  padding: 0 !important;
+  border-radius: 6px !important;
+  border: 1px solid #e2e8f0 !important;
+  background-color: #ffffff !important;
+  color: #64748b !important;
+  box-shadow: none !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.15s ease !important;
+}
+
+.fi-ta-actions .fi-icon-btn:hover,
+.fi-ta-actions button.fi-icon-btn:hover,
+.fi-ta-actions a.fi-icon-btn:hover {
+  background-color: #f1f5f9 !important;
+  border-color: #cbd5e1 !important;
+}
+
+.dark .fi-ta-actions .fi-icon-btn,
+.dark .fi-ta-actions button.fi-icon-btn,
+.dark .fi-ta-actions a.fi-icon-btn {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+  color: #94a3b8 !important;
+}
+
+/* Red Delete Trash Icon for Filament Native Action Buttons */
+.fi-ta-actions .fi-icon-btn.fi-color-danger,
+.fi-ta-actions .fi-icon-btn[data-action="delete"],
+.fi-ta-actions .fi-icon-btn[data-action="forceDelete"] {
+  color: #dc2626 !important;
+}
+
+.fi-ta-actions .fi-icon-btn.fi-color-danger svg,
+.fi-ta-actions .fi-icon-btn[data-action="delete"] svg,
+.fi-ta-actions .fi-icon-btn[data-action="forceDelete"] svg,
+.btn-danger-red,
+.btn-danger-red svg,
+.btn-danger-red path,
+button.btn-danger-red,
+button.btn-danger-red svg {
+  color: #dc2626 !important;
+  fill: #dc2626 !important;
+  stroke: #dc2626 !important;
+}
+
+.fi-ta-actions .fi-icon-btn.fi-color-gray,
+.fi-ta-actions .fi-icon-btn.fi-color-gray svg {
+  color: #64748b !important;
+  fill: currentColor !important;
+}
+
+.fi-ta-actions .fi-icon-btn svg,
+.abt svg {
+  width: 15px !important;
+  height: 15px !important;
+}
+
+/* ==========================================================================
+   UNIFIED PAGINATION FOOTER (Matches /admin/ingredients Filament standard 100%)
+   ========================================================================== */
+.po-footer,
+.sup-footer,
+.emp-footer,
+.time-footer,
+.ot-footer {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  gap: 1rem !important;
+  padding: 0.85rem 1.25rem !important;
+  color: #64748b !important;
+  font-size: 13px !important;
+  font-weight: 400 !important;
+  flex-wrap: wrap !important;
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 0.75rem !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05) !important;
+  margin-top: 1rem !important;
+}
+
+.dark .po-footer,
+.dark .sup-footer,
+.dark .emp-footer,
+.dark .time-footer,
+.dark .ot-footer {
+  background: #0f172a !important;
+  border-color: #1e293b !important;
+  color: #94a3b8 !important;
+}
+
+.po-footer .num-bold,
+.sup-footer .num-bold,
+.emp-footer .num-bold,
+.time-footer .num-bold,
+.ot-footer .num-bold {
+  font-weight: 400 !important;
+  color: #475569 !important;
+  font-variant-numeric: tabular-nums !important;
+}
+
+.dark .po-footer .num-bold,
+.dark .sup-footer .num-bold,
+.dark .emp-footer .num-bold,
+.dark .time-footer .num-bold,
+.dark .ot-footer .num-bold {
+  color: #cbd5e1 !important;
+}
+
+.po-pagination,
+.sup-pagination,
+.emp-pagination {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+}
+
+.po-pagination select,
+.sup-pagination select,
+.po-select,
+.sup-select {
+  height: 32px !important;
+  padding: 0 0.6rem !important;
+  border-radius: 6px !important;
+  border: 1px solid #cbd5e1 !important;
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  font-size: 13px !important;
+  font-weight: 400 !important;
+  font-variant-numeric: tabular-nums !important;
+  cursor: pointer !important;
+  outline: none !important;
+}
+
+.dark .po-pagination select,
+.dark .sup-pagination select,
+.dark .po-select,
+.dark .sup-select {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+}
+
+.po-pagination nav,
+.sup-pagination nav,
+.emp-pagination nav {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.25rem !important;
+}
+
+.po-pagination nav span,
+.po-pagination nav a,
+.po-pagination nav button,
+.sup-pagination nav span,
+.sup-pagination nav a,
+.sup-pagination nav button,
+.sup-small-btn {
+  min-width: 32px !important;
+  height: 32px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 6px !important;
+  border: 1px solid #cbd5e1 !important;
+  background: #ffffff !important;
+  color: #334155 !important;
+  font-weight: 500 !important;
+  font-size: 13px !important;
+  font-variant-numeric: tabular-nums !important;
+  text-decoration: none !important;
+  padding: 0 0.4rem !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+  box-sizing: border-box !important;
+}
+
+.dark .po-pagination nav span,
+.dark .po-pagination nav a,
+.dark .po-pagination nav button,
+.dark .sup-pagination nav span,
+.dark .sup-pagination nav a,
+.dark .sup-pagination nav button,
+.dark .sup-small-btn {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  color: #cbd5e1 !important;
+}
+
+.po-pagination nav button:hover:not([disabled]),
+.sup-pagination nav button:hover:not([disabled]),
+.sup-small-btn:hover:not([disabled]) {
+  background: #f1f5f9 !important;
+  border-color: #94a3b8 !important;
+  color: #0f172a !important;
+}
+
+.dark .po-pagination nav button:hover:not([disabled]),
+.dark .sup-pagination nav button:hover:not([disabled]),
+.dark .sup-small-btn:hover:not([disabled]) {
+  background: #334155 !important;
+  color: #ffffff !important;
+}
+
+/* Active Page Button (Solid Blue Gradient matching /admin/ingredients) */
+.po-pagination nav span[aria-current="page"],
+.sup-pagination nav span[aria-current="page"],
+.po-pagination nav [aria-current="page"] span,
+.sup-pagination nav [aria-current="page"] span {
+  background: linear-gradient(135deg, #1474FF, #0059DD) !important;
+  color: #ffffff !important;
+  border-color: transparent !important;
+  font-weight: 700 !important;
+  box-shadow: 0 4px 12px rgba(18, 103, 232, 0.3) !important;
+}
+
+/* Disabled prev/next buttons */
+.po-pagination nav span[aria-disabled="true"],
+.sup-pagination nav span[aria-disabled="true"] {
+  opacity: 0.4 !important;
+  cursor: not-allowed !important;
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+}
+
+.dark .po-pagination nav span[aria-disabled="true"],
+.dark .sup-pagination nav span[aria-disabled="true"] {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+}
+
+/* Dots (...) */
+.po-pagination nav span.po-page-dots,
+.sup-pagination nav span[aria-hidden="true"] {
+  border: none !important;
+  background: transparent !important;
+  min-width: auto !important;
+  padding: 0 4px !important;
+  color: #94a3b8 !important;
+  box-shadow: none !important;
+}
+
+/* ==========================================================================
+   UNIFIED DELETE CONFIRMATION MODAL & BUTTON STYLING (MATCHING IMAGE 2 SPEC)
+   ========================================================================== */
+
+/* Hide top-right close X button ONLY in small delete confirmation modals (not in wizard modals) */
+.fi-modal-window:not(:has(.fi-fo-wizard)) .fi-modal-close-btn {
+  display: none !important;
+}
+
+/* Modal Window Container - scoped to delete confirmation modals */
+.fi-modal-window:not(:has(.fi-fo-wizard)) {
+  border-radius: 16px !important;
+  box-shadow: 0 20px 45px rgba(15, 23, 42, .25) !important;
+  border: 1px solid var(--bd, #e2e8f0) !important;
+  max-width: 420px !important;
+  padding: 24px !important;
+  background-color: var(--wh, #ffffff) !important;
+  text-align: left !important;
+}
+
+.dark .fi-modal-window:not(:has(.fi-fo-wizard)) {
+  background-color: #0f172a !important;
+  border-color: #334155 !important;
+}
+
+/* Modal Header Layout - scoped to delete confirmation modals */
+.fi-modal-window:not(:has(.fi-fo-wizard)) .fi-modal-header {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: flex-start !important;
+  justify-content: flex-start !important;
+  gap: 12px !important;
+  margin-bottom: 0 !important;
+  padding: 0 !important;
+  text-align: left !important;
+}
+
+/* Modal Warning Icon ⚠️ Badge (Rounded Square, Soft Pink Background) */
+.fi-modal-header>div:first-child,
+.fi-modal-icon-ctn,
+.fi-modal-icon {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px !important;
+  border-radius: 9px !important;
+  font-size: 16px !important;
+  flex: 0 0 auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background-color: #fef2f2 !important;
+}
+
+.fi-modal-header>div:first-child>div,
+.fi-modal-icon {
+  background-color: #fef2f2 !important;
+  color: #dc2626 !important;
+  border-radius: 9px !important;
+}
+
+.fi-modal-icon svg {
+  width: 20px !important;
+  height: 20px !important;
+  color: #dc2626 !important;
+  fill: #dc2626 !important;
+}
+
+.dark .fi-modal-header>div:first-child>div,
+.dark .fi-modal-icon {
+  background-color: rgba(220, 38, 38, 0.2) !important;
+  color: #f87171 !important;
+}
+
+/* Title / Heading Container */
+.fi-modal-header>div:last-child {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  text-align: left !important;
+  flex: 1 1 auto !important;
+}
+
+.fi-modal-heading {
+  margin: 0 !important;
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  color: var(--tx, #0f172a) !important;
+  text-align: left !important;
+  line-height: 36px !important;
+}
+
+.dark .fi-modal-heading {
+  color: #f8fafc !important;
+}
+
+/* Description Message */
+.fi-modal-description {
+  margin: 10px 0 20px 0 !important;
+  font-size: 13.5px !important;
+  line-height: 1.55 !important;
+  color: var(--su, #475569) !important;
+  padding: 0 !important;
+  text-align: left !important;
+  display: block !important;
+  width: 100% !important;
+}
+
+.dark .fi-modal-description {
+  color: #94a3b8 !important;
+}
+
+/* Footer Action Buttons Layout (Pushed to Bottom-Right) */
+.fi-modal-footer-actions {
+  display: flex !important;
+  flex-direction: row !important;
+  justify-content: flex-end !important;
+  align-items: center !important;
+  gap: 10px !important;
+  margin-top: 20px !important;
+  padding: 0 !important;
+  width: 100% !important;
+}
+
+.fi-modal-footer-actions button,
+.fi-modal-footer-actions form button {
+  width: auto !important;
+  flex: 0 0 auto !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: 36px !important;
+  padding: 0 16px !important;
+  border-radius: 8px !important;
+  font-size: 13.5px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: all 0.14s ease !important;
+}
+
+/* Secondary / Cancel (Hủy) Button Style */
+.fi-modal-footer-actions .fi-btn-color-gray,
+.fi-modal-footer-actions button:not(.fi-btn-color-danger) {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #1e293b !important;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+  transform: none !important;
+}
+
+.fi-modal-footer-actions .fi-btn-color-gray:hover:not(:disabled),
+.fi-modal-footer-actions button:not(.fi-btn-color-danger):hover:not(:disabled) {
+  background: #f8fafc !important;
+  background-color: #f8fafc !important;
+  border-color: #94a3b8 !important;
+  color: #0f172a !important;
+  transform: none !important;
+}
+
+/* Primary / Delete (Xóa) Button Style */
+.fi-modal-footer-actions .fi-btn-color-danger,
+.fi-modal-footer-actions button.fi-btn-color-danger,
+.fi-modal-footer-actions button[type="submit"].fi-btn-color-danger {
+  background: #dc2626 !important;
+  background-color: #dc2626 !important;
+  border: 1px solid #dc2626 !important;
+  color: #ffffff !important;
+  box-shadow: 0 1px 2px 0 rgba(220, 38, 38, 0.2) !important;
+  transform: none !important;
+}
+
+.fi-modal-footer-actions .fi-btn-color-danger:hover:not(:disabled),
+.fi-modal-footer-actions button.fi-btn-color-danger:hover:not(:disabled),
+.fi-modal-footer-actions button[type="submit"].fi-btn-color-danger:hover:not(:disabled) {
+  background: #b91c1c !important;
+  background-color: #b91c1c !important;
+  border-color: #b91c1c !important;
+  color: #ffffff !important;
+  transform: none !important;
 }
