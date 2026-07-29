@@ -64,6 +64,7 @@ return [
     'status' => [
         'active' => 'Active',
         'inactive' => 'Inactive',
+        'trashed' => 'Deleted',
     ],
     'infolist' => [
         'linked_suppliers' => 'Linked Suppliers',
@@ -77,6 +78,10 @@ return [
         'unit' => 'Unit',
         'type' => 'Type',
         'trashed' => 'Deleted records',
+        'without_trashed' => 'Without deleted records',
+        'with_trashed' => 'All (Including deleted)',
+        'only_trashed' => 'Only deleted ingredients',
+        'reset' => 'Clear filters',
     ],
     'actions' => [
         'import' => 'Import Excel',
@@ -161,5 +166,10 @@ return [
         'price' => 'Amount',
         'supplier' => 'Supplier',
         'status' => 'Status',
+    ],
+    'notifications' => [
+        'deleted' => 'Deleted ingredient :name.',
+        'restored' => 'Restored ingredient :name.',
+        'force_deleted' => 'Permanently deleted ingredient :name.',
     ],
 ];

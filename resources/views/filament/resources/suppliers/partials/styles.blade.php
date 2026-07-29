@@ -135,6 +135,47 @@
                 flex-wrap: wrap;
             }
 
+            .fbtn {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 6px;
+                height: 34px;
+                padding: 0 13px;
+                background: var(--sup-wh, #ffffff);
+                border: 1px solid var(--sup-bd, #e2e8f0);
+                border-radius: 8px;
+                font-size: 13px;
+                font-weight: 400;
+                color: var(--sup-tx, #0f172a);
+                cursor: pointer;
+                transition: background 0.13s ease, border-color 0.13s ease, color 0.13s ease;
+                box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+                user-select: none;
+                -webkit-user-select: none;
+                outline: none !important;
+            }
+            .fbtn:hover {
+                background: var(--sup-bg, #f8fafc);
+                border-color: #cbd5e1;
+                color: var(--sup-tx, #0f172a);
+            }
+            .fbtn:focus,
+            .fbtn:active {
+                outline: none !important;
+                box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04) !important;
+            }
+            .dark .fbtn {
+                background: #1e293b !important;
+                border-color: #334155 !important;
+                color: #cbd5e1 !important;
+            }
+            .dark .fbtn:hover {
+                background: #0f172a !important;
+                border-color: #475569 !important;
+                color: #f8fafc !important;
+            }
+
             .sup-btn {
                 height: 40px;
                 border-radius: 9px;
@@ -296,9 +337,9 @@
             }
 
             .sup-filter label {
-                color: var(--sup-fa);
+                color: var(--sup-tx, #0f172a);
                 font-size: 10px;
-                font-weight: 600;
+                font-weight: 400;
                 letter-spacing: .04em;
             }
 
@@ -308,10 +349,11 @@
                 border: 1px solid var(--sup-bd);
                 border-radius: 7px;
                 background: var(--sup-wh);
-                color: var(--sup-su);
+                color: var(--sup-tx, #0f172a);
                 padding: 0 .9rem;
                 outline: none;
-                font-size: 12.5px;
+                font-size: 13px;
+                font-weight: 400;
                 width: 100%;
             }
 
@@ -481,7 +523,7 @@
                 text-align: left !important;
                 padding: 10px 12px !important;
                 font-size: 11px !important;
-                font-weight: 700 !important;
+                font-weight: 400 !important;
                 letter-spacing: .07em !important;
                 text-transform: uppercase !important;
                 color: var(--sup-fa) !important;
@@ -498,6 +540,7 @@
                 white-space: nowrap !important;
                 vertical-align: middle !important;
                 font-size: 13px !important;
+                font-weight: 400 !important;
                 overflow: visible !important;
                 text-overflow: clip !important;
             }

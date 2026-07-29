@@ -122,7 +122,7 @@
                 </div>
                 <div class="tsp"></div>
                 <button type="button" wire:click="resetAreaFilters" class="fbtn">
-                    <i class="fa-solid fa-filter-circle-xmark"></i> {{ __('catalog.common.clear_selection') }}
+                    <i class="fa-solid fa-filter-circle-xmark"></i> {{ __('catalog.common.reset_filters') }}
                 </button>
             </div>
             <div class="tw">
@@ -222,7 +222,7 @@
                 </div>
                 <div class="tsp"></div>
                 <button type="button" wire:click="resetCanteenFilters" class="fbtn">
-                    <i class="fa-solid fa-filter-circle-xmark"></i> {{ __('catalog.common.clear_selection') }}
+                    <i class="fa-solid fa-filter-circle-xmark"></i> {{ __('catalog.common.reset_filters') }}
                 </button>
             </div>
             <div class="tw">

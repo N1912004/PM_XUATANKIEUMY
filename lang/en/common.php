@@ -25,5 +25,6 @@ return [
         'placeholder' => '— Select —',
         'search_placeholder' => 'Type to search...',
         'no_results' => 'No results found',
+        'all' => 'All',
     ],
 ];

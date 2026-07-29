@@ -1715,7 +1715,7 @@ td.fi-ta-cell-checkbox,
   height: 32px !important;
   padding: 0 26px 0 10px !important;
   font-size: 13px !important;
-  font-weight: 500 !important;
+  font-weight: 400 !important;
   color: var(--tx, #334155) !important;
   background-color: var(--wh, #ffffff) !important;
   border: 1px solid var(--bd, #cbd5e1) !important;
@@ -3156,13 +3156,13 @@ button.btn-danger-red svg {
    UNIFIED DELETE CONFIRMATION MODAL & BUTTON STYLING (MATCHING IMAGE 2 SPEC)
    ========================================================================== */
 
-/* Hide top-right close X button in Filament modals */
-.fi-modal-close-btn {
+/* Hide top-right close X button ONLY in small delete confirmation modals (not in wizard modals) */
+.fi-modal-window:not(:has(.fi-fo-wizard)) .fi-modal-close-btn {
   display: none !important;
 }
 
-/* Modal Window Container */
-.fi-modal-window {
+/* Modal Window Container - scoped to delete confirmation modals */
+.fi-modal-window:not(:has(.fi-fo-wizard)) {
   border-radius: 16px !important;
   box-shadow: 0 20px 45px rgba(15, 23, 42, .25) !important;
   border: 1px solid var(--bd, #e2e8f0) !important;
@@ -3172,13 +3172,13 @@ button.btn-danger-red svg {
   text-align: left !important;
 }
 
-.dark .fi-modal-window {
+.dark .fi-modal-window:not(:has(.fi-fo-wizard)) {
   background-color: #0f172a !important;
   border-color: #334155 !important;
 }
 
-/* Modal Header Layout */
-.fi-modal-header {
+/* Modal Header Layout - scoped to delete confirmation modals */
+.fi-modal-window:not(:has(.fi-fo-wizard)) .fi-modal-header {
   display: flex !important;
   flex-direction: row !important;
   align-items: flex-start !important;

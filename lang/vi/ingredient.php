@@ -64,6 +64,7 @@ return [
     'status' => [
         'active' => 'Đang hoạt động',
         'inactive' => 'Ngừng hoạt động',
+        'trashed' => 'Đã xóa',
     ],
     'infolist' => [
         'linked_suppliers' => 'Nhà cung cấp liên kết',
@@ -77,6 +78,10 @@ return [
         'unit' => 'Đơn vị',
         'type' => 'Loại NL',
         'trashed' => 'Bản ghi đã xóa',
+        'without_trashed' => 'Không bao gồm bản ghi đã xóa',
+        'with_trashed' => 'Tất cả (Bao gồm đã xóa)',
+        'only_trashed' => 'Chỉ nguyên liệu đã xóa',
+        'reset' => 'Xóa lọc',
     ],
     'actions' => [
         'import' => 'Nhập Excel',
@@ -161,5 +166,10 @@ return [
         'price' => 'Thành tiền',
         'supplier' => 'Nhà cung cấp',
         'status' => 'Trạng thái',
+    ],
+    'notifications' => [
+        'deleted' => 'Đã xóa nguyên liệu :name.',
+        'restored' => 'Đã khôi phục nguyên liệu :name.',
+        'force_deleted' => 'Đã xóa vĩnh viễn nguyên liệu :name.',
     ],
 ];

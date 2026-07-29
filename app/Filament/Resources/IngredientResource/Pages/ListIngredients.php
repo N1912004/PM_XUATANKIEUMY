@@ -5,38 +5,116 @@ namespace App\Filament\Resources\IngredientResource\Pages;
 use App\Exports\IngredientsExport;
 use App\Filament\Resources\IngredientResource;
 use App\Imports\IngredientsImport;
+use App\Models\Ingredient;
+use App\Models\IngredientType;
+use App\Models\Supplier;
+use App\Models\Unit;
 use Filament\Actions;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Wizard\Step;
 use Filament\Forms\Get;
 use Filament\Notifications\Notification;
-use Filament\Resources\Pages\ListRecords;
+use Filament\Resources\Pages\Page;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\HtmlString;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
+use Livewire\WithPagination;
 use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
-class ListIngredients extends ListRecords
+class ListIngredients extends Page
 {
+    use WithPagination;
+
     protected static string $resource = IngredientResource::class;
 
-    public function getTitle(): string
+    protected static string $view = 'filament.resources.ingredients.pages.list-ingredients';
+
+    public string $search = '';
+
+    public string $supplierFilter = '';
+
+    public string $unitFilter = '';
+
+    public string $typeFilter = '';
+
+    public string $trashedFilter = '';
+
+    public string $sortField = 'id';
+
+    public string $sortDirection = 'desc';
+
+    public int $perPage = 10;
+
+    public function sortBy(string $field): void
     {
-        return __('ingredient.navigation.list_heading');
+        if ($this->sortField === $field) {
+            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            $this->sortField = $field;
+            $this->sortDirection = 'asc';
+        }
+        $this->resetPage();
     }
 
-    public function getSubheading(): ?string
+    public function updatedPerPage(): void
     {
-        return __('ingredient.navigation.subheading');
+        $this->resetPage();
     }
 
-    public function getBreadcrumbs(): array
+    protected $queryString = [
+        'search' => ['except' => ''],
+        'supplierFilter' => ['except' => ''],
+        'unitFilter' => ['except' => ''],
+        'typeFilter' => ['except' => ''],
+        'trashedFilter' => ['except' => ''],
+        'sortField' => ['except' => 'id'],
+        'sortDirection' => ['except' => 'desc'],
+    ];
+
+    public function updatedSearch(): void
     {
-        return [];
+        $this->resetPage();
+    }
+
+    public function updatedSupplierFilter(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedUnitFilter(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedTypeFilter(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedTrashedFilter(): void
+    {
+        $this->resetPage();
+    }
+
+    public function resetFilters(): void
+    {
+        $this->search = '';
+        $this->supplierFilter = '';
+        $this->unitFilter = '';
+        $this->typeFilter = '';
+        $this->trashedFilter = '';
+        $this->resetPage();
+    }
+
+    public function resetTableFiltersForm(): void
+    {
+        $this->resetFilters();
     }
 
     protected function getHeaderActions(): array
@@ -102,7 +180,7 @@ class ListIngredients extends ListRecords
                     $filename = __('ingredient.excel.filename').'-'.now()->format('Ymd-His').'.xlsx';
 
                     return Excel::download(
-                        new IngredientsExport($this->getFilteredTableQuery()),
+                        new IngredientsExport($this->baseQuery()),
                         $filename
                     );
                 }),
@@ -112,18 +190,9 @@ class ListIngredients extends ListRecords
         ];
     }
 
-    /**
-     * Kết quả chạy thử, memo hoá theo đường dẫn tệp: Placeholder có thể được
-     * render nhiều lần trong một request, không nên đọc lại file Excel mỗi lần.
-     *
-     * @var array<string, IngredientsImport>
-     */
+    /** @var array<string, IngredientsImport> */
     protected array $previewCache = [];
 
-    /**
-     * Xem trước: chạy đúng luồng import thật trong một transaction rồi rollback,
-     * nên con số hiển thị là kết quả thật chứ không phải ước lượng.
-     */
     protected function renderImportPreview(mixed $state): Htmlable
     {
         $file = is_array($state) ? Arr::first($state) : $state;
@@ -147,7 +216,6 @@ class ListIngredients extends ListRecords
         return view('filament.resources.ingredients.partials.import-preview', ['import' => $import]);
     }
 
-    /** Chạy import thật rồi huỷ bỏ mọi thay đổi — không ghi gì vào CSDL. */
     protected function dryRun(string $path): IngredientsImport
     {
         $import = new IngredientsImport;
@@ -163,10 +231,6 @@ class ListIngredients extends ListRecords
         return $import;
     }
 
-    /**
-     * Báo cáo kết quả import: số dòng thêm mới / cập nhật, và liệt kê rõ
-     * từng dòng bị bỏ qua (trùng mã, thiếu dữ liệu, lỗi ghi).
-     */
     protected function notifyImportResult(IngredientsImport $import): void
     {
         $lines = [];
@@ -183,8 +247,6 @@ class ListIngredients extends ListRecords
         }
 
         if ($skipped !== []) {
-            // Notification không chứa nổi hàng nghìn dòng — 30 lý do đầu là đủ,
-            // danh sách đầy đủ đã soát được ở bước Xem trước
             $lines[] = __('ingredient.import.skipped', ['count' => count($skipped)]);
             $lines = array_merge($lines, array_slice($skipped, 0, 30));
             if (count($skipped) > 30) {
@@ -201,8 +263,6 @@ class ListIngredients extends ListRecords
             return;
         }
 
-        // Filament sanitize rồi render body dạng HTML, nên xuống dòng bằng <br>;
-        // nội dung lấy từ Excel nên escape từng dòng trước khi ghép.
         $notification = Notification::make()
             ->body(implode('<br>', array_map('e', $lines)));
 
@@ -217,15 +277,129 @@ class ListIngredients extends ListRecords
         $notification->send();
     }
 
-    protected function getHeaderWidgets(): array
+    public function deleteIngredient(int $id): void
+    {
+        $ingredient = Ingredient::withTrashed()->find($id);
+
+        if (! $ingredient) {
+            return;
+        }
+
+        abort_unless(IngredientResource::canDelete($ingredient), 403);
+
+        $ingredient->delete();
+
+        Notification::make()
+            ->title(__('ingredient.notifications.deleted', ['name' => $ingredient->name]))
+            ->success()
+            ->send();
+
+        $this->resetPage();
+    }
+
+    public function restoreIngredient(int $id): void
+    {
+        $ingredient = Ingredient::onlyTrashed()->find($id);
+
+        if (! $ingredient) {
+            return;
+        }
+
+        abort_unless(IngredientResource::canRestore($ingredient), 403);
+
+        $ingredient->restore();
+
+        Notification::make()
+            ->title(__('ingredient.notifications.restored', ['name' => $ingredient->name]))
+            ->success()
+            ->send();
+
+        $this->resetPage();
+    }
+
+    public function forceDeleteIngredient(int $id): void
+    {
+        $ingredient = Ingredient::onlyTrashed()->find($id);
+
+        if (! $ingredient) {
+            return;
+        }
+
+        abort_unless(IngredientResource::canForceDelete($ingredient), 403);
+
+        $ingredient->forceDelete();
+
+        Notification::make()
+            ->title(__('ingredient.notifications.force_deleted', ['name' => $ingredient->name]))
+            ->success()
+            ->send();
+
+        $this->resetPage();
+    }
+
+    public function exportExcel(): BinaryFileResponse
+    {
+        abort_unless(IngredientResource::canViewAny(), 403);
+
+        $query = $this->baseQuery()->orderByDesc('id');
+        $filename = __('ingredient.excel.filename').'-'.now()->format('Ymd-His').'.xlsx';
+
+        return Excel::download(new IngredientsExport($query), $filename);
+    }
+
+    public function ingredients(): LengthAwarePaginator
+    {
+        $query = $this->baseQuery()
+            ->with(['typeRelation', 'unitRelation', 'suppliers']);
+
+        if (in_array($this->sortField, ['code', 'name', 'id'])) {
+            $query->orderBy($this->sortField, $this->sortDirection);
+        } else {
+            $query->orderByDesc('id');
+        }
+
+        return $query->paginate($this->perPage);
+    }
+
+    public function stats(): array
     {
         return [
-            IngredientStatsOverview::class,
+            'total' => Ingredient::query()->count(),
+            'suppliers' => Supplier::query()->count(),
+            'units' => Unit::query()->count(),
+            'types' => IngredientType::query()->count(),
         ];
     }
 
-    public function getHeaderWidgetsColumns(): int|string|array
+    public function supplierOptions(): array
     {
-        return 1;
+        return Supplier::query()->orderBy('name')->pluck('name', 'id')->all();
+    }
+
+    public function unitOptions(): array
+    {
+        return Unit::query()->orderBy('name')->pluck('name', 'id')->all();
+    }
+
+    public function typeOptions(): array
+    {
+        return IngredientType::query()->orderBy('name')->pluck('name', 'id')->all();
+    }
+
+    protected function baseQuery()
+    {
+        return Ingredient::query()
+            ->when($this->trashedFilter === 'with', fn ($q) => $q->withTrashed())
+            ->when($this->trashedFilter === 'only', fn ($q) => $q->onlyTrashed())
+            ->when($this->search !== '', function ($query): void {
+                $search = mb_strtolower($this->search);
+                $query->where(function ($q) use ($search): void {
+                    $q->whereRaw('LOWER(name) LIKE ?', ["%{$search}%"])
+                        ->orWhereRaw('LOWER(code) LIKE ?', ["%{$search}%"]);
+                });
+            })
+            ->when($this->supplierFilter !== '', fn ($q) => $q->whereHas('suppliers', fn ($sq) => $sq->where('suppliers.id', $this->supplierFilter)))
+            ->when($this->unitFilter !== '', fn ($q) => $q->where('unit_id', $this->unitFilter))
+            ->when($this->typeFilter !== '', fn ($q) => $q->where('ingredient_type_id', $this->typeFilter));
     }
 }

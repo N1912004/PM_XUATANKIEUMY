@@ -891,7 +891,7 @@
 
     .mp-date-box input[type="date"] {
         font-size: 12.5px;
-        font-weight: 600;
+        font-weight: 400;
         color: var(--po-tx);
         border: none;
         outline: none;
@@ -916,6 +916,7 @@
         border: 1px solid var(--po-bd) !important;
         border-radius: 9px !important;
         font-size: 13px !important;
+        font-weight: 400 !important;
         color: var(--po-su) !important;
         cursor: pointer !important;
         outline: none !important;

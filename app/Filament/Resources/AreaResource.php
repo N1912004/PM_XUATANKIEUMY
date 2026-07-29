@@ -56,12 +56,11 @@ class AreaResource extends Resource
                                     ->relationship('manager', 'name')
                                     ->searchable()
                                     ->preload(),
+                                Forms\Components\TextInput::make('notes')
+                                    ->label(__('catalog.common.notes'))
+                                    ->placeholder(__('catalog.area.placeholders.notes'))
+                                    ->maxLength(500),
                             ]),
-                        Forms\Components\Textarea::make('notes')
-                            ->label(__('catalog.common.notes'))
-                            ->placeholder(__('catalog.area.placeholders.notes'))
-                            ->rows(3)
-                            ->columnSpanFull(),
                         Forms\Components\Toggle::make('status')
                             ->label(__('catalog.common.active_status'))
                             ->default(true)

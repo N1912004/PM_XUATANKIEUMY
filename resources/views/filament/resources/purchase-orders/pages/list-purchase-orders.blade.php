@@ -72,12 +72,12 @@
         </div>
 
         <div class="mp-date-box">
-            <span style="font-weight:600; color:var(--po-mu); white-space:nowrap">{{ __('purchase_order.filters.from_date') }}:</span>
+            <span style="font-weight:500; font-size:12px; color:var(--po-mu); white-space:nowrap">{{ __('purchase_order.filters.from_date') }}:</span>
             <input wire:model.live="fromDate" type="date">
         </div>
 
         <div class="mp-date-box">
-            <span style="font-weight:600; color:var(--po-mu); white-space:nowrap">{{ __('purchase_order.filters.to_date') }}:</span>
+            <span style="font-weight:500; font-size:12px; color:var(--po-mu); white-space:nowrap">{{ __('purchase_order.filters.to_date') }}:</span>
             <input wire:model.live="toDate" type="date">
         </div>
 

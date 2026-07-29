@@ -281,13 +281,13 @@
                 <tbody>
                     @forelse($suppliersList as $index => $supplier)
                         <tr style="border-bottom:1px solid var(--sup-bd2, #f1f5f9)">
-                            <td style="padding:12px 14px; text-align:center; font-weight:600; color:var(--sup-mu, #64748b); font-variant-numeric:tabular-nums">{{ ($suppliersList->currentPage() - 1) * $suppliersList->perPage() + $index + 1 }}</td>
-                            <td style="padding:12px 14px; text-align:center; font-weight:800; color:var(--po-bl, #1267e8); font-variant-numeric:tabular-nums; white-space:nowrap">{{ $supplier->code }}</td>
+                            <td style="padding:12px 14px; text-align:center; font-weight:400; color:var(--sup-mu, #64748b); font-variant-numeric:tabular-nums">{{ ($suppliersList->currentPage() - 1) * $suppliersList->perPage() + $index + 1 }}</td>
+                            <td style="padding:12px 14px; text-align:center; font-weight:400; color:var(--po-bl, #1267e8); font-variant-numeric:tabular-nums; white-space:nowrap">{{ $supplier->code }}</td>
                             <td style="padding:12px 14px; font-weight:700; color:var(--sup-tx, #0f172a)">{{ $supplier->name }}</td>
                             <td style="padding:12px 14px; font-variant-numeric:tabular-nums">{{ $supplier->phone }}</td>
                             <td style="padding:12px 14px; color:var(--sup-mu, #64748b)">{{ $supplier->email ?: '—' }}</td>
-                            <td style="padding:12px 14px; font-weight:600">{{ $supplier->type ?: '—' }}</td>
-                            <td style="padding:12px 14px; text-align:center; font-weight:800; color:var(--po-bl, #1267e8); font-variant-numeric:tabular-nums">{{ $supplier->ingredients_count }}</td>
+                            <td style="padding:12px 14px; font-weight:400">{{ $supplier->type ?: '—' }}</td>
+                            <td style="padding:12px 14px; text-align:center; font-weight:700; color:var(--sup-tx, #0f172a); font-variant-numeric:tabular-nums">{{ $supplier->ingredients_count }}</td>
                             <td style="padding:12px 14px; text-align:center">
                                 @if($supplier->status)
                                     <span class="spill s-ok">{{ __('supplier.status.active') }}</span>

@@ -93,7 +93,7 @@
             </div>
             <div class="tsp"></div>
             <button type="button" wire:click="resetFilters" class="fbtn">
-                <i class="fa-solid fa-filter-circle-xmark"></i> {{ __('catalog.common.clear_selection') }}
+                <i class="fa-solid fa-filter-circle-xmark"></i> {{ __('catalog.common.reset_filters') }}
             </button>
         </div>
         <div class="tw">
@@ -111,19 +111,19 @@
                 <tbody>
                     @forelse($shifts as $index => $row)
                         <tr style="border-bottom:1px solid var(--po-bd2); color:var(--po-tx)" class="emp-row">
-                            <td style="padding:12px 14px; text-align:center; font-weight:600; color:var(--po-mu)">
+                            <td style="padding:12px 14px; text-align:center; font-weight:400; color:var(--po-mu)">
                                 {{ ($shifts->firstItem() ?? 1) + $index }}
                             </td>
-                            <td style="padding:12px 14px; text-align:center; font-weight:800; color:var(--po-bl); font-variant-numeric:tabular-nums">
+                            <td style="padding:12px 14px; text-align:center; font-weight:400; color:var(--po-tx); font-variant-numeric:tabular-nums">
                                 {{ $row->sort_order }}
                             </td>
-                            <td style="padding:12px 14px; font-weight:700; color:var(--po-tx)">
+                            <td style="padding:12px 14px; font-weight:400; color:var(--po-tx)">
                                 {{ $row->name }}
                             </td>
-                            <td style="padding:12px 14px; font-variant-numeric:tabular-nums; font-weight:600">
+                            <td style="padding:12px 14px; font-variant-numeric:tabular-nums; font-weight:400">
                                 {{ $row->time_range }}
                             </td>
-                            <td style="padding:12px 14px; color:var(--po-mu); font-variant-numeric:tabular-nums; white-space:nowrap">
+                            <td style="padding:12px 14px; font-weight:400; color:var(--po-mu); font-variant-numeric:tabular-nums; white-space:nowrap">
                                 {{ $row->created_at?->format('d/m/Y H:i') ?? '—' }}
                             </td>
                             <td style="padding:12px 14px; text-align:center">

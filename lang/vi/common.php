@@ -25,5 +25,6 @@ return [
         'placeholder' => '— Chọn —',
         'search_placeholder' => 'Gõ để tìm...',
         'no_results' => 'Không tìm thấy kết quả',
+        'all' => 'Tất cả',
     ],
 ];

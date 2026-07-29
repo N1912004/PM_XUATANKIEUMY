@@ -803,13 +803,15 @@
                     <i class="fa-solid fa-magnifying-glass" style="font-size:12px; color:#94a3b8; margin-right:4px;"></i>
                     <input type="text" wire:model.live.debounce.300ms="search" placeholder="{{ __('warehouse.placeholders.search_ingredient') }}">
                 </div>
-                <div>
-                    <select wire:model.live="selectedType" class="type-select">
-                        <option value="">{{ __('warehouse.filters.all_types') }}</option>
-                        @foreach($this->getIngredientTypeOptions() as $t)
-                            <option value="{{ $t }}">{{ $t }}</option>
-                        @endforeach
-                    </select>
+                <div style="min-width: 170px;">
+                    @include('filament.components.search-select', [
+                        'name' => 'selectedType',
+                        'live' => true,
+                        'placeholder' => __('warehouse.filters.all_types'),
+                        'nullable' => true,
+                        'emptyLabel' => __('warehouse.filters.all_types'),
+                        'options' => array_map(fn($t) => ['value' => $t, 'label' => $t], $this->getIngredientTypeOptions()),
+                    ])
                 </div>
                 <div>
                     <select wire:model.live="selectedSort" class="type-select">
