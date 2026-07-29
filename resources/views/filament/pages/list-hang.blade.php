@@ -1073,7 +1073,7 @@
                                                     </td>
                                                     <td style="text-align: right;">{{ number_format($dish['portions']) }}</td>
                                                     <td style="text-align: right; color:var(--mu);">{{ number_format($ing['quantity_per_portion'] * 1000, 0, ',', '.') }} g</td>
-                                                    <td style="text-align: right; font-weight: 750;" class="lhn-kg">{{ number_format($ing['quantity'], 3, ',', '.') }} kg</td>
+                                                    <td style="text-align: right; font-weight: 750;" class="lhn-kg">{{ rtrim(rtrim(number_format($ing['quantity'], 3, ',', '.'), '0'), ',') }} kg</td>
                                                 </tr>
                                             @endforeach
                                             <tr class="lhn-total-row">
@@ -1327,10 +1327,10 @@
                                                         {{ implode(', ', $item['dishes']) }}
                                                     </td>
                                                     <td style="text-align:right;">{{ number_format($item['total_suat']) }}</td>
-                                                    <td style="text-align:right; font-weight:600;">{{ number_format($item['total_kg'], 3, ',', '.') }} {{ $item['unit'] }}</td>
+                                                    <td style="text-align:right; font-weight:600;">{{ rtrim(rtrim(number_format($item['total_kg'], 3, ',', '.'), '0'), ',') }} {{ $item['unit'] }}</td>
                                                     {{-- Tồn kho hiện có: SL đề xuất đã tự trừ phần này để không đặt thừa --}}
                                                     <td style="text-align:right; color:{{ ($item['stock_qty'] ?? 0) > 0 ? 'var(--gn)' : 'var(--fa)' }}; font-weight:600;">
-                                                        {{ number_format($item['stock_qty'] ?? 0, 3, ',', '.') }} {{ $item['unit'] }}
+                                                        {{ rtrim(rtrim(number_format($item['stock_qty'] ?? 0, 3, ',', '.'), '0'), ',') }} {{ $item['unit'] }}
                                                     </td>
                                                     <td style="text-align:center;">
                                                         <input type="number" step="0.001" wire:model.blur="poItems.{{ $index }}.quantity_manual" class="table-input" style="height:28px;">
