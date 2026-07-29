@@ -3115,11 +3115,21 @@ button.btn-danger-red svg {
    ========================================================================== */
 
 /* Hide top-right close X button wrapper in Filament modals */
-.fi-modal-window > div.absolute.end-4.top-4,
-.fi-modal-window > div.absolute.end-6.top-6,
+.fi-modal-close-btn-ctn,
+.fi-modal-window > div.absolute,
+.fi-modal-window > div[class*="absolute"],
 .fi-modal-close-btn,
 .fi-modal-close-btn * {
   display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  width: 0 !important;
+  height: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
 }
 
 /* Modal Window Container */
@@ -3151,7 +3161,8 @@ button.btn-danger-red svg {
 }
 
 /* Fix Filament's double-shape icon glitch (outer rounded-full circle + inner square) */
-.fi-modal-header .rounded-full {
+.fi-modal-header .rounded-full,
+.fi-modal-header div[class*="rounded-full"] {
   border-radius: 9px !important;
   background-color: transparent !important;
   background: transparent !important;
@@ -3161,6 +3172,7 @@ button.btn-danger-red svg {
 }
 
 /* Modal Warning Icon ⚠️ Badge (Single Clean Rounded Square, Soft Pink Background) */
+.fi-modal-icon-badge,
 .fi-modal-header > div:first-child,
 .fi-modal-header div:has(> .fi-modal-icon),
 .fi-modal-icon-ctn {
@@ -3170,13 +3182,16 @@ button.btn-danger-red svg {
   width: 36px !important;
   height: 36px !important;
   min-width: 36px !important;
+  max-width: 36px !important;
+  max-height: 36px !important;
   border-radius: 9px !important;
   font-size: 16px !important;
-  flex: 0 0 auto !important;
+  flex: 0 0 36px !important;
   margin: 0 !important;
   padding: 0 !important;
   background-color: #fef2f2 !important;
   background: #fef2f2 !important;
+  box-shadow: none !important;
 }
 
 .fi-modal-icon {
@@ -3186,15 +3201,18 @@ button.btn-danger-red svg {
   fill: #dc2626 !important;
   background: transparent !important;
   background-color: transparent !important;
+  margin: auto !important;
 }
 
-.fi-modal-icon svg {
+.fi-modal-icon svg,
+.fi-modal-icon-badge svg {
   width: 18px !important;
   height: 18px !important;
   color: #dc2626 !important;
   fill: #dc2626 !important;
 }
 
+.dark .fi-modal-icon-badge,
 .dark .fi-modal-header > div:first-child,
 .dark .fi-modal-header div:has(> .fi-modal-icon) {
   background-color: rgba(220, 38, 38, 0.2) !important;
