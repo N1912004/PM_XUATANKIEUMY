@@ -52,7 +52,7 @@ class ViewSupplier extends Page
 
     public function mount(int|string $record): void
     {
-        $supplier = Supplier::query()->with(['ingredients'])->findOrFail($record);
+        $supplier = Supplier::query()->with(['ingredients', 'ingredientTypes'])->findOrFail($record);
         abort_unless(SupplierResource::canView($supplier), 403);
 
         $this->supplierId = $supplier->id;
@@ -78,7 +78,11 @@ class ViewSupplier extends Page
             }
         }
 
-        $this->type = implode(', ', $this->derivedTypeNames());
+        $pivotTypes = $supplier->ingredientTypes->pluck('name')->all();
+        $derivedTypes = $this->derivedTypeNames();
+        $allTypes = collect($pivotTypes)->concat($derivedTypes)->filter()->unique()->sort()->values();
+
+        $this->type = $allTypes->join(', ');
     }
 
     /**
@@ -92,8 +96,18 @@ class ViewSupplier extends Page
             return [];
         }
 
-        return IngredientType::query()
+        $typeIds = Ingredient::query()
             ->whereIn('id', $chosenIds)
+            ->whereNotNull('ingredient_type_id')
+            ->pluck('ingredient_type_id')
+            ->unique();
+
+        if ($typeIds->isEmpty()) {
+            return [];
+        }
+
+        return IngredientType::query()
+            ->whereIn('id', $typeIds)
             ->orderBy('name')
             ->pluck('name')
             ->all();

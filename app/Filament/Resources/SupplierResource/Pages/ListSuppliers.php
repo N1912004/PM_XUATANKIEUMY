@@ -103,6 +103,7 @@ class ListSuppliers extends Page
     public function suppliers(): LengthAwarePaginator
     {
         return $this->baseQuery()
+            ->with(['ingredientTypes'])
             ->withCount('ingredients')
             ->orderByDesc('id')
             ->paginate($this->perPage);

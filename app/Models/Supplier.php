@@ -48,6 +48,18 @@ class Supplier extends Model
         return $this->belongsToMany(IngredientType::class, 'ingredient_type_supplier');
     }
 
+    /**
+     * Tương thích ngược: Chuỗi loại thực phẩm cung cấp (ghép các tên loại từ `ingredientTypes`).
+     */
+    public function getTypeAttribute(): string
+    {
+        if ($this->relationLoaded('ingredientTypes')) {
+            return $this->ingredientTypes->pluck('name')->join(', ');
+        }
+
+        return $this->ingredientTypes()->pluck('name')->join(', ');
+    }
+
     public function purchaseOrders(): HasMany
     {
         return $this->hasMany(PurchaseOrder::class);

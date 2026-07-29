@@ -100,11 +100,15 @@
 
                 <div style="grid-column: span 2;">
                     <label style="font-size:12px; font-weight:700; color:var(--po-tx); display:block; margin-bottom:6px">{{ __('purchase_order.fields.selected_shifts') }}</label>
-                    <div style="display:flex; gap:12px; flex-wrap:wrap">
+                    <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center">
                         @foreach($shifts as $s)
-                            <label style="display:inline-flex; align-items:center; gap:5px; font-size:12.5px; font-weight:600; cursor:pointer; background:#F8FAFC; padding:5px 10px; border-radius:6px; border:1px solid var(--po-bd2)">
-                                <input type="checkbox" value="{{ $s->id }}" wire:model.live="selectedShifts" style="accent-color:var(--po-bl)">
-                                {{ $s->name }}
+                            @php
+                                $sId = (string) $s->id;
+                                $isSelected = in_array($sId, $selectedShifts, true) || in_array($s->id, $selectedShifts, true);
+                            @endphp
+                            <label style="display:inline-flex; align-items:center; gap:6px; font-size:12px; font-weight:600; cursor:pointer; padding:6px 12px; border-radius:8px; transition:all 0.15s ease; user-select:none; @if($isSelected) background:var(--po-bl-s, #EFF6FF); color:var(--po-bl, #1D4ED8); border:1px solid var(--po-bl-m, #93C5FD); box-shadow:0 1px 2px rgba(59,130,246,0.08); @else background:var(--po-wh, #FFFFFF); color:var(--po-mu, #64748b); border:1px solid var(--po-bd2, #E2E8F0); opacity:0.75; @endif" class="dark:bg-gray-800 dark:border-gray-700">
+                                <input type="checkbox" value="{{ $s->id }}" wire:model.live="selectedShifts" style="accent-color:var(--po-bl); width:14px; height:14px; cursor:pointer">
+                                <span>{{ $s->name }}</span>
                             </label>
                         @endforeach
                     </div>
