@@ -9,15 +9,12 @@ use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 
 /**
  * Xuất TẤT CẢ đơn đặt hàng cùng đợt (cùng bếp + cùng ngày giao) ra MỘT file .xlsx:
- * MỖI NHÀ CUNG CẤP LÀ MỘT SHEET — các phiếu tách (P1/P2/P3) của cùng một NCC được gộp
- * chung vào một sheet, dựng lại đúng "MẪU ĐƠN ĐẶT HÀNG.xlsx" bằng PurchaseOrderTemplateExport.
+ * mỗi nhà cung cấp là một sheet, dựng lại đúng "MẪU ĐƠN ĐẶT HÀNG.xlsx" bằng
+ * PurchaseOrderTemplateExport — thay bản CSV cũ (một khối văn bản dồn nhiều đơn).
  */
 class PurchaseOrdersBatchExport implements WithMultipleSheets
 {
     use Exportable;
-
-    /** Giới hạn độ dài tên sheet của Excel. */
-    protected const SHEET_TITLE_MAX = 31;
 
     /** @param Collection<int, PurchaseOrder> $orders */
     public function __construct(protected Collection $orders) {}
@@ -29,43 +26,36 @@ class PurchaseOrdersBatchExport implements WithMultipleSheets
     {
         $used = [];
 
-        // Gom theo NHÀ CUNG CẤP: mỗi NCC đúng một sheet.
-        // Đơn chưa gán NCC không gộp lẫn nhau — mỗi đơn đứng riêng theo mã đơn.
-        return $this->orders
-            ->groupBy(fn (PurchaseOrder $po) => $po->supplier_id ? 'S'.$po->supplier_id : 'O'.$po->id)
-            ->map(function (Collection $orders) use (&$used): PurchaseOrderTemplateExport {
-                $first = $orders->first();
-                $supplierName = $first->supplier?->name ?: $first->code;
+        // Gom nhóm đơn theo Nhà cung cấp trong đợt này
+        $groupedBySupplier = $this->orders->groupBy(fn (PurchaseOrder $po) => $po->supplier_id ?: $po->code);
 
-                return new PurchaseOrderTemplateExport(
-                    $orders->values(),
-                    $this->uniqueSheetTitle($supplierName, $used),
-                );
-            })
-            ->values()
-            ->all();
-    }
+        return $this->orders->map(function (PurchaseOrder $order) use (&$used, $groupedBySupplier): PurchaseOrderTemplateExport {
+            $supplierName = $order->supplier?->name ?: $order->code;
+            $supplierKey = $order->supplier_id ?: $order->code;
+            $sameSupplierOrders = $groupedBySupplier->get($supplierKey, collect())->values();
+            $hasMultiple = $sameSupplierOrders->count() > 1;
 
-    /**
-     * Tên sheet hợp lệ với Excel: thay ký tự cấm, cắt còn 31 ký tự, thêm hậu tố khi trùng.
-     *
-     * @param  array<int, string>  $used
-     */
-    protected function uniqueSheetTitle(string $name, array &$used): string
-    {
-        $clean = trim(preg_replace('#[\\\\/*?:\[\]]#u', '-', $name) ?? '');
-        $clean = $clean !== '' ? $clean : 'NCC';
+            // Nếu NCC có nhiều đơn/phiếu tách trong đợt, gắn thứ tự P1, P2, P3...
+            $suffix = '';
+            if ($hasMultiple) {
+                $idx = $sameSupplierOrders->search(fn (PurchaseOrder $po) => $po->id === $order->id);
+                $suffix = ' - P'.(($idx !== false ? $idx : 0) + 1);
+            }
 
-        $title = mb_substr($clean, 0, self::SHEET_TITLE_MAX);
-        $i = 2;
+            $maxSupplierLen = 31 - mb_strlen($suffix);
+            $base = mb_substr($supplierName, 0, max(10, $maxSupplierLen)).$suffix;
+            $name = $base;
+            $i = 2;
 
-        while (in_array($title, $used, true)) {
-            $suffix = ' ('.$i++.')';
-            $title = mb_substr($clean, 0, self::SHEET_TITLE_MAX - mb_strlen($suffix)).$suffix;
-        }
+            while (in_array($name, $used, true)) {
+                $suffixLoop = ' - P'.$i++;
+                $maxLen = 31 - mb_strlen($suffixLoop);
+                $name = mb_substr($supplierName, 0, max(10, $maxLen)).$suffixLoop;
+            }
 
-        $used[] = $title;
+            $used[] = $name;
 
-        return $title;
+            return new PurchaseOrderTemplateExport($order, $name);
+        })->all();
     }
 }

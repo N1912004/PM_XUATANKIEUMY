@@ -3,7 +3,6 @@
 namespace App\Exports;
 
 use App\Models\PurchaseOrder;
-use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithEvents;
@@ -31,16 +30,7 @@ class PurchaseOrderTemplateExport implements FromArray, ShouldAutoSize, WithEven
 
     protected int $grandTotalRow = 0;
 
-    /** @var Collection<int, PurchaseOrder> Các đơn của cùng một NCC trong đợt (phiếu tách P1/P2/P3) */
-    protected Collection $orders;
-
-    /**
-     * @param  PurchaseOrder|Collection<int, PurchaseOrder>  $order  Một đơn, hoặc nhiều đơn cùng một NCC gộp vào một sheet.
-     */
-    public function __construct(PurchaseOrder|Collection $order, protected ?string $sheetTitle = null)
-    {
-        $this->orders = $order instanceof PurchaseOrder ? collect([$order]) : $order->values();
-    }
+    public function __construct(protected PurchaseOrder $order, protected ?string $sheetTitle = null) {}
 
     public function title(): string
     {
@@ -52,25 +42,21 @@ class PurchaseOrderTemplateExport implements FromArray, ShouldAutoSize, WithEven
      */
     public function array(): array
     {
-        $orders = $this->orders->each(fn (PurchaseOrder $po) => $po->loadMissing(['supplier', 'kitchen', 'items.ingredient']));
-        $first = $orders->first();
+        $order = $this->order->loadMissing(['supplier', 'kitchen', 'items.ingredient']);
 
         $rows = [];
         $rows[] = $this->pad([__('purchase_order.excel.header_title')]);
         $rows[] = $this->pad([
-            __('purchase_order.excel.date', ['date' => $first?->estimated_delivery_date?->format('d/m/Y') ?? now()->format('d/m/Y')])
-            .'   |   '.__('purchase_order.excel.order_code', ['code' => $orders->pluck('code')->implode(', ')])
-            .'   |   '.__('purchase_order.excel.supplier', ['name' => $first?->supplier?->name ?? __('purchase_order.excel.unassigned')])
-            .'   |   '.__('purchase_order.excel.kitchen', ['name' => $first?->kitchen?->name ?? '']),
+            __('purchase_order.excel.date', ['date' => $order->estimated_delivery_date?->format('d/m/Y') ?? now()->format('d/m/Y')])
+            .'   |   '.__('purchase_order.excel.order_code', ['code' => $order->code])
+            .'   |   '.__('purchase_order.excel.supplier', ['name' => $order->supplier?->name ?? __('purchase_order.excel.unassigned')])
+            .'   |   '.__('purchase_order.excel.kitchen', ['name' => $order->kitchen?->name ?? '']),
         ]);
         $rows[] = $this->pad([]);
 
         // Section theo nhóm nguyên liệu, đúng bố cục file MẪU ĐƠN ĐẶT HÀNG.xlsx
-        $grouped = $orders
-            ->flatMap(fn (PurchaseOrder $po) => $po->items)
-            ->groupBy(fn ($item) => $item->ingredient?->typeRelation?->name ?? $item->ingredient?->type ?: 'Khác');
+        $grouped = $order->items->groupBy(fn ($item) => $item->ingredient?->typeRelation?->name ?? $item->ingredient?->type ?: 'Khác');
         $grandTotal = 0.0;
-        $codeByOrderId = $orders->pluck('code', 'id');
 
         $sectionHeadings = [
             __('purchase_order.excel.col_no'),
@@ -91,39 +77,19 @@ class PurchaseOrderTemplateExport implements FromArray, ShouldAutoSize, WithEven
             $rows[] = $sectionHeadings;
 
             $i = 1;
-
-            // Gộp các phiếu tách của cùng NCC: cùng nguyên liệu + cùng đơn giá thì cộng dồn số lượng.
-            $merged = $items->groupBy(fn ($item) => $item->ingredient_id.'|'.(float) $item->unit_price);
-
-            foreach ($merged as $lines) {
-                $item = $lines->first();
-                $quantity = (float) $lines->sum(fn ($line) => (float) $line->quantity_ordered);
-                $lineTotal = $quantity * (float) $item->unit_price;
+            foreach ($items as $item) {
+                $lineTotal = (float) $item->quantity_ordered * (float) $item->unit_price;
                 $grandTotal += $lineTotal;
-
-                $note = $lines
-                    ->map(function ($line) use ($codeByOrderId): string {
-                        $text = trim((string) $line->receive_note);
-                        // Nhiều phiếu tách trong cùng sheet: ghi kèm mã đơn để không mất dấu P1/P2/P3
-                        $code = $codeByOrderId->count() > 1
-                            ? (string) $codeByOrderId->get($line->purchase_order_id, '')
-                            : '';
-
-                        return trim($code !== '' ? trim($code.' '.$text) : $text);
-                    })
-                    ->filter()
-                    ->unique()
-                    ->implode('; ');
 
                 $rows[] = [
                     $i++,
                     $item->ingredient?->name ?? '',
                     $item->ingredient?->unitRelation?->name ?? $item->ingredient?->unit ?? 'Kg',
-                    $quantity,
+                    (float) $item->quantity_ordered,
                     (float) $item->unit_price,
-                    $first?->supplier?->name ?? '',
+                    $order->supplier?->name ?? '',
                     $lineTotal,
-                    $note,
+                    $item->receive_note ?? '',
                 ];
             }
 
