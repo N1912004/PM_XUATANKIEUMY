@@ -98,29 +98,28 @@
     </div>
 
     <!-- Main Card -->
-    <div class="sup-card">
+    <div class="sup-card sup-table-card">
         <!-- Filter Bar -->
-        <div class="sup-filter-bar">
-            <div class="sup-search-wrap">
-                <svg class="sup-search-ico" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <div class="sup-toolbar">
+            <div class="sup-search">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
                 </svg>
                 <input
                     type="text"
                     wire:model.live.debounce.300ms="search"
-                    placeholder="{{ __('ingredient.filter.search_placeholder') }}"
-                    class="sup-search-input"
+                    placeholder="{{ __('ingredient.table.search_placeholder') }}"
                 />
             </div>
 
-            <select wire:model.live="typeFilter" class="sup-select">
+            <select wire:model.live="typeFilter" class="sup-select" style="height:38px">
                 <option value="">-- {{ __('ingredient.filter.type') }} --</option>
                 @foreach($this->typeOptions() as $id => $name)
                     <option value="{{ $id }}">{{ $name }}</option>
                 @endforeach
             </select>
 
-            <select wire:model.live="trashedFilter" class="sup-select">
+            <select wire:model.live="trashedFilter" class="sup-select" style="height:38px">
                 <option value="">Trạng thái xóa: Mặc định</option>
                 <option value="with">Tất cả (Bao gồm đã xóa)</option>
                 <option value="only">Chỉ nguyên liệu đã xóa</option>
