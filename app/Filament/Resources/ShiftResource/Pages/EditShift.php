@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\ShiftResource\Pages;
 
 use App\Filament\Resources\ShiftResource;
-use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Contracts\Support\Htmlable;
 
@@ -27,9 +26,7 @@ class EditShift extends EditRecord
 
     protected function getHeaderActions(): array
     {
-        return [
-            Actions\DeleteAction::make(),
-        ];
+        return [];
     }
 
     protected function getRedirectUrl(): string
