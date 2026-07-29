@@ -76,6 +76,11 @@ class ListRecipes extends Page
         $this->selectedRecipes = [];
     }
 
+    public function clearSelectedRecipes(): void
+    {
+        $this->resetSelection();
+    }
+
     public function updatedSearch(): void
     {
         $this->resetSelection();

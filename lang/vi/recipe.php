@@ -41,7 +41,7 @@ return [
         'no_filtered_dishes' => 'Không tìm thấy món ăn nào phù hợp với bộ lọc hiện tại',
         'no_ingredient_quantities' => 'Chưa có định lượng nguyên liệu nào cho món ăn này',
     ],
-    'bulk' => ['selected' => 'Đã chọn :count món ăn', 'restore' => 'Khôi phục hàng loạt', 'force_delete' => 'Xóa vĩnh viễn hàng loạt', 'delete' => 'Xóa hàng loạt'],
+    'bulk' => ['selected' => 'Đã chọn :count món ăn', 'deselect' => 'Bỏ chọn', 'restore' => 'Khôi phục hàng loạt', 'force_delete' => 'Xóa vĩnh viễn hàng loạt', 'delete' => 'Xóa hàng loạt'],
     'confirm' => ['bulk_restore' => 'Bạn có chắc chắn muốn khôi phục toàn bộ các món ăn đã chọn?', 'bulk_force_delete' => 'HÀNH ĐỘNG NÀY KHÔNG THỂ HOÀN TÁC. Bạn có chắc chắn muốn xóa vĩnh viễn toàn bộ các món ăn đã chọn và định mức nguyên liệu liên quan?', 'bulk_delete' => 'Bạn có chắc chắn muốn xóa mềm toàn bộ các món ăn đã chọn?', 'restore' => 'Bạn có chắc chắn muốn khôi phục món ăn này?', 'force_delete' => 'HÀNH ĐỘNG NÀY KHÔNG THỂ HOÀN TÁC. Bạn có chắc chắn muốn xóa vĩnh viễn món ăn này và toàn bộ định mức nguyên liệu liên quan?', 'delete' => 'Bạn có chắc chắn muốn xóa món ăn này?'],
     'labels' => ['adjusted' => 'Đã điều chỉnh'],
     'pagination' => ['summary' => 'Hiển thị :from - :to trong tổng số :total món ăn', 'per_page' => ':count / trang'],
