@@ -10,6 +10,7 @@ use Filament\Tables\Actions\DeleteAction as TableDeleteAction;
 use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Actions\ForceDeleteAction as TableForceDeleteAction;
 use Filament\Tables\Actions\ForceDeleteBulkAction;
+use Illuminate\Support\HtmlString;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -55,7 +56,8 @@ class AppServiceProvider extends ServiceProvider
                 ->modalSubmitActionLabel('Xóa')
                 ->modalCancelActionLabel('Hủy')
                 ->modalIcon('heroicon-s-exclamation-triangle')
-                ->modalIconColor('danger');
+                ->modalIconColor('danger')
+                ->icon(new HtmlString('<i class="fa-solid fa-trash" style="color:#dc2626;font-size:14px"></i>'));
         };
 
         DeleteAction::configureUsing($configureDelete);

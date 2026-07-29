@@ -13,6 +13,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\HtmlString;
 
 class IngredientResource extends Resource
 {
@@ -317,7 +318,7 @@ class IngredientResource extends Resource
                     ->modalCancelActionLabel('Hủy')
                     ->modalIcon('heroicon-s-exclamation-triangle')
                     ->modalIconColor('danger')
-                    ->icon('heroicon-m-trash')
+                    ->icon(new HtmlString('<i class="fa-solid fa-trash" style="color:#dc2626;font-size:14px"></i>'))
                     ->color('danger')
                     ->extraAttributes(['class' => 'abt btn-danger-red', 'style' => 'color: #dc2626 !important;'])
                     ->iconButton(),
@@ -333,7 +334,7 @@ class IngredientResource extends Resource
                     ->modalCancelActionLabel('Hủy')
                     ->modalIcon('heroicon-s-exclamation-triangle')
                     ->modalIconColor('danger')
-                    ->icon('heroicon-m-trash')
+                    ->icon(new HtmlString('<i class="fa-solid fa-trash" style="color:#dc2626;font-size:14px"></i>'))
                     ->color('danger')
                     ->extraAttributes(['class' => 'abt btn-danger-red', 'style' => 'color: #dc2626 !important;'])
                     ->iconButton(),
