@@ -27,7 +27,7 @@ return [
         'no_filtered_dishes' => 'No dishes match the selected filter criteria',
         'no_ingredient_quantities' => 'No ingredient quantities recorded for this dish',
     ],
-    'bulk' => ['selected' => ':count dishes selected', 'restore' => 'Restore selected', 'force_delete' => 'Permanently delete selected', 'delete' => 'Delete selected'],
+    'bulk' => ['selected' => ':count dishes selected', 'deselect' => 'Deselect', 'restore' => 'Restore selected', 'force_delete' => 'Permanently delete selected', 'delete' => 'Delete selected'],
     'confirm' => ['bulk_restore' => 'Are you sure you want to restore all selected dishes?', 'bulk_force_delete' => 'THIS ACTION CANNOT BE UNDONE. Permanently delete all selected dishes and their ingredient quantities?', 'bulk_delete' => 'Are you sure you want to move all selected dishes to trash?', 'restore' => 'Are you sure you want to restore this dish?', 'force_delete' => 'THIS ACTION CANNOT BE UNDONE. Permanently delete this dish and all related ingredient quantities?', 'delete' => 'Are you sure you want to delete this dish?'],
     'labels' => ['adjusted' => 'Adjusted'],
     'pagination' => ['summary' => 'Showing :from - :to of :total dishes', 'per_page' => ':count / page'],
