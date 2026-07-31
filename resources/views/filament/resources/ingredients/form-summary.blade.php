@@ -8,7 +8,7 @@
     $typeId = $getFn('ingredient_type_id');
     $typeName = $typeId ? \App\Models\IngredientType::find($typeId)?->name : '--';
     $rawPrice = $getFn('reference_price');
-    $priceNum = is_numeric($rawPrice) ? (float) $rawPrice : (float) str_replace(['.', ','], '', (string) $rawPrice);
+    $priceNum = max(0, (float) str_replace(['.', ','], '', (string) ($rawPrice ?? 0)));
 @endphp
 
 <div class="flex flex-col divide-y divide-gray-100 dark:divide-gray-800 text-xs">
