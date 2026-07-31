@@ -304,7 +304,7 @@ class CreateSupplier extends Page
         // để Livewire 3 đồng bộ hoàn chỉnh dữ liệu từ Alpine qua @entangle
         foreach ($this->selectedIngredients as $id => $selected) {
             if ($selected && ! isset($this->ingredientCosts[$id])) {
-                $this->ingredientCosts[$id] = 0;
+                $this->ingredientCosts[$id] = (float) (Ingredient::find($id)?->reference_price ?? 0);
             }
         }
     }
