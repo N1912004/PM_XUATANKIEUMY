@@ -110,11 +110,9 @@ class Ingredient extends Model
         static::saved(function (Ingredient $ingredient): void {
             if ($ingredient->supplier_id) {
                 $supplier = Supplier::find($ingredient->supplier_id);
-                if ($supplier) {
-                    $supplier->ingredients()->syncWithoutDetaching([
-                        $ingredient->id => [
-                            'reference_price' => (float) ($ingredient->reference_price ?? 0),
-                        ],
+                if ($supplier && ! $supplier->ingredients()->where('ingredient_id', $ingredient->id)->exists()) {
+                    $supplier->ingredients()->attach($ingredient->id, [
+                        'reference_price' => (float) ($ingredient->reference_price ?? 0),
                     ]);
                 }
             }

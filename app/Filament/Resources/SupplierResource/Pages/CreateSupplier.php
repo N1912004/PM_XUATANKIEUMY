@@ -234,15 +234,14 @@ class CreateSupplier extends Page
 
         $supplier->ingredients()->sync($syncData);
 
-        // Đồng bộ ngược cột supplier_id và reference_price ở bảng ingredients để tương thích ngược.
-        foreach ($syncData as $ingredientId => $pivotData) {
-            // Update qua model instance để hook đổi giá của Ingredient chạy
-            // (đưa các recipe liên quan về 'pending' khi giá tham chiếu thay đổi)
+        // Đồng bộ liên kết supplier_id ở bảng ingredients (không ghi đè đơn giá chuẩn của nguyên liệu)
+        foreach (array_keys($syncData) as $ingredientId) {
             $ingredient = Ingredient::find($ingredientId);
-            $ingredient?->update([
-                'supplier_id' => $supplier->id,
-                'reference_price' => $pivotData['reference_price'],
-            ]);
+            if ($ingredient && blank($ingredient->supplier_id)) {
+                $ingredient->update([
+                    'supplier_id' => $supplier->id,
+                ]);
+            }
         }
     }
 
@@ -305,7 +304,7 @@ class CreateSupplier extends Page
         // để Livewire 3 đồng bộ hoàn chỉnh dữ liệu từ Alpine qua @entangle
         foreach ($this->selectedIngredients as $id => $selected) {
             if ($selected && ! isset($this->ingredientCosts[$id])) {
-                $this->ingredientCosts[$id] = (float) (Ingredient::find($id)?->reference_price ?? 0);
+                $this->ingredientCosts[$id] = 0;
             }
         }
     }

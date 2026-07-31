@@ -78,7 +78,7 @@ class EditSupplier extends Page
         foreach ($directIngredients as $ingredient) {
             if (! isset($this->selectedIngredients[$ingredient->id])) {
                 $this->selectedIngredients[$ingredient->id] = true;
-                $this->ingredientCosts[$ingredient->id] = (float) $ingredient->reference_price;
+                $this->ingredientCosts[$ingredient->id] = 0;
             }
         }
     }
@@ -255,23 +255,20 @@ class EditSupplier extends Page
 
         $supplier->ingredients()->sync($syncData);
 
-        // Đồng bộ ngược cột supplier_id và reference_price ở bảng ingredients để tương thích ngược.
         Ingredient::query()
             ->where('supplier_id', $supplier->id)
             ->whereNotIn('id', array_keys($syncData))
             ->update([
                 'supplier_id' => null,
-                'reference_price' => 0,
             ]);
 
-        foreach ($syncData as $ingredientId => $pivotData) {
-            // Update qua model instance để hook đổi giá của Ingredient chạy
-            // (đưa các recipe liên quan về 'pending' khi giá tham chiếu thay đổi)
+        foreach (array_keys($syncData) as $ingredientId) {
             $ingredient = Ingredient::find($ingredientId);
-            $ingredient?->update([
-                'supplier_id' => $supplier->id,
-                'reference_price' => $pivotData['reference_price'],
-            ]);
+            if ($ingredient && blank($ingredient->supplier_id)) {
+                $ingredient->update([
+                    'supplier_id' => $supplier->id,
+                ]);
+            }
         }
     }
 
@@ -334,7 +331,7 @@ class EditSupplier extends Page
         // để Livewire 3 đồng bộ hoàn chỉnh dữ liệu từ Alpine qua @entangle
         foreach ($this->selectedIngredients as $id => $selected) {
             if ($selected && ! isset($this->ingredientCosts[$id])) {
-                $this->ingredientCosts[$id] = (float) (Ingredient::find($id)?->reference_price ?? 0);
+                $this->ingredientCosts[$id] = 0;
             }
         }
     }
