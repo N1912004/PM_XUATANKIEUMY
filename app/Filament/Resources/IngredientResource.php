@@ -9,6 +9,7 @@ use Filament\Forms\Form;
 use Filament\Infolists;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
+use Filament\Support\RawJs;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -100,8 +101,19 @@ class IngredientResource extends Resource
                                             ->preload()
                                             ->optionsLimit(50)
                                             ->live()
-                                            ->columnSpanFull()
                                             ->placeholder(__('ingredient.form.type_placeholder')),
+                                        Forms\Components\TextInput::make('reference_price')
+                                            ->label(__('ingredient.form.reference_price'))
+                                            ->numeric()
+                                            ->minValue(0)
+                                            ->default(0)
+                                            ->formatStateUsing(fn (mixed $state): string => number_format((float) ($state ?? 0), 0, '', ''))
+                                            ->dehydrateStateUsing(fn (mixed $state): float => max(0, (float) str_replace(['.', ','], '', (string) ($state ?? 0))))
+                                            ->mask(RawJs::make('$money($input, \',\', \'.\', 0)'))
+                                            ->stripCharacters(['.', ','])
+                                            ->suffix('đ')
+                                            ->live(onBlur: true)
+                                            ->placeholder(__('ingredient.form.reference_price_placeholder')),
                                     ])
                                     ->columns(2),
                             ])
@@ -161,7 +173,7 @@ class IngredientResource extends Resource
                                     ->label(__('ingredient.form.type'))
                                     ->weight('bold'),
                                 Infolists\Components\TextEntry::make('reference_price')
-                                    ->label(__('ingredient.form.reference_price'))
+                                    ->label(__('ingredient.infolist.reference_price'))
                                     ->money('VND')
                                     ->weight('bold'),
                                 Infolists\Components\TextEntry::make('status')

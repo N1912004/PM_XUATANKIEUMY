@@ -42,8 +42,8 @@ return [
         'type' => 'Loại nguyên liệu',
         'type_placeholder' => 'Chọn loại nguyên liệu',
         'type_name' => 'Tên loại nguyên liệu',
-        'reference_price' => 'Thành tiền',
-        'reference_price_placeholder' => 'Nhập thành tiền',
+        'reference_price' => 'Đơn giá',
+        'reference_price_placeholder' => 'Nhập đơn giá nguyên liệu',
         'status' => 'Trạng thái',
     ],
     'table' => [
@@ -53,7 +53,7 @@ return [
         'supplier' => 'TÊN NCC',
         'unit' => 'ĐƠN VỊ',
         'type' => 'LOẠI NL',
-        'reference_price' => 'THÀNH TIỀN',
+        'reference_price' => 'ĐƠN GIÁ',
         'status' => 'TRẠNG THÁI',
         'action' => 'THAO TÁC',
         'more_suppliers' => '+:count NCC',
@@ -67,6 +67,7 @@ return [
         'trashed' => 'Đã xóa',
     ],
     'infolist' => [
+        'reference_price' => 'Thành tiền',
         'linked_suppliers' => 'Nhà cung cấp liên kết',
         'quotes_table' => 'Bảng báo giá của các nhà cung cấp',
         'supplier_name' => 'Tên nhà cung cấp',

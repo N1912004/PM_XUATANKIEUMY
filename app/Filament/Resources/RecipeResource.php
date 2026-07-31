@@ -177,8 +177,8 @@ class RecipeResource extends Resource
                                     ->live()
                                     ->disableOptionsWhenSelectedInSiblingRepeaterItems()
                                     ->extraAttributes(['class' => 'recipe-select-chevron'])
-                                    ->afterStateHydrated(fn (Set $set, ?int $state): mixed => $set('ingredient_price', self::ingredientPrice($state)))
-                                    ->afterStateUpdated(fn (Set $set, ?int $state): mixed => $set('ingredient_price', self::ingredientPrice($state)))
+                                    ->afterStateHydrated(fn (Set $set, ?int $state): mixed => $set('ingredient_price', self::formatCurrency(self::ingredientPrice($state))))
+                                    ->afterStateUpdated(fn (Set $set, ?int $state): mixed => $set('ingredient_price', self::formatCurrency(self::ingredientPrice($state))))
                                     ->placeholder(__('recipe.placeholders.ingredient'))
                                     ->columnSpan(3),
                                 Forms\Components\TextInput::make('quantity_per_portion')
@@ -200,7 +200,7 @@ class RecipeResource extends Resource
                                     ->disabled()
                                     ->dehydrated(false)
                                     ->prefixIcon('heroicon-m-lock-closed')
-                                    ->formatStateUsing(fn (mixed $state): string => self::formatCurrency((float) $state))
+                                    ->formatStateUsing(fn (mixed $state): string => is_numeric($state) ? self::formatCurrency((float) $state) : (string) $state)
                                     ->columnSpan(5),
                                 Forms\Components\Placeholder::make('line_total')
                                     ->label(__('recipe.fields.line_total'))
