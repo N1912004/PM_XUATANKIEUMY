@@ -67,6 +67,7 @@ return [
         'trashed' => 'Deleted',
     ],
     'infolist' => [
+        'reference_price' => 'Amount',
         'linked_suppliers' => 'Linked Suppliers',
         'quotes_table' => 'Supplier Price Quotes',
         'supplier_name' => 'Supplier Name',
