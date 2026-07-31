@@ -227,6 +227,11 @@ class CreatePurchaseOrder extends Page
         }
 
         $allSuppliers = $this->suppliers->keyBy('id');
+        $allIngredientIds = array_keys($aggregated);
+        $pivotPrices = DB::table('ingredient_supplier')
+            ->whereIn('ingredient_id', $allIngredientIds)
+            ->get(['supplier_id', 'ingredient_id', 'reference_price'])
+            ->keyBy(fn ($row) => $row->supplier_id.'-'.$row->ingredient_id);
 
         $groups = [];
         foreach ($aggregated as $item) {
@@ -273,6 +278,15 @@ class CreatePurchaseOrder extends Page
                 $selectedSupplierId = null;
             }
 
+            // Ưu tiên lấy báo giá riêng của NCC được chọn (nếu có > 0), ngược lại dùng giá gốc nguyên liệu
+            $effectivePrice = (float) $item['reference_price'];
+            if ($selectedSupplierId && isset($pivotPrices[$selectedSupplierId.'-'.$ingId])) {
+                $pPrice = (float) $pivotPrices[$selectedSupplierId.'-'.$ingId]->reference_price;
+                if ($pPrice > 0) {
+                    $effectivePrice = $pPrice;
+                }
+            }
+
             $existingOrders = isset($existingPOItems[$ingId])
                 ? array_values(array_unique(array_filter($existingPOItems[$ingId]->pluck('code')->toArray())))
                 : [];
@@ -293,7 +307,8 @@ class CreatePurchaseOrder extends Page
             $item['supplier_id'] = $selectedSupplierId;
             $item['supplier_valid'] = $isSupplierValid;
             $item['split'] = $split;
-            $item['line_total'] = ($isSelected && $selectedSupplierId) ? ((float) $manualQty * $item['reference_price']) : 0;
+            $item['reference_price'] = $effectivePrice;
+            $item['line_total'] = ($isSelected && $selectedSupplierId) ? ((float) $manualQty * $effectivePrice) : 0;
             $item['dish_string'] = implode(', ', array_slice($item['dishes'], 0, 3)).(count($item['dishes']) > 3 ? '...' : '');
 
             $groups[$gKey]['items'][] = $item;

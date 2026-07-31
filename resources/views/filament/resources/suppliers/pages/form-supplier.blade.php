@@ -175,10 +175,14 @@
                                         <td class="sup-name">{{ $ing->name }}</td>
                                         <td>{{ $ing->unit }}</td>
                                         <td>{{ $ing->type }}</td>
-                                        <td>
+                                        {{-- wire:key đổi theo trạng thái tích: buộc Livewire thay hẳn element khi tick/bỏ tick
+                                             để Alpine khởi tạo lại với giá gợi ý vừa seed. KHÔNG dùng @entangle ở đây — lúc render
+                                             ban đầu key ingredientCosts.<id> chưa tồn tại nên entangle bind hỏng lặng lẽ (giá gõ
+                                             không bao giờ lên server, save dính giá gợi ý). --}}
+                                        <td wire:key="sup-ing-cost-{{ $ing->id }}-{{ ($selectedIngredients[$ing->id] ?? false) ? 'on' : 'off' }}">
                                             <input type="text"
                                                    x-data="{
-                                                       rawVal: @entangle('ingredientCosts.' . $ing->id),
+                                                       rawVal: @js(isset($ingredientCosts[$ing->id]) && $ingredientCosts[$ing->id] !== '' && $ingredientCosts[$ing->id] !== null ? (float) $ingredientCosts[$ing->id] : null),
                                                        {{-- VND không có số lẻ: chỉ nhận chữ số, hiển thị kiểu VN (dấu chấm nghìn) — đồng bộ với form Nguyên liệu --}}
                                                        get formatted() {
                                                            if (this.rawVal === undefined || this.rawVal === null || this.rawVal === '') return '';
@@ -188,6 +192,7 @@
                                                        set formatted(val) {
                                                            let clean = String(val).replace(/[^0-9]/g, '');
                                                            this.rawVal = clean === '' ? null : Number(clean);
+                                                           $wire.set('ingredientCosts.{{ $ing->id }}', this.rawVal, false);
                                                        }
                                                    }"
                                                    x-model="formatted"
