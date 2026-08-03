@@ -30,7 +30,7 @@ class SupplierPriceLog extends Model
 
     public function ingredient(): BelongsTo
     {
-        return $this->belongsTo(Ingredient::class);
+        return $this->belongsTo(Ingredient::class)->withTrashed();
     }
 
     public function user(): BelongsTo

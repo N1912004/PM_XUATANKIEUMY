@@ -658,8 +658,8 @@ class ListStocks extends ListRecords
             $this->poItemsData[] = [
                 'id' => $item->id,
                 'ingredient_id' => $item->ingredient_id,
-                'name' => $item->ingredient->name,
-                'unit' => $item->ingredient->unit,
+                'name' => $item->ingredient?->name ?? 'Nguyên liệu đã bị xóa',
+                'unit' => $item->ingredient?->unit ?? '',
                 'current_stock' => (float) ($stocks[$item->ingredient_id] ?? 0),
                 'quantity_ordered' => (float) $item->quantity_ordered,
                 'quantity_received' => (float) $item->quantity_ordered, // Pre-filled default

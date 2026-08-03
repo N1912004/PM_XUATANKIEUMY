@@ -107,7 +107,7 @@ class Menu extends Model
 
     public function recipe(): BelongsTo
     {
-        return $this->belongsTo(Recipe::class);
+        return $this->belongsTo(Recipe::class)->withTrashed();
     }
 
     public function kitchen(): BelongsTo
