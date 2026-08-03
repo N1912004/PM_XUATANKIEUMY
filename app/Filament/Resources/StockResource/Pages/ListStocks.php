@@ -101,6 +101,21 @@ class ListStocks extends ListRecords
 
     public array $transferItemsData = [];
 
+    // Array pagination states
+    public int $poItemsPage = 1;
+    public int $poItemsPerPage = 10;
+    public int $directItemsPage = 1;
+    public int $directItemsPerPage = 10;
+    public int $prodItemsPage = 1;
+    public int $prodItemsPerPage = 10;
+    public int $transferItemsPage = 1;
+    public int $transferItemsPerPage = 10;
+
+    public function updatedPoItemsPerPage(): void { $this->poItemsPage = 1; }
+    public function updatedDirectItemsPerPage(): void { $this->directItemsPage = 1; }
+    public function updatedProdItemsPerPage(): void { $this->prodItemsPage = 1; }
+    public function updatedTransferItemsPerPage(): void { $this->transferItemsPage = 1; }
+
     public string $transferNote = '';
 
     // Ledger (Thẻ kho) properties
@@ -222,6 +237,10 @@ class ListStocks extends ListRecords
         $this->directItemsData = [];
         $this->prodItemsData = [];
         $this->transferItemsData = [];
+        $this->poItemsPage = 1;
+        $this->directItemsPage = 1;
+        $this->prodItemsPage = 1;
+        $this->transferItemsPage = 1;
         $this->actualQuantities = [];
         $this->checkNotes = [];
         $this->selectedLedgerIngId = null;

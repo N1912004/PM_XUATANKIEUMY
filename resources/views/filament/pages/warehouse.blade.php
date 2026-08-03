@@ -1248,7 +1248,21 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach($poItemsData as $index => $item)
+                                    @php
+
+                                        $arrTotal = count($poItemsData);
+
+                                        $arrPage = $this->poItemsPage;
+
+                                        $arrPerPage = $this->poItemsPerPage;
+
+                                        $arrLastPage = max((int) ceil($arrTotal / $arrPerPage), 1);
+
+                                        $arrWindow = collect([1, $arrPage - 1, $arrPage, $arrPage + 1, $arrLastPage])->filter(fn($p) => $p >= 1 && $p <= $arrLastPage)->unique()->sort()->values();
+
+                                    @endphp
+
+                                    @foreach(array_slice($poItemsData, ($arrPage - 1) * $arrPerPage, $arrPerPage, true) as $index => $item)
                                         @php
                                             $diff = (float) ($item['quantity_received'] ?? 0) - (float) $item['quantity_ordered'];
                                         @endphp
@@ -1298,6 +1312,45 @@
                                 </tbody>
                             </table>
                         </div>
+                            @if($arrTotal > 0)
+                                <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-top:14px; padding:14px 16px; border-top:1px solid #e2e8f0; font-size:12px; color:#64748b;" class="dark:text-gray-400 dark:border-gray-700">
+                                    <div>
+                                        {{ __('warehouse.pagination.showing', ['from' => min(($arrPage-1)*$arrPerPage + 1, $arrTotal), 'to' => min($arrPage*$arrPerPage, $arrTotal), 'total' => $arrTotal]) }}
+                                    </div>
+                                    <div class="pgwrap" style="display:flex;align-items:center;gap:8px">
+                                        <span>{{ __('common.pagination.per_page_label') }}</span>
+                                        <select wire:model.live="poItemsPerPage" class="lv-per-page-select" style="min-width:68px; height:32px; padding:0 24px 0 10px; font-size:13px; font-weight:400; color:#334155; background-color:#ffffff; border:1px solid #cbd5e1; border-radius:8px; outline:none; appearance:none; -webkit-appearance:none; background-image:url('data:image/svg+xml,%3csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 20 20\'%3e%3cpath stroke=\'%2364748b\' stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'1.5\' d=\'M6 8l4 4 4-4\'/%3e%3c/svg%3e'); background-position:right 8px center; background-repeat:no-repeat; background-size:16px 16px; cursor:pointer;">
+                                            @foreach([5, 10, 20, 30, 50] as $count)
+                                                <option value="{{ $count }}">{{ $count }}</option>
+                                            @endforeach
+                                        </select>
+                                        <nav style="display:flex; align-items:center; gap:4px;">
+                                            @if($arrPage <= 1)
+                                                <span style="opacity:.4; padding:4px;"><i class="fa-solid fa-chevron-left" style="font-size:11px"></i></span>
+                                            @else
+                                                <button wire:click="$set('poItemsPage', {{ $arrPage - 1 }})" type="button" style="display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border:1px solid #cbd5e1;border-radius:6px;background:transparent"><i class="fa-solid fa-chevron-left" style="font-size:11px"></i></button>
+                                            @endif
+                                            
+                                            @foreach($arrWindow as $i => $p)
+                                                @if($i > 0 && $p - $arrWindow[$i-1] > 1)
+                                                    <span style="padding:0 4px">…</span>
+                                                @endif
+                                                @if($p == $arrPage)
+                                                    <span style="display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border-radius:6px;background:#1267E8;color:#fff;font-weight:700">{{ $p }}</span>
+                                                @else
+                                                    <button wire:click="$set('poItemsPage', {{ $p }})" type="button" style="display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border:1px solid #cbd5e1;border-radius:6px;background:transparent">{{ $p }}</button>
+                                                @endif
+                                            @endforeach
+                            
+                                            @if($arrPage >= $arrLastPage)
+                                                <span style="opacity:.4; padding:4px;"><i class="fa-solid fa-chevron-right" style="font-size:11px"></i></span>
+                                            @else
+                                                <button wire:click="$set('poItemsPage', {{ $arrPage + 1 }})" type="button" style="display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border:1px solid #cbd5e1;border-radius:6px;background:transparent"><i class="fa-solid fa-chevron-right" style="font-size:11px"></i></button>
+                                            @endif
+                                        </nav>
+                                    </div>
+                                </div>
+                            @endif
                     @endif
                 </div>
             @elseif($inMode === 'direct')
@@ -1345,7 +1398,21 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach($directItemsData as $index => $item)
+                                @php
+
+                                    $arrTotal = count($directItemsData);
+
+                                    $arrPage = $this->directItemsPage;
+
+                                    $arrPerPage = $this->directItemsPerPage;
+
+                                    $arrLastPage = max((int) ceil($arrTotal / $arrPerPage), 1);
+
+                                    $arrWindow = collect([1, $arrPage - 1, $arrPage, $arrPage + 1, $arrLastPage])->filter(fn($p) => $p >= 1 && $p <= $arrLastPage)->unique()->sort()->values();
+
+                                @endphp
+
+                                @foreach(array_slice($directItemsData, ($arrPage - 1) * $arrPerPage, $arrPerPage, true) as $index => $item)
                                     <tr>
                                         <td>
                                             @include('filament.components.search-select', [
@@ -1407,6 +1474,45 @@
                             </tbody>
                         </table>
                     </div>
+                        @if($arrTotal > 0)
+                            <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-top:14px; padding:14px 16px; border-top:1px solid #e2e8f0; font-size:12px; color:#64748b;" class="dark:text-gray-400 dark:border-gray-700">
+                                <div>
+                                    {{ __('warehouse.pagination.showing', ['from' => min(($arrPage-1)*$arrPerPage + 1, $arrTotal), 'to' => min($arrPage*$arrPerPage, $arrTotal), 'total' => $arrTotal]) }}
+                                </div>
+                                <div class="pgwrap" style="display:flex;align-items:center;gap:8px">
+                                    <span>{{ __('common.pagination.per_page_label') }}</span>
+                                    <select wire:model.live="directItemsPerPage" class="lv-per-page-select" style="min-width:68px; height:32px; padding:0 24px 0 10px; font-size:13px; font-weight:400; color:#334155; background-color:#ffffff; border:1px solid #cbd5e1; border-radius:8px; outline:none; appearance:none; -webkit-appearance:none; background-image:url('data:image/svg+xml,%3csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 20 20\'%3e%3cpath stroke=\'%2364748b\' stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'1.5\' d=\'M6 8l4 4 4-4\'/%3e%3c/svg%3e'); background-position:right 8px center; background-repeat:no-repeat; background-size:16px 16px; cursor:pointer;">
+                                        @foreach([5, 10, 20, 30, 50] as $count)
+                                            <option value="{{ $count }}">{{ $count }}</option>
+                                        @endforeach
+                                    </select>
+                                    <nav style="display:flex; align-items:center; gap:4px;">
+                                        @if($arrPage <= 1)
+                                            <span style="opacity:.4; padding:4px;"><i class="fa-solid fa-chevron-left" style="font-size:11px"></i></span>
+                                        @else
+                                            <button wire:click="$set('directItemsPage', {{ $arrPage - 1 }})" type="button" style="display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border:1px solid #cbd5e1;border-radius:6px;background:transparent"><i class="fa-solid fa-chevron-left" style="font-size:11px"></i></button>
+                                        @endif
+                                        
+                                        @foreach($arrWindow as $i => $p)
+                                            @if($i > 0 && $p - $arrWindow[$i-1] > 1)
+                                                <span style="padding:0 4px">…</span>
+                                            @endif
+                                            @if($p == $arrPage)
+                                                <span style="display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border-radius:6px;background:#1267E8;color:#fff;font-weight:700">{{ $p }}</span>
+                                            @else
+                                                <button wire:click="$set('directItemsPage', {{ $p }})" type="button" style="display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border:1px solid #cbd5e1;border-radius:6px;background:transparent">{{ $p }}</button>
+                                            @endif
+                                        @endforeach
+                        
+                                        @if($arrPage >= $arrLastPage)
+                                            <span style="opacity:.4; padding:4px;"><i class="fa-solid fa-chevron-right" style="font-size:11px"></i></span>
+                                        @else
+                                            <button wire:click="$set('directItemsPage', {{ $arrPage + 1 }})" type="button" style="display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border:1px solid #cbd5e1;border-radius:6px;background:transparent"><i class="fa-solid fa-chevron-right" style="font-size:11px"></i></button>
+                                        @endif
+                                    </nav>
+                                </div>
+                            </div>
+                        @endif
                 </div>
             @endif
 
@@ -1506,7 +1612,21 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach($prodItemsData as $index => $item)
+                                    @php
+
+                                        $arrTotal = count($prodItemsData);
+
+                                        $arrPage = $this->prodItemsPage;
+
+                                        $arrPerPage = $this->prodItemsPerPage;
+
+                                        $arrLastPage = max((int) ceil($arrTotal / $arrPerPage), 1);
+
+                                        $arrWindow = collect([1, $arrPage - 1, $arrPage, $arrPage + 1, $arrLastPage])->filter(fn($p) => $p >= 1 && $p <= $arrLastPage)->unique()->sort()->values();
+
+                                    @endphp
+
+                                    @foreach(array_slice($prodItemsData, ($arrPage - 1) * $arrPerPage, $arrPerPage, true) as $index => $item)
                                         <tr>
                                             <td class="wh-ing-name">{{ $item['name'] }}</td>
                                             {{-- payload từ client có thể thiếu key → không được để vỡ trang (500) --}}
@@ -1523,6 +1643,45 @@
                                 </tbody>
                             </table>
                         </div>
+                            @if($arrTotal > 0)
+                                <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-top:14px; padding:14px 16px; border-top:1px solid #e2e8f0; font-size:12px; color:#64748b;" class="dark:text-gray-400 dark:border-gray-700">
+                                    <div>
+                                        {{ __('warehouse.pagination.showing', ['from' => min(($arrPage-1)*$arrPerPage + 1, $arrTotal), 'to' => min($arrPage*$arrPerPage, $arrTotal), 'total' => $arrTotal]) }}
+                                    </div>
+                                    <div class="pgwrap" style="display:flex;align-items:center;gap:8px">
+                                        <span>{{ __('common.pagination.per_page_label') }}</span>
+                                        <select wire:model.live="prodItemsPerPage" class="lv-per-page-select" style="min-width:68px; height:32px; padding:0 24px 0 10px; font-size:13px; font-weight:400; color:#334155; background-color:#ffffff; border:1px solid #cbd5e1; border-radius:8px; outline:none; appearance:none; -webkit-appearance:none; background-image:url('data:image/svg+xml,%3csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 20 20\'%3e%3cpath stroke=\'%2364748b\' stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'1.5\' d=\'M6 8l4 4 4-4\'/%3e%3c/svg%3e'); background-position:right 8px center; background-repeat:no-repeat; background-size:16px 16px; cursor:pointer;">
+                                            @foreach([5, 10, 20, 30, 50] as $count)
+                                                <option value="{{ $count }}">{{ $count }}</option>
+                                            @endforeach
+                                        </select>
+                                        <nav style="display:flex; align-items:center; gap:4px;">
+                                            @if($arrPage <= 1)
+                                                <span style="opacity:.4; padding:4px;"><i class="fa-solid fa-chevron-left" style="font-size:11px"></i></span>
+                                            @else
+                                                <button wire:click="$set('prodItemsPage', {{ $arrPage - 1 }})" type="button" style="display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border:1px solid #cbd5e1;border-radius:6px;background:transparent"><i class="fa-solid fa-chevron-left" style="font-size:11px"></i></button>
+                                            @endif
+                                            
+                                            @foreach($arrWindow as $i => $p)
+                                                @if($i > 0 && $p - $arrWindow[$i-1] > 1)
+                                                    <span style="padding:0 4px">…</span>
+                                                @endif
+                                                @if($p == $arrPage)
+                                                    <span style="display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border-radius:6px;background:#1267E8;color:#fff;font-weight:700">{{ $p }}</span>
+                                                @else
+                                                    <button wire:click="$set('prodItemsPage', {{ $p }})" type="button" style="display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border:1px solid #cbd5e1;border-radius:6px;background:transparent">{{ $p }}</button>
+                                                @endif
+                                            @endforeach
+                            
+                                            @if($arrPage >= $arrLastPage)
+                                                <span style="opacity:.4; padding:4px;"><i class="fa-solid fa-chevron-right" style="font-size:11px"></i></span>
+                                            @else
+                                                <button wire:click="$set('prodItemsPage', {{ $arrPage + 1 }})" type="button" style="display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border:1px solid #cbd5e1;border-radius:6px;background:transparent"><i class="fa-solid fa-chevron-right" style="font-size:11px"></i></button>
+                                            @endif
+                                        </nav>
+                                    </div>
+                                </div>
+                            @endif
                     @endif
                 </div>
             @elseif($outMode === 'transfer')
@@ -1584,7 +1743,21 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach($transferItemsData as $index => $item)
+                                @php
+
+                                    $arrTotal = count($transferItemsData);
+
+                                    $arrPage = $this->transferItemsPage;
+
+                                    $arrPerPage = $this->transferItemsPerPage;
+
+                                    $arrLastPage = max((int) ceil($arrTotal / $arrPerPage), 1);
+
+                                    $arrWindow = collect([1, $arrPage - 1, $arrPage, $arrPage + 1, $arrLastPage])->filter(fn($p) => $p >= 1 && $p <= $arrLastPage)->unique()->sort()->values();
+
+                                @endphp
+
+                                @foreach(array_slice($transferItemsData, ($arrPage - 1) * $arrPerPage, $arrPerPage, true) as $index => $item)
                                     <tr>
                                         <td>
                                             @include('filament.components.search-select', [
@@ -1619,6 +1792,45 @@
                             </tbody>
                         </table>
                     </div>
+                        @if($arrTotal > 0)
+                            <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-top:14px; padding:14px 16px; border-top:1px solid #e2e8f0; font-size:12px; color:#64748b;" class="dark:text-gray-400 dark:border-gray-700">
+                                <div>
+                                    {{ __('warehouse.pagination.showing', ['from' => min(($arrPage-1)*$arrPerPage + 1, $arrTotal), 'to' => min($arrPage*$arrPerPage, $arrTotal), 'total' => $arrTotal]) }}
+                                </div>
+                                <div class="pgwrap" style="display:flex;align-items:center;gap:8px">
+                                    <span>{{ __('common.pagination.per_page_label') }}</span>
+                                    <select wire:model.live="transferItemsPerPage" class="lv-per-page-select" style="min-width:68px; height:32px; padding:0 24px 0 10px; font-size:13px; font-weight:400; color:#334155; background-color:#ffffff; border:1px solid #cbd5e1; border-radius:8px; outline:none; appearance:none; -webkit-appearance:none; background-image:url('data:image/svg+xml,%3csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 20 20\'%3e%3cpath stroke=\'%2364748b\' stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'1.5\' d=\'M6 8l4 4 4-4\'/%3e%3c/svg%3e'); background-position:right 8px center; background-repeat:no-repeat; background-size:16px 16px; cursor:pointer;">
+                                        @foreach([5, 10, 20, 30, 50] as $count)
+                                            <option value="{{ $count }}">{{ $count }}</option>
+                                        @endforeach
+                                    </select>
+                                    <nav style="display:flex; align-items:center; gap:4px;">
+                                        @if($arrPage <= 1)
+                                            <span style="opacity:.4; padding:4px;"><i class="fa-solid fa-chevron-left" style="font-size:11px"></i></span>
+                                        @else
+                                            <button wire:click="$set('transferItemsPage', {{ $arrPage - 1 }})" type="button" style="display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border:1px solid #cbd5e1;border-radius:6px;background:transparent"><i class="fa-solid fa-chevron-left" style="font-size:11px"></i></button>
+                                        @endif
+                                        
+                                        @foreach($arrWindow as $i => $p)
+                                            @if($i > 0 && $p - $arrWindow[$i-1] > 1)
+                                                <span style="padding:0 4px">…</span>
+                                            @endif
+                                            @if($p == $arrPage)
+                                                <span style="display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border-radius:6px;background:#1267E8;color:#fff;font-weight:700">{{ $p }}</span>
+                                            @else
+                                                <button wire:click="$set('transferItemsPage', {{ $p }})" type="button" style="display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border:1px solid #cbd5e1;border-radius:6px;background:transparent">{{ $p }}</button>
+                                            @endif
+                                        @endforeach
+                        
+                                        @if($arrPage >= $arrLastPage)
+                                            <span style="opacity:.4; padding:4px;"><i class="fa-solid fa-chevron-right" style="font-size:11px"></i></span>
+                                        @else
+                                            <button wire:click="$set('transferItemsPage', {{ $arrPage + 1 }})" type="button" style="display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border:1px solid #cbd5e1;border-radius:6px;background:transparent"><i class="fa-solid fa-chevron-right" style="font-size:11px"></i></button>
+                                        @endif
+                                    </nav>
+                                </div>
+                            </div>
+                        @endif
 
                     <!-- Phiếu điều chuyển gần đây -->
                     @php $recentTransfers = $this->getRecentTransfers(); @endphp
