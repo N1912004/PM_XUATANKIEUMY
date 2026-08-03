@@ -1328,7 +1328,7 @@
                                             @if($arrPage <= 1)
                                                 <span style="opacity:.4; padding:4px;"><i class="fa-solid fa-chevron-left" style="font-size:11px"></i></span>
                                             @else
-                                                <button wire:click="$set('poItemsPage', {{ $arrPage - 1 }})" type="button" style="display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border:1px solid #cbd5e1;border-radius:6px;background:transparent"><i class="fa-solid fa-chevron-left" style="font-size:11px"></i></button>
+                                                <button wire:click="setArrayPage('poItemsPage', {{ $arrPage - 1 }})" type="button" style="display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border:1px solid #cbd5e1;border-radius:6px;background:transparent"><i class="fa-solid fa-chevron-left" style="font-size:11px"></i></button>
                                             @endif
                                             
                                             @foreach($arrWindow as $i => $p)
@@ -1338,14 +1338,14 @@
                                                 @if($p == $arrPage)
                                                     <span style="display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border-radius:6px;background:#1267E8;color:#fff;font-weight:700">{{ $p }}</span>
                                                 @else
-                                                    <button wire:click="$set('poItemsPage', {{ $p }})" type="button" style="display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border:1px solid #cbd5e1;border-radius:6px;background:transparent">{{ $p }}</button>
+                                                    <button wire:click="setArrayPage('poItemsPage', {{ $p }})" type="button" style="display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border:1px solid #cbd5e1;border-radius:6px;background:transparent">{{ $p }}</button>
                                                 @endif
                                             @endforeach
                             
                                             @if($arrPage >= $arrLastPage)
                                                 <span style="opacity:.4; padding:4px;"><i class="fa-solid fa-chevron-right" style="font-size:11px"></i></span>
                                             @else
-                                                <button wire:click="$set('poItemsPage', {{ $arrPage + 1 }})" type="button" style="display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border:1px solid #cbd5e1;border-radius:6px;background:transparent"><i class="fa-solid fa-chevron-right" style="font-size:11px"></i></button>
+                                                <button wire:click="setArrayPage('poItemsPage', {{ $arrPage + 1 }})" type="button" style="display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border:1px solid #cbd5e1;border-radius:6px;background:transparent"><i class="fa-solid fa-chevron-right" style="font-size:11px"></i></button>
                                             @endif
                                         </nav>
                                     </div>
@@ -1490,7 +1490,7 @@
                                         @if($arrPage <= 1)
                                             <span style="opacity:.4; padding:4px;"><i class="fa-solid fa-chevron-left" style="font-size:11px"></i></span>
                                         @else
-                                            <button wire:click="$set('directItemsPage', {{ $arrPage - 1 }})" type="button" style="display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border:1px solid #cbd5e1;border-radius:6px;background:transparent"><i class="fa-solid fa-chevron-left" style="font-size:11px"></i></button>
+                                            <button wire:click="setArrayPage('directItemsPage', {{ $arrPage - 1 }})" type="button" style="display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border:1px solid #cbd5e1;border-radius:6px;background:transparent"><i class="fa-solid fa-chevron-left" style="font-size:11px"></i></button>
                                         @endif
                                         
                                         @foreach($arrWindow as $i => $p)
@@ -1500,14 +1500,14 @@
                                             @if($p == $arrPage)
                                                 <span style="display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border-radius:6px;background:#1267E8;color:#fff;font-weight:700">{{ $p }}</span>
                                             @else
-                                                <button wire:click="$set('directItemsPage', {{ $p }})" type="button" style="display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border:1px solid #cbd5e1;border-radius:6px;background:transparent">{{ $p }}</button>
+                                                <button wire:click="setArrayPage('directItemsPage', {{ $p }})" type="button" style="display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border:1px solid #cbd5e1;border-radius:6px;background:transparent">{{ $p }}</button>
                                             @endif
                                         @endforeach
                         
                                         @if($arrPage >= $arrLastPage)
                                             <span style="opacity:.4; padding:4px;"><i class="fa-solid fa-chevron-right" style="font-size:11px"></i></span>
                                         @else
-                                            <button wire:click="$set('directItemsPage', {{ $arrPage + 1 }})" type="button" style="display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border:1px solid #cbd5e1;border-radius:6px;background:transparent"><i class="fa-solid fa-chevron-right" style="font-size:11px"></i></button>
+                                            <button wire:click="setArrayPage('directItemsPage', {{ $arrPage + 1 }})" type="button" style="display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border:1px solid #cbd5e1;border-radius:6px;background:transparent"><i class="fa-solid fa-chevron-right" style="font-size:11px"></i></button>
                                         @endif
                                     </nav>
                                 </div>
@@ -1659,7 +1659,7 @@
                                             @if($arrPage <= 1)
                                                 <span style="opacity:.4; padding:4px;"><i class="fa-solid fa-chevron-left" style="font-size:11px"></i></span>
                                             @else
-                                                <button wire:click="$set('prodItemsPage', {{ $arrPage - 1 }})" type="button" style="display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border:1px solid #cbd5e1;border-radius:6px;background:transparent"><i class="fa-solid fa-chevron-left" style="font-size:11px"></i></button>
+                                                <button wire:click="setArrayPage('prodItemsPage', {{ $arrPage - 1 }})" type="button" style="display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border:1px solid #cbd5e1;border-radius:6px;background:transparent"><i class="fa-solid fa-chevron-left" style="font-size:11px"></i></button>
                                             @endif
                                             
                                             @foreach($arrWindow as $i => $p)
@@ -1669,14 +1669,14 @@
                                                 @if($p == $arrPage)
                                                     <span style="display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border-radius:6px;background:#1267E8;color:#fff;font-weight:700">{{ $p }}</span>
                                                 @else
-                                                    <button wire:click="$set('prodItemsPage', {{ $p }})" type="button" style="display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border:1px solid #cbd5e1;border-radius:6px;background:transparent">{{ $p }}</button>
+                                                    <button wire:click="setArrayPage('prodItemsPage', {{ $p }})" type="button" style="display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border:1px solid #cbd5e1;border-radius:6px;background:transparent">{{ $p }}</button>
                                                 @endif
                                             @endforeach
                             
                                             @if($arrPage >= $arrLastPage)
                                                 <span style="opacity:.4; padding:4px;"><i class="fa-solid fa-chevron-right" style="font-size:11px"></i></span>
                                             @else
-                                                <button wire:click="$set('prodItemsPage', {{ $arrPage + 1 }})" type="button" style="display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border:1px solid #cbd5e1;border-radius:6px;background:transparent"><i class="fa-solid fa-chevron-right" style="font-size:11px"></i></button>
+                                                <button wire:click="setArrayPage('prodItemsPage', {{ $arrPage + 1 }})" type="button" style="display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border:1px solid #cbd5e1;border-radius:6px;background:transparent"><i class="fa-solid fa-chevron-right" style="font-size:11px"></i></button>
                                             @endif
                                         </nav>
                                     </div>
@@ -1808,7 +1808,7 @@
                                         @if($arrPage <= 1)
                                             <span style="opacity:.4; padding:4px;"><i class="fa-solid fa-chevron-left" style="font-size:11px"></i></span>
                                         @else
-                                            <button wire:click="$set('transferItemsPage', {{ $arrPage - 1 }})" type="button" style="display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border:1px solid #cbd5e1;border-radius:6px;background:transparent"><i class="fa-solid fa-chevron-left" style="font-size:11px"></i></button>
+                                            <button wire:click="setArrayPage('transferItemsPage', {{ $arrPage - 1 }})" type="button" style="display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border:1px solid #cbd5e1;border-radius:6px;background:transparent"><i class="fa-solid fa-chevron-left" style="font-size:11px"></i></button>
                                         @endif
                                         
                                         @foreach($arrWindow as $i => $p)
@@ -1818,14 +1818,14 @@
                                             @if($p == $arrPage)
                                                 <span style="display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border-radius:6px;background:#1267E8;color:#fff;font-weight:700">{{ $p }}</span>
                                             @else
-                                                <button wire:click="$set('transferItemsPage', {{ $p }})" type="button" style="display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border:1px solid #cbd5e1;border-radius:6px;background:transparent">{{ $p }}</button>
+                                                <button wire:click="setArrayPage('transferItemsPage', {{ $p }})" type="button" style="display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border:1px solid #cbd5e1;border-radius:6px;background:transparent">{{ $p }}</button>
                                             @endif
                                         @endforeach
                         
                                         @if($arrPage >= $arrLastPage)
                                             <span style="opacity:.4; padding:4px;"><i class="fa-solid fa-chevron-right" style="font-size:11px"></i></span>
                                         @else
-                                            <button wire:click="$set('transferItemsPage', {{ $arrPage + 1 }})" type="button" style="display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border:1px solid #cbd5e1;border-radius:6px;background:transparent"><i class="fa-solid fa-chevron-right" style="font-size:11px"></i></button>
+                                            <button wire:click="setArrayPage('transferItemsPage', {{ $arrPage + 1 }})" type="button" style="display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border:1px solid #cbd5e1;border-radius:6px;background:transparent"><i class="fa-solid fa-chevron-right" style="font-size:11px"></i></button>
                                         @endif
                                     </nav>
                                 </div>

@@ -116,6 +116,13 @@ class ListStocks extends ListRecords
     public function updatedProdItemsPerPage(): void { $this->prodItemsPage = 1; }
     public function updatedTransferItemsPerPage(): void { $this->transferItemsPage = 1; }
 
+    public function setArrayPage(string $property, int $page): void
+    {
+        if (property_exists($this, $property)) {
+            $this->{$property} = max(1, $page);
+        }
+    }
+
     public string $transferNote = '';
 
     // Ledger (Thẻ kho) properties
