@@ -214,8 +214,14 @@
             background: #ffffff;
             padding: 0.375rem;
             margin-bottom: 0.875rem;
-            flex-wrap: wrap;
+            flex-wrap: nowrap;
             gap: 0.375rem;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none; /* Firefox */
+        }
+        .tabs-bar::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, Opera */
         }
         .dark .tabs-bar {
             border-color: #1e293b;
@@ -235,6 +241,8 @@
             gap: 0.375rem;
             border: none;
             background: transparent;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
         .tab-btn:hover {
             background: #f1f5f9;
@@ -860,16 +868,16 @@
                                 </td>
                                 <td style="padding:12px 14px; font-weight: 600;">{{ $item['ingredient']['type'] ?? '—' }}</td>
                                 <td style="padding:12px 14px;">{{ str_starts_with($item['ingredient']['supplier']['name'] ?? '', 'test_') ? __('warehouse.common.test_supplier') : ($item['ingredient']['supplier']['name'] ?? '—') }}</td>
-                                <td style="padding:12px 14px; text-align: center; font-weight: 800; color: var(--po-bl, #1267e8); font-variant-numeric: tabular-nums;">
+                                <td style="padding:12px 14px; text-align: center; font-weight: 800; color: var(--po-bl, #1267e8); font-variant-numeric: tabular-nums; white-space: nowrap;">
                                     {{ $this->formatQty($item['quantity']) }} {{ $item['ingredient']['unit'] ?? '' }}
                                 </td>
-                                <td style="padding:12px 14px; text-align: center; color: #64748b; font-variant-numeric: tabular-nums;">
+                                <td style="padding:12px 14px; text-align: center; color: #64748b; font-variant-numeric: tabular-nums; white-space: nowrap;">
                                     {{ $this->formatQty($item['min_quantity']) }} {{ $item['ingredient']['unit'] ?? '' }}
                                 </td>
-                                <td style="padding:12px 14px; text-align: right; font-weight: 600; font-variant-numeric: tabular-nums;">
+                                <td style="padding:12px 14px; text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap;">
                                     {{ number_format($item['unit_price'], 0, ',', '.') }} {{ __('warehouse.common.currency') }}
                                 </td>
-                                <td style="padding:12px 14px; text-align: right; font-weight: 800; color: var(--po-bl, #1267e8); font-variant-numeric: tabular-nums;">
+                                <td style="padding:12px 14px; text-align: right; font-weight: 800; color: var(--po-bl, #1267e8); font-variant-numeric: tabular-nums; white-space: nowrap;">
                                     {{ number_format($item['quantity'] * $item['unit_price'], 0, ',', '.') }} {{ __('warehouse.common.currency') }}
                                 </td>
                                 <td style="text-align: center; font-size: 11px; color: #64748b; font-variant-numeric: tabular-nums;">

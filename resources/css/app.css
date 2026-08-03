@@ -312,6 +312,16 @@ button.fi-fo-toggle[aria-checked="false"]>span {
   color: var(--tx);
 }
 
+.sidebar-footer-settings-btn.active {
+  background: #105DD1;
+  color: #ffffff;
+}
+
+.sidebar-footer-settings-btn.active .sidebar-footer-settings-icon {
+  background: transparent;
+  color: #ffffff;
+}
+
 .sidebar-footer-settings-icon {
   width: 24px;
   height: 24px;

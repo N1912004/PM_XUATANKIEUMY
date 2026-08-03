@@ -1,5 +1,5 @@
 <div class="border-t border-gray-100 dark:border-gray-800">
-    <a href="{{ url('/admin/system-settings') }}" class="sidebar-footer-settings-btn" title="{{ __('Cài đặt hệ thống') }}">
+    <a href="{{ url('/admin/system-settings') }}" class="sidebar-footer-settings-btn {{ request()->is('admin/system-settings*') ? 'active' : '' }}" title="{{ __('Cài đặt hệ thống') }}">
         <svg class="sidebar-footer-settings-icon"
              fill="none" 
              stroke="currentColor" 

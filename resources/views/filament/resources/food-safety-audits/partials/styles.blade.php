@@ -259,8 +259,14 @@
         display: flex;
         gap: 6px;
         margin-bottom: 14px;
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
         align-items: center;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+    .area-tabs::-webkit-scrollbar {
+        display: none;
     }
 
     .area-tab {
@@ -278,6 +284,8 @@
         gap: 6px;
         transition: .13s;
         outline: none !important;
+        white-space: nowrap;
+        flex-shrink: 0;
     }
 
     .area-tab.active {

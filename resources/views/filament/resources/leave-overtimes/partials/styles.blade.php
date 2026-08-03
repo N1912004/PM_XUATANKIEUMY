@@ -142,6 +142,13 @@
         gap: 24px;
         border-bottom: 1px solid var(--po-bd);
         margin-bottom: 16px;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+    .lv-tabs::-webkit-scrollbar {
+        display: none;
     }
 
     .lv-tab {
@@ -157,6 +164,8 @@
         border-left: none;
         border-right: none;
         outline: none !important;
+        white-space: nowrap;
+        flex-shrink: 0;
     }
 
     .lv-tab:hover {
@@ -437,6 +446,13 @@
         gap: 8px;
         border-bottom: 1.5px solid var(--po-bd2);
         padding-bottom: 2px;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+    .lf-tabs::-webkit-scrollbar {
+        display: none;
     }
 
     .lf-tab {
@@ -452,7 +468,10 @@
         align-items: center;
         gap: 6px;
         border-bottom: none;
-        transition: .13s;
+        transition: background .15s, color .15s, border-color .15s;
+        outline: none !important;
+        white-space: nowrap;
+        flex-shrink: 0;
     }
 
     .lf-tab.active {

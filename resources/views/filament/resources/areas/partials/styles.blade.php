@@ -199,6 +199,13 @@
         border-bottom: 1.5px solid var(--po-bd2);
         padding-bottom: 2px;
         margin-bottom: 16px;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+    .area-tabs::-webkit-scrollbar {
+        display: none;
     }
 
     .area-tab {
@@ -216,6 +223,8 @@
         border-bottom: none;
         transition: background .15s, color .15s, border-color .15s;
         outline: none !important;
+        white-space: nowrap;
+        flex-shrink: 0;
     }
 
     .area-tab:not(.active):hover {

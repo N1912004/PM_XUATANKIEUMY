@@ -1157,8 +1157,14 @@
     .oh-ncc-tabs {
         display: flex;
         gap: 8px;
-        flex-wrap: wrap;
         margin-bottom: 16px;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+    .oh-ncc-tabs::-webkit-scrollbar {
+        display: none;
     }
 
     .oh-ncc-tab {
@@ -1176,6 +1182,8 @@
         display: flex;
         align-items: center;
         gap: 7px;
+        white-space: nowrap;
+        flex-shrink: 0;
     }
 
     .oh-ncc-tab:hover {
