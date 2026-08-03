@@ -931,7 +931,7 @@
                             'total' => $stocksData->total(),
                         ]) }}
                     </div>
-                    <div class="pgwrap">
+                    <div class="pgwrap" style="display:flex;align-items:center;gap:8px">
                         <span>{{ __('common.pagination.per_page_label') }}</span>
                         <select wire:model.live="perPage" class="lv-per-page-select" style="min-width:68px; height:32px; padding:0 24px 0 10px; font-size:13px; font-weight:400; color:#334155; background-color:#ffffff; border:1px solid #cbd5e1; border-radius:8px; outline:none; appearance:none; -webkit-appearance:none; background-image:url('data:image/svg+xml,%3csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 20 20\'%3e%3cpath stroke=\'%2364748b\' stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'1.5\' d=\'M6 8l4 4 4-4\'/%3e%3c/svg%3e'); background-position:right 8px center; background-repeat:no-repeat; background-size:16px 16px; cursor:pointer;">
                             @foreach([5, 10, 20, 30, 50] as $count)
@@ -1121,7 +1121,7 @@
                                 'total' => $stocksData->total(),
                             ]) }}
                         </div>
-                        <div class="pgwrap">
+                        <div class="pgwrap" style="display:flex;align-items:center;gap:8px">
                             <span>{{ __('common.pagination.per_page_label') }}</span>
                             <select wire:model.live="checkPerPage" class="lv-per-page-select" style="min-width:68px; height:32px; padding:0 24px 0 10px; font-size:13px; font-weight:400; color:#334155; background-color:#ffffff; border:1px solid #cbd5e1; border-radius:8px; outline:none; appearance:none; -webkit-appearance:none; background-image:url('data:image/svg+xml,%3csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 20 20\'%3e%3cpath stroke=\'%2364748b\' stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'1.5\' d=\'M6 8l4 4 4-4\'/%3e%3c/svg%3e'); background-position:right 8px center; background-repeat:no-repeat; background-size:16px 16px; cursor:pointer;">
                                 @foreach([5, 10, 20, 30, 50] as $count)
@@ -1777,7 +1777,7 @@
                     ]) }}
                 </div>
                 <div style="display:flex; align-items:center; gap:12px;">
-                    <div class="pgwrap">
+                    <div class="pgwrap" style="display:flex;align-items:center;gap:8px">
                         <span>{{ __('common.pagination.per_page_label') }}</span>
                         <select wire:model.live="logPerPage" class="lv-per-page-select" style="min-width:68px; height:32px; padding:0 24px 0 10px; font-size:13px; font-weight:400; color:#334155; background-color:#ffffff; border:1px solid #cbd5e1; border-radius:8px; outline:none; appearance:none; -webkit-appearance:none; background-image:url('data:image/svg+xml,%3csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 20 20\'%3e%3cpath stroke=\'%2364748b\' stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'1.5\' d=\'M6 8l4 4 4-4\'/%3e%3c/svg%3e'); background-position:right 8px center; background-repeat:no-repeat; background-size:16px 16px; cursor:pointer;">
                             @foreach([5, 10, 20, 30, 50] as $count)

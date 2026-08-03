@@ -190,7 +190,7 @@
         @if($kitchens->total() > 0)
             <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-top:14px; padding:14px 16px; border-top:1px solid var(--po-bd2); font-size:12px; color:var(--po-mu)">
                 <div>{{ __('catalog.pagination.summary', ['from' => $kitchens->firstItem() ?? 0, 'to' => $kitchens->lastItem() ?? 0, 'total' => $kitchens->total(), 'entity' => __('catalog.kitchen.list.pagination_entity')]) }}</div>
-                <div class="pgwrap">
+                <div class="pgwrap" style="display:flex;align-items:center;gap:8px">
                     <span>{{ __('common.pagination.per_page_label') }}</span>
                     <select wire:model.live="kitchenPerPage" class="lv-per-page-select" style="min-width:68px; height:32px; padding:0 24px 0 10px; font-size:13px; font-weight:400; color:var(--po-tx, #0f172a); background-color:var(--po-wh, #ffffff); border:1px solid var(--po-bd, #cbd5e1); border-radius:8px; outline:none; appearance:none; -webkit-appearance:none; background-image:url('data:image/svg+xml,%3csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 20 20\'%3e%3cpath stroke=\'%2364748b\' stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'1.5\' d=\'M6 8l4 4 4-4\'/%3e%3c/svg%3e'); background-position:right 8px center; background-repeat:no-repeat; background-size:16px 16px; cursor:pointer;">
                         @foreach([5, 10, 20, 30, 50] as $count)
