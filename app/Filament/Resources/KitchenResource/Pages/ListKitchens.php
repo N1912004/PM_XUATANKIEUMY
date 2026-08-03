@@ -32,6 +32,8 @@ class ListKitchens extends Page
 
     public $kitchenStatusFilter = '';
 
+    public int $kitchenPerPage = 10;
+
     protected $queryString = [
         'kitchenSearch' => ['except' => ''],
         'kitchenAreaFilter' => ['except' => ''],
@@ -56,6 +58,12 @@ class ListKitchens extends Page
 
     public function updatedKitchenStatusFilter(): void
     {
+        $this->resetPage('kitchensPage');
+    }
+
+    public function updatedKitchenPerPage(): void
+    {
+        $this->kitchenPerPage = $this->resolvePerPage($this->kitchenPerPage);
         $this->resetPage('kitchensPage');
     }
 
@@ -94,7 +102,14 @@ class ListKitchens extends Page
             $query->where('status', $this->kitchenStatusFilter);
         }
 
-        return $query->paginate(10, ['*'], 'kitchensPage');
+        return $query->paginate($this->resolvePerPage($this->kitchenPerPage), ['*'], 'kitchensPage');
+    }
+
+    private function resolvePerPage(int|string $value): int
+    {
+        $value = (int) $value;
+
+        return in_array($value, [5, 10, 20, 30, 50], true) ? $value : 10;
     }
 
     /**

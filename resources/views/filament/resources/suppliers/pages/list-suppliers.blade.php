@@ -327,21 +327,21 @@
                 </div>
                 <div class="sup-pagination">
                     <span>{{ __('common.pagination.per_page_label') }}</span>
-                    <select wire:model.live="perPage" class="lv-per-page-select">
-                        @foreach([5, 10, 20, 50] as $count)
+                    <select wire:model.live="perPage" class="lv-per-page-select" style="min-width:68px; height:32px; padding:0 24px 0 10px; font-size:13px; font-weight:400; color:var(--sup-tx, #0f172a); background-color:var(--sup-wh, #ffffff); border:1px solid var(--sup-bd, #cbd5e1); border-radius:8px; outline:none; appearance:none; -webkit-appearance:none; background-image:url(&quot;data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e&quot;); background-position:right 8px center; background-repeat:no-repeat; background-size:16px 16px; cursor:pointer;">
+                        @foreach([5, 10, 20, 30, 50] as $count)
                             <option value="{{ $count }}">{{ $count }}</option>
                         @endforeach
                     </select>
 
                     @if($suppliersList->total() > 0)
-                        <nav role="navigation" aria-label="Pagination Navigation">
+                        <nav role="navigation" aria-label="Pagination Navigation" style="display:flex; align-items:center; gap:4px;">
                             {{-- Previous Page Link --}}
                             @if ($suppliersList->onFirstPage())
-                                <span aria-disabled="true">
+                                <span aria-disabled="true" style="display:inline-flex; align-items:center; justify-content:center; min-width:30px; height:30px; padding:0 6px; border:1px solid var(--sup-bd, #e2e8f0); border-radius:6px; background:transparent; color:var(--sup-mu, #94a3b8); opacity:.4; cursor:not-allowed;">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><polyline points="15 18 9 12 15 6"/></svg>
                                 </span>
                             @else
-                                <button type="button" wire:click="previousPage" class="sup-small-btn" rel="prev">
+                                <button type="button" wire:click="previousPage" class="sup-small-btn" rel="prev" style="display:inline-flex; align-items:center; justify-content:center; min-width:30px; height:30px; padding:0 6px; border:1px solid var(--sup-bd, #cbd5e1); border-radius:6px; background:var(--sup-wh, #fff); color:var(--sup-mu, #64748b); cursor:pointer;">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><polyline points="15 18 9 12 15 6"/></svg>
                                 </button>
                             @endif
@@ -358,22 +358,22 @@
                             @endphp
                             @foreach ($supPageWindow as $i => $page)
                                 @if ($i > 0 && $page - $supPageWindow[$i - 1] > 1)
-                                    <span aria-hidden="true" style="padding:0 4px">…</span>
+                                    <span aria-hidden="true" style="display:inline-flex; align-items:center; justify-content:center; min-width:20px; height:30px; padding:0 2px; color:var(--sup-mu, #94a3b8);">…</span>
                                 @endif
                                 @if ($page == $supCurrentPage)
-                                    <span aria-current="page">{{ $page }}</span>
+                                    <span aria-current="page" style="display:inline-flex; align-items:center; justify-content:center; min-width:30px; height:30px; border-radius:6px; background:var(--sup-bl, #2563eb); color:#ffffff; font-weight:700; font-size:13px;">{{ $page }}</span>
                                 @else
-                                    <button type="button" wire:click="gotoPage({{ $page }})" class="sup-small-btn">{{ $page }}</button>
+                                    <button type="button" wire:click="gotoPage({{ $page }})" class="sup-small-btn" style="display:inline-flex; align-items:center; justify-content:center; min-width:30px; height:30px; padding:0 8px; border:1px solid var(--sup-bd, #cbd5e1); border-radius:6px; background:var(--sup-wh, #fff); color:var(--sup-tx, #0f172a); font-size:13px; font-weight:500; cursor:pointer;">{{ $page }}</button>
                                 @endif
                             @endforeach
 
                             {{-- Next Page Link --}}
                             @if ($suppliersList->hasMorePages())
-                                <button type="button" wire:click="nextPage" class="sup-small-btn" rel="next">
+                                <button type="button" wire:click="nextPage" class="sup-small-btn" rel="next" style="display:inline-flex; align-items:center; justify-content:center; min-width:30px; height:30px; padding:0 6px; border:1px solid var(--sup-bd, #cbd5e1); border-radius:6px; background:var(--sup-wh, #fff); color:var(--sup-mu, #64748b); cursor:pointer;">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><polyline points="9 18 15 12 9 6"/></svg>
                                 </button>
                             @else
-                                <span aria-disabled="true">
+                                <span aria-disabled="true" style="display:inline-flex; align-items:center; justify-content:center; min-width:30px; height:30px; padding:0 6px; border:1px solid var(--sup-bd, #e2e8f0); border-radius:6px; background:transparent; color:var(--sup-mu, #94a3b8); opacity:.4; cursor:not-allowed;">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px"><polyline points="9 18 15 12 9 6"/></svg>
                                 </span>
                             @endif

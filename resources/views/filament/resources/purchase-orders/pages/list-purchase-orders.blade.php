@@ -221,21 +221,21 @@
             </div>
             <div class="po-pagination">
                 <span>{{ __('common.pagination.per_page_label') }}</span>
-                <select wire:model.live="perPage" class="lv-per-page-select">
-                    @foreach([5, 10, 20, 50] as $count)
+                <select wire:model.live="perPage" class="lv-per-page-select" style="min-width:68px; height:32px; padding:0 24px 0 10px; font-size:13px; font-weight:400; color:var(--po-tx, #0f172a); background-color:var(--po-wh, #ffffff); border:1px solid var(--po-bd, #cbd5e1); border-radius:8px; outline:none; appearance:none; -webkit-appearance:none; background-image:url(&quot;data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e&quot;); background-position:right 8px center; background-repeat:no-repeat; background-size:16px 16px; cursor:pointer;">
+                    @foreach([5, 10, 20, 30, 50] as $count)
                         <option value="{{ $count }}">{{ $count }}</option>
                     @endforeach
                 </select>
 
                 @if($ordersList->total() > 0)
-                    <nav role="navigation" aria-label="Pagination Navigation">
+                    <nav role="navigation" aria-label="Pagination Navigation" style="display:flex; align-items:center; gap:4px;">
                         {{-- Previous --}}
                         @if ($ordersList->onFirstPage())
-                            <span aria-disabled="true">
+                            <span aria-disabled="true" style="display:inline-flex; align-items:center; justify-content:center; min-width:30px; height:30px; padding:0 6px; border:1px solid var(--po-bd, #e2e8f0); border-radius:6px; background:transparent; color:var(--po-mu, #94a3b8); opacity:.4; cursor:not-allowed;">
                                 <i class="fa-solid fa-chevron-left" style="font-size: 10px;"></i>
                             </span>
                         @else
-                            <button type="button" wire:click="previousPage" rel="prev">
+                            <button type="button" wire:click="previousPage" rel="prev" style="display:inline-flex; align-items:center; justify-content:center; min-width:30px; height:30px; padding:0 6px; border:1px solid var(--po-bd, #cbd5e1); border-radius:6px; background:var(--po-wh, #fff); color:var(--po-mu, #64748b); cursor:pointer;">
                                 <i class="fa-solid fa-chevron-left" style="font-size: 10px;"></i>
                             </button>
                         @endif
@@ -243,22 +243,22 @@
                         {{-- Windowed page numbers --}}
                         @foreach ($pageWindow as $i => $page)
                             @if ($i > 0 && $page - $pageWindow[$i - 1] > 1)
-                                <span class="po-page-dots" aria-hidden="true">…</span>
+                                <span class="po-page-dots" aria-hidden="true" style="display:inline-flex; align-items:center; justify-content:center; min-width:20px; height:30px; padding:0 2px; color:var(--po-mu, #94a3b8);">…</span>
                             @endif
                             @if ($page == $currentPage)
-                                <span aria-current="page">{{ $page }}</span>
+                                <span aria-current="page" style="display:inline-flex; align-items:center; justify-content:center; min-width:30px; height:30px; border-radius:6px; background:var(--po-bl, #2563eb); color:#ffffff; font-weight:700; font-size:13px;">{{ $page }}</span>
                             @else
-                                <button type="button" wire:click="gotoPage({{ $page }})">{{ $page }}</button>
+                                <button type="button" wire:click="gotoPage({{ $page }})" style="display:inline-flex; align-items:center; justify-content:center; min-width:30px; height:30px; padding:0 8px; border:1px solid var(--po-bd, #cbd5e1); border-radius:6px; background:var(--po-wh, #fff); color:var(--po-tx, #0f172a); font-size:13px; font-weight:500; cursor:pointer;">{{ $page }}</button>
                             @endif
                         @endforeach
 
                         {{-- Next --}}
                         @if ($ordersList->hasMorePages())
-                            <button type="button" wire:click="nextPage" rel="next">
+                            <button type="button" wire:click="nextPage" rel="next" style="display:inline-flex; align-items:center; justify-content:center; min-width:30px; height:30px; padding:0 6px; border:1px solid var(--po-bd, #cbd5e1); border-radius:6px; background:var(--po-wh, #fff); color:var(--po-mu, #64748b); cursor:pointer;">
                                 <i class="fa-solid fa-chevron-right" style="font-size: 10px;"></i>
                             </button>
                         @else
-                            <span aria-disabled="true">
+                            <span aria-disabled="true" style="display:inline-flex; align-items:center; justify-content:center; min-width:30px; height:30px; padding:0 6px; border:1px solid var(--po-bd, #e2e8f0); border-radius:6px; background:transparent; color:var(--po-mu, #94a3b8); opacity:.4; cursor:not-allowed;">
                                 <i class="fa-solid fa-chevron-right" style="font-size: 10px;"></i>
                             </span>
                         @endif

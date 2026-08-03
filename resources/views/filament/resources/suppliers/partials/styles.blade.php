@@ -686,25 +686,31 @@
             }
 
             .sup-pagination nav span,
-            .sup-pagination nav a {
+            .sup-pagination nav a,
+            .sup-pagination nav button,
+            .sup-pagination nav .sup-small-btn {
                 min-width: 2rem;
                 height: 2rem;
                 display: inline-flex;
                 align-items: center;
                 justify-content: center;
                 border-radius: .5rem;
-                border: 1px solid var(--sup-bd);
-                background: var(--sup-wh);
-                color: var(--sup-mu);
+                border: 1px solid var(--sup-bd, #cbd5e1);
+                background: var(--sup-wh, #ffffff);
+                color: var(--sup-mu, #64748b);
                 font-weight: 500;
+                font-size: .86rem;
                 text-decoration: none;
                 padding: 0 .55rem;
+                cursor: pointer;
             }
 
+            .sup-pagination nav span[aria-current="page"],
             .sup-pagination nav span[aria-current="page"] span {
-                background: var(--sup-bl);
-                border-color: var(--sup-bl);
-                color: #fff;
+                background: var(--sup-bl, #2563eb) !important;
+                border-color: var(--sup-bl, #2563eb) !important;
+                color: #ffffff !important;
+                font-weight: 700 !important;
             }
 
             .sup-form-layout {

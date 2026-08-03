@@ -287,7 +287,7 @@ class IngredientResource extends Resource
             ])
             ->defaultSort('id', 'desc')
             ->searchPlaceholder(__('ingredient.table.search_placeholder'))
-            ->paginated([5, 10, 20, 50])
+            ->paginated([5, 10, 20, 30, 50])
             ->defaultPaginationPageOption(10)
             ->filters([
                 Tables\Filters\SelectFilter::make('suppliers')

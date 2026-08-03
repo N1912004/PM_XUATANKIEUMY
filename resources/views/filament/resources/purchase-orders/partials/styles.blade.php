@@ -658,10 +658,12 @@
         padding: 0;
     }
 
+    .po-pagination nav span[aria-current="page"],
     .po-pagination nav span[aria-current="page"] span {
-        background: var(--po-bl);
-        border-color: var(--po-bl);
-        color: #fff;
+        background: var(--po-bl, #2563eb) !important;
+        border-color: var(--po-bl, #2563eb) !important;
+        color: #ffffff !important;
+        font-weight: 700 !important;
     }
 
     /* Empty state */

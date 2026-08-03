@@ -141,7 +141,7 @@ class ListAreas extends Page
     {
         $value = (int) $value;
 
-        return in_array($value, [5, 10, 20, 50], true) ? $value : 10;
+        return in_array($value, [5, 10, 20, 30, 50], true) ? $value : 10;
     }
 
     public function getStats(): array
