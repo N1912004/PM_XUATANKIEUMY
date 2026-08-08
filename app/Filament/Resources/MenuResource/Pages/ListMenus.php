@@ -1769,24 +1769,26 @@ class ListMenus extends Page
 
     public function getRecipes()
     {
-        return Recipe::with(['ingredients', 'recipeType'])
-            ->where('status', 'active')
+        return Recipe::withTrashed()
+            ->with(['ingredients', 'recipeType'])
             ->orderBy('name')
             ->get();
     }
 
     public function getRecipesDataProperty(): array
     {
-        return $this->getRecipes()->map(function ($recipe) {
-            $cost = $recipe->effectiveCostPerPortion();
+        return $this->getRecipes()
+            ->filter(fn ($recipe) => ! $recipe->trashed() && $recipe->status === 'active')
+            ->map(function ($recipe) {
+                $cost = $recipe->effectiveCostPerPortion();
 
-            return [
-                'id' => (string) $recipe->id,
-                'name' => $recipe->name,
-                'group' => $recipe->type ?? __('menu.popup.other_group'),
-                'cost' => $cost,
-                'cost_formatted' => number_format($cost, 0, ',', '.').'đ',
-            ];
-        })->values()->toArray();
+                return [
+                    'id' => (string) $recipe->id,
+                    'name' => $recipe->name,
+                    'group' => $recipe->type ?? __('menu.popup.other_group'),
+                    'cost' => $cost,
+                    'cost_formatted' => number_format($cost, 0, ',', '.').'đ',
+                ];
+            })->values()->toArray();
     }
 }

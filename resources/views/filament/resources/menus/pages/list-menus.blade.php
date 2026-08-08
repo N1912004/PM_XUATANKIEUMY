@@ -573,7 +573,7 @@
                                                     style="border:1px solid {{ $selectedRec ? 'var(--po-bl-m, #bfdbfe)' : 'var(--po-bd, #e2e8f0)' }}; border-radius:8px; padding:6px 8px; background:{{ $selectedRec ? '#FAFCFF' : '#fff' }}; text-align:left; cursor:pointer; width:100%; transition:all .15s; outline:none; display:flex; flex-direction:column; gap:2px">
                                                 @if($selectedRec)
                                                     <div style="font-size:12px; font-weight:700; color:var(--po-tx, #0f172a); line-clamp:2; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; line-height:1.3">
-                                                        {{ $selectedRec->name }}
+                                                        {{ $selectedRec->name }} @if($selectedRec->trashed()) <span style="font-size:10px; color:#DC2626; font-weight:600">(Đã xóa)</span> @endif
                                                     </div>
                                                     <div style="font-size:11px; font-weight:700; color:var(--po-bl, #2563eb); display:flex; align-items:center; gap:4px">
                                                         <span>{{ $portionsVal }} {{ __('menu.labels.portions') }}</span>
