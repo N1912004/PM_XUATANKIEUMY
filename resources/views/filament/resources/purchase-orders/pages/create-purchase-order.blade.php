@@ -82,6 +82,11 @@
 
         <!-- Date & Shift Filters Card -->
         <div style="background:var(--po-wh); border:1px solid var(--po-bd); border-radius:var(--po-r); padding:16px; margin-bottom:20px; box-shadow:var(--po-sh)">
+            <div style="margin-bottom: 14px; padding: 10px 14px; background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 8px; font-size: 12.5px; color: #1E40AF; display: flex; align-items: center; gap: 8px;">
+                <i class="fa-solid fa-circle-info" style="font-size: 14px; color: #3B82F6;"></i>
+                <span><strong>Nguồn dữ liệu:</strong> Số suất và nhu cầu thực phẩm được tổng hợp tự động từ các <strong>Thực đơn Đã chốt (status = locked)</strong>. Số lượng mua đề xuất đã được tự động trừ tồn kho khả dụng tại bếp.</span>
+            </div>
+
             <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:16px; align-items:end">
                 <div>
                     <label style="font-size:12px; font-weight:700; color:var(--po-tx); display:block; margin-bottom:4px">{{ __('purchase_order.fields.order_date') }}</label>

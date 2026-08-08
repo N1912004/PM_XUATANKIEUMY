@@ -186,36 +186,7 @@ class DatabaseSeeder extends Seeder
         $shift3 = Shift::firstOrCreate(['name' => 'CA 3'], [
             'time_range' => '00:00 - 07:00',
         ]);
-        // 6. Menus (18/05/2026 - T2)
-        $dateStr = '2026-05-18';
-        Menu::firstOrCreate([
-            'date' => $dateStr,
-            'shift_id' => $shift1->id,
-            'recipe_id' => $recipe1->id,
-        ], [
-            'estimated_portions' => 240,
-            'status' => 'locked',
-        ]);
-
-        Menu::firstOrCreate([
-            'date' => $dateStr,
-            'shift_id' => $shift1->id,
-            'recipe_id' => $recipe2->id,
-        ], [
-            'estimated_portions' => 240,
-            'status' => 'locked',
-        ]);
-
-        Menu::firstOrCreate([
-            'date' => $dateStr,
-            'shift_id' => $shift1->id,
-            'recipe_id' => $recipe3->id,
-        ], [
-            'estimated_portions' => 240,
-            'status' => 'locked',
-        ]);
-
-        // 7. Stocks
+        // 6. Stocks
         foreach ([$ing1, $ing2, $ing3, $ing4, $ing5, $ing6, $ing7, $ing8] as $ing) {
             Stock::firstOrCreate(['ingredient_id' => $ing->id], [
                 'quantity' => 150.000,

@@ -8,7 +8,9 @@ use App\Models\Menu;
 use App\Models\PurchaseOrder;
 use App\Models\PurchaseOrderItem;
 use App\Models\Shift;
+use App\Models\Stock;
 use App\Models\Supplier;
+use App\Models\User;
 use Carbon\Carbon;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
@@ -60,6 +62,21 @@ class CreatePurchaseOrder extends Page
     public array $itemSplits = [];
 
     public const SPLIT_OPTIONS = ['P1', 'P2', 'P3'];
+
+    protected function seesAllKitchens(): bool
+    {
+        return auth()->user()?->hasRole([User::superAdminRole(), 'Quản trị viên']) ?? false;
+    }
+
+    protected function enforcedKitchenId(): ?int
+    {
+        return $this->seesAllKitchens() ? null : auth()->user()?->currentKitchenId();
+    }
+
+    protected function kitchenScopeBlocked(): bool
+    {
+        return ! $this->seesAllKitchens() && ! auth()->user()?->currentKitchenId();
+    }
 
     public function mount(): void
     {
@@ -140,7 +157,11 @@ class CreatePurchaseOrder extends Page
 
     public function getAggregatedGroupsProperty(): array
     {
-        $kitchenId = auth()->user()?->currentKitchenId();
+        $kitchenId = $this->enforcedKitchenId();
+
+        if ($this->kitchenScopeBlocked()) {
+            return [];
+        }
 
         $menus = Menu::with(['recipe.ingredients.typeRelation', 'recipe.ingredients.suppliers', 'recipe.ingredients.unitRelation', 'recipe.ingredients.supplier'])
             // Khoảng nửa mở [from, to+1) — cột date có thể lưu kèm giờ (SQLite trong test),
@@ -148,24 +169,31 @@ class CreatePurchaseOrder extends Page
             ->where('date', '>=', $this->sourceFrom)
             ->where('date', '<', Carbon::parse($this->sourceTo)->addDay()->toDateString())
             ->when(! empty($this->selectedShifts), fn ($q) => $q->whereIn('shift_id', $this->selectedShifts))
-            ->when($kitchenId && ! auth()->user()?->hasRole(['super_admin', 'Quản trị viên']), fn ($q) => $q->where('kitchen_id', $kitchenId))
+            ->when($kitchenId, fn ($q) => $q->where('kitchen_id', $kitchenId))
             ->where('status', 'locked')
             ->get();
 
         // Fetch existing PO items for ingredients in this date range to mark as already ordered
         $existingPOItems = DB::table('purchase_order_items')
             ->join('purchase_orders', 'purchase_orders.id', '=', 'purchase_order_items.purchase_order_id')
-            ->when($kitchenId && ! auth()->user()?->hasRole(['super_admin', 'Quản trị viên']), fn ($q) => $q->where('purchase_orders.kitchen_id', $kitchenId))
+            ->when($kitchenId, fn ($q) => $q->where('purchase_orders.kitchen_id', $kitchenId))
             ->where('purchase_orders.estimated_delivery_date', '>=', $this->sourceFrom)
             ->where('purchase_orders.estimated_delivery_date', '<=', $this->sourceTo)
             ->select('purchase_order_items.ingredient_id', 'purchase_orders.code')
             ->get()
             ->groupBy('ingredient_id');
 
+        // Tồn kho khả dụng của bếp — SL đề xuất mua = nhu cầu − tồn còn trong kho (BA R13: không đặt thừa hàng đang có sẵn)
+        $stockByIngredient = Stock::query()
+            ->when($kitchenId, fn ($q) => $q->where('kitchen_id', $kitchenId))
+            ->get()
+            ->groupBy('ingredient_id')
+            ->map(fn ($rows) => max(0, $rows->sum(fn (Stock $s) => (float) $s->quantity - (float) ($s->frozen_quantity ?? 0))));
+
         $aggregated = [];
 
         foreach ($menus as $menu) {
-            $servings = (float) ($menu->estimated_portions ?? 1);
+            $servings = (float) ($menu->estimated_portions ?? 0);
             $recipe = $menu->recipe;
             if (! $recipe) {
                 continue;
@@ -246,15 +274,14 @@ class CreatePurchaseOrder extends Page
             }
 
             $ingId = $item['ingredient_id'];
-            $manualQty = max(0, (float) ($this->itemQuantities[$ingId] ?? round($item['total_kg'], 2)));
+            $stockQty = (float) ($stockByIngredient[$ingId] ?? 0);
+            $suggestedQty = round(max(0, $item['total_kg'] - $stockQty), 3);
+            $manualQty = max(0, (float) ($this->itemQuantities[$ingId] ?? $suggestedQty));
 
             if (array_key_exists($ingId, $this->itemSuppliers)) {
                 $selectedSupplierId = $this->itemSuppliers[$ingId] ? (int) $this->itemSuppliers[$ingId] : null;
             } else {
                 // Mặc định: NCC chính của nguyên liệu, hoặc NCC khớp đúng loại nhóm.
-                // KHÔNG fallback "NCC đầu tiên trong DB" — gán bừa NCC không cung cấp
-                // được (NCC gạo cho rau) tệ hơn để trống; trống thì ô viền đỏ và
-                // createAndSendOrders đã validate bắt buộc chọn trước khi lưu.
                 $rawTypeName = str_replace(['🥩 ', '🥬 ', '📦 '], '', $item['group_label']);
                 $matchedSupplier = $allSuppliers->first(function ($s) use ($rawTypeName) {
                     $sType = mb_strtolower($s->type ?? '');
@@ -303,6 +330,7 @@ class CreatePurchaseOrder extends Page
 
             $item['already_ordered_pos'] = $existingOrders;
             $item['selected'] = $isSelected;
+            $item['stock_qty'] = $stockQty;
             $item['quantity_manual'] = (float) $manualQty;
             $item['supplier_id'] = $selectedSupplierId;
             $item['supplier_valid'] = $isSupplierValid;
@@ -320,6 +348,7 @@ class CreatePurchaseOrder extends Page
     public function createAndSendOrders()
     {
         abort_unless(PurchaseOrderResource::canCreate(), 403);
+        abort_if($this->kitchenScopeBlocked(), 403);
 
         $groups = $this->getAggregatedGroupsProperty();
         $allItems = [];
@@ -361,7 +390,7 @@ class CreatePurchaseOrder extends Page
             return;
         }
 
-        $kitchenId = auth()->user()?->currentKitchenId();
+        $kitchenId = $this->enforcedKitchenId() ?? auth()->user()?->currentKitchenId();
         // Tách đơn theo NCC + Phiếu (P1/P2/P3) — mỗi cặp thành 1 PO riêng, giống ListHang
         $itemsGrouped = collect($allItems)->groupBy(fn ($it) => $it['supplier_id'].'|'.$it['split']);
 
